@@ -1,0 +1,34 @@
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+<div id="overlay" class="overlay"></div>
+
+<div id="filterSidebar" class="filter-sidebar">
+  <div class="filter-header">
+    <h2 class="text-xl font-semibold">Filter Options</h2>
+    <button id="closeBtn" class="close-btn">&times;</button>
+  </div>
+
+  <div class="filter-section">
+    <h3>Last Month</h3>
+    <button class="date-option last-month-option" data-value="week">
+      Last Week
+    </button>
+    <button class="date-option last-month-option" data-value="twoWeeks">
+      Last 2 Weeks
+    </button>
+    <button class="date-option last-month-option" data-value="month">
+      Last Month
+    </button>
+  </div>
+
+  <div class="filter-section">
+    <h3>Custom Date Range</h3>
+    <input type="text" id="startDate" class="date-input" placeholder="Start Date" readonly>
+    <input type="text" id="endDate" class="date-input" placeholder="End Date" readonly>
+  </div>
+
+  <button id="applyBtn" class="apply-btn">
+    Apply Filter
+  </button>
+</div>
