@@ -44,4 +44,8 @@ router.get("/about", (req, res) => {
   });
 });
 
+router.get("/template", checkSession, (req, res) => {
+  res.render("Dashboard/manage_template");
+});
+
 export default router;

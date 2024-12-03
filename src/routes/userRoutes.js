@@ -25,6 +25,6 @@ router.post("/resend-email-otp", resendEmailOTP);
 router.post("/resetPassword", resetPassword);
 router.post("/about", about);
 router.post("/login", login);
-router.post("/changePassword", changePassword)
+router.post("/changePassword", changePassword);
 
 export default router;

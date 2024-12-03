@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+  <meta charset="UTF-8" />
+  <title>Pages - Admin Dashboard UI Kit - Cards</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css"> -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <link href="assets/plugins/pace/pace-theme-flash.css" rel="stylesheet" type="text/css" />
+  <link href="assets/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+  <link href="assets/plugins/jquery-scrollbar/jquery.scrollbar.css" rel="stylesheet" type="text/css" media="screen" />
+  <link href="assets/plugins/select2/css/select2.min.css" rel="stylesheet" type="text/css" media="screen" />
+  <link class="main-stylesheet" href="pages/css/themes/corporate.css" rel="stylesheet" type="text/css" />
+  <!-- Please remove the file below for production: Contains demo classes -->
+  <!-- <link class="main-stylesheet" href="assets/css/style.css" rel="stylesheet" type="text/css" /> -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet" />
+
+  <link href="styles/style.css" rel="stylesheet" type="text/css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body>
+  <!-- Sidebar -->
+  <div class="layout-container">
+    <nav class="sidebar">
+      <div class="logo pb-3">
+        <img src="/assets/img/Wizard_logo.png" alt="Whizard Logo" />
+      </div>
+      <ul>
+        <li>
+          <a href="#" class=""><span class="icon active"><i class="fas fa-chart-line"></i></span>
+            Dashboard</a>
+        </li>
+        <li>
+          <a href="#"><span class="icon"><i class="fa-regular fa-comment"></i></span>
+            Chats</a>
+        </li>
+        <li>
+          <a href="#"><span class="icon"><i class="fa-regular fa-address-book"></i></span>
+            Contact List</a>
+        </li>
+        <li>
+          <a href="#"><span class="icon"><i class="fa-regular fa-envelope"></i></span>
+            Template</a>
+        </li>
+        <li>
+          <a href="#"><span class="icon"><i class="fa-regular fa-user"></i></span>
+            Manage Users</a>
+        </li>
+        <li>
+          <a href="#"><span class="icon"><i class="fa-regular fa-chart-bar"></i></span>
+            Reports</a>
+        </li>
+      </ul>
+      <div class="user-profile">
+        <img src="https://via.placeholder.com/50" alt="User Profile" />
+      </div>
+    </nav>
+    <!-- END SIDEBAR MENU TOP TRAY CONTENT-->
+
+    <!-- START PAGE-CONTAINER -->
+    <div class="main-content">
+      <!-- END HEADER -->
+      <div class="logo flex justify-between items-center">
+
+        <h6 class="text-red-600 text-lg">Manage Template</h6>
+        <button class="bg-black p-2 flex items-center rounded-lg" onclick="document.location='index.html'">
+          <i class="pg-icon">add</i>
+          Create new template
+        </button>
+      </div>
+
+
+      <div class="">
+        <div class="row pull-left align-items-center">
+          <h6 class="px-3">List of templates</h6>
+          <div class="btn-group list-toggle btn-group-toggle" data-toggle="buttons">
+            <label class="btn btn-default active">
+              <input type="radio" name="options" id="option1" checked="" />
+              <i class="fas fa-list"></i>
+            </label>
+            <label class="btn btn-default">
+              <input onclick="document.location='template_preview.html'" type="radio" name="options" id="option2" />
+              <i class="fas fa-th"></i>
+            </label>
+          </div>
+        </div>
+
+        <div class="row pull-right justify-content-center align-items-center">
+          <div type="button" aria-label="" type="button" data-toggle="modal" data-target="#filter" id="show-modal" class="px-4 filter">
+            <i class="fa fa-filter" aria-hidden="true"></i>
+            Filter
+          </div>
+          <button type="button" class="btn btn-facebook p-2 btn-cons">
+            <i class="fas fa-sync mx-2"></i>Sync Facebook
+          </button>
+        </div>
+        <div class="clearfix"></div>
+      </div>
+      <div class="row py-3">
+        <div class="col-12">
+          <div class="table-responsive">
+            <table class="table table-hover responsive nowrap" style="width: 100%">
+              <thead>
+                <tr class="border">
+                  <th>Sno.</th>
+                  <th>Template Name</th>
+                  <th>Category</th>
+                  <th>Language</th>
+                  <th>Status</th>
+                  <th>Messages Sent</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>1</td>
+                  <td>
+                    <a href="#">
+                      <div class="d-flex align-items-center">
+                        <div class="">
+                          <p class="text-td mb-0">Test Template</p>
+                          <p class="text-muted mb-0">
+                            29 Aug-2024 at 02:05 AM
+                          </p>
+                        </div>
+                      </div>
+                    </a>
+                  </td>
+                  <td class="">Marketing</td>
+                  <td>
+                    <p class="btn btn-language language-badge-indonesia">
+                      Indonesia
+                    </p>
+                  </td>
+                  <td>
+                    <p class="text-ornage bold status" aria-label="" data-toggle="modal" data-target="#status">
+                      Pending
+                    </p>
+                  </td>
+                  <td>
+                    <p class="  ">204</p>
+                  </td>
+                  <td>
+                    <button class="btn btn-link text-secondary">
+                      <i class="pg-icon">earth</i>
+                    </button>
+                    <button class="btn btn-link text-secondary">
+                      <i class="pg-icon">copy</i>
+                    </button>
+
+                    <button class="btn btn-link text-secondary">
+                      <i class="pg-icon">trash_alt</i>
+                    </button>
+                  </td>
+                </tr>
+                <tr>
+                  <td>1</td>
+                  <td>
+                    <a href="#">
+                      <div class="d-flex align-items-center">
+                        <div class="">
+                          <p class="text-td mb-0">Test Template</p>
+                          <p class="text-muted mb-0">
+                            29 Aug-2024 at 02:05 AM
+                          </p>
+                        </div>
+                      </div>
+                    </a>
+                  </td>
+                  <td class="">Marketing</td>
+                  <td>
+                    <p class="btn btn-language language-badge-indonesia">
+                      Indonesia
+                    </p>
+                  </td>
+                  <td>
+                    <p class="text-danger bold">Rejected</p>
+                  </td>
+                  <td>
+                    <p class="  ">204</p>
+                  </td>
+                  <td>
+                    <button class="btn btn-link text-secondary">
+                      <i class="pg-icon">earth</i>
+                    </button>
+                    <button class="btn btn-link text-secondary">
+                      <i class="pg-icon">copy</i>
+                    </button>
+
+                    <button class="btn btn-link text-secondary">
+                      <i class="pg-icon">trash_alt</i>
+                    </button>
+                  </td>
+                </tr>
+                <tr>
+                  <td>1</td>
+                  <td>
+                    <a href="#">
+                      <div class="d-flex align-items-center">
+                        <div class="">
+                          <p class="text-td mb-0">Test Template</p>
+                          <p class="text-muted mb-0">
+                            29 Aug-2024 at 02:05 AM
+                          </p>
+                        </div>
+                      </div>
+                    </a>
+                  </td>
+                  <td class="">Marketing</td>
+                  <td>
+                    <p class="btn btn-language language-badge-india">
+                      India
+                    </p>
+                  </td>
+                  <td>
+                    <p class="text-success bold">Approved</p>
+                  </td>
+                  <td>
+                    <p class="  ">204</p>
+                  </td>
+                  <td>
+                    <button class="btn btn-link text-secondary">
+                      <i class="pg-icon">earth</i>
+                    </button>
+                    <button class="btn btn-link text-secondary">
+                      <i class="pg-icon">copy</i>
+                    </button>
+
+                    <button class="btn btn-link text-secondary">
+                      <i class="pg-icon">trash_alt</i>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <!-- Pagination -->
+          <div class="row py-3">
+            <div class="col d-flex justify-content-center">
+              <nav aria-label="Page navigation">
+                <ul class="pagination">
+                  <li class="page-item disabled">
+                    <a class="page-link" href="#" tabindex="-1" aria-disabled="true">‹</a>
+                  </li>
+                  <li class="page-item active">
+                    <a class="page-link" href="#">1</a>
+                  </li>
+                  <li class="page-item">
+                    <a class="page-link" href="#">2</a>
+                  </li>
+                  <li class="page-item disabled">
+                    <a class="page-link" href="#">...</a>
+                  </li>
+                  <li class="page-item">
+                    <a class="page-link" href="#">9</a>
+                  </li>
+                  <li class="page-item">
+                    <a class="page-link" href="#">10</a>
+                  </li>
+                  <li class="page-item">
+                    <a class="page-link" href="#">›</a>
+                  </li>
+                </ul>
+              </nav>
+              <div class="px-3">
+                <span>Go to page</span>
+                <input type="number" min="1" max="10" class="form-control d-inline-block" style="width: 60px" value="1" />
+                <button type="button" class="btn btn-primary p-2">
+                  Go
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- END card -->
+
+
+      <!-- status modal start -->
+
+      <div class="modal fade" id="status" tabindex="-1" role="dialog" aria-labelledby="filterModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+          <div class="modal-content">
+            <div class="modal-header align-items-center py-3">
+              <h5 class="modal-title" id="filterModalLabel">
+                Test Template - id
+              </h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <div class="row">
+                <div class="col">
+                  <form>
+                    <div class="form-group py-1">
+                      <label for="brandName">Variable 1</label>
+                      <input type="text" class="p-2 form-control shadow-sm border rounded" id="brandName" placeholder="What you want to add" />
+                    </div>
+                    <div class="form-group py-1">
+                      <label for="brandName">Variable 2</label>
+                      <input type="text" class="p-2 form-control shadow-sm border rounded" id="brandName" placeholder="What you want to add" />
+                    </div>
+                    <div class="form-group py-1">
+                      <label for="brandName">Upload Media</label>
+                      <div class="file-upload-area" onclick="document.getElementById('file-input').click();">
+                        Browse to choose file
+                        <br />
+
+                        <input type="file" id="file-input" class="file-upload-input" accept=".pdf" multiple />
+                      </div>
+                    </div>
+                    <div class="py-2">
+                      <button type="button" class="btn btn-primary btn-cons w-100">
+                        Submit Review
+                      </button>
+                    </div>
+                  </form>
+                </div>
+
+                <div class="col">
+                  <div class="iphone-container">
+                    <div class="iphone-screen">
+                      <!-- Card Example -->
+                      <div class="custom-card mt-2">
+                        <div class="card-container p-2">
+                          <div class="custom-card-body bg-white">
+                            <img src="https://media.licdn.com/dms/image/v2/C560BAQGeY0JtR6JxpA/company-logo_200_200/company-logo_200_200/0/1630588885858?e=2147483647&v=beta&t=dMDDABvAomoeydN01wwlKcuEwws2PVsP8YGCfUIShcI" alt="Card Image" class="custom-card-img" />
+                            <h5 class="custom-card-title">
+                              Dear User! Plz read this information
+                            </h5>
+                            <p class="custom-card-subtitle">Subscribe Now</p>
+                            <div>
+                              <a href="#" class="custom-btn">
+                                <i class="fas fa-external-link-alt"></i> Visit
+                                Now
+                              </a>
+                              <a href="tel:+123456789" class="custom-btn">
+                                <i class="fas fa-phone-alt"></i> Call Now
+                              </a>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <!-- Add more cards here -->
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- status modal end -->
+
+      <!-- filter modal start -->
+
+      <div class="modal fade" id="filter" tabindex="-1" role="dialog" aria-labelledby="filterModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+          <div class="modal-content">
+            <div class="modal-header align-items-center py-3">
+              <h5 class="modal-title" id="filterModalLabel">Apply Filters</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <!-- Modal Form -->
+              <form>
+                <label> Search by template name*</label>
+                <div class="form-group-default-select2">
+                  <select class="rounded shadow-sm border full-width" data-init-plugin="select2" multiple>
+                    <option value="FACEBOOK">FACEBOOK</option>
+                    <option value="INSTAGRAM">INSTAGRAM</option>
+                    <option value="LINKEDIN">LINKEDIN</option>
+                    <option value="SNAPCHAT">SNAPCHAT</option>
+                    <option value="TIKTOK">TIKTOK</option>
+                    <option value="TWITTER">TWITTER</option>
+                    <option value="YOUTUBE">YOUTUBE</option>
+                  </select>
+                </div>
+                <label for="campaignTitle">Choose Language</label>
+                <div class="form-group py-1">
+                  <div class="dropdown dropdown-default w-100">
+                    <button aria-label="" class="btn dropdown-toggle w-100 p-2" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                      Language
+                    </button>
+                    <div class="dropdown-menu w-100" style="width: 83.5125px; will-change: transform">
+                      <a class="dropdown-item" href="#">Language </a>
+                      <a class="dropdown-item" href="#">Indonesia</a>
+                    </div>
+                  </div>
+                </div>
+
+                <label for="campaignTitle">Choose Category</label>
+                <div class="form-group py-1">
+                  <div class="dropdown dropdown-default w-100">
+                    <button aria-label="" class="btn dropdown-toggle w-100 p-2" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                      Category
+                    </button>
+                    <div class="dropdown-menu w-100" style="width: 83.5125px; will-change: transform">
+                      <a class="dropdown-item" href="#">Category </a>
+                      <a class="dropdown-item" href="#">Indonesia</a>
+                    </div>
+                  </div>
+                </div>
+              </form>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-primary btn-cons w-100">
+                Add List
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <script>
+        const fileInput = document.getElementById("file-input");
+        const fileList = document.getElementById("file-list");
+
+        fileInput.addEventListener("change", function() {
+          const files = fileInput.files;
+
+          for (const file of files) {
+            const fileItem = document.createElement("div");
+            fileItem.classList.add("file-item");
+
+            const fileStatus = document.createElement("div");
+            fileStatus.classList.add("file-status");
+
+            const fileName = document.createElement("span");
+            fileName.textContent = file.name;
+            fileName.classList.add("status-uploading");
+
+            const loader = document.createElement("div");
+            loader.classList.add("circular-loader");
+
+            const statusText = document.createElement("span");
+            statusText.textContent = "Uploading...";
+            statusText.classList.add("status-uploading");
+
+            const removeButton = document.createElement("span");
+            removeButton.textContent = "✖";
+            removeButton.classList.add("remove-file");
+            removeButton.onclick = () => fileItem.remove();
+
+            fileStatus.appendChild(loader);
+            fileStatus.appendChild(fileName);
+            fileStatus.appendChild(statusText);
+            fileItem.appendChild(fileStatus);
+            fileItem.appendChild(removeButton);
+            fileList.appendChild(fileItem);
+
+            setTimeout(() => {
+              loader.remove();
+              statusText.textContent = "Uploaded";
+              statusText.classList.remove("status-uploading");
+              statusText.classList.add("status-uploaded");
+
+              const uploadedIcon = document.createElement("div");
+              uploadedIcon.classList.add("uploaded-icon");
+              uploadedIcon.textContent = "✔";
+
+              fileStatus.prepend(uploadedIcon);
+            }, 2000);
+          }
+        });
+      </script>
+      <!-- END PAGE CONTENT -->
+      <!-- START COPYRIGHT -->
+      <!-- START CONTAINER FLUID -->
+      <!-- START CONTAINER FLUID -->
+      <div class="container-fluid container-fixed-lg footer">
+        <div class="copyright sm-text-center">
+          <p class="small-text no-margin pull-left sm-pull-reset">
+            ©2014-2020 All Rights Reserved. Pages® and/or its subsidiaries or
+            affiliates are registered trademark of Revox Ltd.
+            <span class="hint-text m-l-15">Pages v05.23 20201105.r.190</span>
+          </p>
+          <p class="small no-margin pull-right sm-pull-reset">
+            Hand-crafted <span class="hint-text">&amp; made with Love</span>
+          </p>
+          <div class="clearfix"></div>
+        </div>
+      </div>
+      <!-- END COPYRIGHT -->
+      <!-- END PAGE CONTENT WRAPPER -->
+    </div>
+  </div>
+  <!-- END PAGE CONTAINER -->
+
+  <!-- BEGIN VENDOR JS -->
+  <script src="assets/plugins/pace/pace.min.js" type="text/javascript"></script>
+  <!--  A polyfill for browsers that don't support ligatures: remove liga.js if not needed-->
+  <script src="assets/plugins/liga.js" type="text/javascript"></script>
+  <script src="assets/plugins/jquery/jquery-3.2.1.min.js" type="text/javascript"></script>
+  <script src="assets/plugins/modernizr.custom.js" type="text/javascript"></script>
+  <script src="assets/plugins/jquery-ui/jquery-ui.min.js" type="text/javascript"></script>
+  <script src="assets/plugins/popper/umd/popper.min.js" type="text/javascript"></script>
+  <script src="assets/plugins/bootstrap/js/bootstrap.min.js" type="text/javascript"></script>
+  <script src="assets/plugins/jquery/jquery-easy.js" type="text/javascript"></script>
+  <script src="assets/plugins/jquery-unveil/jquery.unveil.min.js" type="text/javascript"></script>
+  <script src="assets/plugins/jquery-ios-list/jquery.ioslist.min.js" type="text/javascript"></script>
+  <script src="assets/plugins/jquery-actual/jquery.actual.min.js"></script>
+  <script src="assets/plugins/jquery-scrollbar/jquery.scrollbar.min.js"></script>
+  <script type="text/javascript" src="assets/plugins/select2/js/select2.full.min.js"></script>
+  <script type="text/javascript" src="assets/plugins/classie/classie.js"></script>
+  <!-- END VENDOR JS -->
+  <!-- BEGIN CORE TEMPLATE JS -->
+  <!-- BEGIN CORE TEMPLATE JS -->
+  <script src="pages/js/pages.js"></script>
+  <!-- END CORE TEMPLATE JS -->
+  <!-- BEGIN PAGE LEVEL JS -->
+  <script src="assets/js/scripts.js" type="text/javascript"></script>
+  <!-- END PAGE LEVEL JS -->
+  <!-- END CORE TEMPLATE JS -->
+  <!-- BEGIN PAGE LEVEL JS -->
+  <script src="assets/js/card.js" type="text/javascript"></script>
+  <script src="assets/js/scripts.js" type="text/javascript"></script>
+  <!-- <script src="https://kit.fontawesome.com/44e4e59292.js" crossorigin="anonymous"></script> -->
+
+  <!-- END PAGE LEVEL JS -->
+</body>
+
+</html>
