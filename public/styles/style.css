@@ -277,7 +277,7 @@
 
 @media (max-width: 768px) {
   .sidebar {
-    width: 100%;
+    width: 10%;
     height: auto;
     position: relative;
   }
@@ -378,7 +378,6 @@
 }
 
 .sidebar ul li {
-  
   margin-bottom: 5px;
 }
 
@@ -467,8 +466,10 @@
 .main-content {
   flex: 1;
   height: 100vh;
+  padding: 1rem;
   overflow-y: auto; /* Enable scrolling for main content */
   background-color: white;
+  width: 100%;
 }
 
 /* Layout container */
@@ -477,6 +478,7 @@
   width: 100%;
   height: 100vh;
 }
+
 @media (max-width: 768px) {
   .dashboard-content {
     margin-left: 0;

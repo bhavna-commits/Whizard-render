@@ -48,4 +48,8 @@ router.get("/template", checkSession, (req, res) => {
   res.render("Dashboard/manage_template");
 });
 
+router.get("/create-template", checkSession, (req, res) => {
+  res.render("Dashboard/templates/create-templates")
+})
+
 export default router;

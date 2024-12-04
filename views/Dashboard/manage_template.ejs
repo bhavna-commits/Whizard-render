@@ -66,221 +66,104 @@
     <div class="main-content">
       <!-- END HEADER -->
       <div class="logo flex justify-between items-center">
+        <div class="" data-pages="parallax">
+          <!-- START BREADCRUMB -->
+          <ol class="flex">
+            <li class="breadcrumb-item"><a href="/" class="text-red-600 text-xl">Dashboard</a></li>
+            <li class="breadcrumb-item active"><a href="/template" class="text-red-600 text-xl">Manage Template</a></li>
+          </ol>
 
-        <h6 class="text-red-600 text-lg">Manage Template</h6>
-        <button class="bg-black p-2 flex items-center rounded-lg" onclick="document.location='index.html'">
+        </div>
+        <!-- END BREADCRUMB -->
+        <button class="bg-black p-2 flex items-center rounded-lg text-lg font-thin" onclick="document.location='create-template'">
           <i class="pg-icon">add</i>
           Create new template
         </button>
       </div>
+      <div class="flex justify-between items-center p-3">
+        <div class="flex items-center justify-start">
+          <h6 class="pr-2 text-black text-lg">List of templates</h6>
+          <div class="relative flex items-center bg-gray-200 w-[72px] h-8 rounded-full p-1">
+            <!-- Toggle Button -->
+            <div id="toggle" class="absolute w-8 h-6 bg-white rounded-full transform transition-transform duration-300"></div>
 
+            <!-- List Icon -->
+            <i id="option1" class="fas fa-list text-red-500 cursor-pointer z-10 ml-2"></i>
 
-      <div class="">
-        <div class="row pull-left align-items-center">
-          <h6 class="px-3">List of templates</h6>
-          <div class="btn-group list-toggle btn-group-toggle" data-toggle="buttons">
-            <label class="btn btn-default active">
-              <input type="radio" name="options" id="option1" checked="" />
-              <i class="fas fa-list"></i>
-            </label>
-            <label class="btn btn-default">
-              <input onclick="document.location='template_preview.html'" type="radio" name="options" id="option2" />
-              <i class="fas fa-th"></i>
-            </label>
+            <!-- Grid Icon -->
+            <i id="option2" class="fas fa-th text-gray-400 cursor-pointer z-10 ml-[18px] mr-2"></i>
           </div>
         </div>
 
-        <div class="row pull-right justify-content-center align-items-center">
-          <div type="button" aria-label="" type="button" data-toggle="modal" data-target="#filter" id="show-modal" class="px-4 filter">
+        <div class="flex justify-end items-center">
+          <div data-toggle="modal" data-target="#filter" id="show-modal" class="px-4 filter cursor-pointer flex items-center">
             <i class="fa fa-filter" aria-hidden="true"></i>
-            Filter
+            <span class="ml-2">Filter</span>
           </div>
-          <button type="button" class="btn btn-facebook p-2 btn-cons">
-            <i class="fas fa-sync mx-2"></i>Sync Facebook
+          <button type="button" class="flex items-center bg-blue-600 text-white px-4 py-2 rounded">
+            <i class="fas fa-sync mr-2"></i>Sync Facebook
           </button>
         </div>
-        <div class="clearfix"></div>
       </div>
-      <div class="row py-3">
-        <div class="col-12">
-          <div class="table-responsive">
-            <table class="table table-hover responsive nowrap" style="width: 100%">
-              <thead>
-                <tr class="border">
-                  <th>Sno.</th>
-                  <th>Template Name</th>
-                  <th>Category</th>
-                  <th>Language</th>
-                  <th>Status</th>
-                  <th>Messages Sent</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>1</td>
-                  <td>
-                    <a href="#">
-                      <div class="d-flex align-items-center">
-                        <div class="">
-                          <p class="text-td mb-0">Test Template</p>
-                          <p class="text-muted mb-0">
-                            29 Aug-2024 at 02:05 AM
-                          </p>
-                        </div>
-                      </div>
-                    </a>
-                  </td>
-                  <td class="">Marketing</td>
-                  <td>
-                    <p class="btn btn-language language-badge-indonesia">
-                      Indonesia
-                    </p>
-                  </td>
-                  <td>
-                    <p class="text-ornage bold status" aria-label="" data-toggle="modal" data-target="#status">
-                      Pending
-                    </p>
-                  </td>
-                  <td>
-                    <p class="  ">204</p>
-                  </td>
-                  <td>
-                    <button class="btn btn-link text-secondary">
-                      <i class="pg-icon">earth</i>
-                    </button>
-                    <button class="btn btn-link text-secondary">
-                      <i class="pg-icon">copy</i>
-                    </button>
 
-                    <button class="btn btn-link text-secondary">
-                      <i class="pg-icon">trash_alt</i>
-                    </button>
-                  </td>
-                </tr>
-                <tr>
-                  <td>1</td>
-                  <td>
-                    <a href="#">
-                      <div class="d-flex align-items-center">
-                        <div class="">
-                          <p class="text-td mb-0">Test Template</p>
-                          <p class="text-muted mb-0">
-                            29 Aug-2024 at 02:05 AM
-                          </p>
-                        </div>
-                      </div>
-                    </a>
-                  </td>
-                  <td class="">Marketing</td>
-                  <td>
-                    <p class="btn btn-language language-badge-indonesia">
-                      Indonesia
-                    </p>
-                  </td>
-                  <td>
-                    <p class="text-danger bold">Rejected</p>
-                  </td>
-                  <td>
-                    <p class="  ">204</p>
-                  </td>
-                  <td>
-                    <button class="btn btn-link text-secondary">
-                      <i class="pg-icon">earth</i>
-                    </button>
-                    <button class="btn btn-link text-secondary">
-                      <i class="pg-icon">copy</i>
-                    </button>
+      <!-- Templates container -->
+      <div id="template-container">
+        <!-- List View (default) -->
+        <div id="list-view" class="block">
+          <%- include('templates/templates-table') %>
+        </div>
 
-                    <button class="btn btn-link text-secondary">
-                      <i class="pg-icon">trash_alt</i>
-                    </button>
-                  </td>
-                </tr>
-                <tr>
-                  <td>1</td>
-                  <td>
-                    <a href="#">
-                      <div class="d-flex align-items-center">
-                        <div class="">
-                          <p class="text-td mb-0">Test Template</p>
-                          <p class="text-muted mb-0">
-                            29 Aug-2024 at 02:05 AM
-                          </p>
-                        </div>
-                      </div>
-                    </a>
-                  </td>
-                  <td class="">Marketing</td>
-                  <td>
-                    <p class="btn btn-language language-badge-india">
-                      India
-                    </p>
-                  </td>
-                  <td>
-                    <p class="text-success bold">Approved</p>
-                  </td>
-                  <td>
-                    <p class="  ">204</p>
-                  </td>
-                  <td>
-                    <button class="btn btn-link text-secondary">
-                      <i class="pg-icon">earth</i>
-                    </button>
-                    <button class="btn btn-link text-secondary">
-                      <i class="pg-icon">copy</i>
-                    </button>
-
-                    <button class="btn btn-link text-secondary">
-                      <i class="pg-icon">trash_alt</i>
-                    </button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <!-- Pagination -->
-          <div class="row py-3">
-            <div class="col d-flex justify-content-center">
-              <nav aria-label="Page navigation">
-                <ul class="pagination">
-                  <li class="page-item disabled">
-                    <a class="page-link" href="#" tabindex="-1" aria-disabled="true">‹</a>
-                  </li>
-                  <li class="page-item active">
-                    <a class="page-link" href="#">1</a>
-                  </li>
-                  <li class="page-item">
-                    <a class="page-link" href="#">2</a>
-                  </li>
-                  <li class="page-item disabled">
-                    <a class="page-link" href="#">...</a>
-                  </li>
-                  <li class="page-item">
-                    <a class="page-link" href="#">9</a>
-                  </li>
-                  <li class="page-item">
-                    <a class="page-link" href="#">10</a>
-                  </li>
-                  <li class="page-item">
-                    <a class="page-link" href="#">›</a>
-                  </li>
-                </ul>
-              </nav>
-              <div class="px-3">
-                <span>Go to page</span>
-                <input type="number" min="1" max="10" class="form-control d-inline-block" style="width: 60px" value="1" />
-                <button type="button" class="btn btn-primary p-2">
-                  Go
-                </button>
-              </div>
-            </div>
-          </div>
+        <!-- Grid View -->
+        <div id="grid-view" class="hidden">
+          <%- include('templates/templates-cards') %>
         </div>
       </div>
 
+      <script>
+        const toggle = document.getElementById('toggle');
+        const option1 = document.getElementById('option1');
+        const option2 = document.getElementById('option2');
+        const listView = document.getElementById('list-view');
+        const gridView = document.getElementById('grid-view');
 
-      <!-- END card -->
+        // Default active state for list view (left position)
+        let isListView = true;
+
+        // Event listener for List Icon
+        option1.addEventListener('click', () => {
+          if (!isListView) {
+            toggle.classList.remove('translate-x-8'); // Move to the left
+            toggle.classList.add('translate-x-0');
+            option1.classList.add('text-red-500');
+            option2.classList.remove('text-red-500');
+            isListView = true;
+
+            // Show list view, hide grid view
+            listView.classList.remove('hidden');
+            listView.classList.add('block');
+            gridView.classList.add('hidden');
+            gridView.classList.remove('block');
+          }
+        });
+
+        // Event listener for Grid Icon
+        option2.addEventListener('click', () => {
+          if (isListView) {
+            toggle.classList.remove('translate-x-0'); // Move to the right
+            toggle.classList.add('translate-x-8');
+            option2.classList.add('text-red-500');
+            option1.classList.remove('text-red-500');
+            isListView = false;
+
+            // Show grid view, hide list view
+            gridView.classList.remove('hidden');
+            gridView.classList.add('block');
+            listView.classList.add('hidden');
+            listView.classList.remove('block');
+          }
+        });
+      </script>
+
 
 
       <!-- status modal start -->
@@ -474,25 +357,6 @@
           }
         });
       </script>
-      <!-- END PAGE CONTENT -->
-      <!-- START COPYRIGHT -->
-      <!-- START CONTAINER FLUID -->
-      <!-- START CONTAINER FLUID -->
-      <div class="container-fluid container-fixed-lg footer">
-        <div class="copyright sm-text-center">
-          <p class="small-text no-margin pull-left sm-pull-reset">
-            ©2014-2020 All Rights Reserved. Pages® and/or its subsidiaries or
-            affiliates are registered trademark of Revox Ltd.
-            <span class="hint-text m-l-15">Pages v05.23 20201105.r.190</span>
-          </p>
-          <p class="small no-margin pull-right sm-pull-reset">
-            Hand-crafted <span class="hint-text">&amp; made with Love</span>
-          </p>
-          <div class="clearfix"></div>
-        </div>
-      </div>
-      <!-- END COPYRIGHT -->
-      <!-- END PAGE CONTENT WRAPPER -->
     </div>
   </div>
   <!-- END PAGE CONTAINER -->
