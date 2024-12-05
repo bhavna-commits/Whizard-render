@@ -2,7 +2,11 @@
 module.exports = {
   content: ["./src/**/*.{html,js}"],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        figtree: ["Figtree", "sans-serif"], // add the Figtree font here
+      },
+    },
   },
   plugins: [],
 };

@@ -2,8 +2,9 @@ import express from "express";
 import dotenv from "dotenv";
 import path from "path";
 import sessionMiddleware from "./middleWares/sessionHandler.js";
-import userRoutes from "./routes/userRoutes.js";
+import userRoutes from "./routes/user.routes.js";
 import frontEndRoutes from "./routes/frontEnd.routes.js";
+import dashboardRoutes from "./routes/dashboard.routes.js";
 
 dotenv.config();
 
@@ -33,7 +34,7 @@ app.use(express.urlencoded({ extended: true }));
 // Home route to check session and serve appropriate view
 app.use("/", frontEndRoutes);
 // app.use("/twilio", twilioRoute);
-
+app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/users", userRoutes);
 
 export default app;
