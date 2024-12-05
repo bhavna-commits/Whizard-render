@@ -133,21 +133,23 @@ document.addEventListener("click", (event) => {
 });
 
 function addBrackets() {
-    const bodyInput = document.getElementById("bodyInput");
+	const bodyInput = document.getElementById("bodyInput");
 
-	// Insert the emoji at the end of the content
+	// Insert the brackets at the end of the content
 	bodyInput.textContent = bodyInput.textContent + "{}";
 
 	// Focus the bodyInput to bring the cursor back
 	bodyInput.focus();
 
-	// Move the cursor to the end of the content
+	// Move the cursor inside the curly brackets
 	const range = document.createRange();
 	const selection = window.getSelection();
 
-	range.selectNodeContents(bodyInput); // Select all content in bodyInput
-	range.collapse(false); // Collapse the range to the end (false = end)
+	// Select the contents of bodyInput
+	range.setStart(bodyInput.firstChild, bodyInput.textContent.length - 1); // Place the cursor between {}
+	range.setEnd(bodyInput.firstChild, bodyInput.textContent.length - 1); // Ensure it's a collapsed range
 
 	selection.removeAllRanges(); // Clear any existing selection ranges
-	selection.addRange(range); 
+	selection.addRange(range); // Apply the new range
 }
+
