@@ -2,396 +2,399 @@
 <html lang="en">
 
 <head>
-  <meta http-equiv="content-type" content="text/html;charset=UTF-8" />
-  <meta charset="UTF-8" />
-  <title>Pages - Admin Dashboard UI Kit - Cards</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <!-- <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css"> -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
-  <link href="assets/plugins/pace/pace-theme-flash.css" rel="stylesheet" type="text/css" />
-  <link href="assets/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
-  <link href="assets/plugins/jquery-scrollbar/jquery.scrollbar.css" rel="stylesheet" type="text/css" media="screen" />
-  <link href="assets/plugins/select2/css/select2.min.css" rel="stylesheet" type="text/css" media="screen" />
-  <link class="main-stylesheet" href="pages/css/themes/corporate.css" rel="stylesheet" type="text/css" />
-  <!-- Please remove the file below for production: Contains demo classes -->
-  <!-- <link class="main-stylesheet" href="assets/css/style.css" rel="stylesheet" type="text/css" /> -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet" />
+	<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+	<meta charset="UTF-8" />
+	<title>Pages - Admin Dashboard UI Kit - Cards</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<!-- <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css"> -->
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+	<link href="assets/plugins/pace/pace-theme-flash.css" rel="stylesheet" type="text/css" />
+	<link href="assets/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+	<link href="assets/plugins/jquery-scrollbar/jquery.scrollbar.css" rel="stylesheet" type="text/css" media="screen" />
+	<link href="assets/plugins/select2/css/select2.min.css" rel="stylesheet" type="text/css" media="screen" />
+	<link class="main-stylesheet" href="pages/css/themes/corporate.css" rel="stylesheet" type="text/css" />
+	<!-- Please remove the file below for production: Contains demo classes -->
+	<!-- <link class="main-stylesheet" href="assets/css/style.css" rel="stylesheet" type="text/css" /> -->
+	<link rel="preconnect" href="https://fonts.googleapis.com" />
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+	<link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet" />
 
-  <link href="styles/style.css" rel="stylesheet" type="text/css" />
-  <script src="https://cdn.tailwindcss.com"></script>
+	<link href="styles/style.css" rel="stylesheet" type="text/css" />
+	<script src="https://cdn.tailwindcss.com"></script>
 </head>
 
 <body>
-  <!-- Sidebar -->
-  <div class="layout-container">
-    <nav class="sidebar">
-      <div class="logo pb-3">
-        <img src="/assets/img/Wizard_logo.png" alt="Whizard Logo" />
-      </div>
-      <ul>
-        <li>
-          <a href="#" class=""><span class="icon active"><i class="fas fa-chart-line"></i></span>
-            Dashboard</a>
-        </li>
-        <li>
-          <a href="#"><span class="icon"><i class="fa-regular fa-comment"></i></span>
-            Chats</a>
-        </li>
-        <li>
-          <a href="#"><span class="icon"><i class="fa-regular fa-address-book"></i></span>
-            Contact List</a>
-        </li>
-        <li>
-          <a href="#"><span class="icon"><i class="fa-regular fa-envelope"></i></span>
-            Template</a>
-        </li>
-        <li>
-          <a href="#"><span class="icon"><i class="fa-regular fa-user"></i></span>
-            Manage Users</a>
-        </li>
-        <li>
-          <a href="#"><span class="icon"><i class="fa-regular fa-chart-bar"></i></span>
-            Reports</a>
-        </li>
-      </ul>
-      <div class="user-profile">
-        <img src="https://via.placeholder.com/50" alt="User Profile" />
-      </div>
-    </nav>
-    <!-- END SIDEBAR MENU TOP TRAY CONTENT-->
+	<!-- Sidebar -->
+	<div class="layout-container">
+		<nav class="sidebar">
+			<div class="logo pb-2">
+				<img src="/assets/img/Wizard_logo.png" alt="Whizard Logo" />
+			</div>
+			<ul>
+				<li>
+					<a href="#" class=""><span class="icon"><i class="fas fa-chart-line"></i></span>
+						Dashboard</a>
+				</li>
+				<li>
+					<a href="#"><span class="icon"><i class="fa-regular fa-comment"></i></span>
+						Chats</a>
+				</li>
+				<li>
+					<a href="#"><span class="icon"><i class="fa-regular fa-address-book"></i></span>
+						Contact List</a>
+				</li>
+				<li>
+					<a href="#"><span class="icon active"><i class="fa-regular fa-envelope-open"></i></span>
 
-    <!-- START PAGE-CONTAINER -->
-    <div class="main-content">
-      <!-- END HEADER -->
-      <div class="logo flex justify-between items-center">
-        <div class="" data-pages="parallax">
-          <!-- START BREADCRUMB -->
-          <ol class="flex">
-            <li class="breadcrumb-item"><a href="/" class="text-red-600 text-xl">Dashboard</a></li>
-            <li class="breadcrumb-item active"><a href="/template" class="text-red-600 text-xl">Manage Template</a></li>
-          </ol>
+						Template</a>
+				</li>
+				<li>
+					<a href="#"><span class="icon"><i class="fa-regular fa-user"></i></span>
+						Manage Users</a>
+				</li>
+				<li>
+					<a href="#"><span class="icon"><i class="fa-regular fa-chart-bar"></i></span>
+						Reports</a>
+				</li>
+			</ul>
+			<div class="user-profile">
+				<img src="https://via.placeholder.com/50" alt="User Profile" />
+			</div>
+		</nav>
+		<!-- END SIDEBAR MENU TOP TRAY CONTENT-->
 
-        </div>
-        <!-- END BREADCRUMB -->
-        <button class="bg-black p-2 flex items-center rounded-lg text-lg font-thin" onclick="document.location='create-template'">
-          <i class="pg-icon">add</i>
-          Create new template
-        </button>
-      </div>
-      <div class="flex justify-between items-center p-3">
-        <div class="flex items-center justify-start">
-          <h6 class="pr-2 text-black text-lg">List of templates</h6>
-          <div class="relative flex items-center bg-gray-200 w-[72px] h-8 rounded-full p-1">
-            <!-- Toggle Button -->
-            <div id="toggle" class="absolute w-8 h-6 bg-white rounded-full transform transition-transform duration-300"></div>
+		<!-- START PAGE-CONTAINER -->
+		<div class="main-content">
+			<!-- END HEADER -->
+			<div class="logo flex justify-between items-center ">
+				<div class="" data-pages="parallax">
+					<!-- START BREADCRUMB -->
+					<ol class="h-full flex pt-2">
+						<li class="breadcrumb-item"><a href="/" class="text-red-600 text-base">Dashboard</a></li>
+						<li class="breadcrumb-item active"><a href="/template" class="text-red-600 text-base">Manage Template</a></li>
+					</ol>
 
-            <!-- List Icon -->
-            <i id="option1" class="fas fa-list text-red-500 cursor-pointer z-10 ml-2"></i>
+				</div>
+				<!-- END BREADCRUMB -->
+				<button class="bg-black p-2 flex items-center rounded-lg text-base font-thin" onclick="document.location='create-template'">
+					<i class="pg-icon font-thin">add</i>
+					Create new template
+				</button>
+			</div>
+			<div class="flex justify-between items-center px-3">
+				<div class="flex items-center justify-start">
+					<h6 class="pr-2 text-black text-lg">List of templates</h6>
+					<div class="relative flex items-center bg-gray-200 w-[72px] h-8 rounded-full p-1">
+						<!-- Toggle Button -->
+						<div id="toggle" class="absolute w-8 h-6 bg-white rounded-full transform transition-transform duration-300"></div>
 
-            <!-- Grid Icon -->
-            <i id="option2" class="fas fa-th text-gray-400 cursor-pointer z-10 ml-[18px] mr-2"></i>
-          </div>
-        </div>
+						<!-- List Icon -->
+						<i id="option1" class="fas fa-list text-red-500 cursor-pointer z-10 ml-2"></i>
 
-        <div class="flex justify-end items-center">
-          <div data-toggle="modal" data-target="#filter" id="show-modal" class="px-4 filter cursor-pointer flex items-center">
-            <i class="fa fa-filter" aria-hidden="true"></i>
-            <span class="ml-2">Filter</span>
-          </div>
-          <button type="button" class="flex items-center bg-blue-600 text-white px-4 py-2 rounded">
-            <i class="fas fa-sync mr-2"></i>Sync Facebook
-          </button>
-        </div>
-      </div>
+						<!-- Grid Icon -->
+						<i id="option2" class="fas fa-th text-gray-400 cursor-pointer z-10 ml-[18px] mr-2"></i>
+					</div>
+				</div>
 
-      <!-- Templates container -->
-      <div id="template-container">
-        <!-- List View (default) -->
-        <div id="list-view" class="block">
-          <%- include('templates/templates-table') %>
-        </div>
+				<div class="flex justify-end items-center">
+					<div data-toggle="modal" data-target="#filter" id="show-modal" class="px-4 filter cursor-pointer flex items-center">
+						<i class="fa fa-filter" aria-hidden="true"></i>
+						<span class="ml-2">Filter</span>
+					</div>
+					<button type="button" class="flex items-center bg-blue-600 text-white px-4 py-2 rounded">
+						<i class="fas fa-sync mr-2"></i>Sync Facebook
+					</button>
+				</div>
+			</div>
 
-        <!-- Grid View -->
-        <div id="grid-view" class="hidden">
-          <%- include('templates/templates-cards') %>
-        </div>
-      </div>
+			<!-- Templates container -->
+			<div id="template-container">
+				<!-- List View (default) -->
+				<div id="list-view" class="block">
+					<%- include('templates-table') %>
+				</div>
 
-      <script>
-        const toggle = document.getElementById('toggle');
-        const option1 = document.getElementById('option1');
-        const option2 = document.getElementById('option2');
-        const listView = document.getElementById('list-view');
-        const gridView = document.getElementById('grid-view');
+				<!-- Grid View -->
+				<div id="grid-view" class="hidden">
+					<%- include('templates-cards') %>
+				</div>
+			</div>
 
-        // Default active state for list view (left position)
-        let isListView = true;
+			<script>
+				const toggle = document.getElementById('toggle');
+				const option1 = document.getElementById('option1');
+				const option2 = document.getElementById('option2');
+				const listView = document.getElementById('list-view');
+				const gridView = document.getElementById('grid-view');
 
-        // Event listener for List Icon
-        option1.addEventListener('click', () => {
-          if (!isListView) {
-            toggle.classList.remove('translate-x-8'); // Move to the left
-            toggle.classList.add('translate-x-0');
-            option1.classList.add('text-red-500');
-            option2.classList.remove('text-red-500');
-            isListView = true;
+				// Default active state for list view (left position)
+				let isListView = true;
 
-            // Show list view, hide grid view
-            listView.classList.remove('hidden');
-            listView.classList.add('block');
-            gridView.classList.add('hidden');
-            gridView.classList.remove('block');
-          }
-        });
+				// Event listener for List Icon
+				option1.addEventListener('click', () => {
+					if (!isListView) {
+						toggle.classList.remove('translate-x-8'); // Move to the left
+						toggle.classList.add('translate-x-0');
+						option1.classList.add('text-red-500');
+						option2.classList.remove('text-red-500');
+						isListView = true;
 
-        // Event listener for Grid Icon
-        option2.addEventListener('click', () => {
-          if (isListView) {
-            toggle.classList.remove('translate-x-0'); // Move to the right
-            toggle.classList.add('translate-x-8');
-            option2.classList.add('text-red-500');
-            option1.classList.remove('text-red-500');
-            isListView = false;
+						// Show list view, hide grid view
+						listView.classList.remove('hidden');
+						listView.classList.add('block');
+						gridView.classList.add('hidden');
+						gridView.classList.remove('block');
+					}
+				});
 
-            // Show grid view, hide list view
-            gridView.classList.remove('hidden');
-            gridView.classList.add('block');
-            listView.classList.add('hidden');
-            listView.classList.remove('block');
-          }
-        });
-      </script>
+				// Event listener for Grid Icon
+				option2.addEventListener('click', () => {
+					if (isListView) {
+						toggle.classList.remove('translate-x-0'); // Move to the right
+						toggle.classList.add('translate-x-8');
+						option2.classList.add('text-red-500');
+						option1.classList.remove('text-red-500');
+						isListView = false;
+
+						// Show grid view, hide list view
+						gridView.classList.remove('hidden');
+						gridView.classList.add('block');
+						listView.classList.add('hidden');
+						listView.classList.remove('block');
+					}
+				});
+
+			</script>
 
 
 
-      <!-- status modal start -->
+			<!-- status modal start -->
 
-      <div class="modal fade" id="status" tabindex="-1" role="dialog" aria-labelledby="filterModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-          <div class="modal-content">
-            <div class="modal-header align-items-center py-3">
-              <h5 class="modal-title" id="filterModalLabel">
-                Test Template - id
-              </h5>
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-              </button>
-            </div>
-            <div class="modal-body">
-              <div class="row">
-                <div class="col">
-                  <form>
-                    <div class="form-group py-1">
-                      <label for="brandName">Variable 1</label>
-                      <input type="text" class="p-2 form-control shadow-sm border rounded" id="brandName" placeholder="What you want to add" />
-                    </div>
-                    <div class="form-group py-1">
-                      <label for="brandName">Variable 2</label>
-                      <input type="text" class="p-2 form-control shadow-sm border rounded" id="brandName" placeholder="What you want to add" />
-                    </div>
-                    <div class="form-group py-1">
-                      <label for="brandName">Upload Media</label>
-                      <div class="file-upload-area" onclick="document.getElementById('file-input').click();">
-                        Browse to choose file
-                        <br />
+			<div class="modal fade" id="status" tabindex="-1" role="dialog" aria-labelledby="filterModalLabel" aria-hidden="true">
+				<div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+					<div class="modal-content">
+						<div class="modal-header align-items-center py-3">
+							<h5 class="modal-title" id="filterModalLabel">
+								Test Template - id
+							</h5>
+							<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+								<span aria-hidden="true">&times;</span>
+							</button>
+						</div>
+						<div class="modal-body">
+							<div class="row">
+								<div class="col">
+									<form>
+										<div class="form-group py-1">
+											<label for="brandName">Variable 1</label>
+											<input type="text" class="p-2 form-control shadow-sm border rounded" id="brandName" placeholder="What you want to add" />
+										</div>
+										<div class="form-group py-1">
+											<label for="brandName">Variable 2</label>
+											<input type="text" class="p-2 form-control shadow-sm border rounded" id="brandName" placeholder="What you want to add" />
+										</div>
+										<div class="form-group py-1">
+											<label for="brandName">Upload Media</label>
+											<div class="file-upload-area" onclick="document.getElementById('file-input').click();">
+												Browse to choose file
+												<br />
 
-                        <input type="file" id="file-input" class="file-upload-input" accept=".pdf" multiple />
-                      </div>
-                    </div>
-                    <div class="py-2">
-                      <button type="button" class="btn btn-primary btn-cons w-100">
-                        Submit Review
-                      </button>
-                    </div>
-                  </form>
-                </div>
+												<input type="file" id="file-input" class="file-upload-input" accept=".pdf" multiple />
+											</div>
+										</div>
+										<div class="py-2">
+											<button type="button" class="btn btn-primary btn-cons w-100">
+												Submit Review
+											</button>
+										</div>
+									</form>
+								</div>
 
-                <div class="col">
-                  <div class="iphone-container">
-                    <div class="iphone-screen">
-                      <!-- Card Example -->
-                      <div class="custom-card mt-2">
-                        <div class="card-container p-2">
-                          <div class="custom-card-body bg-white">
-                            <img src="https://media.licdn.com/dms/image/v2/C560BAQGeY0JtR6JxpA/company-logo_200_200/company-logo_200_200/0/1630588885858?e=2147483647&v=beta&t=dMDDABvAomoeydN01wwlKcuEwws2PVsP8YGCfUIShcI" alt="Card Image" class="custom-card-img" />
-                            <h5 class="custom-card-title">
-                              Dear User! Plz read this information
-                            </h5>
-                            <p class="custom-card-subtitle">Subscribe Now</p>
-                            <div>
-                              <a href="#" class="custom-btn">
-                                <i class="fas fa-external-link-alt"></i> Visit
-                                Now
-                              </a>
-                              <a href="tel:+123456789" class="custom-btn">
-                                <i class="fas fa-phone-alt"></i> Call Now
-                              </a>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <!-- Add more cards here -->
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <!-- status modal end -->
+								<div class="col">
+									<div class="iphone-container">
+										<div class="iphone-screen">
+											<!-- Card Example -->
+											<div class="custom-card mt-2">
+												<div class="card-container p-2">
+													<div class="custom-card-body bg-white">
+														<img src="https://media.licdn.com/dms/image/v2/C560BAQGeY0JtR6JxpA/company-logo_200_200/company-logo_200_200/0/1630588885858?e=2147483647&v=beta&t=dMDDABvAomoeydN01wwlKcuEwws2PVsP8YGCfUIShcI" alt="Card Image" class="custom-card-img" />
+														<h5 class="custom-card-title">
+															Dear User! Plz read this information
+														</h5>
+														<p class="custom-card-subtitle">Subscribe Now</p>
+														<div>
+															<a href="#" class="custom-btn">
+																<i class="fas fa-external-link-alt"></i> Visit
+																Now
+															</a>
+															<a href="tel:+123456789" class="custom-btn">
+																<i class="fas fa-phone-alt"></i> Call Now
+															</a>
+														</div>
+													</div>
+												</div>
+											</div>
+											<!-- Add more cards here -->
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- status modal end -->
 
-      <!-- filter modal start -->
+			<!-- filter modal start -->
 
-      <div class="modal fade" id="filter" tabindex="-1" role="dialog" aria-labelledby="filterModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered" role="document">
-          <div class="modal-content">
-            <div class="modal-header align-items-center py-3">
-              <h5 class="modal-title" id="filterModalLabel">Apply Filters</h5>
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-              </button>
-            </div>
-            <div class="modal-body">
-              <!-- Modal Form -->
-              <form>
-                <label> Search by template name*</label>
-                <div class="form-group-default-select2">
-                  <select class="rounded shadow-sm border full-width" data-init-plugin="select2" multiple>
-                    <option value="FACEBOOK">FACEBOOK</option>
-                    <option value="INSTAGRAM">INSTAGRAM</option>
-                    <option value="LINKEDIN">LINKEDIN</option>
-                    <option value="SNAPCHAT">SNAPCHAT</option>
-                    <option value="TIKTOK">TIKTOK</option>
-                    <option value="TWITTER">TWITTER</option>
-                    <option value="YOUTUBE">YOUTUBE</option>
-                  </select>
-                </div>
-                <label for="campaignTitle">Choose Language</label>
-                <div class="form-group py-1">
-                  <div class="dropdown dropdown-default w-100">
-                    <button aria-label="" class="btn dropdown-toggle w-100 p-2" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                      Language
-                    </button>
-                    <div class="dropdown-menu w-100" style="width: 83.5125px; will-change: transform">
-                      <a class="dropdown-item" href="#">Language </a>
-                      <a class="dropdown-item" href="#">Indonesia</a>
-                    </div>
-                  </div>
-                </div>
+			<div class="modal fade" id="filter" tabindex="-1" role="dialog" aria-labelledby="filterModalLabel" aria-hidden="true">
+				<div class="modal-dialog modal-dialog-centered" role="document">
+					<div class="modal-content">
+						<div class="modal-header align-items-center py-3">
+							<h5 class="modal-title" id="filterModalLabel">Apply Filters</h5>
+							<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+								<span aria-hidden="true">&times;</span>
+							</button>
+						</div>
+						<div class="modal-body">
+							<!-- Modal Form -->
+							<form>
+								<label> Search by template name*</label>
+								<div class="form-group-default-select2">
+									<select class="rounded shadow-sm border full-width" data-init-plugin="select2" multiple>
+										<option value="FACEBOOK">FACEBOOK</option>
+										<option value="INSTAGRAM">INSTAGRAM</option>
+										<option value="LINKEDIN">LINKEDIN</option>
+										<option value="SNAPCHAT">SNAPCHAT</option>
+										<option value="TIKTOK">TIKTOK</option>
+										<option value="TWITTER">TWITTER</option>
+										<option value="YOUTUBE">YOUTUBE</option>
+									</select>
+								</div>
+								<label for="campaignTitle">Choose Language</label>
+								<div class="form-group py-1">
+									<div class="dropdown dropdown-default w-100">
+										<button aria-label="" class="btn dropdown-toggle w-100 p-2" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+											Language
+										</button>
+										<div class="dropdown-menu w-100" style="width: 83.5125px; will-change: transform">
+											<a class="dropdown-item" href="#">Language </a>
+											<a class="dropdown-item" href="#">Indonesia</a>
+										</div>
+									</div>
+								</div>
 
-                <label for="campaignTitle">Choose Category</label>
-                <div class="form-group py-1">
-                  <div class="dropdown dropdown-default w-100">
-                    <button aria-label="" class="btn dropdown-toggle w-100 p-2" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                      Category
-                    </button>
-                    <div class="dropdown-menu w-100" style="width: 83.5125px; will-change: transform">
-                      <a class="dropdown-item" href="#">Category </a>
-                      <a class="dropdown-item" href="#">Indonesia</a>
-                    </div>
-                  </div>
-                </div>
-              </form>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-primary btn-cons w-100">
-                Add List
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+								<label for="campaignTitle">Choose Category</label>
+								<div class="form-group py-1">
+									<div class="dropdown dropdown-default w-100">
+										<button aria-label="" class="btn dropdown-toggle w-100 p-2" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+											Category
+										</button>
+										<div class="dropdown-menu w-100" style="width: 83.5125px; will-change: transform">
+											<a class="dropdown-item" href="#">Category </a>
+											<a class="dropdown-item" href="#">Indonesia</a>
+										</div>
+									</div>
+								</div>
+							</form>
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-primary btn-cons w-100">
+								Add List
+							</button>
+						</div>
+					</div>
+				</div>
+			</div>
 
-      <script>
-        const fileInput = document.getElementById("file-input");
-        const fileList = document.getElementById("file-list");
+			<script>
+				const fileInput = document.getElementById("file-input");
+				const fileList = document.getElementById("file-list");
 
-        fileInput.addEventListener("change", function() {
-          const files = fileInput.files;
+				fileInput.addEventListener("change", function () {
+					const files = fileInput.files;
 
-          for (const file of files) {
-            const fileItem = document.createElement("div");
-            fileItem.classList.add("file-item");
+					for (const file of files) {
+						const fileItem = document.createElement("div");
+						fileItem.classList.add("file-item");
 
-            const fileStatus = document.createElement("div");
-            fileStatus.classList.add("file-status");
+						const fileStatus = document.createElement("div");
+						fileStatus.classList.add("file-status");
 
-            const fileName = document.createElement("span");
-            fileName.textContent = file.name;
-            fileName.classList.add("status-uploading");
+						const fileName = document.createElement("span");
+						fileName.textContent = file.name;
+						fileName.classList.add("status-uploading");
 
-            const loader = document.createElement("div");
-            loader.classList.add("circular-loader");
+						const loader = document.createElement("div");
+						loader.classList.add("circular-loader");
 
-            const statusText = document.createElement("span");
-            statusText.textContent = "Uploading...";
-            statusText.classList.add("status-uploading");
+						const statusText = document.createElement("span");
+						statusText.textContent = "Uploading...";
+						statusText.classList.add("status-uploading");
 
-            const removeButton = document.createElement("span");
-            removeButton.textContent = "✖";
-            removeButton.classList.add("remove-file");
-            removeButton.onclick = () => fileItem.remove();
+						const removeButton = document.createElement("span");
+						removeButton.textContent = "✖";
+						removeButton.classList.add("remove-file");
+						removeButton.onclick = () => fileItem.remove();
 
-            fileStatus.appendChild(loader);
-            fileStatus.appendChild(fileName);
-            fileStatus.appendChild(statusText);
-            fileItem.appendChild(fileStatus);
-            fileItem.appendChild(removeButton);
-            fileList.appendChild(fileItem);
+						fileStatus.appendChild(loader);
+						fileStatus.appendChild(fileName);
+						fileStatus.appendChild(statusText);
+						fileItem.appendChild(fileStatus);
+						fileItem.appendChild(removeButton);
+						fileList.appendChild(fileItem);
 
-            setTimeout(() => {
-              loader.remove();
-              statusText.textContent = "Uploaded";
-              statusText.classList.remove("status-uploading");
-              statusText.classList.add("status-uploaded");
+						setTimeout(() => {
+							loader.remove();
+							statusText.textContent = "Uploaded";
+							statusText.classList.remove("status-uploading");
+							statusText.classList.add("status-uploaded");
 
-              const uploadedIcon = document.createElement("div");
-              uploadedIcon.classList.add("uploaded-icon");
-              uploadedIcon.textContent = "✔";
+							const uploadedIcon = document.createElement("div");
+							uploadedIcon.classList.add("uploaded-icon");
+							uploadedIcon.textContent = "✔";
 
-              fileStatus.prepend(uploadedIcon);
-            }, 2000);
-          }
-        });
-      </script>
-    </div>
-  </div>
-  <!-- END PAGE CONTAINER -->
+							fileStatus.prepend(uploadedIcon);
+						}, 2000);
+					}
+				});
 
-  <!-- BEGIN VENDOR JS -->
-  <script src="assets/plugins/pace/pace.min.js" type="text/javascript"></script>
-  <!--  A polyfill for browsers that don't support ligatures: remove liga.js if not needed-->
-  <script src="assets/plugins/liga.js" type="text/javascript"></script>
-  <script src="assets/plugins/jquery/jquery-3.2.1.min.js" type="text/javascript"></script>
-  <script src="assets/plugins/modernizr.custom.js" type="text/javascript"></script>
-  <script src="assets/plugins/jquery-ui/jquery-ui.min.js" type="text/javascript"></script>
-  <script src="assets/plugins/popper/umd/popper.min.js" type="text/javascript"></script>
-  <script src="assets/plugins/bootstrap/js/bootstrap.min.js" type="text/javascript"></script>
-  <script src="assets/plugins/jquery/jquery-easy.js" type="text/javascript"></script>
-  <script src="assets/plugins/jquery-unveil/jquery.unveil.min.js" type="text/javascript"></script>
-  <script src="assets/plugins/jquery-ios-list/jquery.ioslist.min.js" type="text/javascript"></script>
-  <script src="assets/plugins/jquery-actual/jquery.actual.min.js"></script>
-  <script src="assets/plugins/jquery-scrollbar/jquery.scrollbar.min.js"></script>
-  <script type="text/javascript" src="assets/plugins/select2/js/select2.full.min.js"></script>
-  <script type="text/javascript" src="assets/plugins/classie/classie.js"></script>
-  <!-- END VENDOR JS -->
-  <!-- BEGIN CORE TEMPLATE JS -->
-  <!-- BEGIN CORE TEMPLATE JS -->
-  <script src="pages/js/pages.js"></script>
-  <!-- END CORE TEMPLATE JS -->
-  <!-- BEGIN PAGE LEVEL JS -->
-  <script src="assets/js/scripts.js" type="text/javascript"></script>
-  <!-- END PAGE LEVEL JS -->
-  <!-- END CORE TEMPLATE JS -->
-  <!-- BEGIN PAGE LEVEL JS -->
-  <script src="assets/js/card.js" type="text/javascript"></script>
-  <script src="assets/js/scripts.js" type="text/javascript"></script>
-  <!-- <script src="https://kit.fontawesome.com/44e4e59292.js" crossorigin="anonymous"></script> -->
+			</script>
+		</div>
+	</div>
+	<!-- END PAGE CONTAINER -->
 
-  <!-- END PAGE LEVEL JS -->
+	<!-- BEGIN VENDOR JS -->
+	<script src="assets/plugins/pace/pace.min.js" type="text/javascript"></script>
+	<!--  A polyfill for browsers that don't support ligatures: remove liga.js if not needed-->
+	<script src="assets/plugins/liga.js" type="text/javascript"></script>
+	<script src="assets/plugins/jquery/jquery-3.2.1.min.js" type="text/javascript"></script>
+	<script src="assets/plugins/modernizr.custom.js" type="text/javascript"></script>
+	<script src="assets/plugins/jquery-ui/jquery-ui.min.js" type="text/javascript"></script>
+	<script src="assets/plugins/popper/umd/popper.min.js" type="text/javascript"></script>
+	<script src="assets/plugins/bootstrap/js/bootstrap.min.js" type="text/javascript"></script>
+	<script src="assets/plugins/jquery/jquery-easy.js" type="text/javascript"></script>
+	<script src="assets/plugins/jquery-unveil/jquery.unveil.min.js" type="text/javascript"></script>
+	<script src="assets/plugins/jquery-ios-list/jquery.ioslist.min.js" type="text/javascript"></script>
+	<script src="assets/plugins/jquery-actual/jquery.actual.min.js"></script>
+	<script src="assets/plugins/jquery-scrollbar/jquery.scrollbar.min.js"></script>
+	<script type="text/javascript" src="assets/plugins/select2/js/select2.full.min.js"></script>
+	<script type="text/javascript" src="assets/plugins/classie/classie.js"></script>
+	<!-- END VENDOR JS -->
+	<!-- BEGIN CORE TEMPLATE JS -->
+	<!-- BEGIN CORE TEMPLATE JS -->
+	<script src="pages/js/pages.js"></script>
+	<!-- END CORE TEMPLATE JS -->
+	<!-- BEGIN PAGE LEVEL JS -->
+	<script src="assets/js/scripts.js" type="text/javascript"></script>
+	<!-- END PAGE LEVEL JS -->
+	<!-- END CORE TEMPLATE JS -->
+	<!-- BEGIN PAGE LEVEL JS -->
+	<script src="assets/js/card.js" type="text/javascript"></script>
+	<script src="assets/js/scripts.js" type="text/javascript"></script>
+	<!-- <script src="https://kit.fontawesome.com/44e4e59292.js" crossorigin="anonymous"></script> -->
+
+	<!-- END PAGE LEVEL JS -->
 </body>
 
 </html>

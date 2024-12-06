@@ -49,16 +49,4 @@ router.get("/about", (req, res) => {
 	});
 });
 
-router.get("/template", checkSession, (req, res) => {
-	res.render("Templates/manage_template");
-});
-
-router.get("/create-template", checkSession, (req, res) => {
-	res.render("Templates/create-template");
-});
-
-router.get("/template-preview", checkSession, (req, res) => {
-	res.render("Templates/template-preview");
-});
-
 export default router;

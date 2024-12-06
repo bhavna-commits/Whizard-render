@@ -466,7 +466,7 @@
 .main-content {
   flex: 1;
   height: 100vh;
-  padding: 1rem;
+  /* padding: 1rem; */
   overflow-y: auto; /* Enable scrolling for main content */
   background-color: white;
   width: 100%;

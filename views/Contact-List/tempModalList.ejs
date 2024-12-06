@@ -1,0 +1,268 @@
+	<script>
+		const toggle = document.getElementById("toggle");
+		const option1 = document.getElementById("option1");
+		const option2 = document.getElementById("option2");
+		const listView = document.getElementById("list-view");
+		const gridView = document.getElementById("grid-view");
+
+		// Default active state for list view (left position)
+		let isListView = true;
+
+		// Event listener for List Icon
+		option1.addEventListener("click", () => {
+			if (!isListView) {
+				toggle.classList.remove("translate-x-8"); // Move to the left
+				toggle.classList.add("translate-x-0");
+				option1.classList.add("text-red-500");
+				option2.classList.remove("text-red-500");
+				isListView = true;
+
+				// Show list view, hide grid view
+				listView.classList.remove("hidden");
+				listView.classList.add("block");
+				gridView.classList.add("hidden");
+				gridView.classList.remove("block");
+			}
+		});
+
+		// Event listener for Grid Icon
+		option2.addEventListener("click", () => {
+			if (isListView) {
+				toggle.classList.remove("translate-x-0"); // Move to the right
+				toggle.classList.add("translate-x-8");
+				option2.classList.add("text-red-500");
+				option1.classList.remove("text-red-500");
+				isListView = false;
+
+				// Show grid view, hide list view
+				gridView.classList.remove("hidden");
+				gridView.classList.add("block");
+				listView.classList.add("hidden");
+				listView.classList.remove("block");
+			}
+		});
+
+	</script>
+
+	<!-- status modal start -->
+
+	<div class="modal fade" id="status" tabindex="-1" role="dialog" aria-labelledby="filterModalLabel" aria-hidden="true">
+		<div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+			<div class="modal-content">
+				<div class="modal-header align-items-center py-3">
+					<h5 class="modal-title" id="filterModalLabel">
+						Test Template - id
+					</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<div class="row">
+						<div class="col">
+							<form>
+								<div class="form-group py-1">
+									<label for="brandName">Variable 1</label>
+									<input type="text" class="p-2 form-control shadow-sm border rounded" id="brandName" placeholder="What you want to add" />
+								</div>
+								<div class="form-group py-1">
+									<label for="brandName">Variable 2</label>
+									<input type="text" class="p-2 form-control shadow-sm border rounded" id="brandName" placeholder="What you want to add" />
+								</div>
+								<div class="form-group py-1">
+									<label for="brandName">Upload Media</label>
+									<div class="file-upload-area" onclick="document.getElementById('file-input').click();">
+										Browse to choose file
+										<br />
+
+										<input type="file" id="file-input" class="file-upload-input" accept=".pdf" multiple />
+									</div>
+								</div>
+								<div class="py-2">
+									<button type="button" class="btn btn-primary btn-cons w-100">
+										Submit Review
+									</button>
+								</div>
+							</form>
+						</div>
+
+						<div class="col">
+							<div class="iphone-container">
+								<div class="iphone-screen">
+									<!-- Card Example -->
+									<div class="custom-card mt-2">
+										<div class="card-container p-2">
+											<div class="custom-card-body bg-white">
+												<img src="https://media.licdn.com/dms/image/v2/C560BAQGeY0JtR6JxpA/company-logo_200_200/company-logo_200_200/0/1630588885858?e=2147483647&v=beta&t=dMDDABvAomoeydN01wwlKcuEwws2PVsP8YGCfUIShcI" alt="Card Image" class="custom-card-img" />
+												<h5 class="custom-card-title">
+													Dear User! Plz
+													read this
+													information
+												</h5>
+												<p class="custom-card-subtitle">
+													Subscribe Now
+												</p>
+												<div>
+													<a href="#" class="custom-btn">
+														<i class="fas fa-external-link-alt"></i>
+														Visit Now
+													</a>
+													<a href="tel:+123456789" class="custom-btn">
+														<i class="fas fa-phone-alt"></i>
+														Call Now
+													</a>
+												</div>
+											</div>
+										</div>
+									</div>
+									<!-- Add more cards here -->
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- status modal end -->
+
+	<!-- filter modal start -->
+
+	<div class="modal fade" id="filter" tabindex="-1" role="dialog" aria-labelledby="filterModalLabel" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered" role="document">
+			<div class="modal-content">
+				<div class="modal-header align-items-center py-3">
+					<h5 class="modal-title" id="filterModalLabel">
+						Apply Filters
+					</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<!-- Modal Form -->
+					<form>
+						<label> Search by template name*</label>
+						<div class="form-group-default-select2">
+							<select class="rounded shadow-sm border full-width" data-init-plugin="select2" multiple>
+								<option value="FACEBOOK">
+									FACEBOOK
+								</option>
+								<option value="INSTAGRAM">
+									INSTAGRAM
+								</option>
+								<option value="LINKEDIN">
+									LINKEDIN
+								</option>
+								<option value="SNAPCHAT">
+									SNAPCHAT
+								</option>
+								<option value="TIKTOK">
+									TIKTOK
+								</option>
+								<option value="TWITTER">
+									TWITTER
+								</option>
+								<option value="YOUTUBE">
+									YOUTUBE
+								</option>
+							</select>
+						</div>
+						<label for="campaignTitle">Choose Language</label>
+						<div class="form-group py-1">
+							<div class="dropdown dropdown-default w-100">
+								<button aria-label="" class="btn dropdown-toggle w-100 p-2" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+									Language
+								</button>
+								<div class="dropdown-menu w-100" style="
+													width: 83.5125px;
+													will-change: transform;
+												">
+									<a class="dropdown-item" href="#">Language
+									</a>
+									<a class="dropdown-item" href="#">Indonesia</a>
+								</div>
+							</div>
+						</div>
+
+						<label for="campaignTitle">Choose Category</label>
+						<div class="form-group py-1">
+							<div class="dropdown dropdown-default w-100">
+								<button aria-label="" class="btn dropdown-toggle w-100 p-2" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+									Category
+								</button>
+								<div class="dropdown-menu w-100" style="
+													width: 83.5125px;
+													will-change: transform;
+												">
+									<a class="dropdown-item" href="#">Category
+									</a>
+									<a class="dropdown-item" href="#">Indonesia</a>
+								</div>
+							</div>
+						</div>
+					</form>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-primary btn-cons w-100">
+						Add List
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		const fileInput = document.getElementById("file-input");
+		const fileList = document.getElementById("file-list");
+
+		fileInput.addEventListener("change", function () {
+			const files = fileInput.files;
+
+			for (const file of files) {
+				const fileItem = document.createElement("div");
+				fileItem.classList.add("file-item");
+
+				const fileStatus = document.createElement("div");
+				fileStatus.classList.add("file-status");
+
+				const fileName = document.createElement("span");
+				fileName.textContent = file.name;
+				fileName.classList.add("status-uploading");
+
+				const loader = document.createElement("div");
+				loader.classList.add("circular-loader");
+
+				const statusText = document.createElement("span");
+				statusText.textContent = "Uploading...";
+				statusText.classList.add("status-uploading");
+
+				const removeButton = document.createElement("span");
+				removeButton.textContent = "✖";
+				removeButton.classList.add("remove-file");
+				removeButton.onclick = () => fileItem.remove();
+
+				fileStatus.appendChild(loader);
+				fileStatus.appendChild(fileName);
+				fileStatus.appendChild(statusText);
+				fileItem.appendChild(fileStatus);
+				fileItem.appendChild(removeButton);
+				fileList.appendChild(fileItem);
+
+				setTimeout(() => {
+					loader.remove();
+					statusText.textContent = "Uploaded";
+					statusText.classList.remove("status-uploading");
+					statusText.classList.add("status-uploaded");
+
+					const uploadedIcon =
+						document.createElement("div");
+					uploadedIcon.classList.add("uploaded-icon");
+					uploadedIcon.textContent = "✔";
+
+					fileStatus.prepend(uploadedIcon);
+				}, 2000);
+			}
+		});
+
+	</script>

@@ -1,0 +1,99 @@
+.modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+}
+
+.modal-content {
+  position: relative;
+  background-color: #fff;
+  margin: 10% auto;
+  padding: 24px;
+  width: 90%;
+  max-width: 500px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  border: 1px solid black;
+}
+
+.modal-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  border: #000 solid 1px;
+}
+
+.close {
+  cursor: pointer;
+  font-size: 1.5rem;
+  color: #666;
+  border: #000 1px solid;
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-control {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.file-input-container {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.file-input-wrapper {
+  flex: 1;
+}
+
+.choose-file {
+  display: inline-block;
+  padding: 8px 12px;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  color: #666;
+}
+
+.download-btn {
+  padding: 8px 12px;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  color: #666;
+}
+
+.add-list-btn {
+  width: 100%;
+  padding: 12px;
+  background: #000;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.add-list-btn:hover {
+  background: #333;
+}

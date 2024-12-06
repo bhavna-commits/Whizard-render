@@ -24,10 +24,14 @@ export const createTemplate = async (req, res) => {
 };
 
 export const templatePreview = async (req, res) => {
-    try {
+	try {
 		const { template } = req.session.user;
 		if (template) {
-			res.status(200).json({ success: true, template: template });
+			res.render("Templates/template-preview", {
+				templateData: template,
+			});
+		} else {
+			res.render("Templates/create-template");
 		}
 	} catch (error) {
 		res.status(400).json({
