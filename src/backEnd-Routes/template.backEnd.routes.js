@@ -4,7 +4,7 @@ import {
 	createTemplate,
 	templatePreview,
 } from "../controllers/Dashboard/template.controller.js";
-import upload from "../services/multerUpload.js";
+import upload from "../config/multerUpload.js";
 
 const router = express.Router();
 

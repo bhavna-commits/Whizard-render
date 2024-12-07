@@ -45,6 +45,6 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/", userfrontEndRoutes, tempalteFrontEndRoutes, contactFrontEndRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/users", userRoutes);
-app.use("/api/contactList", contactListRoute);
+app.use("/api/contact-list", contactListRoute);
 
 export default app;

@@ -1,31 +1,17 @@
 import { Schema, model } from "mongoose";
 
+// Schema definition
 const contactListSchema = new Schema(
 	{
 		name: { type: String, required: true },
-		email: { type: String, required: true, unique: true },
-		password: { type: String, required: true },
-		phone: {
-			countryCode: { type: String, required: true },
-			number: { type: String, required: true },
-		},
-		addedUsers: [
-			{ type: mongoose.Schema.Types.ObjectId, ref: "AddedUser" },
-		],
-		companyname: { type: String, required: true },
-		companyDescription: { type: String, required: false },
-		country: { type: String, required: true },
-		state: { type: String, required: true },
-		companySize: { type: String, required: true },
-		industry: { type: String, required: true },
-		jobRole: { type: String, required: true },
-		website: { type: String, required: true },
+		fileData: { type: Array, required: true }, // Array to store parsed file data
+		countryCode: { type: String, required: true },
+		participantCount: { type: Number, required: true },
+		createdAt: { type: Date, default: Date.now },
 	},
-
-	{ timestamps: true },
-	{ strict: false },
+	{ timestamps: true }, // Automatically adds createdAt and updatedAt
 );
 
-const User = model("contactList", contactListSchema);
+const ContactList = model("ContactList", contactListSchema);
 
-export default User;
+export default ContactList;
