@@ -1,25 +1,26 @@
 import path from "path";
 import ContactList from "../../models/contactList.model.js";
+import Contacts from "../../models/contacts.modal.js";
 import User from "../../models/user.model.js";
 import { countries } from "../../utils/dropDown.js";
 
 export const createList = async (req, res) => {
 	try {
-		const { formData } = req.body;
-		console.log(req.body);
-		if (!formData) {
+		const userId = req.session.user.id;
+
+		const { countryCode, listName, fileData } = req.body;
+
+		// Check if file data is provided
+		if (!fileData) {
 			return res
 				.status(400)
 				.json({ success: false, message: "No file data provided" });
 		}
-		const { countryCode, listName: name, fileData } = formData;
 
+		// Parse the file data (assuming it's in JSON format)
 		const parsedData = JSON.parse(fileData);
 
-		// Assuming you have the user's ID from the session or token
-		const userId = req.session.user.id; // Assuming req.user contains the authenticated user's data
-
-		// Check if the user exists (optional)
+		// Check if the user exists (optional but good practice)
 		const user = await User.findById(userId);
 		if (!user) {
 			return res
@@ -27,21 +28,38 @@ export const createList = async (req, res) => {
 				.json({ success: false, message: "User not found" });
 		}
 
-		const participantCount = fileData.length;
-		// Create the contact list and refer to the user
+		const participantCount = parsedData.length;
+
+		// Create the contact list and associate it with the user
 		const contactList = new ContactList({
-			user: user._id, // Reference the user by their ID
-			name: name,
-			fileData: parsedData, // Store the file path
-			countryCode,
-			participantCount,
+			ContactListName: listName, // Updated to match the schema
+			owner: user._id, // Reference the user by their ID
+			countryCode, // Pass countryCode
+			participantCount, // Count of participants from the file
 		});
 
+		// Save the contact list to the database
 		await contactList.save();
+
+		// Create individual contacts and associate them with the contact list
+		const contactsToSave = parsedData.map((contactData) => {
+			return new Contacts({
+				userName: contactData.name, // Assuming `name` exists in the parsed data
+				whatsApp: contactData.whatsApp, // Assuming `whatsApp` exists in the parsed data
+				tags: contactData.tags || "Hot Leads", // Default to "Hot Leads" if no tag is provided
+				countryCode: countryCode, // Use the same countryCode for each contact
+				validated: contactData.validated || "Verified", // Default to "Verified"
+				owner: user._id, // Associate contact with the user
+				contactList: contactList._id, // Associate contact with the newly created contact list
+			});
+		});
+
+		// Save all the contacts in one go
+		await Contacts.insertMany(contactsToSave);
 
 		res.json({
 			success: true,
-			message: "Contact list created successfully",
+			message: "Contact list and contacts created successfully",
 		});
 	} catch (error) {
 		console.error(error);
@@ -51,6 +69,7 @@ export const createList = async (req, res) => {
 		});
 	}
 };
+
 
 export const editList = async (req, res) => {
 	try {
@@ -119,9 +138,9 @@ export const getList = async (req, res) => {
 		const userId = req.session.user.id; // Assuming req.session.user contains authenticated user data
 
 		// Fetch the user's contact lists
-		const contactLists = await ContactList.find({ user: userId });
+		let contactLists = await ContactList.find({ user: userId });
 
-		if (!contactLists) {
+		if (!contactLists.length) {
 			res.render("Contact-List/contact-list", {
 				countries: countries,
 				contacts: [],
@@ -141,7 +160,9 @@ export const getList = async (req, res) => {
 	}
 };
 
+
 export const sampleCSV = async (req, res) => {
+    const __dirname = path.resolve();
 	res.download(
 		path.join(__dirname, "..", "public", "sample.csv"),
 		"sample.csv",
@@ -154,3 +175,4 @@ export const sampleCSV = async (req, res) => {
 		},
 	);
 };
+

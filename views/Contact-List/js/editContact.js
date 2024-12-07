@@ -1,93 +1,88 @@
-document.addEventListener("DOMContentLoaded", function () {
-	const editModal = document.getElementById("editContactModal");
-	const modalContent = editModal.querySelector(".bg-white");
-	const editButtons = document.querySelectorAll(".edit-contact-btn");
-	const closeBtn = editModal.querySelector(".close");
-	const editContactForm = document.getElementById("editContactForm");
+// Select the modal and form elements
+const editModal = document.getElementById("editModal");
+const editContactForm = document.getElementById("editContactForm");
 
-	function showModal() {
-		// First make the modal visible but transparent
-		editModal.classList.remove("pointer-events-none");
-		// Trigger reflow
-		editModal.offsetHeight;
-		// Add opacity and scale
-		editModal.classList.add("opacity-100");
-		modalContent.classList.remove("scale-95");
-		modalContent.classList.add("scale-100");
-	}
+// Event listener for when the modal is opened
+editModal.addEventListener("show.bs.modal", function (event) {
+	const button = event.relatedTarget; // Button that triggered the modal
+	const contact = JSON.parse(button.getAttribute("data-contact")); // Extract the contact data from data-* attribute
 
-	function hideModal() {
-		// Start fade out animation
-		editModal.classList.remove("opacity-100");
-		modalContent.classList.remove("scale-100");
-		modalContent.classList.add("scale-95");
-		// Wait for animation to finish before hiding completely
-		setTimeout(() => {
-			editModal.classList.add("pointer-events-none");
-		}, 300);
-	}
+	// Populate the form fields with the contact data
+	document.getElementById("edit-contact-id").value = contact._id;
+	document.getElementById("edit-contact-name").value = contact.name;
+	document.getElementById("edit-contact-tags").value = contact.tags;
+	document.getElementById("edit-contact-whatsapp").value = contact.validated;
+});
 
-	// Show modal and populate form
-	editButtons.forEach((button) => {
-		button.addEventListener("click", function () {
-			const contactData = JSON.parse(this.dataset.contact);
+// Handle the form submission for saving changes
+editContactForm.addEventListener("submit", async function (event) {
+	event.preventDefault(); // Prevent the default form submission
 
-			// Populate form fields
-			document.getElementById("editCountryCode").value =
-				contactData.countryCode;
-			document.getElementById("editWhatsAppNumber").value =
-				contactData.whatsappNumber;
-			document.getElementById("editCity").value = contactData.cityId;
-			document.getElementById("editUserName").value =
-				contactData.userName;
+	// Extract data from the form
+	const contactId = document.getElementById("edit-contact-id").value;
+	const updatedData = {
+		name: document.getElementById("edit-contact-name").value,
+		tags: document.getElementById("edit-contact-tags").value,
+		validated: document.getElementById("edit-contact-whatsapp").value,
+	};
 
-			// Show modal
-			showModal();
-		});
-	});
-
-	// Close modal
-	closeBtn.addEventListener("click", hideModal);
-
-	// Close modal when clicking outside
-	editModal.addEventListener("click", function (event) {
-		if (
-			event.target === editModal ||
-			event.target === editModal.firstElementChild
-		) {
-			hideModal();
-		}
-	});
-
-	// Handle form submission
-	editContactForm.addEventListener("submit", function (e) {
-		e.preventDefault();
-
-		const formData = {
-			countryCode: document.getElementById("editCountryCode").value,
-			whatsappNumber: document.getElementById("editWhatsAppNumber").value,
-			cityId: document.getElementById("editCity").value,
-			userName: document.getElementById("editUserName").value,
-		};
-
-		// Send to your backend endpoint
-		fetch("/api/contacts/update", {
+	try {
+		// Send the updated data to the server via a PUT request
+		const response = await fetch(`/contact-list/overview/${contactId}`, {
 			method: "PUT",
 			headers: {
 				"Content-Type": "application/json",
 			},
-			body: JSON.stringify(formData),
-		})
-			.then((response) => response.json())
-			.then((data) => {
-				if (data.success) {
-					hideModal();
-					// Refresh the contact list or update the row
-					window.location.reload();
-				}
-			})
-			.catch((error) => {
-				console.error("Error:", error);
-			});
-	});
+			body: JSON.stringify(updatedData),
+		});
+
+		const result = await response.json();
+
+		if (result.success) {
+			// Optionally refresh the page or update the table row with new data
+			window.location.reload(); // Reload the page to reflect changes
+		} else {
+			alert("Error updating contact: " + result.message);
+		}
+	} catch (error) {
+		console.error("Error:", error);
+		alert("An error occurred while updating the contact.");
+	}
+});
+
+// Get references to the modal and delete button
+const deleteModal = document.getElementById('deleteModal');
+const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+
+// Event listener for when the delete modal is shown
+deleteModal.addEventListener('show.bs.modal', function (event) {
+  const button = event.relatedTarget; // Button that triggered the modal
+  const contactId = button.getAttribute('data-contact-id'); // Extract contact ID from data-* attribute
+
+  // Set the contact ID in the hidden input field
+  document.getElementById('delete-contact-id').value = contactId;
+});
+
+// Handle the delete confirmation button click
+confirmDeleteBtn.addEventListener('click', async function () {
+  const contactId = document.getElementById('delete-contact-id').value;
+
+  try {
+    // Send a DELETE request to the server to delete the contact
+    const response = await fetch(`/contact-list/${contactId}`, {
+      method: 'DELETE',
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+      // Optionally refresh the page or remove the row from the table
+      window.location.reload(); // Reload the page to reflect changes
+    } else {
+      alert('Error deleting contact: ' + result.message);
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    alert('An error occurred while deleting the contact.');
+  }
 });

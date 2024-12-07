@@ -13,6 +13,8 @@ dotenv.config();
 
 const app = express();
 
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 // Set view engine to EJS
 app.set("view engine", "ejs");
 
@@ -36,10 +38,6 @@ app.use(
 );
 // Middleware to handle session
 app.use(sessionMiddleware);
-
-// Middleware to parse incoming requests
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
 // Home route to check session and serve appropriate view
 app.use("/", userfrontEndRoutes, tempalteFrontEndRoutes, contactFrontEndRoutes);

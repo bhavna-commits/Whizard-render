@@ -1,7 +1,7 @@
 const modal = document.getElementById("campaignModal");
-const modalContent = modal.querySelector(".bg-white");
+const createModal = modal.querySelector(".bg-white");
 const showModalBtn = document.getElementById("create-List");
-const closeBtn = modal.querySelector(".close");
+const createcloseBtn = modal.querySelector(".close");
 const contactListForm = document.getElementById("contactListForm");
 const downloadBtn = document.getElementById("downloadTemplate");
 const fileInput = document.getElementById("contactFile");
@@ -13,15 +13,15 @@ function showModal() {
 	modal.offsetHeight;
 	// Add opacity and scale
 	modal.classList.add("opacity-100");
-	modalContent.classList.remove("scale-95");
-	modalContent.classList.add("scale-100");
+	createModal.classList.remove("scale-95");
+	createModal.classList.add("scale-100");
 }
 
 function hideModal() {
 	// Start fade out animation
 	modal.classList.remove("opacity-100");
-	modalContent.classList.remove("scale-100");
-	modalContent.classList.add("scale-95");
+	createModal.classList.remove("scale-100");
+	createModal.classList.add("scale-95");
 	// Wait for animation to finish before hiding completely
 	setTimeout(() => {
 		modal.classList.add("pointer-events-none");
@@ -32,7 +32,7 @@ function hideModal() {
 showModalBtn.addEventListener("click", showModal);
 
 // Close modal
-closeBtn.addEventListener("click", hideModal);
+createcloseBtn.addEventListener("click", hideModal);
 
 // Close modal when clicking outside
 modal.addEventListener("click", function (event) {
@@ -100,6 +100,9 @@ contactListForm.addEventListener("submit", function (e) {
 		// Send the data to the backend
 		fetch("/api/contact-list/createList", {
 			method: "POST",
+			headers: {
+				"Content-Type": "application/json", // Add this header
+			},
 			body: JSON.stringify(formData),
 		})
 			.then((response) => response.json())
@@ -109,12 +112,12 @@ contactListForm.addEventListener("submit", function (e) {
 					// Refresh the contact list or show success message
 					window.location.reload();
 				} else {
-					alert("Error: " + data.message);
+					alert(data.message);
 				}
 			})
 			.catch((error) => {
-				alert("Error: " + error);
-				console.error("Error:", error);
+				alert(error);
+				console.error(error);
 			});
 	};
 
