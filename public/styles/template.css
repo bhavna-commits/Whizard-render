@@ -527,3 +527,71 @@ ol {
 .preview-link-class:hover {
   background-color: #eeeeee;
 }
+
+/* Custom Dropdown Button Styling */
+.custom-btn-dropdown .custom-dropdown-toggle, 
+.custom-dropdown-default .custom-dropdown-toggle {
+  background-color: transparent;
+  color: black;
+  border: 1px solid rgba(128, 128, 128, 0.256);
+  border-radius: 4px;
+  padding: 10px;
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+  width: fit-content; /* Ensure button only takes the necessary width */
+}
+
+.custom-btn-dropdown .custom-dropdown-toggle:hover, 
+.custom-dropdown-default .custom-dropdown-toggle:hover {
+  background-color: #0057b316;
+}
+
+/* Custom Dropdown Menu Styling */
+.custom-dropdown-menu {
+  background-color: #f8f9fa;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 0.25rem;
+  margin-top: 8px;
+  padding: 5px;
+  min-width: fit-content; /* Adjust width to fit content */
+  box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.1);
+  display: none; /* Hidden by default */
+  position: absolute;
+  z-index: 1000;
+  flex-direction: column; /* Ensure items stack vertically */
+}
+
+/* Show the dropdown menu */
+.custom-dropdown-menu.show {
+  display: flex; /* Show on toggle */
+  flex-direction: column;
+}
+
+/* Custom Dropdown Item Styling */
+.custom-dropdown-item {
+  padding: 8px 16px;
+  color: #212529;
+  font-size: 14px;
+  cursor: pointer;
+  white-space: nowrap; /* Prevent items from wrapping */
+}
+
+.custom-dropdown-item:hover {
+  background-color: #e9ecef;
+  color: #007bff;
+}
+
+/* Ensures dropdown takes full width of parent container */
+.custom-btn-dropdown .custom-dropdown-menu,
+.custom-dropdown-default .custom-dropdown-menu {
+  width: fit-content; /* Fits to the content size */
+}
+
+/* Positioning for second dropdown */
+.relative .custom-dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 1000;
+}

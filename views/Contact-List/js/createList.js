@@ -55,7 +55,6 @@ contactListForm.addEventListener("submit", function (e) {
 	e.preventDefault();
 
 	const file = fileInput?.files[0];
-	console.log(file);
 	if (!file) {
 		alert("Please upload a file.");
 		return;
@@ -71,14 +70,12 @@ contactListForm.addEventListener("submit", function (e) {
 
 	reader.onload = function (event) {
 		const fileContent = event.target.result;
-		console.log(fileContent);
 		let parsedData;
 
 		// Check file type and parse accordingly
 		if (file.type === "text/csv") {
 			// If it's a CSV file
 			parsedData = Papa.parse(fileContent, { header: true }).data;
-			console.log(parsedData);
 		} else if (
 			file.type ===
 				"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ||
@@ -94,9 +91,18 @@ contactListForm.addEventListener("submit", function (e) {
 			return;
 		}
 
-		// Add the parsed data to the FormData
+		// Check if first two columns are "Name" and "WhatsApp"
+		const firstRow = parsedData[0];
+		if (!firstRow || !firstRow.Name || !firstRow.WhatsApp) {
+			alert(
+				"The first two columns must be 'Name' and 'WhatsApp'. Please correct the file.",
+			);
+			return;
+		}
+
+		// Add the parsed data to the form data
 		formData.fileData = JSON.stringify(parsedData);
-		console.log(formData);
+
 		// Send the data to the backend
 		fetch("/api/contact-list/createList", {
 			method: "POST",
@@ -128,6 +134,7 @@ contactListForm.addEventListener("submit", function (e) {
 		reader.readAsBinaryString(file);
 	}
 });
+
 
 // Handle template download
 

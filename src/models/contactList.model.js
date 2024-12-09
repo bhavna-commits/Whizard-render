@@ -7,16 +7,8 @@ const contactListSchema = new Schema(
 		owner: { type: Schema.ObjectId, ref: "User", required: true },
 		countryCode: { type: String, required: true },
 		participantCount: { type: Number, required: true },
-		createdAt: {
-			type: String,
-			default: () => {
-				const now = new Date();
-				return now.toDateString();
-			},
-		},
 	},
 	{ timestamps: true },
-
 	{ strict: false },
 );
 

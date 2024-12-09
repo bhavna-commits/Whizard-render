@@ -4,7 +4,7 @@
 <head>
 	<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
 	<meta charset="UTF-8" />
-	<title>Pages - Admin Dashboard UI Kit - Cards</title>
+	<title>Custom Field</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<!-- <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css"> -->
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
@@ -36,28 +36,28 @@
 			</div>
 			<ul>
 				<li>
-					<a href="#" class=""><span class="icon"><i class="fas fa-chart-line"></i></span>
+					<a href="/" class=""><span class="icon"><i class="fas fa-chart-line"></i></span>
 						Dashboard</a>
 				</li>
 				<li>
-					<a href="#"><span class="icon"><i class="fa-regular fa-comment"></i></span>
+					<a href="/chats"><span class="icon"><i class="fa-regular fa-comment"></i></span>
 						Chats</a>
 				</li>
 				<li>
-					<a href="#"><span class="icon active"><i class="fa-regular fa-address-book"></i></span>
+					<a href="/contact-list"><span class="icon active"><i class="fa-regular fa-address-book"></i></span>
 						
 						Contact List</a>
 				</li>
 				<li>
-					<a href="#"><span class="icon"><i class="fa-regular fa-envelope"></i></span>
+					<a href="/template"><span class="icon"><i class="fa-regular fa-envelope"></i></span>
 						Template</a>
 				</li>
 				<li>
-					<a href="#"><span class="icon"><i class="fa-regular fa-user"></i></span>
+					<a href="/users"><span class="icon"><i class="fa-regular fa-user"></i></span>
 						Manage Users</a>
 				</li>
 				<li>
-					<a href="#"><span class="icon"><i class="fa-regular fa-chart-bar"></i></span>
+					<a href="/reports"><span class="icon"><i class="fa-regular fa-chart-bar"></i></span>
 						Reports</a>
 				</li>
 			</ul>
@@ -101,7 +101,7 @@
 						</div>
 						
 						<div class="text-center pr-3">
-							<button aria-label="" onclick="document.location='contact-list/custom-field'" type="button" class="border py-2 px-2 rounded-lg transition-colors ease-in-out duration-300 hover:bg-gray-100 text-sm font-medium">
+							<button aria-label="" onclick="document.location='custom_field.html'" type="button" class="border py-2 px-2 rounded-lg transition-colors ease-in-out duration-300 hover:bg-gray-100 text-sm font-medium">
 								Manage custom fields
 							</button>
 						</div>
@@ -112,15 +112,16 @@
 						</button>
 					</div>
 					<!-- Pop-Up Modal to create List -->
-					<%- include('partials/createList') %>
+					
 				</div>
 				
 				<!-- Contact list table -->
-				<%- include('partials/contactListTable') %>
+				<%- include('partials/customFieldTable') %>
+                <%- include('partials/editCustomField') %>
 			</div>
 			
 			<!-- Pop-Up Modal to Edit List -->
-			<%- include('partials/editContactList') %>
+		
 			
 			
 		</div>

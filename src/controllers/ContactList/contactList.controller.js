@@ -7,59 +7,102 @@ import { countries } from "../../utils/dropDown.js";
 export const createList = async (req, res) => {
 	try {
 		const userId = req.session.user.id;
-
 		const { countryCode, listName, fileData } = req.body;
 
 		// Check if file data is provided
 		if (!fileData) {
-			return res
-				.status(400)
-				.json({ success: false, message: "No file data provided" });
+			return res.status(400).json({
+				success: false,
+				message: "No file data provided.",
+			});
 		}
 
-		// Parse the file data (assuming it's in JSON format)
-		const parsedData = JSON.parse(fileData);
+		// Parse the uploaded file data (assumed JSON from the frontend)
+		let parsedData;
+		try {
+			parsedData = JSON.parse(fileData);
+		} catch (e) {
+			return res.status(400).json({
+				success: false,
+				message: "Invalid file format.",
+			});
+		}
 
-		// Check if the user exists (optional but good practice)
+		// Check if the parsed data contains any contacts
+		if (!parsedData.length) {
+			return res.status(400).json({
+				success: false,
+				message: "No contacts found in the file.",
+			});
+		}
+
+		// Find the user by ID
 		const user = await User.findById(userId);
 		if (!user) {
-			return res
-				.status(404)
-				.json({ success: false, message: "User not found" });
+			return res.status(404).json({
+				success: false,
+				message: "User not found.",
+			});
 		}
 
 		const participantCount = parsedData.length;
 
-		// Create the contact list and associate it with the user
+		// Create a new Contact List
 		const contactList = new ContactList({
-			ContactListName: listName, // Updated to match the schema
-			owner: user._id, // Reference the user by their ID
-			countryCode, // Pass countryCode
-			participantCount, // Count of participants from the file
+			ContactListName: listName,
+			owner: user._id,
+			countryCode,
+			participantCount,
 		});
 
-		// Save the contact list to the database
 		await contactList.save();
 
-		// Create individual contacts and associate them with the contact list
-		const contactsToSave = parsedData.map((contactData) => {
-			return new Contacts({
-				userName: contactData.name, // Assuming `name` exists in the parsed data
-				whatsApp: contactData.whatsApp, // Assuming `whatsApp` exists in the parsed data
-				tags: contactData.tags || "Hot Leads", // Default to "Hot Leads" if no tag is provided
-				countryCode: countryCode, // Use the same countryCode for each contact
-				validated: contactData.validated || "Verified", // Default to "Verified"
-				owner: user._id, // Associate contact with the user
-				contactList: contactList._id, // Associate contact with the newly created contact list
-			});
-		});
+		// Prepare contacts with additional attributes
+		const contactsToSave = parsedData
+			.map((contactData) => {
+				// Destructure Name, WhatsApp, and additional attributes
+				let { Name, WhatsApp, ...additionalFields } = contactData;
 
-		// Save all the contacts in one go
-		await Contacts.insertMany(contactsToSave);
+				// Trim leading and trailing whitespaces from Name and WhatsApp
+				Name = (Name || "").trim();
+				WhatsApp = (WhatsApp || "").trim();
+
+				// Skip contacts with missing Name or WhatsApp
+				if (!Name || !WhatsApp) {
+					console.log("Skipping invalid contact:", contactData);
+					return null; // Return null for invalid contacts
+				}
+
+				return new Contacts({
+					userName: Name, // The "Name" column
+					whatsApp: WhatsApp, // The "WhatsApp" column
+					countryCode, // Same country code for all contacts
+					owner: user._id, // Associate contact with the user
+					contactList: contactList._id, // Link contact to the newly created list
+					additionalAttributes: additionalFields, // Save all other columns as dynamic attributes
+				});
+			})
+			.filter((contact) => contact !== null); // Remove any null values (invalid contacts)
+
+		// Check if there are valid contacts to save
+		if (contactsToSave.length > 0) {
+			await Contacts.insertMany(contactsToSave);
+		} else {
+			return res.status(400).json({
+				success: false,
+				message: "No valid contacts to save.",
+			});
+		}
+
+		// Extract all the keys (additional attributes) for sending to the frontend
+		const dynamicAttributes = Object.keys(parsedData[0]).filter(
+			(key) => key !== "Name" && key !== "WhatsApp",
+		);
 
 		res.json({
 			success: true,
 			message: "Contact list and contacts created successfully",
+			dynamicAttributes, // Send the dynamic attributes back to the frontend
 		});
 	} catch (error) {
 		console.error(error);
@@ -69,7 +112,6 @@ export const createList = async (req, res) => {
 		});
 	}
 };
-
 
 export const editList = async (req, res) => {
 	try {
@@ -106,7 +148,6 @@ export const editList = async (req, res) => {
 	}
 };
 
-// Delete a contact list
 export const deleteList = async (req, res) => {
 	try {
 		const { id } = req.params;
@@ -138,8 +179,8 @@ export const getList = async (req, res) => {
 		const userId = req.session.user.id; // Assuming req.session.user contains authenticated user data
 
 		// Fetch the user's contact lists
-		let contactLists = await ContactList.find({ user: userId });
-
+		let contactLists = await ContactList.find({ owner: userId });
+		// console.log(contactLists);
 		if (!contactLists.length) {
 			res.render("Contact-List/contact-list", {
 				countries: countries,
@@ -160,9 +201,8 @@ export const getList = async (req, res) => {
 	}
 };
 
-
 export const sampleCSV = async (req, res) => {
-    const __dirname = path.resolve();
+	const __dirname = path.resolve();
 	res.download(
 		path.join(__dirname, "..", "public", "sample.csv"),
 		"sample.csv",
@@ -176,3 +216,74 @@ export const sampleCSV = async (req, res) => {
 	);
 };
 
+export const addCustomField = async (req, res) => {
+	try {
+		// Get the authenticated user's ID from the session
+		const userId = req.session.user.id; // Assuming req.session.user contains authenticated user data
+
+		// Fetch the user's contact lists
+		let contactLists = await ContactList.find({ owner: userId });
+		// console.log(contactLists);
+		if (!contactLists.length) {
+			res.render("Contact-List/custom-field", {
+				countries: countries,
+				contacts: [],
+			});
+		} else {
+			res.render("Contact-List/custom-field", {
+				countries: countries,
+				contacts: contactLists,
+			});
+		}
+	} catch (error) {
+		console.error(error);
+		res.status(500).json({
+			success: false,
+			message: "Error fetching contact lists",
+		});
+	}
+};
+
+export const updateContactListName = async (req, res) => {
+	const contactListId = req.params.id; // Get the contact list ID from the URL parameter
+	const { updatedValue } = req.body; // Get the updated value from the request body
+
+	if (!updatedValue) {
+		return res.status(400).json({
+			success: false,
+			message: "Updated value is required",
+		});
+	}
+
+	try {
+		console.log(updatedValue);
+		// Find the contact list by ID and update the name
+		const updatedContactList = await ContactList.findByIdAndUpdate(
+			contactListId,
+			{ $set: { ContactListName: updatedValue } }, // Update the 'name' field with the new value
+			{ new: true }, // Return the updated document
+		);
+
+		console.log(updatedContactList.ContactListName);
+
+		if (!updatedContactList) {
+			return res.status(404).json({
+				success: false,
+				message: "Contact list not found",
+			});
+		}
+
+		// Send success response
+		res.json({
+			success: true,
+			message: "Contact list name updated successfully",
+			updatedContactList,
+		});
+	} catch (error) {
+		console.error("Error updating contact list:", error);
+		res.status(500).json({
+			success: false,
+			message: "An error occurred while updating the contact list",
+		});
+	}
+};

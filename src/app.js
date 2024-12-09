@@ -5,7 +5,7 @@ import sessionMiddleware from "./middleWares/sessionHandler.js";
 import userRoutes from "./backEnd-Routes/user.backEnd.routes.js";
 import userfrontEndRoutes from "./frontEnd-Routes/user.frontEnd.routes.js";
 import tempalteFrontEndRoutes from "./frontEnd-Routes/template.frontEnd.routes.js";
-import contactFrontEndRoutes from "./frontEnd-Routes/contact.frontEnd.routes.js";
+import contactFrontEndRoutes from "./frontEnd-Routes/contactList.frontEnd.routes.js";
 import dashboardRoutes from "./backEnd-Routes/template.backEnd.routes.js";
 import contactListRoute from "./backEnd-Routes/contactList.backEnd.routes.js";
 
@@ -20,7 +20,7 @@ app.set("view engine", "ejs");
 
 // Middleware for serving static files
 app.use(express.static("public"));
-
+app.use("/contact-list/overview", express.static("public"));
 // Serve static files from the "views/js" directory
 const __dirname = path.resolve();
 app.use(

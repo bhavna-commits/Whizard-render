@@ -16,14 +16,7 @@ const contactsSchema = new Schema(
 			type: String,
 			required: true,
 			enum: ["Verified", "Not Verified"],
-			default: "Verified",
-		},
-		createdAt: {
-			type: String,
-			default: () => {
-				const now = new Date();
-				return now.toDateString(); 
-			},
+			default: "Not Verified",
 		},
 		owner: { type: Schema.ObjectId, required: true, ref: "User" },
 		contactList: {
@@ -31,6 +24,7 @@ const contactsSchema = new Schema(
 			required: true,
 			ref: "ContactList",
 		},
+		additionalAttributes: { type: Map, of: String }, // New field to store additional columns as key-value pairs
 	},
 	{ timestamps: true },
 	{ strict: false },

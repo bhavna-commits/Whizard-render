@@ -1,6 +1,23 @@
 document.addEventListener("DOMContentLoaded", () => {
 	// Toggle the emoji container on button click
 
+	document.querySelectorAll(".custom-dropdown-toggle").forEach((button) => {
+		button.addEventListener("click", function () {
+			const dropdownMenu = this.nextElementSibling;
+			dropdownMenu.classList.toggle("show");
+		});
+	});
+
+	document.addEventListener("click", function (event) {
+		if (!event.target.matches(".custom-dropdown-toggle")) {
+			document
+				.querySelectorAll(".custom-dropdown-menu")
+				.forEach((menu) => {
+					menu.classList.remove("show");
+				});
+		}
+	});
+
 	const dropDown = document.getElementById("mediaTypeDropdown");
 	const none = document.getElementById("noneInputContainer");
 	const text = document.getElementById("headerInputContainer");
@@ -348,4 +365,6 @@ function updatePreview() {
 		document.getElementById("bodyInput").innerHTML;
 }
 
-function submit() {}
+function () {
+
+}

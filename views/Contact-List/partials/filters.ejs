@@ -1,0 +1,112 @@
+
+
+<!-- Filter Modal -->
+<div id="filterModal" class="fixed inset-0 bg-gray-500 bg-opacity-50 flex justify-center items-center z-50 hidden">
+	<div class="bg-white p-6 rounded-lg w-96">
+		<span class="absolute top-2 right-2 text-gray-500 text-2xl cursor-pointer" onclick="closeFilterModal()">×</span>
+		<h3 class="text-lg font-semibold mb-4">Apply Filters</h3>
+		
+		<!-- Filters Form -->
+		<div class="mb-4">
+			<label for="dateInterval" class="block text-sm font-medium text-gray-700">Created At</label>
+			<input type="text" id="dateInterval" placeholder="Choose interval" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+		</div>
+		
+		<div class="mb-4">
+			<label for="attributeSelect" class="block text-sm font-medium text-gray-700">Attributes</label>
+			<div class="flex items-center space-x-2">
+				<select id="attributeSelect" class="block w-1/2 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+					<option value="name">Name</option>
+					<option value="tags">Tags</option>
+					<option value="contact">Contact</option>
+					<option value="whatsapp">WhatsApp</option>
+				</select>
+				<select id="conditionSelect" class="block w-1/4 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+					<option value="is">is</option>
+					<!-- Add more conditions if needed -->
+				</select>
+				<input type="text" id="attributeValue" placeholder="Attribute value" class="block w-1/4 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+			</div>
+		</div>
+		
+		<!-- Add new filters -->
+		<div class="mb-4">
+			<button type="button" class="px-3 py-1 text-sm font-medium text-blue-600 bg-blue-100 hover:bg-blue-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" onclick="addFilter()">+ Add Filter</button>
+		</div>
+		
+		<!-- Action Buttons -->
+		<div class="flex justify-between">
+			<button class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500" onclick="applyFilters()">Apply</button>
+			<button class="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-200 rounded-lg hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500" onclick="clearFilters()">Clear all</button>
+		</div>
+	</div>
+</div>
+
+<!-- Modal Style -->
+<style>
+	.filter-row {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+	}
+</style>
+
+<!-- Modal Logic -->
+<script>
+	function openFilterModal () {
+		document.getElementById("filterModal").classList.remove("hidden");
+	}
+	
+	function closeFilterModal () {
+		document.getElementById("filterModal").classList.add("hidden");
+	}
+	
+	function applyFilters () {
+		const dateInterval = document.getElementById("dateInterval").value;
+		const attribute = document.getElementById("attributeSelect").value;
+		const condition = document.getElementById("conditionSelect").value;
+		const attributeValue = document.getElementById("attributeValue").value;
+		
+		// You can send these values to the backend or apply filters on the front-end
+		console.log("Filters Applied: ", {
+			dateInterval,
+			attribute,
+			condition,
+			attributeValue
+		});
+		
+		// Close the modal after applying filters
+		closeFilterModal();
+	}
+	
+	function clearFilters () {
+		document.getElementById("dateInterval").value = "";
+		document.getElementById("attributeSelect").value = "";
+		document.getElementById("conditionSelect").value = "";
+		document.getElementById("attributeValue").value = "";
+	}
+	
+	function addFilter () {
+		const filterRow = document.createElement("div");
+		filterRow.classList.add("filter-row", "mb-4");
+		
+		// Add the filter elements (similar to what is inside the modal)
+		filterRow.innerHTML = `
+            <select class="block w-1/2 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                <option value="name">Name</option>
+                <option value="tags">Tags</option>
+                <option value="contact">Contact</option>
+                <option value="whatsapp">WhatsApp</option>
+            </select>
+            <select class="block w-1/4 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                <option value="is">is</option>
+                <!-- Add more conditions if needed -->
+            </select>
+            <input type="text" class="block w-1/4 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Attribute value">
+        `;
+		
+		// Append the new filter row to the modal
+		document.querySelector(".mb-4").appendChild(filterRow);
+	}
+</script>
+
