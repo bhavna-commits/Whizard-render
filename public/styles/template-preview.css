@@ -1,7 +1,7 @@
 .iphone-container {
 	position: relative;
-	width: 550px;
-	height: 700px;
+	width: 350px;
+	height: 480px;
 	background: url("./Iphone-png-mockup.png") no-repeat center center;
 	background-size: contain;
 	overflow: hidden;
@@ -10,10 +10,10 @@
 
 .iphone-screen {
 	position: absolute;
-	top: 17px;
-	left: 123px;
-	width: calc(77% - 120px);
-	height: calc(96% - 8px);
+	top: 11px;
+	left: 52px;
+	width: calc(77% - 30px);
+	height: calc(100% - 23px);
 	overflow: hidden;
 	background-image: url(./BG.jpg);
 	background-size: cover;
@@ -24,12 +24,13 @@
 }
 
 .iphone-container .card {
-	margin-top: 35px;
-	border: none;
-	border-radius: 20px;
+	margin: 0;
+	/* border: none;
+	border-radius: 20px; */
 	/* Smooth edges */
-	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+	/* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); */
 	/* Card shadow */
+	margin-top: 35px;
 }
 
 .iphone-container .card-body {

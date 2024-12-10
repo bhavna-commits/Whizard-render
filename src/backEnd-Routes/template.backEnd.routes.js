@@ -2,19 +2,16 @@ import express from "express";
 import { checkSession } from "../middleWares/checkSession.js";
 import {
 	createTemplate,
-	templatePreview,
+	deleteTemplate,
+	duplicateTemplate,
 } from "../controllers/Dashboard/template.controller.js";
-import upload from "../config/multerUpload.js";
 
 const router = express.Router();
 
-router.post(
-	"/createTemplate",
-	checkSession,
-	upload.single("headerFile"),
-	createTemplate,
-);
+router.post("/createTemplate", checkSession, createTemplate);
 
+router.post("/duplicate/:id", checkSession, duplicateTemplate);
 
+router.delete("/delete/:id", deleteTemplate);
 
 export default router;

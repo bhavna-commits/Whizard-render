@@ -35,6 +35,7 @@
 	<link href="styles/style.css" rel="stylesheet" type="text/css" />
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
 	<script src="https://cdn.tailwindcss.com"></script>
+	<link rel="stylesheet" type="text/css" href="styles/template-preview.css" />
 	<style>
 		* {
 			font-size: large;
@@ -62,7 +63,7 @@
 						Chats</a>
 				</li>
 				<li>
-					<a href="/contact-list"><span class="icon "><i class="fa-regular fa-address-book"></i></span>
+					<a href="/contact-list"><span class="icon"><i class="fa-regular fa-address-book"></i></span>
 						
 						Contact List</a>
 				</li>
@@ -88,7 +89,7 @@
 		<!-- START PAGE-CONTAINER -->
 		
 		<div class="flex flex-grow w-[90%] overflow-y-scroll">
-			<div class="card px-3 ml-2 flex-shrink ">
+			<div class="card px-3 ml-2 flex-shrink">
 				<div class="title logo">
 					<h4 class="page-title font-bold text-xl pb-1 text-center">
 						Add template
@@ -98,30 +99,50 @@
 				<form action="">
 					<div class="form-group mt-3">
 						<label class="font-semibold">Template Name</label>
-						<input type="email" class="form-control shadow-sm rounded border-1 font-semibold" placeholder="Give new template a name" required="" />
+						<input type="text" class="form-control shadow-sm rounded border-1 font-semibold" placeholder="Give new template a name" required="" />
 					</div>
 					
 					<div class="form-group mt-3">
 						<label class="font-semibold">Category</label>
-						<div class="custom-dropdown custom-dropdown-default w-100 relative">
-							<button id="categoryButton" class="custom-btn custom-dropdown-toggle w-100" type="button" aria-haspopup="true" aria-expanded="true">
+						<div class="relative">
+							<button id="categoryButton" aria-haspopup="true" aria-expanded="false" class="w-full text-sm bg-transparent border border-gray-300 rounded px-4 py-2 text-left cursor-pointer text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500" type="button">
 								Choose category
 							</button>
-							<div class="custom-dropdown-menu absolute">
-								<a class="custom-dropdown-item" href="#" onclick="selectCategory('Marketing')">Marketing</a>
-								<a class="custom-dropdown-item" href="#" onclick="selectCategory('Utility')">Utility</a>
-								<a class="custom-dropdown-item" href="#" onclick="selectCategory('Authentication')">Authentication</a>
+							<div id="categoryDropdown" class="hidden absolute bg-white border border-gray-200 rounded mt-2 py-2 shadow-lg w-full z-50">
+								<a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onclick="selectCategory('Marketing')">Marketing</a>
+								<a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onclick="selectCategory('Utility')">Utility</a>
+								<a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onclick="selectCategory('Authentication')">Authentication</a>
 							</div>
 						</div>
 					</div>
 					
 					<script>
 						function selectCategory (category) {
+							const categoryButton = document.getElementById("categoryButton");
 							// Change the button text to the selected category
-							document.getElementById('categoryButton').textContent = category;
+							categoryButton.textContent = category;
+							// Close the dropdown
+							document.getElementById('categoryDropdown').classList.add('hidden');
 						}
+						
+						document.getElementById('categoryButton').addEventListener('click', function () {
+							const dropdown = document.getElementById('categoryDropdown');
+							dropdown.classList.toggle('hidden');
+							// Manage aria-expanded attribute for accessibility
+							const isExpanded = dropdown.classList.contains('hidden') ? 'false' : 'true';
+							this.setAttribute('aria-expanded', isExpanded);
+						});
+						
+						// Close dropdown when clicking outside
+						document.addEventListener('click', function (event) {
+							const categoryButton = document.getElementById('categoryButton');
+							const dropdown = document.getElementById('categoryDropdown');
+							if (!categoryButton.contains(event.target) && !dropdown.contains(event.target)) {
+								dropdown.classList.add('hidden');
+								categoryButton.setAttribute('aria-expanded', 'false');
+							}
+						});
 					</script>
-					
 					
 					
 					<!-- <div class="form-group py-1">
@@ -145,7 +166,7 @@
 			
 			<div class="min-w-[50%] px-1 flex-grow">
 				<div class="card px-3">
-					<div class="d-flex justify-content-between align-items-center logo ">
+					<div class="d-flex justify-content-between align-items-center logo">
 						<div class="title">
 							<h4 class="page-title text-xl font-bold">
 								Setup Template
@@ -153,10 +174,30 @@
 						</div>
 						<!-- Submit Button -->
 						<div class="text-end">
-							<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#templateModal">
+							<button type="button" class="btn btn-primary" id="submitTemplate" onclick="submit()">
 								Submit
 							</button>
 						</div>
+						
+						<!-- Modal -->
+						<!-- <div class="modal fade" id="templateModal" tabindex="-1" aria-labelledby="templateModalLabel" aria-hidden="true">
+							<div class="modal-dialog modal-xl">
+								<div class="modal-content">
+									<div class="modal-header">
+										<h5 class="modal-title" id="templateModalLabel">Template Submission</h5>
+										<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+									</div>
+									<div class="modal-body">
+										
+										<div id="modalContent"></div>
+									</div>
+									<div class="modal-footer">
+										<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+									</div>
+								</div>
+							</div>
+						</div> -->
+						
 					</div>
 					
 					<div class="setup-template">
@@ -170,9 +211,15 @@
 							</div>
 							<div class="header-dropdown form-group">
 								<select id="mediaTypeDropdown" class="cursor-pointer w-full rounded-md border border-gray-300 bg-white py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
-									<option class="text-sm" value="none">None</option>
-									<option class="text-sm" value="text">Text</option>
-									<option class="text-sm" value="media">Media</option>
+									<option class="text-sm" value="none">
+										None
+									</option>
+									<option class="text-sm" value="text">
+										Text
+									</option>
+									<option class="text-sm" value="media">
+										Media
+									</option>
 								</select>
 							</div>
 						</div>
@@ -210,13 +257,15 @@
 					
 					<!-- Body -->
 					<div class="form-group">
-						<h6 class="font-semibold text-lg pb-2 pt-1">Body</h6>
+						<h6 class="font-semibold text-lg pb-2 pt-1">
+							Body
+						</h6>
 						<label class="font-medium text-secondary pb-2 text-sm">Enter the text for your message in the language
 							that you&apos;ve selected. Add {1}, {2}, {3}
 							(Curly Braceses and numbers) to add Dynamic
 							values</label>
 						<div class="border rounded shadow-sm relative z-0">
-							<div class="px-2  h-fit d-flex align-items-center justify-content-between" role="toolbar">
+							<div class="px-2 h-fit d-flex align-items-center justify-content-between" role="toolbar">
 								<div id="toolbar" class="relative flex gap-4">
 									<button class=" " onclick="formatText('bold', this)">
 										<i class="fa fa-bold text-sm"></i>
@@ -239,7 +288,7 @@
 									<!-- Container where emojis will be displayed -->
 								</div>
 								<div id="emojiContainer" class="hidden absolute top-full left-0 bg-white p-4 rounded shadow-lg w-[480px] h-52 overflow-y-auto z-50">
-									<input id="emojiSearch" type="text" placeholder="Search for emojis..." class="border shadow-md focus:shadow-lg rounded p-2 mb-3 w-full" />
+									<input id="emojiSearch" type="text" placeholder="Search for emojis..." class=" border shadow-md focus:shadow-lg rounded p-2 mb-3 w-full" />
 									<div id="emojiList" class="grid grid-cols-6 gap-2"></div>
 								</div>
 								
@@ -248,7 +297,7 @@
 								</div>
 							</div>
 							<!-- <textarea id="bodyInput" class="w-full h-full px-2 text-xl" placeholder="Enter body here" contenteditable="true" maxlength="1024" cols="1"></textarea> -->
-							<div id="bodyInput" class="focus:outline-none p-2" contenteditable="true" maxlength="1024" style="min-height: 50px; height: auto"></div>
+							<div id="bodyInput" class="focus:outline-none p-2 text-sm" contenteditable="true" maxlength="1024" style="min-height: 50px; height: auto"></div>
 						</div>
 					</div>
 					
@@ -260,7 +309,7 @@
 							opt-out button, the associated footer will be
 							shown here by default.</label>
 						<div class="border rounded shadow-sm d-flex align-items-center justify-content-between p-2">
-							<input type="text" class="border-0 w-full" maxlength="64" id="footerInput" placeholder="Enter footer text" />
+							<input type="text" class="border-0 w-full text-sm" maxlength="64" id="footerInput" placeholder="Enter footer text" />
 							
 							<div class="count">
 								<small class="text-secondary footer-count float-end">0/64</small>
@@ -278,25 +327,54 @@
 							your message or take action.
 						</label>
 						<!-- Button Dropdown -->
-						<div class="custom-btn-dropdown w-25">
-							<div class="custom-dropdown custom-dropdown-default w-100">
-								<button aria-label="" class="custom-btn w-100 custom-dropdown-toggle" type="button" aria-haspopup="true" aria-expanded="false">
+						<div class="w-fit mt-4">
+							<div class="relative w-full">
+								<!-- Button to toggle dropdown -->
+								<button id="addButtonDropdown" class="text-sm w-fit h-fit bg-transparent border border-gray-300 rounded px-4 py-2 cursor-pointer text-left text-black focus:outline-none" type="button">
 									+ Add a button
 								</button>
-								<div class="custom-dropdown-menu">
-									<div class="custom-dropdown-item text-sm" id="addWebsiteBtn" class="text-sm">Visit Website</div>
-									<div class="custom-dropdown-item text-sm" id="addCallBtn">Call Phone Number</div>
+								
+								<!-- Dropdown with options -->
+								<div id="buttonDropdown" class="hidden absolute bg-white border border-gray-200 rounded mt-2 py-2 shadow-lg w-full z-50">
+									<div class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer" id="addWebsiteBtn">Visit Website</div>
+									<div class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer" id="addCallBtn">Call Phone Number</div>
 								</div>
 							</div>
 						</div>
 						
-						<div id="buttonOptions"></div>
+						<script>
+							const buttonDropdown = document.getElementById("addButtonDropdown");
+							const dropdownMenu = document.getElementById("buttonDropdown");
+							
+							// Toggle dropdown visibility when button is clicked
+							buttonDropdown.addEventListener("click", function (e) {
+								e.stopPropagation(); // Prevent this click from closing the dropdown
+								console.log(dropdownMenu.classList.toggle("hidden")); // Toggle the visibility of the dropdown
+								// console.log(dropdownMenu.classList);
+							});
+							
+							// Close dropdown if clicking outside of it
+							window.addEventListener("click", function (e) {
+								if (!dropdownMenu.contains(e.target) && !buttonDropdown.contains(e.target)) {
+									// console.log("coming here")
+									dropdownMenu.classList.add("hidden"); // Hide dropdown if clicking outside
+								}
+							});
+							
+							// Prevent dropdown from closing when clicking inside the dropdown
+							dropdownMenu.addEventListener("click", function (e) {
+								e.stopPropagation(); // Stops clicks inside dropdown from closing it
+							});
+						</script>
+						
+						<div id="buttonOptions" class="space-y-3"></div>
+						
 					</div>
 				</div>
 			</div>
 			<div class="col-lg-3 px-1">
 				<div class="card">
-					<div class="title pb-3 logo">
+					<div class="title logo">
 						<h4 class="page-title text-2xl font-bold text-center">
 							Template Preview
 						</h4>
@@ -311,17 +389,19 @@
 				</div>
 			</div>
 		</div>
-		<%- include("template-preview") %>
+		<%- include("template-preview-modal") %>
 		<!-- Preview Section -->
 		
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/js/all.min.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-		
 	</div>
 	<!-- END PAGE CONTENT WRAPPER -->
+	<!-- Bootstrap 5.3 CSS -->
+	<!-- Bootstrap 5.3 CSS -->
+	<!-- Bootstrap 5.3 CSS without integrity and crossorigin -->
 	
 	<!-- BEGIN VENDOR JS -->
-	<script src="assets/plugins/pace/pace.min.js" type="text/javascript"></script>
+	<script src=" assets/plugins/pace/pace.min.js" type="text/javascript"></script>
 	<!--  A polyfill for browsers that don't support ligatures: remove liga.js if not needed-->
 	<script src="assets/plugins/liga.js" type="text/javascript"></script>
 	<script src="assets/plugins/jquery/jquery-3.2.1.min.js" type="text/javascript"></script>
@@ -341,7 +421,6 @@
 	<script src="template/js/submit-template.js"></script>
 	<script src="template/js/fetchEmoji.js"></script>
 	<script src="template/js/create-template.js"></script>
-	
 	
 	<!-- END PAGE LEVEL JS -->
 </body>

@@ -136,6 +136,9 @@ document.addEventListener("DOMContentLoaded", () => {
 		.getElementById("footerInput")
 		.addEventListener("input", function () {
 			document.getElementById("previewFooter").textContent = this.value;
+			document
+				.getElementById("previewFooter")
+				.classList.add("text-center");
 			document.querySelector(".footer-count").textContent =
 				this.value.length + "/64";
 		});
@@ -363,8 +366,4 @@ function insertAtCaret(divId, text) {
 function updatePreview() {
 	document.getElementById("previewBody").innerHTML =
 		document.getElementById("bodyInput").innerHTML;
-}
-
-function () {
-
 }

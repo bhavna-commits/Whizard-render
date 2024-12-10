@@ -95,7 +95,7 @@
           <label for="otp" class="form-label text-gray-500">Enter OTP</label>
           <div class="d-flex gap-2">
             <% for(let i = 1; i <= 6; i++) { %>
-            <input type="text" id="otp<%= i %>" name="otp<%= i %>" class="form-control otp-input" maxlength="1" required />
+            <input type="number" id="otp<%= i %>" name="otp<%= i %>" class="form-control otp-input" maxlength="1" required />
             <% } %>
           </div>
         </div>

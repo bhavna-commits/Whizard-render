@@ -173,34 +173,6 @@ export const deleteList = async (req, res) => {
 	}
 };
 
-export const getList = async (req, res) => {
-	try {
-		// Get the authenticated user's ID from the session
-		const userId = req.session.user.id; // Assuming req.session.user contains authenticated user data
-
-		// Fetch the user's contact lists
-		let contactLists = await ContactList.find({ owner: userId });
-		// console.log(contactLists);
-		if (!contactLists.length) {
-			res.render("Contact-List/contact-list", {
-				countries: countries,
-				contacts: [],
-			});
-		} else {
-			res.render("Contact-List/contact-list", {
-				countries: countries,
-				contacts: contactLists,
-			});
-		}
-	} catch (error) {
-		console.error(error);
-		res.status(500).json({
-			success: false,
-			message: "Error fetching contact lists",
-		});
-	}
-};
-
 export const sampleCSV = async (req, res) => {
 	const __dirname = path.resolve();
 	res.download(
@@ -284,6 +256,34 @@ export const updateContactListName = async (req, res) => {
 		res.status(500).json({
 			success: false,
 			message: "An error occurred while updating the contact list",
+		});
+	}
+};
+
+export const getList = async (req, res) => {
+	try {
+		// Get the authenticated user's ID from the session
+		const userId = req.session.user.id; // Assuming req.session.user contains authenticated user data
+
+		// Fetch the user's contact lists
+		let contactLists = await ContactList.find({ owner: userId });
+		// console.log(contactLists);
+		if (!contactLists.length) {
+			res.render("Contact-List/contact-list", {
+				countries: countries,
+				contacts: [],
+			});
+		} else {
+			res.render("Contact-List/contact-list", {
+				countries: countries,
+				contacts: contactLists,
+			});
+		}
+	} catch (error) {
+		console.error(error);
+		res.status(500).json({
+			success: false,
+			message: "Error fetching contact lists",
 		});
 	}
 };

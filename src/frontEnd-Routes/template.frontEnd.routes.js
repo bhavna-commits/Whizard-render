@@ -1,17 +1,15 @@
 import express from "express";
 import { checkSession } from "../middleWares/checkSession.js";
-import { templatePreview } from "../controllers/Dashboard/template.controller.js";
+import { templatePreview, getList } from "../controllers/Dashboard/template.controller.js";
 
 const router = express.Router();
 
-router.get("/template", checkSession, (req, res) => {
-	res.render("Templates/manage_template");
-});
+router.get("/template", checkSession, getList);
 
 router.get("/create-template", checkSession, (req, res) => {
-	res.render("Templates/create-template");
+	res.render("Templates/create-template", {
+		templateData: [],
+	});
 });
-
-router.get("/template-preview", checkSession, templatePreview);
 
 export default router;
