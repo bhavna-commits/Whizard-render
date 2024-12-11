@@ -111,7 +111,7 @@
 	});
 	
 	function duplicateTemplate (templateId) {
-		fetch(`/templates/duplicate/${templateId}`, {
+		fetch(`/api/templates/duplicate/${templateId}`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
@@ -132,7 +132,7 @@
 	// Function to confirm deletion
 	function confirmDelete (templateId) {
 		if (confirm('Are you sure you want to delete this template?')) {
-			fetch(`/templates/delete/${templateId}`, {
+			fetch(`/api/templates/delete/${templateId}`, {
 					method: 'DELETE',
 					headers: {
 						'Content-Type': 'application/json',

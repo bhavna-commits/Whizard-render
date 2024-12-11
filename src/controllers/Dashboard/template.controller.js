@@ -41,7 +41,6 @@ export const templatePreview = async (req, res) => {
 				templateData: template,
 			});
 		} else {
-			
 		}
 	} catch (error) {
 		res.status(400).json({
@@ -63,47 +62,76 @@ export const getList = async (req, res) => {
 	}
 };
 
-// Controller function to duplicate a template
 export const duplicateTemplate = async (req, res) => {
-    try {
-        const templateId = req.params.id;
+	try {
+		const templateId = req.params.id;
 
-        // Find the template by its ID
-        const originalTemplate = await Template.findById(templateId);
-        if (!originalTemplate) {
-            return res.status(404).json({ success: false, error: 'Template not found' });
-        }
+		// Find the template by its ID
+		const originalTemplate = await Template.findById(templateId);
+		if (!originalTemplate) {
+			return res
+				.status(404)
+				.json({ success: false, error: "Template not found" });
+		}
 
-        // Create a new template with the same data but a new _id
-        const newTemplate = new Template({
-            ...originalTemplate.toObject(), // Copy all properties
-            _id: undefined, // Remove _id to generate a new one
-            createdAt: new Date(),
-            updatedAt: new Date(),
-        });
+		// Create a new template with the same data but a new _id
+		const newTemplate = new Template({
+			...originalTemplate.toObject(), // Copy all properties
+			_id: undefined, // Remove _id to generate a new one
+			createdAt: new Date(),
+			updatedAt: new Date(),
+		});
 
-        // Save the duplicated template
-        await newTemplate.save();
+		// Save the duplicated template
+		await newTemplate.save();
 
-        res.status(201).json({ success: true, template: newTemplate });
-    } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
-    }
+		res.status(201).json({ success: true, template: newTemplate });
+	} catch (error) {
+		res.status(500).json({ success: false, error: error.message });
+	}
 };
 
-// Controller function to delete a template
 export const deleteTemplate = async (req, res) => {
-    try {
-        const templateId = req.params.id;
+	try {
+		const templateId = req.params.id;
 
-        // Find and delete the template by its ID
-        const deletedTemplate = await Template.findByIdAndDelete(templateId);
-        if (!deletedTemplate) {
-            return res.status(404).json({ success: false, error: 'Template not found' });
-        }
+		// Find and delete the template by its ID
+		const deletedTemplate = await Template.findByIdAndDelete(templateId);
+		if (!deletedTemplate) {
+			return res
+				.status(404)
+				.json({ success: false, error: "Template not found" });
+		}
 
-        res.status(200).json({ success: true, message: 'Template deleted successfully' });
-    } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
-    }
+		res.status(200).json({
+			success: true,
+			message: "Template deleted successfully",
+		});
+	} catch (error) {
+		res.status(500).json({ success: false, error: error.message });
+	}
+};
+
+export const getCampaignTemplates = async (req, res) => {
+	try {
+		const template = await Template.findById(req.params.id);
+		if (!template)
+			return res.status(404).json({ error: "Template not found" });
+		const dynamicVariables = template.dynamicVariables;
+		res.json({ template, dynamicVariables });
+	} catch (error) {
+		res.status(500).json({ error: error.message });
+	}
+};
+
+export const getTemplates = async (req, res) => {
+	try {
+		const { id } = req.session.user;
+
+		const templates = await Template.find({ owner: id });
+
+		res.json(templates);
+	} catch (error) {
+		res.status(500).json({ success: false, error: error.message });
+	}
 };

@@ -1,6 +1,7 @@
 import path from "path";
 import ContactList from "../../models/contactList.model.js";
 import Contacts from "../../models/contacts.modal.js";
+import Template from "../../models/templates.model.js";
 import User from "../../models/user.model.js";
 import { countries } from "../../utils/dropDown.js";
 
@@ -285,5 +286,28 @@ export const getList = async (req, res) => {
 			success: false,
 			message: "Error fetching contact lists",
 		});
+	}
+};
+
+export const getContactList = async (req, res) => {
+	try {
+		const { id } = req.session.user;
+
+		const contactLists = await ContactList.find({ owner: id });
+
+		res.json(contactLists);
+	} catch (error) {
+		res.status(500).json({ success: false, error: error.message });
+	}
+};
+
+export const getCampaignContacts = async (req, res) => {
+	try {
+		const contacts = await Contacts.find({ contactList: req.params.id });
+		if (!contacts)
+			return res.status(404).json({ error: "No contacts found" });
+		res.json(contacts);
+	} catch (error) {
+		res.status(500).json({ error: error.message });
 	}
 };

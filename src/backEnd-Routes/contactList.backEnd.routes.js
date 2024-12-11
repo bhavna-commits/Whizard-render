@@ -7,6 +7,7 @@ import {
 	deleteList,
 	sampleCSV,
 	updateContactListName,
+	getCampaignContacts,
 } from "../controllers/ContactList/contactList.controller.js";
 import {
 	updateContact,
@@ -34,6 +35,6 @@ router.delete("/contacts/:id", checkSession, deleteContact);
 
 router.put("/:id/updateName", checkSession, updateContactListName);
 
-
+router.get("/:id/contacts", checkSession, getCampaignContacts);
 
 export default router;

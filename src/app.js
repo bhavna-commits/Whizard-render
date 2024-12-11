@@ -22,6 +22,7 @@ app.set("view engine", "ejs");
 app.use(express.static("public"));
 app.use("/contact-list/overview", express.static("public"));
 // Serve static files from the "views/js" directory
+app.use("/Contact-List/createCampaign", express.static("public"));
 const __dirname = path.resolve();
 app.use(
 	"/dashboard/js",
