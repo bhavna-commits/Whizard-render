@@ -6,10 +6,11 @@ import {
 	duplicateTemplate,
 	getCampaignTemplates,
 } from "../controllers/Dashboard/template.controller.js";
+import multerMiddle from "../config/multerMiddleware.js";
 
 const router = express.Router();
 
-router.post("/createTemplate", checkSession, createTemplate);
+router.post("/createTemplate", checkSession, multerMiddle, createTemplate);
 
 router.post("/duplicate/:id", checkSession, duplicateTemplate);
 

@@ -9,7 +9,7 @@ async function submit() {
 
 	try {
 		const templateData = collectTemplateData();
-		// console.log(templateData);
+		console.log(templateData);
 		// Validate curly braces in header, body, and footer
 		let headerValidation = { isValid: true, error: null, numbers: [] };
 
@@ -52,33 +52,73 @@ async function submit() {
 		if (templateData.header.content instanceof File) {
 			formData.append("headerFile", templateData.header.content);
 		}
-
+		console.log("FormData:", Array.from(formData.entries())); // Log all formData entries as an array
 		// Submit to API
 		const response = await fetch("/api/templates/createTemplate", {
 			method: "POST",
 			body: formData,
 		});
 
-		if (!response.ok) {
-			throw new Error("Failed to create template");
-		}
-
 		// Parse response data to populate modal content
 		const responseData = await response.json();
 		console.log(responseData);
+
 		// Assuming the response contains templateData
 		if (responseData.templateData) {
 			// Set the modal data dynamically based on the response
+			const previewContainer =
+				document.getElementById("previewContainer");
+			const previewHead = document.getElementById("previewHead");
+			previewHead.innerHTML = "";
+			const templateData = responseData.templateData;
+			// Check if the header content is of type "media"
+			const header = templateData.header;
+			if (header.type === "text") {
+				// Display text preview
+				previewHead.textContent =
+					header.content || "Header Text Preview";
+			} else if (header.type === "media" && header.content) {
+				// Handle media content (image, video, document)
+				if (
+					header.content.includes(".jpg") ||
+					header.content.includes(".png")
+				) {
+					// Image preview
+					const img = document.createElement("img");
+					img.src = `/uploads/${templateData.owner}/${header.content}`;
+					img.style.width = "200px";
+					img.style.height = "200px";
+					previewHead.appendChild(img);
+				} else if (header.content.includes(".mp4")) {
+					// Video preview
+					const video = document.createElement("video");
+					video.src = `/uploads/${templateData.owner}/${header.content}`;
+					video.controls = true;
+					video.style.width = "200px";
+					video.style.height = "200px";
+					previewHead.appendChild(video);
+				} else if (header.content.includes(".pdf")) {
+					// Document preview (PDF)
+					const iframe = document.createElement("iframe");
+					iframe.src = `/uploads/${templateData.owner}/${header.content}`;
+					iframe.style.width = "200px";
+					iframe.style.height = "200px";
+					previewHead.appendChild(iframe);
+				} else {
+					// For other document types (e.g., DOCX, CSV), just display the file name
+					previewHead.textContent =
+						"Uploaded File: " + header.content;
+				}
+			}
+
 			const modalTitle = document.getElementById("templateModalLabel");
 			const previewForm = document.getElementById("previewForm");
-			const previewHeader = document.getElementById("previewHeader");
+			const previewHeader = document.getElementById("previewHead");
 			console.log(previewHeader);
-			const previewBody = document.getElementById("previewBody");
+			const previewBody = document.getElementById("previewBod");
 			console.log(previewBody.value);
-			const previewFooter = document.getElementById("previewFooter");
-			
+			const previewFooter = document.getElementById("previewFoot");
 
-			//
 			// Set the modal title
 			modalTitle.innerHTML = responseData.templateData.templateName;
 
@@ -109,8 +149,8 @@ async function submit() {
 				/(\r\n|\n|\r)/g,
 				"<br>",
 			);
-			console.log(previewBody.innerHTML)
-			previewFooter.innerHTML = `<small class="text-muted border leading-6">${responseData.templateData.footer.replace(
+			console.log(previewBody.innerHTML);
+			previewFooter.innerHTML = `<small class="text-muted leading-6">${responseData.templateData.footer.replace(
 				/(\r\n|\n|\r)/g,
 				"<br>",
 			)}</small>`;
@@ -130,8 +170,10 @@ async function submit() {
 }
 
 function generatePreviewWebsite(templateData) {
-	const previewButtons = document.getElementById("previewButtons");
-	let url = templateData?.buttons?.filter((d) => d.urlPhone.startsWith("http"));
+	const previewButtons = document.getElementById("previewButton");
+	let url = templateData?.buttons?.filter((d) =>
+		d.urlPhone.startsWith("http"),
+	);
 	if (!url) return;
 	let label = url.length > 0 && url[0].text ? url[0].text : "Visit Now";
 
@@ -150,8 +192,10 @@ function generatePreviewWebsite(templateData) {
 
 // Generate Call Button Preview with FA icon
 function generatePreviewCall(templateData) {
-	const previewButtons = document.getElementById("previewButtons");
-	let url = templateData.buttons.filter((d) => !d.urlPhone.startsWith("http"));
+	const previewButtons = document.getElementById("previewButton");
+	let url = templateData.buttons.filter(
+		(d) => !d.urlPhone.startsWith("http"),
+	);
 	if (url) return;
 	let label = url.length > 0 && url[0].text ? url[0].text : "Call Now";
 
@@ -161,11 +205,10 @@ function generatePreviewCall(templateData) {
         </button>
     `;
 
-	let existingBtn = document.getElementById("callBtn_" + id);
-	if (existingBtn) {
-		existingBtn.outerHTML = preview;
+	if (previewButtons) {
+		previewButtons.outerHTML = preview;
 	} else {
-		document.getElementById("previewButtons").innerHTML += preview;
+		previewButtons.innerHTML += preview;
 	}
 }
 
@@ -218,133 +261,6 @@ const sampleTemplateData = {
 	dynamicVariables: ["Name", "WhatsApp"],
 	body: "This is the body of the template preview.",
 };
-
-// Open the modal when needed
-
-// function generateModalBody(templateData) {
-// 	// Generate the modal's HTML structure
-// 	return `
-//     <div class="flex space-x-4 p-4"> <!-- Flex container for left and right sections -->
-
-//       <!-- Left Side: Form for Dynamic Variables -->
-//       <div class="w-1/2 p-4 border-r"> <!-- 50% width for the left side with padding and border -->
-//        <!-- Template name on top -->
-//         <form id="previewForm">
-//           ${templateData.dynamicVariables
-// 				.map(
-// 					(variable) => `
-//             <div class="form-group py-2">
-//               <label class="font-semibold">Choose Attributes for ${variable}</label>
-//              <input type="text" class="w-full" onchange="updateAttribute()" />
-//             </div>
-//           `,
-// 				)
-// 				.join(
-// 					"",
-// 				)} <!-- Join dynamic form elements into the structure -->
-//         </form>
-//       </div>
-
-//       <!-- Right Side: iPhone Preview -->
-//       <div class="w-1/2 flex justify-center items-center"> <!-- 50% width for the right side -->
-//         <div class="iphone-container">
-//           <div class="iphone-screen">
-//             <div class="card">
-
-//               <!-- Header Section -->
-//               ${
-// 					templateData.header &&
-// 					templateData.header.type !== "none" &&
-// 					templateData.header.content
-// 						? `
-//                 ${
-// 					templateData.header.contentType === "image"
-// 						? `
-//                   <img src="${templateData.header.content}" class="card-img-top img-fluid" alt="Header Image" />
-//                 `
-// 						: templateData.header.contentType === "pdf"
-// 						? `
-//                   <embed src="${templateData.header.content}#page=1" type="application/pdf" width="100%" height="500px" />
-//                 `
-// 						: templateData.header.contentType === "docx"
-// 						? `
-//                   <iframe src="https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(
-// 						templateData.header.content,
-// 					)}" width="100%" height="500px" frameborder="0"></iframe>
-//                 `
-// 						: templateData.header.contentType === "video"
-// 						? `
-//                   <video controls class="card-img-top" width="100%">
-//                     <source src="${templateData.header.content}" type="video/mp4" />
-//                     Your browser does not support the video tag.
-//                   </video>
-//                 `
-// 						: templateData.header.contentType === "location"
-// 						? `
-//                   <iframe width="100%" height="300px" src="https://www.google.com/maps/embed/v1/place?key=YOUR_GOOGLE_MAPS_API_KEY&q=${encodeURIComponent(
-// 						templateData.header.content,
-// 					)}" frameborder="0" style="border: 0" allowfullscreen=""></iframe>
-//                 `
-// 						: templateData.header.type === "text"
-// 						? `
-//                   <p class="card-text text-sm font-bold pb-2" id="previewHead">
-//                     ${templateData.header.content.replace(
-// 						/(\r\n|\n|\r)/g,
-// 						"<br>",
-// 					)}
-//                   </p>
-//                   <img src="https://via.placeholder.com/360x180" class="card-img-top" alt="Image" />
-//                 `
-// 						: ""
-// 				}
-//               `
-// 						: ""
-// 				}
-
-//               <!-- Body and Footer Section -->
-//               <div class="card-body">
-//                 <p class="card-text text-sm" id="previewBody">
-//                   ${templateData.body.replace(/(\r\n|\n|\r)/g, "<br>")}
-//                 </p>
-//                 <p class="card-text text-sm" id="previewFooter">
-//                   <small class="text-muted">${templateData.footer.replace(
-// 						/(\r\n|\n|\r)/g,
-// 						"<br>",
-// 					)}</small>
-//                 </p>
-
-//                 <!-- Dynamic Buttons -->
-//                 ${templateData.buttons
-// 					.map(
-// 						(button) => `
-//                   <a href="${
-// 						button.urlPhone.startsWith("http")
-// 							? button.urlPhone
-// 							: "tel:" + button.urlPhone
-// 					}" class="btn btn-sm btn-outline-primary">
-//                     <i class="pr-1 ${
-// 						button.urlPhone.startsWith("http")
-// 							? "fa-solid fa-arrow-up-right-from-square"
-// 							: "fa-solid fa-phone"
-// 					}"></i>
-//                     ${
-// 						button.text ||
-// 						(button.urlPhone.startsWith("http")
-// 							? "Visit Now"
-// 							: "Call Now")
-// 					}
-//                   </a>
-//                 `,
-// 					)
-// 					.join("")}
-//               </div>
-//             </div>
-//           </div>
-//         </div>
-//       </div>
-//     </div>
-//   `;
-// }
 
 // Validate curly braces format and extract numbers
 function validateCurlyBraces(text) {

@@ -18,6 +18,70 @@ document.addEventListener("DOMContentLoaded", () => {
 		}
 	});
 
+	document
+		.getElementById("mediaTypeDropdown")
+		.addEventListener("change", function (e) {
+			const selectedValue = e.target.value;
+			const previewHeader = document.getElementById("previewHeader");
+
+			// Reset preview content
+			previewHeader.innerHTML = "";
+
+			if (selectedValue === "text") {
+				// Show the text input for the header
+				previewHeader.textContent = "Header Text Preview";
+				document
+					.getElementById("headerInput")
+					.addEventListener("input", (e) => {
+						previewHeader.textContent =
+							e.target.value || "Header Text Preview";
+					});
+			} else if (selectedValue === "media") {
+				const mediaType = document.getElementById("mediaType").value;
+				const fileInput =
+					document.getElementById("file-upload").files[0];
+
+				if (mediaType === "image" && fileInput) {
+					// Create image element for preview
+					const img = document.createElement("img");
+					img.src = URL.createObjectURL(fileInput);
+					img.style.width = "200px";
+					img.style.height = "200px";
+					previewHeader.appendChild(img);
+				} else if (mediaType === "video" && fileInput) {
+					// Create video element for preview
+					const video = document.createElement("video");
+					video.src = URL.createObjectURL(fileInput);
+					video.controls = true;
+					video.style.width = "200px";
+					video.style.height = "200px";
+					previewHeader.appendChild(video);
+				} else if (mediaType === "document" && fileInput) {
+					// Show document preview for PDF
+					if (fileInput.type === "application/pdf") {
+						const iframe = document.createElement("iframe");
+						iframe.src = URL.createObjectURL(fileInput);
+						iframe.style.width = "200px";
+						iframe.style.height = "200px";
+						previewHeader.appendChild(iframe);
+					} else {
+						// Display file name for other documents like DOCX, CSV
+						previewHeader.textContent =
+							"Uploaded File: " + fileInput.name;
+					}
+				}
+			}
+		});
+
+	// Listen for changes in the file upload input to update the preview dynamically
+	document
+		.getElementById("file-upload")
+		.addEventListener("change", function () {
+			const mediaTypeDropdown =
+				document.getElementById("mediaTypeDropdown");
+			mediaTypeDropdown.dispatchEvent(new Event("change"));
+		});
+
 	const dropDown = document.getElementById("mediaTypeDropdown");
 	const none = document.getElementById("noneInputContainer");
 	const text = document.getElementById("headerInputContainer");
@@ -136,9 +200,7 @@ document.addEventListener("DOMContentLoaded", () => {
 		.getElementById("footerInput")
 		.addEventListener("input", function () {
 			document.getElementById("previewFooter").textContent = this.value;
-			document
-				.getElementById("previewFooter")
-				.classList.add("text-center");
+			document.getElementById("previewFooter").classList.add("text-left");
 			document.querySelector(".footer-count").textContent =
 				this.value.length + "/64";
 		});
@@ -156,8 +218,8 @@ document.addEventListener("DOMContentLoaded", () => {
 	document
 		.getElementById("addWebsiteBtn")
 		.addEventListener("click", function () {
-			if (websiteBtnCount >= 2) {
-				alert("You can only add 2 website buttons.");
+			if (websiteBtnCount >= 1) {
+				alert("You can only add 1 website buttons.");
 				return;
 			}
 
@@ -177,7 +239,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     
                     <div class="col-4">
                         <label>Website URL</label>
-                        <input type="text" class="form-control" id="websiteUrl_${uniqueId}" placeholder="example.com">
+                        <input type="url" class="form-control" id="websiteUrl_${uniqueId}" placeholder="example.com">
                     </div>
                     
                 </div>
@@ -208,6 +270,7 @@ document.addEventListener("DOMContentLoaded", () => {
 			document
 				.querySelector(`.remove-btn[data-id="websiteForm_${uniqueId}"]`)
 				.addEventListener("click", function () {
+					// Remove the form and its preview
 					document.getElementById("websiteForm_" + uniqueId).remove();
 					document.getElementById("websiteBtn_" + uniqueId).remove();
 					websiteBtnCount--;
@@ -239,7 +302,7 @@ document.addEventListener("DOMContentLoaded", () => {
                      
                     <div class="col-4">
                         <label>Phone Number</label>
-                        <input type="text" class="form-control" id="phoneNumber_${uniqueId}" placeholder="9999999999">
+                        <input type="tel" maxlength="10" class="form-control" id="phoneNumber_${uniqueId}" placeholder="9999999999">
                     </div>
                     
                 </div>

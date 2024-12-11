@@ -33,18 +33,13 @@ const templateSchema = new Schema(
 		header: {
 			type: {
 				type: String,
-				enum: [
-					"none",
-					"text",
-					"image",
-					"pdf",
-					"docx",
-					"video",
-					"location",
-				],
+				enum: ["none", "text", "media"],
 				default: "none",
 			},
-			content: String,
+			content: {
+				type: mongoose.Schema.Types.Mixed,
+				default: null,
+			},
 		},
 		dynamicVariables: [Number],
 		status: {

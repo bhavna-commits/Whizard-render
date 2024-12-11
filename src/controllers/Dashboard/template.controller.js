@@ -1,10 +1,19 @@
+import path from "path";
+import fs from "fs";
 import Template from "../../models/templates.model.js";
 
 export const createTemplate = async (req, res) => {
 	try {
 		const templateData = JSON.parse(req.body.templateData);
-		console.log(templateData);
 		const id = req.session.user.id;
+
+		// Prepare the header content
+		let header = templateData.header;
+		if (req.file) {
+			// If the file is uploaded, save the file name in the header content
+			header.content = req.file.filename;
+		}
+
 		// Create a new Template document and save it to the database
 		const newTemplate = new Template({
 			owner: id,
@@ -13,12 +22,30 @@ export const createTemplate = async (req, res) => {
 			body: templateData.body,
 			footer: templateData.footer,
 			buttons: templateData.buttons,
-			header: templateData.header,
+			header: header,
 			dynamicVariables: templateData.dynamicVariables,
 			status: "pending",
 		});
 
 		const savedTemplate = await newTemplate.save();
+
+		const __dirname = path.resolve();
+		if (header.type === "media" && header.content) {
+			const filePath = path.join(
+				__dirname,
+				"..",
+				"uploads",
+				req.session.user.name,
+				header.content,
+			);
+
+			// Check if the file exists before adding to the response
+			if (fs.existsSync(filePath)) {
+				templateData.header.fileUrl = filePath;
+			} else {
+				templateData.header.fileUrl = null; // File not found
+			}
+		}
 
 		res.status(201).json({
 			success: true,
@@ -117,10 +144,47 @@ export const getCampaignTemplates = async (req, res) => {
 		const template = await Template.findById(req.params.id);
 		if (!template)
 			return res.status(404).json({ error: "Template not found" });
-		const dynamicVariables = template.dynamicVariables;
-		res.json({ template, dynamicVariables });
+		// Prepare the response data
+		let templateData = {
+			templateName: template.templateName,
+			category: template.category,
+			body: template.body,
+			footer: template.footer,
+			buttons: template.buttons,
+			dynamicVariables: template.dynamicVariables,
+			header: template.header,
+		};
+
+		// If the header contains a media file, attach the file path
+		const __dirname = path.resolve();
+		if (template.header.type === "media" && template.header.content) {
+			const filePath = path.join(
+				__dirname,
+				"..",
+				"uploads",
+				req.session.user.name,
+				template.header.content,
+			);
+
+			// Check if the file exists before adding to the response
+			if (fs.existsSync(filePath)) {
+				templateData.header.fileUrl = filePath;
+			} else {
+				templateData.header.fileUrl = null; // File not found
+			}
+		}
+
+		// Send the full template data (including file if present)
+		res.status(200).json({
+			success: true,
+			templateData: templateData,
+			dynamicVariables: templateData.dynamicVariables,
+		});
 	} catch (error) {
-		res.status(500).json({ error: error.message });
+		res.status(500).json({
+			success: false,
+			error: error.message,
+		});
 	}
 };
 

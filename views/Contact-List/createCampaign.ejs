@@ -1,351 +1,186 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta
-			http-equiv="content-type"
-			content="text/html;charset=UTF-8"
-		/>
-		<meta charset="UTF-8" />
-		<title>Create Campaign</title>
-		<meta
-			name="viewport"
-			content="width=device-width, initial-scale=1.0"
-		/>
-		<!-- <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css"> -->
-		<link
-			rel="stylesheet"
-			href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
-		/>
-		<link
-			href="assets/plugins/pace/pace-theme-flash.css"
-			rel="stylesheet"
-			type="text/css"
-		/>
-		<link
-			href="assets/plugins/bootstrap/css/bootstrap.min.css"
-			rel="stylesheet"
-			type="text/css"
-		/>
-		<link
-			href="assets/plugins/jquery-scrollbar/jquery.scrollbar.css"
-			rel="stylesheet"
-			type="text/css"
-			media="screen"
-		/>
-		<link
-			href="assets/plugins/select2/css/select2.min.css"
-			rel="stylesheet"
-			type="text/css"
-			media="screen"
-		/>
-		<link
-			class="main-stylesheet"
-			href="/pages/css/themes/corporate.css"
-			rel="stylesheet"
-			type="text/css"
-		/>
-		<!-- Please remove the file below for production: Contains demo classes -->
-		<!-- <link class="main-stylesheet" href="assets/css/style.css" rel="stylesheet" type="text/css" /> -->
-		<link
-			rel="preconnect"
-			href="https://fonts.googleapis.com"
-		/>
-		<link
-			rel="preconnect"
-			href="https://fonts.gstatic.com"
-			crossorigin
-		/>
-		<link
-			href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
-			rel="stylesheet"
-		/>
-		<link
-			class="main-stylesheet"
-			href="assets/css/style.css"
-			rel="stylesheet"
-			type="text/css"
-		/>
 
-		<link
-			href="styles/style.css"
-			rel="stylesheet"
-			type="text/css"
-		/>
-		<script src="https://cdn.tailwindcss.com"></script>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.5/xlsx.full.min.js"></script>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+<head>
+	<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+	<meta charset="UTF-8" />
+	<title>Create Campaign</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<!-- <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css"> -->
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+	<link href="assets/plugins/pace/pace-theme-flash.css" rel="stylesheet" type="text/css" />
+	<link href="assets/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+	<link href="assets/plugins/jquery-scrollbar/jquery.scrollbar.css" rel="stylesheet" type="text/css" media="screen" />
+	<link href="assets/plugins/select2/css/select2.min.css" rel="stylesheet" type="text/css" media="screen" />
+	<link class="main-stylesheet" href="/pages/css/themes/corporate.css" rel="stylesheet" type="text/css" />
+	<!-- Please remove the file below for production: Contains demo classes -->
+	<!-- <link class="main-stylesheet" href="assets/css/style.css" rel="stylesheet" type="text/css" /> -->
+	<link rel="preconnect" href="https://fonts.googleapis.com" />
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+	<link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet" />
+	<link class="main-stylesheet" href="assets/css/style.css" rel="stylesheet" type="text/css" />
+	
+	<link href="styles/style.css" rel="stylesheet" type="text/css" />
+	<script src="https://cdn.tailwindcss.com"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.5/xlsx.full.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+	
+	<!-- <link href="styles/createList.css" rel="stylesheet" type="text/css" /> -->
+</head>
 
-		<!-- <link href="styles/createList.css" rel="stylesheet" type="text/css" /> -->
-	</head>
-
-	<body>
-		<div class="layout-container">
-			<nav class="sidebar">
-				<div class="logo pb-1">
-					<img
-						src="/assets/img/Wizard_logo.png"
-						alt="Whizard Logo"
-					/>
+<body>
+	<div class="layout-container">
+		<nav class="sidebar">
+			<div class="logo pb-2">
+				<img src="/assets/img/Wizard_logo.png" alt="Whizard Logo" />
+			</div>
+			<ul>
+				<li>
+					<a href="/" class=""><span class="icon"><i class="fas fa-chart-line"></i></span>
+						Dashboard</a>
+				</li>
+				<li>
+					<a href="/chats"><span class="icon"><i class="fa-regular fa-comment"></i></span>
+						Chats</a>
+				</li>
+				<li>
+					<a href="/contact-list"><span class="icon active"><i class="fa-regular fa-address-book"></i></span>
+						
+						Contact List</a>
+				</li>
+				<li>
+					<a href="/template"><span class="icon "><i class="fa-regular fa-envelope-open"></i></span>
+						Template</a>
+				</li>
+				<li>
+					<a href="/users"><span class="icon"><i class="fa-regular fa-user"></i></span>
+						Manage Users</a>
+				</li>
+				<li>
+					<a href="/reports"><span class="icon"><i class="fa-regular fa-chart-bar"></i></span>
+						Reports</a>
+				</li>
+			</ul>
+			<div class="user-profile">
+				<img src="https://via.placeholder.com/50" alt="User Profile" />
+			</div>
+		</nav>
+		<!-- END SIDEBAR MENU TOP TRAY CONTENT-->
+		
+		<!-- START PAGE-CONTAINER -->
+		<div class="main-content">
+			<!-- END HEADER -->
+			<div class="logo flex justify-between items-center">
+				<div class="pb-2" data-pages="parallax">
+					<!-- START BREADCRUMB -->
+					<ol class="flex">
+						<li class="breadcrumb-item">
+							<a href="/" class="text-red-600 text-base">Dashboard</a>
+						</li>
+						<li class="breadcrumb-item active">
+							<a href="/contact-list" class="text-red-600 text-base">Contact List</a>
+						</li>
+					</ol>
 				</div>
-				<ul>
-					<li>
-						<a
-							href="#"
-							class=""
-							><span class="icon"
-								><i class="fas fa-chart-line"></i
-							></span>
-							Dashboard</a
-						>
-					</li>
-					<li>
-						<a href="#"
-							><span class="icon"
-								><i class="fa-regular fa-comment"></i
-							></span>
-							Chats</a
-						>
-					</li>
-					<li>
-						<a href="#"
-							><span class="icon active"
-								><i class="fa-regular fa-address-book"></i
-							></span>
-
-							Contact List</a
-						>
-					</li>
-					<li>
-						<a href="#"
-							><span class="icon"
-								><i class="fa-regular fa-envelope"></i
-							></span>
-							Template</a
-						>
-					</li>
-					<li>
-						<a href="#"
-							><span class="icon"
-								><i class="fa-regular fa-user"></i
-							></span>
-							Manage Users</a
-						>
-					</li>
-					<li>
-						<a href="#"
-							><span class="icon"
-								><i class="fa-regular fa-chart-bar"></i
-							></span>
-							Reports</a
-						>
-					</li>
-				</ul>
-				<div class="user-profile">
-					<img
-						src="https://via.placeholder.com/50"
-						alt="User Profile"
-					/>
-				</div>
-			</nav>
-			<!-- END SIDEBAR MENU TOP TRAY CONTENT-->
-
-			<!-- START PAGE-CONTAINER -->
-			<div class="main-content">
-				<!-- END HEADER -->
-				<div class="logo flex justify-between items-center">
-					<div
-						class="pb-2"
-						data-pages="parallax"
-					>
-						<!-- START BREADCRUMB -->
-						<ol class="flex">
-							<li class="breadcrumb-item">
-								<a
-									href="/"
-									class="text-red-600 text-base"
-									>Dashboard</a
-								>
-							</li>
-							<li class="breadcrumb-item active">
-								<a
-									href="/contact-list"
-									class="text-red-600 text-base"
-									>Contact List</a
-								>
-							</li>
-						</ol>
+				<!-- END BREADCRUMB -->
+			</div>
+			<div class="w-full">
+				<div class="flex w-full">
+					<div class="px-1">
+						<div class="card p-3">
+							<div class="title border-bottom">
+								<h4 class="page-title">Send Message</h4>
+							</div>
+							<form id="campaign-form">
+								<div class="form-group mt-3">
+									<label>Campaign name</label>
+									<input type="text" id="campaign-name" class="form-control shadow-sm rounded border-1" placeholder="Give new template a name" required />
+								</div>
+								
+								<div class="form-group mt-3">
+									<label>Select template</label>
+									<select id="template-select" class="full-width select2-hidden-accessible" data-init-plugin="select2">
+										<option value="">
+											Select a template...
+										</option>
+									</select>
+								</div>
+								
+								<div class="form-group mt-3">
+									<label>Select recipient list</label>
+									<select id="recipient-select" class="full-width select2-hidden-accessible" data-init-plugin="select2">
+										<option value="">
+											Select recipients...
+										</option>
+									</select>
+								</div>
+								
+								<div class="mt-3 w-100">
+									<button type="submit" class="btn btn-primary w-50 p-2 btn-cons">
+										Send Message
+									</button>
+								</div>
+							</form>
+						</div>
 					</div>
-					<!-- END BREADCRUMB -->
-				</div>
-				<div class="w-full">
-					<div class="flex w-full">
-						<div class="px-1">
-							<div class="card p-3">
-								<div class="title border-bottom">
-									<h4 class="page-title">Send Message</h4>
+					
+					<div class="px-1">
+						<div class="card p-3">
+							<div class="border-bottom d-flex justify-content-between align-items-center">
+								<div class="title">
+									<h4 class="page-title">Preview</h4>
 								</div>
-								<form id="campaign-form">
-									<div class="form-group mt-3">
-										<label>Campaign name</label>
-										<input
-											type="text"
-											id="campaign-name"
-											class="form-control shadow-sm rounded border-1"
-											placeholder="Give new template a name"
-											required
-										/>
-									</div>
-
-									<div class="form-group mt-3">
-										<label>Select template</label>
-										<select
-											id="template-select"
-											class="full-width select2-hidden-accessible"
-											data-init-plugin="select2"
-										>
-											<option value="">
-												Select a template...
-											</option>
-										</select>
-									</div>
-
-									<div class="form-group mt-3">
-										<label>Select recipient list</label>
-										<select
-											id="recipient-select"
-											class="full-width select2-hidden-accessible"
-											data-init-plugin="select2"
-										>
-											<option value="">
-												Select recipients...
-											</option>
-										</select>
-									</div>
-
-									<div class="mt-3 w-100">
-										<button
-											type="submit"
-											class="btn btn-primary w-50 p-2 btn-cons"
-										>
-											Send Message
-										</button>
-									</div>
-								</form>
+							</div>
+							<div id="preview-container" class="custom-card-body bg-white">
+								<!-- Preview content will be dynamically inserted here -->
 							</div>
 						</div>
-
-						<div class="px-1">
-							<div class="card p-3">
-								<div
-									class="border-bottom d-flex justify-content-between align-items-center"
-								>
-									<div class="title">
-										<h4 class="page-title">Preview</h4>
-									</div>
-								</div>
-								<div
-									id="preview-container"
-									class="custom-card-body bg-white"
-								>
-									<!-- Preview content will be dynamically inserted here -->
-								</div>
+					</div>
+					
+					<div class="px-1">
+						<div class="card p-3">
+							<div class="title border-bottom">
+								<h4 class="page-title">Add Attributes</h4>
 							</div>
-						</div>
-
-						<div class="px-1">
-							<div class="card p-3">
-								<div class="title border-bottom">
-									<h4 class="page-title">Add Attributes</h4>
-								</div>
-								<form
-									id="attributes-form"
-									class="attributes-form"
-								>
-									<!-- Dynamic attributes will be inserted here -->
-								</form>
-							</div>
+							<form id="attributes-form" class="attributes-form">
+								<!-- Dynamic attributes will be inserted here -->
+							</form>
 						</div>
 					</div>
 				</div>
 			</div>
 		</div>
+	</div>
+	
+	<script></script>
+	<script src="assets/plugins/pace/pace.min.js" type="text/javascript"></script>
+	<!--  A polyfill for browsers that don't support ligatures: remove liga.js if not needed-->
+	<script src="assets/plugins/liga.js" type="text/javascript"></script>
+	<script src="assets/plugins/jquery/jquery-3.2.1.min.js" type="text/javascript"></script>
+	<script src="assets/plugins/modernizr.custom.js" type="text/javascript"></script>
+	<script src="assets/plugins/jquery-ui/jquery-ui.min.js" type="text/javascript"></script>
+	<script src="assets/plugins/popper/umd/popper.min.js" type="text/javascript"></script>
+	<script src="assets/plugins/bootstrap/js/bootstrap.min.js" type="text/javascript"></script>
+	<script src="assets/plugins/jquery/jquery-easy.js" type="text/javascript"></script>
+	<script src="assets/plugins/jquery-unveil/jquery.unveil.min.js" type="text/javascript"></script>
+	<script src="assets/plugins/jquery-ios-list/jquery.ioslist.min.js" type="text/javascript"></script>
+	<script src="assets/plugins/jquery-actual/jquery.actual.min.js"></script>
+	<script src="assets/plugins/jquery-scrollbar/jquery.scrollbar.min.js"></script>
+	<script type="text/javascript" src="assets/plugins/select2/js/select2.full.min.js"></script>
+	<script type="text/javascript" src="assets/plugins/classie/classie.js"></script>
+	<!-- END VENDOR JS -->
+	<!-- BEGIN CORE TEMPLATE JS -->
+	<!-- BEGIN CORE TEMPLATE JS -->
+	<script src="pages/js/pages.js"></script>
+	<!-- END CORE TEMPLATE JS -->
+	<!-- BEGIN PAGE LEVEL JS -->
+	<script src="assets/js/scripts.js" type="text/javascript"></script>
+	<!-- END PAGE LEVEL JS -->
+	<!-- END CORE TEMPLATE JS -->
+	<!-- BEGIN PAGE LEVEL JS -->
+	<script src="assets/js/card.js" type="text/javascript"></script>
+	<script src="assets/js/scripts.js" type="text/javascript"></script>
+	<script src="/contact-list/js/createCampaign.js" type="text/javascript"></script>
+</body>
 
-		<script></script>
-		<script
-			src="assets/plugins/pace/pace.min.js"
-			type="text/javascript"
-		></script>
-		<!--  A polyfill for browsers that don't support ligatures: remove liga.js if not needed-->
-		<script
-			src="assets/plugins/liga.js"
-			type="text/javascript"
-		></script>
-		<script
-			src="assets/plugins/jquery/jquery-3.2.1.min.js"
-			type="text/javascript"
-		></script>
-		<script
-			src="assets/plugins/modernizr.custom.js"
-			type="text/javascript"
-		></script>
-		<script
-			src="assets/plugins/jquery-ui/jquery-ui.min.js"
-			type="text/javascript"
-		></script>
-		<script
-			src="assets/plugins/popper/umd/popper.min.js"
-			type="text/javascript"
-		></script>
-		<script
-			src="assets/plugins/bootstrap/js/bootstrap.min.js"
-			type="text/javascript"
-		></script>
-		<script
-			src="assets/plugins/jquery/jquery-easy.js"
-			type="text/javascript"
-		></script>
-		<script
-			src="assets/plugins/jquery-unveil/jquery.unveil.min.js"
-			type="text/javascript"
-		></script>
-		<script
-			src="assets/plugins/jquery-ios-list/jquery.ioslist.min.js"
-			type="text/javascript"
-		></script>
-		<script src="assets/plugins/jquery-actual/jquery.actual.min.js"></script>
-		<script src="assets/plugins/jquery-scrollbar/jquery.scrollbar.min.js"></script>
-		<script
-			type="text/javascript"
-			src="assets/plugins/select2/js/select2.full.min.js"
-		></script>
-		<script
-			type="text/javascript"
-			src="assets/plugins/classie/classie.js"
-		></script>
-		<!-- END VENDOR JS -->
-		<!-- BEGIN CORE TEMPLATE JS -->
-		<!-- BEGIN CORE TEMPLATE JS -->
-		<script src="pages/js/pages.js"></script>
-		<!-- END CORE TEMPLATE JS -->
-		<!-- BEGIN PAGE LEVEL JS -->
-		<script
-			src="assets/js/scripts.js"
-			type="text/javascript"
-		></script>
-		<!-- END PAGE LEVEL JS -->
-		<!-- END CORE TEMPLATE JS -->
-		<!-- BEGIN PAGE LEVEL JS -->
-		<script
-			src="assets/js/card.js"
-			type="text/javascript"
-		></script>
-		<script
-			src="assets/js/scripts.js"
-			type="text/javascript"
-		></script>
-		<script
-			src="/contact-list/js/createCampaign.js"
-			type="text/javascript"
-		></script>
-	</body>
 </html>

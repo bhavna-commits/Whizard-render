@@ -1,137 +1,109 @@
 // API service for handling data fetching
 async function fetchTemplates() {
-	const response = await fetch("/getTemplates");
-	return response.json();
+    const response = await fetch("/getTemplates");
+    return response.json();
 }
 
 async function fetchContactLists() {
-	const response = await fetch("/contact-list/getContactList");
-	return response.json();
+    const response = await fetch("/contact-list/getContactList");
+    return response.json();
 }
 
 async function fetchTemplateById(templateId) {
-	const response = await fetch(`/api/templates/${templateId}`);
-	return response.json();
+    const response = await fetch(`/api/templates/${templateId}`);
+    return response.json();
 }
 
 async function fetchContactListContacts(contactListId) {
-	const response = await fetch(`/api/contact-list/${contactListId}/contacts`);
-	return response.json();
+    const response = await fetch(`/api/contact-list/${contactListId}/contacts`);
+    return response.json();
 }
 
 class Preview {
-	constructor(container) {
-		this.container = container;
-	}
+    constructor(container) {
+        this.container = container;
+    }
 
     update(template) {
+        if (!template) {
+            this.container.innerHTML = '<p class="text-center text-gray-500">Select a template to preview</p>';
+            return;
+        }
+
+        const { header, body, footer, buttons, image } = template;
         
-		if (!template) {
-			this.container.innerHTML =
-				'<p class="text-center text-gray-500">Select a template to preview</p>';
-			return;
-		}
-
-		const { header, body, footer, buttons, image } = template;
-
-		this.container.innerHTML = `
-            <img src="${
-				image ||
-				"https://media.licdn.com/dms/image/v2/C560BAQGeY0JtR6JxpA/company-logo_200_200/company-logo_200_200/0/1630588885858?e=2147483647&v=beta&t=dMDDABvAomoeydN01wwlKcuEwws2PVsP8YGCfUIShcI"
-			}" 
+        this.container.innerHTML = `
+            <img src="${image || 'https://media.licdn.com/dms/image/v2/C560BAQGeY0JtR6JxpA/company-logo_200_200/company-logo_200_200/0/1630588885858?e=2147483647&v=beta&t=dMDDABvAomoeydN01wwlKcuEwws2PVsP8YGCfUIShcI'}" 
                  alt="Card Image" 
                  class="custom-card-img">
-            <h5 class="custom-card-title">${header?.content || "Header"}</h5>
-            <p class="custom-card-subtitle">${body || "Body"}</p>
-            <p>${footer || "Footer"}</p>
+            <h5 class="custom-card-title">${header?.content || 'Header'}</h5>
+            <p class="custom-card-subtitle">${body || 'Body'}</p>
+            <p>${footer || 'Footer'}</p>
             <div>
-                ${(buttons || [])
-					.map(
-						(button) => `
+                ${(buttons || []).map(button => `
                     <a href="#" class="custom-btn">
-                        <i class="${
-							button.icon || "fas fa-external-link-alt"
-						}"></i> ${button.text}
+                        <i class="${button.icon || 'fas fa-external-link-alt'}"></i> ${button.text}
                     </a>
-                `,
-					)
-					.join("")}
+                `).join('')}
             </div>
         `;
-	}
+    }
 }
 
 class AttributeManager {
-	constructor(container, onAttributeChange) {
-		this.container = container;
-		this.onAttributeChange = onAttributeChange;
-	}
+    constructor(container, onAttributeChange) {
+        this.container = container;
+        this.onAttributeChange = onAttributeChange;
+    }
 
-	update(template, contacts) {
-		if (!template?.dynamicVariables || !contacts.length) {
-			this.container.innerHTML =
-				'<p class="text-center text-gray-500">No attributes available</p>';
-			return;
-		}
+    update(template, contacts) {
+        if (!template?.dynamicVariables || !contacts.length) {
+            this.container.innerHTML = '<p class="text-center text-gray-500">No attributes available</p>';
+            return;
+        }
 
-		const attributes = contacts[0]?.additionalAttributes || {};
-		const options = this.generateAttributeOptions(Object.keys(attributes));
+        const attributes = contacts[0]?.additionalAttributes || {};
+        const options = this.generateAttributeOptions(Object.keys(attributes));
 
-		this.container.innerHTML = template.dynamicVariables
-			.map(
-				(variable) => `
+        this.container.innerHTML = template.dynamicVariables
+            .map(variable => `
                 <div class="form-group mt-3">
                     <label>Variable: {${variable}}</label>
-                    <select class="full-width select2-hidden-accessible" data-variable="${variable}">
-                        ${options
-							.map(
-								(opt) => `
+                    <select class="attribute-select" data-variable="${variable}">
+                        ${options.map(opt => `
                             <option value="${opt.value}">${opt.label}</option>
-                        `,
-							)
-							.join("")}
+                        `).join('')}
                     </select>
                 </div>
-            `,
-			)
-			.join("");
+            `).join('');
 
-		this.setupEventListeners();
+        // Initialize Select2 on new dropdowns
+        $(this.container).find('.attribute-select').select2().on('change', () => this.handleSelection());
+    }
 
-		// Initialize Select2 on new dropdowns
-		$(this.container).find("select").select2();
-	}
+    generateAttributeOptions(attributes, includeUserName = true) {
+        const options = includeUserName ? ['userName'] : [];
+        return [...options, ...attributes].map(attr => ({
+            value: attr,
+            label: attr.charAt(0).toUpperCase() + attr.slice(1)
+        }));
+    }
 
-	generateAttributeOptions(attributes, includeUserName = true) {
-		const options = includeUserName ? ["userName"] : [];
-		return [...options, ...attributes].map((attr) => ({
-			value: attr,
-			label: attr.charAt(0).toUpperCase() + attr.slice(1),
-		}));
-	}
+    handleSelection() {
+        const variables = {};
+        $(this.container).find('.attribute-select').each(function() {
+            const variable = $(this).data('variable');
+            variables[variable] = $(this).val();
+        });
 
-	setupEventListeners() {
-		this.container.querySelectorAll("select").forEach((select) => {
-			select.addEventListener("change", () => this.handleSelection());
-		});
-	}
-
-	handleSelection() {
-		const variables = {};
-		this.container.querySelectorAll("select").forEach((select) => {
-			const variable = select.dataset.variable;
-			variables[variable] = select.value;
-		});
-
-		this.onAttributeChange(variables);
-	}
+        this.onAttributeChange(variables);
+    }
 }
 
 class TemplateManager {
 	constructor() {
-		// Initialize DOM elements with new IDs
-		this.templateSelect = document.getElementById("template-select");
-		this.recipientSelect = document.getElementById("recipient-select");
+		this.templateSelect = $("#template-select");
+		this.recipientSelect = $("#recipient-select");
 		this.previewContainer = document.getElementById("preview-container");
 		this.attributesForm = document.getElementById("attributes-form");
 		this.campaignForm = document.getElementById("campaign-form");
@@ -145,22 +117,25 @@ class TemplateManager {
 		this.currentTemplate = null;
 		this.currentContacts = [];
 
-		// Bind methods
-		this.handleTemplateChange = this.handleTemplateChange.bind(this);
-		this.handleContactListChange = this.handleContactListChange.bind(this);
-		this.handleFormSubmit = this.handleFormSubmit.bind(this);
-
 		this.init();
 	}
 
 	async init() {
 		try {
 			await Promise.all([this.loadTemplates(), this.loadContactLists()]);
-			this.setupEventListeners();
 
-			// Initialize Select2 on the dropdowns
-			$(this.templateSelect).select2();
-			$(this.recipientSelect).select2();
+			// Initialize Select2 and bind events
+			this.templateSelect
+				.select2()
+				.on("change", (e) => this.handleTemplateChange(e));
+			this.recipientSelect
+				.select2()
+				.on("change", (e) => this.handleContactListChange(e));
+
+			// Form submit handler
+			$(this.campaignForm).on("submit", (e) => this.handleFormSubmit(e));
+
+			console.log("Initialization complete");
 		} catch (error) {
 			console.error("Error initializing:", error);
 		}
@@ -169,15 +144,15 @@ class TemplateManager {
 	async loadTemplates() {
 		try {
 			const templates = await fetchTemplates();
-			this.templateSelect.innerHTML = `
-                <option value="">Select a template...</option>
-                ${templates
-					.map(
-						(template) =>
-							`<option value="${template._id}">${template.templateName}</option>`,
-					)
-					.join("")}
-            `;
+			this.templateSelect
+				.empty()
+				.append('<option value="">Select a template...</option>');
+
+			templates.forEach((template) => {
+				this.templateSelect.append(
+					new Option(template.templateName, template._id),
+				);
+			});
 		} catch (error) {
 			console.error("Error loading templates:", error);
 		}
@@ -186,34 +161,22 @@ class TemplateManager {
 	async loadContactLists() {
 		try {
 			const contactLists = await fetchContactLists();
-			this.recipientSelect.innerHTML = `
-                <option value="">Select recipients...</option>
-                ${contactLists
-					.map(
-						(list) =>
-							`<option value="${list._id}">${list.ContactListName}</option>`,
-					)
-					.join("")}
-            `;
+			this.recipientSelect
+				.empty()
+				.append('<option value="">Select recipients...</option>');
+
+			contactLists.forEach((list) => {
+				this.recipientSelect.append(
+					new Option(list.ContactListName, list._id),
+				);
+			});
 		} catch (error) {
 			console.error("Error loading contact lists:", error);
 		}
 	}
 
-	setupEventListeners() {
-		this.templateSelect.addEventListener(
-			"change",
-			this.handleTemplateChange,
-		);
-		this.recipientSelect.addEventListener(
-			"change",
-			this.handleContactListChange,
-		);
-		this.campaignForm.addEventListener("submit", this.handleFormSubmit);
-	}
-
-	async handleTemplateChange() {
-		const templateId = this.templateSelect.value;
+	async handleTemplateChange(event) {
+		const templateId = event.target.value;
 		console.log("Template changed:", templateId);
 
 		if (!templateId) {
@@ -232,8 +195,8 @@ class TemplateManager {
 		}
 	}
 
-	async handleContactListChange() {
-		const contactListId = this.recipientSelect.value;
+	async handleContactListChange(event) {
+		const contactListId = event.target.value;
 		console.log("Contact list changed:", contactListId);
 
 		if (!contactListId) {
@@ -256,58 +219,49 @@ class TemplateManager {
 	}
 
 	handleAttributeSelection(variables) {
-		if (!this.currentTemplate) return;
-
-		const updatedTemplate = {
-			...this.currentTemplate,
-			header: {
-				content: this.replaceTemplateVariables(
-					this.currentTemplate.header?.content || "",
-					variables,
-				),
-			},
-			body: this.replaceTemplateVariables(
-				this.currentTemplate.body || "",
-				variables,
-			),
-			footer: this.replaceTemplateVariables(
-				this.currentTemplate.footer || "",
-				variables,
-			),
-		};
-
-		this.currentTemplate = updatedTemplate;
-		this.preview.update(updatedTemplate);
+		console.log("Attributes selected:", variables);
+		// Handle attribute selection here, e.g., update the campaign with the selected variables
 	}
 
-	replaceTemplateVariables(content, variables) {
-		return content.replace(
-			/\{(\w+)\}/g,
-			(match, key) => variables[key] || match,
-		);
-	}
-
-	handleFormSubmit(event) {
+	async handleFormSubmit(event) {
 		event.preventDefault();
-		const campaignName = document.getElementById("campaign-name").value;
-		const templateId = this.templateSelect.value;
-		const recipientListId = this.recipientSelect.value;
 
-		if (!campaignName || !templateId || !recipientListId) {
-			alert("Please fill in all required fields");
-			return;
+		const formData = new FormData(this.campaignForm);
+		formData.append("templateId", this.templateSelect.val());
+		formData.append("contactListId", this.recipientSelect.val());
+
+		const selectedAttributes = {};
+		$(this.attributesForm)
+			.find(".attribute-select")
+			.each(function () {
+				const variable = $(this).data("variable");
+				selectedAttributes[variable] = $(this).val();
+			});
+
+		formData.append("variables", JSON.stringify(selectedAttributes));
+
+		try {
+			const response = await fetch("/api/campaigns", {
+				method: "POST",
+				body: formData,
+			});
+
+			const result = await response.json();
+			if (response.ok) {
+				alert("Campaign created successfully!");
+			} else {
+				alert(`Error: ${result.message}`);
+			}
+		} catch (error) {
+			console.error("Error submitting campaign:", error);
+			alert("An error occurred while creating the campaign.");
 		}
-
-		// Here you can add the logic to submit the campaign
-		console.log("Submitting campaign:", {
-			campaignName,
-			templateId,
-			recipientListId,
-		});
 	}
 }
 
-// Initialize when DOM is loaded
-document.addEventListener("DOMContentLoaded", () => {
+// Initialize the TemplateManager once the DOM is fully loaded
+$(document).ready(() => {
 	new TemplateManager();
 });
+
+
