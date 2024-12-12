@@ -57,7 +57,7 @@
 						Manage Users</a>
 				</li>
 				<li>
-					<a href="/reports"><span class="icon"><i class="fa-regular fa-chart-bar"></i></span>
+					<a><span class="icon"><i class="fa-regular fa-chart-bar"></i></span>
 						Reports</a>
 				</li>
 			</ul>
@@ -85,15 +85,15 @@
 				<!-- END BREADCRUMB -->
 			</div>
 			<div class="w-full">
-				<div class="flex w-full">
-					<div class="px-1">
-						<div class="card p-3">
-							<div class="title border-bottom">
-								<h4 class="page-title">Send Message</h4>
+				<div class="flex w-full bg-gray-50">
+					<div class="px-1 bg-white">
+						<div class="max-w-[500px] min-w-[400px] p-3 ">
+							<div class="title pb-3">
+								<h4 class="page-title font-normal text-xl">Create Campaign</h4>
 							</div>
 							<form id="campaign-form">
-								<div class="form-group mt-3">
-									<label>Campaign name</label>
+								<div class="form-group mt-3 ">
+									<label style="color: #6b7280; font-weight: 500;">Campaign name</label>
 									<input type="text" id="campaign-name" class="form-control shadow-sm rounded border-1" placeholder="Give new template a name" required />
 								</div>
 								
@@ -116,7 +116,7 @@
 								</div>
 								
 								<div class="mt-3 w-100">
-									<button type="submit" class="btn btn-primary w-50 p-2 btn-cons">
+									<button type="button" class="btn btn-primary w-50 p-2 btn-cons" onclick="">
 										Send Message
 									</button>
 								</div>
@@ -124,11 +124,11 @@
 						</div>
 					</div>
 					
-					<div class="px-1">
-						<div class="card p-3">
-							<div class="border-bottom d-flex justify-content-between align-items-center">
+					<div class="px-1 mx-2 bg-white">
+						<div class="max-w-[400px] min-w-[300px] p-3">
+							<div class="pb-4 d-flex justify-content-between align-items-center">
 								<div class="title">
-									<h4 class="page-title">Preview</h4>
+									<h4 class="page-title font-normal text-xl">Preview</h4>
 								</div>
 							</div>
 							<div id="preview-container" class="custom-card-body bg-white">
@@ -137,10 +137,10 @@
 						</div>
 					</div>
 					
-					<div class="px-1">
-						<div class="card p-3">
-							<div class="title border-bottom">
-								<h4 class="page-title">Add Attributes</h4>
+					<div class="px-1 bg-white">
+						<div class="max-w-[400px] min-w-[300px] p-3">
+							<div class="title pb-4">
+								<h4 class="page-title font-normal text-xl">Add Attributes</h4>
 							</div>
 							<form id="attributes-form" class="attributes-form">
 								<!-- Dynamic attributes will be inserted here -->

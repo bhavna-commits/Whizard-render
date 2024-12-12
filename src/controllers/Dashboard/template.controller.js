@@ -11,6 +11,7 @@ export const createTemplate = async (req, res) => {
 		let header = templateData.header;
 		if (req.file) {
 			// If the file is uploaded, save the file name in the header content
+			console.log(req.file.filename, ": fileName");
 			header.content = req.file.filename;
 		}
 
@@ -141,34 +142,28 @@ export const deleteTemplate = async (req, res) => {
 
 export const getCampaignTemplates = async (req, res) => {
 	try {
-		const template = await Template.findById(req.params.id);
-		if (!template)
+		const templateData = await Template.findById(req.params.id);
+		if (!templateData)
 			return res.status(404).json({ error: "Template not found" });
-		// Prepare the response data
-		let templateData = {
-			templateName: template.templateName,
-			category: template.category,
-			body: template.body,
-			footer: template.footer,
-			buttons: template.buttons,
-			dynamicVariables: template.dynamicVariables,
-			header: template.header,
-		};
 
 		// If the header contains a media file, attach the file path
 		const __dirname = path.resolve();
-		if (template.header.type === "media" && template.header.content) {
+		if (
+			templateData.header.type === "media" &&
+			templateData.header.content
+		) {
 			const filePath = path.join(
 				__dirname,
 				"..",
 				"uploads",
-				req.session.user.name,
-				template.header.content,
+				req.session.user.id,
+				templateData.header.content,
 			);
-
+			console.log("fileURL :", filePath);
 			// Check if the file exists before adding to the response
 			if (fs.existsSync(filePath)) {
 				templateData.header.fileUrl = filePath;
+				console.log("fileURL :", filePath);
 			} else {
 				templateData.header.fileUrl = null; // File not found
 			}
@@ -177,8 +172,7 @@ export const getCampaignTemplates = async (req, res) => {
 		// Send the full template data (including file if present)
 		res.status(200).json({
 			success: true,
-			templateData: templateData,
-			dynamicVariables: templateData.dynamicVariables,
+			template: templateData,
 		});
 	} catch (error) {
 		res.status(500).json({

@@ -1,32 +1,36 @@
-
-
 <!-- Filter Modal -->
-<div id="filterModal" class="fixed inset-0 bg-gray-500 bg-opacity-50 flex justify-center items-center z-50 hidden">
-	<div class="bg-white p-6 rounded-lg w-96">
-		<span class="absolute top-2 right-2 text-gray-500 text-2xl cursor-pointer" onclick="closeFilterModal()">×</span>
+<div id="filterModal" class="fixed inset-0 bg-gray-500 bg-opacity-50 flex justify-center items-center z-50 hidden" onclick="closeFilterModal(event)">
+	<div class="bg-white p-6 rounded-lg w-[500px] relative" onclick="event.stopPropagation()">
+		<span class="absolute top-5 right-5 text-gray-500 text-2xl cursor-pointer" onclick="closeFilterModal()">×</span>
 		<h3 class="text-lg font-semibold mb-4">Apply Filters</h3>
 		
 		<!-- Filters Form -->
 		<div class="mb-4">
 			<label for="dateInterval" class="block text-sm font-medium text-gray-700">Created At</label>
-			<input type="text" id="dateInterval" placeholder="Choose interval" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+			<input type="text" id="dateInterval" placeholder="Choose date" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
 		</div>
 		
-		<div class="mb-4">
+		<div class="mb-4 ">
 			<label for="attributeSelect" class="block text-sm font-medium text-gray-700">Attributes</label>
-			<div class="flex items-center space-x-2">
-				<select id="attributeSelect" class="block w-1/2 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+			<div class="flex items-center space-x-2 relative">
+				<select id="attributeSelect" class="w-fit px-2 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
 					<option value="name">Name</option>
 					<option value="tags">Tags</option>
 					<option value="contact">Contact</option>
 					<option value="whatsapp">WhatsApp</option>
 				</select>
-				<select id="conditionSelect" class="block w-1/4 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-					<option value="is">is</option>
+				<select id="conditionSelect" class="w-fit px-2 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+					<option value="is">has</option>
+					<option value="is">does not</option>
 					<!-- Add more conditions if needed -->
 				</select>
-				<input type="text" id="attributeValue" placeholder="Attribute value" class="block w-1/4 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+				<input type="text" id="attributeValue" placeholder="Attribute value" class="w-fit px-2 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
 			</div>
+			<!-- Add a container div for dynamically added filters -->
+			<div class="filter-container">
+				<!-- Dynamically added filters will go here -->
+			</div>
+			
 		</div>
 		
 		<!-- Add new filters -->
@@ -35,31 +39,38 @@
 		</div>
 		
 		<!-- Action Buttons -->
-		<div class="flex justify-between">
+		<div class="flex justify-between spac ">
 			<button class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500" onclick="applyFilters()">Apply</button>
 			<button class="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-200 rounded-lg hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500" onclick="clearFilters()">Clear all</button>
 		</div>
 	</div>
 </div>
 
-<!-- Modal Style -->
-<style>
-	.filter-row {
-		display: flex;
-		align-items: center;
-		gap: 10px;
-	}
-</style>
-
 <!-- Modal Logic -->
+<!-- Include Flatpickr CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+<!-- Include Flatpickr JS -->
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
 <script>
 	function openFilterModal () {
 		document.getElementById("filterModal").classList.remove("hidden");
 	}
 	
-	function closeFilterModal () {
-		document.getElementById("filterModal").classList.add("hidden");
+	function closeFilterModal (event = null) {
+		// Close the modal if clicking on the backdrop or the close button
+		if (event === null || event.target.id === "filterModal") {
+			document.getElementById("filterModal").classList.add("hidden");
+			
+			// Remove all dynamically added filter rows
+			const filterContainer = document.querySelector(".filter-container");
+			while (filterContainer.firstChild) {
+				filterContainer.removeChild(filterContainer.firstChild);
+			}
+		}
 	}
+	
 	
 	function applyFilters () {
 		const dateInterval = document.getElementById("dateInterval").value;
@@ -84,29 +95,42 @@
 		document.getElementById("attributeSelect").value = "";
 		document.getElementById("conditionSelect").value = "";
 		document.getElementById("attributeValue").value = "";
-	}
-	
-	function addFilter () {
-		const filterRow = document.createElement("div");
-		filterRow.classList.add("filter-row", "mb-4");
+		const filterContainer = document.querySelector(".filter-container");
+		while (filterContainer.firstChild) {
+			filterContainer.removeChild(filterContainer.firstChild);
+		}
 		
-		// Add the filter elements (similar to what is inside the modal)
-		filterRow.innerHTML = `
-            <select class="block w-1/2 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                <option value="name">Name</option>
-                <option value="tags">Tags</option>
-                <option value="contact">Contact</option>
-                <option value="whatsapp">WhatsApp</option>
-            </select>
-            <select class="block w-1/4 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                <option value="is">is</option>
-                <!-- Add more conditions if needed -->
-            </select>
-            <input type="text" class="block w-1/4 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Attribute value">
-        `;
+		function addFilter () {
+			const filterRow = document.createElement("div");
+			filterRow.classList.add("filter-row");
+			
+			// Add the filter elements (similar to what is inside the modal)
+			filterRow.innerHTML = `
+	<div class="flex items-center pt-2 space-x-2 relative">
+		<select placeholder="" id="attributeSelect" class="w-fit px-2 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+			<option value="name">Name</option>
+			<option value="tags">Tags</option>
+			<option value="contact">Contact</option>
+			<option value="whatsapp">WhatsApp</option>
+		</select>
+		<select id="conditionSelect" class="w-fit px-2 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+			<option value="is">has</option>
+			<option value="is">does not</option>
+			<!-- Add more conditions if needed -->
+		</select>
+		<input type="text" id="attributeValue" placeholder="Attribute value" class="w-fit px-2 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+	</div>
+	`;
+			
+			// Append the new filter row to the .filter-container
+			document.querySelector(".filter-container").appendChild(filterRow);
+		}
 		
-		// Append the new filter row to the modal
-		document.querySelector(".mb-4").appendChild(filterRow);
-	}
+		flatpickr("#dateInterval", {
+			mode: "range",
+			dateFormat: "d-m-Y", // Format: Year-Month-Day
+			onClose: function (selectedDates, dateStr, instance) {
+				console.log("Selected date range: ", dateStr);
+			}
+		});
 </script>
-

@@ -338,56 +338,47 @@ function collectTemplateData() {
 
 	// Validate buttons
 	const buttonElements = document.getElementById("buttonOptions").children;
-
 	templateData.buttons = Array.from(buttonElements).map((btn, index) => {
-		const type = btn.dataset.type; // Identify button type (url/phone)
-		let buttonData = { type, text: "", urlPhone: "" };
+		let buttonData = { text: "", urlPhone: "" };
 
-		if (type === "url") {
-			// For 'Visit Now' button
-			buttonData.text = btn
-				.querySelector('input[placeholder="Visit Now"]')
-				?.value?.trim();
-			buttonData.urlPhone = btn
-				.querySelector('input[placeholder="example.com"]')
-				?.value?.trim();
+		// Check for 'Visit Now' (Website) button
+		let websiteText = btn
+			.querySelector('input[placeholder="Visit Now"]')
+			?.value?.trim();
+		let websiteUrl = btn
+			.querySelector('input[placeholder="example.com"]')
+			?.value?.trim();
 
-			// Validate the text and URL
-			if (!buttonData.text) {
+		// Check for 'Call Now' (Phone Call) button
+		let callText = btn
+			.querySelector('input[placeholder="Call Now"]')
+			?.value?.trim();
+		let phoneNumber = btn
+			.querySelector('input[placeholder="9999999999"]')
+			?.value?.trim();
+
+		// If website fields exist, handle 'Visit Now' button validation
+		if (websiteText !== undefined || websiteUrl !== undefined) {
+			buttonData.text = websiteText || "Visit Now"; // Default to 'Visit Now' if text is empty
+
+			// Validate URL
+			if (!websiteUrl || !websiteUrl.startsWith("http")) {
 				showError(
 					`Button ${
 						index + 1
-					}: Text is required for 'Visit Now' button.`,
+					}: A valid URL is required for 'Visit Now' button.`,
 				);
 				return null;
 			}
-			if (!buttonData.urlPhone) {
-				showError(
-					`Button ${
-						index + 1
-					}: URL is required for 'Visit Now' button.`,
-				);
-				return null;
-			}
-		} else if (type === "phone") {
-			// For 'Call Now' button
-			buttonData.text = btn
-				.querySelector('input[placeholder="Call Now"]')
-				?.value?.trim();
-			buttonData.urlPhone = btn
-				.querySelector('input[placeholder="9999999999"]')
-				?.value?.trim();
+			buttonData.urlPhone = websiteUrl;
+		}
 
-			// Validate the text and phone number
-			if (!buttonData.text) {
-				showError(
-					`Button ${
-						index + 1
-					}: Text is required for 'Call Now' button.`,
-				);
-				return null;
-			}
-			if (!buttonData.urlPhone) {
+		// If phone fields exist, handle 'Call Now' button validation
+		if (callText !== undefined || phoneNumber !== undefined) {
+			buttonData.text = callText || "Call Now"; // Default to 'Call Now' if text is empty
+
+			// Validate Phone Number
+			if (!phoneNumber) {
 				showError(
 					`Button ${
 						index + 1
@@ -395,6 +386,13 @@ function collectTemplateData() {
 				);
 				return null;
 			}
+			buttonData.urlPhone = `tel:${phoneNumber}`; // Ensure the phone number is prefixed with 'tel:'
+		}
+
+		// If neither website nor phone data exists, alert and return null
+		if (!buttonData.urlPhone) {
+			showError(`Button ${index + 1}: URL or Phone number is required.`);
+			return null;
 		}
 
 		return buttonData;

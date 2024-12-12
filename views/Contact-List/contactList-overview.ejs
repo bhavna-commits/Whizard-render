@@ -105,7 +105,7 @@
 						<!-- Filters Button -->
 						<div class="text-center pr-3">
 							<button aria-label="Filters" onclick="openFilterModal()" type="button" class="border py-2 px-4 rounded-lg transition-colors ease-in-out duration-300 hover:bg-gray-100 text-sm font-semibold flex items-center">
-								<span class="icon">
+								<span class="icon pr-1">
 									<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="14" height="12" fill="currentColor">
 										<path d="M487.7 0H24.29C5.719 0-5.938 23.44 7.031 37.22L192 245.8V432c0 10.05 5.75 19.25 14.91 23.77l96 48c16.41 8.203 33.09-4.578 33.09-23.77V245.8L504.1 37.22C518.1 23.44 506.3 0 487.7 0zM320 240.4V457.2L224 409.2V240.4L36.65 32h438.7L320 240.4z" />
 									</svg>
@@ -123,7 +123,9 @@
 				</div>
 				
 				<!-- Contact list table -->
-				<%- include('partials/OverViewTable') %>
+				<div class="flex w-full justify-center items-center ">
+					<div class="w-[95%]  "><%- include('partials/OverViewTable') %></div>
+				</div>
 			</div>
 			
 			<!-- Pop-Up Modal to Edit List -->

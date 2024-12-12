@@ -37,6 +37,7 @@ app.use(
 	"/contact-list/js",
 	express.static(path.join(__dirname, "views/Contact-List/js")),
 );
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 // Middleware to handle session
 app.use(sessionMiddleware);
 

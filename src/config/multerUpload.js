@@ -9,7 +9,7 @@ const storage = multer.diskStorage({
 
 		// Check if the folder exists, if not, create it
 		if (!fs.existsSync(userFolder)) {
-			fs.mkdirSync(userFolder, { recursive: true }); 
+			fs.mkdirSync(userFolder, { recursive: true });
 		}
 
 		cb(null, userFolder);
@@ -22,10 +22,27 @@ const storage = multer.diskStorage({
 const fileFilter = (req, file, cb) => {
 	// Validate file types (example: accept images and videos)
 	const allowedTypes = [
+		// Images
 		"image/jpeg",
 		"image/png",
+		"image/gif",
+		"image/bmp",
+		"image/webp",
+		"image/svg+xml",
+		// Videos
 		"video/mp4",
-		"application/pdf",
+		"video/x-msvideo", // avi
+		"video/x-matroska", // mkv
+		"video/quicktime", // mov
+		"video/webm",
+		"video/ogg",
+		// Documents
+		"application/pdf", // PDF
+		"text/csv", // CSV
+		"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", // XLSX
+		"application/vnd.ms-excel", // XLS
+		"application/vnd.openxmlformats-officedocument.wordprocessingml.document", // DOCX
+		"application/msword", // DOC
 	];
 	if (allowedTypes.includes(file.mimetype)) {
 		cb(null, true);

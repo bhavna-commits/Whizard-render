@@ -86,10 +86,6 @@ document.addEventListener("DOMContentLoaded", () => {
 	const none = document.getElementById("noneInputContainer");
 	const text = document.getElementById("headerInputContainer");
 	const media = document.getElementById("mediaInputContainer");
-	// Hide all containers first
-	// text.classList.add("hidden");
-	// media.classList.add("hidden");
-	// none.classList.add("hidden");
 
 	dropDown.addEventListener("change", (e) => {
 		const value = e.target.value;
@@ -120,13 +116,30 @@ document.addEventListener("DOMContentLoaded", () => {
 
 	// Allowed file types by category
 	const allowedFileTypes = {
-		image: ["image/jpeg", "image/png", "image/webp"],
-		video: ["video/mp4", "video/x-msvideo", "video/webm"],
+		image: [
+			"image/jpeg",
+			"image/png",
+			"image/gif",
+			"image/bmp",
+			"image/webp",
+			"image/svg+xml",
+		],
+		video: [
+			"video/mp4",
+			"video/x-msvideo", // avi
+			"video/x-matroska", // mkv
+			"video/quicktime", // mov
+			"video/webm",
+			"video/ogg",
+		],
 		document: [
 			"application/pdf",
 			"application/msword",
 			"application/vnd.openxmlformats-officedocument.wordprocessingml.document",
 			"text/plain",
+			"text/csv",
+			"application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+			"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", // XLSX
 		],
 		location: [
 			"application/gpx+xml",
@@ -179,7 +192,7 @@ document.addEventListener("DOMContentLoaded", () => {
 		}
 		return false;
 	}
-
+	
 	// Dynamically update allowed file types based on mediaType dropdown
 	document.getElementById("mediaType").addEventListener("change", (e) => {
 		const value = e.target.value;

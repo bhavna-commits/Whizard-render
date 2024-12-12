@@ -275,29 +275,6 @@
 
 /* side bar styling and dashboard */
 
-@media (max-width: 768px) {
-  .sidebar {
-    width: 10%;
-    height: auto;
-    position: relative;
-  }
-}
-
-@media (max-width: 576px) {
-  .sidebar ul {
-    display: flex;
-    justify-content: space-around;
-  }
-
-  /* .sidebar .logo {
-    text-align: left;
-  }
-
-  .sidebar ul li {
-    margin: 5px;
-  } */
-}
-
 .sidebar {
   /* padding: 16px; */
   /* width: 200px; */
@@ -309,6 +286,7 @@
   box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
   position: relative;
   background-color: white;
+  width: 110px;
 }
 
 .logo img {
