@@ -1,6 +1,6 @@
 <!-- Filter Modal -->
-<div id="filterModal" class="fixed inset-0 bg-gray-500 bg-opacity-50 flex justify-center items-center z-50 hidden" onclick="closeFilterModal(event)">
-	<div class="bg-white p-6 rounded-lg w-[500px] relative" onclick="event.stopPropagation()">
+<div id="filterModal" class="fixed inset-0 bg-gray-500 bg-opacity-0 flex justify-center items-center z-50 opacity-0 pointer-events-none transition-opacity duration-300" onclick="closeFilterModal(event)">
+	<div class="bg-white p-6 rounded-lg w-[500px] relative transition-transform transform scale-95 duration-300" onclick="event.stopPropagation()">
 		<span class="absolute top-5 right-5 text-gray-500 text-2xl cursor-pointer" onclick="closeFilterModal()">×</span>
 		<h3 class="text-lg font-semibold mb-4">Apply Filters</h3>
 		
@@ -53,84 +53,4 @@
 <!-- Include Flatpickr JS -->
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
-<script>
-	function openFilterModal () {
-		document.getElementById("filterModal").classList.remove("hidden");
-	}
-	
-	function closeFilterModal (event = null) {
-		// Close the modal if clicking on the backdrop or the close button
-		if (event === null || event.target.id === "filterModal") {
-			document.getElementById("filterModal").classList.add("hidden");
-			
-			// Remove all dynamically added filter rows
-			const filterContainer = document.querySelector(".filter-container");
-			while (filterContainer.firstChild) {
-				filterContainer.removeChild(filterContainer.firstChild);
-			}
-		}
-	}
-	
-	
-	function applyFilters () {
-		const dateInterval = document.getElementById("dateInterval").value;
-		const attribute = document.getElementById("attributeSelect").value;
-		const condition = document.getElementById("conditionSelect").value;
-		const attributeValue = document.getElementById("attributeValue").value;
-		
-		// You can send these values to the backend or apply filters on the front-end
-		console.log("Filters Applied: ", {
-			dateInterval,
-			attribute,
-			condition,
-			attributeValue
-		});
-		
-		// Close the modal after applying filters
-		closeFilterModal();
-	}
-	
-	function clearFilters () {
-		document.getElementById("dateInterval").value = "";
-		document.getElementById("attributeSelect").value = "";
-		document.getElementById("conditionSelect").value = "";
-		document.getElementById("attributeValue").value = "";
-		const filterContainer = document.querySelector(".filter-container");
-		while (filterContainer.firstChild) {
-			filterContainer.removeChild(filterContainer.firstChild);
-		}
-		
-		function addFilter () {
-			const filterRow = document.createElement("div");
-			filterRow.classList.add("filter-row");
-			
-			// Add the filter elements (similar to what is inside the modal)
-			filterRow.innerHTML = `
-	<div class="flex items-center pt-2 space-x-2 relative">
-		<select placeholder="" id="attributeSelect" class="w-fit px-2 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-			<option value="name">Name</option>
-			<option value="tags">Tags</option>
-			<option value="contact">Contact</option>
-			<option value="whatsapp">WhatsApp</option>
-		</select>
-		<select id="conditionSelect" class="w-fit px-2 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-			<option value="is">has</option>
-			<option value="is">does not</option>
-			<!-- Add more conditions if needed -->
-		</select>
-		<input type="text" id="attributeValue" placeholder="Attribute value" class="w-fit px-2 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-	</div>
-	`;
-			
-			// Append the new filter row to the .filter-container
-			document.querySelector(".filter-container").appendChild(filterRow);
-		}
-		
-		flatpickr("#dateInterval", {
-			mode: "range",
-			dateFormat: "d-m-Y", // Format: Year-Month-Day
-			onClose: function (selectedDates, dateStr, instance) {
-				console.log("Selected date range: ", dateStr);
-			}
-		});
-</script>
+<script src="/contact-list/js/filter.js"></script>

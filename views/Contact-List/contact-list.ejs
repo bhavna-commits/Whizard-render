@@ -49,7 +49,7 @@
 						Contact List</a>
 				</li>
 				<li>
-					<a href="/template"><span class="icon "><i class="fa-regular fa-envelope-open"></i></span>
+					<a href="/template"><span class="icon "><i class="fa-regular fa-envelope"></i></span>
 						Template</a>
 				</li>
 				<li>
@@ -71,25 +71,26 @@
 		<div class="main-content">
 			<!-- END HEADER -->
 			<div class="logo flex justify-between items-center">
-				<div class="pb-2" data-pages="parallax">
+				<div class="mb-3 flex items-center">
 					<!-- START BREADCRUMB -->
-					<ol class="flex">
-						<li class="breadcrumb-item">
-							<a href="/" class="text-red-600 text-base">Dashboard</a>
-						</li>
-						<li class="breadcrumb-item active">
-							<a href="/contact-list" class="text-red-600 text-base">Contact List</a>
-						</li>
-					</ol>
+					
+					<div class="flex items-center">
+						<a href="/" class="text-gray-500 hover:text-gray-700 text-base font-medium">Dashboard</a>
+						<svg class="w-4 h-4 mx-2 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+							<path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L11.586 10 7.293 5.707a1 1 0 011.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+						</svg>
+					</div>
+					
+					<a href="/contact-list" class="text-red-600 hover:text-gray-700 text-base font-medium">Contact List</a>
+					<!-- END BREADCRUMB -->
 				</div>
-				<!-- END BREADCRUMB -->
 			</div>
 			
 			<!-- START card -->
-			<div class="mt-4">
+			<div class="">
 				<div class="flex w-full justify-between items-center px-2">
 					<div class="">
-						<h6 class="px-3 text-xl">Contact List</h6>
+						<h6 class="p-3 text-2xl">Contact List</h6>
 					</div>
 					
 					<div class="flex items-center justify-evenly">
@@ -97,7 +98,8 @@
 							<svg xmlns="http://www.w3.org/2000/svg" height="14px" viewBox="0 -960 960 960" width="24px" fill="gray">
 								<path d="M784-120 532-372q-30 24-69 38t-83 14q-109 0-184.5-75.5T120-580q0-109 75.5-184.5T380-840q109 0 184.5 75.5T640-580q0 44-14 83t-38 69l252 252-56 56ZM380-400q75 0 127.5-52.5T560-580q0-75-52.5-127.5T380-760q-75 0-127.5 52.5T200-580q0 75 52.5 127.5T380-400Z" />
 							</svg>
-							<input type="search" placeholder="Search by template name" class="outline-none focus:outline-none w-full" />
+							<input type="search" id="searchInput" placeholder="Search by template name" class="outline-none focus:outline-none w-full" />
+							
 						</div>
 						
 						<div class="text-center pr-3">
@@ -116,7 +118,10 @@
 				</div>
 				
 				<!-- Contact list table -->
-				<%- include('partials/contactListTable') %>
+				<div class="flex justify-center w-full pt-2">
+					<div class="w-[95%] ">
+						<%- include('partials/contactListTable') %></div>
+				</div>
 			</div>
 			
 			<!-- Pop-Up Modal to Edit List -->

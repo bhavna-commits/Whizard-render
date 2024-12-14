@@ -43,6 +43,11 @@
 			font-optical-sizing: auto;
 			font-style: normal;
 		}
+		
+		button.active {
+			background-color: #ddd;
+			border-color: #333;
+		}
 	</style>
 	<!-- Font Awesome link -->
 </head>
@@ -143,24 +148,6 @@
 							}
 						});
 					</script>
-					
-					
-					<!-- <div class="form-group py-1">
-						<label class="font-semibold">
-							Choose Language(s)*</label>
-						<div class="form-group-default-select2">
-							<select class="rounded shadow-sm border full-width select2-hidden-accessible" data-init-plugin="select2" multiple="" tabindex="-1" aria-hidden="true">
-								<option value="English">English</option>
-								<option value="Hindi">Hindi</option>
-								<option value="Bahasa">Bahasa</option>
-								<option value="Cantonese">Cantonese</option>
-								<option value="Tamil">Tamil</option>
-								<option value="Telugu">Telugu</option>
-								<option value="YOUTUBE">Marathi</option>
-								<option value="YOUTUBE">Marathi</option>
-							</select>
-						</div>
-					</div> -->
 				</form>
 			</div>
 			
@@ -178,26 +165,6 @@
 								Submit
 							</button>
 						</div>
-						
-						<!-- Modal -->
-						<!-- <div class="modal fade" id="templateModal" tabindex="-1" aria-labelledby="templateModalLabel" aria-hidden="true">
-							<div class="modal-dialog modal-xl">
-								<div class="modal-content">
-									<div class="modal-header">
-										<h5 class="modal-title" id="templateModalLabel">Template Submission</h5>
-										<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-									</div>
-									<div class="modal-body">
-										
-										<div id="modalContent"></div>
-									</div>
-									<div class="modal-footer">
-										<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-									</div>
-								</div>
-							</div>
-						</div> -->
-						
 					</div>
 					
 					<div class="setup-template">
@@ -355,6 +322,7 @@
 							
 							// Close dropdown if clicking outside of it
 							window.addEventListener("click", function (e) {
+								e.stopPropagation();
 								if (!dropdownMenu.contains(e.target) && !buttonDropdown.contains(e.target)) {
 									// console.log("coming here")
 									dropdownMenu.classList.add("hidden"); // Hide dropdown if clicking outside

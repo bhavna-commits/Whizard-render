@@ -3,7 +3,7 @@
  	<div class="table-responsive">
  		<table class="min-w-full bg-white">
  			<thead>
- 				<tr class="bg-gray-50 border-b">
+ 				<tr class="">
  					<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sno.</th>
  					<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact list name</th>
  					<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Number of participant</th>
@@ -11,9 +11,9 @@
  					<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
  				</tr>
  			</thead>
- 			<tbody class="divide-y divide-gray-200">
+ 			<tbody class="">
  				<% contacts.forEach((contact, index) => { %>
- 				<tr class="hover:bg-green-100 cursor-pointer" onclick="window.location.href='/contact-list/overview/<%= contact._id %>'">
+ 				<tr class="hover:bg-green-100 cursor-pointer border" onclick="window.location.href='/contact-list/overview/<%= contact._id %>'">
  					<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><%= index + 1 %></td>
  					<td class="px-6 py-4 whitespace-nowrap text-sm">
  						<%= contact.ContactListName %>
@@ -93,37 +93,74 @@
  		<div class="flex items-center justify-center py-4 space-x-4">
  			<nav class="flex items-center">
  				<ul class="flex space-x-1">
+ 					<!-- Previous Button -->
  					<li>
- 						<a href="#" class="px-3 py-2 rounded-md text-sm font-medium text-gray-500 bg-white border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed" aria-disabled="true">‹</a>
+ 						<a href="/contact-list?page=<%= page > 1 ? page - 1 : 1 %>" class="px-3 py-2 rounded-md text-sm font-medium text-gray-500 bg-white border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed" <%= page === 1 ? 'aria-disabled="true"' : '' %>>‹</a>
  					</li>
+ 					
+ 					<!-- First Page Button -->
  					<li>
- 						<a href="#" class="px-3 py-2 rounded-md text-sm font-medium text-white bg-blue-600 border border-blue-600">1</a>
+ 						<a href="/contact-list?page=1" class="px-3 py-2 rounded-md text-sm font-medium <%= page === 1 ? 'text-white bg-blue-600 border-blue-600' : 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50' %>">1</a>
  					</li>
+ 					
+ 					<% if (page > 3) { %>
+ 					<!-- Show "..." if current page is greater than 3 -->
+ 					<li><span class="px-3 py-2 text-sm text-gray-500">...</span></li>
+ 					<% } %>
+ 					
+ 					<!-- Dynamic Page Numbers based on current page -->
+ 					<% for (let i = Math.max(2, page - 1); i <= Math.min(totalPages - 1, page + 1); i++) { %>
  					<li>
- 						<a href="#" class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50">2</a>
+ 						<a href="/contact-list?page=<%= i %>" class="px-3 py-2 rounded-md text-sm font-medium <%= i === page ? 'text-white bg-blue-600 border-blue-600' : 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50' %>"><%= i %></a>
  					</li>
+ 					<% } %>
+ 					
+ 					<% if (page < totalPages - 2) { %>
+ 					<!-- Show "..." if there are more pages -->
+ 					<li><span class="px-3 py-2 text-sm text-gray-500">...</span></li>
+ 					<% } %>
+ 					
+ 					<!-- Last Page Button -->
+ 					<% if (totalPages > 1) { %>
  					<li>
- 						<span class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 bg-white border border-gray-300">...</span>
+ 						<a href="/contact-list?page=<%= totalPages %>" class="px-3 py-2 rounded-md text-sm font-medium <%= page === totalPages ? 'text-white bg-blue-600 border-blue-600' : 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50' %>"><%= totalPages %></a>
  					</li>
+ 					<% } %>
+ 					
+ 					<!-- Next Button -->
  					<li>
- 						<a href="#" class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50">9</a>
- 					</li>
- 					<li>
- 						<a href="#" class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50">10</a>
- 					</li>
- 					<li>
- 						<a href="#" class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50">›</a>
+ 						<a href="/contact-list?page=<%= page < totalPages ? page + 1 : totalPages %>" class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50">›</a>
  					</li>
  				</ul>
  			</nav>
+ 			
+ 			<!-- "Go to page" input -->
  			<div class="flex items-center space-x-2">
  				<span class="text-sm text-gray-700">Go to page</span>
- 				<input type="number" min="1" max="10" class="w-16 px-2 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" value="1" />
- 				<button type="button" class="px-3 py-1 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
- 					Go
- 				</button>
+ 				<input type="number" min="1" max="<%= totalPages %>" class="w-16 px-2 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" value="<%= page %>" id="pageInput" />
+ 				<button type="button" class="px-3 py-1 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" onclick="goToPage()">Go</button>
  			</div>
  		</div>
+ 		
+ 		<script>
+ 			function goToPage () {
+ 				const pageInput = document.getElementById('pageInput');
+ 				const page = parseInt(pageInput.value);
+ 				const totalPages = <%- JSON.parse(totalPages) %>;
+ 				
+ 				if (page > totalPages) {
+ 					alert("Page doesn't exist. Try a lower number.");
+ 					pageInput.value = <%- JSON.parse(page) %>; 
+ 				} else if (page < 1) {
+ 					alert("Page number should be at least 1.");
+ 					pageInput.value = <%- JSON.parse(page) %>;
+ 				} else {
+ 					window.location.href = `/contact-list?page=${page}`;
+ 				}
+ 			}
+ 		</script>
+
+
  	</div>
  	<% } else { %>
  	<!-- Empty state -->

@@ -4,6 +4,8 @@
   font-style: normal;
 }
 
+
+
 .gradient-bg {
   background: linear-gradient(90deg, #000000 0%, #1a1a1a 50%, #333333 100%);
 }

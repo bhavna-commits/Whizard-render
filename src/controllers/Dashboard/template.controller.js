@@ -79,14 +79,30 @@ export const templatePreview = async (req, res) => {
 };
 
 export const getList = async (req, res) => {
-	const id = req.session.user.id;
-	if (!id) res.render("login");
 	try {
-		const template = await Template.find({ owner: id });
-		// console.log(template);
-		res.render("Templates/manage_template", { list: template });
+		const id = req.session.user.id;
+		const page = parseInt(req.query.page) || 1;
+		const limit = 6;
+		const skip = (page - 1) * limit;
+
+		const totalTemplates = await Template.countDocuments({ owner: id });
+		const templates = await Template.find({ owner: id })
+			.skip(skip)
+			.limit(limit);
+
+		const totalPages = Math.ceil(totalTemplates / limit);
+
+		res.render("Templates/manage_template", {
+			list: templates,
+			page,
+			totalPages,
+		});
 	} catch (error) {
-		res.render("Templates/manage_template", { list: [] });
+		res.render("Templates/manage_template", {
+			list: [],
+			page: 1,
+			totalPages: 0,
+		});
 	}
 };
 

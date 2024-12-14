@@ -18,7 +18,7 @@
 	<link rel="preconnect" href="https://fonts.googleapis.com" />
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 	<link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet" />
-
+	
 	<link href="styles/style.css" rel="stylesheet" type="text/css" />
 	<script src="https://cdn.tailwindcss.com"></script>
 </head>
@@ -62,74 +62,86 @@
 			</div>
 		</nav>
 		<!-- END SIDEBAR MENU TOP TRAY CONTENT-->
-
+		
 		<!-- START PAGE-CONTAINER -->
 		<div class="main-content">
 			<!-- END HEADER -->
 			<div class="logo flex justify-between items-center ">
-				<div class="" data-pages="parallax">
+				<div class="-mb-2">
 					<!-- START BREADCRUMB -->
-					<ol class="h-full flex pt-2">
-						<li class="breadcrumb-item"><a href="/" class="text-red-600 text-base">Dashboard</a></li>
-						<li class="breadcrumb-item active"><a href="/template" class="text-red-600 text-base">Manage Template</a></li>
-					</ol>
-
+					<nav class="flex" aria-label="Breadcrumb">
+						
+						<div class="flex items-center">
+							<a href="/" class="text-gray-500 hover:text-gray-700 text-base font-medium">Dashboard</a>
+							<svg class="w-4 h-4 mx-2 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+								<path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L11.586 10 7.293 5.707a1 1 0 011.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+							</svg>
+						</div>
+						
+						<div class="flex items-center">
+							<a href="/template" class="text-red-600 hover:text-gray-700 text-base font-medium">Templates</a>
+							
+						</div>
+						
+					</nav>
+					<!-- END BREADCRUMB -->
+					
 				</div>
 				<!-- END BREADCRUMB -->
-				<button class="bg-black p-2 flex items-center rounded-lg text-base font-thin" onclick="document.location='create-template'">
+				<button class="bg-black p-2 flex items-center rounded-lg text-sm font-thin" onclick="document.location='create-template'">
 					<i class="pg-icon font-thin">add</i>
 					Create new template
 				</button>
 			</div>
-			<div class="flex justify-between items-center px-3">
+			<div class="flex justify-between items-center px-3 pt-3">
 				<div class="flex items-center justify-start">
 					<h6 class="pr-2 text-black text-lg">List of templates</h6>
 					<div class="relative flex items-center bg-gray-200 w-[72px] h-8 rounded-full p-1">
 						<!-- Toggle Button -->
 						<div id="toggle" class="absolute w-8 h-6 bg-white rounded-full transform transition-transform duration-300"></div>
-
+						
 						<!-- List Icon -->
 						<i id="option1" class="fas fa-list text-red-500 cursor-pointer z-10 ml-2"></i>
-
+						
 						<!-- Grid Icon -->
 						<i id="option2" class="fas fa-th text-gray-400 cursor-pointer z-10 ml-[18px] mr-2"></i>
 					</div>
 				</div>
-
+				
 				<div class="flex justify-end items-center">
-					<div data-toggle="modal" data-target="#filter" id="show-modal" class="px-4 filter cursor-pointer flex items-center">
+					<div data-toggle="modal" data-target="#filter" id="show-modal" class="px-4 filter cursor-pointer flex  items-center">
 						<i class="fa fa-filter" aria-hidden="true"></i>
-						<span class="ml-3">Filter</span>
+						<span class="ml-1">Filter</span>
 					</div>
 					<button type="button" class="flex items-center bg-blue-600 text-white px-4 py-2 rounded">
 						<i class="fas fa-sync mr-2"></i>Sync Facebook
 					</button>
 				</div>
 			</div>
-
+			
 			<!-- Templates container -->
 			<div id="template-container">
 				<!-- List View (default) -->
 				<div id="list-view" class="block">
 					<%- include('templates-table') %>
 				</div>
-
+				
 				<!-- Grid View -->
 				<div id="grid-view" class="hidden">
 					<%- include('templates-cards') %>
 				</div>
 			</div>
-
+			
 			<script>
 				const toggle = document.getElementById('toggle');
 				const option1 = document.getElementById('option1');
 				const option2 = document.getElementById('option2');
 				const listView = document.getElementById('list-view');
 				const gridView = document.getElementById('grid-view');
-
+				
 				// Default active state for list view (left position)
 				let isListView = true;
-
+				
 				// Event listener for List Icon
 				option1.addEventListener('click', () => {
 					if (!isListView) {
@@ -138,7 +150,7 @@
 						option1.classList.add('text-red-500');
 						option2.classList.remove('text-red-500');
 						isListView = true;
-
+						
 						// Show list view, hide grid view
 						listView.classList.remove('hidden');
 						listView.classList.add('block');
@@ -146,7 +158,7 @@
 						gridView.classList.remove('block');
 					}
 				});
-
+				
 				// Event listener for Grid Icon
 				option2.addEventListener('click', () => {
 					if (isListView) {
@@ -155,7 +167,7 @@
 						option2.classList.add('text-red-500');
 						option1.classList.remove('text-red-500');
 						isListView = false;
-
+						
 						// Show grid view, hide list view
 						gridView.classList.remove('hidden');
 						gridView.classList.add('block');
@@ -163,13 +175,12 @@
 						listView.classList.remove('block');
 					}
 				});
-
 			</script>
-
-
-
+			
+			
+			
 			<!-- status modal start -->
-
+			
 			<div class="modal fade" id="status" tabindex="-1" role="dialog" aria-labelledby="filterModalLabel" aria-hidden="true">
 				<div class="modal-dialog modal-lg modal-dialog-centered" role="document">
 					<div class="modal-content">
@@ -198,7 +209,7 @@
 											<div class="file-upload-area" onclick="document.getElementById('file-input').click();">
 												Browse to choose file
 												<br />
-
+												
 												<input type="file" id="file-input" class="file-upload-input" accept=".pdf" multiple />
 											</div>
 										</div>
@@ -209,7 +220,7 @@
 										</div>
 									</form>
 								</div>
-
+								
 								<div class="col">
 									<div class="iphone-container">
 										<div class="iphone-screen">
@@ -244,9 +255,9 @@
 				</div>
 			</div>
 			<!-- status modal end -->
-
+			
 			<!-- filter modal start -->
-
+			
 			<div class="modal fade" id="filter" tabindex="-1" role="dialog" aria-labelledby="filterModalLabel" aria-hidden="true">
 				<div class="modal-dialog modal-dialog-centered" role="document">
 					<div class="modal-content">
@@ -283,7 +294,7 @@
 										</div>
 									</div>
 								</div>
-
+								
 								<label for="campaignTitle">Choose Category</label>
 								<div class="form-group py-1">
 									<div class="dropdown dropdown-default w-100">
@@ -306,64 +317,63 @@
 					</div>
 				</div>
 			</div>
-
+			
 			<script>
 				const fileInput = document.getElementById("file-input");
 				const fileList = document.getElementById("file-list");
-
+				
 				fileInput.addEventListener("change", function () {
 					const files = fileInput.files;
-
+					
 					for (const file of files) {
 						const fileItem = document.createElement("div");
 						fileItem.classList.add("file-item");
-
+						
 						const fileStatus = document.createElement("div");
 						fileStatus.classList.add("file-status");
-
+						
 						const fileName = document.createElement("span");
 						fileName.textContent = file.name;
 						fileName.classList.add("status-uploading");
-
+						
 						const loader = document.createElement("div");
 						loader.classList.add("circular-loader");
-
+						
 						const statusText = document.createElement("span");
 						statusText.textContent = "Uploading...";
 						statusText.classList.add("status-uploading");
-
+						
 						const removeButton = document.createElement("span");
 						removeButton.textContent = "✖";
 						removeButton.classList.add("remove-file");
 						removeButton.onclick = () => fileItem.remove();
-
+						
 						fileStatus.appendChild(loader);
 						fileStatus.appendChild(fileName);
 						fileStatus.appendChild(statusText);
 						fileItem.appendChild(fileStatus);
 						fileItem.appendChild(removeButton);
 						fileList.appendChild(fileItem);
-
+						
 						setTimeout(() => {
 							loader.remove();
 							statusText.textContent = "Uploaded";
 							statusText.classList.remove("status-uploading");
 							statusText.classList.add("status-uploaded");
-
+							
 							const uploadedIcon = document.createElement("div");
 							uploadedIcon.classList.add("uploaded-icon");
 							uploadedIcon.textContent = "✔";
-
+							
 							fileStatus.prepend(uploadedIcon);
 						}, 2000);
 					}
 				});
-
 			</script>
 		</div>
 	</div>
 	<!-- END PAGE CONTAINER -->
-
+	
 	<!-- BEGIN VENDOR JS -->
 	<script src="assets/plugins/pace/pace.min.js" type="text/javascript"></script>
 	<!--  A polyfill for browsers that don't support ligatures: remove liga.js if not needed-->
@@ -393,7 +403,7 @@
 	<script src="assets/js/card.js" type="text/javascript"></script>
 	<script src="assets/js/scripts.js" type="text/javascript"></script>
 	<!-- <script src="https://kit.fontawesome.com/44e4e59292.js" crossorigin="anonymous"></script> -->
-
+	
 	<!-- END PAGE LEVEL JS -->
 </body>
 

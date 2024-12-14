@@ -71,59 +71,177 @@
 		<div class="main-content">
 			<!-- END HEADER -->
 			<div class="logo flex justify-between items-center">
-				<div class="pb-2" data-pages="parallax">
+				<div class="mb-2">
 					<!-- START BREADCRUMB -->
-					<ol class="flex">
-						<li class="breadcrumb-item">
-							<a href="/" class="text-red-600 text-base">Dashboard</a>
-						</li>
-						<li class="breadcrumb-item active">
-							<a href="/contact-list" class="text-red-600 text-base">Contact List</a>
-						</li>
-					</ol>
+					<nav class="flex" aria-label="Breadcrumb">
+						
+						<div class="flex items-center">
+							<a href="/" class="text-gray-500 hover:text-gray-700 text-base font-medium">Dashboard</a>
+							<svg class="w-4 h-4 mx-2 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+								<path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L11.586 10 7.293 5.707a1 1 0 011.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+							</svg>
+						</div>
+						
+						<div class="flex items-center">
+							<a href="/contact-list" class="text-gray-500 hover:text-gray-700 text-base font-medium">Contact List</a>
+							<svg class="w-4 h-4 mx-2 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+								<path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L11.586 10 7.293 5.707a1 1 0 011.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+							</svg>
+						</div>
+						
+						<a href="#" class="text-red-600 text-base font-medium">Custom Field</a>
+						
+						
+					</nav>
+					<!-- END BREADCRUMB -->
 				</div>
-				<!-- END BREADCRUMB -->
 			</div>
 			
 			<!-- START card -->
-			<div class="mt-4">
-				<div class="flex w-full justify-between items-center px-2">
-					<div class="">
-						<h6 class="px-3 text-xl">Contact List</h6>
+			<div class=" w-full bg-gray-50">
+				<div class=" flex items-start w-full justify-between ">
+					<!-- Custom Fields Table -->
+					
+					<div class="bg-white  w-1/2 mx-2 p-5 ">
+						<% if (customFields && customFields.length > 0) { %>
+						<div class="table-responsive ">
+							<table class="min-w-full ">
+								<thead>
+									<tr class="">
+										<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sno.</th>
+										<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Field name</th>
+										<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Field type</th>
+										<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+									</tr>
+								</thead>
+								<tbody class="bg-white divide-y divide-gray-200">
+									<% customFields.forEach((field, index) => { %>
+									<tr class="border-gray-100 border">
+										<td class="px-6 py-4 whitespace-nowrap"><%= index + 1 %></td>
+										<td class="px-6 py-4 whitespace-nowrap"><%= field.fieldName %></td>
+										<td class="px-6 py-4 whitespace-nowrap"><%= field.fieldType %></td>
+										<td class="px-6 py-4 whitespace-nowrap">
+											<button onclick="deleteField('<%= field._id %>')" class="text-red-600 hover:text-red-900">
+												<i class="fas fa-trash"></i>
+											</button>
+										</td>
+									</tr>
+									<% }); %>
+								</tbody>
+							</table>
+							<div class="flex items-center justify-center py-4 space-x-4">
+								<nav class="flex items-center">
+									<ul class="flex space-x-1">
+										<!-- Previous Button -->
+										<li>
+											<a href="/contact-list?page=<%= page > 1 ? page - 1 : 1 %>" class="px-3 py-2 rounded-md text-sm font-medium text-gray-500 bg-white border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed" <%= page === 1 ? 'aria-disabled="true"' : '' %>>‹</a>
+										</li>
+										
+										<!-- First Page Button -->
+										<li>
+											<a href="/contact-list?page=1" class="px-3 py-2 rounded-md text-sm font-medium <%= page === 1 ? 'text-white bg-blue-600 border-blue-600' : 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50' %>">1</a>
+										</li>
+										
+										<% if (page > 3) { %>
+										<!-- Show "..." if current page is greater than 3 -->
+										<li><span class="px-3 py-2 text-sm text-gray-500">...</span></li>
+										<% } %>
+										
+										<!-- Dynamic Page Numbers based on current page -->
+										<% for (let i = Math.max(2, page - 1); i <= Math.min(totalPages - 1, page + 1); i++) { %>
+										<li>
+											<a href="/contact-list?page=<%= i %>" class="px-3 py-2 rounded-md text-sm font-medium <%= i === page ? 'text-white bg-blue-600 border-blue-600' : 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50' %>"><%= i %></a>
+										</li>
+										<% } %>
+										
+										<% if (page < totalPages - 2) { %>
+										<!-- Show "..." if there are more pages -->
+										<li><span class="px-3 py-2 text-sm text-gray-500">...</span></li>
+										<% } %>
+										
+										<!-- Last Page Button -->
+										<% if (totalPages > 1) { %>
+										<li>
+											<a href="/contact-list?page=<%= totalPages %>" class="px-3 py-2 rounded-md text-sm font-medium <%= page === totalPages ? 'text-white bg-blue-600 border-blue-600' : 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50' %>"><%= totalPages %></a>
+										</li>
+										<% } %>
+										
+										<!-- Next Button -->
+										<li>
+											<a href="/contact-list?page=<%= page < totalPages ? page + 1 : totalPages %>" class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50">›</a>
+										</li>
+									</ul>
+								</nav>
+								
+								<!-- "Go to page" input -->
+								<div class="flex items-center space-x-2">
+									<span class="text-sm text-gray-700">Go to page</span>
+									<input type="number" min="1" max="<%= totalPages %>" class="w-16 px-2 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" value="<%= page %>" id="pageInput" />
+									<button type="button" class="px-3 py-1 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" onclick="goToPage()">Go</button>
+								</div>
+							</div>
+							
+							<script>
+								function goToPage () {
+									const pageInput = document.getElementById('pageInput');
+									const page = parseInt(pageInput.value);
+									const totalPages = <%= totalPages %>;
+									
+									if (page > totalPages) {
+										alert("Page doesn't exist. Try a lower number.");
+										pageInput.value = <%= page %>; // Reset input to the current page
+									} else if (page < 1) {
+										alert("Page number should be at least 1.");
+										pageInput.value = <%= page %>;
+									} else {
+										window.location.href = `/contact-list?page=${page}`;
+									}
+								}
+							</script>
+							
+						</div>
+						<% } else { %>
+						<div class="flex flex-col items-center justify-center min-h-[400px]  rounded-lg mt-4">
+							<div class="text-center">
+								<img src="https://img.freepik.com/free-vector/hands-holding-tablet-with-forefinger-clicking-start-button-new-application-launch-flat-illustration_74855-20595.jpg?ga=GA1.1.131490893.1732525963&semt=ais_hybrid" alt="No contacts" class="w-48 h-48 mx-auto mb-4">
+								
+								<h3 class="text-xl font-semibold text-gray-900 mb-2">No custom fields yet</h3>
+								<p class="text-gray-600 mb-6">Start adding custom fields by clicking on "Add"</p>
+								<button type="submit" class="bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black">
+									Add
+								</button>
+							</div>
+						</div>
+						<% } %>
 					</div>
 					
-					<div class="flex items-center justify-evenly">
-						<div class="border flex rounded-lg items-center py-2 px-2 w-72 mr-3">
-							<svg xmlns="http://www.w3.org/2000/svg" height="14px" viewBox="0 -960 960 960" width="24px" fill="gray">
-								<path d="M784-120 532-372q-30 24-69 38t-83 14q-109 0-184.5-75.5T120-580q0-109 75.5-184.5T380-840q109 0 184.5 75.5T640-580q0 44-14 83t-38 69l252 252-56 56ZM380-400q75 0 127.5-52.5T560-580q0-75-52.5-127.5T380-760q-75 0-127.5 52.5T200-580q0 75 52.5 127.5T380-400Z" />
-							</svg>
-							<input type="search" placeholder="Search by template name" class="outline-none focus:outline-none w-full" />
-						</div>
-						
-						<div class="text-center pr-3">
-							<button aria-label="" onclick="document.location='custom_field.html'" type="button" class="border py-2 px-2 rounded-lg transition-colors ease-in-out duration-300 hover:bg-gray-100 text-sm font-medium">
-								Manage custom fields
+					
+					<!-- Add New Field Form -->
+					<div class=" w-1/2 mx-2 bg-white p-6 rounded-lg ">
+						<h2 class="text-xl font-semibold mb-4">Add new field</h2>
+						<form id="addFieldForm" class="space-y-7">
+							<div>
+								<label class="block text-sm font-medium text-gray-500">Field name</label>
+								<input type="text" name="fieldName" placeholder="What is name of user" class="mt-1 p-3 border block w-full rounded-md border-gray-300  focus:border-indigo-500 focus:ring-indigo-500" required>
+							</div>
+							
+							<div>
+								<label class="block text-sm font-medium text-gray-500">Field Type</label>
+								<select name="fieldType" class="mt-1 p-3 block w-full rounded-md border-gray-300 border  focus:border-indigo-500 focus:ring-indigo-500 text-gray-500" required>
+									<option value="">Select user type</option>
+									<option value="input">Input</option>
+									<option value="dropdown">Dropdown</option>
+								</select>
+							</div>
+							
+							<button type="submit" class="bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black">
+								Add
 							</button>
-						</div>
-						
-						<button aria-label="Create new Contact list" type="button" id="create-List" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black">
-							<i class="pg-icon pr-1">add</i>
-							<span>Create new Contact list</span>
-						</button>
+						</form>
 					</div>
-					<!-- Pop-Up Modal to create List -->
-					
 				</div>
-				
-				<!-- Contact list table -->
-				<%- include('partials/customFieldTable') %>
-                <%- include('partials/editCustomField') %>
 			</div>
-			
 			<!-- Pop-Up Modal to Edit List -->
-		
-			
-			
 		</div>
 	</div>
 	<!-- END PAGE CONTAINER -->
@@ -157,8 +275,8 @@
 	<script src="assets/js/card.js" type="text/javascript"></script>
 	<script src="assets/js/scripts.js" type="text/javascript"></script>
 	<!-- <script src="https://kit.fontawesome.com/44e4e59292.js" crossorigin="anonymous"></script> -->
-	<script src="/contact-list/js/createList.js"></script>
-	<script src="/contact-list/js/editContactList.js"></script>
+	<script src="/contact-list/js/customFields.js"></script>
+	
 	<!-- END PAGE LEVEL JS -->
 </body>
 

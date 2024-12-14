@@ -2,8 +2,13 @@ import path from "path";
 import ContactList from "../../models/contactList.model.js";
 import Contacts from "../../models/contacts.modal.js";
 import Template from "../../models/templates.model.js";
+import CustomField from "../../models/customField.model.js";
 import User from "../../models/user.model.js";
 import { countries } from "../../utils/dropDown.js";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 export const createList = async (req, res) => {
 	try {
@@ -175,44 +180,123 @@ export const deleteList = async (req, res) => {
 };
 
 export const sampleCSV = async (req, res) => {
-	const __dirname = path.resolve();
-	res.download(
-		path.join(__dirname, "..", "public", "sample.csv"),
-		"sample.csv",
-		(err) => {
+	try {
+		const filePath = path.join(
+			__dirname,
+			"..",
+			"..",
+			"..",
+			"public",
+			"sample.csv",
+		);
+
+		res.setHeader("Content-Type", "text/csv");
+		res.setHeader(
+			"Content-Disposition",
+			'attachment; filename="sample.csv"',
+		);
+		res.setHeader("Cache-Control", "no-cache");
+		res.setHeader("Pragma", "no-cache");
+		res.setHeader("Expires", "0");
+
+		res.download(filePath, "sample.csv", (err) => {
 			if (err) {
+				console.error(err);
 				res.status(500).send({
-					message: "Error downloading the sample CSV file.",
+					message: err,
 				});
 			}
-		},
-	);
+		});
+	} catch (error) {
+		res.status(500).send({
+			message: "Unexpected error occurred.",
+		});
+	}
 };
 
-export const addCustomField = async (req, res) => {
+export const getCustomField = async (req, res) => {
 	try {
-		// Get the authenticated user's ID from the session
-		const userId = req.session.user.id; // Assuming req.session.user contains authenticated user data
+		const userId = req.session.user.id;
+		const page = parseInt(req.query.page) || 1;
+		const limit = 6;
+		const skip = (page - 1) * limit;
 
-		// Fetch the user's contact lists
-		let contactLists = await ContactList.find({ owner: userId });
-		// console.log(contactLists);
-		if (!contactLists.length) {
-			res.render("Contact-List/custom-field", {
-				countries: countries,
-				contacts: [],
-			});
-		} else {
-			res.render("Contact-List/custom-field", {
-				countries: countries,
-				contacts: contactLists,
-			});
-		}
+		const totalCustomFields = await CustomField.countDocuments({
+			owner: userId,
+		});
+		const customFields = await CustomField.find({ owner: userId })
+			.skip(skip)
+			.limit(limit);
+
+		const totalPages = Math.ceil(totalCustomFields / limit);
+
+		res.render("Contact-List/custom-field", {
+			customFields: customFields || [],
+			page,
+			totalPages,
+		});
 	} catch (error) {
 		console.error(error);
 		res.status(500).json({
 			success: false,
-			message: "Error fetching contact lists",
+			message: "Error fetching custom fields",
+		});
+	}
+};
+
+export const createCustomField = async (req, res) => {
+	try {
+		const userId = req.session.user.id;
+		const { fieldName, fieldType } = req.body;
+		// console.log(req.body);
+		const newField = new CustomField({
+			owner: userId,
+			fieldName,
+			fieldType,
+		});
+
+		await newField.save();
+
+		res.status(201).json({
+			success: true,
+			message: "Custom field created successfully",
+			field: newField,
+		});
+	} catch (error) {
+		console.error(error);
+		res.status(500).json({
+			success: false,
+			message: "Error creating custom field",
+		});
+	}
+};
+
+export const deleteCustomField = async (req, res) => {
+	try {
+		const userId = req.session.user.id;
+		const fieldId = req.params.id;
+
+		const field = await CustomField.findOneAndDelete({
+			_id: fieldId,
+			owner: userId,
+		});
+
+		if (!field) {
+			return res.status(404).json({
+				success: false,
+				message: "Custom field not found",
+			});
+		}
+
+		res.json({
+			success: true,
+			message: "Custom field deleted successfully",
+		});
+	} catch (error) {
+		console.error(error);
+		res.status(500).json({
+			success: false,
+			message: "Error deleting custom field",
 		});
 	}
 };
@@ -263,23 +347,26 @@ export const updateContactListName = async (req, res) => {
 
 export const getList = async (req, res) => {
 	try {
-		// Get the authenticated user's ID from the session
-		const userId = req.session.user.id; // Assuming req.session.user contains authenticated user data
+		const userId = req.session.user.id;
+		const page = parseInt(req.query.page) || 1;
+		const limit = 6; // Adjust the limit as needed
+		const skip = (page - 1) * limit;
 
-		// Fetch the user's contact lists
-		let contactLists = await ContactList.find({ owner: userId });
-		// console.log(contactLists);
-		if (!contactLists.length) {
-			res.render("Contact-List/contact-list", {
-				countries: countries,
-				contacts: [],
-			});
-		} else {
-			res.render("Contact-List/contact-list", {
-				countries: countries,
-				contacts: contactLists,
-			});
-		}
+		const totalContactLists = await ContactList.countDocuments({
+			owner: userId,
+		});
+		const contactLists = await ContactList.find({ owner: userId })
+			.skip(skip)
+			.limit(limit);
+
+		const totalPages = Math.ceil(totalContactLists / limit);
+
+		res.render("Contact-List/contact-list", {
+			countries: countries,
+			contacts: contactLists,
+			page,
+			totalPages,
+		});
 	} catch (error) {
 		console.error(error);
 		res.status(500).json({
@@ -309,5 +396,21 @@ export const getCampaignContacts = async (req, res) => {
 		res.json(contacts);
 	} catch (error) {
 		res.status(500).json({ error: error.message });
+	}
+};
+
+export const searchContactLists = async (req, res) => {
+	const { query } = req.query;
+
+	try {
+		// Perform a case-insensitive search on the contact list name
+		const contacts = await ContactList.find({
+			ContactListName: { $regex: query, $options: "i" },
+		});
+
+		res.json({ contacts });
+	} catch (error) {
+		console.error("Error fetching contact lists:", error);
+		res.status(500).json({ message: "Error fetching contact lists" });
 	}
 };

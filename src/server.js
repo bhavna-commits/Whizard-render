@@ -1,10 +1,9 @@
-import app from "./app.js";
+import app from "./routes.app.js";
 import { connectDB } from "./config/db.js";
 import dotenv from "dotenv";
 
-dotenv.config(); // Load environment variables
+dotenv.config(); 
 
-// Connect to MongoDB
 connectDB();
 
 // Define the port

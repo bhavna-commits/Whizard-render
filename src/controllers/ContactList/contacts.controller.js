@@ -41,24 +41,26 @@ export const updateContact = async (req, res) => {
 export const getContacts = async (req, res) => {
 	try {
 		const id = req.params.id;
+		const page = parseInt(req.query.page) || 1;
+		const limit = 6;
+		const skip = (page - 1) * limit;
 
-		let contactLists = await Contacts.find({ contactList: id });
-		let name = await ContactList.findById(id);
-		name = name.ContactListName;
-		// console.log(name);
-		if (!contactLists.length) {
-			res.render("Contact-List/contactList-overview", {
-				// countries: countries,
-				name: name,
-				contacts: [],
-			});
-		} else {
-			res.render("Contact-List/contactList-overview", {
-				// countries: countries,
-				name: name,
-				contacts: contactLists,
-			});
-		}
+		const totalContacts = await Contacts.countDocuments({
+			contactList: id,
+		});
+		const contactLists = await Contacts.find({ contactList: id })
+			.skip(skip)
+			.limit(limit);
+
+		const name = (await ContactList.findById(id)).ContactListName;
+		const totalPages = Math.ceil(totalContacts / limit);
+
+		res.render("Contact-List/contactList-overview", {
+			name: name,
+			contacts: contactLists,
+			page,
+			totalPages,
+		});
 	} catch (error) {
 		console.error(error);
 		res.status(500).json({
@@ -67,37 +69,6 @@ export const getContacts = async (req, res) => {
 		});
 	}
 };
-
-// Controller to delete a contact
-// export const deleteContact = async (req, res) => {
-// 	const contactId = req.params.id;
-
-// 	try {
-// 		// Find the contact by ID and delete it
-// 		const deletedContact = await ContactList.findByIdAndDelete(contactId);
-// 		await ContactList.findByIdAndUpdate(contactId, {
-// 			$inc: { participantCount: -1 },
-// 		});
-
-// 		if (!deletedContact) {
-// 			return res.status(404).json({
-// 				success: false,
-// 				message: "Contact not found",
-// 			});
-// 		}
-
-// 		res.json({
-// 			success: true,
-// 			message: "Contact deleted successfully",
-// 		});
-// 	} catch (error) {
-// 		console.error(error);
-// 		res.status(500).json({
-// 			success: false,
-// 			message: "Error deleting contact",
-// 		});
-// 	}
-// };
 
 export const editContact = async (req, res) => {
 	const { id } = req.params;

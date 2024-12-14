@@ -236,28 +236,27 @@ document.addEventListener("DOMContentLoaded", () => {
 				return;
 			}
 
-			let uniqueId = new Date().getTime();
 			websiteBtnCount++;
 
 			// Form for website button
 			let websiteForm = `
-        <div class=" border rounded shadow-sm  action-card mt-3" id="websiteForm_${uniqueId}">
+        <div class=" border rounded shadow-sm  action-card mt-3" id="websiteForm">
             <div class="d-flex justify-evenly items-center">
                 <div class="drag-handle">::</div>
                 <div class="row w-100">
                     <div class="col-4">
                         <label>Button label</label>
-                        <input type="text" class="form-control" id="websiteBtnLabel_${uniqueId}" placeholder="Visit Now">
+                        <input type="text" class="form-control" id="websiteBtnLabel" placeholder="Visit Now">
                     </div>
                     
                     <div class="col-4">
                         <label>Website URL</label>
-                        <input type="url" class="form-control" id="websiteUrl_${uniqueId}" placeholder="example.com">
+                        <input type="url" class="form-control" id="websiteUrl" placeholder="example.com">
                     </div>
                     
                 </div>
                 <div class="col-1 close-icon">
-                    <span class="remove-btn" data-id="websiteForm_${uniqueId}">&times;</span>
+                    <span class="remove-btn" data-id="websiteForm">&times;</span>
                 </div>
             </div>
         </div>
@@ -265,27 +264,28 @@ document.addEventListener("DOMContentLoaded", () => {
 			document.getElementById("buttonOptions").innerHTML += websiteForm;
 
 			// Immediately add to preview
-			generatePreviewWebsite(uniqueId);
+			generatePreviewWebsite();
 
 			// Add event listeners to update the preview in real-time
 			document
-				.getElementById("websiteBtnLabel_" + uniqueId)
+				.getElementById("websiteBtnLabel")
 				.addEventListener("input", function () {
-					generatePreviewWebsite(uniqueId);
+					generatePreviewWebsite();
 				});
 			document
-				.getElementById("websiteUrl_" + uniqueId)
+				.getElementById("websiteUrl")
 				.addEventListener("input", function () {
-					generatePreviewWebsite(uniqueId);
+					generatePreviewWebsite();
 				});
 
 			// Delete button and its preview on close icon click
 			document
-				.querySelector(`.remove-btn[data-id="websiteForm_${uniqueId}"]`)
+				.querySelector(`.remove-btn[data-id="websiteForm"]`)
 				.addEventListener("click", function () {
 					// Remove the form and its preview
-					document.getElementById("websiteForm_" + uniqueId).remove();
-					document.getElementById("websiteBtn_" + uniqueId).remove();
+					console.log("website remove");
+					document.getElementById("websiteForm").remove();
+					document.getElementById("websiteBtn").remove();
 					websiteBtnCount--;
 				});
 		});
@@ -304,23 +304,23 @@ document.addEventListener("DOMContentLoaded", () => {
 
 			// Form for call button
 			let callForm = `
-        <div class=" border rounded shadow-sm action-card mt-3 mb-10" id="callForm_${uniqueId}">
+        <div class=" border rounded shadow-sm action-card mt-3 mb-10" id="callForm">
             <div class="d-flex justify-evenly items-center">
                 <div class="drag-handle">::</div>
                 <div class="row w-100">
                     <div class="col-4">
                         <label>Button label</label>
-                        <input type="text" class="form-control" id="callBtnLabel_${uniqueId}" placeholder="Call Now">
+                        <input type="text" class="form-control" id="callBtnLabel" placeholder="Call Now">
                     </div>
                      
                     <div class="col-4">
                         <label>Phone Number</label>
-                        <input type="tel" maxlength="10" class="form-control" id="phoneNumber_${uniqueId}" placeholder="9999999999">
+                        <input type="tel" maxlength="10" class="form-control" id="phoneNumber" placeholder="9999999999">
                     </div>
                     
                 </div>
                 <div class="col-1 close-icon">
-                    <span class="remove-btn" data-id="callForm_${uniqueId}">&times;</span>
+                    <span class="remove-btn" data-id="callForm">&times;</span>
                 </div>
             </div>
         </div>
@@ -330,39 +330,40 @@ document.addEventListener("DOMContentLoaded", () => {
 			generatePreviewCall(uniqueId);
 
 			document
-				.getElementById("callBtnLabel_" + uniqueId)
+				.getElementById("callBtnLabel")
 				.addEventListener("input", function () {
 					generatePreviewCall(uniqueId);
 				});
 			document
-				.getElementById("phoneNumber_" + uniqueId)
+				.getElementById("phoneNumber")
 				.addEventListener("input", function () {
 					generatePreviewCall(uniqueId);
 				});
 
 			document
-				.querySelector(`.remove-btn[data-id="callForm_${uniqueId}"]`)
+				.querySelector(`.remove-btn[data-id="callForm"]`)
 				.addEventListener("click", function () {
-					document.getElementById("callForm_" + uniqueId).remove();
-					document.getElementById("callBtn_" + uniqueId).remove();
+					console.log("call remove");
+					document.getElementById("callForm").remove();
+					document.getElementById("callBtn").remove();
 					callBtnCount--;
 				});
 		});
 
 	// Generate Website Button Preview with FA icon
-	function generatePreviewWebsite(id) {
+	function generatePreviewWebsite(id) {	
 		let label =
-			document.getElementById("websiteBtnLabel_" + id).value ||
+			document.getElementById("websiteBtnLabel").value ||
 			"Visit Now";
-		let url = document.getElementById("websiteUrl_" + id).value || "#";
+		let url = document.getElementById("websiteUrl").value || "#";
 
 		let preview = `
-        <button class="btn  btn-secondary me-2" id="websiteBtn_${id}" onclick="window.open('${url}', '_blank')" style="color: #6A67FF;">
+        <button class="btn  btn-secondary me-2" id="websiteBtn" onclick="window.open('${url}', '_blank')" style="color: #6A67FF;">
             <i class="fa fa-external-link mx-2"></i>${label}
         </button>
     `;
 
-		let existingBtn = document.getElementById("websiteBtn_" + id);
+		let existingBtn = document.getElementById("websiteBtn");
 		if (existingBtn) {
 			existingBtn.outerHTML = preview;
 		} else {
@@ -371,18 +372,18 @@ document.addEventListener("DOMContentLoaded", () => {
 	}
 
 	// Generate Call Button Preview with FA icon
-	function generatePreviewCall(id) {
+	function generatePreviewCall() {
 		let label =
-			document.getElementById("callBtnLabel_" + id).value || "Call Now";
-		let phone = document.getElementById("phoneNumber_" + id).value || "#";
+			document.getElementById("callBtnLabel").value || "Call Now";
+		let phone = document.getElementById("phoneNumber").value || "#";
 
 		let preview = `
-        <button class="btn btn-secondary me-2" id="callBtn_${id}" onclick="window.location.href='tel:${phone}'" style="color: #6A67FF;">
+        <button class="btn btn-secondary me-2" id="callBtn" onclick="window.location.href='tel:${phone}'" style="color: #6A67FF;">
             <i class="fa fa-phone mx-2"></i>${label}
         </button>
     `;
 
-		let existingBtn = document.getElementById("callBtn_" + id);
+		let existingBtn = document.getElementById("callBtn");
 		if (existingBtn) {
 			existingBtn.outerHTML = preview;
 		} else {
@@ -392,13 +393,13 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function formatText(command, button) {
-	document.getElementById("bodyInput").focus();
+	document.getElementById("editor").focus(); // Ensure the text area is focused
 
-	document.execCommand(command, false, null);
+	document.execCommand(command, false, null); // Apply the command
 
-	toggleActiveButton(button);
+	toggleActiveButton(button); // Toggle button active state
 
-	updatePreview();
+	updatePreview(); // Call to preview if needed
 }
 
 function toggleActiveButton(button) {
@@ -408,6 +409,12 @@ function toggleActiveButton(button) {
 		button.classList.add("active");
 	}
 }
+
+function updatePreview() {
+	// Implement a preview update if you want a live preview of formatted text
+	// For now, this function can be empty
+}
+
 
 function insertEmoji(emoji) {
 	insertAtCaret("bodyInput", emoji);

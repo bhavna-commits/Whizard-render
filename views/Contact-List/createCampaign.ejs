@@ -49,7 +49,7 @@
 						Contact List</a>
 				</li>
 				<li>
-					<a href="/template"><span class="icon "><i class="fa-regular fa-envelope-open"></i></span>
+					<a href="/template"><span class="icon "><i class="fa-regular fa-envelope"></i></span>
 						Template</a>
 				</li>
 				<li>
@@ -71,18 +71,29 @@
 		<div class="main-content">
 			<!-- END HEADER -->
 			<div class="logo flex justify-between items-center">
-				<div class="pb-2" data-pages="parallax">
+				<div class="mb-2">
 					<!-- START BREADCRUMB -->
-					<ol class="flex">
-						<li class="breadcrumb-item">
-							<a href="/" class="text-red-600 text-base">Dashboard</a>
-						</li>
-						<li class="breadcrumb-item active">
-							<a href="/contact-list" class="text-red-600 text-base">Contact List</a>
-						</li>
-					</ol>
+					<nav class="flex" aria-label="Breadcrumb">
+						
+						<div class="flex items-center">
+							<a href="/" class="text-gray-500 hover:text-gray-700 text-base font-medium">Dashboard</a>
+							<svg class="w-4 h-4 mx-2 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+								<path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L11.586 10 7.293 5.707a1 1 0 011.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+							</svg>
+						</div>
+						
+						<div class="flex items-center">
+							<a href="/contact-list" class="text-gray-500 hover:text-gray-700 text-base font-medium">Contact List</a>
+							<svg class="w-4 h-4 mx-2 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+								<path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L11.586 10 7.293 5.707a1 1 0 011.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+							</svg>
+						</div>
+						
+						<a href="#" class="text-red-600 text-base font-medium">Create Campaign</a>
+						
+					</nav>
+					<!-- END BREADCRUMB -->
 				</div>
-				<!-- END BREADCRUMB -->
 			</div>
 			<div class="w-full">
 				<div class="flex w-full bg-gray-50">
