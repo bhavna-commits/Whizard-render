@@ -2,7 +2,7 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 
-// Set up storage and file filter
+// Set up storage for general files
 const storage = multer.diskStorage({
 	destination: (req, file, cb) => {
 		const userFolder = path.join("uploads", req.session.user.id);
@@ -19,8 +19,30 @@ const storage = multer.diskStorage({
 	},
 });
 
+// Set up storage for profile pictures (DP)
+const profileStorage = multer.diskStorage({
+	destination: (req, file, cb) => {
+		const profileFolder = path.join(
+			"uploads",
+			req.session.user.id,
+			"profile",
+		);
+
+		// Check if the folder exists, if not, create it
+		if (!fs.existsSync(profileFolder)) {
+			fs.mkdirSync(profileFolder, { recursive: true });
+		}
+
+		cb(null, profileFolder);
+	},
+	filename: (req, file, cb) => {
+		// Save the file with a static name (e.g., 'profile-picture') to ensure a single profile picture per user
+		cb(null, "profile-picture" + path.extname(file.originalname));
+	},
+});
+
+// File filter for general files (images, videos, docs)
 const fileFilter = (req, file, cb) => {
-	// Validate file types (example: accept images and videos)
 	const allowedTypes = [
 		// Images
 		"image/jpeg",
@@ -31,18 +53,18 @@ const fileFilter = (req, file, cb) => {
 		"image/svg+xml",
 		// Videos
 		"video/mp4",
-		"video/x-msvideo", // avi
-		"video/x-matroska", // mkv
-		"video/quicktime", // mov
+		"video/x-msvideo",
+		"video/x-matroska",
+		"video/quicktime",
 		"video/webm",
 		"video/ogg",
 		// Documents
-		"application/pdf", // PDF
-		"text/csv", // CSV
-		"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", // XLSX
-		"application/vnd.ms-excel", // XLS
-		"application/vnd.openxmlformats-officedocument.wordprocessingml.document", // DOCX
-		"application/msword", // DOC
+		"application/pdf",
+		"text/csv",
+		"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+		"application/vnd.ms-excel",
+		"application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+		"application/msword",
 	];
 	if (allowedTypes.includes(file.mimetype)) {
 		cb(null, true);
@@ -51,11 +73,35 @@ const fileFilter = (req, file, cb) => {
 	}
 };
 
-// Multer upload configuration
+// File filter for profile pictures (images only)
+const profileFileFilter = (req, file, cb) => {
+	const allowedTypes = [
+		"image/jpeg",
+		"image/png",
+		"image/gif",
+		"image/bmp",
+		"image/webp",
+		"image/svg+xml",
+	];
+	if (allowedTypes.includes(file.mimetype)) {
+		cb(null, true);
+	} else {
+		cb(new Error("Invalid file type for profile picture"), false);
+	}
+};
+
+// General upload configuration (for documents, videos, etc.)
 const upload = multer({
 	storage,
 	fileFilter,
-	limits: { fileSize: 10 * 1024 * 1024 }, // Limit to 10MB
+	limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
 });
 
-export default upload;
+// Profile picture upload configuration (images only, smaller size)
+const uploadProfilePicture = multer({
+	storage: profileStorage,
+	fileFilter: profileFileFilter,
+	limits: { fileSize: 100 * 1024 }, // 2MB limit for profile pictures
+});
+
+export { upload, uploadProfilePicture };

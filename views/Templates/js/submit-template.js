@@ -10,6 +10,7 @@ async function submit() {
 	try {
 		const templateData = collectTemplateData();
 		console.log(templateData);
+		if (!templateData) return;
 		// Validate curly braces in header, body, and footer
 		let headerValidation = { isValid: true, error: null, numbers: [] };
 
@@ -52,8 +53,7 @@ async function submit() {
 		if (templateData.header.content instanceof File) {
 			formData.append("headerFile", templateData.header.content);
 		}
-		console.log("FormData:", Array.from(formData.entries())); // Log all formData entries as an array
-		// Submit to API
+		console.log("FormData:", Array.from(formData.entries()));
 		const response = await fetch("/api/templates/createTemplate", {
 			method: "POST",
 			body: formData,
@@ -65,29 +65,28 @@ async function submit() {
 
 		// Assuming the response contains templateData
 		if (responseData.templateData) {
-			// Set the modal data dynamically based on the response
-			const previewContainer =
-				document.getElementById("previewContainer");
 			const previewHead = document.getElementById("previewHead");
 			previewHead.innerHTML = "";
 			const templateData = responseData.templateData;
 			// Check if the header content is of type "media"
 			const header = templateData.header;
-			if (header.type === "text") {
+			if (header?.type === "text") {
 				// Display text preview
 				previewHead.textContent =
 					header.content || "Header Text Preview";
-			} else if (header.type === "media" && header.content) {
-				// Handle media content (image, video, document)
+			} else if (header?.type === "media" && header.content) {
 				if (
-					header.content.includes(".jpg") ||
-					header.content.includes(".png")
+					header?.content.includes(".jpg") ||
+					header?.content.includes(".png") ||
+					header?.content.includes(".jpeg") ||
+					header?.content.includes(".webp")
 				) {
 					// Image preview
 					const img = document.createElement("img");
 					img.src = `/uploads/${templateData.owner}/${header.content}`;
+					console.log(img.src);
 					img.style.width = "200px";
-					img.style.height = "200px";
+					img.style.height = "100px";
 					previewHead.appendChild(img);
 				} else if (header.content.includes(".mp4")) {
 					// Video preview
@@ -95,14 +94,14 @@ async function submit() {
 					video.src = `/uploads/${templateData.owner}/${header.content}`;
 					video.controls = true;
 					video.style.width = "200px";
-					video.style.height = "200px";
+					video.style.height = "100px";
 					previewHead.appendChild(video);
-				} else if (header.content.includes(".pdf")) {
+				} else if (header?.content.includes(".pdf")) {
 					// Document preview (PDF)
 					const iframe = document.createElement("iframe");
 					iframe.src = `/uploads/${templateData.owner}/${header.content}`;
 					iframe.style.width = "200px";
-					iframe.style.height = "200px";
+					iframe.style.height = "100px";
 					previewHead.appendChild(iframe);
 				} else {
 					// For other document types (e.g., DOCX, CSV), just display the file name
@@ -113,31 +112,25 @@ async function submit() {
 
 			const modalTitle = document.getElementById("templateModalLabel");
 			const previewForm = document.getElementById("previewForm");
-			const previewHeader = document.getElementById("previewHead");
-			console.log(previewHeader);
 			const previewBody = document.getElementById("previewBod");
-			console.log(previewBody.value);
+			console.log(previewBody);
 			const previewFooter = document.getElementById("previewFoot");
 
-			// Set the modal title
 			modalTitle.innerHTML = responseData.templateData.templateName;
 
-			// Populate the dynamic variables form
 			previewForm.innerHTML = responseData.templateData.dynamicVariables
 				.map(
 					(variable) => `
-        <div class="form-group py-1">
-            <label class="font-semibold">Choose Attributes for ${variable}</label>
-            <input type="text" class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm" placeholder="Enter ${variable}">
-        </div>
-    `,
+        				<div class="form-group py-1">
+            				<label class="font-semibold">Choose Attributes for ${variable}</label>
+            				<input type="text" class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm" placeholder="Enter ${variable}">
+        				</div>`,
 				)
 				.join("");
 
-			// Update the iPhone preview sections
 			if (responseData.templateData.header) {
 				if (responseData.templateData.header.type === "text") {
-					previewHeader.innerHTML =
+					previewHead.innerHTML =
 						responseData.templateData.header.content.replace(
 							/(\r\n|\n|\r)/g,
 							"<br>",
@@ -150,7 +143,7 @@ async function submit() {
 				"<br>",
 			);
 			console.log(previewBody.innerHTML);
-			previewFooter.innerHTML = `<small class="text-muted leading-6">${responseData.templateData.footer.replace(
+			previewFooter.innerHTML = `<small class="text-muted leading-3">${responseData.templateData.footer.replace(
 				/(\r\n|\n|\r)/g,
 				"<br>",
 			)}</small>`;
@@ -178,7 +171,7 @@ function generatePreviewWebsite(templateData) {
 	let label = url.length > 0 && url[0].text ? url[0].text : "Visit Now";
 
 	let preview = `
-        <button class="btn  btn-secondary me-2" id="websiteBtn" onclick="window.open('${url.urlPhone}', '_blank')" style="color: #6A67FF;">
+        <button class="btn  btn-secondary me-2" id="websiteBt" onclick="window.open('${url.urlPhone}', '_blank')" style="color: #6A67FF;">
             <i class="fa fa-external-link mx-2"></i>${label}
         </button>
     `;
@@ -200,7 +193,7 @@ function generatePreviewCall(templateData) {
 	let label = url.length > 0 && url[0].text ? url[0].text : "Call Now";
 
 	let preview = `
-        <button class="btn btn-secondary me-2" id="callBtn" onclick="window.location.href='tel:${phone}'" style="color: #6A67FF;">
+        <button class="btn btn-secondary me-2" id="callBt" onclick="window.location.href='tel:${phone}'" style="color: #6A67FF;">
             <i class="fa fa-phone mx-2"></i>${label}
         </button>
     `;
@@ -300,7 +293,7 @@ function collectTemplateData() {
 
 	// Helper function to display error messages
 	function showError(message) {
-		alert(message); // Can be replaced with better UI error display, such as showing in the DOM
+		alert(message);
 		return false;
 	}
 

@@ -34,7 +34,6 @@ async function fetchEmojis() {
 		const response = await fetch(BASE_URL);
 		const emojis = await response.json();
 
-		// Once the emojis are fetched, display them
 		return emojis;
 	} catch (error) {
 		console.error("Error fetching emojis:", error);
@@ -42,46 +41,65 @@ async function fetchEmojis() {
 	}
 }
 
-// Function to display emojis in the emojiList div
-// Function to display emojis in the emojiList div
 function displayEmojis(emojis) {
 	const emojiList = document.getElementById("emojiList");
-	emojiList.innerHTML = ""; // Clear any previous emojis
+	emojiList.innerHTML = "";
 
 	emojis.forEach((emoji) => {
 		const emojiItem = document.createElement("div");
 		emojiItem.classList.add("text-2xl", "cursor-pointer", "z-10");
 		emojiItem.textContent = emoji.character;
 
-		// Handle emoji click to insert emoji at the cursor position in the contenteditable div
 		emojiItem.addEventListener("click", () => {
-			insertEmojiAtCursor(emoji.character); // Insert emoji at cursor
+			insertEmojiAtCursor(emoji.character);
 		});
 
 		emojiList.appendChild(emojiItem);
 	});
 }
 
-// Function to insert the emoji at the current cursor position in the contenteditable div
 function insertEmojiAtCursor(emoji) {
 	const bodyInput = document.getElementById("bodyInput");
+	bodyInput.focus(); // Focus on the contenteditable div
 
-	// Insert the emoji at the end of the content
-	bodyInput.textContent = bodyInput.textContent + emoji;
-
-	// Focus the bodyInput to bring the cursor back
-	bodyInput.focus();
-
-	// Move the cursor to the end of the content
-	const range = document.createRange();
 	const selection = window.getSelection();
 
-	range.selectNodeContents(bodyInput); // Select all content in bodyInput
-	range.collapse(false); // Collapse the range to the end (false = end)
+	// Ensure there is a valid selection
+	if (!selection.rangeCount) return;
 
-	selection.removeAllRanges(); // Clear any existing selection ranges
-	selection.addRange(range); // Add the new range with the cursor at the end
+	const range = selection.getRangeAt(0);
+
+	// If selection is collapsed (no text selected, just a cursor)
+	if (range.collapsed) {
+		const emojiNode = document.createTextNode(emoji); // Create emoji text node
+
+		// Insert the emoji at the current position (cursor)
+		range.insertNode(emojiNode);
+
+		// Move the cursor right after the emoji
+		range.setStartAfter(emojiNode);
+		range.setEndAfter(emojiNode);
+
+		// Update the selection to reflect the new range
+		selection.removeAllRanges();
+		selection.addRange(range);
+	} else {
+		// Handle the case where text is selected (to replace selected text with emoji)
+		range.deleteContents(); // Delete the selected content
+		const emojiNode = document.createTextNode(emoji); // Create emoji text node
+		range.insertNode(emojiNode); // Insert the emoji at the selection position
+
+		// Move the cursor after the inserted emoji
+		range.setStartAfter(emojiNode);
+		range.setEndAfter(emojiNode);
+
+		// Update the selection to reflect the new range
+		selection.removeAllRanges();
+		selection.addRange(range);
+	}
 }
+
+
 
 // Search input for filtering emojis
 document.getElementById("emojiSearch").addEventListener("input", async (e) => {
@@ -134,22 +152,23 @@ document.addEventListener("click", (event) => {
 
 function addBrackets() {
 	const bodyInput = document.getElementById("bodyInput");
-
-	// Insert the brackets at the end of the content
-	bodyInput.textContent = bodyInput.textContent + "{}";
-
-	// Focus the bodyInput to bring the cursor back
 	bodyInput.focus();
 
-	// Move the cursor inside the curly brackets
-	const range = document.createRange();
+	// Create a range object for the current selection
+	const range = document.getSelection().getRangeAt(0);
+
+	// Create a document fragment to hold the brackets
+	const bracketText = document.createTextNode("{}");
+
+	// Insert the brackets at the current caret position
+	range.insertNode(bracketText);
+
+	// Adjust the range to place the cursor between the brackets
+	range.setStart(bracketText, 1); // Move to between the {}
+	range.setEnd(bracketText, 1); // Collapse the range so it's a caret
+
+	// Apply the new selection range
 	const selection = window.getSelection();
-
-	// Select the contents of bodyInput
-	range.setStart(bodyInput.firstChild, bodyInput.textContent.length - 1); // Place the cursor between {}
-	range.setEnd(bodyInput.firstChild, bodyInput.textContent.length - 1); // Ensure it's a collapsed range
-
-	selection.removeAllRanges(); // Clear any existing selection ranges
-	selection.addRange(range); // Apply the new range
+	selection.removeAllRanges();
+	selection.addRange(range);
 }
-

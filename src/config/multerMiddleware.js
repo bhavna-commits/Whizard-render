@@ -1,12 +1,21 @@
-import upload from "./multerUpload.js";
+import { upload, uploadProfilePicture } from "./multerUpload.js";
 
-const multerMiddle = (req, res, next) => {
+export const multerMiddle = (req, res, next) => {
 	upload.single("headerFile")(req, res, (err) => {
 		if (err) {
 			return res.status(400).json({ error: err.message });
 		}
-		next(); 
+		next();
 	});
 };
 
-export default multerMiddle;
+export const uploadProfilePicController = (req, res, next) => {
+	uploadProfilePicture.single("profilePic")(req, res, (err) => {
+		if (err) {
+			return res
+				.status(400)
+				.json({ success: false, message: err.message });
+		}
+		next();
+	});
+};

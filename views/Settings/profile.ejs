@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+	<meta charset="utf-8" />
+	<title>Pages - Admin Dashboard UI Kit - Blank Page</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no" />
+	<link rel="apple-touch-icon" href="pages/ico/60.png" />
+	<link rel="apple-touch-icon" sizes="76x76" href="pages/ico/76.png" />
+	<link rel="apple-touch-icon" sizes="120x120" href="pages/ico/120.png" />
+	<link rel="apple-touch-icon" sizes="152x152" href="pages/ico/152.png" />
+	<link rel="icon" type="image/x-icon" href="favicon.ico" />
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+	<meta name="apple-touch-fullscreen" content="yes" />
+	<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+	<meta content="Meet pages - The simplest and fastest way to build web UI for your dashboard or app." name="description" />
+	<meta content="Ace" name="author" />
+	<link href="assets/plugins/pace/pace-theme-flash.css" rel="stylesheet" type="text/css" />
+	<link href="assets/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+	<!-- <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" /> -->
+	<link href="assets/plugins/jquery-scrollbar/jquery.scrollbar.css" rel="stylesheet" type="text/css" media="screen" />
+	<link href="assets/plugins/select2/css/select2.min.css" rel="stylesheet" type="text/css" media="screen" />
+	<!-- <link class="main-stylesheet" href="pages/css/themes/corporate.css" rel="stylesheet" type="text/css" /> -->
+	<!-- Please remove the file below for production: Contains demo classes -->
+	<link class="main-stylesheet" href="assets/css/style.css" rel="stylesheet" type="text/css" />
+	<link rel="preconnect" href="https://fonts.googleapis.com" />
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+	<link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet" />
+	<script src="https://viralpitch.co/insights/app/js/apexcharts-bundle/dist/apexcharts.js"></script>
+	<link rel="stylesheet" href="styles/template.css" />
+	<link rel="stylesheet" href="https://viralpitch.co/insights/app/js/apexcharts-bundle/dist/apexcharts.css" />
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+	<link href="styles/style.css" rel="stylesheet" type="text/css" />
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+	<script src="https://cdn.tailwindcss.com"></script>
+	<link rel="stylesheet" type="text/css" href="styles/template-preview.css" />
+</head>
+
+<body>
+	<div class="layout-container">
+		<nav class="sidebar">
+			<div class="logo pb-2">
+				<img src="/assets/img/Wizard_logo.png" alt="Whizard Logo" />
+			</div>
+			<ul class="pt-3">
+				<li>
+					<a href="/" class=""><span class="icon"><i class="fas fa-chart-line"></i></span>
+						Dashboard</a>
+				</li>
+				<li class="py-1">
+					<a href="/chats"><span class="icon"><i class="fa-regular fa-comment"></i></span>
+						Chats</a>
+				</li>
+				<li class="py-1">
+					<a href="/contact-list"><span class="icon "><i class="fa-regular fa-address-book"></i></span>
+						
+						Contact List</a>
+				</li>
+				<li class="py-1">
+					<a href="/template"><span class="icon "><i class="fa-regular fa-envelope"></i></span>
+						Template</a>
+				</li>
+				<li class="py-1">
+					<a href="/settings"><span class="icon active"><i class="fa-regular fa-user"></i></span>
+						Settings</a>
+				</li>
+				<li class="py-1">
+					<a><span class="icon"><i class="fa-regular fa-chart-bar"></i></span>
+						Reports</a>
+				</li>
+			</ul>
+			<div class="user-profile">
+				<img src="https://via.placeholder.com/50" alt="User Profile" />
+			</div>
+		</nav>
+		<!-- END SIDEBAR MENU TOP TRAY CONTENT-->
+		
+		<!-- START PAGE-CONTAINER -->
+		<div class="main-content  p-2">
+			<!-- END HEADER -->
+			<div class="logo flex justify-between items-center">
+				<div class="">
+					<!-- START BREADCRUMB -->
+					<nav class="flex px-3  mt-2" aria-label="Breadcrumb">
+						
+						<div class="flex items-center">
+							<a href="/settings" class="text-gray-500 hover:text-gray-700 text-lg font-medium">Settings</a>
+							<svg class="w-4 h-4 mx-2 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+								<path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L11.586 10 7.293 5.707a1 1 0 011.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+							</svg>
+						</div>
+						
+						<div class="flex items-center">
+							<a href="/contact-list" class="text-gray-500 hover:text-gray-700 text-lg font-medium">Contact List</a>
+							
+						</div>
+						
+					</nav>
+					<!-- END BREADCRUMB -->
+				</div>
+			</div>
+			<div class="max-w-5xl mx-auto bg-white p-8 ">
+				<h1 class="text-2xl font-bold mb-4">Personal Profile</h1>
+				
+				<form id="profileForm" class="space-y-6 border rounded-lg p-5" enctype="multipart/form-data">
+					<!-- Profile Image Section -->
+					<div class="flex items-center justify-between space-x-4">
+						<!-- Profile Picture -->
+						<div class="space-y-1">
+							<label class="text-gray-600 text-2xl block">Profile Image</label>
+							
+							<p class="text-sm text-gray-500">Image should be less than 100KB</p>
+						</div>
+						<div class="flex items-center justify-center">
+							<div class="w-20 h-20 rounded-full bg-blue-600 text-white flex items-center justify-center  text-xl font-semibold mr-3">
+								<% if (user.profilePhoto) { %>
+								<img src="<%= user.profilePhoto %>" class="w-full h-full object-contain" />
+								<% } else { %>
+								<%= user.name.charAt(0) %>
+								<% } %>
+							</div>
+							<input type="file" name="profilePhoto" id="profilePhoto" accept="image/*" class="bg-gray-100 p-2 rounded border">
+						</div>
+						
+						
+					</div>
+					
+					<!-- Name Field -->
+					<div class="flex justify-between items-center">
+						<label class=" text-gray-600">Name</label>
+						<input type="text" name="name" value="<%= user.name %>" class="w-3/5 p-3 border rounded-lg bg-gray-50">
+					</div>
+					
+					<!-- Email Field -->
+					<div class="flex justify-between items-center">
+						<label class=" text-gray-600">Email</label>
+						<input type="email" name="email" value="<%= user.email %>" class="w-3/5 p-3 border rounded-lg bg-gray-50" disabled>
+					</div>
+					
+					<!-- Role Field (Disabled) -->
+					<div class="flex justify-between items-center">
+						<label class=" text-gray-600">Role</label>
+						<input type="text" name="role" value="<%= user.role %>" class="w-3/5 p-3 border rounded-lg bg-gray-50" disabled>
+					</div>
+					
+					<!-- Language Dropdown -->
+					<div class="flex justify-between items-center">
+						<label class=" text-gray-600">Language</label>
+						<select name="language" class="w-3/5 p-3 border rounded-lg bg-gray-50">
+							<% languages.forEach(function(lang) { %>
+							<option value="<%= lang %>" <%= language === lang ? 'selected' : '' %>>
+								<%= lang %>
+							</option>
+							<% }); %>
+						</select>
+
+					</div>
+					
+					<!-- Password Field -->
+					<div class="flex justify-between items-center">
+						<label class=" text-gray-600">Password</label>
+						<input type="password" name="password" value="<%= user.password %>" class="w-3/5 p-3 border rounded-lg bg-gray-50">
+					</div>
+					
+					<!-- Action Buttons -->
+					<div class="flex justify-between">
+						<a href="/settings" class="text-gray-500 hover:underline">Cancel</a>
+						<button type="submit" class="bg-black text-white py-2 px-4 rounded-lg">Save changes</button>
+					</div>
+				</form>
+				
+				<!-- Success/Error Message Display -->
+				<div id="message" class="mt-4"></div>
+			</div>
+		</div>
+	</div>
+	<script>
+		document.getElementById('profileForm').addEventListener('submit', async function (event) {
+			event.preventDefault(); // Prevent the form from submitting normally
+			
+			// Gather form data
+			const formData = new FormData();
+			formData.append('profilePhoto', document.getElementById('profilePhoto').files[0]);
+			formData.append('name', document.querySelector('input[name="name"]').value);
+			formData.append('language', document.querySelector('select[name="language"]').value);
+			formData.append('password', document.querySelector('input[name="password"]').value);
+			
+			try {
+				// Send the form data via Axios
+				const response = await axios.post('/settings/profile', formData, {
+					headers: {
+						'Content-Type': 'multipart/form-data',
+					}
+				});
+				
+				// Handle success response
+				if (response.status === 200) {
+					document.getElementById('message').innerHTML = `<p class="text-green-500">Profile updated successfully!</p>`;
+				}
+			} catch (error) {
+				// Handle error response
+				document.getElementById('message').innerHTML = `<p class="text-red-500">Error updating profile: ${error.response.data.message || 'An error occurred'}</p>`;
+			}
+		});
+	</script>
+</body>
+
+</html>

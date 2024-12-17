@@ -1,5 +1,12 @@
 document.addEventListener("DOMContentLoaded", () => {
-	// Toggle the emoji container on button click
+	document
+		.getElementById("bodyInput")
+		.addEventListener("keypress", function (event) {
+			if (event.key === "Enter") {
+				document.execCommand("formatBlock", false, "p");
+				document.execCommand("fontSize", false, "2");
+			}
+		});
 
 	document.querySelectorAll(".custom-dropdown-toggle").forEach((button) => {
 		button.addEventListener("click", function () {
@@ -24,11 +31,15 @@ document.addEventListener("DOMContentLoaded", () => {
 			const selectedValue = e.target.value;
 			const previewHeader = document.getElementById("previewHeader");
 
-			// Reset preview content
+			// Reset preview content and alignment
 			previewHeader.innerHTML = "";
+			previewHeader.style.textAlign = "left";
+			previewHeader.style.display = "block";
+			previewHeader.style.justifyContent = "flex-start";
+			previewHeader.style.alignItems = "flex-start";
 
 			if (selectedValue === "text") {
-				// Show the text input for the header
+				// Set text alignment to left for text content
 				previewHeader.textContent = "Header Text Preview";
 				document
 					.getElementById("headerInput")
@@ -37,35 +48,35 @@ document.addEventListener("DOMContentLoaded", () => {
 							e.target.value || "Header Text Preview";
 					});
 			} else if (selectedValue === "media") {
+				previewHeader.style.display = "flex";
+				previewHeader.style.justifyContent = "center";
+				previewHeader.style.alignItems = "center";
+
 				const mediaType = document.getElementById("mediaType").value;
 				const fileInput =
 					document.getElementById("file-upload").files[0];
 
 				if (mediaType === "image" && fileInput) {
-					// Create image element for preview
 					const img = document.createElement("img");
 					img.src = URL.createObjectURL(fileInput);
 					img.style.width = "200px";
-					img.style.height = "200px";
+					img.style.height = "100px";
 					previewHeader.appendChild(img);
 				} else if (mediaType === "video" && fileInput) {
-					// Create video element for preview
 					const video = document.createElement("video");
 					video.src = URL.createObjectURL(fileInput);
 					video.controls = true;
 					video.style.width = "200px";
-					video.style.height = "200px";
+					video.style.height = "100px";
 					previewHeader.appendChild(video);
 				} else if (mediaType === "document" && fileInput) {
-					// Show document preview for PDF
 					if (fileInput.type === "application/pdf") {
 						const iframe = document.createElement("iframe");
 						iframe.src = URL.createObjectURL(fileInput);
 						iframe.style.width = "200px";
-						iframe.style.height = "200px";
+						iframe.style.height = "100px";
 						previewHeader.appendChild(iframe);
 					} else {
-						// Display file name for other documents like DOCX, CSV
 						previewHeader.textContent =
 							"Uploaded File: " + fileInput.name;
 					}
@@ -192,7 +203,7 @@ document.addEventListener("DOMContentLoaded", () => {
 		}
 		return false;
 	}
-	
+
 	// Dynamically update allowed file types based on mediaType dropdown
 	document.getElementById("mediaType").addEventListener("change", (e) => {
 		const value = e.target.value;
@@ -218,79 +229,77 @@ document.addEventListener("DOMContentLoaded", () => {
 				this.value.length + "/64";
 		});
 
-	document.getElementById("bodyInput").addEventListener("input", function () {
-		document.getElementById("previewBody").innerHTML = this.innerHTML;
-		document.getElementById("charCount").textContent =
-			this.textContent.length + "/1024";
-	});
+	document
+		.getElementById("bodyInput")
+		.addEventListener("keydown", function (event) {
+			const bodyInput = this;
+
+			if (event.key === "Enter") {
+				event.preventDefault();
+				const selection = window.getSelection();
+				const range = selection.getRangeAt(0);
+				const newLine = document.createElement("div");
+				newLine.classList.add("text-base");
+				newLine.innerHTML = "<br>";
+				// Insert the new line at the cursor position
+				range.deleteContents();
+				range.insertNode(newLine);
+
+				// Move the cursor to the new line
+				const newRange = document.createRange();
+				newRange.setStart(newLine, 0);
+				newRange.setEnd(newLine, 0);
+				selection.removeAllRanges();
+				selection.addRange(newRange);
+			}
+			document
+				.getElementById("bodyInput")
+				.addEventListener("input", function () {
+					document.getElementById("previewBody").innerHTML =
+						this.innerHTML;
+				});
+
+			document.getElementById("charCount").textContent =
+				this.textContent.length + "/1024";
+		});
 
 	let websiteBtnCount = 0;
 	let callBtnCount = 0;
 
-	// Add Website Button
 	document
 		.getElementById("addWebsiteBtn")
 		.addEventListener("click", function () {
 			if (websiteBtnCount >= 1) {
-				alert("You can only add 1 website buttons.");
+				alert("You can only add 1 website button.");
 				return;
 			}
 
+			// Display the website form
+			document.getElementById("websiteForm").style.display = "block";
+			generatePreviewWebsite();
 			websiteBtnCount++;
 
-			// Form for website button
-			let websiteForm = `
-        <div class=" border rounded shadow-sm  action-card mt-3" id="websiteForm">
-            <div class="d-flex justify-evenly items-center">
-                <div class="drag-handle">::</div>
-                <div class="row w-100">
-                    <div class="col-4">
-                        <label>Button label</label>
-                        <input type="text" class="form-control" id="websiteBtnLabel" placeholder="Visit Now">
-                    </div>
-                    
-                    <div class="col-4">
-                        <label>Website URL</label>
-                        <input type="url" class="form-control" id="websiteUrl" placeholder="example.com">
-                    </div>
-                    
-                </div>
-                <div class="col-1 close-icon">
-                    <span class="remove-btn" data-id="websiteForm">&times;</span>
-                </div>
-            </div>
-        </div>
-    `;
-			document.getElementById("buttonOptions").innerHTML += websiteForm;
+			// Add event listener to remove the form on click
+			document
+				.getElementById("closeWebsite")
+				.addEventListener("click", function () {
+					document.getElementById("websiteForm").style.display =
+						"none";
+					websiteBtnCount--;
 
-			// Immediately add to preview
-			generatePreviewWebsite();
+					// Remove the website button from preview
+					removePreviewButton("websiteBtn");
+				});
 
-			// Add event listeners to update the preview in real-time
+			// Add input event listeners for dynamic preview update
 			document
 				.getElementById("websiteBtnLabel")
-				.addEventListener("input", function () {
-					generatePreviewWebsite();
-				});
+				.addEventListener("input", generatePreviewWebsite);
 			document
 				.getElementById("websiteUrl")
-				.addEventListener("input", function () {
-					generatePreviewWebsite();
-				});
-
-			// Delete button and its preview on close icon click
-			document
-				.querySelector(`.remove-btn[data-id="websiteForm"]`)
-				.addEventListener("click", function () {
-					// Remove the form and its preview
-					console.log("website remove");
-					document.getElementById("websiteForm").remove();
-					document.getElementById("websiteBtn").remove();
-					websiteBtnCount--;
-				});
+				.addEventListener("input", generatePreviewWebsite);
 		});
 
-	// Add Call Button
 	document
 		.getElementById("addCallBtn")
 		.addEventListener("click", function () {
@@ -299,66 +308,39 @@ document.addEventListener("DOMContentLoaded", () => {
 				return;
 			}
 
-			let uniqueId = new Date().getTime();
+			// Display the call form
+			document.getElementById("callForm").style.display = "block";
+			generatePreviewCall();
 			callBtnCount++;
 
-			// Form for call button
-			let callForm = `
-        <div class=" border rounded shadow-sm action-card mt-3 mb-10" id="callForm">
-            <div class="d-flex justify-evenly items-center">
-                <div class="drag-handle">::</div>
-                <div class="row w-100">
-                    <div class="col-4">
-                        <label>Button label</label>
-                        <input type="text" class="form-control" id="callBtnLabel" placeholder="Call Now">
-                    </div>
-                     
-                    <div class="col-4">
-                        <label>Phone Number</label>
-                        <input type="tel" maxlength="10" class="form-control" id="phoneNumber" placeholder="9999999999">
-                    </div>
-                    
-                </div>
-                <div class="col-1 close-icon">
-                    <span class="remove-btn" data-id="callForm">&times;</span>
-                </div>
-            </div>
-        </div>
-    `;
-			document.getElementById("buttonOptions").innerHTML += callForm;
+			// Add event listener to remove the form on click
+			document
+				.getElementById("closeCall")
+				.addEventListener("click", function () {
+					document.getElementById("callForm").style.display = "none";
+					callBtnCount--;
 
-			generatePreviewCall(uniqueId);
+					// Remove the call button from preview
+					removePreviewButton("callBtn");
+				});
 
+			// Add input event listeners for dynamic preview update
 			document
 				.getElementById("callBtnLabel")
-				.addEventListener("input", function () {
-					generatePreviewCall(uniqueId);
-				});
+				.addEventListener("input", generatePreviewCall);
 			document
 				.getElementById("phoneNumber")
-				.addEventListener("input", function () {
-					generatePreviewCall(uniqueId);
-				});
-
-			document
-				.querySelector(`.remove-btn[data-id="callForm"]`)
-				.addEventListener("click", function () {
-					console.log("call remove");
-					document.getElementById("callForm").remove();
-					document.getElementById("callBtn").remove();
-					callBtnCount--;
-				});
+				.addEventListener("input", generatePreviewCall);
 		});
 
 	// Generate Website Button Preview with FA icon
-	function generatePreviewWebsite(id) {	
+	function generatePreviewWebsite() {
 		let label =
-			document.getElementById("websiteBtnLabel").value ||
-			"Visit Now";
+			document.getElementById("websiteBtnLabel").value || "Visit Now";
 		let url = document.getElementById("websiteUrl").value || "#";
 
 		let preview = `
-        <button class="btn  btn-secondary me-2" id="websiteBtn" onclick="window.open('${url}', '_blank')" style="color: #6A67FF;">
+        <button class="btn btn-secondary me-2" id="websiteBtn" onclick="window.open('${url}', '_blank')" style="color: #6A67FF;">
             <i class="fa fa-external-link mx-2"></i>${label}
         </button>
     `;
@@ -373,8 +355,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 	// Generate Call Button Preview with FA icon
 	function generatePreviewCall() {
-		let label =
-			document.getElementById("callBtnLabel").value || "Call Now";
+		let label = document.getElementById("callBtnLabel").value || "Call Now";
 		let phone = document.getElementById("phoneNumber").value || "#";
 
 		let preview = `
@@ -390,63 +371,116 @@ document.addEventListener("DOMContentLoaded", () => {
 			document.getElementById("previewButtons").innerHTML += preview;
 		}
 	}
+
+	// Function to remove a preview button by its ID
+	function removePreviewButton(buttonId) {
+		let button = document.getElementById(buttonId);
+		if (button) {
+			button.remove();
+		}
+	}
+
+	const previewContainer = document.getElementById("previewContainer");
+	let draggedElement = null;
+
+	// Function to add draggable attribute and event listeners to all buttons
+	function makeButtonsDraggable() {
+		const buttons = previewContainer.querySelectorAll("button");
+		buttons.forEach((button) => {
+			button.setAttribute("draggable", true);
+
+			// Add drag start event
+			button.addEventListener("dragstart", (e) => {
+				draggedElement = button;
+				e.dataTransfer.effectAllowed = "move";
+				e.dataTransfer.setData("text/html", button.outerHTML);
+				setTimeout(() => (button.style.display = "none"), 0); // Hide while dragging
+			});
+
+			// Add drag end event
+			button.addEventListener("dragend", () => {
+				draggedElement = null;
+				button.style.display = "block";
+			});
+		});
+	}
+
+	// Allow elements to be dragged over the previewContainer
+	previewContainer.addEventListener("dragover", (e) => {
+		e.preventDefault(); // Prevent default to allow drop
+		e.dataTransfer.dropEffect = "move";
+	});
+
+	// Handle drop event in previewContainer
+	previewContainer.addEventListener("drop", (e) => {
+		e.preventDefault();
+		if (draggedElement) {
+			// Get the drop target and place the dragged element there
+			const dropTarget = e.target.closest(".btn") || previewContainer;
+			if (dropTarget && draggedElement !== dropTarget) {
+				dropTarget.insertAdjacentHTML(
+					"beforebegin",
+					e.dataTransfer.getData("text/html"),
+				);
+				dropTarget.parentNode.removeChild(draggedElement); // Remove the original button
+				makeButtonsDraggable(); // Reapply draggable logic to new buttons
+			}
+		}
+	});
+
+	// Initial call to make buttons draggable
+	makeButtonsDraggable();
+
+	// Example button generation functions (adjust these to add draggable logic automatically)
+	function generatePreviewWebsite() {
+		let label =
+			document.getElementById("websiteBtnLabel").value || "Visit Now";
+		let url = document.getElementById("websiteUrl").value || "#";
+
+		let preview = `
+        <button class="btn btn-secondary me-2" id="websiteBtn" draggable="true" onclick="window.open('${url}', '_blank')" style="color: #6A67FF;">
+            <i class="fa fa-external-link mx-2"></i>${label}
+        </button>
+    `;
+
+		let existingBtn = document.getElementById("websiteBtn");
+		if (existingBtn) {
+			existingBtn.outerHTML = preview;
+		} else {
+			document.getElementById("previewButtons").innerHTML += preview;
+		}
+
+		makeButtonsDraggable(); // Ensure new button is draggable
+	}
+
+	function generatePreviewCall() {
+		let label = document.getElementById("callBtnLabel").value || "Call Now";
+		let phone = document.getElementById("phoneNumber").value || "#";
+
+		let preview = `
+        <button class="btn btn-secondary me-2" id="callBtn" draggable="true" onclick="window.location.href='tel:${phone}'" style="color: #6A67FF;">
+            <i class="fa fa-phone mx-2"></i>${label}
+        </button>
+    `;
+
+		let existingBtn = document.getElementById("callBtn");
+		if (existingBtn) {
+			existingBtn.outerHTML = preview;
+		} else {
+			document.getElementById("previewButtons").innerHTML += preview;
+		}
+
+		makeButtonsDraggable();
+	}
 });
 
 function formatText(command, button) {
-	document.getElementById("editor").focus(); // Ensure the text area is focused
-
-	document.execCommand(command, false, null); // Apply the command
-
-	toggleActiveButton(button); // Toggle button active state
-
-	updatePreview(); // Call to preview if needed
+	const bodyInput = document.getElementById("bodyInput");
+	bodyInput.focus();
+	document.execCommand(command, false, null);
+	toggleActiveButton(button);
 }
 
 function toggleActiveButton(button) {
-	if (button.classList.contains("active")) {
-		button.classList.remove("active");
-	} else {
-		button.classList.add("active");
-	}
-}
-
-function updatePreview() {
-	// Implement a preview update if you want a live preview of formatted text
-	// For now, this function can be empty
-}
-
-
-function insertEmoji(emoji) {
-	insertAtCaret("bodyInput", emoji);
-	updatePreview();
-}
-
-function insertText(text) {
-	insertAtCaret("bodyInput", text);
-	updatePreview();
-}
-
-function insertEmoji(emoji) {
-	insertAtCaret("bodyInput", emoji);
-	updatePreview();
-}
-
-function insertAtCaret(divId, text) {
-	var div = document.getElementById(divId);
-	div.focus();
-	var sel, range;
-	if (window.getSelection) {
-		sel = window.getSelection();
-		if (sel.getRangeAt && sel.rangeCount) {
-			range = sel.getRangeAt(0);
-			range.deleteContents();
-			range.insertNode(document.createTextNode(text));
-		}
-	}
-	updatePreview();
-}
-
-function updatePreview() {
-	document.getElementById("previewBody").innerHTML =
-		document.getElementById("bodyInput").innerHTML;
+	button.classList.toggle("active");
 }

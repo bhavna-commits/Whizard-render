@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+	<meta charset="utf-8" />
+	<title>Settings - Whizard Api</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no" />
+	<link rel="apple-touch-icon" href="pages/ico/60.png" />
+	<link rel="apple-touch-icon" sizes="76x76" href="pages/ico/76.png" />
+	<link rel="apple-touch-icon" sizes="120x120" href="pages/ico/120.png" />
+	<link rel="apple-touch-icon" sizes="152x152" href="pages/ico/152.png" />
+	<link rel="icon" type="image/x-icon" href="favicon.ico" />
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+	<meta name="apple-touch-fullscreen" content="yes" />
+	<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+	<meta content="Meet pages - The simplest and fastest way to build web UI for your dashboard or app." name="description" />
+	<meta content="Ace" name="author" />
+	<link href="assets/plugins/pace/pace-theme-flash.css" rel="stylesheet" type="text/css" />
+	<link href="assets/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+	<!-- <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" /> -->
+	<link href="assets/plugins/jquery-scrollbar/jquery.scrollbar.css" rel="stylesheet" type="text/css" media="screen" />
+	<link href="assets/plugins/select2/css/select2.min.css" rel="stylesheet" type="text/css" media="screen" />
+	<!-- <link class="main-stylesheet" href="pages/css/themes/corporate.css" rel="stylesheet" type="text/css" /> -->
+	<!-- Please remove the file below for production: Contains demo classes -->
+	<link class="main-stylesheet" href="assets/css/style.css" rel="stylesheet" type="text/css" />
+	<link rel="preconnect" href="https://fonts.googleapis.com" />
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+	<link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet" />
+	<script src="https://viralpitch.co/insights/app/js/apexcharts-bundle/dist/apexcharts.js"></script>
+	<link rel="stylesheet" href="styles/template.css" />
+	<link rel="stylesheet" href="https://viralpitch.co/insights/app/js/apexcharts-bundle/dist/apexcharts.css" />
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+	<link href="styles/style.css" rel="stylesheet" type="text/css" />
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+	<script src="https://cdn.tailwindcss.com"></script>
+	<link rel="stylesheet" type="text/css" href="styles/template-preview.css" />
+</head>
+
+<body>
+	<div class="layout-container">
+		<nav class="sidebar">
+			<div class="logo pb-2">
+				<img src="/assets/img/Wizard_logo.png" alt="Whizard Logo" />
+			</div>
+			<ul class="pt-3">
+				<li>
+					<a href="/" class=""><span class="icon"><i class="fas fa-chart-line"></i></span>
+						Dashboard</a>
+				</li>
+				<li class="py-1">
+					<a href="/chats"><span class="icon"><i class="fa-regular fa-comment"></i></span>
+						Chats</a>
+				</li>
+				<li class="py-1">
+					<a href="/contact-list"><span class="icon "><i class="fa-regular fa-address-book"></i></span>
+						
+						Contact List</a>
+				</li>
+				<li class="py-1">
+					<a href="/template"><span class="icon "><i class="fa-regular fa-envelope"></i></span>
+						Template</a>
+				</li>
+				<li class="py-1">
+					<a href="/settings"><span class="icon active"><i class="fa-regular fa-user"></i></span>
+						Settings</a>
+				</li>
+				<li class="py-1">
+					<a><span class="icon"><i class="fa-regular fa-chart-bar"></i></span>
+						Reports</a>
+				</li>
+			</ul>
+			<div class="user-profile">
+				<img src="https://via.placeholder.com/50" alt="User Profile" />
+			</div>
+		</nav>
+		<!-- END SIDEBAR MENU TOP TRAY CONTENT-->
+		
+		<!-- START PAGE-CONTAINER -->
+		<div class="main-content  p-2">
+			<!-- END HEADER -->
+			<div class="logo flex justify-between items-center">
+				<div class="">
+					<!-- START BREADCRUMB -->
+					<nav class="flex px-3  mt-2" aria-label="Breadcrumb">
+						
+						<div class="flex items-center">
+							<a href="/settings" class="text-gray-500 hover:text-gray-700 text-lg font-medium">Settings</a>
+							
+						</div>
+						
+						
+					</nav>
+					<!-- END BREADCRUMB -->
+				</div>
+			</div>
+			<div class="w-full h-[80%] flex justify-center items-center mt-3 ">
+				<div class="w-[60%] h-full grid grid-cols-2 grid-rows-3 gap-4">
+					<a href="/settings/profile" class="border text-slate-500 rounded-xl space-y-3 min-w-[300px] min-h-[200px] p-3 hover:bg-slate-100">
+						<i class="fa-solid fa-user text-black text-xl"></i>
+						<h2 class="text-2xl text-black">Profile</h2>
+						<p>Manage personal details such as name, email, password, language preferences, and user role.</p>
+					</a>
+					<a href="/settings/account-details" class="border rounded-xl text-slate-500 space-y-3 min-w-[300px] min-h-[200px] p-3 hover:bg-slate-100">
+						<i class="fas fa-info-circle text-black text-xl"></i>
+						<h2 class="text-2xl text-black">Account Details</h2>
+						<p>View and update business information and contact information.</p>
+					</a>
+					<a href="/settings/user" class="border rounded-xl text-slate-500 space-y-3 min-w-[300px] min-h-[200px] p-3 hover:bg-slate-100">
+						<i class="fa fa-users text-black text-xl" aria-hidden="true"></i>
+						<h2 class="text-2xl text-black">User Management</h2>
+						<p>Add, edit, remove users, and assign roles to manage team access and permissions effectively.</p>
+					</a>
+					<a href="/settings/tags" class="border text-slate-500 rounded-xl space-y-3 min-w-[300px] min-h-[200px] p-3 hover:bg-slate-100">
+						<i class="fa-solid fa-tags text-black text-xl"></i>
+						<h2 class="text-2xl text-black">Tags</h2>
+						<p>Create, edit, and manage tags to organize and categorize data for better searchability and segmentation.</p>
+					</a>
+					<a href="/settings/logs" class="border rounded-xl text-slate-500 space-y-3 min-w-[300px] min-h-[200px] p-3 hover:bg-slate-100">
+						<i class="fas fa-history text-black text-xl"></i>
+						<h2 class="text-2xl text-black">Activity Logs</h2>
+						<p>Track user activity and display a timeline of actions, including activity type, user details, and timestamps.</p>
+					</a>
+				</div>
+				
+			</div>
+		</div>
+	</div>
+</body>
+
+</html>

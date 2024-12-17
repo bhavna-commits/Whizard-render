@@ -38,9 +38,9 @@ class AttributeManager {
 		this.container.innerHTML = template.dynamicVariables
 			.map(
 				(variable) => `
-                <div class="form-group mt-3">
-                    <label>Variable: {${variable}}</label>
-                    <select class="attribute-select" data-variable="${variable}">
+                <div class=" mt-3">
+                    <label class="w-full">Variable: {${variable}}</label>
+                    <select class="attribute-select w-full" data-variable="${variable}">
                         ${options
 							.map(
 								(opt) => `
@@ -96,7 +96,7 @@ class Preview {
 		}
 
 		const { header, body, footer, buttons } = template;
-
+		console.log(body);
 		let headerContent = "";
 		// Assuming base path for uploaded files
 		const baseFilePath = `/uploads/${template.owner}/`;
@@ -106,7 +106,7 @@ class Preview {
 			const fileName = header?.content; // Get the file name from header.content
 			const fileExtension = fileName.split(".").pop().toLowerCase(); // Extract the file extension
 			const fileUrl = baseFilePath + fileName;
-
+			console.log(fileUrl);
 			if (["jpg", "jpeg", "png", "gif", "svg"].includes(fileExtension)) {
 				headerContent = `<img src="${fileUrl}" alt="Header Image" class="custom-card-img">`;
 			} else if (["mp4", "mov", "avi", "mkv"].includes(fileExtension)) {
@@ -124,8 +124,8 @@ class Preview {
 
 		this.container.innerHTML = `
     ${headerContent}
-    <p class="text-base">${body}</p>
-    <p class="text-sm text-gray-500">${footer}</p>
+   <p class="text-lg py-1">${body.replace(/\n/g, "<br>")}</p>
+    <p class="text-base text-gray-500 py-1">${footer.replace(/\n/g, "<br>")}</p>
     <div>
         ${buttons
 			.map((button) => {
@@ -134,8 +134,8 @@ class Preview {
 				if (button.urlPhone.startsWith("http")) {
 					let label = button.text || "Visit Now";
 					buttonContent = `
-                        <button class="border-t w-full mt-2 pt-1 text-center me-2" onclick="window.open('${button.urlPhone}', '_blank')" style="color: #6A67FF;">
-                            <i class="fa fa-external-link mx-2"></i>${label}
+                        <button class="border-t w-full mt-2 pt-1 text-center me-2 text-base" onclick="window.open('${button.urlPhone}', '_blank')" style="color: #6A67FF;">
+                            <i class="fa fa-external-link mx-2"></i><span class="text-lg">${label}</span>
                         </button>
                     `;
 				}
@@ -144,8 +144,8 @@ class Preview {
 					let label = button.text || "Call Now";
 					let phone = button.urlPhone.replace("tel:", ""); // Extract phone number
 					buttonContent = `
-                        <button class="border-t w-full mt-2 pt-1 text-center  me-2" onclick="window.location.href='tel:${phone}'" style="color: #6A67FF;">
-                            <i class="fa fa-phone mx-2"></i>${label}
+                        <button class="border-t w-full mt-2 pt-1 text-center  me-2 text-base" onclick="window.location.href='tel:${phone}'" style="color: #6A67FF;">
+                            <i class="fa fa-phone mx-2"></i><span class="text-lg">${label}</span>
                         </button>
                     `;
 				}
@@ -196,8 +196,7 @@ class TemplateManager {
 				'<p class="text-center text-gray-500">Select a template to preview</p>';
 
 			this.attributesForm.innerHTML =
-				'<p class="text-center p-2 text-gray-500">No attributes available</p>';
-
+				'<p class="text-center p-2 text-gray-500">Select a template and a recipient list</p>';
 		} catch (error) {
 			console.error("Error initializing:", error);
 		}
@@ -324,4 +323,55 @@ class TemplateManager {
 // Initialize the TemplateManager once the DOM is fully loaded
 $(document).ready(() => {
 	new TemplateManager();
+	// JavaScript for toggling the button visibility and switch behavior
+	const toggleSwitch = document.getElementById("toggleSwitch");
+	const toggleKnob = document.getElementById("toggleKnob");
+	const scheduleSection = document.getElementById("scheduleSection");
+	const scheduleButton = document.getElementById("scheduleButton");
+	const sendNowButton = document.getElementById("sendNowButton");
+
+	let isScheduled = false;
+
+	toggleSwitch.addEventListener("click", function () {
+		isScheduled = !isScheduled;
+
+		// Toggle the knob position
+		if (isScheduled) {
+			toggleKnob.classList.add("translate-x-full"); // Moves the knob to the right
+
+			// Show the schedule section smoothly
+			scheduleSection.classList.remove("max-h-0");
+			scheduleSection.classList.add("max-h-[500px]");
+
+			// Update button visibility
+			scheduleButton.classList.remove("hidden");
+			sendNowButton.classList.add("hidden");
+		} else {
+			toggleKnob.classList.remove("translate-x-full"); // Moves the knob back to the left
+
+			// Hide the schedule section smoothly
+			scheduleSection.classList.add("max-h-0");
+			scheduleSection.classList.remove("max-h-[500px]");
+
+			// Update button visibility
+			scheduleButton.classList.add("hidden");
+			sendNowButton.classList.remove("hidden");
+		}
+	});
+
+
+	// Initialize Flatpickr
+	flatpickr("#datePicker", {
+		dateFormat: "d/m/Y",
+		defaultDate: "01/01/2025",
+		allowInput: true,
+	});
+
+	flatpickr("#timePicker", {
+		enableTime: true,
+		noCalendar: true,
+		dateFormat: "h:i K",
+		defaultDate: "13:00",
+		allowInput: true,
+	});
 });

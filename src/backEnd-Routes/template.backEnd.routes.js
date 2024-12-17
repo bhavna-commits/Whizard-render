@@ -6,7 +6,7 @@ import {
 	duplicateTemplate,
 	getCampaignTemplates,
 } from "../controllers/Dashboard/template.controller.js";
-import multerMiddle from "../config/multerMiddleware.js";
+import { multerMiddle } from "../config/multerMiddleware.js";
 
 const router = express.Router();
 
