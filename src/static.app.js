@@ -7,7 +7,7 @@ app.use("/contact-list/overview", express.static("public"));
 app.use("/Contact-List/createCampaign", express.static("public"));
 app.use("/Contact-List/custom-field", express.static("public"));
 app.use("/Settings/profile", express.static("public"));
-
+app.use("/Settings/account-details", express.static("public"));
 
 const __dirname = path.resolve();
 
@@ -23,6 +23,10 @@ app.use(
 app.use(
 	"/contact-list/js",
 	express.static(path.join(__dirname, "views/Contact-List/js")),
+);
+app.use(
+	"/settings/js",
+	express.static(path.join(__dirname, "views/Settings/js")),
 );
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));

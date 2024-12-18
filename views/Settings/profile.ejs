@@ -93,7 +93,7 @@
 						</div>
 						
 						<div class="flex items-center">
-							<a href="/contact-list" class="text-gray-500 hover:text-gray-700 text-lg font-medium">Contact List</a>
+							<a href="/settings/profile" class="text-red-500 hover:text-gray-700 text-lg font-medium ">Profile</a>
 							
 						</div>
 						
@@ -114,17 +114,21 @@
 							<p class="text-sm text-gray-500">Image should be less than 100KB</p>
 						</div>
 						<div class="flex items-center justify-center">
-							<div class="w-20 h-20 rounded-full bg-blue-600 text-white flex items-center justify-center  text-xl font-semibold mr-3">
+							<div class="w-20 h-20 rounded-full bg-blue-600 text-white flex items-center justify-center text-xl font-semibold mr-3 relative overflow-hidden">
 								<% if (user.profilePhoto) { %>
-								<img src="<%= user.profilePhoto %>" class="w-full h-full object-contain" />
+								<!-- Display profile image if it exists -->
+								<img id="profilePreview" src="<%= user.profilePhoto %>" class="w-full h-full object-cover block" />
 								<% } else { %>
-								<%= user.name.charAt(0) %>
+								<!-- This img is for the client-side preview -->
+								<img id="dpPreview" src="" class="w-full h-full absolute object-cover hidden" />
+								<span id="userInitial" class="block"><%= user.name.charAt(0) %></span>
 								<% } %>
 							</div>
-							<input type="file" name="profilePhoto" id="profilePhoto" accept="image/*" class="bg-gray-100 p-2 rounded border">
+							
+							<input type="file" name="profilePhoto" id="profilePhoto" accept="image/*" class="bg-gray-100 p-2 rounded border" onchange="previewImage(event)">
+							
+							<button type="button" id="removePhotoButton" class="hidden mt-2 p-2 bg-red-600 text-white rounded" onclick="removePhoto()">Remove Photo</button>
 						</div>
-						
-						
 					</div>
 					
 					<!-- Name Field -->
@@ -150,61 +154,105 @@
 						<label class=" text-gray-600">Language</label>
 						<select name="language" class="w-3/5 p-3 border rounded-lg bg-gray-50">
 							<% languages.forEach(function(lang) { %>
-							<option value="<%= lang %>" <%= language === lang ? 'selected' : '' %>>
+							<option value="<%= lang %>" <%= language === lang ? "selected" : '' %>>
 								<%= lang %>
 							</option>
 							<% }); %>
 						</select>
-
+						
 					</div>
 					
 					<!-- Password Field -->
 					<div class="flex justify-between items-center">
-						<label class=" text-gray-600">Password</label>
-						<input type="password" name="password" value="<%= user.password %>" class="w-3/5 p-3 border rounded-lg bg-gray-50">
+						<label class="text-gray-600">Password</label>
+						<button id="openModalBtn" class="w-3/5 p-3 border rounded-lg hover:bg-slate-100 bg-gray-50">
+							Change Password
+						</button>
 					</div>
 					
 					<!-- Action Buttons -->
-					<div class="flex justify-between">
-						<a href="/settings" class="text-gray-500 hover:underline">Cancel</a>
-						<button type="submit" class="bg-black text-white py-2 px-4 rounded-lg">Save changes</button>
+					<div class="flex justify-end">
+						<div class="flex justify-evenly">
+							<button type="button" class="text-gray-500 border p-2 rounded-lg " onclick="location.reload()">Cancel</button>
+							<button type="submit" class=" bg-black ml-3 text-white py-2 px-4 rounded-lg">Save changes</button>
+						</div>
 					</div>
+					<div id="message" class="mt-4"></div>
 				</form>
 				
 				<!-- Success/Error Message Display -->
-				<div id="message" class="mt-4"></div>
+				
 			</div>
 		</div>
 	</div>
 	<script>
-		document.getElementById('profileForm').addEventListener('submit', async function (event) {
-			event.preventDefault(); // Prevent the form from submitting normally
+		function previewImage (event) {
+			const input = event.target;
+			const preview = document.getElementById('dpPreview');
+			const userInitial = document.getElementById('userInitial');
 			
-			// Gather form data
+			if (input.files && input.files[0]) {
+				const reader = new FileReader();
+				
+				reader.onload = function (e) {
+					// Set the src of the img tag to the base64 image string
+					preview.src = e.target.result;
+					
+					// Show the profile image and hide the user's initial
+					preview.classList.remove('hidden');
+					userInitial.classList.add('hidden');
+				};
+				
+				reader.readAsDataURL(input.files[0]);
+			}
+		}
+		
+		function removePhoto () {
+			const input = document.getElementById('profilePhoto');
+			const preview = document.getElementById('profilePreview');
+			const userInitial = document.getElementById('userInitial');
+			const removeButton = document.getElementById('removePhotoButton');
+			
+			// Clear the input file and hide the profile photo
+			input.value = '';
+			preview.classList.add('hidden');
+			userInitial.classList.remove('hidden');
+			
+			// Hide the remove photo button
+			removeButton.classList.add('hidden');
+		}
+		
+		
+		document.getElementById('profileForm').addEventListener('submit', async function (event) {
+			event.preventDefault();
+			
 			const formData = new FormData();
 			formData.append('profilePhoto', document.getElementById('profilePhoto').files[0]);
 			formData.append('name', document.querySelector('input[name="name"]').value);
+			
 			formData.append('language', document.querySelector('select[name="language"]').value);
-			formData.append('password', document.querySelector('input[name="password"]').value);
 			
 			try {
 				// Send the form data via Axios
-				const response = await axios.post('/settings/profile', formData, {
-					headers: {
-						'Content-Type': 'multipart/form-data',
-					}
+				const res = await fetch('/api/settings/profile', {
+					method: "POST",
+					body: formData,
 				});
-				
+				const response = await res.json();
 				// Handle success response
-				if (response.status === 200) {
+				if (response.success) {
 					document.getElementById('message').innerHTML = `<p class="text-green-500">Profile updated successfully!</p>`;
+				} else {
+					document.getElementById('message').innerHTML = `<p class="text-red-500">Error updating profile: ${response.message || 'An error occurred'}</p>`;
 				}
 			} catch (error) {
 				// Handle error response
-				document.getElementById('message').innerHTML = `<p class="text-red-500">Error updating profile: ${error.response.data.message || 'An error occurred'}</p>`;
+				document.getElementById('message').innerHTML = `<p class="text-red-500">Error updating profile: ${error.message || 'An error occurred'}</p>`;
 			}
 		});
 	</script>
+	<%- include("partials/changePassword") %>
+	
 </body>
 
 </html>

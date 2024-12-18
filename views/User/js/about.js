@@ -138,9 +138,9 @@ document.addEventListener("DOMContentLoaded", function () {
         .querySelector(".country-name")
         .textContent.toLowerCase();
       if (countryName.includes(searchValue)) {
-        option.style.display = "flex"; // Show the matching country
+        option.style.display = "flex"; 
       } else {
-        option.style.display = "none"; // Hide non-matching countries
+        option.style.display = "none";
       }
     });
   });

@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+	<meta charset="utf-8" />
+	<title>Pages - Admin Dashboard UI Kit - Blank Page</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no" />
+	<link rel="apple-touch-icon" href="pages/ico/60.png" />
+	<link rel="apple-touch-icon" sizes="76x76" href="pages/ico/76.png" />
+	<link rel="apple-touch-icon" sizes="120x120" href="pages/ico/120.png" />
+	<link rel="apple-touch-icon" sizes="152x152" href="pages/ico/152.png" />
+	<link rel="icon" type="image/x-icon" href="favicon.ico" />
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+	<meta name="apple-touch-fullscreen" content="yes" />
+	<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+	<meta content="Meet pages - The simplest and fastest way to build web UI for your dashboard or app." name="description" />
+	<meta content="Ace" name="author" />
+	<link href="assets/plugins/pace/pace-theme-flash.css" rel="stylesheet" type="text/css" />
+	<link href="assets/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+	<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+	<link href="assets/plugins/jquery-scrollbar/jquery.scrollbar.css" rel="stylesheet" type="text/css" media="screen" />
+	<link href="assets/plugins/select2/css/select2.min.css" rel="stylesheet" type="text/css" media="screen" />
+	<!-- <link class="main-stylesheet" href="pages/css/themes/corporate.css" rel="stylesheet" type="text/css" /> -->
+	<!-- Please remove the file below for production: Contains demo classes -->
+	<link class="main-stylesheet" href="assets/css/style.css" rel="stylesheet" type="text/css" />
+	<link rel="stylesheet" href="/styles/style.css" />
+	<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+	<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" />
+	<script src="https://cdn.tailwindcss.com"></script>
+	<link rel="stylesheet" href="/styles/countrySelector.css" />
+	<link rel="preconnect" href="https://fonts.googleapis.com" />
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+	<link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+	<script src="https://kit.fontawesome.com/44e4e59292.js" crossorigin="anonymous"></script>
+	<style>
+		.loading-spinner {
+			border: 3px solid rgba(0, 0, 0, 0.1);
+			border-left-color: #fff;
+			border-radius: 100%;
+			width: 16px;
+			height: 16px;
+			animation: spin 1s linear infinite;
+		}
+		
+		@keyframes spin {
+			0% {
+				transform: rotate(0deg);
+			}
+			
+			100% {
+				transform: rotate(360deg);
+			}
+		}
+		
+		#errorMessage {
+			color: red;
+			margin-top: 10px;
+		}
+	</style>
+	
+<body>
+	<div class="layout-container">
+		<nav class="sidebar">
+			<div class="logo pb-2">
+				<img src="/assets/img/Wizard_logo.png" alt="Whizard Logo" />
+			</div>
+			<ul class="pt-3">
+				<li>
+					<a href="/" class=""><span class="icon"><i class="fas fa-chart-line"></i></span>
+						Dashboard</a>
+				</li>
+				<li class="py-1">
+					<a href="/chats"><span class="icon"><i class="fa-regular fa-comment"></i></span>
+						Chats</a>
+				</li>
+				<li class="py-1">
+					<a href="/contact-list"><span class="icon "><i class="fa-regular fa-address-book"></i></span>
+						
+						Contact List</a>
+				</li>
+				<li class="py-1">
+					<a href="/template"><span class="icon "><i class="fa-regular fa-envelope"></i></span>
+						Template</a>
+				</li>
+				<li class="py-1">
+					<a href="/settings"><span class="icon active"><i class="fa-regular fa-user"></i></span>
+						Settings</a>
+				</li>
+				<li class="py-1">
+					<a><span class="icon"><i class="fa-regular fa-chart-bar"></i></span>
+						Reports</a>
+				</li>
+			</ul>
+			<div class="user-profile">
+				<img src="https://via.placeholder.com/50" alt="User Profile" />
+			</div>
+		</nav>
+		<!-- END SIDEBAR MENU TOP TRAY CONTENT-->
+		
+		<!-- START PAGE-CONTAINER -->
+		<div class="main-content  p-2">
+			<!-- END HEADER -->
+			<div class="logo flex justify-between items-center">
+				<div class="">
+					<!-- START BREADCRUMB -->
+					<nav class="flex px-3  mt-2" aria-label="Breadcrumb">
+						
+						<div class="flex items-center">
+							<a href="/settings" class="text-gray-500 hover:text-gray-700 text-lg font-medium">Settings</a>
+							<svg class="w-4 h-4 mx-2 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+								<path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L11.586 10 7.293 5.707a1 1 0 011.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+							</svg>
+						</div>
+						
+						<div class="flex items-center">
+							<a href="/settings/profile" class="text-red-500 hover:text-gray-700 text-lg font-medium ">Profile</a>
+							
+						</div>
+						
+					</nav>
+					<!-- END BREADCRUMB -->
+				</div>
+			</div>
+			<div class="w-full flex flex-col justify-start items-center mx-auto bg-white p-8 ">
+				<div class="w-75">
+					<h1 class="text-2xl font-bold mb-4">Account Details</h1>
+				</div>
+				
+				<div class="w-75 max-w-5xl p-5 border rounded-lg">
+					
+					<form id="signUpForm">
+						<div class="mb-4 flex justify-between items-center">
+							<label for="name" class="form-label text-gray-500">Company Name</label>
+							<input type="text" class="form-control w-3/5" id="name" name="name" placeholder="Enter your Company's Name" value="<%= user.companyName %>" required />
+						</div>
+						<div class="mb-4 flex justify-between items-start">
+							<label for="description" class="form-label text-gray-500">Description</label>
+							<div class="w-3/5  block">
+								<textarea class="form-control w-full" id="description" name="description" placeholder="Tell us a bit about your company..." rows="2" maxlength="100" value="<%= user.companyDescription  %>" required></textarea>
+								<div class="form-text text-gray-500 mt-2 text-sm text-right" id="wordCount">
+									0/100 words
+								</div>
+							</div>
+						</div>
+						<div class="mb-4 flex justify-between items-center w-full">
+							<label for="country" class="form-label text-gray-500">Country</label>
+							<div class="country-selector w-3/5 focus:outline-none" id="countrySelector">
+								<button type="button" class="country-selector-button  outline-blue-500 w-full" id="countrySelectorButton">
+									<span id="selectedFlag"></span> &nbsp;
+									<input type="text" name="countryCode" value="<%= user.country %>"
+                                    id="countrySearch" placeholder="Search country..." class="p-0 outline-none" />
+									<div class="rotate-180">
+										<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="18px" fill="black" class="text-black z-20">
+											<path d="M480-528 296-344l-56-56 240-240 240 240-56 56-184-184Z" />
+										</svg>
+									</div>
+								</button>
+								<div class="country-dropdown hidden " id="countryDropdown">
+									<div class="countries-list">
+										<% countries.forEach(function(country) { %>
+										<button type="button" class="country-option ">
+											<span class="country-flag"><%= country.flag %></span>
+											<span class="country-name"><%= country.name %></span>
+										</button>
+										<% }); %>
+									</div>
+								</div>
+							</div>
+						</div>
+						
+						<div class="mb-4 flex justify-between items-center w-full">
+							<label for="state" class="form-label text-gray-500">State</label>
+							<div class="w-3/5">
+								<input type="text" id="stateInput" class="hidden form-control" value="<%= user.state %>" placeholder="Enter your state" />
+								<select id="stateDropdown" class="form-control">
+									<option value="">Select State</option>
+								</select>
+							</div>
+						</div>
+						
+						
+						<div class="mb-4 flex justify-between items-center">
+							<label for="companySize" class="form-label text-gray-500">Company Size</label>
+							<select id="companySize" name="companySize" class="form-control w-3/5" required>
+								<option value="">Select company size</option>
+								<% size.forEach(function(s) { %>
+								<option value="<%= s %>"><%= s %></option>
+								<% }); %>
+							</select>
+						</div>
+						
+						<div class="mb-4 flex justify-between items-center">
+							<label for="industry" class="form-label text-gray-500">Industry/Category</label>
+							<select id="industry" name="industry" class="form-control w-3/5" required>
+								<option value="">Select industry type</option>
+								<% industryCategory.forEach(function(industry) { %>
+								<option value="<%= industry %>"><%= industry %></option>
+								<% }); %>
+							</select>
+						</div>
+						
+						
+						
+						<div class="mb-4 flex justify-between items-center">
+							<label for="jobRole" class="form-label text-gray-500">Job Role</label>
+							<select id="jobRole" name="jobRole" class="form-control w-3/5" required>
+								<option value="">Select your role</option>
+								<% roles.forEach(function(role) { %>
+								<option value="<%= role %>"><%= role %></option>
+								<% }); %>
+							</select>
+						</div>
+						
+						<div class="mb-4 flex justify-between items-center">
+							<label for="website" class="form-label text-gray-500">Website URL</label>
+							<input type="url" id="website" class="px-3 py-2 rounded-xl w-3/5 border outline-none" name="website" class="form-control" placeholder="https://example.com" />
+						</div>
+						
+						
+						<!-- Action Buttons -->
+						<div class="flex justify-end">
+							<div class="flex justify-evenly">
+								<button type="button" class="text-gray-500 border p-2 rounded-lg " onclick="location.reload()">Cancel</button>
+								<button type="submit" class=" bg-black ml-3 text-white py-2 px-4 rounded-lg">Save changes</button>
+							</div>
+						</div>
+						
+						<div id="errorMessage" class="hidden"></div>
+					</form>
+				</div>
+				
+				
+				<!-- Success/Error Message Display -->
+				
+			</div>
+		</div>
+	</div>
+	<script>
+		const countries = <%- JSON.stringify(countries) %>;
+	</script>
+	<script src="/settings/js/accountDetails.js"></script>
+	
+</body>
+
+</html>

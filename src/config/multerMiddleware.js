@@ -10,7 +10,7 @@ export const multerMiddle = (req, res, next) => {
 };
 
 export const uploadProfilePicController = (req, res, next) => {
-	uploadProfilePicture.single("profilePic")(req, res, (err) => {
+	uploadProfilePicture.single("profilePhoto")(req, res, (err) => {
 		if (err) {
 			return res
 				.status(400)

@@ -13,7 +13,7 @@ const userSchema = new mongoose.Schema(
 		addedUsers: [
 			{ type: mongoose.Schema.Types.ObjectId, ref: "AddedUser" },
 		],
-		companyname: { type: String, required: true },
+		companyName: { type: String, required: true },
 		companyDescription: { type: String, required: true },
 		country: { type: String, required: true },
 		state: { type: String, required: true },
