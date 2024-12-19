@@ -1,18 +1,15 @@
-// Function to open Edit Modal and populate it with data
-function openEditModal(contactData) {
-	const contact = JSON.parse(contactData);
+function openEditModal(contact) {
+	console.log(contact);
 	const editModal = document.getElementById("editContactModal");
 	const modalContent = editModal.querySelector(".bg-white");
 
-	// Populate form fields
 	document.getElementById("editCountryCode").value = contact.countryCode;
 	document.getElementById("editWhatsAppNumber").value = contact.whatsApp;
 	document.getElementById("editCity").value = contact.cityId;
 	document.getElementById("editUserName").value = contact.userName;
 
 	// Show modal
-	editModal.classList.remove("pointer-events-none");
-	editModal.classList.add("opacity-100");
+	editModal.classList.remove("pointer-events-none", "opacity-0");
 	modalContent.classList.remove("scale-95");
 	modalContent.classList.add("scale-100");
 }
@@ -23,34 +20,19 @@ function hideEditModal() {
 	const modalContent = editModal.querySelector(".bg-white");
 
 	// Start fade out animation
-	editModal.classList.remove("opacity-100");
+	editModal.classList.add("opacity-0");
 	modalContent.classList.remove("scale-100");
 	modalContent.classList.add("scale-95");
 
-	// Wait for animation to finish before hiding completely
 	setTimeout(() => {
 		editModal.classList.add("pointer-events-none");
 	}, 300);
 }
 
 // Close modal when clicking the close button
-const closeBtn = document.querySelector(".edit-modal-close-btn");
-if (closeBtn) {
-	closeBtn.addEventListener("click", function () {
-		hideEditModal();
-	});
-}
-
-// Close modal when clicking outside of the modal content
-const editModal = document.getElementById("editContactModal");
-if (editModal) {
-	editModal.addEventListener("click", function (event) {
-		const modalContent = editModal.querySelector(".bg-white");
-		if (!modalContent.contains(event.target)) {
-			hideEditModal();
-		}
-	});
-}
+document
+	.querySelector(".edit-modal-close-btn")
+	.addEventListener("click", hideEditModal);
 
 // Submit form for contact edit
 document
@@ -65,7 +47,6 @@ document
 			userName: document.getElementById("editUserName").value,
 		};
 
-		// Send the updated contact data to the backend
 		fetch("/api/contacts/update", {
 			method: "PUT",
 			headers: {
@@ -77,7 +58,37 @@ document
 			.then((data) => {
 				if (data.success) {
 					hideEditModal();
-					window.location.reload(); // Reload the page to reflect changes
+					window.location.reload();
+				}
+			})
+			.catch((error) => {
+				console.error("Error:", error);
+			});
+	});
+
+// Function to open delete modal
+function openDeleteModal(contactId, contactName) {
+	console.log(contactId, contactName);
+	document.getElementById("deleteContactId").value = contactId;
+	document.getElementById("deleteContactName").textContent = contactName;
+	new bootstrap.Modal(document.getElementById("deleteModal")).show();
+}
+
+// Submit form for contact delete
+document
+	.getElementById("deleteContactForm")
+	.addEventListener("submit", function (e) {
+		e.preventDefault();
+
+		const contactId = document.getElementById("deleteContactId").value;
+
+		fetch(`/api/contacts/${contactId}`, {
+			method: "DELETE",
+		})
+			.then((response) => response.json())
+			.then((data) => {
+				if (data.success) {
+					window.location.reload();
 				}
 			})
 			.catch((error) => {

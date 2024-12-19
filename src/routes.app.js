@@ -5,7 +5,8 @@ import contactFrontEndRoutes from "./frontEnd-Routes/contactList.frontEnd.routes
 import templatesRoutes from "./backEnd-Routes/template.backEnd.routes.js";
 import contactListRoute from "./backEnd-Routes/contactList.backEnd.routes.js";
 import settingsFrontRoute from "./frontEnd-Routes/setting.frontEnd.routes.js";
-import settingsbackEndRoute from "./backEnd-Routes/settings.backEnd.routes.js"
+import settingsbackEndRoute from "./backEnd-Routes/settings.backEnd.routes.js";
+import faceBookBackEndRoute from "./backEnd-Routes/facebook.backEnd.routes.js"
 import app from "./static.app.js";
 
 app.use("/", userfrontEndRoutes, tempalteFrontEndRoutes);
@@ -15,5 +16,6 @@ app.use("/api/templates", templatesRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/contact-list", contactListRoute);
 app.use("/api/settings", settingsbackEndRoute);
+app.use("/api/facebook", faceBookBackEndRoute);
 
 export default app;

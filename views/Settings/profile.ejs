@@ -41,32 +41,32 @@
 <body>
 	<div class="layout-container">
 		<nav class="sidebar">
-			<div class="logo pb-2">
+			<div class="logo py-3">
 				<img src="/assets/img/Wizard_logo.png" alt="Whizard Logo" />
 			</div>
-			<ul class="pt-3">
+			<ul class="mt-4 space-y-4">
 				<li>
 					<a href="/" class=""><span class="icon"><i class="fas fa-chart-line"></i></span>
 						Dashboard</a>
 				</li>
-				<li class="py-1">
+				<li class="">
 					<a href="/chats"><span class="icon"><i class="fa-regular fa-comment"></i></span>
 						Chats</a>
 				</li>
-				<li class="py-1">
+				<li class="">
 					<a href="/contact-list"><span class="icon "><i class="fa-regular fa-address-book"></i></span>
 						
 						Contact List</a>
 				</li>
-				<li class="py-1">
+				<li class="">
 					<a href="/template"><span class="icon "><i class="fa-regular fa-envelope"></i></span>
 						Template</a>
 				</li>
-				<li class="py-1">
+				<li class="">
 					<a href="/settings"><span class="icon active"><i class="fa-regular fa-user"></i></span>
 						Settings</a>
 				</li>
-				<li class="py-1">
+				<li class="">
 					<a><span class="icon"><i class="fa-regular fa-chart-bar"></i></span>
 						Reports</a>
 				</li>
@@ -83,17 +83,17 @@
 			<div class="logo flex justify-between items-center">
 				<div class="">
 					<!-- START BREADCRUMB -->
-					<nav class="flex px-3  mt-2" aria-label="Breadcrumb">
+					<nav class="flex px-3  mt-4" aria-label="Breadcrumb">
 						
 						<div class="flex items-center">
-							<a href="/settings" class="text-gray-500 hover:text-gray-700 text-lg font-medium">Settings</a>
+							<a href="/settings" class="text-gray-500 hover:text-gray-700 text-xl font-medium">Settings</a>
 							<svg class="w-4 h-4 mx-2 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
 								<path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L11.586 10 7.293 5.707a1 1 0 011.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
 							</svg>
 						</div>
 						
 						<div class="flex items-center">
-							<a href="/settings/profile" class="text-red-500 hover:text-gray-700 text-lg font-medium ">Profile</a>
+							<a href="/settings/profile" class="text-red-500 hover:text-gray-700 text-xl font-medium ">Profile</a>
 							
 						</div>
 						
@@ -116,12 +116,12 @@
 						<div class="flex items-center justify-center">
 							<div class="w-20 h-20 rounded-full bg-blue-600 text-white flex items-center justify-center text-xl font-semibold mr-3 relative overflow-hidden">
 								<% if (user.profilePhoto) { %>
-								<!-- Display profile image if it exists -->
-								<img id="profilePreview" src="<%= user.profilePhoto %>" class="w-full h-full object-cover block" />
+								
+									<img id="profilePreview" src="/<%= user.profilePhoto %>" class="w-full h-full object-cover block" />
 								<% } else { %>
-								<!-- This img is for the client-side preview -->
-								<img id="dpPreview" src="" class="w-full h-full absolute object-cover hidden" />
-								<span id="userInitial" class="block"><%= user.name.charAt(0) %></span>
+							
+									<img id="dpPreview" src="" class="w-full h-full absolute object-cover hidden" />
+									<span id="userInitial" class="block"><%= user.name.charAt(0) %></span>
 								<% } %>
 							</div>
 							
@@ -165,7 +165,7 @@
 					<!-- Password Field -->
 					<div class="flex justify-between items-center">
 						<label class="text-gray-600">Password</label>
-						<button id="openModalBtn" class="w-3/5 p-3 border rounded-lg hover:bg-slate-100 bg-gray-50">
+						<button id="openModalBtn" class="w-3/5 p-3 border rounded-lg hover:bg-slate-100 bg-gray-50 text-left">
 							Change Password
 						</button>
 					</div>
@@ -178,10 +178,7 @@
 						</div>
 					</div>
 					<div id="message" class="mt-4"></div>
-				</form>
-				
-				<!-- Success/Error Message Display -->
-				
+				</form>				
 			</div>
 		</div>
 	</div>

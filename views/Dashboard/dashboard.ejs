@@ -12,7 +12,7 @@
 	<link href="assets/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
 	<link href="assets/plugins/jquery-scrollbar/jquery.scrollbar.css" rel="stylesheet" type="text/css" media="screen" />
 	<link href="assets/plugins/select2/css/select2.min.css" rel="stylesheet" type="text/css" media="screen" />
-	<link class="main-stylesheet" href="pages/css/themes/corporate.css" rel="stylesheet" type="text/css" />
+	<!-- <link class="main-stylesheet" href="pages/css/themes/corporate.css" rel="stylesheet" type="text/css" /> -->
 	<!-- Please remove the file below for production: Contains demo classes -->
 	<!-- <link class="main-stylesheet" href="assets/css/style.css" rel="stylesheet" type="text/css" /> -->
 	<link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -31,10 +31,10 @@
 	<!-- Sidebar -->
 	<div class="layout-container">
 		<nav class="sidebar">
-			<div class="logo pb-2">
+			<div class="logo py-3">
 				<img src="/assets/img/Wizard_logo.png" alt="Whizard Logo" />
 			</div>
-			<ul>
+			<ul class="mt-5 space-y-4">
 				<li>
 					<a href="/" class=""><span class="icon active"><i class="fas fa-chart-line"></i></span>
 						Dashboard</a>
@@ -44,12 +44,12 @@
 						Chats</a>
 				</li>
 				<li>
-					<a href="/contact-list"><span class="icon "><i class="fa-regular fa-address-book"></i></span>
+					<a href="/contact-list"><span class="icon"><i class="fa-regular fa-address-book"></i></span>
 						
 						Contact List</a>
 				</li>
 				<li>
-					<a href="/template"><span class="icon "><i class="fa-regular fa-envelope"></i></span>
+					<a href="/template"><span class="icon"><i class="fa-regular fa-envelope"></i></span>
 						Template</a>
 				</li>
 				<li>
@@ -68,14 +68,19 @@
 		
 		<!-- Main Content -->
 		<div class="p-4">
-			<div class="dashboard-header">
+			<div class="flex justify-between items-center">
 				<h1 class="dash-text">Dashboard</h1>
-				<p class="p-text">
-					All the statistics from your account are displayed here. You can
-					apply various filters to refine the data and get fully customized
-					results.
-				</p>
+				<span class="p-text text-lg">WhatsApp API status:
+					<span class="<%= status === 'pending' ? 'text-red-500' : 'text-green-500' %> uppercase text-lg">
+						<%= status %>
+					</span>
+				</span>
 			</div>
+			<p class="p-text py-4">
+				All the statistics from your account are displayed here. You
+				can apply various filters to refine the data and get fully
+				customized results.
+			</p>
 			<!-- Connect to WhatsApp -->
 			
 			<div class="gradient-bg rounded-2xl shadow-slate-700 shadow-md overflow-hidden relative h-44">
@@ -84,9 +89,10 @@
 						Connect your WhatsApp Business Number
 					</h1>
 					<p class="text-gray-400 text-sm mb-4">
-						Start engaging with your customers through WhatsApp Business API
+						Start engaging with your customers through WhatsApp
+						Business API
 					</p>
-					<button id="connectBtn" class="connect-btn bg-white text-gray-900 px-4 py-2 rounded-full text-sm font-medium inline-flex items-center w-fit hover:bg-gray-50">
+					<button id="connectBtn" onclick="launchWhatsAppSignup()" class="connect-btn bg-white text-gray-900 px-4 py-2 rounded-full text-sm font-medium inline-flex items-center w-fit hover:bg-gray-50">
 						Connect Now
 					</button>
 				</div>
@@ -243,6 +249,77 @@
 	<script src="assets/plugins/pace/pace.min.js" type="text/javascript"></script>
 	<script src="https://kit.fontawesome.com/44e4e59292.js" crossorigin="anonymous"></script>
 	<script src="/Dashboard/js/filter-sidebar.js"></script>
+	<script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js"></script>
+	
+	<script>
+		// SDK initialization
+		const app_id = <%- JSON.stringify(app) %>;
+		const config_id = <%- JSON.stringify(config) %>;
+		const graph_v = <%- JSON.stringify(graph) %>;
+		
+		window.fbAsyncInit = function () {
+			FB.init({
+				appId: app_id,
+				autoLogAppEvents: true,
+				xfbml: true,
+				version: graph_v,
+			});
+		};
+		
+		// Session logging message event listener
+		window.addEventListener('message', (event) => {
+			if (event.origin !== "https://www.facebook.com" && event.origin !== "https://web.facebook.com") return;
+			try {
+				const data = JSON.parse(event.data);
+				if (data.type === 'WA_EMBEDDED_SIGNUP') {
+					console.log('message event: ', data);
+				}
+			} catch {
+				console.log('message event: ', event.data)
+			}
+		});
+		
+		// Response callback
+		const fbLoginCallback = (response) => {
+			if (response.authResponse) {
+				const code = response.authResponse.code;
+				console.log('response: ', code);
+				fetch('/api/facebook/auth_code', {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json',
+						},
+						body: JSON.stringify({
+							code
+						}),
+					})
+					.then(response => response.json())
+					.then(data => {
+						console.log('Access Token received:', data.access_token);
+					})
+					.catch(error => {
+						console.error('Error:', error);
+					});
+				
+			} else {
+				console.log('response: ', response);
+			}
+		}
+		
+		// Launch method and callback registration
+		const launchWhatsAppSignup = () => {
+			FB.login(fbLoginCallback, {
+				config_id: config_id,
+				response_type: 'code',
+				override_default_response_type: true,
+				extras: {
+					setup: {},
+					featureType: '',
+					sessionInfoVersion: '3',
+				}
+			});
+		}
+	</script>
 </body>
 
 </html>

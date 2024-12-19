@@ -8,7 +8,8 @@ import {
 	languages,
 	countries,
 	size,
-	industryCategory, roles
+	industryCategory,
+	roles,
 } from "../../utils/dropDown.js";
 
 export const home = async (req, res) => {
@@ -120,8 +121,8 @@ export const accountDetails = async (req, res) => {
 			user,
 			countries,
 			industryCategory,
-            size, 
-            roles
+			size,
+			roles,
 		});
 	} catch (error) {
 		console.error(error);
@@ -143,9 +144,10 @@ export const updateAccountDetails = async (req, res) => {
 			jobRole,
 			website,
 		} = req.body;
+		// console.log(req.body);
 
 		const updatedUser = await User.findByIdAndUpdate(
-			req.session.user.id, 
+			req.session.user.id,
 			{
 				companyName,
 				companyDescription: description,
@@ -178,3 +180,4 @@ export const updateAccountDetails = async (req, res) => {
 		});
 	}
 };
+

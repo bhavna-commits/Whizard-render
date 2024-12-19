@@ -132,12 +132,12 @@
 					<form id="signUpForm">
 						<div class="mb-4 flex justify-between items-center">
 							<label for="name" class="form-label text-gray-500">Company Name</label>
-							<input type="text" class="form-control w-3/5" id="name" name="name" placeholder="Enter your Company's Name" value="<%= user.companyName %>" required />
+							<input type="text" class="form-control w-3/5" id="name" name="name" value="<%= user.companyName %>" placeholder="Enter your Company's Name" required />
 						</div>
 						<div class="mb-4 flex justify-between items-start">
 							<label for="description" class="form-label text-gray-500">Description</label>
 							<div class="w-3/5  block">
-								<textarea class="form-control w-full" id="description" name="description" placeholder="Tell us a bit about your company..." rows="2" maxlength="100" value="<%= user.companyDescription  %>" required></textarea>
+								<textarea class="form-control w-full" id="description" name="description" placeholder="Tell us a bit about your company..." rows="2" maxlength="100" required><%= user.companyDescription %></textarea>
 								<div class="form-text text-gray-500 mt-2 text-sm text-right" id="wordCount">
 									0/100 words
 								</div>
@@ -148,8 +148,7 @@
 							<div class="country-selector w-3/5 focus:outline-none" id="countrySelector">
 								<button type="button" class="country-selector-button  outline-blue-500 w-full" id="countrySelectorButton">
 									<span id="selectedFlag"></span> &nbsp;
-									<input type="text" name="countryCode" value="<%= user.country %>"
-                                    id="countrySearch" placeholder="Search country..." class="p-0 outline-none" />
+									<input type="text" name="countryCode" value="<%= user.country %>" id="countrySearch" placeholder="Search country..." class="p-0 outline-none" />
 									<div class="rotate-180">
 										<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="18px" fill="black" class="text-black z-20">
 											<path d="M480-528 296-344l-56-56 240-240 240 240-56 56-184-184Z" />
@@ -185,9 +184,10 @@
 							<select id="companySize" name="companySize" class="form-control w-3/5" required>
 								<option value="">Select company size</option>
 								<% size.forEach(function(s) { %>
-								<option value="<%= s %>"><%= s %></option>
+								<option value="<%= s %>" <%= user.companySize === s ? 'selected' : '' %>><%= s %></option>
 								<% }); %>
 							</select>
+							
 						</div>
 						
 						<div class="mb-4 flex justify-between items-center">
@@ -195,9 +195,10 @@
 							<select id="industry" name="industry" class="form-control w-3/5" required>
 								<option value="">Select industry type</option>
 								<% industryCategory.forEach(function(industry) { %>
-								<option value="<%= industry %>"><%= industry %></option>
+								<option value="<%= industry %>" <%= user.industry === industry ? 'selected' : '' %>><%= industry %></option>
 								<% }); %>
 							</select>
+							
 						</div>
 						
 						
@@ -207,14 +208,16 @@
 							<select id="jobRole" name="jobRole" class="form-control w-3/5" required>
 								<option value="">Select your role</option>
 								<% roles.forEach(function(role) { %>
-								<option value="<%= role %>"><%= role %></option>
+								<option value="<%= role %>" <%= user.jobRole === role ? 'selected' : '' %>><%= role %></option>
 								<% }); %>
 							</select>
+							
 						</div>
 						
 						<div class="mb-4 flex justify-between items-center">
 							<label for="website" class="form-label text-gray-500">Website URL</label>
-							<input type="url" id="website" class="px-3 py-2 rounded-xl w-3/5 border outline-none" name="website" class="form-control" placeholder="https://example.com" />
+							<input type="url" id="website" class="px-3 py-2 rounded-xl w-3/5 border outline-none form-control" name="website" placeholder="https://example.com" value="<%= user.website %>" />
+							
 						</div>
 						
 						
@@ -222,11 +225,11 @@
 						<div class="flex justify-end">
 							<div class="flex justify-evenly">
 								<button type="button" class="text-gray-500 border p-2 rounded-lg " onclick="location.reload()">Cancel</button>
-								<button type="submit" class=" bg-black ml-3 text-white py-2 px-4 rounded-lg">Save changes</button>
+								<button type="submit" id="submitBtn" class=" bg-black ml-3 text-white py-2 px-4 rounded-lg">Save changes</button>
 							</div>
 						</div>
 						
-						<div id="errorMessage" class="hidden"></div>
+						<div id="errorMessage" class="hidden text-green-500"></div>
 					</form>
 				</div>
 				
@@ -238,6 +241,8 @@
 	</div>
 	<script>
 		const countries = <%- JSON.stringify(countries) %>;
+		const user = <%- JSON.stringify(user) %>;
+		// console.log(typeof user.companyName);
 	</script>
 	<script src="/settings/js/accountDetails.js"></script>
 	

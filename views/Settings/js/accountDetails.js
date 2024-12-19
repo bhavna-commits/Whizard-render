@@ -41,7 +41,7 @@ document.addEventListener("DOMContentLoaded", function () {
 		};
 
 		try {
-			const response = await fetch("/api/settings/about", {
+			const response = await fetch("/api/settings/account-details", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
@@ -61,16 +61,25 @@ document.addEventListener("DOMContentLoaded", function () {
 
 			// If the result is successful, redirect to the homepage or next page
 			if (result.success) {
-				window.location.href = "/";
+				errorMessage.classList.remove("hidden");
+				errorMessage.innerText = result.message;
+				setTimeout(() => {
+                    errorMessage.classList.add("hidden");
+                    errorMessage.classList.remove("text-green-500");
+				}, 2000);
 			}
 		} catch (error) {
-			// Show the specific error message received from the backend
 			errorMessage.classList.remove("hidden");
-			errorMessage.textContent = error.message; // Display the error message
+			errorMessage.classList.add("text-red-500");
+			errorMessage.innerText = error.message;
+			setTimeout(() => {
+                errorMessage.classList.add("hidden");
+                errorMessage.classList.remove("text-red-500");
+			}, 2000);
 		} finally {
 			// Re-enable the submit button and restore the original text
 			submitBtn.disabled = false;
-			submitBtn.innerHTML = "Complete Sign Up";
+			submitBtn.innerHTML = "Save Changes";
 		}
 	});
 
@@ -78,8 +87,8 @@ document.addEventListener("DOMContentLoaded", function () {
 	stateInput.disabled = true;
 	stateDropdown.disabled = true;
 
-    countrySelectorButton.addEventListener("click", function () {
-        // console.log("lciked");  
+	countrySelectorButton.addEventListener("click", function () {
+		// console.log("lciked");
 		countryDropdown.classList.toggle("hidden");
 	});
 

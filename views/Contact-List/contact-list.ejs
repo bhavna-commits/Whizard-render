@@ -7,12 +7,13 @@
 	<title>Pages - Admin Dashboard UI Kit - Cards</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<!-- <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css"> -->
+	<script src="https://kit.fontawesome.com/44e4e59292.js" crossorigin="anonymous"></script>
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
 	<link href="assets/plugins/pace/pace-theme-flash.css" rel="stylesheet" type="text/css" />
 	<link href="assets/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
 	<link href="assets/plugins/jquery-scrollbar/jquery.scrollbar.css" rel="stylesheet" type="text/css" media="screen" />
 	<link href="assets/plugins/select2/css/select2.min.css" rel="stylesheet" type="text/css" media="screen" />
-	<link class="main-stylesheet" href="pages/css/themes/corporate.css" rel="stylesheet" type="text/css" />
+	<!-- <link class="main-stylesheet" href="pages/css/themes/corporate.css" rel="stylesheet" type="text/css" /> -->
 	<!-- Please remove the file below for production: Contains demo classes -->
 	<!-- <link class="main-stylesheet" href="assets/css/style.css" rel="stylesheet" type="text/css" /> -->
 	<link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -25,18 +26,31 @@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
 	
 	<!-- <link href="styles/createList.css" rel="stylesheet" type="text/css" /> -->
+	<style>
+		* {
+			outline: none;
+		}
+		
+		*:active {
+			outline: none;
+		}
+		
+		*:focus {
+			outline: none;
+		}
+	</style>
 </head>
 
 <body>
 	<!-- Sidebar -->
 	<div class="layout-container">
 		<nav class="sidebar">
-			<div class="logo pb-2">
+			<div class="logo py-3">
 				<img src="/assets/img/Wizard_logo.png" alt="Whizard Logo" />
 			</div>
-			<ul>
+			<ul class="mt-5 space-y-4">
 				<li>
-					<a href="/" class=""><span class="icon"><i class="fas fa-chart-line"></i></span>
+					<a href="/" class=""><span class="icon "><i class="fas fa-chart-line"></i></span>
 						Dashboard</a>
 				</li>
 				<li>
@@ -49,7 +63,7 @@
 						Contact List</a>
 				</li>
 				<li>
-					<a href="/template"><span class="icon "><i class="fa-regular fa-envelope"></i></span>
+					<a href="/template"><span class="icon"><i class="fa-regular fa-envelope"></i></span>
 						Template</a>
 				</li>
 				<li>
@@ -70,24 +84,24 @@
 		<!-- START PAGE-CONTAINER -->
 		<div class="main-content">
 			<!-- END HEADER -->
-			<div class="logo flex justify-between items-center">
-				<div class="mb-3 flex items-center">
+			<div class="logo flex justify-between items-center px-3">
+				<div class=" mt-[30px] flex items-center">
 					<!-- START BREADCRUMB -->
 					
 					<div class="flex items-center">
-						<a href="/" class="text-gray-500 hover:text-gray-700 text-base font-medium">Dashboard</a>
+						<a href="/" class="text-gray-500 hover:text-gray-700 text-xl font-medium">Dashboard</a>
 						<svg class="w-4 h-4 mx-2 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
 							<path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L11.586 10 7.293 5.707a1 1 0 011.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
 						</svg>
 					</div>
 					
-					<a href="/contact-list" class="text-red-600 hover:text-gray-700 text-base font-medium">Contact List</a>
+					<a href="/contact-list" class="text-red-600 hover:text-gray-700 text-xl font-medium">Contact List</a>
 					<!-- END BREADCRUMB -->
 				</div>
 			</div>
 			
 			<!-- START card -->
-			<div class="">
+			<div class="pt-3">
 				<div class="flex w-full justify-between items-center px-2">
 					<div class="">
 						<h6 class="p-3 text-2xl">Contact List</h6>
@@ -103,13 +117,13 @@
 						</div>
 						
 						<div class="text-center pr-3">
-							<button aria-label="" onclick="document.location='contact-list/custom-field'" type="button" class="border py-2 px-2 rounded-lg transition-colors ease-in-out duration-300 hover:bg-gray-100 text-sm font-medium">
+							<button aria-label="" onclick="document.location='contact-list/custom-field'" type="button" class="border py-2 px-2 rounded-lg transition-colors ease-in-out duration-300 hover:bg-gray-100 text-base font-medium">
 								Manage custom fields
 							</button>
 						</div>
 						
-						<button aria-label="Create new Contact list" type="button" id="create-List" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black">
-							<i class="pg-icon pr-1">add</i>
+						<button aria-label="Create new Contact list" type="button" id="create-List" class="inline-flex items-center px-4 py-3 border border-transparent text-sm font-medium rounded-md text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black">
+							<i class="fa-solid fa-plus pr-2"></i>
 							<span>Create new Contact list</span>
 						</button>
 					</div>
@@ -120,7 +134,8 @@
 				<!-- Contact list table -->
 				<div class="flex justify-center w-full pt-2">
 					<div class="w-[95%] ">
-						<%- include('partials/contactListTable') %></div>
+						<%- include('partials/contactListTable') %>
+					</div>
 				</div>
 			</div>
 			

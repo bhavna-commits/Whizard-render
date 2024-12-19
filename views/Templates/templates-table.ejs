@@ -65,7 +65,7 @@
 				
 				<!-- First Page Button -->
 				<li>
-					<a href="/contact-list?page=1" class="px-3 py-2 rounded-md text-sm font-medium <%= page === 1 ? 'text-white bg-blue-600 border-blue-600' : 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50' %>">1</a>
+					<a href="/template?page=1" class="px-3 py-2 rounded-md text-sm font-medium <%= page === 1 ? 'text-white bg-blue-600 border-blue-600' : 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50' %>">1</a>
 				</li>
 				
 				<% if (page > 3) { %>
@@ -76,7 +76,7 @@
 				<!-- Dynamic Page Numbers based on current page -->
 				<% for (let i = Math.max(2, page - 1); i <= Math.min(totalPages - 1, page + 1); i++) { %>
 				<li>
-					<a href="/contact-list?page=<%= i %>" class="px-3 py-2 rounded-md text-sm font-medium <%= i === page ? 'text-white bg-blue-600 border-blue-600' : 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50' %>"><%= i %></a>
+					<a href="/template?page=<%= i %>" class="px-3 py-2 rounded-md text-sm font-medium <%= i === page ? 'text-white bg-blue-600 border-blue-600' : 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50' %>"><%= i %></a>
 				</li>
 				<% } %>
 				
@@ -88,13 +88,13 @@
 				<!-- Last Page Button -->
 				<% if (totalPages > 1) { %>
 				<li>
-					<a href="/contact-list?page=<%= totalPages %>" class="px-3 py-2 rounded-md text-sm font-medium <%= page === totalPages ? 'text-white bg-blue-600 border-blue-600' : 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50' %>"><%= totalPages %></a>
+					<a href="/tempalte?page=<%= totalPages %>" class="px-3 py-2 rounded-md text-sm font-medium <%= page === totalPages ? 'text-white bg-blue-600 border-blue-600' : 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50' %>"><%= totalPages %></a>
 				</li>
 				<% } %>
 				
 				<!-- Next Button -->
 				<li>
-					<a href="/contact-list?page=<%= page < totalPages ? page + 1 : totalPages %>" class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50">›</a>
+					<a href="/template?page=<%= page < totalPages ? page + 1 : totalPages %>" class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50">›</a>
 				</li>
 			</ul>
 		</nav>

@@ -27,6 +27,13 @@ const userSchema = new mongoose.Schema(
 			default: "owner",
 			required: true,
 		},
+		WhatsAppConnectStatus: {
+			type: String,
+			enum: ["Pending", "Live"],
+			default: "Pending",
+			required: true,
+		},
+		accessToken: String,
 	},
 
 	{ timestamps: true },
