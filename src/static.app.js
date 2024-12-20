@@ -8,6 +8,7 @@ app.use("/Contact-List/createCampaign", express.static("public"));
 app.use("/Contact-List/custom-field", express.static("public"));
 app.use("/Settings/profile", express.static("public"));
 app.use("/Settings/account-details", express.static("public"));
+app.use("/Settings/activity-logs", express.static("public"));
 
 const __dirname = path.resolve();
 

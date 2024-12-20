@@ -10,12 +10,12 @@ import { multerMiddle } from "../config/multerMiddleware.js";
 
 const router = express.Router();
 
-router.post("/createTemplate", checkSession, multerMiddle, createTemplate);
+router.post("/createTemplate", multerMiddle, createTemplate);
 
-router.post("/duplicate/:id", checkSession, duplicateTemplate);
+router.post("/duplicate/:id", duplicateTemplate);
 
-router.delete("/delete/:id", checkSession, deleteTemplate);
+router.delete("/delete/:id", deleteTemplate);
 
-router.get("/:id", checkSession, getCampaignTemplates);
+router.get("/:id", getCampaignTemplates);
 
 export default router;

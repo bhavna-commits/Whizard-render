@@ -6,16 +6,18 @@ import templatesRoutes from "./backEnd-Routes/template.backEnd.routes.js";
 import contactListRoute from "./backEnd-Routes/contactList.backEnd.routes.js";
 import settingsFrontRoute from "./frontEnd-Routes/setting.frontEnd.routes.js";
 import settingsbackEndRoute from "./backEnd-Routes/settings.backEnd.routes.js";
-import faceBookBackEndRoute from "./backEnd-Routes/facebook.backEnd.routes.js"
+import faceBookBackEndRoute from "./backEnd-Routes/facebook.backEnd.routes.js";
+import { checkSession } from "./middleWares/checkSession.js";
 import app from "./static.app.js";
 
 app.use("/", userfrontEndRoutes, tempalteFrontEndRoutes);
-app.use("/settings", settingsFrontRoute);
-app.use("/contact-list", contactFrontEndRoutes);
-app.use("/api/templates", templatesRoutes);
 app.use("/api/users", userRoutes);
-app.use("/api/contact-list", contactListRoute);
-app.use("/api/settings", settingsbackEndRoute);
-app.use("/api/facebook", faceBookBackEndRoute);
+app.use("/", checkSession, tempalteFrontEndRoutes);
+app.use("/settings", checkSession, settingsFrontRoute);
+app.use("/contact-list", checkSession, contactFrontEndRoutes);
+app.use("/api/templates", checkSession, templatesRoutes);
+app.use("/api/contact-list", checkSession, contactListRoute);
+app.use("/api/settings", checkSession, settingsbackEndRoute);
+app.use("/api/facebook", checkSession, faceBookBackEndRoute);
 
 export default app;

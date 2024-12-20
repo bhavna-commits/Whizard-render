@@ -8,14 +8,14 @@ import {
 
 const router = express.Router();
 
-router.get("/template", checkSession, getList);
+router.get("/template", getList);
 
-router.get("/create-template", checkSession, (req, res) => {
+router.get("/create-template", (req, res) => {
 	res.render("Templates/create-template", {
 		templateData: [],
 	});
 });
 
-router.get("/getTemplates", checkSession, getTemplates);
+router.get("/getTemplates", getTemplates);
 
 export default router;

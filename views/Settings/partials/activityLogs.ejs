@@ -1,0 +1,9 @@
+<% logs.forEach((log) => { %>
+<div class="bg-white shadow rounded-lg p-4 mb-4">
+	<div class="flex justify-between">
+		<span class="text-lg font-semibold"><%= log.name %></span>
+		<span class="text-sm text-gray-500"><%= new Date(log.createdAt).toLocaleDateString() %></span>
+	</div>
+	<p class="text-gray-600"><%= log.actions %>: <%= log.details %></p>
+</div>
+<% }) %>

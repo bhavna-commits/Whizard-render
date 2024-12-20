@@ -12,11 +12,11 @@ import {
 
 const router = express.Router();
 
-router.get("/", checkSession, getList);
-router.get("/overview/:id", checkSession, getContacts);
-router.get("/custom-field", checkSession, getCustomField);
-router.get("/getContactList", checkSession, getContactList);
-router.get("/createCampaign", checkSession, (req, res) => {
+router.get("/", getList);
+router.get("/overview/:id", getContacts);
+router.get("/custom-field", getCustomField);
+router.get("/getContactList", getContactList);
+router.get("/createCampaign", (req, res) => {
 	res.render("Contact-List/createCampaign");
 });
 

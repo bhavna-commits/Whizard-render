@@ -79,9 +79,11 @@ export const templatePreview = async (req, res) => {
 };
 
 export const getList = async (req, res) => {
+	// console.log("here")
 	try {
 		const id = req.session.user.id;
 		const page = parseInt(req.query.page) || 1;
+		// console.log(req.query.page);
 		const limit = 6;
 		const skip = (page - 1) * limit;
 

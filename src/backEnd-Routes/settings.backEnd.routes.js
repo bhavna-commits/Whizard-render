@@ -5,17 +5,18 @@ import {
 	updateProfile,
 	updatePassword,
 	updateAccountDetails,
+	getActivityLogs,
 } from "../controllers/Settings/settings.controller.js";
 
 const router = express.Router();
 
 router.post(
 	"/profile",
-	checkSession,
+
 	uploadProfilePicController,
 	updateProfile,
 );
-router.post("/update-password", checkSession, updatePassword);
-router.post("/account-details", checkSession, updateAccountDetails);
+router.post("/update-password", updatePassword);
+router.post("/account-details", updateAccountDetails);
 
 export default router;

@@ -1,22 +1,12 @@
-import {
-	generateEmailToken,
-	sendEmailVerification,
-	sendWhatsAppVerification,
-	verifyEmailToken,
-	verifyWhatsAppOTP,
-} from "./userFunctions.js";
+import { sendEmailVerification } from "./userFunctions.js";
 import User from "../../models/user.model.js";
+import AddedUser from "../../models/addedUser.model.js";
 import bcrypt from "bcrypt";
-// import countryCodes from "../../utils/dropDown.js";
-
-const createOTP = () => {
-	return Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit OTP
-};
 
 const setOTPExpiry = () => {
 	return Date.now() + 600000; // 10 minutes in milliseconds
 };
-// Register User (send email and WhatsApp OTP, but don't touch DB)
+
 export const generateOTP = async (req, res) => {
 	const { name, email, password, phoneNumber, countryCode } = req.body;
 
@@ -33,12 +23,10 @@ export const generateOTP = async (req, res) => {
 		}
 
 		if (mobileExists) {
-			return res
-				.status(409)
-				.json({
-					success: false,
-					message: "Phone number already exists",
-				});
+			return res.status(409).json({
+				success: false,
+				message: "Phone number already exists",
+			});
 		}
 
 		const otp = Math.floor(100000 + Math.random() * 900000).toString();
@@ -84,7 +72,6 @@ export const generateOTP = async (req, res) => {
 	}
 };
 
-// Verify email using token
 export const verifyEmail = async (req, res) => {
 	const { otp, email } = req.body;
 
@@ -102,12 +89,10 @@ export const verifyEmail = async (req, res) => {
 		// Assuming OTP is stored in session or some temp storage
 
 		if (tempUser.otp !== otp) {
-			return res
-				.status(400)
-				.json({
-					success: false,
-					message: "Invalid OTP. Please try again.",
-				});
+			return res.status(400).json({
+				success: false,
+				message: "Invalid OTP. Please try again.",
+			});
 		}
 
 		// OTP verified, proceed to activate user or further steps
@@ -124,7 +109,6 @@ export const verifyEmail = async (req, res) => {
 	}
 };
 
-// Verify WhatsApp OTP
 export const verifyWhatsAppNumber = async (req, res) => {
 	const { otp, phoneNumber, countryCode } = req.query;
 
@@ -159,38 +143,58 @@ export const login = async (req, res) => {
 	const { email, password, rememberMe } = req.body;
 
 	try {
-		// Check if the user exists
 		const user = await User.findOne({ email });
 
 		if (!user) {
+			const addedUser = await AddedUser.findOne({ email });
+			if (addedUser) {
+				const isMatch = bcrypt.compare(password, addedUser.password);
+
+				if (!isMatch) {
+					return res
+						.status(400)
+						.json({ message: "Invalid credentials" });
+				}
+
+				req.session.user = {
+					id: addedUser.owner,
+				};
+				req.session.addedUser = {
+					id: addedUser._id,
+					name: addedUser.name,
+				};
+
+				if (rememberMe) {
+					req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000; // 30 days
+				} else {
+					req.session.cookie.maxAge = 60 * 60 * 1000; // 1 hour
+				}
+				res.status(200).json({
+					message: "Login successful",
+				});
+			}
 			return res.status(400).json({ message: "User not found" });
 		}
 
-		// Compare entered password with stored hashed password
 		const isMatch = await bcrypt.compare(password, user.password);
 
 		if (!isMatch) {
 			return res.status(400).json({ message: "Invalid credentials" });
 		}
 
-		// Store user info in the session
 		req.session.user = {
 			id: user._id,
 			name: user.name,
-			email: user.email,
 		};
 
-		// Adjust session expiration based on "Remember Me" option
 		if (rememberMe) {
 			req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000; // 30 days
 		} else {
 			req.session.cookie.maxAge = 60 * 60 * 1000; // 1 hour
 		}
 
-		// Send response to the frontend
 		res.status(200).json({
 			message: "Login successful",
-			user: { id: user._id, name: user.name, email: user.email },
 		});
 	} catch (error) {
 		res.status(500).json({ message: "Error logging in", error });
@@ -222,14 +226,79 @@ export const resendEmailOTP = async (req, res) => {
 	}
 };
 
-export const about = async (req, res) => {
-	if (!req.session.tempUser) {
+export const resetPassword = async (req, res) => {
+	const { email } = req.body;
+
+	try {
+		// Find the user by email
+		const user = await User.findOne({ email });
+		// console.log(user);
+		if (!user) {
+			// If no user is found, send an error response
+			return res.status(400).json({ message: "User not found" });
+		}
+
+		// Generate a random OTP
+		const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+		// Send the OTP via email (assuming sendEmailVerification is a working function)
+		await sendEmailVerification(email, otp);
+		req.session.tempUser.email = email;
+		req.session.tempUser.otp = otp;
+
+		// Send a success response to the frontend
+		res.status(200).json({ message: "OTP sent successfully" });
+	} catch (error) {
+		// If any error occurs, send an error response
+		res.status(500).json({
+			message: "An error occurred while sending OTP",
+		});
+	}
+};
+
+export const changePassword = async (req, res) => {
+	const { email, password } = req.body;
+
+	// Validate input
+	if (!email || !password) {
 		return res
 			.status(400)
-			.json({
-				success: false,
-				message: "Session expired. Please try again.",
-			});
+			.json({ message: "Email and password are required" });
+	}
+
+	try {
+		// Find the user by email
+		const user = await User.findOne({ email });
+
+		if (!user) {
+			return res.status(404).json({ message: "User not found" });
+		}
+
+		// Hash the new password
+		const hashedPassword = await bcrypt.hash(password, 10);
+
+		// Update the user's password in the database
+		user.password = hashedPassword;
+		await user.save();
+
+		// Respond with a success message
+		return res
+			.status(200)
+			.json({ message: "Password changed successfully" });
+	} catch (error) {
+		console.error(error);
+		return res
+			.status(500)
+			.json({ message: "Server error, please try again later" });
+	}
+};
+
+export const about = async (req, res) => {
+	if (!req.session.tempUser) {
+		return res.status(400).json({
+			success: false,
+			message: "Session expired. Please try again.",
+		});
 	}
 
 	const {
@@ -305,72 +374,5 @@ export const about = async (req, res) => {
 			message: "Error creating user.",
 			error: error.message,
 		});
-	}
-};
-
-export const resetPassword = async (req, res) => {
-	const { email } = req.body;
-
-	try {
-		// Find the user by email
-		const user = await User.findOne({ email });
-		// console.log(user);
-		if (!user) {
-			// If no user is found, send an error response
-			return res.status(400).json({ message: "User not found" });
-		}
-
-		// Generate a random OTP
-		const otp = Math.floor(100000 + Math.random() * 900000).toString();
-
-		// Send the OTP via email (assuming sendEmailVerification is a working function)
-		await sendEmailVerification(email, otp);
-		req.session.tempUser.email = email;
-		req.session.tempUser.otp = otp;
-
-		// Send a success response to the frontend
-		res.status(200).json({ message: "OTP sent successfully" });
-	} catch (error) {
-		// If any error occurs, send an error response
-		res.status(500).json({
-			message: "An error occurred while sending OTP",
-		});
-	}
-};
-
-export const changePassword = async (req, res) => {
-	const { email, password } = req.body;
-
-	// Validate input
-	if (!email || !password) {
-		return res
-			.status(400)
-			.json({ message: "Email and password are required" });
-	}
-
-	try {
-		// Find the user by email
-		const user = await User.findOne({ email });
-
-		if (!user) {
-			return res.status(404).json({ message: "User not found" });
-		}
-
-		// Hash the new password
-		const hashedPassword = await bcrypt.hash(password, 10);
-
-		// Update the user's password in the database
-		user.password = hashedPassword;
-		await user.save();
-
-		// Respond with a success message
-		return res
-			.status(200)
-			.json({ message: "Password changed successfully" });
-	} catch (error) {
-		console.error(error);
-		return res
-			.status(500)
-			.json({ message: "Server error, please try again later" });
 	}
 };

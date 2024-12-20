@@ -6,6 +6,7 @@ import CustomField from "../../models/customField.model.js";
 import User from "../../models/user.model.js";
 import { countries } from "../../utils/dropDown.js";
 import { fileURLToPath } from "url";
+import ActivityLogs from "../../models/activityLogs.model.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -15,7 +16,6 @@ export const createList = async (req, res) => {
 		const userId = req.session.user.id;
 		const { countryCode, listName, fileData } = req.body;
 
-		// Check if file data is provided
 		if (!fileData) {
 			return res.status(400).json({
 				success: false,
@@ -23,7 +23,6 @@ export const createList = async (req, res) => {
 			});
 		}
 
-		// Parse the uploaded file data (assumed JSON from the frontend)
 		let parsedData;
 		try {
 			parsedData = JSON.parse(fileData);
@@ -34,7 +33,6 @@ export const createList = async (req, res) => {
 			});
 		}
 
-		// Check if the parsed data contains any contacts
 		if (!parsedData.length) {
 			return res.status(400).json({
 				success: false,
@@ -42,7 +40,6 @@ export const createList = async (req, res) => {
 			});
 		}
 
-		// Find the user by ID
 		const user = await User.findById(userId);
 		if (!user) {
 			return res.status(404).json({
@@ -63,10 +60,8 @@ export const createList = async (req, res) => {
 
 		await contactList.save();
 
-		// Prepare contacts with additional attributes
 		const contactsToSave = parsedData
 			.map((contactData) => {
-				// Destructure Name, WhatsApp, and additional attributes
 				let { Name, WhatsApp, ...additionalFields } = contactData;
 
 				// Trim leading and trailing whitespaces from Name and WhatsApp
@@ -105,10 +100,18 @@ export const createList = async (req, res) => {
 			(key) => key !== "Name" && key !== "WhatsApp",
 		);
 
+		await ActivityLogs.create({
+			name: req.session.user.name
+				? req.session.user.name
+				: req.session.addedUser.name,
+			actions: "Create",
+			details: `Created a contact List named : ${listName}`,
+		});
+
 		res.json({
 			success: true,
 			message: "Contact list and contacts created successfully",
-			dynamicAttributes, // Send the dynamic attributes back to the frontend
+			dynamicAttributes,
 		});
 	} catch (error) {
 		console.error(error);
@@ -132,14 +135,22 @@ export const editList = async (req, res) => {
 		}
 
 		// Update the fields
-		contactList.name = name || contactList.name;
+		contactList.ContactListName = name || contactList.name;
 		contactList.fileData = fileData || contactList.fileData;
 		contactList.countryCode = countryCode || contactList.countryCode;
 		contactList.participantCount = fileData
 			? fileData.length
-			: contactList.participantCount; // Recalculate participant count based on new data
+			: contactList.participantCount;
 
 		await contactList.save();
+
+		await ActivityLogs.create({
+			name: req.session.user.name
+				? req.session.user.name
+				: req.session.addedUser.name,
+			actions: "Update",
+			details: `Updated contact list named: ${contactList.name}`,
+		});
 
 		res.status(200).json({
 			success: true,
@@ -165,6 +176,14 @@ export const deleteList = async (req, res) => {
 		}
 
 		await contactList.remove();
+
+		await ActivityLogs.create({
+			name: req.session.user.name
+				? req.session.user.name
+				: req.session.addedUser.name,
+			actions: "Delete",
+			details: `Deleted a contact List named : ${contactList.ContactListName}`,
+		});
 
 		res.status(200).json({
 			success: true,
@@ -248,7 +267,6 @@ export const createCustomField = async (req, res) => {
 	try {
 		const userId = req.session.user.id;
 		const { fieldName, fieldType } = req.body;
-		// console.log(req.body);
 		const newField = new CustomField({
 			owner: userId,
 			fieldName,
@@ -256,6 +274,14 @@ export const createCustomField = async (req, res) => {
 		});
 
 		await newField.save();
+
+		await ActivityLogs.create({
+			name: req.session.user.name
+				? req.session.user.name
+				: req.session.addedUser.name,
+			actions: "Create",
+			details: `Created a custom field named : ${fieldName}`,
+		});
 
 		res.status(201).json({
 			success: true,
@@ -288,6 +314,14 @@ export const deleteCustomField = async (req, res) => {
 			});
 		}
 
+		await ActivityLogs.create({
+			name: req.session.user.name
+				? req.session.user.name
+				: req.session.addedUser.name,
+			actions: "Delete",
+			details: `Deleted a custom field named : ${field.fieldName}`,
+		});
+
 		res.json({
 			success: true,
 			message: "Custom field deleted successfully",
@@ -302,8 +336,8 @@ export const deleteCustomField = async (req, res) => {
 };
 
 export const updateContactListName = async (req, res) => {
-	const contactListId = req.params.id; // Get the contact list ID from the URL parameter
-	const { updatedValue } = req.body; // Get the updated value from the request body
+	const contactListId = req.params.id; 
+	const { updatedValue } = req.body; 
 
 	if (!updatedValue) {
 		return res.status(400).json({
@@ -329,6 +363,14 @@ export const updateContactListName = async (req, res) => {
 				message: "Contact list not found",
 			});
 		}
+
+		await ActivityLogs.create({
+			name: req.session.user.name
+				? req.session.user.name
+				: req.session.addedUser.name,
+			actions: "Update",
+			details: `Updated a contact List Name to : ${updatedValue}`,
+		});
 
 		// Send success response
 		res.json({

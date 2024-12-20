@@ -60,7 +60,7 @@
 			<ul class="flex space-x-1">
 				<!-- Previous Button -->
 				<li>
-					<a href="/contact-list?page=<%= page > 1 ? page - 1 : 1 %>" class="px-3 py-2 rounded-md text-sm font-medium text-gray-500 bg-white border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed" <%= page === 1 ? 'aria-disabled="true"' : '' %>>‹</a>
+					<a href="/template?page=<%= page > 1 ? page - 1 : 1 %>" class="px-3 py-2 rounded-md text-sm font-medium text-gray-500 bg-white border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed" <%= page === 1 ? 'aria-disabled="true"' : '' %>>‹</a>
 				</li>
 				
 				<!-- First Page Button -->
@@ -88,7 +88,7 @@
 				<!-- Last Page Button -->
 				<% if (totalPages > 1) { %>
 				<li>
-					<a href="/tempalte?page=<%= totalPages %>" class="px-3 py-2 rounded-md text-sm font-medium <%= page === totalPages ? 'text-white bg-blue-600 border-blue-600' : 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50' %>"><%= totalPages %></a>
+					<a href="/template?page=<%= totalPages %>" class="px-3 py-2 rounded-md text-sm font-medium <%= page === totalPages ? 'text-white bg-blue-600 border-blue-600' : 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50' %>"><%= totalPages %></a>
 				</li>
 				<% } %>
 				

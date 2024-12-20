@@ -20,30 +20,30 @@ import {
 
 const router = express.Router();
 
-router.post("/createList", checkSession, createList);
+router.post("/createList", createList);
 
-router.put("/editList/:id", checkSession, editList);
+router.put("/editList/:id", editList);
 
-router.delete("/deleteList/:id", checkSession, deleteList);
+router.delete("/deleteList/:id", deleteList);
 
-router.put("/overview/:id", checkSession, updateContact);
+router.put("/overview/:id", updateContact);
 
-router.delete("/overview/:id", checkSession, deleteContact);
+router.delete("/overview/:id", deleteContact);
 
-router.get("/sampleCSV", checkSession, sampleCSV);
+router.get("/sampleCSV", sampleCSV);
 
-router.put("/contacts/:id", checkSession, editContact);
+router.put("/contacts/:id", editContact);
 
-router.delete("/contacts/:id", checkSession, deleteContact);
+router.delete("/contacts/:id", deleteContact);
 
-router.put("/:id/updateName", checkSession, updateContactListName);
+router.put("/:id/updateName", updateContactListName);
 
-router.get("/:id/contacts", checkSession, getCampaignContacts);
+router.get("/:id/contacts", getCampaignContacts);
 
-router.post("/custom-fields", checkSession, createCustomField);
+router.post("/custom-fields", createCustomField);
 
-router.delete("/custom-fields/:id", checkSession, deleteCustomField);
+router.delete("/custom-fields/:id", deleteCustomField);
 
-router.get("/search", checkSession, searchContactLists);
+router.get("/search", searchContactLists);
 
 export default router;

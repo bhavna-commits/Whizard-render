@@ -1,6 +1,6 @@
 import crypto from "crypto";
 import { sendVerificationEmail } from "../../services/OTP/emailOTPService.js";
-import { sendWhatsAppOTP, verifyOTP } from "../../services/OTP/whatsAppOTPService.js";
+// import { sendWhatsAppOTP, verifyOTP } from "../../services/OTP/whatsAppOTPService.js";
 
 // Generate email verification token
 export const generateEmailToken = () => {
@@ -19,13 +19,13 @@ export const sendEmailVerification = async (email, token) => {
 };
 
 // Send WhatsApp OTP
-export const sendWhatsAppVerification = async (phoneNumber, countryCode) => {
-  try {
-    await sendWhatsAppOTP(phoneNumber, countryCode);
-  } catch (error) {
-    throw new Error("Failed to send WhatsApp OTP");
-  }
-};
+// export const sendWhatsAppVerification = async (phoneNumber, countryCode) => {
+//   try {
+//     await sendWhatsAppOTP(phoneNumber, countryCode);
+//   } catch (error) {
+//     throw new Error("Failed to send WhatsApp OTP");
+//   }
+// };
 
 // Verify the email token
 export const verifyEmailToken = (incomingToken, storedToken, tokenExpiry) => {
@@ -40,7 +40,7 @@ export const verifyEmailToken = (incomingToken, storedToken, tokenExpiry) => {
 };
 
 // Verify the WhatsApp OTP
-export const verifyWhatsAppOTP = (phoneNumber, countryCode, otp) => {
-  const isValid = verifyOTP(phoneNumber, countryCode, otp);
-  return isValid;
-};
+// export const verifyWhatsAppOTP = (phoneNumber, countryCode, otp) => {
+//   const isValid = verifyOTP(phoneNumber, countryCode, otp);
+//   return isValid;
+// };

@@ -4,7 +4,7 @@
 <head>
 	<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
 	<meta charset="utf-8" />
-	<title>Settings - Whizard Api</title>
+	<title>Pages - Admin Dashboard UI Kit - Blank Page</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no" />
 	<link rel="apple-touch-icon" href="pages/ico/60.png" />
 	<link rel="apple-touch-icon" sizes="76x76" href="pages/ico/76.png" />
@@ -41,32 +41,32 @@
 <body>
 	<div class="layout-container">
 		<nav class="sidebar">
-			<div class="logo pb-2">
+			<div class="logo py-3">
 				<img src="/assets/img/Wizard_logo.png" alt="Whizard Logo" />
 			</div>
-			<ul class="pt-3">
+			<ul class="mt-4 space-y-4">
 				<li>
 					<a href="/" class=""><span class="icon"><i class="fas fa-chart-line"></i></span>
 						Dashboard</a>
 				</li>
-				<li class="py-1">
+				<li class="">
 					<a href="/chats"><span class="icon"><i class="fa-regular fa-comment"></i></span>
 						Chats</a>
 				</li>
-				<li class="py-1">
+				<li class="">
 					<a href="/contact-list"><span class="icon "><i class="fa-regular fa-address-book"></i></span>
 						
 						Contact List</a>
 				</li>
-				<li class="py-1">
+				<li class="">
 					<a href="/template"><span class="icon "><i class="fa-regular fa-envelope"></i></span>
 						Template</a>
 				</li>
-				<li class="py-1">
+				<li class="">
 					<a href="/settings"><span class="icon active"><i class="fa-regular fa-user"></i></span>
 						Settings</a>
 				</li>
-				<li class="py-1">
+				<li class="">
 					<a><span class="icon"><i class="fa-regular fa-chart-bar"></i></span>
 						Reports</a>
 				</li>
@@ -79,50 +79,58 @@
 		
 		<!-- START PAGE-CONTAINER -->
 		<div class="main-content  p-2">
-			<!-- END HEADER -->
 			<div class="logo flex justify-between items-center">
 				<div class="">
 					<!-- START BREADCRUMB -->
-					<nav class="flex px-3  mt-2" aria-label="Breadcrumb">					
+					<nav class="flex px-3  mt-2" aria-label="Breadcrumb">
 						<div class="flex items-center">
 							<a href="/settings" class="text-gray-500 hover:text-gray-700 text-lg font-medium">Settings</a>
-						</div>					
+						</div>
 					</nav>
 					<!-- END BREADCRUMB -->
 				</div>
 			</div>
-			<div class="w-full h-[80%] flex justify-center items-center mt-3">
-				<div class="w-[60%] h-full grid grid-cols-1 sm:grid-cols-2 gap-4">
-					<div onclick="location.href='/settings/profile'" class="border cursor-pointer text-slate-500 rounded-xl space-y-3 p-3 hover:bg-slate-100">
-						<i class="fa-solid fa-user text-black text-xl"></i>
-						<h2 class="text-2xl text-black">Profile</h2>
-						<p>Manage personal details such as name, email, password, language preferences, and user role.</p>
+			<div class="container mx-auto">
+				<div class="flex justify-between mb-6">
+					<div>
+						<label for="dateRange" class="block text-sm font-medium text-gray-700">Date Range</label>
+						<select id="dateRange" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+							<option>Past 7 days</option>
+							<option>Past 30 days</option>
+							<option>Past 90 days</option>
+							<option>This month</option>
+							<option>Previous month</option>
+						</select>
 					</div>
-					<div onclick="location.href='/settings/account-details'" class="border cursor-pointer rounded-xl text-slate-500 space-y-3 p-3 hover:bg-slate-100">
-						<i class="fas fa-info-circle text-black text-xl"></i>
-						<h2 class="text-2xl text-black">Account Details</h2>
-						<p>View and update business information and contact information.</p>
-					</div>
-					<div onclick="location.href='/settings/user'" class="border cursor-pointer rounded-xl text-slate-500 space-y-3 p-3 hover:bg-slate-100">
-						<i class="fa fa-users text-black text-xl" aria-hidden="true"></i>
-						<h2 class="text-2xl text-black">User Management</h2>
-						<p>Add, edit, remove users, and assign roles to manage team access and permissions effectively.</p>
-					</div>
-					<div onclick="location.href='/settings/tags'" class="border cursor-pointer text-slate-500 rounded-xl space-y-3 p-3 hover:bg-slate-100">
-						<i class="fa-solid fa-tags text-black text-xl"></i>
-						<h2 class="text-2xl text-black">Tags</h2>
-						<p>Create, edit, and manage tags to organize and categorize data for better searchability and segmentation.</p>
-					</div>
-					<div onclick="location.href='/settings/activity-logs'" class="border cursor-pointer rounded-xl text-slate-500 space-y-3 p-3 hover:bg-slate-100">
-						<i class="fas fa-history text-black text-xl"></i>
-						<h2 class="text-2xl text-black">Activity Logs</h2>
-						<p>Track user activity and display a timeline of actions, including activity type, user details, and timestamps.</p>
+					<div>
+						<label for="actionFilter" class="block text-sm font-medium text-gray-700">Action</label>
+						<select id="actionFilter" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+							<option>All action</option>
+							<option>Update</option>
+							<option>Create</option>
+							<option>Delete</option>
+							<option>Send</option>
+						</select>
 					</div>
 				</div>
+				
+				<!-- Activity Logs -->
+				<div id="activityLogs">
+                    <% logs.forEach((log) => { %>
+                    <div class="bg-white shadow rounded-lg p-4 mb-4">
+                    	<div class="flex justify-between">
+                    		<span class="text-lg font-semibold"><%= log.name %></span>
+                    		<span class="text-sm text-gray-500"><%= new Date(log.createdAt).toLocaleDateString() %></span>
+                    	</div>
+                    	<p class="text-gray-600"><%= log.actions %>: <%= log.details %></p>
+                    </div>
+                    <% }) %>
+					<%- include("partials/activityLogs") %>
+				</div>
 			</div>
-
 		</div>
 	</div>
+	<script defer src="/settings/js/activityLogs.js"></script>
 </body>
 
 </html>

@@ -22,7 +22,6 @@ const sessionMiddleware = session({
 	},
 });
 
-// Optional logging for development (remove for production)
 if (process.env.NODE_ENV !== "production") {
 	console.log(
 		`Session Configured: Secure=${process.env.NODE_ENV === "production"}`,

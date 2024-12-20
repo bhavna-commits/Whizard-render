@@ -24,7 +24,7 @@ const contactsSchema = new Schema(
 			required: true,
 			ref: "ContactList",
 		},
-		additionalAttributes: { type: Map, of: String }, // New field to store additional columns as key-value pairs
+		additionalAttributes: { type: Map, of: String },
 	},
 	{ timestamps: true },
 	{ strict: false },

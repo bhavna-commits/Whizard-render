@@ -1,13 +1,19 @@
 import express from "express";
 import { checkSession } from "../middleWares/checkSession.js";
 import {
-	home, profile, accountDetails
+	home,
+	profile,
+	accountDetails,
+	getActivityLogs,
+	activityLogsFiltered,
 } from "../controllers/Settings/settings.controller.js";
 
 const router = express.Router();
 
-router.get("/", checkSession, home);
-router.get("/profile", checkSession, profile);
-router.get("/account-details", checkSession, accountDetails);
+router.get("/", home);
+router.get("/profile", profile);
+router.get("/account-details", accountDetails);
+router.get("/activity-logs", getActivityLogs);
+router.get("/activity-logs/filtered", activityLogsFiltered);
 
 export default router;

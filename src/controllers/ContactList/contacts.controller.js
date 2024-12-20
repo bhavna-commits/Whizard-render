@@ -1,9 +1,6 @@
-// Controller to update a contact
-import path from "path";
 import ContactList from "../../models/contactList.model.js";
 import Contacts from "../../models/contacts.modal.js";
-import User from "../../models/user.model.js";
-import { countries } from "../../utils/dropDown.js";
+import ActivityLogs from "../../models/activityLogs.model.js";
 
 export const updateContact = async (req, res) => {
 	const contactId = req.params.id;
@@ -14,7 +11,7 @@ export const updateContact = async (req, res) => {
 		const updatedContact = await ContactList.findByIdAndUpdate(
 			contactId,
 			{ name, tags, validated },
-			{ new: true }, // Return the updated document
+			{ new: true },
 		);
 
 		if (!updatedContact) {
@@ -23,6 +20,14 @@ export const updateContact = async (req, res) => {
 				message: "Contact not found",
 			});
 		}
+
+		await ActivityLogs.create({
+			name: req.session.user.name
+				? req.session.user.name
+				: req.session.addedUser.name,
+			actions: "Update",
+			details: `updated contact of ${name}`,
+		});
 
 		res.json({
 			success: true,
@@ -84,7 +89,14 @@ export const editContact = async (req, res) => {
 	}
 
 	try {
-		await Contacts.findByIdAndUpdate(id, updatedData);
+		const contacts = await Contacts.findByIdAndUpdate(id, updatedData);
+		await ActivityLogs.create({
+			name: req.session.user.name
+				? req.session.user.name
+				: req.session.addedUser.name,
+			actions: "Update",
+			details: `Edited contact of : ${contacts.userName}`,
+		});
 		res.json({ success: true });
 	} catch (error) {
 		res.json({ success: false, message: error.message });
@@ -100,7 +112,6 @@ export const deleteContact = async (req, res) => {
 		});
 	}
 	try {
-		// Find the contact by ID to get the associated contact list
 		const contact = await Contacts.findById(id);
 		if (!contact) {
 			return res
@@ -108,24 +119,26 @@ export const deleteContact = async (req, res) => {
 				.json({ success: false, message: "Contact not found" });
 		}
 
-		// Get the contact list ID from the contact
 		const contactListId = contact.contactList;
-
-		// Delete the contact
+		const contacts = await Contacts.findById(id);
 		await Contacts.findByIdAndDelete(id);
-
-		// Decrement the participant count in the related contact list
 		await ContactList.findByIdAndUpdate(contactListId, {
 			$inc: { participantCount: -1 },
 		});
 
-		// Send a success response
+		await ActivityLogs.create({
+			name: req.session.user.name
+				? req.session.user.name
+				: req.session.addedUser.name,
+			actions: "Update",
+			details: `Deleted contact of : ${contacts.userName}`,
+		});
+
 		res.json({
 			success: true,
 			message: "Contact deleted and participant count updated",
 		});
 	} catch (error) {
-		// Handle any errors
 		console.error("Error deleting contact:", error);
 		res.status(500).json({
 			success: false,
