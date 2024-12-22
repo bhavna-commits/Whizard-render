@@ -11,6 +11,7 @@ import ActivityLogs from "../../models/activityLogs.model.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+
 export const createList = async (req, res) => {
 	try {
 		const userId = req.session.user.id;
@@ -168,14 +169,13 @@ export const editList = async (req, res) => {
 export const deleteList = async (req, res) => {
 	try {
 		const { id } = req.params;
-		const contactList = await ContactList.findById(id);
+		const contactList = await ContactList.findByIdAndDelete(id);
+		// console.log(contactList);
 		if (!contactList) {
 			return res
 				.status(404)
 				.json({ success: false, message: "Contact list not found" });
 		}
-
-		await contactList.remove();
 
 		await ActivityLogs.create({
 			name: req.session.user.name

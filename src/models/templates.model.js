@@ -2,13 +2,42 @@ import mongoose from "mongoose";
 
 const Schema = mongoose.Schema;
 
+const componentSchema = new Schema({
+	text: {
+		type: String,
+		required: function () {
+			return this.type !== "HEADER";
+		},
+	},
+	type: {
+		type: String,
+		enum: ["HEADER", "BODY", "FOOTER", "BUTTON"],
+		required: true,
+	},
+	format: {
+		type: String,
+		enum: ["IMAGE", "VIDEO", "DOCUMENT"], 
+		required: function () {
+			return this.type === "HEADER";
+		},
+	},
+	example: {
+		header_handle: {
+			type: [String], 
+			required: function () {
+				return this.type === "HEADER" && this.format;
+			},
+		},
+	},
+});
+
 const templateSchema = new Schema(
 	{
 		owner: {
 			type: Schema.ObjectId,
 			required: true,
 		},
-		templateName: {
+		name: {
 			type: String,
 			required: true,
 		},
@@ -16,36 +45,39 @@ const templateSchema = new Schema(
 			type: String,
 			required: true,
 		},
-		body: {
+		components: [componentSchema], 
+		language: {
+			type: String,
+			default: "en",
+		},
+		namespace: {
 			type: String,
 			required: true,
 		},
-		footer: {
+		rejected_reason: {
 			type: String,
-			required: true,
+			default: "NONE",
 		},
-		buttons: [
-			{
-				text: String,
-				urlPhone: String,
-			},
-		],
-		header: {
-			type: {
-				type: String,
-				enum: ["none", "text", "media"],
-				default: "none",
-			},
-			content: {
-				type: mongoose.Schema.Types.Mixed,
-				default: null,
-			},
-		},
-		dynamicVariables: [Number],
 		status: {
 			type: String,
 			enum: ["approved", "rejected", "pending"],
 			default: "pending",
+		},
+		subscribe_update: {
+			type: Number,
+			required: true,
+		},
+		whizard_status: {
+			type: Number,
+			default: 1,
+		},
+		unique_id: {
+			type: String,
+			required: true,
+		},
+		useradmin: {
+			type: Number,
+			required: true,
 		},
 	},
 	{ timestamps: true },

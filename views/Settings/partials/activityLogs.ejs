@@ -1,9 +1,49 @@
-<% logs.forEach((log) => { %>
-<div class="bg-white shadow rounded-lg p-4 mb-4">
-	<div class="flex justify-between">
-		<span class="text-lg font-semibold"><%= log.name %></span>
-		<span class="text-sm text-gray-500"><%= new Date(log.createdAt).toLocaleDateString() %></span>
+<% let currentDate = ''; %>
+<% logs.forEach((log, index) => { %>
+<%		const logDate = new Date(log.createdAt).toLocaleDateString("en-GB", { %>
+<%		day: 'numeric', %>
+<%		month: 'short', %>
+<%		year: 'numeric' %>
+<%	}); %>
+
+<% if (logDate !== currentDate) { %>
+<!-- New date section header -->
+<div class="timeline-date font-bold text-lg mt-6 mb-4">
+	<%= logDate %> <%= logDate === new Date().toLocaleDateString("en-GB", {day: 'numeric', month: 'short', year: 'numeric'}) ? "Today" : "" %>
+</div>
+<% currentDate = logDate; } %>
+
+<!-- Log item -->
+<div class="timeline-item flex items-center relative">
+	<!-- Circle with initials -->
+	<div class="icon bg-gray-200 text-gray-700 rounded-full flex justify-center items-center w-10 h-10 font-semibold">
+		<%= log.name.split(" ").map(n => n[0]).join("") %>
 	</div>
-	<p class="text-gray-600"><%= log.actions %>: <%= log.details %></p>
+	
+	<!-- Line connecting to next log -->
+	<% if (index < logs.length - 1 && new Date(logs[index + 1].createdAt).toLocaleDateString("en-GB") === logDate) { %>
+	<div class="absolute left-5 top-10 bottom-0 w-1 bg-gray-300"></div>
+	<% } %>
+	
+	<!-- Log content -->
+	<div class="content ml-4">
+		<div class="flex justify-between w-full">
+			<!-- User and time -->
+			<div>
+				<p class="text-sm font-bold"><%= log.name %></p>
+				<p class="text-xs text-gray-500"><%= new Date(log.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) %></p>
+			</div>
+			
+			<!-- Log details on the right -->
+			<div class="text-sm text-gray-600 text-right"><%= log.details %></div>
+		</div>
+		
+		<!-- Action with colored background -->
+		<p class="mt-2">
+			<span class="<%= log.action.toLowerCase() %> bg-<%= log.action.toLowerCase() === 'sent' ? 'orange-100' : log.action.toLowerCase() === 'updated' ? 'pink-100' : 'blue-100' %> text-<%= log.action.toLowerCase() === 'sent' ? 'orange-500' : log.action.toLowerCase() === 'updated' ? 'pink-500' : 'blue-500' %> px-2 py-1 rounded-full text-xs">
+				<%= log.action %>
+			</span>
+		</p>
+	</div>
 </div>
 <% }) %>

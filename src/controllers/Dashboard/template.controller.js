@@ -1,62 +1,42 @@
 import path from "path";
 import fs from "fs";
 import Template from "../../models/templates.model.js";
+import dotenv from "dotenv";
+import { saveTemplateToDatabase } from "./template.functions.controller.js";
+import { submitTemplateToFacebook } from "./template.functions.controller.js";
+
+dotenv.config();
 
 export const createTemplate = async (req, res) => {
 	try {
 		const templateData = JSON.parse(req.body.templateData);
 		const id = req.session.user.id;
 
-		// Prepare the header content
-		let header = templateData.header;
-		if (req.file) {
-			// If the file is uploaded, save the file name in the header content
-			console.log(req.file.filename, ": fileName");
-			header.content = req.file.filename;
-		}
+		const savedTemplate = await saveTemplateToDatabase(
+			req,
+			templateData,
+			id,
+		);
+		console.log("yah a gya");
 
-		// Create a new Template document and save it to the database
-		const newTemplate = new Template({
-			owner: id,
-			templateName: templateData.templateName,
-			category: templateData.category,
-			body: templateData.body,
-			footer: templateData.footer,
-			buttons: templateData.buttons,
-			header: header,
-			dynamicVariables: templateData.dynamicVariables,
-			status: "pending",
+		const facebookResponse = await submitTemplateToFacebook(savedTemplate);
+
+		await ActivityLogs.create({
+			name: req.session.user.name
+				? req.session.user.name
+				: req.session.addedUser.name,
+			actions: "Create",
+			details: `Created new template named: ${savedTemplate.name}`,
 		});
-
-		const savedTemplate = await newTemplate.save();
-
-		const __dirname = path.resolve();
-		if (header.type === "media" && header.content) {
-			const filePath = path.join(
-				__dirname,
-				"..",
-				"uploads",
-				req.session.user.name,
-				header.content,
-			);
-
-			// Check if the file exists before adding to the response
-			if (fs.existsSync(filePath)) {
-				templateData.header.fileUrl = filePath;
-			} else {
-				templateData.header.fileUrl = null; // File not found
-			}
-		}
 
 		res.status(201).json({
 			success: true,
 			templateData: savedTemplate,
+			facebookResponse,
+			WABA_ID,
 		});
 	} catch (error) {
-		res.status(400).json({
-			success: false,
-			error: error.message,
-		});
+		res.status(500).json({ success: false, message: error.message });
 	}
 };
 
@@ -79,14 +59,13 @@ export const templatePreview = async (req, res) => {
 };
 
 export const getList = async (req, res) => {
-	// console.log("here")
 	try {
 		const id = req.session.user.id;
 		const page = parseInt(req.query.page) || 1;
-		// console.log(req.query.page);
 		const limit = 6;
 		const skip = (page - 1) * limit;
 
+		// Count total templates for the owner
 		const totalTemplates = await Template.countDocuments({ owner: id });
 		const templates = await Template.find({ owner: id })
 			.skip(skip)
@@ -95,7 +74,7 @@ export const getList = async (req, res) => {
 		const totalPages = Math.ceil(totalTemplates / limit);
 
 		res.render("Templates/manage_template", {
-			list: templates,
+			list: templates, // Templates with components array
 			page,
 			totalPages,
 		});
@@ -126,12 +105,21 @@ export const duplicateTemplate = async (req, res) => {
 			_id: undefined, // Remove _id to generate a new one
 			createdAt: new Date(),
 			updatedAt: new Date(),
+			unique_id: `unique_${Date.now()}`, // Generate a new unique ID
+			status: "pending", // New template starts as pending
 		});
 
 		// Save the duplicated template
-		await newTemplate.save();
+		const savedTemplate = await newTemplate.save();
 
-		res.status(201).json({ success: true, template: newTemplate });
+		// Log the duplication activity
+		await ActivityLogs.create({
+			name: req.session.user.name || req.session.addedUser.name,
+			actions: "Create",
+			details: `Duplicated Template named: ${savedTemplate.name}`,
+		});
+
+		res.status(201).json({ success: true, template: savedTemplate });
 	} catch (error) {
 		res.status(500).json({ success: false, error: error.message });
 	}
@@ -141,13 +129,19 @@ export const deleteTemplate = async (req, res) => {
 	try {
 		const templateId = req.params.id;
 
-		// Find and delete the template by its ID
+		const one = Template.findById(templateId);
 		const deletedTemplate = await Template.findByIdAndDelete(templateId);
 		if (!deletedTemplate) {
 			return res
 				.status(404)
 				.json({ success: false, error: "Template not found" });
 		}
+
+		await ActivityLogs.create({
+			name: req.session.user.name || req.session.addedUser.name,
+			actions: "Delete",
+			details: `Deleted Template named: ${one.name}`,
+		});
 
 		res.status(200).json({
 			success: true,
@@ -161,33 +155,34 @@ export const deleteTemplate = async (req, res) => {
 export const getCampaignTemplates = async (req, res) => {
 	try {
 		const templateData = await Template.findById(req.params.id);
-		if (!templateData)
+		if (!templateData) {
 			return res.status(404).json({ error: "Template not found" });
+		}
 
-		// If the header contains a media file, attach the file path
+		// Handle file attachments if the header contains media
 		const __dirname = path.resolve();
-		if (
-			templateData.header.type === "media" &&
-			templateData.header.content
-		) {
+		const header = templateData.components.find(
+			(component) => component.type === "HEADER",
+		);
+
+		if (header && header.type === "media" && header.content) {
 			const filePath = path.join(
 				__dirname,
 				"..",
 				"uploads",
 				req.session.user.id,
-				templateData.header.content,
+				header.content,
 			);
-			console.log("fileURL :", filePath);
+			console.log("fileURL:", filePath);
+
 			// Check if the file exists before adding to the response
 			if (fs.existsSync(filePath)) {
-				templateData.header.fileUrl = filePath;
-				console.log("fileURL :", filePath);
+				header.fileUrl = filePath;
 			} else {
-				templateData.header.fileUrl = null; // File not found
+				header.fileUrl = null; // File not found
 			}
 		}
 
-		// Send the full template data (including file if present)
 		res.status(200).json({
 			success: true,
 			template: templateData,
@@ -203,9 +198,7 @@ export const getCampaignTemplates = async (req, res) => {
 export const getTemplates = async (req, res) => {
 	try {
 		const { id } = req.session.user;
-
 		const templates = await Template.find({ owner: id });
-
 		res.json(templates);
 	} catch (error) {
 		res.status(500).json({ success: false, error: error.message });

@@ -60,99 +60,127 @@ async function submit() {
 		});
 
 		// Parse response data to populate modal content
-		const responseData = await response.json();
-		console.log(responseData);
+		const res = await response.json();
+		console.log(res);
 
-		// Assuming the response contains templateData
-		if (responseData.templateData) {
-			const previewHead = document.getElementById("previewHead");
-			previewHead.innerHTML = "";
-			const templateData = responseData.templateData;
-			// Check if the header content is of type "media"
-			const header = templateData.header;
-			if (header?.type === "text") {
-				// Display text preview
-				previewHead.textContent =
-					header.content || "Header Text Preview";
-			} else if (header?.type === "media" && header.content) {
-				if (
-					header?.content.includes(".jpg") ||
-					header?.content.includes(".png") ||
-					header?.content.includes(".jpeg") ||
-					header?.content.includes(".webp")
-				) {
-					// Image preview
-					const img = document.createElement("img");
-					img.src = `/uploads/${templateData.owner}/${header.content}`;
-					console.log(img.src);
-					img.style.width = "200px";
-					img.style.height = "100px";
-					previewHead.appendChild(img);
-				} else if (header.content.includes(".mp4")) {
-					// Video preview
-					const video = document.createElement("video");
-					video.src = `/uploads/${templateData.owner}/${header.content}`;
-					video.controls = true;
-					video.style.width = "200px";
-					video.style.height = "100px";
-					previewHead.appendChild(video);
-				} else if (header?.content.includes(".pdf")) {
-					// Document preview (PDF)
-					const iframe = document.createElement("iframe");
-					iframe.src = `/uploads/${templateData.owner}/${header.content}`;
-					iframe.style.width = "200px";
-					iframe.style.height = "100px";
-					previewHead.appendChild(iframe);
-				} else {
-					// For other document types (e.g., DOCX, CSV), just display the file name
-					previewHead.textContent =
-						"Uploaded File: " + header.content;
-				}
-			}
-
-			const modalTitle = document.getElementById("templateModalLabel");
-			const previewForm = document.getElementById("previewForm");
-			const previewBody = document.getElementById("previewBod");
-			console.log(previewBody);
-			const previewFooter = document.getElementById("previewFoot");
-
-			modalTitle.innerHTML = responseData.templateData.templateName;
-
-			previewForm.innerHTML = responseData.templateData.dynamicVariables
-				.map(
-					(variable) => `
-        				<div class="form-group py-1">
-            				<label class="font-semibold">Choose Attributes for ${variable}</label>
-            				<input type="text" class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm" placeholder="Enter ${variable}">
-        				</div>`,
-				)
-				.join("");
-
-			if (responseData.templateData.header) {
-				if (responseData.templateData.header.type === "text") {
-					previewHead.innerHTML =
-						responseData.templateData.header.content.replace(
-							/(\r\n|\n|\r)/g,
-							"<br>",
-						);
-				}
-			}
-
-			previewBody.innerHTML = responseData.templateData.body.replace(
-				/(\r\n|\n|\r)/g,
-				"<br>",
-			);
-			console.log(previewBody.innerHTML);
-			previewFooter.innerHTML = `<small class="text-muted leading-3">${responseData.templateData.footer.replace(
-				/(\r\n|\n|\r)/g,
-				"<br>",
-			)}</small>`;
-			generatePreviewWebsite(templateData);
-			generatePreviewCall(templateData);
-			// Show the modal using Tailwind by removing the 'hidden' class
-			const customModal = document.getElementById("customModal");
-			customModal.classList.remove("hidden");
+		if (res.success) {
+			location.href = "/template";
+		} else {
+			alert(message);
 		}
+		// Assuming the response contains templateData
+
+		// if (responseData.templateData) {
+		// 	const previewHead = document.getElementById("previewHead");
+		// 	const previewBody = document.getElementById("previewBod");
+		// 	const previewFooter = document.getElementById("previewFoot");
+		// 	const modalTitle = document.getElementById("templateModalLabel");
+		// 	const previewForm = document.getElementById("previewForm");
+		// 	const templateData = responseData.templateData;
+		// 	previewHead.innerHTML = "";
+		// 	previewBody.innerHTML = "";
+		// 	previewFooter.innerHTML = "";
+
+		// 	// Set modal title
+		// 	modalTitle.innerHTML = templateData.name;
+
+		// 	// Loop through the components array to handle each part dynamically
+		// 	const components = templateData.components || [];
+		// 	components.forEach((component) => {
+		// 		switch (component.type) {
+		// 			case "HEADER":
+		// 				handleHeaderPreview(component, templateData.owner);
+		// 				break;
+		// 			case "BODY":
+		// 				previewBody.innerHTML = component.text.replace(
+		// 					/(\r\n|\n|\r)/g,
+		// 					"<br>",
+		// 				);
+		// 				break;
+		// 			case "FOOTER":
+		// 				previewFooter.innerHTML = `<small class="text-muted leading-3">${component.text.replace(
+		// 					/(\r\n|\n|\r)/g,
+		// 					"<br>",
+		// 				)}</small>`;
+		// 				break;
+		// 			default:
+		// 				break;
+		// 		}
+		// 	});
+
+		// 	// Generate form for dynamic variables (assuming dynamic variables are still part of the template)
+		// 	if (
+		// 		templateData.dynamicVariables &&
+		// 		templateData.dynamicVariables.length
+		// 	) {
+		// 		previewForm.innerHTML = templateData.dynamicVariables
+		// 			.map(
+		// 				(variable) => `
+		// 			<div class="form-group py-1">
+		// 				<label class="font-semibold">Choose Attributes for ${variable}</label>
+		// 				<input type="text" class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm" placeholder="Enter ${variable}">
+		// 			</div>`,
+		// 			)
+		// 			.join("");
+		// 	}
+
+		// 	// Generate other preview content
+		// 	generatePreviewWebsite(templateData);
+		// 	generatePreviewCall(templateData);
+
+		// 	// Show the modal using Tailwind by removing the 'hidden' class
+		// 	const customModal = document.getElementById("customModal");
+		// 	customModal.classList.remove("hidden");
+		// }
+
+		// Helper function to handle different types of header previews
+
+		// function handleHeaderPreview(headerComponent, ownerId) {
+		// 	const previewHead = document.getElementById("previewHead");
+
+		// 	// Check if the header content is of type "media"
+		// 	if (
+		// 		headerComponent?.format &&
+		// 		headerComponent.example?.header_handle
+		// 	) {
+		// 		const headerUrl = headerComponent.example.header_handle[0]; // Assuming first handle in the array
+		// 		if (
+		// 			headerUrl.includes(".jpg") ||
+		// 			headerUrl.includes(".png") ||
+		// 			headerUrl.includes(".jpeg") ||
+		// 			headerUrl.includes(".webp")
+		// 		) {
+		// 			// Image preview
+		// 			const img = document.createElement("img");
+		// 			img.src = `/uploads/${ownerId}/${headerUrl}`;
+		// 			img.style.width = "200px";
+		// 			img.style.height = "100px";
+		// 			previewHead.appendChild(img);
+		// 		} else if (headerUrl.includes(".mp4")) {
+		// 			// Video preview
+		// 			const video = document.createElement("video");
+		// 			video.src = `/uploads/${ownerId}/${headerUrl}`;
+		// 			video.controls = true;
+		// 			video.style.width = "200px";
+		// 			video.style.height = "100px";
+		// 			previewHead.appendChild(video);
+		// 		} else if (headerUrl.includes(".pdf")) {
+		// 			// Document preview (PDF)
+		// 			const iframe = document.createElement("iframe");
+		// 			iframe.src = `/uploads/${ownerId}/${headerUrl}`;
+		// 			iframe.style.width = "200px";
+		// 			iframe.style.height = "100px";
+		// 			previewHead.appendChild(iframe);
+		// 		} else {
+		// 			// For other document types (e.g., DOCX, CSV), just display the file name
+		// 			previewHead.textContent = "Uploaded File: " + headerUrl;
+		// 		}
+		// 	} else if (headerComponent?.text) {
+		// 		// If the header is text-based
+		// 		previewHead.textContent =
+		// 			headerComponent.text || "Header Text Preview";
+		// 	}
+		// }
 	} catch (error) {
 		alert(error.message);
 	} finally {
@@ -206,19 +234,48 @@ function generatePreviewCall(templateData) {
 }
 
 // Function to show the modal
-function openModal(templateData) {
-	// Show the modal
+function openModal() {
+	const templateData = collectTemplateData();
+	if (!templateData) return;
+
 	document.getElementById("customModal").classList.remove("hidden");
 
 	// Set template name
 	document.getElementById("templateModalLabel").innerText =
 		templateData.templateName;
 
+	let headerValidation = { isValid: true, error: null, numbers: [] };
+
+	if (templateData.header.type === "text") {
+		headerValidation = validateCurlyBraces(templateData.header.content);
+	}
+	const bodyValidation = validateCurlyBraces(templateData.body);
+	const footerValidation = validateCurlyBraces(templateData.footer);
+
+	if (
+		!headerValidation.isValid ||
+		!bodyValidation.isValid ||
+		!footerValidation.isValid
+	) {
+		throw new Error(
+			headerValidation.error ||
+				bodyValidation.error ||
+				footerValidation.error,
+		);
+	}
+
+	// Collect all dynamic variables
+	const dynamicVariables = [
+		...headerValidation.numbers,
+		...bodyValidation.numbers,
+		...footerValidation.numbers,
+	].sort((a, b) => a - b);
+
 	// Generate and insert dynamic attributes
 	const previewForm = document.getElementById("previewForm");
-	previewForm.innerHTML = ""; // Clear existing form content
+	previewForm.innerHTML = "";
 
-	templateData.dynamicVariables.forEach((variable) => {
+	dynamicVariables.forEach((variable) => {
 		const formGroup = document.createElement("div");
 		formGroup.className = "form-group py-1";
 
@@ -229,15 +286,6 @@ function openModal(templateData) {
 
 		previewForm.appendChild(formGroup);
 	});
-
-	// Generate and insert iPhone preview
-	const iphoneContainer = document.querySelector(".iphone-container");
-	iphoneContainer.innerHTML = `
-    <div class="card bg-gray-100 p-4 rounded-md shadow-lg">
-      <h3 class="text-lg font-bold">iPhone Preview</h3>
-      <p class="mt-4">${templateData.body}</p>
-    </div>
-  `;
 }
 
 // Function to close the modal
@@ -255,24 +303,26 @@ const sampleTemplateData = {
 	body: "This is the body of the template preview.",
 };
 
-// Validate curly braces format and extract numbers
+// Validate double curly braces format and extract numbers
 function validateCurlyBraces(text) {
 	if (!text) return { isValid: true, numbers: [] };
 
-	const regex = /\{(\d+)\}/g;
+	// Regex to match {{number}}
+	const regex = /\{\{(\d+)\}\}/g;
 	const matches = text.match(regex) || [];
 	const numbers = [];
 	let isValid = true;
 
-	// Check for invalid curly brace formats
-	const invalidFormatRegex = /\{[^\d}]*\}|\{[\d]*[^\d}]+[\d]*\}|\{(?!\d+\})/g;
+	// Check for invalid double curly brace formats
+	const invalidFormatRegex =
+		/\{\{[^\d}]*\}\}|\{\{[\d]*[^\d}]+[\d]*\}\}|\{\{(?!\d+\}\})/g;
 	if (text.match(invalidFormatRegex)) {
-		return { isValid: false, error: "Invalid curly braces format" };
+		return { isValid: false, error: "Invalid double curly braces format" };
 	}
 
 	// Extract numbers and check for duplicates
 	matches.forEach((match) => {
-		const num = parseInt(match.replace(/[{}]/g, ""));
+		const num = parseInt(match.replace(/[\{\}]/g, ""));
 		if (numbers.includes(num)) {
 			isValid = false;
 		} else {
@@ -283,7 +333,7 @@ function validateCurlyBraces(text) {
 	return {
 		isValid,
 		numbers: isValid ? numbers : [],
-		error: !isValid ? "Duplicate numbers in curly braces" : null,
+		error: !isValid ? "Duplicate numbers in double curly braces" : null,
 	};
 }
 
@@ -331,70 +381,75 @@ function collectTemplateData() {
 
 	// Validate buttons
 	const buttonElements = document.getElementById("buttonOptions").children;
-	templateData.buttons = Array.from(buttonElements).map((btn, index) => {
-		let buttonData = { text: "", urlPhone: "" };
+	templateData.buttons = Array.from(buttonElements)
+		.filter((btn) => btn.style.display !== "none") // Ignore buttons with display: none
+		.map((btn, index) => {
+			let buttonData = { text: "", urlPhone: "" };
 
-		// Check for 'Visit Now' (Website) button
-		let websiteText = btn
-			.querySelector('input[placeholder="Visit Now"]')
-			?.value?.trim();
-		let websiteUrl = btn
-			.querySelector('input[placeholder="example.com"]')
-			?.value?.trim();
+			// Check for 'Visit Now' (Website) button
+			let websiteText = btn
+				.querySelector('input[placeholder="Visit Now"]')
+				?.value?.trim();
+			let websiteUrl = btn
+				.querySelector('input[placeholder="example.com"]')
+				?.value?.trim();
 
-		// Check for 'Call Now' (Phone Call) button
-		let callText = btn
-			.querySelector('input[placeholder="Call Now"]')
-			?.value?.trim();
-		let phoneNumber = btn
-			.querySelector('input[placeholder="9999999999"]')
-			?.value?.trim();
+			// Check for 'Call Now' (Phone Call) button
+			let callText = btn
+				.querySelector('input[placeholder="Call Now"]')
+				?.value?.trim();
+			let phoneNumber = btn
+				.querySelector('input[placeholder="9999999999"]')
+				?.value?.trim();
 
-		// If website fields exist, handle 'Visit Now' button validation
-		if (websiteText !== undefined || websiteUrl !== undefined) {
-			buttonData.text = websiteText || "Visit Now"; // Default to 'Visit Now' if text is empty
+			// If website fields exist, handle 'Visit Now' button validation
+			if (websiteText !== undefined || websiteUrl !== undefined) {
+				buttonData.text = websiteText || "Visit Now"; // Default to 'Visit Now' if text is empty
 
-			// Validate URL
-			if (!websiteUrl || !websiteUrl.startsWith("http")) {
+				// Validate URL
+				if (!websiteUrl || !websiteUrl.startsWith("http")) {
+					showError(
+						`Button ${
+							index + 1
+						}: A valid URL is required for 'Visit Now' button.`,
+					);
+					return null;
+				}
+				buttonData.urlPhone = websiteUrl;
+			}
+
+			// If phone fields exist, handle 'Call Now' button validation
+			if (callText !== undefined || phoneNumber !== undefined) {
+				buttonData.text = callText || "Call Now"; // Default to 'Call Now' if text is empty
+
+				// Validate Phone Number
+				if (!phoneNumber) {
+					showError(
+						`Button ${
+							index + 1
+						}: Phone number is required for 'Call Now' button.`,
+					);
+					return null;
+				}
+				buttonData.urlPhone = `tel:${phoneNumber}`; // Ensure the phone number is prefixed with 'tel:'
+			}
+
+			// If neither website nor phone data exists, alert and return null
+			if (!buttonData.urlPhone) {
 				showError(
-					`Button ${
-						index + 1
-					}: A valid URL is required for 'Visit Now' button.`,
+					`Button ${index + 1}: URL or Phone number is required.`,
 				);
 				return null;
 			}
-			buttonData.urlPhone = websiteUrl;
-		}
 
-		// If phone fields exist, handle 'Call Now' button validation
-		if (callText !== undefined || phoneNumber !== undefined) {
-			buttonData.text = callText || "Call Now"; // Default to 'Call Now' if text is empty
-
-			// Validate Phone Number
-			if (!phoneNumber) {
-				showError(
-					`Button ${
-						index + 1
-					}: Phone number is required for 'Call Now' button.`,
-				);
-				return null;
-			}
-			buttonData.urlPhone = `tel:${phoneNumber}`; // Ensure the phone number is prefixed with 'tel:'
-		}
-
-		// If neither website nor phone data exists, alert and return null
-		if (!buttonData.urlPhone) {
-			showError(`Button ${index + 1}: URL or Phone number is required.`);
-			return null;
-		}
-
-		return buttonData;
-	});
+			return buttonData;
+		});
 
 	// Check if any button validation failed
 	if (templateData.buttons.includes(null)) {
 		return false; // Stop submission if any button is invalid
 	}
+
 
 	// Validate header input based on type
 	const headerTypeDropdown = document.getElementById("mediaTypeDropdown");
@@ -407,10 +462,8 @@ function collectTemplateData() {
 
 	// Skip header validation if the type is "none"
 	if (headerType === "none") {
-		// If 'none' is selected, skip header validation and keep header content as null
 		templateData.header.content = null;
 	} else if (headerType === "text") {
-		// Validate text header
 		const headerText = document.getElementById("headerInput").value.trim();
 		if (!headerText) {
 			return showError("Header content cannot be empty for text type.");
@@ -422,12 +475,10 @@ function collectTemplateData() {
 		if (!fileInput || !fileInput.files.length) {
 			return showError("Please upload a media file for the header.");
 		}
-		templateData.header.content = fileInput.files[0]; // Ensure file uploads are handled properly on the backend
+		templateData.header.content = fileInput.files[0];
 	} else {
-		// Handle invalid header types
 		return showError("Invalid header type selected.");
 	}
 
-	// Return the final validated template data
 	return templateData;
 }

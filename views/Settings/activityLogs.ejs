@@ -78,53 +78,55 @@
 		<!-- END SIDEBAR MENU TOP TRAY CONTENT-->
 		
 		<!-- START PAGE-CONTAINER -->
-		<div class="main-content  p-2">
+		<div class="main-content p-2">
 			<div class="logo flex justify-between items-center">
-				<div class="">
+				<div class="p-2">
 					<!-- START BREADCRUMB -->
 					<nav class="flex px-3  mt-2" aria-label="Breadcrumb">
+						
 						<div class="flex items-center">
-							<a href="/settings" class="text-gray-500 hover:text-gray-700 text-lg font-medium">Settings</a>
+							<a href="/settings" class="text-gray-500 hover:text-gray-700 text-xl font-medium">Settings</a>
+							<svg class="w-4 h-4 mx-2 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+								<path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L11.586 10 7.293 5.707a1 1 0 011.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+							</svg>
 						</div>
+						
+						<div class="flex items-center">
+							<a href="/settings/activity-logs" class="text-red-500 hover:text-gray-700 text-xl font-medium ">Profile</a>
+							
+						</div>
+						
 					</nav>
 					<!-- END BREADCRUMB -->
 				</div>
 			</div>
-			<div class="container mx-auto">
+			<div class="container  w-full mx-auto py-5">
 				<div class="flex justify-between mb-6">
-					<div>
-						<label for="dateRange" class="block text-sm font-medium text-gray-700">Date Range</label>
-						<select id="dateRange" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-							<option>Past 7 days</option>
-							<option>Past 30 days</option>
-							<option>Past 90 days</option>
-							<option>This month</option>
-							<option>Previous month</option>
-						</select>
-					</div>
-					<div>
-						<label for="actionFilter" class="block text-sm font-medium text-gray-700">Action</label>
-						<select id="actionFilter" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-							<option>All action</option>
-							<option>Update</option>
-							<option>Create</option>
-							<option>Delete</option>
-							<option>Send</option>
-						</select>
+					<div class="text-2xl">Activity Logs</div>
+					<div class="flex space-x-4">
+						<div>
+							<select id="dateRange" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+								<option>Past 7 days</option>
+								<option>Past 30 days</option>
+								<option>Past 90 days</option>
+								<option>This month</option>
+								<option>Previous month</option>
+							</select>
+						</div>
+						<div>
+							<select id="actionFilter" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+								<option>All action</option>
+								<option>Update</option>
+								<option>Create</option>
+								<option>Delete</option>
+								<option>Send</option>
+							</select>
+						</div>
 					</div>
 				</div>
 				
 				<!-- Activity Logs -->
-				<div id="activityLogs">
-                    <% logs.forEach((log) => { %>
-                    <div class="bg-white shadow rounded-lg p-4 mb-4">
-                    	<div class="flex justify-between">
-                    		<span class="text-lg font-semibold"><%= log.name %></span>
-                    		<span class="text-sm text-gray-500"><%= new Date(log.createdAt).toLocaleDateString() %></span>
-                    	</div>
-                    	<p class="text-gray-600"><%= log.actions %>: <%= log.details %></p>
-                    </div>
-                    <% }) %>
+				<div id="activityLogs" class="border rounded-2xl p-4">
 					<%- include("partials/activityLogs") %>
 				</div>
 			</div>

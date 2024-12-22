@@ -82,7 +82,7 @@ document
 
 		const contactId = document.getElementById("deleteContactId").value;
 
-		fetch(`/api/contacts/${contactId}`, {
+		fetch(`/api/contact-list/deleteList/${contactId}`, {
 			method: "DELETE",
 		})
 			.then((response) => response.json())

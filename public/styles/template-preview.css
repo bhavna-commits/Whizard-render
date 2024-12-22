@@ -11,8 +11,8 @@
 .iphone-screen {
 	position: absolute;
 	top: 11px;
-	left: 52px;
-	width: calc(77% - 30px);
+	left: 32px;
+	width: calc(80% - 8px);
 	height: calc(100% - 23px);
 	overflow: hidden;
 	background-image: url(./BG.jpg);

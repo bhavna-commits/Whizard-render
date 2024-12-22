@@ -99,8 +99,6 @@ function insertEmojiAtCursor(emoji) {
 	}
 }
 
-
-
 // Search input for filtering emojis
 document.getElementById("emojiSearch").addEventListener("input", async (e) => {
 	const query = e.target.value.trim();
@@ -158,14 +156,14 @@ function addBrackets() {
 	const range = document.getSelection().getRangeAt(0);
 
 	// Create a document fragment to hold the brackets
-	const bracketText = document.createTextNode("{}");
+	const bracketText = document.createTextNode("{{}}");
 
 	// Insert the brackets at the current caret position
 	range.insertNode(bracketText);
 
 	// Adjust the range to place the cursor between the brackets
-	range.setStart(bracketText, 1); // Move to between the {}
-	range.setEnd(bracketText, 1); // Collapse the range so it's a caret
+	range.setStart(bracketText, 2); // Move to between the {}
+	range.setEnd(bracketText, 2); // Collapse the range so it's a caret
 
 	// Apply the new selection range
 	const selection = window.getSelection();
