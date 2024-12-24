@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 const activityLogsSchema = new mongoose.Schema(
 	{
 		name: { type: String, required: true }, 
-		action: {
+		actions: {
 			type: String,
 			enum: ["All action", "Update", "Create", "Delete", "Send"],
 			default: "All action",

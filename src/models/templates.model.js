@@ -34,7 +34,7 @@ const componentSchema = new Schema({
 const templateSchema = new Schema(
 	{
 		owner: {
-			type: Schema.ObjectId,
+			type: String,
 			required: true,
 		},
 		name: {
@@ -45,10 +45,10 @@ const templateSchema = new Schema(
 			type: String,
 			required: true,
 		},
-		components: [componentSchema], 
+		components: [componentSchema],
 		language: {
 			type: String,
-			default: "en",
+			default: "en_US",
 		},
 		namespace: {
 			type: String,
@@ -79,9 +79,22 @@ const templateSchema = new Schema(
 			type: Number,
 			required: true,
 		},
+		createdAt: {
+			type: Number,
+			default: () => Date.now(), 
+		},
+		updatedAt: {
+			type: Number,
+			default: () => Date.now(),
+		},
 	},
-	{ timestamps: true },
+	{ timestamps: false },
 	{ strict: false },
 );
+
+templateSchema.pre("save", function (next) {
+	this.updatedAt = Date.now();
+	next();
+});
 
 export default mongoose.model("Template", templateSchema);

@@ -68,119 +68,7 @@ async function submit() {
 		} else {
 			alert(message);
 		}
-		// Assuming the response contains templateData
-
-		// if (responseData.templateData) {
-		// 	const previewHead = document.getElementById("previewHead");
-		// 	const previewBody = document.getElementById("previewBod");
-		// 	const previewFooter = document.getElementById("previewFoot");
-		// 	const modalTitle = document.getElementById("templateModalLabel");
-		// 	const previewForm = document.getElementById("previewForm");
-		// 	const templateData = responseData.templateData;
-		// 	previewHead.innerHTML = "";
-		// 	previewBody.innerHTML = "";
-		// 	previewFooter.innerHTML = "";
-
-		// 	// Set modal title
-		// 	modalTitle.innerHTML = templateData.name;
-
-		// 	// Loop through the components array to handle each part dynamically
-		// 	const components = templateData.components || [];
-		// 	components.forEach((component) => {
-		// 		switch (component.type) {
-		// 			case "HEADER":
-		// 				handleHeaderPreview(component, templateData.owner);
-		// 				break;
-		// 			case "BODY":
-		// 				previewBody.innerHTML = component.text.replace(
-		// 					/(\r\n|\n|\r)/g,
-		// 					"<br>",
-		// 				);
-		// 				break;
-		// 			case "FOOTER":
-		// 				previewFooter.innerHTML = `<small class="text-muted leading-3">${component.text.replace(
-		// 					/(\r\n|\n|\r)/g,
-		// 					"<br>",
-		// 				)}</small>`;
-		// 				break;
-		// 			default:
-		// 				break;
-		// 		}
-		// 	});
-
-		// 	// Generate form for dynamic variables (assuming dynamic variables are still part of the template)
-		// 	if (
-		// 		templateData.dynamicVariables &&
-		// 		templateData.dynamicVariables.length
-		// 	) {
-		// 		previewForm.innerHTML = templateData.dynamicVariables
-		// 			.map(
-		// 				(variable) => `
-		// 			<div class="form-group py-1">
-		// 				<label class="font-semibold">Choose Attributes for ${variable}</label>
-		// 				<input type="text" class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm" placeholder="Enter ${variable}">
-		// 			</div>`,
-		// 			)
-		// 			.join("");
-		// 	}
-
-		// 	// Generate other preview content
-		// 	generatePreviewWebsite(templateData);
-		// 	generatePreviewCall(templateData);
-
-		// 	// Show the modal using Tailwind by removing the 'hidden' class
-		// 	const customModal = document.getElementById("customModal");
-		// 	customModal.classList.remove("hidden");
-		// }
-
-		// Helper function to handle different types of header previews
-
-		// function handleHeaderPreview(headerComponent, ownerId) {
-		// 	const previewHead = document.getElementById("previewHead");
-
-		// 	// Check if the header content is of type "media"
-		// 	if (
-		// 		headerComponent?.format &&
-		// 		headerComponent.example?.header_handle
-		// 	) {
-		// 		const headerUrl = headerComponent.example.header_handle[0]; // Assuming first handle in the array
-		// 		if (
-		// 			headerUrl.includes(".jpg") ||
-		// 			headerUrl.includes(".png") ||
-		// 			headerUrl.includes(".jpeg") ||
-		// 			headerUrl.includes(".webp")
-		// 		) {
-		// 			// Image preview
-		// 			const img = document.createElement("img");
-		// 			img.src = `/uploads/${ownerId}/${headerUrl}`;
-		// 			img.style.width = "200px";
-		// 			img.style.height = "100px";
-		// 			previewHead.appendChild(img);
-		// 		} else if (headerUrl.includes(".mp4")) {
-		// 			// Video preview
-		// 			const video = document.createElement("video");
-		// 			video.src = `/uploads/${ownerId}/${headerUrl}`;
-		// 			video.controls = true;
-		// 			video.style.width = "200px";
-		// 			video.style.height = "100px";
-		// 			previewHead.appendChild(video);
-		// 		} else if (headerUrl.includes(".pdf")) {
-		// 			// Document preview (PDF)
-		// 			const iframe = document.createElement("iframe");
-		// 			iframe.src = `/uploads/${ownerId}/${headerUrl}`;
-		// 			iframe.style.width = "200px";
-		// 			iframe.style.height = "100px";
-		// 			previewHead.appendChild(iframe);
-		// 		} else {
-		// 			// For other document types (e.g., DOCX, CSV), just display the file name
-		// 			previewHead.textContent = "Uploaded File: " + headerUrl;
-		// 		}
-		// 	} else if (headerComponent?.text) {
-		// 		// If the header is text-based
-		// 		previewHead.textContent =
-		// 			headerComponent.text || "Header Text Preview";
-		// 	}
-		// }
+		
 	} catch (error) {
 		alert(error.message);
 	} finally {
@@ -295,13 +183,6 @@ function closeModal() {
 
 // Attach close button event
 document.getElementById("modalCloseBtn").addEventListener("click", closeModal);
-
-// Example usage
-const sampleTemplateData = {
-	templateName: "Sample Template",
-	dynamicVariables: ["Name", "WhatsApp"],
-	body: "This is the body of the template preview.",
-};
 
 // Validate double curly braces format and extract numbers
 function validateCurlyBraces(text) {

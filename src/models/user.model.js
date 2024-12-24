@@ -34,6 +34,14 @@ const userSchema = new mongoose.Schema(
 			required: true,
 		},
 		accessToken: String,
+		unique_id: {
+			type: String,
+			required: true,
+		},
+		useradmin: {
+			type: Number,
+			required: true,
+		},
 	},
 
 	{ timestamps: true },

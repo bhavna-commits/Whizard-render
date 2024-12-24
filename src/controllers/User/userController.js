@@ -2,6 +2,7 @@ import { sendEmailVerification } from "./userFunctions.js";
 import User from "../../models/user.model.js";
 import AddedUser from "../../models/addedUser.model.js";
 import bcrypt from "bcrypt";
+import { generateUniqueId } from "../../utils/otpGenerator.js";
 
 const setOTPExpiry = () => {
 	return Date.now() + 600000; // 10 minutes in milliseconds
@@ -86,8 +87,6 @@ export const verifyEmail = async (req, res) => {
 				.json({ message: "Session expired. Please try again." });
 		}
 
-		// Assuming OTP is stored in session or some temp storage
-
 		if (tempUser.otp !== otp) {
 			return res.status(400).json({
 				success: false,
@@ -95,7 +94,6 @@ export const verifyEmail = async (req, res) => {
 			});
 		}
 
-		// OTP verified, proceed to activate user or further steps
 		res.status(200).json({
 			success: true,
 			message: "OTP verfied Succesfully",
@@ -104,36 +102,6 @@ export const verifyEmail = async (req, res) => {
 		res.status(500).json({
 			success: false,
 			message: "Error verifying email.",
-			error,
-		});
-	}
-};
-
-export const verifyWhatsAppNumber = async (req, res) => {
-	const { otp, phoneNumber, countryCode } = req.query;
-
-	try {
-		const tempUser = req.session.tempUser;
-
-		if (!tempUser) {
-			return res
-				.status(400)
-				.json({ message: "Session expired. Please try again." });
-		}
-
-		const isOTPValid = verifyWhatsAppOTP(phoneNumber, countryCode, otp);
-
-		if (!isOTPValid) {
-			return res.status(400).json({ message: "Invalid WhatsApp OTP" });
-		}
-
-		// Mark phone as verified
-		req.session.tempUser.phoneVerified = true;
-
-		// If both email and phone are verified, save the user to the DB
-	} catch (error) {
-		res.status(500).json({
-			message: "Error verifying WhatsApp number",
 			error,
 		});
 	}
@@ -158,6 +126,7 @@ export const login = async (req, res) => {
 
 				req.session.user = {
 					id: addedUser.owner,
+					WhatsAppConnectStatus: user.WhatsAppConnectStatus,
 				};
 				req.session.addedUser = {
 					id: addedUser._id,
@@ -185,6 +154,7 @@ export const login = async (req, res) => {
 		req.session.user = {
 			id: user._id,
 			name: user.name,
+			WhatsAppConnectStatus: user.WhatsAppConnectStatus,
 		};
 
 		if (rememberMe) {
@@ -329,11 +299,18 @@ export const about = async (req, res) => {
 		const saltRounds = 10;
 		const hashedPassword = await bcrypt.hash(password, saltRounds);
 
+		// Generate unique alphanumeric key for unique_id
+		const unique_id = generateUniqueId();
+
+		// Find the latest userAdmin number and increment by 1
+		const lastUser = await User.findOne().sort({ useradmin: -1 });
+		const userAdmin = lastUser ? lastUser.useradmin + 1 : 1;
+
 		// Create the new user with hashed password
 		const newUser = new User({
 			name,
 			email,
-			password: hashedPassword, // Store hashed password
+			password: hashedPassword, 
 			phone: {
 				countryCode,
 				number: phoneNumber,
@@ -346,6 +323,8 @@ export const about = async (req, res) => {
 			industry,
 			jobRole,
 			website,
+			unique_id, 
+			userAdmin,
 		});
 
 		// Save the new user to the database
@@ -353,7 +332,7 @@ export const about = async (req, res) => {
 
 		// Update session with the newly created user data to keep them logged in
 		req.session.user = {
-			id: newUser._id,
+			id: newUser.unique_id,
 		};
 
 		// Send success response
@@ -363,8 +342,10 @@ export const about = async (req, res) => {
 			user: {
 				name: newUser.name,
 				email: newUser.email,
-				companyName: newUser.companyname,
+				companyName: newUser.companyName,
 				industry: newUser.industry,
+				unique_id: newUser.unique_id, // Return unique_id for reference
+				userAdmin: newUser.userAdmin, // Return userAdmin for reference
 			},
 		});
 	} catch (error) {

@@ -2,8 +2,12 @@ import path from "path";
 import fs from "fs";
 import Template from "../../models/templates.model.js";
 import dotenv from "dotenv";
-import { saveTemplateToDatabase } from "./template.functions.controller.js";
-import { submitTemplateToFacebook } from "./template.functions.controller.js";
+import {
+	saveTemplateToDatabase,
+	submitTemplateToFacebook,
+	fetchFacebookTemplates,
+} from "./template.functions.controller.js";
+import Permissions from "../../models/permissions.model.js";
 
 dotenv.config();
 
@@ -17,11 +21,14 @@ export const createTemplate = async (req, res) => {
 			templateData,
 			id,
 		);
-		console.log("yah a gya");
+		// console.log("yah a gya");
 
-		const facebookResponse = await submitTemplateToFacebook(savedTemplate);
+		await submitTemplateToFacebook(savedTemplate);
 
 		await ActivityLogs.create({
+			photo: req.session.user.photo
+				? req.session.user.photo
+				: req.session.addedUser.photo,
 			name: req.session.user.name
 				? req.session.user.name
 				: req.session.addedUser.name,
@@ -31,9 +38,6 @@ export const createTemplate = async (req, res) => {
 
 		res.status(201).json({
 			success: true,
-			templateData: savedTemplate,
-			facebookResponse,
-			WABA_ID,
 		});
 	} catch (error) {
 		res.status(500).json({ success: false, message: error.message });
@@ -74,7 +78,7 @@ export const getList = async (req, res) => {
 		const totalPages = Math.ceil(totalTemplates / limit);
 
 		res.render("Templates/manage_template", {
-			list: templates, // Templates with components array
+			list: templates, 
 			page,
 			totalPages,
 		});
@@ -198,9 +202,64 @@ export const getCampaignTemplates = async (req, res) => {
 export const getTemplates = async (req, res) => {
 	try {
 		const { id } = req.session.user;
-		const templates = await Template.find({ owner: id });
-		res.json(templates);
+
+		// Fetch templates from MongoDB based on logged-in user
+		const mongoTemplates = await Template.find({ owner: id });
+
+		// Fetch templates from Facebook Graph API
+		const facebookTemplatesResponse = await fetchFacebookTemplates();
+		const facebookTemplates = facebookTemplatesResponse.data;
+
+		// Loop through the MongoDB templates and update their status based on Facebook data
+		for (let mongoTemplate of mongoTemplates) {
+			// Find the matching template in the Facebook templates by name
+			const matchingFacebookTemplate = facebookTemplates.find(
+				(fbTemplate) => fbTemplate.name === mongoTemplate.name,
+			);
+
+			// If a match is found, update the status in the MongoDB template
+			if (matchingFacebookTemplate) {
+				let newStatus;
+				let rejectedReason = mongoTemplate.rejected_reason || null;
+
+				switch (matchingFacebookTemplate.status) {
+					case "APPROVED":
+						newStatus = "approved";
+						rejectedReason = "NONE"; // Reset reason if approved
+						break;
+					case "REJECTED":
+						newStatus = "rejected";
+						rejectedReason =
+							matchingFacebookTemplate.rejected_reason ||
+							"UNKNOWN"; // Assign rejection reason
+						break;
+					default:
+						newStatus = "pending";
+				}
+
+				// Only update if the status has changed
+				if (
+					mongoTemplate.status !== newStatus ||
+					mongoTemplate.rejected_reason !== rejectedReason
+				) {
+					mongoTemplate.status = newStatus;
+					mongoTemplate.rejected_reason = rejectedReason; // Update rejected reason
+					await mongoTemplate.save(); // Save the updated template
+				}
+			}
+		}
+
+		// Respond with the updated templates from MongoDB
+		const updatedTemplates = await Template.find({ owner: id });
+		res.json({
+			success: true,
+			data: updatedTemplates,
+		});
 	} catch (error) {
-		res.status(500).json({ success: false, error: error.message });
+		// Handle errors, returning a 500 status code with error message
+		res.status(500).json({
+			success: false,
+			error: error.message,
+		});
 	}
 };

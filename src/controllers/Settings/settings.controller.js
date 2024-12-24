@@ -141,7 +141,9 @@ export const updatePassword = async (req, res) => {
 	await user.save();
 
 	await ActivityLogs.create({
-		name: req.session.user.name ? req.session.user.name : req.session.addedUser.name,
+		name: req.session.user.name
+			? req.session.user.name
+			: req.session.addedUser.name,
 		actions: "Update",
 		details: `${req.addedUser.name} updated their password`,
 	});
@@ -233,6 +235,7 @@ export const updateAccountDetails = async (req, res) => {
 export const getActivityLogs = async (req, res) => {
 	try {
 		const logs = await ActivityLogs.find().sort({ createdAt: -1 });
+
 		res.render("Settings/activityLogs", { logs });
 	} catch (err) {
 		console.error("Error fetching logs:", err);
@@ -283,5 +286,26 @@ export const activityLogsFiltered = async (req, res) => {
 	} catch (err) {
 		console.error("Error fetching logs:", err);
 		res.status(500).send("Server error");
+	}
+};
+
+export const getUserManagement = async (req, res) => {
+	const id = req.session.user.id;
+
+	try {
+		const user = await User.findOne({ unique_id: id });
+
+		if (!user) {
+			return res.status(404).json({ message: "User not found" });
+		}
+
+		// console.log("User Information:", user);
+		const language = "English";
+		res.render("Settings/userMangement", );
+	} catch (error) {
+		console.error(error);
+		res.status(500).json({
+			message: "An error occurred while fetching the user profile",
+		});
 	}
 };

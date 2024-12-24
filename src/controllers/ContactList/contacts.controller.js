@@ -1,5 +1,5 @@
 import ContactList from "../../models/contactList.model.js";
-import Contacts from "../../models/contacts.modal.js";
+import Contacts from "../../models/contacts.model.js";
 import ActivityLogs from "../../models/activityLogs.model.js";
 
 export const updateContact = async (req, res) => {
@@ -146,3 +146,4 @@ export const deleteContact = async (req, res) => {
 		});
 	}
 };
+

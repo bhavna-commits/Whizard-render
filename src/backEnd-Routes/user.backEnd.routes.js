@@ -2,7 +2,6 @@ import express from "express";
 import {
 	generateOTP,
 	verifyEmail,
-	verifyWhatsAppNumber,
 	resendEmailOTP,
 	about,
 	resetPassword,
@@ -14,10 +13,9 @@ const router = express.Router();
 
 router.post("/generateOTP", generateOTP);
 router.post("/verify-email", verifyEmail);
-router.post("/verify-phone", verifyWhatsAppNumber);
 router.post("/resend-email-otp", resendEmailOTP);
 router.post("/resetPassword", resetPassword);
-router.post("/about", about);
+router.post("/about", about);	
 router.post("/login", login);
 router.post("/changePassword", changePassword);
 

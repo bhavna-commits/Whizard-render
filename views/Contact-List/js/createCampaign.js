@@ -302,7 +302,7 @@ class TemplateManager {
 		formData.append("variables", JSON.stringify(selectedAttributes));
 
 		try {
-			const response = await fetch("/api/campaigns", {
+			const response = await fetch("/api/contact-list/create-campaign", {
 				method: "POST",
 				body: formData,
 			});

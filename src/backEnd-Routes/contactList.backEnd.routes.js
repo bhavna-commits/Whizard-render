@@ -11,16 +11,20 @@ import {
 	createCustomField,
 	deleteCustomField,
 	searchContactLists,
+	previewContactList,
 } from "../controllers/ContactList/contactList.controller.js";
 import {
 	updateContact,
 	deleteContact,
 	editContact,
+	
 } from "../controllers/ContactList/contacts.controller.js";
 
 const router = express.Router();
 
 router.post("/createList", createList);
+
+router.post("/previewContactList", previewContactList);
 
 router.put("/editList/:id", editList);
 

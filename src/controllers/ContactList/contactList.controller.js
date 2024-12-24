@@ -1,16 +1,145 @@
 import path from "path";
 import ContactList from "../../models/contactList.model.js";
-import Contacts from "../../models/contacts.modal.js";
-import Template from "../../models/templates.model.js";
+import Contacts from "../../models/contacts.model.js";
+// import Template from "../../models/templates.model.js";
+import XLSX from "xlsx"; // Excel reading library
+import Papa from "papaparse"; // CSV reading library
+import Permissions from "../../models/permissions.model.js";
 import CustomField from "../../models/customField.model.js";
 import User from "../../models/user.model.js";
 import { countries } from "../../utils/dropDown.js";
 import { fileURLToPath } from "url";
 import ActivityLogs from "../../models/activityLogs.model.js";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+export const previewContactList = async (req, res) => {
+	try {
+		const { fileData } = req.body;
+
+		if (!fileData) {
+			return res.status(400).json({
+				success: false,
+				message: "No file data provided.",
+			});
+		}
+
+		// Parse file data
+		let parsedData;
+		try {
+			parsedData = JSON.parse(fileData);
+		} catch (e) {
+			return res.status(400).json({
+				success: false,
+				message: "Invalid file format.",
+			});
+		}
+
+		if (!parsedData.length) {
+			return res.status(400).json({
+				success: false,
+				message: "No contacts found in the file.",
+			});
+		}
+
+		// Required columns (Name, Number)
+		const requiredColumns = ["Name", "Number"];
+
+		// Fetch custom fields from DB
+		const customFields = await CustomField.find({
+			owner: req.session.user.id,
+		});
+		const customFieldNames = customFields.map((field) => field.fieldName);
+
+		// Combine required columns with custom fields
+		const expectedColumns = [...requiredColumns, ...customFieldNames];
+
+		// Extract the header (first row) from the parsed data
+		const actualColumns = Object.keys(parsedData[0]);
+
+		// Check if required columns exist
+		const missingColumns = requiredColumns.filter(
+			(col) => !actualColumns.includes(col),
+		);
+
+		// Check if custom fields match
+		const invalidColumns = actualColumns.filter(
+			(col) =>
+				!expectedColumns.includes(col) &&
+				col !== "Name" &&
+				col !== "Number",
+		);
+
+		// Check for empty values in the parsed data
+		const emptyFields = parsedData
+			.map((row, rowIndex) => {
+				return Object.keys(row).map((key) => {
+					if (!row[key] || row[key].trim() === "") {
+						return {
+							row: rowIndex + 1,
+							column: key,
+							value: row[key],
+						};
+					}
+					return null;
+				});
+			})
+			.flat()
+			.filter((item) => item !== null);
+
+		// If any errors, send them back for the preview
+		if (
+			missingColumns.length > 0 ||
+			invalidColumns.length > 0 ||
+			emptyFields.length > 0
+		) {
+			return res.status(400).json({
+				success: false,
+				message: "Validation errors found.",
+				missingColumns,
+				invalidColumns,
+				emptyFields,
+				parsedData,
+			});
+		}
+
+		// Render the table HTML for the preview
+		let tableHtml = "";
+		tableHtml += '<table class="min-w-full table-auto"><thead><tr>';
+		actualColumns.forEach((header) => {
+			tableHtml += `<th class="px-4 py-2 border">${header}</th>`;
+		});
+		tableHtml += "</tr></thead><tbody>";
+
+		parsedData.forEach((row) => {
+			tableHtml += "<tr>";
+			actualColumns.forEach((header) => {
+				tableHtml += `<td class="px-4 py-2 border">${
+					row[header] || ""
+				}</td>`;
+			});
+			tableHtml += "</tr>";
+		});
+
+		tableHtml += "</tbody></table>";
+
+		return res.status(200).json({
+			success: true,
+			message: "Data preview successful.",
+			tableHtml, // Include the rendered HTML in the response
+		});
+	} catch (error) {
+		console.error(error);
+		return res.status(500).json({
+			success: false,
+			message: "Error validating contact list.",
+		});
+	}
+};
 
 export const createList = async (req, res) => {
 	try {
@@ -41,7 +170,7 @@ export const createList = async (req, res) => {
 			});
 		}
 
-		const user = await User.findById(userId);
+		const user = await User.findOne({ unique_id: userId });
 		if (!user) {
 			return res.status(404).json({
 				success: false,
@@ -65,26 +194,24 @@ export const createList = async (req, res) => {
 			.map((contactData) => {
 				let { Name, WhatsApp, ...additionalFields } = contactData;
 
-				// Trim leading and trailing whitespaces from Name and WhatsApp
 				Name = (Name || "").trim();
 				WhatsApp = (WhatsApp || "").trim();
 
-				// Skip contacts with missing Name or WhatsApp
 				if (!Name || !WhatsApp) {
 					console.log("Skipping invalid contact:", contactData);
-					return null; // Return null for invalid contacts
+					return null;
 				}
 
 				return new Contacts({
-					userName: Name, // The "Name" column
-					whatsApp: WhatsApp, // The "WhatsApp" column
-					countryCode, // Same country code for all contacts
-					owner: user._id, // Associate contact with the user
-					contactList: contactList._id, // Link contact to the newly created list
-					additionalAttributes: additionalFields, // Save all other columns as dynamic attributes
+					userName: Name,
+					whatsApp: WhatsApp,
+					countryCode,
+					owner: user._id,
+					contactList: contactList._id,
+					additionalAttributes: additionalFields,
 				});
 			})
-			.filter((contact) => contact !== null); // Remove any null values (invalid contacts)
+			.filter((contact) => contact !== null);
 
 		// Check if there are valid contacts to save
 		if (contactsToSave.length > 0) {
@@ -336,8 +463,8 @@ export const deleteCustomField = async (req, res) => {
 };
 
 export const updateContactListName = async (req, res) => {
-	const contactListId = req.params.id; 
-	const { updatedValue } = req.body; 
+	const contactListId = req.params.id;
+	const { updatedValue } = req.body;
 
 	if (!updatedValue) {
 		return res.status(400).json({
@@ -391,7 +518,7 @@ export const getList = async (req, res) => {
 	try {
 		const userId = req.session.user.id;
 		const page = parseInt(req.query.page) || 1;
-		const limit = 6; // Adjust the limit as needed
+		const limit = 6;
 		const skip = (page - 1) * limit;
 
 		const totalContactLists = await ContactList.countDocuments({
@@ -403,12 +530,43 @@ export const getList = async (req, res) => {
 
 		const totalPages = Math.ceil(totalContactLists / limit);
 
-		res.render("Contact-List/contact-list", {
-			countries: countries,
-			contacts: contactLists,
-			page,
-			totalPages,
-		});
+		const permissions = req.session?.addedUser?.permissions;
+		if (permissions) {
+			const access = Permissions.findOne({ unique_id: permissions });
+			if (access.contactList) {
+				res.render("Contact-List/contact-list", {
+					access: access.contactList,
+					countries: countries,
+					contacts: contactLists,
+					page,
+					totalPages,
+					headers: [],
+					data: [],
+					errors: [],
+				});
+			} else {
+				res.render("Dashboard/dashboard", {
+					access: access.dashboard,
+					config: process.env.CONFIG_ID,
+					app: process.env.FB_APP_ID,
+					graph: process.env.FB_GRAPH_VERSION,
+					status: req.session.user.WhatsAppConnectStatus,
+					secret: process.env.FB_APP_SECRET,
+				});
+			}
+		} else {
+			const access = Permissions.findOne({ owner: userId });
+			res.render("Contact-List/contact-list", {
+				access: access.user?.contactList,
+				countries: countries,
+				contacts: contactLists,
+				page,
+				totalPages,
+				headers: [],
+				data: [],
+				errors: [],
+			});
+		}
 	} catch (error) {
 		console.error(error);
 		res.status(500).json({

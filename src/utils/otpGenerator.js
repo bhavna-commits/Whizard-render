@@ -1,3 +1,5 @@
+import crypto from "crypto";
+
 export const generateOTP = () => {
 	return Math.floor(100000 + Math.random() * 900000).toString();
 };
@@ -17,3 +19,7 @@ export function validatePassword(password) {
 		specialChar.test(password)
 	);
 }
+
+export const generateUniqueId = () => {
+	return crypto.randomBytes(5).toString("hex").slice(0, 10);
+};

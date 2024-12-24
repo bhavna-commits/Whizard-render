@@ -12,7 +12,6 @@ const router = express.Router();
 
 router.post(
 	"/profile",
-
 	uploadProfilePicController,
 	updateProfile,
 );

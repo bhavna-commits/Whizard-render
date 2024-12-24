@@ -40,7 +40,7 @@ export const saveTemplateToDatabase = async (req, templateData, id) => {
 			__dirname,
 			"..",
 			"uploads",
-			req.session.user.name || req.session.addedUser.name,
+			req.session.user.id,
 			req.file.filename,
 		);
 
@@ -101,7 +101,7 @@ export function submitTemplateToFacebook(savedTemplate) {
 		req.on("error", (error) => {
 			reject(new Error("Error with the request: " + error.message));
 		});
-        console.log(req);
+        // console.log(req);
 		// Prepare the data to send in the body
 		const body = JSON.stringify({
 			name: savedTemplate.name,
@@ -117,3 +117,36 @@ export function submitTemplateToFacebook(savedTemplate) {
 		req.end();
 	});
 }
+
+export const fetchFacebookTemplates = async () => {
+	try {
+		const wabaId = process.env.WABA_ID;
+		const accessToken = process.env.FB_ACCESS_TOKEN;
+		const url = `https://graph.facebook.com/v17.0/${wabaId}/message_templates`;
+
+		// Using native fetch API
+		const response = await fetch(url, {
+			method: "GET",
+			headers: {
+				Authorization: `Bearer ${accessToken}`,
+			},
+		});
+
+		// Check if the response is ok (status code 200-299)
+		if (!response.ok) {
+			throw new Error(
+				`Error fetching templates from Facebook: ${response.statusText}`,
+			);
+		}
+
+		// Parse and return the JSON response
+		const data = await response.json();
+		return data;
+	} catch (error) {
+		console.error(
+			"Error fetching Facebook message templates:",
+			error.message,
+		);
+		throw new Error("Failed to fetch Facebook message templates");
+	}
+};
