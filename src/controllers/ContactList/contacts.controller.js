@@ -51,13 +51,14 @@ export const getContacts = async (req, res) => {
 		const skip = (page - 1) * limit;
 
 		const totalContacts = await Contacts.countDocuments({
-			contactList: id,
+			contactId: id,
 		});
-		const contactLists = await Contacts.find({ contactList: id })
+		const contactLists = await Contacts.find({ contactId: id })
 			.skip(skip)
 			.limit(limit);
 
-		const name = (await ContactList.findById(id)).ContactListName;
+		const name = (await ContactList.findOne({ contactId: id }))
+			.contalistName;
 		const totalPages = Math.ceil(totalContacts / limit);
 
 		res.render("Contact-List/contactList-overview", {
@@ -146,4 +147,3 @@ export const deleteContact = async (req, res) => {
 		});
 	}
 };
-

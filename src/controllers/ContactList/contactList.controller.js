@@ -1,9 +1,10 @@
 import path from "path";
+import fs from "fs";
+import csv from "csv-parser";
+import { parseAsync } from "json2csv";
 import ContactList from "../../models/contactList.model.js";
 import Contacts from "../../models/contacts.model.js";
 // import Template from "../../models/templates.model.js";
-import XLSX from "xlsx"; // Excel reading library
-import Papa from "papaparse"; // CSV reading library
 import Permissions from "../../models/permissions.model.js";
 import CustomField from "../../models/customField.model.js";
 import User from "../../models/user.model.js";
@@ -11,20 +12,30 @@ import { countries } from "../../utils/dropDown.js";
 import { fileURLToPath } from "url";
 import ActivityLogs from "../../models/activityLogs.model.js";
 import dotenv from "dotenv";
+import { generateUniqueId } from "../../utils/otpGenerator.js";
 
 dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const csvFilePath = path.join(
+	__dirname,
+	"..",
+	"..",
+	"..",
+	"public",
+	"sample.csv",
+);
 
 export const previewContactList = async (req, res) => {
 	try {
-		const { fileData } = req.body;
+		const { fileData, listName } = req.body;
 
-		if (!fileData) {
+		// Check for missing data
+		if (!fileData || !listName) {
 			return res.status(400).json({
 				success: false,
-				message: "No file data provided.",
+				message: "Required fields missing: fileData, listName.",
 			});
 		}
 
@@ -35,10 +46,12 @@ export const previewContactList = async (req, res) => {
 		} catch (e) {
 			return res.status(400).json({
 				success: false,
-				message: "Invalid file format.",
+				message:
+					"Invalid file format. Please upload a valid JSON file.",
 			});
 		}
 
+		// Check if the parsed data contains contacts
 		if (!parsedData.length) {
 			return res.status(400).json({
 				success: false,
@@ -46,27 +59,19 @@ export const previewContactList = async (req, res) => {
 			});
 		}
 
-		// Required columns (Name, Number)
+		// Validate columns
 		const requiredColumns = ["Name", "Number"];
-
-		// Fetch custom fields from DB
 		const customFields = await CustomField.find({
-			owner: req.session.user.id,
+			customid: req.session.user.id,
 		});
-		const customFieldNames = customFields.map((field) => field.fieldName);
-
-		// Combine required columns with custom fields
+		const customFieldNames = customFields.map((field) => field.clname);
 		const expectedColumns = [...requiredColumns, ...customFieldNames];
 
-		// Extract the header (first row) from the parsed data
 		const actualColumns = Object.keys(parsedData[0]);
 
-		// Check if required columns exist
 		const missingColumns = requiredColumns.filter(
 			(col) => !actualColumns.includes(col),
 		);
-
-		// Check if custom fields match
 		const invalidColumns = actualColumns.filter(
 			(col) =>
 				!expectedColumns.includes(col) &&
@@ -74,7 +79,6 @@ export const previewContactList = async (req, res) => {
 				col !== "Number",
 		);
 
-		// Check for empty values in the parsed data
 		const emptyFields = parsedData
 			.map((row, rowIndex) => {
 				return Object.keys(row).map((key) => {
@@ -91,34 +95,30 @@ export const previewContactList = async (req, res) => {
 			.flat()
 			.filter((item) => item !== null);
 
-		// If any errors, send them back for the preview
-		if (
-			missingColumns.length > 0 ||
-			invalidColumns.length > 0 ||
-			emptyFields.length > 0
-		) {
-			return res.status(400).json({
-				success: false,
-				message: "Validation errors found.",
-				missingColumns,
-				invalidColumns,
-				emptyFields,
-				parsedData,
-			});
-		}
+		// Generate the HTML table for the preview
+		let tableHtml = "<table class='min-w-full table-auto'><thead><tr>";
 
-		// Render the table HTML for the preview
-		let tableHtml = "";
-		tableHtml += '<table class="min-w-full table-auto"><thead><tr>';
-		actualColumns.forEach((header) => {
-			tableHtml += `<th class="px-4 py-2 border">${header}</th>`;
+		// Add a new header for row numbers (Row Number)
+		tableHtml += "<th class='px-4 py-2 border'>#</th>";
+
+		// Add headers for the actual columns
+		actualColumns.forEach((header, index) => {
+			tableHtml += `<th class='px-4 py-2 border'>${header} (${
+				index + 1
+			})</th>`; // Add index number in header
 		});
 		tableHtml += "</tr></thead><tbody>";
 
-		parsedData.forEach((row) => {
+		// Loop through the data and add rows with row numbers
+		parsedData.forEach((row, rowIndex) => {
 			tableHtml += "<tr>";
+
+			// Add a column for row numbers
+			tableHtml += `<td class='px-4 py-2 border'>${rowIndex + 1}</td>`;
+
+			// Add the actual data columns
 			actualColumns.forEach((header) => {
-				tableHtml += `<td class="px-4 py-2 border">${
+				tableHtml += `<td class='px-4 py-2 border'>${
 					row[header] || ""
 				}</td>`;
 			});
@@ -127,50 +127,60 @@ export const previewContactList = async (req, res) => {
 
 		tableHtml += "</tbody></table>";
 
+		// Return validation errors if any
+		if (
+			missingColumns.length > 0 ||
+			invalidColumns.length > 0 ||
+			emptyFields.length > 0
+		) {
+			return res.status(400).json({
+				success: false,
+				missingColumns,
+				invalidColumns,
+				emptyFields,
+				tableHtml,
+			});
+		}
+
+		req.session.user.contactListCSV = parsedData;
+		req.session.user.listName = listName;
+
+		// Respond with the preview data
 		return res.status(200).json({
 			success: true,
 			message: "Data preview successful.",
-			tableHtml, // Include the rendered HTML in the response
+			tableHtml,
 		});
 	} catch (error) {
 		console.error(error);
 		return res.status(500).json({
 			success: false,
-			message: "Error validating contact list.",
+			message: "An error occurred while validating the contact list.",
 		});
 	}
 };
 
 export const createList = async (req, res) => {
 	try {
+		if (
+			!req.session.user ||
+			!req.session.user.contactListCSV ||
+			!req.session.user.listName
+		) {
+			return res.status(400).json({
+				success: false,
+				message: "Session data missing or incomplete.",
+			});
+		}
+
 		const userId = req.session.user.id;
-		const { countryCode, listName, fileData } = req.body;
+		const parsedData = req.session.user.contactListCSV;
+		const listName = req.session.user.listName;
 
-		if (!fileData) {
-			return res.status(400).json({
-				success: false,
-				message: "No file data provided.",
-			});
-		}
+		req.session.user.contactListCSV = null;
+		req.session.user.listName = null;
 
-		let parsedData;
-		try {
-			parsedData = JSON.parse(fileData);
-		} catch (e) {
-			return res.status(400).json({
-				success: false,
-				message: "Invalid file format.",
-			});
-		}
-
-		if (!parsedData.length) {
-			return res.status(400).json({
-				success: false,
-				message: "No contacts found in the file.",
-			});
-		}
-
-		const user = await User.findOne({ unique_id: userId });
+		const user = await User.findOne({ _id: userId });
 		if (!user) {
 			return res.status(404).json({
 				success: false,
@@ -182,33 +192,23 @@ export const createList = async (req, res) => {
 
 		// Create a new Contact List
 		const contactList = new ContactList({
-			ContactListName: listName,
-			owner: user._id,
-			countryCode,
+			contalistName: listName,
+			useradmin: userId,
 			participantCount,
+			contactId: generateUniqueId(),
 		});
 
 		await contactList.save();
 
 		const contactsToSave = parsedData
 			.map((contactData) => {
-				let { Name, WhatsApp, ...additionalFields } = contactData;
-
-				Name = (Name || "").trim();
-				WhatsApp = (WhatsApp || "").trim();
-
-				if (!Name || !WhatsApp) {
-					console.log("Skipping invalid contact:", contactData);
-					return null;
-				}
+				let { Name, Number, ...additionalFields } = contactData;
 
 				return new Contacts({
-					userName: Name,
-					whatsApp: WhatsApp,
-					countryCode,
-					owner: user._id,
-					contactList: contactList._id,
-					additionalAttributes: additionalFields,
+					Name,
+					wa_id: Number,
+					contactId: contactList.contactId,
+					masterExtra: additionalFields,
 				});
 			})
 			.filter((contact) => contact !== null);
@@ -368,12 +368,13 @@ export const getCustomField = async (req, res) => {
 		const skip = (page - 1) * limit;
 
 		const totalCustomFields = await CustomField.countDocuments({
-			owner: userId,
+			customid: userId,
 		});
-		const customFields = await CustomField.find({ owner: userId })
+		const customFields = await CustomField.find({ customid: userId })
 			.skip(skip)
 			.limit(limit);
 
+		// console.log(customFields);
 		const totalPages = Math.ceil(totalCustomFields / limit);
 
 		res.render("Contact-List/custom-field", {
@@ -394,22 +395,53 @@ export const createCustomField = async (req, res) => {
 	try {
 		const userId = req.session.user.id;
 		const { fieldName, fieldType } = req.body;
+
+		// Only proceed if the field type is "input"
+		if (fieldType === "input") {
+			let csvData = [];
+			let headers = [];
+
+			// Reading the CSV file
+			const fileContent = fs.readFileSync(csvFilePath, "utf8");
+			const rows = fileContent.split("\n");
+			headers = rows[0].split(",");
+
+			// Check if the fieldName already exists in the CSV headers
+			if (!headers.includes(fieldName)) {
+				// Append the new field name to headers
+				headers.push(fieldName);
+
+				// Update the CSV with the new header
+				const updatedCsv = [headers.join(",")]
+					.concat(rows.slice(1))
+					.join("\n");
+
+				// Write the updated CSV back to the file
+				fs.writeFileSync(csvFilePath, updatedCsv, "utf8");
+			}
+		}
+
+		// Create a new custom field in the database
+		const unique_id = generateUniqueId();
 		const newField = new CustomField({
-			owner: userId,
-			fieldName,
-			fieldType,
+			customid: userId,
+			unique_id,
+			clname: fieldName,
+			cltype: fieldType,
 		});
 
 		await newField.save();
 
+		// Log activity
 		await ActivityLogs.create({
 			name: req.session.user.name
 				? req.session.user.name
 				: req.session.addedUser.name,
 			actions: "Create",
-			details: `Created a custom field named : ${fieldName}`,
+			details: `Created a custom field named: ${fieldName}`,
 		});
 
+		// Send success response
 		res.status(201).json({
 			success: true,
 			message: "Custom field created successfully",
@@ -426,12 +458,11 @@ export const createCustomField = async (req, res) => {
 
 export const deleteCustomField = async (req, res) => {
 	try {
-		const userId = req.session.user.id;
 		const fieldId = req.params.id;
 
-		const field = await CustomField.findOneAndDelete({
-			_id: fieldId,
-			owner: userId,
+		// Find the custom field based on the field ID and user
+		const field = await CustomField.findOne({
+			customid: fieldId,
 		});
 
 		if (!field) {
@@ -441,23 +472,77 @@ export const deleteCustomField = async (req, res) => {
 			});
 		}
 
-		await ActivityLogs.create({
-			name: req.session.user.name
-				? req.session.user.name
-				: req.session.addedUser.name,
-			actions: "Delete",
-			details: `Deleted a custom field named : ${field.fieldName}`,
-		});
+		// Update the status to 0 to mark it as deleted
+		field.status = 0;
+		await field.save();
 
-		res.json({
-			success: true,
-			message: "Custom field deleted successfully",
-		});
+		// Remove the field name from the CSV if it's an "input" field
+		if (field.cltype === "input") {
+			// Read the CSV
+			const rows = [];
+			fs.createReadStream(csvFilePath)
+				.pipe(csv())
+				.on("data", (row) => rows.push(row))
+				.on("end", async () => {
+					// Get headers from the first row
+					const headers = Object.keys(rows[0]);
+
+					// Exclude the deleted field name
+					const updatedHeaders = headers.filter(
+						(header) => header !== field.clname,
+					);
+
+					// Write the updated CSV without the deleted field's column
+					const updatedRows = rows.map((row) => {
+						const newRow = {};
+						updatedHeaders.forEach((header) => {
+							newRow[header] = row[header];
+						});
+						return newRow;
+					});
+
+					// Convert back to CSV and overwrite the existing file
+					const csvData = await parseAsync(updatedRows, {
+						fields: updatedHeaders,
+					});
+					fs.writeFileSync(csvFilePath, csvData);
+
+					// Log the activity
+					await ActivityLogs.create({
+						name: req.session.user.name
+							? req.session.user.name
+							: req.session.addedUser.name,
+						actions: "Delete",
+						details: `Marked the custom field named : ${field.clname} as deleted and removed from CSV`,
+					});
+
+					// Respond to the client
+					res.json({
+						success: true,
+						message:
+							"Custom field marked as deleted and removed from CSV successfully",
+					});
+				});
+		} else {
+			// If it's not an "input" type, just log and respond
+			await ActivityLogs.create({
+				name: req.session.user.name
+					? req.session.user.name
+					: req.session.addedUser.name,
+				actions: "Delete",
+				details: `Marked the custom field named : ${field.clname} as deleted`,
+			});
+
+			res.json({
+				success: true,
+				message: "Custom field marked as deleted successfully",
+			});
+		}
 	} catch (error) {
 		console.error(error);
 		res.status(500).json({
 			success: false,
-			message: "Error deleting custom field",
+			message: "Error marking custom field as deleted",
 		});
 	}
 };
@@ -522,9 +607,9 @@ export const getList = async (req, res) => {
 		const skip = (page - 1) * limit;
 
 		const totalContactLists = await ContactList.countDocuments({
-			owner: userId,
+			useradmin: userId,
 		});
-		const contactLists = await ContactList.find({ owner: userId })
+		const contactLists = await ContactList.find({ useradmin: userId })
 			.skip(skip)
 			.limit(limit);
 

@@ -23,18 +23,18 @@
 			</thead>
 			<tbody>
 				<% contacts.forEach((contact, index) => { %>
-				<tr class="hover:bg-green-100 cursor-pointer border" onclick="window.location.href='/contact-list/overview/<%= contact._id %>'">
+				<tr class="hover:bg-green-100 cursor-pointer border" onclick="window.location.href='/contact-list/overview/<%= contact.contactId %>'">
 					<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
 						<%= index + 1 %>
 					</td>
 					<td class="px-6 py-4 whitespace-nowrap text-sm">
-						<%= contact.ContactListName %>
+						<%= contact.contalistName %>
 					</td>
 					<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
 						<%= contact.participantCount %>
 					</td>
 					<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-						<%= new Date(contact.createdAt).toLocaleString('en-GB',
+						<%= new Date(contact.adddate).toLocaleString('en-GB',
 						{ year: 'numeric', month: 'short', day: '2-digit' }) %>
 					</td>
 					<td class="px-6 py-4 whitespace-nowrap text-sm">
@@ -43,7 +43,7 @@
 							<i class="fas fa-edit"></i>
 						</button>
 						<!-- Delete Button -->
-						<button aria-label="Delete contact" class="text-gray-600 hover:text-red-600 mx-1" onclick="event.stopPropagation(); openDeleteModal('<%= contact._id %>', '<%= contact.ContactListName %>');">
+						<button aria-label="Delete contact" class="text-gray-600 hover:text-red-600 mx-1" onclick="event.stopPropagation(); openDeleteModal('<%= contact._id %>', '<%= contact.contalistName %>');">
 							<i class="fas fa-trash-alt"></i>
 						</button>
 					</td>
@@ -51,68 +51,154 @@
 				<% }); %>
 			</tbody>
 		</table>
-		
-		<!-- Edit Modal Structure -->
-		<div id="editContactModal" class="fixed inset-0 bg-gray-800 bg-opacity-50 z-50 flex items-center justify-center pointer-events-none opacity-0 transition-opacity duration-300">
-			<div class="bg-white w-1/3 rounded-lg shadow-lg p-6 transform scale-95 transition-transform duration-300">
-				<button class="edit-modal-close-btn absolute top-8 right-8 text-gray-400 hover:text-gray-600">
-					<i class="fas fa-times"></i>
-				</button>
-				<h2 class="text-xl font-bold mb-4">Edit Contact</h2>
-				<form id="editContactForm">
-					<div class="mb-4">
-						<label for="editCountryCode" class="block text-sm font-medium text-gray-700">Country Code</label>
-						<input id="editCountryCode" type="text" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" />
-					</div>
-					<div class="mb-4">
-						<label for="editWhatsAppNumber" class="block text-sm font-medium text-gray-700">WhatsApp Number</label>
-						<input id="editWhatsAppNumber" type="text" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" />
-					</div>
-					<div class="mb-4">
-						<label for="editCity" class="block text-sm font-medium text-gray-700">City</label>
-						<input id="editCity" type="text" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" />
-					</div>
-					<div class="mb-4">
-						<label for="editUserName" class="block text-sm font-medium text-gray-700">User Name</label>
-						<input id="editUserName" type="text" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" />
-					</div>
-					<div class="flex justify-end">
-						<button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">
-							Save Changes
-						</button>
-					</div>
-				</form>
+		<!-- Pagination -->
+		<div class="flex items-center justify-center py-4 space-x-4">
+			<nav class="flex items-center">
+				<ul class="flex space-x-1">
+					<!-- Previous Button -->
+					<li>
+						<a href="/contact-list?page=<%= page > 1 ? page - 1 : 1 %>" class="px-3 py-2 rounded-md text-sm font-medium text-gray-500 bg-white border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed" <%= page === 1 ? 'aria-disabled="true"' : '' %>>‹</a>
+					</li>
+					
+					<!-- First Page Button -->
+					<li>
+						<a href="/contact-list?page=1" class="px-3 py-2 rounded-md text-sm font-medium <%= page === 1 ? 'text-white bg-blue-600 border-blue-600' : 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50' %>">1</a>
+					</li>
+					
+					<% if (page > 3) { %>
+					<!-- Show "..." if current page is greater than 3 -->
+					<li><span class="px-3 py-2 text-sm text-gray-500">...</span></li>
+					<% } %>
+					
+					<!-- Dynamic Page Numbers based on current page -->
+					<% for (let i = Math.max(2, page - 1); i <= Math.min(totalPages - 1, page + 1); i++) { %>
+					<li>
+						<a href="/contact-list?page=<%= i %>" class="px-3 py-2 rounded-md text-sm font-medium <%= i === page ? 'text-white bg-blue-600 border-blue-600' : 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50' %>"><%= i %></a>
+					</li>
+					<% } %>
+					
+					<% if (page < totalPages - 2) { %>
+					<!-- Show "..." if there are more pages -->
+					<li><span class="px-3 py-2 text-sm text-gray-500">...</span></li>
+					<% } %>
+					
+					<!-- Last Page Button -->
+					<% if (totalPages > 1) { %>
+					<li>
+						<a href="/contact-list?page=<%= totalPages %>" class="px-3 py-2 rounded-md text-sm font-medium <%= page === totalPages ? 'text-white bg-blue-600 border-blue-600' : 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50' %>"><%= totalPages %></a>
+					</li>
+					<% } %>
+					
+					<!-- Next Button -->
+					<li>
+						<a href="/contact-list?page=<%= page < totalPages ? page + 1 : totalPages %>" class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50">›</a>
+					</li>
+				</ul>
+			</nav>
+			
+			<!-- "Go to page" input -->
+			<div class="flex items-center space-x-2">
+				<span class="text-sm text-gray-700">Go to page</span>
+				<input type="number" min="1" max="<%= totalPages %>" class="w-16 px-2 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" value="<%= page %>" id="pageInput" />
+				<button type="button" class="px-3 py-1 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" onclick="goToPage()">Go</button>
 			</div>
 		</div>
 		
-		<!-- Delete Contact Modal -->
-		<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
-			<div class="modal-dialog">
-				<div class="modal-content">
-					<div class="modal-header">
-						<h5 class="modal-title" id="deleteModalLabel">
-							Delete Contact
-						</h5>
-						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-					</div>
-					<div class="modal-body">
-						Are you sure you want to delete
-						<strong id="deleteContactName"></strong>?
-					</div>
-					<div class="modal-footer">
-						<form id="deleteContactForm">
-							<input type="hidden" name="contactId" id="deleteContactId" />
-							<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-								Cancel
-							</button>
-							<button type="submit" class="btn btn-danger">
-								Delete
-							</button>
-						</form>
-					</div>
-				</div>
+		<script>
+			function goToPage () {
+				const pageInput = document.getElementById('pageInput');
+				const page = parseInt(pageInput.value);
+				const totalPages = <%= totalPages %>;
+				
+				if (page > totalPages) {
+					alert("Page doesn't exist. Try a lower number.");
+					pageInput.value = <%= page %>; // Reset input to the current page
+				} else if (page < 1) {
+					alert("Page number should be at least 1.");
+					pageInput.value = <%= page %>;
+				} else {
+					window.location.href = `/contact-list?page=${page}`;
+				}
+			}
+		</script>
+		
+		
+		
+	</div>
+	<% } else { %>
+	<!-- Empty state -->
+	<div class="flex flex-col items-center justify-center min-h-[400px]  rounded-lg mt-4">
+		<div class="text-center">
+			<img src="https://img.freepik.com/free-vector/hands-holding-tablet-with-forefinger-clicking-start-button-new-application-launch-flat-illustration_74855-20595.jpg?ga=GA1.1.131490893.1732525963&semt=ais_hybrid" alt="No contacts" class="w-48 h-48 mx-auto mb-4">
+			
+			<h3 class="text-xl font-semibold text-gray-900 mb-2">No contact list yet</h3>
+			<p class="text-gray-600 mb-6">Start adding contacts by clicking on "Create new Contact list"</p>
+			<button onclick="document.getElementById('create-List').click()" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black">
+				<i class="fa-solid fa-plus pr-2"></i>
+				Create new Contact list
+			</button>
+		</div>
+	</div>
+	<% } %>
+</div>
+<!-- Edit Modal Structure -->
+<div id="editContactModal" class="fixed inset-0 bg-gray-800 bg-opacity-50 z-50 flex items-center justify-center pointer-events-none opacity-0 transition-opacity duration-300">
+	<div class="bg-white w-1/3 rounded-lg shadow-lg p-6 transform scale-95 transition-transform duration-300">
+		<button class="edit-modal-close-btn absolute top-8 right-8 text-gray-400 hover:text-gray-600">
+			<i class="fas fa-times"></i>
+		</button>
+		<h2 class="text-xl font-bold mb-4">Edit Contact</h2>
+		<form id="editContactForm">
+			<div class="mb-4">
+				<label for="editCountryCode" class="block text-sm font-medium text-gray-700">Country Code</label>
+				<input id="editCountryCode" type="text" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" />
+			</div>
+			<div class="mb-4">
+				<label for="editWhatsAppNumber" class="block text-sm font-medium text-gray-700">WhatsApp Number</label>
+				<input id="editWhatsAppNumber" type="text" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" />
+			</div>
+			<div class="mb-4">
+				<label for="editCity" class="block text-sm font-medium text-gray-700">City</label>
+				<input id="editCity" type="text" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" />
+			</div>
+			<div class="mb-4">
+				<label for="editUserName" class="block text-sm font-medium text-gray-700">User Name</label>
+				<input id="editUserName" type="text" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" />
+			</div>
+			<div class="flex justify-end">
+				<button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">
+					Save Changes
+				</button>
+			</div>
+		</form>
+	</div>
+</div>
+
+<!-- Delete Contact Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="deleteModalLabel">
+					Delete Contact
+				</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				Are you sure you want to delete
+				<strong id="deleteContactName"></strong>?
+			</div>
+			<div class="modal-footer">
+				<form id="deleteContactForm">
+					<input type="hidden" name="contactId" id="deleteContactId" />
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+						Cancel
+					</button>
+					<button type="submit" class="btn btn-danger">
+						Delete
+					</button>
+				</form>
 			</div>
 		</div>
 	</div>
 </div>
-<% } %>

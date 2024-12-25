@@ -21,12 +21,12 @@ body {
 }
 
 *::-webkit-scrollbar-thumb {
-	background-color: #fc9d9d;
+	background-color: #d8cdcd;
 	border-radius: 10px;
 }
 
 *::-webkit-scrollbar-thumb:hover {
-	background-color: #fb5b5b;
+	background-color: #000000;
 }
 
 .gradient-bg {

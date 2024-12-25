@@ -2,26 +2,48 @@ import { Schema, model } from "mongoose";
 
 const contactsSchema = new Schema(
 	{
-		_id: { type: Schema.Types.ObjectId, auto: false },
 		userlive: { type: Number, default: 0 },
-		wa_idK: { type: String, required: true },
-		keyId: { type: String, required: true },
+		wa_idK: { type: String },
+		keyId: { type: String },
 		subscribe: { type: Number, default: 1 },
-		subscribe_date: { type: Number, required: true },
-		subscribe_update: { type: Number, required: true },
-		unsubscribe_date: { type: Number, default: "" },
-		Name: { type: String, required: true },
-		Number: { type: String, required: true },
-		wa_id: { type: String, required: true },
-		usertimestmp: { type: Number, required: true },
-		userupdate: { type: Number, required: true },
+		subscribe_date: {
+			type: Number,
+			default: () => Date.now(),
+		},
+		subscribe_update: {
+			type: Number,
+			default: () => Date.now(),
+		},
+		unsubscribe_date: { type: String, default: 0 },
+		Name: { type: String },
+		wa_id: { type: String },
+		usertimestmp: {
+			type: Number,
+			default: () => Date.now(),
+		},
+		userupdate: { type: Number },
 		user_bot: { type: Number, default: 0 },
-		usertimestmpup: { type: Number, required: true },
-		masterExtra: { type: Object },
-		contactId: { type: String, required: true },
+		usertimestmpup: {
+			type: Number,
+			default: () => Date.now(),
+		},
+		masterExtra: { type: Schema.Types.Mixed },
+		contactId: { type: String },
 	},
 	{ timestamps: false, strict: false },
 );
+
+contactsSchema.pre("save", function (next) {
+	this.usertimestmp = Date.now();
+	this.subscribe_date = Date.now();
+	if (!this.subscribe_update) {
+		this.subscribe_update = Date.now();
+	}
+	if (!this.usertimestmpup) {
+		this.usertimestmpup = Date.now();
+	}
+	next();
+});
 
 const Contacts = model("Contacts", contactsSchema);
 

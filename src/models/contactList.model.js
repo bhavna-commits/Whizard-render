@@ -2,14 +2,17 @@ import { Schema, model } from "mongoose";
 
 const contactListSchema = new Schema(
 	{
-		_id: { type: Schema.Types.ObjectId, auto: false },
-		useradmin: { type: Number, required: true },
+		useradmin: { type: String, required: true },
 		contalistName: { type: String, required: true },
 		contactId: { type: String, required: true },
-		adddate: { type: String, required: true },
+		adddate: {
+			type: Number,
+			default: () => Date.now(),
+		},
 		contact_status: { type: Number, required: true, default: 1 },
+		participantCount: { type: Number, required: true },
 	},
-	{ timestamps: true, strict: false },
+	{ timestamps: false, strict: false },
 );
 
 const ContactList = model("ContactList", contactListSchema);

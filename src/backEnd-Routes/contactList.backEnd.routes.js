@@ -22,7 +22,7 @@ import {
 
 const router = express.Router();
 
-router.post("/createList", createList);
+router.post("/create-list", createList);
 
 router.post("/previewContactList", previewContactList);
 
