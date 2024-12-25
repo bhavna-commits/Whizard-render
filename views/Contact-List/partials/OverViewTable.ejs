@@ -1,25 +1,29 @@
  <div class="py-5">
  	<% if (contacts && contacts.length > 0) { %>
  	<div class="table-responsive ">
- 		<table class="min-w-full bg-white">
+ 		<table class="min-w-full bg-white min-h-full">
  			<thead>
  				<tr class=" ">
  					<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sno.</th>
-					<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+ 					<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
  					<!-- <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tags</th> -->
  					<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contacts</th>
  					<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created at</th>
  					<!-- <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">WhatsApp</th> -->
+ 					<% if (contacts[0].masterExtra) { %>
+ 					<% Object.keys(contacts[0].masterExtra).forEach(function(key) { %>
+ 					<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"><%= key %></th>
+ 					<% }); %>
+ 					<% } %>
  					<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-					
-					<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"><%  %></th>
+ 					
  				</tr>
  			</thead>
  			<tbody class="divide-y divide-gray-200">
  				<% contacts.forEach((contact, index) => { %>
  				<tr class="hover:bg-green-100 border rounded-lg">
  					<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><%= index + 1 %></td>
-					<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><%= contact?.Name %></td>
+ 					<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><%= contact?.Name %></td>
  					<!-- <td class="px-6 py-4 whitespace-nowrap p-2 rounded-lg">
  						<div class="w-fit px-2 rounded-lg 
 					<% if (contact.tags === 'Hot Leads') { %>
@@ -36,6 +40,11 @@
  					</td>
  					<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><%= new Date(contact.subscribe_date).toLocaleString('en-GB', { year: 'numeric', month: 'short', day: '2-digit' }) %></td>
  					<!-- <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><%= contact.validated %></td> -->
+ 					<% if (contact.masterExtra) { %>
+ 					<% Object.keys(contact.masterExtra).forEach(function(key) { %>
+ 					<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"><%= contact.masterExtra[key] %></th>
+ 					<% }); %>
+ 					<% } %>
  					<td class="px-6 py-4 whitespace-nowrap text-sm">
  						<!-- Edit Button -->
  						<button aria-label="Edit contact" class="text-gray-600 hover:text-blue-600 mx-1" onclick="event.stopPropagation(); openEditModal('<%= JSON.stringify(contact) %>');">
@@ -121,9 +130,9 @@
  				}
  			}
  		</script>
-
-
-
+ 		
+ 		
+ 		
  	</div>
  	<% } else { %>
  	<!-- Empty state -->
