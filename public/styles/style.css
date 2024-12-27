@@ -1,4 +1,4 @@
-*  {
+* {
 	box-sizing: border-box;
 	margin: 0;
 	padding: 0;
@@ -27,6 +27,16 @@ body {
 
 *::-webkit-scrollbar-thumb:hover {
 	background-color: #000000;
+}
+
+*,
+*::before,
+*::after {
+	outline: none !important;
+}
+
+:focus {
+	outline: none;
 }
 
 .gradient-bg {

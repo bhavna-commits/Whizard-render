@@ -121,7 +121,7 @@
 										<td class="px-6 py-4 whitespace-nowrap"><%= field.clname %></td>
 										<td class="px-6 py-4 whitespace-nowrap"><%= field.cltype %></td>
 										<td class="px-6 py-4 whitespace-nowrap">
-											<button onclick="deleteField('<%= field._id %>')" class="text-red-600 hover:text-red-900">
+											<button onclick="deleteField('<%= field.unique_id %>')" class="text-red-600 hover:text-red-900">
 												<i class="fas fa-trash"></i>
 											</button>
 										</td>
@@ -134,12 +134,12 @@
 									<ul class="flex space-x-1">
 										<!-- Previous Button -->
 										<li>
-											<a href="/contact-list?page=<%= page > 1 ? page - 1 : 1 %>" class="px-3 py-2 rounded-md text-sm font-medium text-gray-500 bg-white border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed" <%= page === 1 ? 'aria-disabled="true"' : '' %>>‹</a>
+											<a href="/contact-list/custom-field?page=<%= page > 1 ? page - 1 : 1 %>" class="px-3 py-2 rounded-md text-sm font-medium text-gray-500 bg-white border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed" <%= page === 1 ? 'aria-disabled="true"' : '' %>>‹</a>
 										</li>
 										
 										<!-- First Page Button -->
 										<li>
-											<a href="/contact-list?page=1" class="px-3 py-2 rounded-md text-sm font-medium <%= page === 1 ? 'text-white bg-blue-600 border-blue-600' : 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50' %>">1</a>
+											<a href="/contact-list/custom-field?page=1" class="px-3 py-2 rounded-md text-sm font-medium <%= page === 1 ? 'text-white bg-blue-600 border-blue-600' : 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50' %>">1</a>
 										</li>
 										
 										<% if (page > 3) { %>
@@ -150,7 +150,7 @@
 										<!-- Dynamic Page Numbers based on current page -->
 										<% for (let i = Math.max(2, page - 1); i <= Math.min(totalPages - 1, page + 1); i++) { %>
 										<li>
-											<a href="/contact-list?page=<%= i %>" class="px-3 py-2 rounded-md text-sm font-medium <%= i === page ? 'text-white bg-blue-600 border-blue-600' : 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50' %>"><%= i %></a>
+											<a href="/contact-list/custom-field?page=<%= i %>" class="px-3 py-2 rounded-md text-sm font-medium <%= i === page ? 'text-white bg-blue-600 border-blue-600' : 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50' %>"><%= i %></a>
 										</li>
 										<% } %>
 										
@@ -162,13 +162,13 @@
 										<!-- Last Page Button -->
 										<% if (totalPages > 1) { %>
 										<li>
-											<a href="/contact-list?page=<%= totalPages %>" class="px-3 py-2 rounded-md text-sm font-medium <%= page === totalPages ? 'text-white bg-blue-600 border-blue-600' : 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50' %>"><%= totalPages %></a>
+											<a href="/contact-list/custom-field?page=<%= totalPages %>" class="px-3 py-2 rounded-md text-sm font-medium <%= page === totalPages ? 'text-white bg-blue-600 border-blue-600' : 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50' %>"><%= totalPages %></a>
 										</li>
 										<% } %>
 										
 										<!-- Next Button -->
 										<li>
-											<a href="/contact-list?page=<%= page < totalPages ? page + 1 : totalPages %>" class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50">›</a>
+											<a href="/contact-list/custom-field?page=<%= page < totalPages ? page + 1 : totalPages %>" class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50">›</a>
 										</li>
 									</ul>
 								</nav>

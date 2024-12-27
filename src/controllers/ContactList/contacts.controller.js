@@ -1,6 +1,21 @@
+import fs from "fs";
+import path from "path";
+import Papa from "papaparse";
 import ContactList from "../../models/contactList.model.js";
 import Contacts from "../../models/contacts.model.js";
 import ActivityLogs from "../../models/activityLogs.model.js";
+import { fileURLToPath } from "url";
+
+export const __filename = fileURLToPath(import.meta.url);
+export const __dirname = path.dirname(__filename);
+export const csvFilePath = path.join(
+	__dirname,
+	"..",
+	"..",
+	"..",
+	"public",
+	"sample.csv",
+);
 
 export const updateContact = async (req, res) => {
 	const contactId = req.params.id;
@@ -50,12 +65,22 @@ export const getContacts = async (req, res) => {
 		const limit = 6;
 		const skip = (page - 1) * limit;
 
-		const totalContacts = await Contacts.countDocuments({
-			contactId: id,
-		});
-		const contactLists = await Contacts.find({ contactId: id })
-			.skip(skip)
-			.limit(limit);
+		const aggregation = [
+			{ $match: { contactId: id, subscribe: 1 } },
+			{
+				$facet: {
+					paginatedResults: [{ $skip: skip }, { $limit: limit }],
+					totalContacts: [{ $count: "totalContacts" }],
+				},
+			},
+		];
+
+		const result = await Contacts.aggregate(aggregation);
+		const contactLists = result[0].paginatedResults;
+		const totalContacts =
+			result[0].totalContacts.length > 0
+				? result[0].totalContacts[0].totalContacts
+				: 0;
 
 		const name = (await ContactList.findOne({ contactId: id }))
 			.contalistName;
@@ -66,6 +91,8 @@ export const getContacts = async (req, res) => {
 			contacts: contactLists,
 			page,
 			totalPages,
+			tags: [],
+			id,
 		});
 	} catch (error) {
 		console.error(error);
@@ -90,13 +117,16 @@ export const editContact = async (req, res) => {
 	}
 
 	try {
-		const contacts = await Contacts.findByIdAndUpdate(id, updatedData);
+		const contacts = await Contacts.findOneAndUpdate(
+			{ keyId: id },
+			updatedData,
+		);
 		await ActivityLogs.create({
 			name: req.session.user.name
 				? req.session.user.name
 				: req.session.addedUser.name,
 			actions: "Update",
-			details: `Edited contact of : ${contacts.userName}`,
+			details: `Edited contact of : ${contacts.Name}`,
 		});
 		res.json({ success: true });
 	} catch (error) {
@@ -113,26 +143,31 @@ export const deleteContact = async (req, res) => {
 		});
 	}
 	try {
-		const contact = await Contacts.findById(id);
+		const contact = await Contacts.findOne({ _id: id });
 		if (!contact) {
 			return res
 				.status(404)
 				.json({ success: false, message: "Contact not found" });
 		}
 
-		const contactListId = contact.contactList;
-		const contacts = await Contacts.findById(id);
-		await Contacts.findByIdAndDelete(id);
-		await ContactList.findByIdAndUpdate(contactListId, {
-			$inc: { participantCount: -1 },
-		});
+		contact.unsubscribe_date = Date.now();
+		contact.subscribe = 0;
+		await contact.save();
+
+		const contactListId = contact.contactId;
+		await ContactList.findOneAndUpdate(
+			{ contactId: contactListId },
+			{
+				$inc: { participantCount: -1 },
+			},
+		);
 
 		await ActivityLogs.create({
 			name: req.session.user.name
 				? req.session.user.name
 				: req.session.addedUser.name,
 			actions: "Update",
-			details: `Deleted contact of : ${contacts.userName}`,
+			details: `Deleted contact of : ${contact.Name}`,
 		});
 
 		res.json({
@@ -145,5 +180,51 @@ export const deleteContact = async (req, res) => {
 			success: false,
 			message: "An error occurred while deleting the contact.",
 		});
+	}
+};
+
+export const updateCSVOnFieldDelete = async (fieldToDelete) => {
+	try {
+		// Read the CSV file content
+		const csvContent = fs.readFileSync(csvFilePath, "utf8");
+
+		// Parse the CSV using Papa Parse
+		const parsedCSV = Papa.parse(csvContent, {
+			header: true,
+			skipEmptyLines: true,
+		});
+
+		const rows = parsedCSV.data;
+		const headers = parsedCSV.meta.fields;
+
+		// Check if the field exists in the headers
+		if (!headers.includes(fieldToDelete)) {
+			console.log(`Field ${fieldToDelete} not found in CSV`);
+			return;
+		}
+
+		// Filter out the field (column) to be deleted
+		const updatedHeaders = headers.filter(
+			(header) => header !== fieldToDelete,
+		);
+
+		// Remove the corresponding field from each row
+		const updatedRows = rows.map((row) => {
+			const newRow = { ...row };
+			delete newRow[fieldToDelete];
+			return newRow;
+		});
+
+		// Convert back to CSV format
+		const updatedCSV = Papa.unparse({
+			fields: updatedHeaders,
+			data: updatedRows,
+		});
+
+		// Overwrite the CSV with the updated data
+		fs.writeFileSync(csvFilePath, updatedCSV);
+		console.log(`Field ${fieldToDelete} successfully deleted from CSV.`);
+	} catch (error) {
+		console.error("Error updating the CSV:", error);
 	}
 };

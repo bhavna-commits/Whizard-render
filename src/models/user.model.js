@@ -21,12 +21,6 @@ const userSchema = new mongoose.Schema(
 		industry: { type: String, required: true },
 		jobRole: { type: String, required: true },
 		website: { type: String, required: true },
-		role: {
-			type: String,
-			enum: ["owner", "member"],
-			default: "owner",
-			required: true,
-		},
 		WhatsAppConnectStatus: {
 			type: String,
 			enum: ["Pending", "Live"],

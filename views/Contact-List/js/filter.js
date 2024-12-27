@@ -43,7 +43,6 @@ function applyFilters() {
 		attributeValue,
 	});
 
-	
 	// Close the modal after applying filters
 	closeFilterModal();
 }
@@ -57,13 +56,14 @@ function clearFilters() {
 	while (filterContainer.firstChild) {
 		filterContainer.removeChild(filterContainer.firstChild);
 	}
+}
 
-	function addFilter() {
-		const filterRow = document.createElement("div");
-		filterRow.classList.add("filter-row");
+function addFilter() {
+	const filterRow = document.createElement("div");
+	filterRow.classList.add("filter-row");
 
-		// Add the filter elements (similar to what is inside the modal)
-		filterRow.innerHTML = `
+	// Add the filter elements (similar to what is inside the modal)
+	filterRow.innerHTML = `
 	<div class="flex items-center pt-2 space-x-2 relative">
 		<select placeholder="" id="attributeSelect" class="w-fit px-2 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
 			<option value="name">Name</option>
@@ -80,15 +80,14 @@ function clearFilters() {
 	</div>
 	`;
 
-		// Append the new filter row to the .filter-container
-		document.querySelector(".filter-container").appendChild(filterRow);
-	}
-
-	flatpickr("#dateInterval", {
-		mode: "range",
-		dateFormat: "d-m-Y", // Format: Year-Month-Day
-		onClose: function (selectedDates, dateStr, instance) {
-			console.log("Selected date range: ", dateStr);
-		},
-	});
+	// Append the new filter row to the .filter-container
+	document.querySelector(".filter-container").appendChild(filterRow);
 }
+
+flatpickr("#dateInterval", {
+	mode: "range",
+	dateFormat: "d-m-Y", // Format: Year-Month-Day
+	onClose: function (selectedDates, dateStr, instance) {
+		console.log("Selected date range: ", dateStr);
+	},
+});

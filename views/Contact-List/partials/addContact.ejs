@@ -1,0 +1,44 @@
+<!-- Overlay for the sidebar -->
+<div class="overlay" id="overlay" onclick="closeAddContact()"></div>
+
+<!-- Sidebar structure for adding new contact -->
+<div class="filter-sidebar" id="addContactSidebar">
+	<div class="filter-header">
+		<h2>Add New Contact</h2>
+		<button class="close-btn" onclick="closeAddContact()">&times;</button>
+	</div>
+	
+	<div class="filter-section">
+		<form id="addContactForm">
+			<div class="form-group">
+				<label for="contactName">Name</label>
+				<input type="text" id="contactName" name="name" class="date-input" placeholder="Enter name" required>
+			</div>
+			<div class="form-group">
+				<label for="contactNumber">Phone Number</label>
+				<input type="text" id="contactNumber" name="number" class="date-input" placeholder="Enter phone number" required>
+			</div>
+			<% if (tags.length > 0) { %>
+			<div class="form-group">
+				<label for="contactTags">Tags</label>
+				<select id="contactTags" name="tags" class="date-input" required>
+					<% tags?.forEach(function(tag) { %>
+					<option value="<%= tag %>" <%= contact?.tags === tag ? 'selected' : '' %>><%= tag %></option>
+					<% }); %>
+				</select>
+			</div>
+			<% } %>
+			<!-- Additional fields if they come from the backend -->
+			<% if (contacts[0]?.masterExtra) { %>
+			<% Object.keys(contacts[0].masterExtra).forEach(function(key) { %>
+			<div class="form-group">
+				<label for="<%= key %>"><%= key %></label>
+				<input type="text" id="<%= key %>" name="masterExtra[<%= key %>]" class="date-input" placeholder="<%= key %>" required>
+			</div>
+			<% }); %>
+			<% } %>
+			
+			<button type="submit" class="apply-btn">Add Contact</button>
+		</form>
+	</div>
+</div>

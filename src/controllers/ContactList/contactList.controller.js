@@ -1,7 +1,5 @@
 import path from "path";
 import fs from "fs";
-import csv from "csv-parser";
-import { parseAsync } from "json2csv";
 import ContactList from "../../models/contactList.model.js";
 import Contacts from "../../models/contacts.model.js";
 // import Template from "../../models/templates.model.js";
@@ -9,23 +7,17 @@ import Permissions from "../../models/permissions.model.js";
 import CustomField from "../../models/customField.model.js";
 import User from "../../models/user.model.js";
 import { countries } from "../../utils/dropDown.js";
-import { fileURLToPath } from "url";
 import ActivityLogs from "../../models/activityLogs.model.js";
 import dotenv from "dotenv";
 import { generateUniqueId } from "../../utils/otpGenerator.js";
+import {
+	__dirname,
+	__filename,
+	csvFilePath,
+	updateCSVOnFieldDelete,
+} from "./contacts.controller.js";
 
 dotenv.config();
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const csvFilePath = path.join(
-	__dirname,
-	"..",
-	"..",
-	"..",
-	"public",
-	"sample.csv",
-);
 
 export const previewContactList = async (req, res) => {
 	try {
@@ -188,6 +180,8 @@ export const createList = async (req, res) => {
 			});
 		}
 
+		const number = user.phone.countryCode + user.phone.number;
+		const keyId = generateUniqueId();
 		const participantCount = parsedData.length;
 
 		// Create a new Contact List
@@ -206,6 +200,8 @@ export const createList = async (req, res) => {
 
 				return new Contacts({
 					Name,
+					wa_idK: `${number}_${keyId}`,
+					keyId,
 					wa_id: Number,
 					contactId: contactList.contactId,
 					masterExtra: additionalFields,
@@ -250,53 +246,11 @@ export const createList = async (req, res) => {
 	}
 };
 
-export const editList = async (req, res) => {
-	try {
-		const { id } = req.params;
-		const { name, fileData, countryCode } = req.body;
-
-		const contactList = await ContactList.findById(id);
-		if (!contactList) {
-			return res
-				.status(404)
-				.json({ success: false, message: "Contact list not found" });
-		}
-
-		// Update the fields
-		contactList.ContactListName = name || contactList.name;
-		contactList.fileData = fileData || contactList.fileData;
-		contactList.countryCode = countryCode || contactList.countryCode;
-		contactList.participantCount = fileData
-			? fileData.length
-			: contactList.participantCount;
-
-		await contactList.save();
-
-		await ActivityLogs.create({
-			name: req.session.user.name
-				? req.session.user.name
-				: req.session.addedUser.name,
-			actions: "Update",
-			details: `Updated contact list named: ${contactList.name}`,
-		});
-
-		res.status(200).json({
-			success: true,
-			message: "Contact list updated successfully",
-		});
-	} catch (error) {
-		console.error(error);
-		res.status(500).json({
-			success: false,
-			message: "Error editing contact list",
-		});
-	}
-};
-
 export const deleteList = async (req, res) => {
 	try {
 		const { id } = req.params;
-		const contactList = await ContactList.findByIdAndDelete(id);
+		// console.log("here");
+		const contactList = await ContactList.findOne({ contactId: id });
 		// console.log(contactList);
 		if (!contactList) {
 			return res
@@ -304,12 +258,15 @@ export const deleteList = async (req, res) => {
 				.json({ success: false, message: "Contact list not found" });
 		}
 
+		contactList.contact_status = 0;
+		await contactList.save();
+
 		await ActivityLogs.create({
 			name: req.session.user.name
 				? req.session.user.name
 				: req.session.addedUser.name,
 			actions: "Delete",
-			details: `Deleted a contact List named : ${contactList.ContactListName}`,
+			details: `Deleted a contact List named : ${contactList.contalistName}`,
 		});
 
 		res.status(200).json({
@@ -367,19 +324,39 @@ export const getCustomField = async (req, res) => {
 		const limit = 6;
 		const skip = (page - 1) * limit;
 
-		const totalCustomFields = await CustomField.countDocuments({
-			customid: userId,
-		});
-		const customFields = await CustomField.find({ customid: userId })
-			.skip(skip)
-			.limit(limit);
+		const result = await CustomField.aggregate([
+			{
+				// Match the documents where customid matches the userId and custom_status is not 0
+				$match: {
+					customid: userId,
+					status: { $ne: 0 }, // Exclude custom fields with custom_status of 0
+				},
+			},
+			{
+				// Use $facet to return both paginated results and total count
+				$facet: {
+					paginatedResults: [
+						{ $skip: parseInt(skip) }, // Skip for pagination
+						{ $limit: parseInt(limit) }, // Limit for pagination
+					],
+					totalCount: [
+						{ $count: "total" }, // Count total filtered documents
+					],
+				},
+			},
+		]);
 
-		// console.log(customFields);
-		const totalPages = Math.ceil(totalCustomFields / limit);
+		// Extract paginated results and total count from the aggregation result
+		const paginatedResults = result[0]?.paginatedResults || [];
+		const totalCount = result[0]?.totalCount[0]?.total || 0;
 
+		// Calculate total pages
+		const totalPages = Math.ceil(totalCount / limit);
+
+		// Render the page with custom fields and pagination info
 		res.render("Contact-List/custom-field", {
-			customFields: customFields || [],
-			page,
+			customFields: paginatedResults || [],
+			page: parseInt(skip) / parseInt(limit) + 1, // Page number based on skip and limit
 			totalPages,
 		});
 	} catch (error) {
@@ -396,32 +373,31 @@ export const createCustomField = async (req, res) => {
 		const userId = req.session.user.id;
 		const { fieldName, fieldType } = req.body;
 
-		// Only proceed if the field type is "input"
 		if (fieldType === "input") {
 			let csvData = [];
 			let headers = [];
 
 			// Reading the CSV file
 			const fileContent = fs.readFileSync(csvFilePath, "utf8");
-			const rows = fileContent.split("\n");
+
+			const rows = fileContent
+				.split(/\r?\n/) 
+				.map((row) => row.trim()) 
+				.filter((row) => row !== ""); 
+
 			headers = rows[0].split(",");
 
-			// Check if the fieldName already exists in the CSV headers
 			if (!headers.includes(fieldName)) {
-				// Append the new field name to headers
 				headers.push(fieldName);
 
-				// Update the CSV with the new header
 				const updatedCsv = [headers.join(",")]
 					.concat(rows.slice(1))
 					.join("\n");
 
-				// Write the updated CSV back to the file
 				fs.writeFileSync(csvFilePath, updatedCsv, "utf8");
 			}
 		}
 
-		// Create a new custom field in the database
 		const unique_id = generateUniqueId();
 		const newField = new CustomField({
 			customid: userId,
@@ -460,9 +436,9 @@ export const deleteCustomField = async (req, res) => {
 	try {
 		const fieldId = req.params.id;
 
-		// Find the custom field based on the field ID and user
+		// Find the custom field based on the field ID
 		const field = await CustomField.findOne({
-			customid: fieldId,
+			unique_id: fieldId,
 		});
 
 		if (!field) {
@@ -472,67 +448,41 @@ export const deleteCustomField = async (req, res) => {
 			});
 		}
 
-		// Update the status to 0 to mark it as deleted
+		// Update the status to 0 to mark it as deleted in MongoDB
 		field.status = 0;
 		await field.save();
 
-		// Remove the field name from the CSV if it's an "input" field
+		// If the field is of type 'input', proceed with updating the CSV file
 		if (field.cltype === "input") {
-			// Read the CSV
-			const rows = [];
-			fs.createReadStream(csvFilePath)
-				.pipe(csv())
-				.on("data", (row) => rows.push(row))
-				.on("end", async () => {
-					// Get headers from the first row
-					const headers = Object.keys(rows[0]);
+			const fieldNameToDelete = field.clname;
 
-					// Exclude the deleted field name
-					const updatedHeaders = headers.filter(
-						(header) => header !== field.clname,
-					);
+			// Function to delete the field from the CSV
 
-					// Write the updated CSV without the deleted field's column
-					const updatedRows = rows.map((row) => {
-						const newRow = {};
-						updatedHeaders.forEach((header) => {
-							newRow[header] = row[header];
-						});
-						return newRow;
-					});
+			// Call the function to delete the field from the CSV
+			await updateCSVOnFieldDelete(fieldNameToDelete);
 
-					// Convert back to CSV and overwrite the existing file
-					const csvData = await parseAsync(updatedRows, {
-						fields: updatedHeaders,
-					});
-					fs.writeFileSync(csvFilePath, csvData);
-
-					// Log the activity
-					await ActivityLogs.create({
-						name: req.session.user.name
-							? req.session.user.name
-							: req.session.addedUser.name,
-						actions: "Delete",
-						details: `Marked the custom field named : ${field.clname} as deleted and removed from CSV`,
-					});
-
-					// Respond to the client
-					res.json({
-						success: true,
-						message:
-							"Custom field marked as deleted and removed from CSV successfully",
-					});
-				});
-		} else {
-			// If it's not an "input" type, just log and respond
+			// Log the activity
 			await ActivityLogs.create({
-				name: req.session.user.name
-					? req.session.user.name
-					: req.session.addedUser.name,
+				name: req.session.user.name || req.session.addedUser.name,
 				actions: "Delete",
-				details: `Marked the custom field named : ${field.clname} as deleted`,
+				details: `Marked the custom field named: ${field.clname} as deleted and removed from CSV`,
 			});
 
+			// Respond to the client
+			res.json({
+				success: true,
+				message:
+					"Custom field marked as deleted and removed from CSV successfully",
+			});
+		} else {
+			// For non-input fields, just log the activity and mark it as deleted in the DB
+			await ActivityLogs.create({
+				name: req.session.user.name || req.session.addedUser.name,
+				actions: "Delete",
+				details: `Marked the custom field named: ${field.clname} as deleted`,
+			});
+
+			// Respond to the client
 			res.json({
 				success: true,
 				message: "Custom field marked as deleted successfully",
@@ -561,13 +511,14 @@ export const updateContactListName = async (req, res) => {
 	try {
 		console.log(updatedValue);
 		// Find the contact list by ID and update the name
-		const updatedContactList = await ContactList.findByIdAndUpdate(
-			contactListId,
-			{ $set: { ContactListName: updatedValue } }, // Update the 'name' field with the new value
+		const updatedContactList = await ContactList.findOneAndUpdate(
+			{ contactId: contactListId },
+			{ $set: { contalistName: updatedValue } }, // Update the 'name' field with the new value
 			{ new: true }, // Return the updated document
 		);
 
-		console.log(updatedContactList.ContactListName);
+		console.log(updatedContactList.contalistName);
+		await updatedContactList.save();
 
 		if (!updatedContactList) {
 			return res.status(404).json({
@@ -606,14 +557,32 @@ export const getList = async (req, res) => {
 		const limit = 6;
 		const skip = (page - 1) * limit;
 
-		const totalContactLists = await ContactList.countDocuments({
-			useradmin: userId,
-		});
-		const contactLists = await ContactList.find({ useradmin: userId })
-			.skip(skip)
-			.limit(limit);
+		const result = await ContactList.aggregate([
+			{
+				// Match the documents where useradmin matches the userId and contact_status is not 0
+				$match: {
+					useradmin: userId,
+					contact_status: { $ne: 0 },
+				},
+			},
+			{
+				// Use $facet to return both paginated results and total count
+				$facet: {
+					paginatedResults: [
+						{ $skip: parseInt(skip) },
+						{ $limit: parseInt(limit) },
+					],
+					totalCount: [{ $count: "total" }],
+				},
+			},
+		]);
 
-		const totalPages = Math.ceil(totalContactLists / limit);
+		// Extract paginated results and total count from the aggregation result
+		const contactLists = result[0]?.paginatedResults || [];
+		const totalCount = result[0]?.totalCount[0]?.total || 0;
+
+		// Calculate total pages
+		const totalPages = Math.ceil(totalCount / limit);
 
 		const permissions = req.session?.addedUser?.permissions;
 		if (permissions) {

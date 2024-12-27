@@ -14,7 +14,7 @@ const contactsSchema = new Schema(
 			type: Number,
 			default: () => Date.now(),
 		},
-		unsubscribe_date: { type: String, default: 0 },
+		unsubscribe_date: { type: Number, default: 0 },
 		Name: { type: String },
 		wa_id: { type: String },
 		usertimestmp: {

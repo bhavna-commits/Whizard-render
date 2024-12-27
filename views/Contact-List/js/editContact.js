@@ -1,53 +1,33 @@
 // Function to open the edit modal and populate fields
+
 function openEditModal(contactData) {
 	const contact = JSON.parse(contactData);
-
+	// console.log(contact);
 	// Populate fields with contact data
-	document.getElementById("edit-contact-id").value = contact._id;
-	document.getElementById("edit-contact-name").value = contact.userName;
-	console.log(document.getElementById("edit-contact-id").value);
+	document.getElementById("edit-contact-id").value = contact.keyId;
+	// 
+	// console.log(contact.Name);
+	document.getElementById("edit-contact-name").value = contact.Name;
+	console.log(document.getElementById("edit-contact-name").value);
+	document.getElementById("edit-contact-whatsapp").value = contact.wa_id;
+
 	// Set the value for the tags dropdown based on the contact data
 	const tagsDropdown = document.getElementById("edit-contact-tags");
 	tagsDropdown.value = contact.tags;
 
-	// Mask WhatsApp number initially
-	document.getElementById("edit-contact-whatsapp").value = "XXXXXXXXXX";
-
-	// Show the edit modal
-	$("#editModal").modal("show");
-
-	// Remove any existing event listener to avoid duplication and infinite alerts
-	const whatsappInput = document.getElementById("edit-contact-whatsapp");
-	whatsappInput.removeEventListener("focus", handleWhatsAppPrivacyWarning); // Prevent re-adding
-
-	// Add a single event listener to handle WhatsApp privacy warning
-	whatsappInput.addEventListener(
-		"focus",
-		handleWhatsAppPrivacyWarning.bind(null, contact.whatsApp),
-		{ once: true },
-	);
+	// Show the sidebar and overlay
+	document.getElementById("editContactSidebar").classList.add("open");
+	document.getElementById("editContactOverlay").classList.add("active");
 }
 
-function handleWhatsAppPrivacyWarning(whatsAppNumber) {
-	const confirmReveal = confirm(
-		"For privacy reasons, WhatsApp numbers are hidden. Do you want to reveal this number?",
-	);
-	if (confirmReveal) {
-		document.getElementById("edit-contact-whatsapp").value = whatsAppNumber; // Reveal the WhatsApp number
-	}
+// Function to close the Edit Contact sidebar
+function closeEditContact() {
+	document.getElementById("editContactSidebar").classList.remove("open");
+	document.getElementById("editContactOverlay").classList.remove("active");
 }
-
-// Function to open the Delete Contact modal and confirm the deletion
-function openDeleteModal(contactId, contactListName) {
-	// Set the contact ID in the delete confirmation modal
-	document.getElementById("delete-contact-id").value = contactId;
-
-	// Show the modal (Bootstrap modal)
-	const deleteModal = new bootstrap.Modal(
-		document.getElementById("deleteModal"),
-	);
-	deleteModal.show();
-}
+document
+	.getElementById("editContactOverlay")
+	.addEventListener("click", closeEditContact);
 
 // Handle the form submission for editing a contact
 document
@@ -56,22 +36,7 @@ document
 		event.preventDefault(); // Prevent default form submission
 
 		const contactId = document.getElementById("edit-contact-id").value;
-		const originalWhatsApp = document.getElementById(
-			"edit-contact-whatsapp",
-		).dataset.originalValue; // Store original value
 		let formData = new FormData(this);
-
-		// Check if the user has revealed and edited the WhatsApp number
-		const updatedWhatsApp = document.getElementById(
-			"edit-contact-whatsapp",
-		).value;
-		if (updatedWhatsApp === "XXXXXXXXXX") {
-			// If the number was not revealed or changed, remove it from formData
-			formData.delete("validated");
-		} else if (updatedWhatsApp === originalWhatsApp) {
-			// If the number matches the original, also don't update it
-			formData.delete("validated");
-		}
 
 		const saveButton = this.querySelector("button[type='submit']");
 		const originalButtonText = saveButton.innerHTML;
@@ -89,13 +54,8 @@ document
 				if (data.success) {
 					// Close the modal after 0.5 seconds
 					setTimeout(() => {
-						// Use new bootstrap.Modal to get the modal instance
-						const editModalElement =
-							document.getElementById("editModal");
-						const editModal = new bootstrap.Modal(editModalElement);
-						editModal.hide();
-
-						location.reload(); // Reload page after closing the modal
+						closeEditContact();
+						location.reload(); // Reload page after closing the sidebar
 					}, 500);
 				} else {
 					// Show error message near the save button
@@ -120,51 +80,36 @@ document
 			});
 	});
 
-function showPhoneNumber() {
-	const phoneInput = document.getElementById("edit-contact-whatsapp");
-	const phoneNumber = phoneInput.dataset.originalValue; // Get the original phone number
-
-	if (phoneInput.readOnly) {
-		// If the input is read-only, prompt the user to reveal the phone number
-		const showNumber = confirm("Do you want to reveal the phone number?");
-		if (showNumber) {
-			// Set the input as editable and show the real phone number
-			phoneInput.readOnly = false;
-			phoneInput.value = phoneNumber;
-		}
-	} else {
-		// If the input is editable, prevent it from being asked again
-		phoneInput.readOnly = true;
-		phoneInput.value = "XXXXXXXXXX"; // Mask the phone number again
-	}
-}
-
 // Handle the delete confirmation button click
-document
-	.getElementById("confirmDeleteBtn")
-	.addEventListener("click", function () {
-		const contactId = document.getElementById("delete-contact-id").value;
+function openDeleteModal(id) {
+	// Show the confirmation modal
+	const deleteModal = new bootstrap.Modal(
+		document.getElementById("deleteModal"),
+	);
+	deleteModal.show();
 
-		// Perform the DELETE request to remove the contact
-		fetch(`/api/contact-list/contacts/${contactId}`, {
+	// Get the confirmation button element
+	const confirmDeleteBtn = document.getElementById("confirmDeleteBtn");
+
+	// Handle the confirmation button click
+	confirmDeleteBtn.onclick = function () {
+		// Proceed with the deletion
+		fetch(`/api/contact-list/contacts/${id}`, {
 			method: "DELETE",
 		})
 			.then((response) => response.json())
 			.then((data) => {
 				if (data.success) {
-					// For Bootstrap 5
-					const deleteModal = new bootstrap.Modal(
-						document.getElementById("deleteModal"),
-					);
 					deleteModal.hide(); // Hide the modal after successful deletion
-
-					location.reload(); // Reload page after closing the modal
+					location.reload(); // Reload the page after deletion
 				} else {
 					alert("Error deleting contact: " + data.message);
 				}
 			})
 			.catch((err) => console.error("Error:", err));
-	});
+	};
+}
+
 
 // Assuming these elements are defined
 const contactListInput = document.getElementById("contactListName");
@@ -218,3 +163,32 @@ saveChangesBtn.addEventListener("click", function () {
 			alert("An error occurred. Please try again.");
 		});
 });
+
+function openAddContact() {
+	document.getElementById("addContactSidebar").classList.add("open");
+	document.getElementById("overlay").classList.add("active");
+}
+
+function closeAddContact() {
+	document.getElementById("addContactSidebar").classList.remove("open");
+	document.getElementById("overlay").classList.remove("active");
+}
+
+// Form submission logic here
+document
+	.getElementById("addContactForm")
+	.addEventListener("submit", function (event) {
+		event.preventDefault();
+
+		// Collect form data
+		const name = document.getElementById("contactName").value;
+		const number = document.getElementById("contactNumber").value;
+		// const tags = document.getElementById("contactTags").value;
+
+		// Perform backend call to add the new contact here
+		// For now, just close the sidebar
+		closeAddContact();
+
+		// You can reset the form or provide feedback to the user
+		document.getElementById("addContactForm").reset();
+	});

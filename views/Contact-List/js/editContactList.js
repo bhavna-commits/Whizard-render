@@ -29,11 +29,6 @@ function hideEditModal() {
 	}, 300);
 }
 
-// Close modal when clicking the close button
-document
-	.querySelector(".edit-modal-close-btn")
-	.addEventListener("click", hideEditModal);
-
 // Submit form for contact edit
 document
 	.getElementById("editContactForm")
@@ -67,31 +62,48 @@ document
 	});
 
 // Function to open delete modal
+// Open Delete Modal
 function openDeleteModal(contactId, contactName) {
-	console.log(contactId, contactName);
-	document.getElementById("deleteContactId").value = contactId;
+	console.log(contactId, contactName); // For debugging
+	// Set the contact name in the modal
 	document.getElementById("deleteContactName").textContent = contactName;
-	new bootstrap.Modal(document.getElementById("deleteModal")).show();
-}
+	// Set the contactId in the hidden input field
+	document.getElementById("deleteContactId").value = contactId;
 
-// Submit form for contact delete
-document
-	.getElementById("deleteContactForm")
-	.addEventListener("submit", function (e) {
-		e.preventDefault();
+	// Show the modal
+	const deleteModal = new bootstrap.Modal(
+		document.getElementById("deleteModal"),
+	);
+	deleteModal.show();
 
-		const contactId = document.getElementById("deleteContactId").value;
+	// Add event listener to the "Cancel" button to dismiss the modal
+	document
+		.getElementById("cancelDeleteBtn")
+		.addEventListener("click", function () {
+			deleteModal.hide(); // Manually hide the modal
+		});
 
+	// Get the "Delete" button
+	const confirmDeleteBtn = document.getElementById("confirmDeleteBtn");
+
+	// Add event listener to the delete button
+	confirmDeleteBtn.onclick = function () {
+		// Proceed with the deletion
 		fetch(`/api/contact-list/deleteList/${contactId}`, {
 			method: "DELETE",
 		})
 			.then((response) => response.json())
 			.then((data) => {
 				if (data.success) {
-					window.location.reload();
+					deleteModal.hide(); // Hide the modal after successful deletion
+					window.location.reload(); // Reload the page
+				} else {
+					alert("Error deleting contact: " + data.message);
 				}
 			})
 			.catch((error) => {
 				console.error("Error:", error);
 			});
-	});
+	};
+}
+

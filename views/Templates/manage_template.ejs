@@ -263,23 +263,15 @@
 						<div class="modal-header align-items-center py-3">
 							<h5 class="modal-title" id="filterModalLabel">Apply Filters</h5>
 							<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-								<span aria-hidden="true">&times;</span>
+								<span aria-hidden="true" class="text-2xl">&times;</span>
 							</button>
 						</div>
 						<div class="modal-body">
 							<!-- Modal Form -->
 							<form>
-								<label> Search by template name*</label>
-								<div class="form-group-default-select2">
-									<select class="rounded shadow-sm border full-width" data-init-plugin="select2" multiple>
-										<option value="FACEBOOK">FACEBOOK</option>
-										<option value="INSTAGRAM">INSTAGRAM</option>
-										<option value="LINKEDIN">LINKEDIN</option>
-										<option value="SNAPCHAT">SNAPCHAT</option>
-										<option value="TIKTOK">TIKTOK</option>
-										<option value="TWITTER">TWITTER</option>
-										<option value="YOUTUBE">YOUTUBE</option>
-									</select>
+								<div>
+									<label for="templateSearch" class="block "> Search by template name*</label>
+									<input id="templateSearch" type="search" class="w-full border rounded-lg p-3 my-2" placeholder="Search template name here..." />
 								</div>
 								<label for="campaignTitle">Choose Language</label>
 								<div class="form-group py-1">

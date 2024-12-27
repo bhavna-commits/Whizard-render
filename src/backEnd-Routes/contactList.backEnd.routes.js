@@ -3,7 +3,6 @@ import { checkSession } from "../middleWares/checkSession.js";
 
 import {
 	createList,
-	editList,
 	deleteList,
 	sampleCSV,
 	updateContactListName,
@@ -26,7 +25,7 @@ router.post("/create-list", createList);
 
 router.post("/previewContactList", previewContactList);
 
-router.put("/editList/:id", editList);
+// router.put("/editList/:id", editList);
 
 router.delete("/deleteList/:id", deleteList);
 

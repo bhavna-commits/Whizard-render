@@ -39,11 +39,11 @@
 					</td>
 					<td class="px-6 py-4 whitespace-nowrap text-sm">
 						<!-- Edit Button -->
-						<button aria-label="Edit contact" class="text-gray-600 hover:text-blue-600 mx-1" onclick="event.stopPropagation(); openEditModal(<%= JSON.stringify(contact) %>);">
-							<i class="fas fa-edit"></i>
+						<button aria-label="Edit contact" class="text-gray-600  hover:text-blue-600 mx-1" onclick="event.stopPropagation(); location.href='/contact-list/createCampaign'">
+							<i class="fa-solid fa-paper-plane"></i>
 						</button>
 						<!-- Delete Button -->
-						<button aria-label="Delete contact" class="text-gray-600 hover:text-red-600 mx-1" onclick="event.stopPropagation(); openDeleteModal('<%= contact._id %>', '<%= contact.contalistName %>');">
+						<button aria-label="Delete contact" class="text-gray-600 hover:text-red-600 mx-1" onclick="event.stopPropagation(); openDeleteModal('<%= contact.contactId %>', '<%= contact.contalistName %>');">
 							<i class="fas fa-trash-alt"></i>
 						</button>
 					</td>
@@ -143,39 +143,7 @@
 	<% } %>
 </div>
 <!-- Edit Modal Structure -->
-<div id="editContactModal" class="fixed inset-0 bg-gray-800 bg-opacity-50 z-50 flex items-center justify-center pointer-events-none opacity-0 transition-opacity duration-300">
-	<div class="bg-white w-1/3 rounded-lg shadow-lg p-6 transform scale-95 transition-transform duration-300">
-		<button class="edit-modal-close-btn absolute top-8 right-8 text-gray-400 hover:text-gray-600">
-			<i class="fas fa-times"></i>
-		</button>
-		<h2 class="text-xl font-bold mb-4">Edit Contact</h2>
-		<form id="editContactForm">
-			<div class="mb-4">
-				<label for="editCountryCode" class="block text-sm font-medium text-gray-700">Country Code</label>
-				<input id="editCountryCode" type="text" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" />
-			</div>
-			<div class="mb-4">
-				<label for="editWhatsAppNumber" class="block text-sm font-medium text-gray-700">WhatsApp Number</label>
-				<input id="editWhatsAppNumber" type="text" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" />
-			</div>
-			<div class="mb-4">
-				<label for="editCity" class="block text-sm font-medium text-gray-700">City</label>
-				<input id="editCity" type="text" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" />
-			</div>
-			<div class="mb-4">
-				<label for="editUserName" class="block text-sm font-medium text-gray-700">User Name</label>
-				<input id="editUserName" type="text" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" />
-			</div>
-			<div class="flex justify-end">
-				<button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">
-					Save Changes
-				</button>
-			</div>
-		</form>
-	</div>
-</div>
 
-<!-- Delete Contact Modal -->
 <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
 	<div class="modal-dialog">
 		<div class="modal-content">
@@ -183,19 +151,18 @@
 				<h5 class="modal-title" id="deleteModalLabel">
 					Delete Contact
 				</h5>
-				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 			</div>
 			<div class="modal-body">
 				Are you sure you want to delete
 				<strong id="deleteContactName"></strong>?
+				<input type="text" class="hidden" id="deleteContactId" />
 			</div>
 			<div class="modal-footer">
 				<form id="deleteContactForm">
-					<input type="hidden" name="contactId" id="deleteContactId" />
-					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+					<button type="button" class="btn btn-secondary" id="cancelDeleteBtn">
 						Cancel
 					</button>
-					<button type="submit" class="btn btn-danger">
+					<button id="confirmDeleteBtn" type="button" class="btn btn-danger">
 						Delete
 					</button>
 				</form>
