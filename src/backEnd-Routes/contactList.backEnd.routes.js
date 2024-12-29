@@ -1,6 +1,5 @@
 import express from "express";
-import { checkSession } from "../middleWares/checkSession.js";
-
+import multer from "multer";
 import {
 	createList,
 	deleteList,
@@ -16,10 +15,11 @@ import {
 	updateContact,
 	deleteContact,
 	editContact,
-	
+	createContact,
 } from "../controllers/ContactList/contacts.controller.js";
 
 const router = express.Router();
+const upload = multer();
 
 router.post("/create-list", createList);
 
@@ -35,9 +35,11 @@ router.delete("/overview/:id", deleteContact);
 
 router.get("/sampleCSV", sampleCSV);
 
-router.put("/contacts/:id", editContact);
+router.put("/contacts/:id", upload.none(), editContact);
 
 router.delete("/contacts/:id", deleteContact);
+
+router.post("/contacts/create-contact", upload.none(), createContact);
 
 router.put("/:id/updateName", updateContactListName);
 
@@ -48,5 +50,7 @@ router.post("/custom-fields", createCustomField);
 router.delete("/custom-fields/:id", deleteCustomField);
 
 router.get("/search", searchContactLists);
+
+router.post("/create-contact", createContact)
 
 export default router;

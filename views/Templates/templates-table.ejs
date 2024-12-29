@@ -2,58 +2,57 @@
 <div class="p-4">
 	<!-- Responsive Table -->
 	<div class="overflow-x-auto">
-		<table class="min-w-full divide-y divide-gray-200 border-separate border-spacing-y-2">
-			<thead class="bg-gray-100">
-				<tr class="text-sm text-left font-medium text-gray-700 tracking-wider">
-					<th class="px-6 py-3">Sno.</th>
-					<th class="px-6 py-3">Template Name</th>
-					<th class="px-6 py-3">Category</th>
-					<!-- <th class="px-6 py-3">Language</th> -->
-					<th class="px-6 py-3">Status</th>
-					<th class="px-6 py-3">Actions</th>
+		<table class="text-center min-w-full border-separate border-spacing-y-4">
+			<tbody class="">
+				<tr class=" text-gray-500 tracking-wider">
+					<td class="">Sno.</td>
+					<td class="w-fit">Template Name</td>
+					<td class="">Category</td>
+					<!-- <td class="">Language</td> -->
+					<td class="">Status</td>
+					<td class="">Actions</td>
 				</tr>
-			</thead>
-			<tbody>
-				<!-- Row 1 -->
 				
-				<% list.forEach((list) => { %>
-				<tr class="hover:bg-blue-100 border rounded-lg">
-					<td class="px-6 py-4 text-sm text-gray-900">1</td>
-					<td class="px-6 py-4">
-						<a href="#" class="text-blue-600 hover:underline">
-							<div>
-								<p class="text-gray-900 font-semibold"><%= list.name %></p>
-								<!-- Pass the raw createdAt timestamp -->
-								<p class="text-gray-500 text-sm" id="createdAt-<%= list._id %>" data-timestamp="<%= list.createdAt %>"></p>
+				<% list.forEach((list, i) => { %>
+				<tr class="hover:bg-blue-50">
+					<td class="border-l border-t border-b rounded-lg py-4 border-gray-200 text-sm text-gray-500"><%= ++i %></td>
+					<td class="border-t border-b border-gray-200  w-48 text-left ">
+						<a href="#" class="text-blue-600 hover:underline ">
+							<div class="">
+								<p class="text-gray-700 font-semibold"><%= list.name %></p>
+								<p class="text-gray-500 text-sm" id="createdAt-<%= list._id %>" data-timestamp="<%= list.updatedAt %>"></p>
 							</div>
-							
 						</a>
 					</td>
-					<td class="px-6 py-4 text-sm text-gray-900"><%= list.category %></td>
-					<!-- <td class="px-6 py-4">
+					<td class=" text-gray-500 border-t border-b border-gray-200"><%= list.category %></td>
+					<!-- <td class="border-t border-b border-gray-200">
             <span class="inline-block px-2 py-1 text-xs font-semibold bg-yellow-200 text-yellow-800 rounded-full">Indonesia</span>
           </td> -->
-					<td class="px-6 py-4">
-						<% if (list.status === 'rejected') { %>
-						<span class="text-orange-500 font-semibold" title="Rejected Reason: <%= list.rejected_reason %>">
+					<td class="border-t border-b border-gray-200">
+						<% if (list.status === 'Rejected') { %>
+						<span class="text-orange-500 underline-offset-2 underline font-semibold" title="Rejected Reason: <%= list.rejected_reason %>">
+							<%= list.status %>
+						</span>
+						<% } else if (list.status === 'Pending') { %>
+						<span class="text-orange-500 underline-offset-2 underline font-semibold">
 							<%= list.status %>
 						</span>
 						<% } else { %>
-						<span class="text-gray-500 font-semibold">
+						<span class="text-green-500 underline-offset-2 underline font-semibold">
 							<%= list.status %>
 						</span>
 						<% } %>
 					</td>
 					
-					<td class="px-6 py-4">
+					<td class="border-r border-t border-b rounded-lg border-gray-200">
 						<!-- Duplicate Button -->
-						<button type="button" class="text-gray-500 hover:text-gray-700 px-2" onclick="duplicateTemplate('<%= list._id %>')">
-							<i class="fas fa-copy"></i>
+						<button type="button" class="text-gray-500 hover:text-gray-700 px-3 border-r" onclick="duplicateTemplate('<%= list._id %>')">
+							<i class="fa-regular fa-copy"></i>
 						</button>
 						
 						<!-- Delete Button -->
-						<button type="button" class="text-red-500 hover:text-red-700 px-2" onclick="confirmDelete('<%= list._id %>')">
-							<i class="fas fa-trash"></i>
+						<button type="button" class="text-gray-500 hover:text-red-700 px-2" onclick="confirmDelete('<%= list._id %>')">
+							<i class="fa-regular fa-trash-can"></i> 
 						</button>
 					</td>
 				</tr>

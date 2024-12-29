@@ -319,11 +319,9 @@ class TemplateManager {
 		}
 	}
 }
-
-// Initialize the TemplateManager once the DOM is fully loaded
 $(document).ready(() => {
 	new TemplateManager();
-	// JavaScript for toggling the button visibility and switch behavior
+
 	const toggleSwitch = document.getElementById("toggleSwitch");
 	const toggleKnob = document.getElementById("toggleKnob");
 	const scheduleSection = document.getElementById("scheduleSection");
@@ -332,12 +330,17 @@ $(document).ready(() => {
 
 	let isScheduled = false;
 
-	toggleSwitch.addEventListener("click", function () {
+	// Toggle function
+	function toggleSwitchState() {
 		isScheduled = !isScheduled;
 
 		// Toggle the knob position
 		if (isScheduled) {
-			toggleKnob.classList.add("translate-x-full"); // Moves the knob to the right
+			toggleKnob.style.transform = "translateX(100%)"; // Moves the knob to the right
+			toggleSwitch.children[0].classList.replace(
+				"bg-gray-300",
+				"bg-red-300",
+			); // Smooth background change
 
 			// Show the schedule section smoothly
 			scheduleSection.classList.remove("max-h-0");
@@ -347,7 +350,11 @@ $(document).ready(() => {
 			scheduleButton.classList.remove("hidden");
 			sendNowButton.classList.add("hidden");
 		} else {
-			toggleKnob.classList.remove("translate-x-full"); // Moves the knob back to the left
+			toggleKnob.style.transform = "translateX(0)"; // Moves the knob back to the left
+			toggleSwitch.children[0].classList.replace(
+				"bg-red-300",
+				"bg-gray-300",
+			); // Smooth background change
 
 			// Hide the schedule section smoothly
 			scheduleSection.classList.add("max-h-0");
@@ -357,10 +364,12 @@ $(document).ready(() => {
 			scheduleButton.classList.add("hidden");
 			sendNowButton.classList.remove("hidden");
 		}
-	});
+	}
 
+	// Attach click event listener to the entire toggle switch container
+	toggleSwitch.addEventListener("click", toggleSwitchState);
 
-	// Initialize Flatpickr
+	// Initialize Flatpickr for date and time pickers
 	flatpickr("#datePicker", {
 		dateFormat: "d/m/Y",
 		defaultDate: "01/01/2025",

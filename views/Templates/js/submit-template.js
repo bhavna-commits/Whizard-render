@@ -42,6 +42,20 @@ async function submit() {
 
 		// Create FormData for file upload
 		const formData = new FormData();
+		if (templateData.header.type == "media") {
+			const mediaType = document.getElementById("mediaType").value;
+
+			if (mediaType === "image") {
+				templateData.header.type = "image";
+			} else if (mediaType === "video") {
+				templateData.header.type = "video";
+			} else if (mediaType === "document") {
+				templateData.header.type = "document";
+			} else if (mediaType === "location") {
+				templateData.header.type = "location";
+			}
+		}
+
 		formData.append(
 			"templateData",
 			JSON.stringify({
@@ -66,9 +80,8 @@ async function submit() {
 		if (res.success) {
 			location.href = "/template";
 		} else {
-			alert(message);
+			alert(res.message);
 		}
-		
 	} catch (error) {
 		alert(error.message);
 	} finally {
@@ -121,12 +134,25 @@ function generatePreviewCall(templateData) {
 	}
 }
 
-// Function to show the modal
+let originalTemplateData = {}; // To store the original template data
+let currentTemplateData = {}; // To store the current state of the template with replacements
+
 function openModal() {
 	const templateData = collectTemplateData();
 	if (!templateData) return;
 
 	document.getElementById("customModal").classList.remove("hidden");
+
+	// Save the original template data for future use
+	originalTemplateData = {
+		header: templateData.header.content || "",
+		body: templateData.body || "",
+		footer: templateData.footer || "",
+		headerType: templateData.header.type || "none", // Storing the header type for validation
+	};
+
+	// Copy the original data to currentTemplateData for tracking changes
+	currentTemplateData = { ...originalTemplateData };
 
 	// Set template name
 	document.getElementById("templateModalLabel").innerText =
@@ -163,17 +189,78 @@ function openModal() {
 	const previewForm = document.getElementById("previewForm");
 	previewForm.innerHTML = "";
 
-	dynamicVariables.forEach((variable) => {
+	dynamicVariables.forEach((variable, index) => {
 		const formGroup = document.createElement("div");
 		formGroup.className = "form-group py-1";
 
 		formGroup.innerHTML = `
       <label class="font-semibold">Choose Attributes for ${variable}</label>
-      <input type="text" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm">
+      <input type="text" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm" data-variable="${variable}" data-index="${index}">
     `;
 
 		previewForm.appendChild(formGroup);
 	});
+
+	// Add event listeners for dynamic input changes
+	previewForm.querySelectorAll("input").forEach((input) => {
+		input.addEventListener("input", handleInputChange);
+	});
+
+	// Initialize preview with original content
+	updatePreview();
+}
+
+function handleInputChange(event) {
+	const input = event.target;
+	const variable = input.getAttribute("data-variable");
+	const value = input.value;
+
+	// Update the current template with the new value for the specific variable
+	updatePreviewElement(variable, value);
+}
+
+function updatePreviewElement(variable, value) {
+	// Update the current template data
+	if (originalTemplateData.headerType === "text") {
+		currentTemplateData.header = currentTemplateData.header.replaceAll(
+			`{{${variable}}}`,
+			value,
+		);
+	}
+	currentTemplateData.body = currentTemplateData.body.replaceAll(
+		`{{${variable}}}`,
+		value,
+	);
+	currentTemplateData.footer = currentTemplateData.footer.replaceAll(
+		`{{${variable}}}`,
+		value,
+	);
+
+	// Update the preview with the current template state
+	updatePreview();
+}
+
+function updatePreview() {
+	const previewHead = document.getElementById("previewHead");
+	const previewBod = document.getElementById("previewBod");
+	const previewFoot = document.getElementById("previewFoot");
+
+	// Update preview sections while retaining any original formatting (e.g., line breaks)
+	if (originalTemplateData.headerType === "text") {
+		previewHead.innerHTML = currentTemplateData.header.replace(
+			/\n/g,
+			"<br>",
+		);
+	}
+	if (previewBod) {
+		previewBod.innerHTML = currentTemplateData.body.replace(/\n/g, "<br>");
+	}
+	if (previewFoot) {
+		previewFoot.innerHTML = currentTemplateData.footer.replace(
+			/\n/g,
+			"<br>",
+		);
+	}
 }
 
 // Function to close the modal
@@ -331,7 +418,6 @@ function collectTemplateData() {
 		return false; // Stop submission if any button is invalid
 	}
 
-
 	// Validate header input based on type
 	const headerTypeDropdown = document.getElementById("mediaTypeDropdown");
 	if (!headerTypeDropdown) {
@@ -356,7 +442,9 @@ function collectTemplateData() {
 		if (!fileInput || !fileInput.files.length) {
 			return showError("Please upload a media file for the header.");
 		}
+
 		templateData.header.content = fileInput.files[0];
+		console.log(templateData.header.content);
 	} else {
 		return showError("Invalid header type selected.");
 	}

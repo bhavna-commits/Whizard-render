@@ -4,7 +4,9 @@ import Papa from "papaparse";
 import ContactList from "../../models/contactList.model.js";
 import Contacts from "../../models/contacts.model.js";
 import ActivityLogs from "../../models/activityLogs.model.js";
+import User from "../../models/user.model.js";
 import { fileURLToPath } from "url";
+import { generateUniqueId } from "../../utils/otpGenerator.js";
 
 export const __filename = fileURLToPath(import.meta.url);
 export const __dirname = path.dirname(__filename);
@@ -105,9 +107,8 @@ export const getContacts = async (req, res) => {
 
 export const editContact = async (req, res) => {
 	const { id } = req.params;
-	console.log(id);
+	// console.log(id);
 	const updatedData = req.body;
-	console.log(updatedData);
 
 	if (!id || !updatedData) {
 		res.status(401).json({
@@ -117,9 +118,15 @@ export const editContact = async (req, res) => {
 	}
 
 	try {
+		const setData = {};
+		for (const [key, value] of Object.entries(updatedData)) {
+			setData[key] = value;
+		}
+		// console.log(setData);
 		const contacts = await Contacts.findOneAndUpdate(
 			{ keyId: id },
-			updatedData,
+			{ $set: setData },
+			{ new: true, strict: false },
 		);
 		await ActivityLogs.create({
 			name: req.session.user.name
@@ -226,5 +233,57 @@ export const updateCSVOnFieldDelete = async (fieldToDelete) => {
 		console.log(`Field ${fieldToDelete} successfully deleted from CSV.`);
 	} catch (error) {
 		console.error("Error updating the CSV:", error);
+	}
+};
+
+export const createContact = async (req, res) => {
+	const { contactId } = req.body;
+	const contactData = req.body;
+
+	const userId = req.session.user.id;
+	const user = await User.findOne({ _id: userId });
+	if (!user) {
+		return res.status(404).json({
+			success: false,
+			message: "User not found.",
+		});
+	}
+
+	const number = user.phone.countryCode + user.phone.number;
+
+	if (!contactId || !contactData) {
+		return res.status(400).json({
+			success: false,
+			message: "List ID or contact data is missing",
+		});
+	}
+
+	try {
+		// Extract contact data, excluding listId from the body
+		const { Name, contactId, wa_id, ...newContactData } = contactData;
+		const keyId = generateUniqueId();
+		// Add the new contact to the Contacts collection
+		const newContact = await Contacts.create({
+			keyId,
+			contactId,
+			Name,
+			wa_idK: `${number}_${keyId}`,
+			wa_id,
+			masterExtra: newContactData,
+		});
+
+		// Log the activity
+		await ActivityLogs.create({
+			name: req.session.user.name
+				? req.session.user.name
+				: req.session.addedUser.name,
+			actions: "Create",
+			details: `Created a new contact: ${newContact.Name}`,
+		});
+
+		res.status(201).json({ success: true, contact: newContact });
+	} catch (error) {
+		console.error("Error adding contact:", error.message);
+		res.status(500).json({ success: false, message: error.message });
 	}
 };

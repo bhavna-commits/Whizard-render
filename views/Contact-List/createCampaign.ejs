@@ -112,7 +112,7 @@
 								
 								<div class="form-group mt-3 flex flex-col items-start relative">
 									<label class="pr-3 text-gray-500 py-3">Select template</label>
-									<select id="template-select" class="flex-grow text-gray-500 bg-white border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+									<select id="template-select" class="flex-grow w-full text-gray-500 bg-white border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
 										<option class="text-gray-500" value="">
 											Select a template...
 										</option>
@@ -131,9 +131,9 @@
 								<div class="w-full pt-5">
 									<div class="flex justify-between items-center mb-4">
 										<h2 class="text-xl font-semibold">Schedule Date & Time</h2>
-										<div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
-											<div id="toggleSwitch" class="block w-10 h-6 bg-gray-300 rounded-full shadow-inner shadow-red-500  cursor-pointer"></div>
-											<div id="toggleKnob" class="absolute top-0 left-0 w-6 h-6 bg-white rounded-full shadow-md 	shadow-red-500 transform transition-transform duration-300 ease-[cubic-bezier(0.95,0.05,0.795,0.035)]"></div>
+										<div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in" id="toggleSwitch">
+											<div class="block w-10 h-6 bg-gray-300 rounded-full shadow-inner shadow-red-500 cursor-pointer transition-colors duration-300 ease-[cubic-bezier(0.95,0.05,0.795,0.035)]"></div>
+											<div id="toggleKnob" class="absolute top-0 left-0 w-6 h-6 bg-white rounded-full shadow-md shadow-red-500 transform transition-transform duration-300 ease-[cubic-bezier(0.95,0.05,0.795,0.035)] pointer-events-none"></div>
 										</div>
 									</div>
 									<p class="text-sm text-gray-500 mb-4">Schedule your campaign by selecting date & time.</p>
@@ -171,7 +171,7 @@
 									<button id="sendNowButton" class="w-full bg-black text-white py-2 rounded-md hover:bg-gray-800 transition-colors">
 										Send Now
 									</button>
-								</div>								
+								</div>
 							</form>
 						</div>
 					</div>

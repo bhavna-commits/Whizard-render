@@ -1,62 +1,91 @@
 import https from "https";
 import dotenv from "dotenv";
+import path from "path";
+import fs from "fs";
 import Template from "../../models/templates.model.js";
+import { generateUniqueId } from "../../utils/otpGenerator.js";
 const { WABA_ID, FB_ACCESS_TOKEN } = process.env;
 
 dotenv.config();
 
 export const saveTemplateToDatabase = async (req, templateData, id) => {
-	// Prepare components for the template (assuming these are in request body)
-	const components = templateData.components || [];
-
-	// Validate and prepare other fields
-	const language = templateData.language || "en";
-	const namespace = templateData.namespace || "default_namespace";
-	const subscribeUpdate = Date.now();
-	const whizardStatus = templateData.whizard_status || 1;
-
-	// Create a new Template document and save it to the database
 	const newTemplate = new Template({
-		owner: id,
-		name: templateData.name,
+		name: templateData.templateName,
 		category: templateData.category,
-		components: components,
-		language: language,
-		namespace: namespace,
-		rejected_reason: "NONE",
-		status: "pending",
-		subscribe_update: subscribeUpdate,
-		whizard_status: whizardStatus,
-		unique_id: `unique_${Date.now()}`,
-		useradmin: req.session.user || 1,
+		components: [
+			{
+				type: "BODY",
+				text: templateData.body || "",
+			},
+			{
+				type: "FOOTER",
+				text: templateData.footer || "",
+			},
+			...(templateData.header && templateData.header.type === "text"
+				? [
+						{
+							type: "HEADER",
+							text: templateData.header.content || "",
+						},
+				  ]
+				: templateData.header && templateData.header.type !== "text"
+				? [
+						{
+							type: "HEADER",
+							format: templateData.header.type.toUpperCase(),
+							example: {
+								header_handle: [
+									templateData.header.content || "",
+								],
+							},
+						},
+				  ]
+				: []),
+			...(templateData.buttons && templateData.buttons.length
+				? templateData.buttons.map((button) => ({
+						type: "BUTTON",
+						text: button.text || "",
+						example: {
+							header_handle: [button.urlPhone],
+						},
+				  }))
+				: []),
+		],
+		status: "Pending",
+		unique_id: generateUniqueId(),
+		useradmin: id,
 	});
 
-	// If the template has a HEADER component with media, handle file paths
-	const header = components.find((component) => component.type === "HEADER");
-
-	if (header && header.format && req.file) {
-		const __dirname = path.resolve();
+	if (
+		templateData.header &&
+		templateData.header.type !== "text" &&
+		req.file
+	) {
 		const filePath = path.join(
-			__dirname,
-			"..",
 			"uploads",
 			req.session.user.id,
 			req.file.filename,
 		);
 
-		// Check if the file exists and update the header's example field
 		if (fs.existsSync(filePath)) {
-			header.example = {
-				header_handle: [filePath], // Set the file path as header_handle
-			};
+			const headerComponent = newTemplate.components.find(
+				(component) => component.type === "HEADER",
+			);
+			if (headerComponent) {
+				headerComponent.example.header_handle = [filePath];
+			}
 		} else {
-			header.example = {
-				header_handle: [], // No file found, leave header_handle empty
-			};
+			const headerComponent = newTemplate.components.find(
+				(component) => component.type === "HEADER",
+			);
+			if (headerComponent) {
+				headerComponent.example.header_handle = [];
+			}
 		}
 	}
 
 	const savedTemplate = await newTemplate.save();
+	return savedTemplate;
 };
 
 export function submitTemplateToFacebook(savedTemplate) {
@@ -101,7 +130,7 @@ export function submitTemplateToFacebook(savedTemplate) {
 		req.on("error", (error) => {
 			reject(new Error("Error with the request: " + error.message));
 		});
-        // console.log(req);
+		// console.log(req);
 		// Prepare the data to send in the body
 		const body = JSON.stringify({
 			name: savedTemplate.name,

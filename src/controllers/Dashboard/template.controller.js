@@ -7,6 +7,7 @@ import {
 	submitTemplateToFacebook,
 	fetchFacebookTemplates,
 } from "./template.functions.controller.js";
+import ActivityLogs from "../../models/activityLogs.model.js";
 import Permissions from "../../models/permissions.model.js";
 
 dotenv.config();
@@ -15,7 +16,10 @@ export const createTemplate = async (req, res) => {
 	try {
 		const templateData = JSON.parse(req.body.templateData);
 		const id = req.session.user.id;
-
+		console.log(templateData);
+		if (req.file) {
+			templateData.header.content = req.file.path;
+		}
 		const savedTemplate = await saveTemplateToDatabase(
 			req,
 			templateData,
@@ -23,15 +27,12 @@ export const createTemplate = async (req, res) => {
 		);
 		// console.log("yah a gya");
 
-		await submitTemplateToFacebook(savedTemplate);
+		// await submitTemplateToFacebook(savedTemplate);
 
 		await ActivityLogs.create({
-			photo: req.session.user.photo
-				? req.session.user.photo
-				: req.session.addedUser.photo,
-			name: req.session.user.name
-				? req.session.user.name
-				: req.session.addedUser.name,
+			name: req.session.user?.name
+				? req.session.user?.name
+				: req.session.addedUser?.name,
 			actions: "Create",
 			details: `Created new template named: ${savedTemplate.name}`,
 		});
@@ -69,16 +70,28 @@ export const getList = async (req, res) => {
 		const limit = 6;
 		const skip = (page - 1) * limit;
 
-		// Count total templates for the owner
-		const totalTemplates = await Template.countDocuments({ owner: id });
-		const templates = await Template.find({ owner: id })
-			.skip(skip)
-			.limit(limit);
+		const result = await Template.aggregate([
+			{
+				$match: {
+					useradmin: id,
+				},
+			},
+			{
+				$facet: {
+					paginatedResults: [{ $skip: skip }, { $limit: limit }],
+					totalCount: [{ $count: "total" }],
+				},
+			},
+		]);
 
-		const totalPages = Math.ceil(totalTemplates / limit);
+		const templates = result[0]?.paginatedResults || [];
+		const totalCount = result[0]?.totalCount[0]?.total || 0;
+
+		// Calculate total pages
+		const totalPages = Math.ceil(totalCount / limit);
 
 		res.render("Templates/manage_template", {
-			list: templates, 
+			list: templates,
 			page,
 			totalPages,
 		});
@@ -204,53 +217,54 @@ export const getTemplates = async (req, res) => {
 		const { id } = req.session.user;
 
 		// Fetch templates from MongoDB based on logged-in user
-		const mongoTemplates = await Template.find({ owner: id });
+		// const mongoTemplates = await Template.find({ owner: id });
 
 		// Fetch templates from Facebook Graph API
-		const facebookTemplatesResponse = await fetchFacebookTemplates();
-		const facebookTemplates = facebookTemplatesResponse.data;
+		// const facebookTemplatesResponse = await fetchFacebookTemplates();
+		// const facebookTemplates = facebookTemplatesResponse.data;
 
 		// Loop through the MongoDB templates and update their status based on Facebook data
-		for (let mongoTemplate of mongoTemplates) {
-			// Find the matching template in the Facebook templates by name
-			const matchingFacebookTemplate = facebookTemplates.find(
-				(fbTemplate) => fbTemplate.name === mongoTemplate.name,
-			);
+		// for (let mongoTemplate of mongoTemplates) {
+		// 	// Find the matching template in the Facebook templates by name
+		// 	const matchingFacebookTemplate = facebookTemplates.find(
+		// 		(fbTemplate) => fbTemplate.name === mongoTemplate.name,
+		// 	);
 
-			// If a match is found, update the status in the MongoDB template
-			if (matchingFacebookTemplate) {
-				let newStatus;
-				let rejectedReason = mongoTemplate.rejected_reason || null;
+		// 	// If a match is found, update the status in the MongoDB template
+		// 	if (matchingFacebookTemplate) {
+		// 		let newStatus;
+		// 		let rejectedReason = mongoTemplate.rejected_reason || null;
 
-				switch (matchingFacebookTemplate.status) {
-					case "APPROVED":
-						newStatus = "approved";
-						rejectedReason = "NONE"; // Reset reason if approved
-						break;
-					case "REJECTED":
-						newStatus = "rejected";
-						rejectedReason =
-							matchingFacebookTemplate.rejected_reason ||
-							"UNKNOWN"; // Assign rejection reason
-						break;
-					default:
-						newStatus = "pending";
-				}
+		// 		switch (matchingFacebookTemplate.status) {
+		// 			case "APPROVED":
+		// 				newStatus = "approved";
+		// 				rejectedReason = "NONE"; // Reset reason if approved
+		// 				break;
+		// 			case "REJECTED":
+		// 				newStatus = "rejected";
+		// 				rejectedReason =
+		// 					matchingFacebookTemplate.rejected_reason ||
+		// 					"UNKNOWN"; // Assign rejection reason
+		// 				break;
+		// 			default:
+		// 				newStatus = "pending";
+		// 		}
 
-				// Only update if the status has changed
-				if (
-					mongoTemplate.status !== newStatus ||
-					mongoTemplate.rejected_reason !== rejectedReason
-				) {
-					mongoTemplate.status = newStatus;
-					mongoTemplate.rejected_reason = rejectedReason; // Update rejected reason
-					await mongoTemplate.save(); // Save the updated template
-				}
-			}
-		}
+		// 		// Only update if the status has changed
+		// 		if (
+		// 			mongoTemplate.status !== newStatus ||
+		// 			mongoTemplate.rejected_reason !== rejectedReason
+		// 		) {
+		// 			mongoTemplate.status = newStatus;
+		// 			mongoTemplate.rejected_reason = rejectedReason; // Update rejected reason
+		// 			await mongoTemplate.save(); // Save the updated template
+		// 		}
+		// 	}
+		// }
 
 		// Respond with the updated templates from MongoDB
-		const updatedTemplates = await Template.find({ owner: id });
+		const updatedTemplates = await Template.find({ useradmin: id });
+		
 		res.json({
 			success: true,
 			data: updatedTemplates,

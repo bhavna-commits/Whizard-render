@@ -466,73 +466,75 @@ window.addEventListener("click", function (e) {
 	}
 });
 
-// dropdownMenu.addEventListener("click", function (e) {
-// 	e.stopPropagation();
-// });
+dropdownMenu.addEventListener("click", function (e) {
+	e.stopPropagation();
+});
 
-// let dragItem = null;
+let dragItem = null;
 
-// document.querySelectorAll(".draggable").forEach((item) => {
-// 	const dragHandle = item.querySelector(".drag-handle");
+document.querySelectorAll(".draggable").forEach((item) => {
+	const dragHandle = item.querySelector(".drag-handle");
 
-// 	dragHandle.addEventListener("mousedown", function () {
-// 		dragItem = item;
-// 		item.style.opacity = "0.5"; // Visual feedback during drag
-// 	});
+	dragHandle.addEventListener("mousedown", function () {
+		dragItem = item;
+		item.style.opacity = "0.5"; // Visual feedback during drag
+	});
 
-// 	dragHandle.addEventListener("mouseup", function () {
-// 		dragItem = null;
-// 		item.style.opacity = "1"; // Reset after drag
-// 	});
+	dragHandle.addEventListener("mouseup", function () {
+		dragItem = null;
+		item.style.opacity = "1"; // Reset after drag
+	});
 
-// 	item.addEventListener("dragstart", function (e) {
-// 		e.dataTransfer.effectAllowed = "move";
-// 		e.dataTransfer.setData("text/html", item.innerHTML);
-// 	});
+	item.addEventListener("dragstart", function (e) {
+		e.dataTransfer.effectAllowed = "move";
+		e.dataTransfer.setData("text/html", item.innerHTML);
+	});
 
-// 	item.addEventListener("dragend", function () {
-// 		item.style.opacity = "1";
-// 	});
-// });
+	item.addEventListener("dragend", function () {
+		item.style.opacity = "1";
+	});
+});
 
-// document
-// 	.getElementById("buttonOptions")
-// 	.addEventListener("dragover", function (e) {
-// 		e.preventDefault();
-// 	});
+document
+	.getElementById("buttonOptions")
+	.addEventListener("dragover", function (e) {
+		e.preventDefault();
+	});
 
-// document.getElementById("buttonOptions").addEventListener("drop", function (e) {
-// 	e.preventDefault();
-// 	if (dragItem) {
-// 		let afterElement = getDragAfterElement(e.clientY);
-// 		if (afterElement == null) {
-// 			this.appendChild(dragItem);
-// 		} else {
-// 			this.insertBefore(dragItem, afterElement);
-// 		}
-// 	}
-// });
+document.getElementById("buttonOptions").addEventListener("drop", function (e) {
+	e.preventDefault();
+	if (dragItem) {
+		let afterElement = getDragAfterElement(e.clientY);
+		if (afterElement == null) {
+			this.appendChild(dragItem);
+		} else {
+			this.insertBefore(dragItem, afterElement);
+		}
+	}
+});
 
-// function getDragAfterElement(y) {
-// 	const draggableElements = [
-// 		...document.querySelectorAll(".draggable:not(.dragging)"),
-// 	];
+function getDragAfterElement(y) {
+	const draggableElements = [
+		...document.querySelectorAll(".draggable:not(.dragging)"),
+	];
 
-// 	return draggableElements.reduce(
-// 		(closest, child) => {
-// 			const box = child.getBoundingClientRect();
-// 			const offset = y - box.top - box.height / 2;
-// 			if (offset < 0 && offset > closest.offset) {
-// 				return {
-// 					offset: offset,
-// 					element: child,
-// 				};
-// 			} else {
-// 				return closest;
-// 			}
-// 		},
-// 		{
-// 			offset: Number.NEGATIVE_INFINITY,
-// 		},
-// 	).element;
-// }
+	return draggableElements.reduce(
+		(closest, child) => {
+			const box = child.getBoundingClientRect();
+			const offset = y - box.top - box.height / 2;
+			if (offset < 0 && offset > closest.offset) {
+				return {
+					offset: offset,
+					element: child,
+				};
+			} else {
+				return closest;
+			}
+		},
+		{
+			offset: Number.NEGATIVE_INFINITY,
+		},
+	).element;
+}
+
+

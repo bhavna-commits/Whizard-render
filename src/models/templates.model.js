@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const Schema = mongoose.Schema;
 
-const componentSchema = new Schema({
+const componentSchema = new mongoose.Schema({
 	text: {
 		type: String,
 		required: function () {
@@ -16,81 +16,56 @@ const componentSchema = new Schema({
 	},
 	format: {
 		type: String,
-		enum: ["IMAGE", "VIDEO", "DOCUMENT"], 
+		enum: ["IMAGE", "VIDEO", "DOCUMENT"],
 		required: function () {
 			return this.type === "HEADER";
 		},
 	},
 	example: {
 		header_handle: {
-			type: [String], 
-			required: function () {
-				return this.type === "HEADER" && this.format;
-			},
+			type: [String],
+			default: [], 
 		},
 	},
 });
 
-const templateSchema = new Schema(
-	{
-		owner: {
-			type: String,
-			required: true,
-		},
-		name: {
-			type: String,
-			required: true,
-		},
-		category: {
-			type: String,
-			required: true,
-		},
-		components: [componentSchema],
-		language: {
-			type: String,
-			default: "en_US",
-		},
-		namespace: {
-			type: String,
-			required: true,
-		},
-		rejected_reason: {
-			type: String,
-			default: "NONE",
-		},
-		status: {
-			type: String,
-			enum: ["approved", "rejected", "pending"],
-			default: "pending",
-		},
-		subscribe_update: {
-			type: Number,
-			required: true,
-		},
-		whizard_status: {
-			type: Number,
-			default: 1,
-		},
-		unique_id: {
-			type: String,
-			required: true,
-		},
-		useradmin: {
-			type: Number,
-			required: true,
-		},
-		createdAt: {
-			type: Number,
-			default: () => Date.now(), 
-		},
-		updatedAt: {
-			type: Number,
-			default: () => Date.now(),
-		},
+
+const templateSchema = new Schema({
+	name: {
+		type: String,
+		required: true,
 	},
-	{ timestamps: false },
-	{ strict: false },
-);
+	language: {
+		type: String,
+		default: "en_US",
+	},
+	category: {
+		type: String,
+		required: true,
+	},
+	components: [componentSchema],
+	status: {
+		type: String,
+		enum: ["Approved", "Rejected", "Pending"],
+		default: "Pending",
+	},
+	unique_id: {
+		type: String,
+		required: true,
+	},
+	createdAt: {
+		type: Number,
+		default: () => Date.now(),
+	},
+	updatedAt: {
+		type: Number,
+		default: () => Date.now(),
+	},
+	useradmin: {
+		type: String,
+		required: true,
+	},
+});
 
 templateSchema.pre("save", function (next) {
 	this.updatedAt = Date.now();

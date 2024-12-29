@@ -58,28 +58,34 @@
 
 <body class="overflow-hidden">
 	<div class="flex h-screen w-full">
-		<nav class="sidebar">
-			<div class="logo">
+		<nav class="sidebar ">
+			<div class="logo py-3">
 				<img src="/assets/img/Wizard_logo.png" alt="Whizard Logo" />
 			</div>
-			<ul>
-				<li class="pt-2">
+			<ul class="space-y-4 mt-5">
+				<li>
 					<a href="/" class=""><span class="icon"><i class="fas fa-chart-line"></i></span>
 						Dashboard</a>
 				</li>
-				<li class="pt-2"> <a href="/chats"><span class="icon"><i class="fa-regular fa-comment"></i></span>
+				<li>
+					<a href="/chats"><span class="icon"><i class="fa-regular fa-comment"></i></span>
 						Chats</a>
 				</li>
-				<li class="pt-2 text-center"> <a href="/contact-list"><span class="icon"><i class="fa-regular fa-address-book"></i></span>
+				<li>
+					<a href="/contact-list"><span class="icon "><i class="fa-regular fa-address-book"></i></span>
+						
 						Contact List</a>
 				</li>
-				<li class="pt-2"> <a href="/template"><span class="icon active"><i class="fa-regular fa-envelope-open"></i></span>
+				<li>
+					<a href="/template"><span class="icon active"><i class="fa-regular fa-envelope-open"></i></span>
 						Template</a>
 				</li>
-				<li class="pt-2 text-center"> <a href="/settings"><span class="icon "><i class="fa-regular fa-user"></i></span>
+				<li>
+					<a href="/settings"><span class="icon"><i class="fa-regular fa-user"></i></span>
 						Settings</a>
 				</li>
-				<li class="pt-2"> <a href="/reports"><span class="icon"><i class="fa-regular fa-chart-bar"></i></span>
+				<li>
+					<a href="/reports"><span class="icon"><i class="fa-regular fa-chart-bar"></i></span>
 						Reports</a>
 				</li>
 			</ul>
@@ -341,7 +347,7 @@
 										</div>
 										<div class="col-4">
 											<label>Phone Number</label>
-											<input type="tel" maxlength="10" class="form-control" id="phoneNumber" placeholder="9999999999">
+											<input type="tel" class="form-control" id="phoneNumber" placeholder="9999999999">
 										</div>
 									</div>
 									<div class="col-1 close-icon">
@@ -349,10 +355,7 @@
 									</div>
 								</div>
 							</div>
-						</div>
-						
-						
-						
+						</div>					
 					</div>
 				</div>
 			</div>
@@ -364,9 +367,9 @@
 						</h4>
 					</div>
 					<!-- Preview Section -->
-					<div class=" py-3 px-2 mt-3" id="previewContainer">
+					<div class="bg-blue-50 py-3 px-2 mt-3" id="previewContainer">
 						<div id="previewHeader"></div>
-						<p id="previewBody"></p>
+						<p id="previewBody" class="text-base"></p>
 						<div id="previewFooter"></div>
 						<div class="py-2" id="previewButtons"></div>
 					</div>

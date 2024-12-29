@@ -5,52 +5,80 @@
 	<div class="col-12 col-md-6 col-lg-3 py-2">
 		<div class="custom-card-container shadow-sm">
 			<div class="card-container p-3">
-				<div class="custom-card-body bg-white">
+				<div class="custom-card-body bg-white ">
 					
-					<% if (template.header && template.header.type === 'text') { %>
-					<!-- Display header text if header.type is 'text' -->
-					<h6 class="custom-card-header"><%= template.header.content %></h6>
-					<% } else if (template.header && template.header.type === 'media') { %>
-					<!-- Display media content if header.type is 'media' -->
-					<img src="<%= template.header.content %>" alt="Header Media" class="custom-card-img">
-					<% } %>
+					<% 
+// Render HEADER first
+template.components.forEach(component => { 
+	if (component.type === 'HEADER') { 
+		if (component.text) { 
+%>
+					<h6 class="custom-card-header">
+						<%- component.text.replace(/\n/g, '<br>') %>
+					</h6>
+					<% 
+		} else if (component.format === 'IMAGE') { 
+%>
+					<img src="<%= component.example.header_handle[0] %>" alt="Header Media" class="custom-card-img">
+					<% 
+		} 
+	}
+}); 
+%>
 					
-					<h5 class="custom-card-title"><%= template.body %></h5>
-					<p class="custom-card-subtitle"><%= template.footer %></p>
-					<div>
-						<a href="#" class="custom-btn">
-							<i class="fas fa-external-link-alt"></i> Visit Now
-						</a>
-						<a href="tel:+123456789" class="custom-btn">
-							<i class="fas fa-phone-alt"></i> Call Now
-						</a>
-					</div>
+					<% 
+// Render BODY and FOOTER next
+template.components.forEach(component => { 
+	if (component.type === 'BODY') { 
+%>
+					<p class="custom-card-body-text py-2">
+						<%- component.text.replace(/\n/g, '<br>') %>
+					</p>
+					<% 
+	} else if (component.type === 'FOOTER') { 
+%>
+					<p class="custom-card-footer-text text-sm text-gray-500 py-2">
+						<%- component.text.replace(/\n/g, '<br>') %>
+					</p>
+					<% 
+	} 
+}); 
+%>
+					
+					<% 
+// Render BUTTONS if any
+template.components.forEach(component => { 
+	if (component.type === 'BUTTON') { 
+		component.example.header_handle.forEach(button => {
+			if (button.startsWith('tel:')) { 
+%>
+					<button class=" w-full border-b border-gray-300 py-2" id="callBtn" draggable="true" onclick="window.location.href='tel:<%= button.slice(4) %>'" style="color: #6A67FF;">
+						<i class="fa fa-phone mx-2"></i><%= component.text %>
+					</button>
+					<% 
+			} else { 
+%>
+					<button class=" w-full border-b border-gray-300 py-2" id="websiteBtn" draggable="true" onclick="window.open('<%= button %>', '_blank')" style="color: #6A67FF;">
+						<i class="fa fa-external-link mx-2"></i><%= component.text %>
+					</button>
+					<% 
+			} 
+		});
+	} 
+});
+%>
+					
+					
+					
 				</div>
 			</div>
 			<div class="custom-card-footer">
-				<%= template.templateName %>
+				<%= template.name %>
 			</div>
 		</div>
 	</div>
 	<% }) %>
 </div>
-
-<% } else { %>
-<div class="flex flex-col items-center justify-center min-h-[400px]  rounded-lg mt-4">
-	<div class="text-center">
-		<img src="https://img.freepik.com/free-vector/hands-holding-tablet-with-forefinger-clicking-start-button-new-application-launch-flat-illustration_74855-20595.jpg?ga=GA1.1.131490893.1732525963&semt=ais_hybrid" alt="No contacts" class="w-48 h-48 mx-auto mb-4">
-		
-		<h3 class="text-xl font-semibold text-gray-900 mb-2">No Templates yet</h3>
-		<p class="text-gray-600 mb-6">Start adding templates by clicking on "Create new template"</p>
-		<button class="bg-black p-2 flex items-center rounded-lg text-base font-thin w-full justify-center" onclick="document.location='create-template'">
-			<i class="pg-icon font-thin px-2">add</i>
-			Create new template
-		</button>
-	</div>
-</div>
-<% } %>
-
-
 <div class="flex items-center justify-center py-4 space-x-4">
 	<nav class="flex items-center">
 		<ul class="flex space-x-1">
@@ -119,4 +147,19 @@
 			window.location.href = `/contact-list?page=${page}`;
 		}
 	}
-</script>	
+</script>
+
+<% } else { %>
+<div class="flex flex-col items-center justify-center min-h-[400px]  rounded-lg mt-4">
+	<div class="text-center">
+		<img src="https://img.freepik.com/free-vector/hands-holding-tablet-with-forefinger-clicking-start-button-new-application-launch-flat-illustration_74855-20595.jpg?ga=GA1.1.131490893.1732525963&semt=ais_hybrid" alt="No contacts" class="w-48 h-48 mx-auto mb-4">
+		
+		<h3 class="text-xl font-semibold text-gray-900 mb-2">No Templates yet</h3>
+		<p class="text-gray-600 mb-6">Start adding templates by clicking on "Create new template"</p>
+		<button class="bg-black p-2 flex items-center rounded-lg text-white text-base font-thin w-full justify-center" onclick="document.location='create-template'">
+			<i class="fa-solid fa-plus pr-2"></i>
+			Create new template
+		</button>
+	</div>
+</div>
+<% } %>

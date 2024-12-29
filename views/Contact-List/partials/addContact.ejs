@@ -2,7 +2,7 @@
 <div class="overlay" id="overlay" onclick="closeAddContact()"></div>
 
 <!-- Sidebar structure for adding new contact -->
-<div class="filter-sidebar" id="addContactSidebar">
+<div class="filter-sidebar overflow-scroll" id="addContactSidebar">
 	<div class="filter-header">
 		<h2>Add New Contact</h2>
 		<button class="close-btn" onclick="closeAddContact()">&times;</button>
@@ -12,11 +12,11 @@
 		<form id="addContactForm">
 			<div class="form-group">
 				<label for="contactName">Name</label>
-				<input type="text" id="contactName" name="name" class="date-input" placeholder="Enter name" required>
+				<input type="text" id="contactName" name="Name" class="date-input" placeholder="Enter name" required>
 			</div>
 			<div class="form-group">
 				<label for="contactNumber">Phone Number</label>
-				<input type="text" id="contactNumber" name="number" class="date-input" placeholder="Enter phone number" required>
+				<input type="text" id="contactNumber" name="wa_id" class="date-input" placeholder="Enter phone number" required>
 			</div>
 			<% if (tags.length > 0) { %>
 			<div class="form-group">
@@ -33,7 +33,7 @@
 			<% Object.keys(contacts[0].masterExtra).forEach(function(key) { %>
 			<div class="form-group">
 				<label for="<%= key %>"><%= key %></label>
-				<input type="text" id="<%= key %>" name="masterExtra[<%= key %>]" class="date-input" placeholder="<%= key %>" required>
+				<input type="text" id="<%= key %>" name="<%= key %>" class="date-input" placeholder="<%= key %>" required>
 			</div>
 			<% }); %>
 			<% } %>

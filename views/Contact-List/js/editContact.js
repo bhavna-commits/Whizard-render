@@ -2,18 +2,46 @@
 
 function openEditModal(contactData) {
 	const contact = JSON.parse(contactData);
-	// console.log(contact);
-	// Populate fields with contact data
+	// console.log(contact);	
+	// Set the existing fields
 	document.getElementById("edit-contact-id").value = contact.keyId;
-	// 
-	// console.log(contact.Name);
 	document.getElementById("edit-contact-name").value = contact.Name;
-	console.log(document.getElementById("edit-contact-name").value);
 	document.getElementById("edit-contact-whatsapp").value = contact.wa_id;
+	document.getElementById("edit-contact-tags").value = contact.tags;
 
-	// Set the value for the tags dropdown based on the contact data
-	const tagsDropdown = document.getElementById("edit-contact-tags");
-	tagsDropdown.value = contact.tags;
+	// Get the form container
+	const dynamicFieldsContainer = document.getElementById(
+		"dynamicFieldsContainer",
+	);
+	// Loop through contact object and dynamically create form fields for other keys
+	Object.keys(contact.masterExtra).forEach((key) => {
+		// Check if the field already exists (in case the form is opened multiple times)
+		if (!document.getElementById(`edit-contact-${key}`)) {
+			// Create a new form group div
+			const formGroup = document.createElement("div");
+			formGroup.classList.add("form-group");
+
+			// Create a label for the new input field
+			const label = document.createElement("label");
+			label.setAttribute("for", `edit-contact-${key}`);
+			label.textContent = key.charAt(0).toUpperCase() + key.slice(1);
+
+			// Create a new input field
+			const input = document.createElement("input");
+			input.setAttribute("type", "text");
+			input.setAttribute("id", `edit-contact-${key}`);
+			input.setAttribute("name", `masterExtra.${key}`);
+			input.setAttribute("class", "date-input");
+			input.value = contact.masterExtra[key];
+
+			// Append label and input to form group
+			formGroup.appendChild(label);
+			formGroup.appendChild(input);
+
+			// Append the form group to the form
+			dynamicFieldsContainer.appendChild(formGroup);
+		}
+	});
 
 	// Show the sidebar and overlay
 	document.getElementById("editContactSidebar").classList.add("open");
@@ -52,11 +80,7 @@ document
 			.then((response) => response.json())
 			.then((data) => {
 				if (data.success) {
-					// Close the modal after 0.5 seconds
-					setTimeout(() => {
-						closeEditContact();
-						location.reload(); // Reload page after closing the sidebar
-					}, 500);
+					location.reload();
 				} else {
 					// Show error message near the save button
 					saveButton.innerHTML = originalButtonText; // Reset button text
@@ -110,6 +134,12 @@ function openDeleteModal(id) {
 	};
 }
 
+function closeDeleteContact() {
+	const deleteModal = new bootstrap.Modal(
+		document.getElementById("deleteModal"),
+	);
+	deleteModal.hide();
+}
 
 // Assuming these elements are defined
 const contactListInput = document.getElementById("contactListName");
@@ -178,17 +208,52 @@ function closeAddContact() {
 document
 	.getElementById("addContactForm")
 	.addEventListener("submit", function (event) {
-		event.preventDefault();
+		event.preventDefault(); // Prevent default form submission
 
-		// Collect form data
-		const name = document.getElementById("contactName").value;
-		const number = document.getElementById("contactNumber").value;
-		// const tags = document.getElementById("contactTags").value;
+		// Collect the form data
+		const formData = new FormData(this);
 
-		// Perform backend call to add the new contact here
-		// For now, just close the sidebar
-		closeAddContact();
+		// Extract listId from the URL
+		const contactId = window.location.pathname.split("/").pop(); // Extract listId from URL
+		console.log(contactId);
+		// Append listId to formData
+		formData.append("contactId", contactId);
 
-		// You can reset the form or provide feedback to the user
-		document.getElementById("addContactForm").reset();
+		const saveButton = this.querySelector("button[type='submit']");
+		const originalButtonText = saveButton.innerHTML;
+		saveButton.disabled = true; // Disable button
+		saveButton.innerHTML =
+			'<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving...';
+
+		// Perform the POST request to add the new contact
+		fetch(`/api/contact-list/contacts/create-contact`, {
+			method: "POST",
+			body: formData,
+		})
+			.then((response) => response.json())
+			.then((data) => {
+				if (data.success) {
+					// Handle success (e.g., reload the page or show success message)
+					location.reload();
+				} else {
+					// Show error message near the save button
+					saveButton.innerHTML = originalButtonText; // Reset button text
+					saveButton.disabled = false;
+					const errorMessage = document.createElement("div");
+					errorMessage.className = "text-danger mt-2";
+					errorMessage.innerText =
+						"Error adding contact: " + data.message;
+					saveButton.parentNode.appendChild(errorMessage);
+				}
+			})
+			.catch((err) => {
+				// Handle any network or other errors
+				console.error("Error:", err);
+				saveButton.innerHTML = originalButtonText; // Reset button text
+				saveButton.disabled = false;
+				const errorMessage = document.createElement("div");
+				errorMessage.className = "text-danger mt-2";
+				errorMessage.innerText = "An error occurred. Please try again.";
+				saveButton.parentNode.appendChild(errorMessage);
+			});
 	});

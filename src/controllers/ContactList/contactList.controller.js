@@ -181,7 +181,6 @@ export const createList = async (req, res) => {
 		}
 
 		const number = user.phone.countryCode + user.phone.number;
-		const keyId = generateUniqueId();
 		const participantCount = parsedData.length;
 
 		// Create a new Contact List
@@ -197,7 +196,7 @@ export const createList = async (req, res) => {
 		const contactsToSave = parsedData
 			.map((contactData) => {
 				let { Name, Number, ...additionalFields } = contactData;
-
+				const keyId = generateUniqueId();
 				return new Contacts({
 					Name,
 					wa_idK: `${number}_${keyId}`,
@@ -381,9 +380,9 @@ export const createCustomField = async (req, res) => {
 			const fileContent = fs.readFileSync(csvFilePath, "utf8");
 
 			const rows = fileContent
-				.split(/\r?\n/) 
-				.map((row) => row.trim()) 
-				.filter((row) => row !== ""); 
+				.split(/\r?\n/)
+				.map((row) => row.trim())
+				.filter((row) => row !== "");
 
 			headers = rows[0].split(",");
 
