@@ -10,12 +10,14 @@ import {
 	deleteCustomField,
 	searchContactLists,
 	previewContactList,
+	
 } from "../controllers/ContactList/contactList.controller.js";
 import {
 	updateContact,
 	deleteContact,
 	editContact,
 	createContact,
+	createCampaign,
 } from "../controllers/ContactList/contacts.controller.js";
 
 const router = express.Router();
@@ -51,6 +53,8 @@ router.delete("/custom-fields/:id", deleteCustomField);
 
 router.get("/search", searchContactLists);
 
-router.post("/create-contact", createContact)
+router.post("/create-contact", createContact);
+
+router.post("/create-campaign", upload.none(), createCampaign);
 
 export default router;

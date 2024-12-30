@@ -16,7 +16,7 @@ const componentSchema = new mongoose.Schema({
 	},
 	format: {
 		type: String,
-		enum: ["IMAGE", "VIDEO", "DOCUMENT"],
+		enum: ["IMAGE", "VIDEO", "DOCUMENT", "TEXT"],
 		required: function () {
 			return this.type === "HEADER";
 		},
@@ -24,11 +24,10 @@ const componentSchema = new mongoose.Schema({
 	example: {
 		header_handle: {
 			type: [String],
-			default: [], 
+			default: [],
 		},
 	},
 });
-
 
 const templateSchema = new Schema({
 	name: {
@@ -63,6 +62,10 @@ const templateSchema = new Schema({
 	},
 	useradmin: {
 		type: String,
+		required: true,
+	},
+	dynamicVariables: {
+		type: [Number],
 		required: true,
 	},
 });

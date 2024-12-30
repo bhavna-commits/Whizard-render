@@ -4,9 +4,11 @@ import Papa from "papaparse";
 import ContactList from "../../models/contactList.model.js";
 import Contacts from "../../models/contacts.model.js";
 import ActivityLogs from "../../models/activityLogs.model.js";
+import Campaign from "../../models/campaign.model.js";
 import User from "../../models/user.model.js";
 import { fileURLToPath } from "url";
 import { generateUniqueId } from "../../utils/otpGenerator.js";
+import { sendMessages } from "./campaign.functions.js";
 
 export const __filename = fileURLToPath(import.meta.url);
 export const __dirname = path.dirname(__filename);
@@ -285,5 +287,34 @@ export const createContact = async (req, res) => {
 	} catch (error) {
 		console.error("Error adding contact:", error.message);
 		res.status(500).json({ success: false, message: error.message });
+	}
+};
+
+export const createCampaign = async (req, res) => {
+	try {
+		const { templateId, contactListId, variables, schedule } = req.body;
+
+		const newCampaign = new Campaign({
+			unique_id: generateUniqueId(),
+			templateId,
+			contactListId,
+			variables,
+		});
+
+		if (!schedule) {
+			sendMessages(newCampaign);
+		} else {
+			newCampaign.scheduledAt = new Date(schedule);
+			newCampaign.status = "SCHEDULED";
+		}
+
+		await newCampaign.save();
+		res.status(201).json({
+			message: "Campaign created successfully",
+			campaign: newCampaign,
+		});
+	} catch (error) {
+		console.error("Error creating campaign:", error);
+		res.status(500).json({ message: "Error creating campaign" });
 	}
 };

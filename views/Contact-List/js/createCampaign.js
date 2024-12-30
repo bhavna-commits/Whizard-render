@@ -26,13 +26,15 @@ class AttributeManager {
 	}
 
 	update(template, contacts) {
+		// console.log(template?.dynamicVariables);
 		if (!template?.dynamicVariables || !contacts.length) {
 			this.container.innerHTML =
 				'<p class="text-center p-2 text-gray-500">No attributes available</p>';
 			return;
 		}
 
-		const attributes = contacts[0]?.additionalAttributes || {};
+		const attributes = contacts[0]?.masterExtra || {};
+		console.log(attributes);
 		const options = this.generateAttributeOptions(Object.keys(attributes));
 
 		this.container.innerHTML = template.dynamicVariables
@@ -95,65 +97,94 @@ class Preview {
 			return;
 		}
 
-		const { header, body, footer, buttons } = template;
-		console.log(body);
+		// Extract components from the template
+		const { components } = template;
+
 		let headerContent = "";
-		// Assuming base path for uploaded files
-		const baseFilePath = `/uploads/${template.owner}/`;
+		let bodyContent = "";
+		let footerContent = "";
+		let buttonContent = "";
 
-		if (header?.type === "media") {
-			// Check the type of media and render accordingly
-			const fileName = header?.content; // Get the file name from header.content
-			const fileExtension = fileName.split(".").pop().toLowerCase(); // Extract the file extension
-			const fileUrl = baseFilePath + fileName;
-			console.log(fileUrl);
-			if (["jpg", "jpeg", "png", "gif", "svg"].includes(fileExtension)) {
-				headerContent = `<img src="${fileUrl}" alt="Header Image" class="custom-card-img">`;
-			} else if (["mp4", "mov", "avi", "mkv"].includes(fileExtension)) {
-				headerContent = `<video controls class="custom-card-img"><source src="${fileUrl}" type="video/${fileExtension}">Your browser does not support the video tag.</video>`;
-			} else if (["pdf"].includes(fileExtension)) {
-				headerContent = `<embed src="${fileUrl}" type="application/pdf" width="100%" height="400px" />`;
-			} else if (["docx", "xlsx", "csv"].includes(fileExtension)) {
-				headerContent = `<a href="${fileUrl}" target="_blank">Download Document</a>`;
-			} else {
-				headerContent = `<p>Unsupported media format.</p>`;
+		// Filter components for header, body, footer, and buttons
+		components.forEach((component) => {
+			if (component.type === "HEADER") {
+				if (component.format === "IMAGE") {
+					// Handle image format
+					let fileUrl = component.example.header_handle[0].replace(
+						/\\/g,
+						"/",
+					);
+
+					// console.log(fileUrl);
+					headerContent = `<img src="/${fileUrl}" alt="Header Image" class="custom-card-img">`;
+				} else if (component.format === "VIDEO") {
+					// Handle video format
+					let fileUrl = component.example.header_handle[0].replace(
+						/\\/g,
+						"/",
+					);
+					const fileExtension = fileUrl
+						.split(".")
+						.pop()
+						.toLowerCase();
+					headerContent = `
+                    <video controls class="custom-card-img">
+                        <source src="/${fileUrl}" type="video/${fileExtension}">
+                        Your browser does not support the video tag.
+                    </video>
+                `;
+				} else if (component.format === "DOCUMENT") {
+					// Handle document format (PDF, DOCX, etc.)
+					let fileUrl = component.example.header_handle[0].replace(
+						/\\/g,
+						"/",
+					);
+					headerContent = `<a href="/${fileUrl}" target="_blank">Download Document</a>`;
+				} else {
+					headerContent = component.text || "";
+				}
+			} else if (component.type === "BODY") {
+				bodyContent = component.text;
+			} else if (component.type === "FOOTER") {
+				footerContent = component.text;
+				// console.log("fotter")
+			} else if (component.type === "BUTTON") {
+				const buttonText = component.text;
+				const buttonUrl = component.example.header_handle[0];
+
+				let buttonLabel = buttonText || "Click Here";
+				if (buttonUrl && buttonUrl.startsWith("http")) {
+					buttonContent += `
+                    <button class="border-t w-full mt-2 pt-1 text-center me-2 text-base" onclick="window.open('${buttonUrl}', '_blank')" style="color: #6A67FF;">
+                        <i class="fa fa-external-link mx-2"></i><span class="text-lg">${buttonLabel}</span>
+                    </button>
+                `;
+				} else if (buttonUrl && buttonUrl.startsWith("tel:")) {
+					const phoneNumber = buttonUrl.replace("tel:", "");
+					buttonContent += `
+                    <button class="border-t w-full mt-2 pt-1 text-center me-2 text-base" onclick="window.location.href='tel:${phoneNumber}'" style="color: #6A67FF;">
+                        <i class="fa fa-phone mx-2"></i><span class="text-lg">${buttonLabel}</span>
+                    </button>
+                `;
+				}
 			}
-		} else {
-			headerContent = "";
-		}
-
+		});
+		// console.log("button", buttonContent);
 		this.container.innerHTML = `
-    ${headerContent}
-   <p class="text-lg py-1">${body.replace(/\n/g, "<br>")}</p>
-    <p class="text-base text-gray-500 py-1">${footer.replace(/\n/g, "<br>")}</p>
-    <div>
-        ${buttons
-			.map((button) => {
-				let buttonContent = "";
-				// Check if it's an HTTP URL (for web links)
-				if (button.urlPhone.startsWith("http")) {
-					let label = button.text || "Visit Now";
-					buttonContent = `
-                        <button class="border-t w-full mt-2 pt-1 text-center me-2 text-base" onclick="window.open('${button.urlPhone}', '_blank')" style="color: #6A67FF;">
-                            <i class="fa fa-external-link mx-2"></i><span class="text-lg">${label}</span>
-                        </button>
-                    `;
-				}
-				// Check if it's a phone number (for call links)
-				else {
-					let label = button.text || "Call Now";
-					let phone = button.urlPhone.replace("tel:", ""); // Extract phone number
-					buttonContent = `
-                        <button class="border-t w-full mt-2 pt-1 text-center  me-2 text-base" onclick="window.location.href='tel:${phone}'" style="color: #6A67FF;">
-                            <i class="fa fa-phone mx-2"></i><span class="text-lg">${label}</span>
-                        </button>
-                    `;
-				}
-				return buttonContent;
-			})
-			.join("")}
-    </div>
-`;
+        ${
+			headerContent
+				? `<div class="header-container">${headerContent}</div>`
+				: ""
+		}
+        <p class="text-lg py-2">${bodyContent.replace(/\n/g, "<br>")}</p>
+        <p class="text-base text-gray-500 py-1">${footerContent.replace(
+			/\n/g,
+			"<br>",
+		)}</p>
+        <div>
+            ${buttonContent}
+        </div>
+    `;
 	}
 }
 
@@ -209,9 +240,9 @@ class TemplateManager {
 				.empty()
 				.append('<option value="">Select a template...</option>');
 
-			templates.forEach((template) => {
+			templates.data.forEach((template) => {
 				this.templateSelect.append(
-					new Option(template.templateName, template._id),
+					new Option(template.name, template.unique_id),
 				);
 			});
 		} catch (error) {
@@ -228,7 +259,7 @@ class TemplateManager {
 
 			contactLists.forEach((list) => {
 				this.recipientSelect.append(
-					new Option(list.ContactListName, list._id),
+					new Option(list.contalistName, list.contactId),
 				);
 			});
 		} catch (error) {
@@ -271,6 +302,7 @@ class TemplateManager {
 			this.currentContacts = await fetchContactListContacts(
 				contactListId,
 			);
+			// console.log(this.currentContacts);
 			this.attributeManager.update(
 				this.currentTemplate,
 				this.currentContacts,
@@ -291,6 +323,23 @@ class TemplateManager {
 		formData.append("templateId", this.templateSelect.val());
 		formData.append("contactListId", this.recipientSelect.val());
 
+		// Combine the date and time fields into a single Unix timestamp
+		const selectedDate = document.getElementById("datePicker").value;
+		const selectedTime = document.getElementById("timePicker").value;
+
+		if (selectedDate && selectedTime) {
+			const dateTimeString = `${selectedDate} ${selectedTime}`;
+			const dateTime = new Date(dateTimeString);
+
+			if (!isNaN(dateTime.getTime())) {
+				const unixTimestamp = Math.floor(dateTime.getTime() / 1000);
+				formData.append("schedule", unixTimestamp); 
+			} else {
+				alert("Invalid date or time. Please check your selection.");
+				return;
+			}
+		}
+
 		const selectedAttributes = {};
 		$(this.attributesForm)
 			.find(".attribute-select")
@@ -299,7 +348,9 @@ class TemplateManager {
 				selectedAttributes[variable] = $(this).val();
 			});
 
-		formData.append("variables", JSON.stringify(selectedAttributes));
+		if (Object.keys(selectedAttributes).length > 0) {
+			formData.append("variables", JSON.stringify(selectedAttributes));
+		}
 
 		try {
 			const response = await fetch("/api/contact-list/create-campaign", {
@@ -327,6 +378,9 @@ $(document).ready(() => {
 	const scheduleSection = document.getElementById("scheduleSection");
 	const scheduleButton = document.getElementById("scheduleButton");
 	const sendNowButton = document.getElementById("sendNowButton");
+	const date = document.getElementById("datePicker").value;
+
+	console.log(date);
 
 	let isScheduled = false;
 
@@ -384,3 +438,5 @@ $(document).ready(() => {
 		allowInput: true,
 	});
 });
+
+function schedule() {}

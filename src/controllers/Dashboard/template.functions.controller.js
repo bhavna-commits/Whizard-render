@@ -8,7 +8,12 @@ const { WABA_ID, FB_ACCESS_TOKEN } = process.env;
 
 dotenv.config();
 
-export const saveTemplateToDatabase = async (req, templateData, id) => {
+export const saveTemplateToDatabase = async (
+	req,
+	templateData,
+	dynamicVariables,
+	id,
+) => {
 	const newTemplate = new Template({
 		name: templateData.templateName,
 		category: templateData.category,
@@ -26,6 +31,7 @@ export const saveTemplateToDatabase = async (req, templateData, id) => {
 						{
 							type: "HEADER",
 							text: templateData.header.content || "",
+							format: templateData.header.type.toUpperCase(),
 						},
 				  ]
 				: templateData.header && templateData.header.type !== "text"
@@ -54,6 +60,7 @@ export const saveTemplateToDatabase = async (req, templateData, id) => {
 		status: "Pending",
 		unique_id: generateUniqueId(),
 		useradmin: id,
+		dynamicVariables,
 	});
 
 	if (

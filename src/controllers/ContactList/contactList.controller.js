@@ -633,7 +633,7 @@ export const getContactList = async (req, res) => {
 	try {
 		const { id } = req.session.user;
 
-		const contactLists = await ContactList.find({ owner: id });
+		const contactLists = await ContactList.find({ useradmin: id });
 
 		res.json(contactLists);
 	} catch (error) {
@@ -643,7 +643,8 @@ export const getContactList = async (req, res) => {
 
 export const getCampaignContacts = async (req, res) => {
 	try {
-		const contacts = await Contacts.find({ contactList: req.params.id });
+		const contacts = await Contacts.find({ contactId: req.params.id });
+		// console.log(contacts);
 		if (!contacts)
 			return res.status(404).json({ error: "No contacts found" });
 		res.json(contacts);

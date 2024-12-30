@@ -15,6 +15,7 @@ dotenv.config();
 export const createTemplate = async (req, res) => {
 	try {
 		const templateData = JSON.parse(req.body.templateData);
+		const { dynamicVariables } = templateData;
 		const id = req.session.user.id;
 		console.log(templateData);
 		if (req.file) {
@@ -23,6 +24,7 @@ export const createTemplate = async (req, res) => {
 		const savedTemplate = await saveTemplateToDatabase(
 			req,
 			templateData,
+			dynamicVariables,
 			id,
 		);
 		// console.log("yah a gya");
@@ -171,32 +173,32 @@ export const deleteTemplate = async (req, res) => {
 
 export const getCampaignTemplates = async (req, res) => {
 	try {
-		const templateData = await Template.findById(req.params.id);
+		// Fetch the template data by ID
+		const templateData = await Template.findOne({
+			unique_id: req.params.id,
+		});
 		if (!templateData) {
 			return res.status(404).json({ error: "Template not found" });
 		}
 
-		// Handle file attachments if the header contains media
-		const __dirname = path.resolve();
-		const header = templateData.components.find(
+		// Handle file attachments for media in the header component
+		const headerComponent = templateData.components.find(
 			(component) => component.type === "HEADER",
 		);
 
-		if (header && header.type === "media" && header.content) {
-			const filePath = path.join(
-				__dirname,
-				"..",
-				"uploads",
-				req.session.user.id,
-				header.content,
-			);
-			console.log("fileURL:", filePath);
+		if (
+			headerComponent &&
+			headerComponent.example &&
+			headerComponent.example.header_handle[0]
+		) {
+			const filePath = headerComponent.example.header_handle[0];
 
-			// Check if the file exists before adding to the response
+			console.log("filePath:", filePath);
+
 			if (fs.existsSync(filePath)) {
-				header.fileUrl = filePath;
+				headerComponent.fileUrl = `/${filePath.replace(/\\/g, "/")}`;
 			} else {
-				header.fileUrl = null; // File not found
+				headerComponent.fileUrl = null;
 			}
 		}
 
@@ -264,7 +266,7 @@ export const getTemplates = async (req, res) => {
 
 		// Respond with the updated templates from MongoDB
 		const updatedTemplates = await Template.find({ useradmin: id });
-		
+		// console.log(updatedTemplates);
 		res.json({
 			success: true,
 			data: updatedTemplates,
