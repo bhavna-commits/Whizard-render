@@ -71,9 +71,48 @@
 						Reports</a>
 				</li>
 			</ul>
-			<div class="user-profile">
+			
+			<div class="user-profile " onclick="toggleDropdown()">
 				<img src="https://via.placeholder.com/50" alt="User Profile" />
+				<div id="dropdownMenu" class="dropdown-menu hidden">
+					<a href="/settings/profile">Profile</a>
+					<button onclick="logout()">Logout</button>
+				</div>
 			</div>
+			
+			
+			<script>
+				function toggleDropdown () {
+					const dropdown = document.getElementById("dropdownMenu");
+					dropdown.classList.toggle("hidden");
+				}
+				
+				async function logout () {
+					try {
+						const response = await fetch('/api/users/logout', {
+							method: 'POST',
+							credentials: 'same-origin'
+						});
+						
+						if (response.ok) {
+							window.location.href = '/login';
+						} else {
+							alert('Error logging out.');
+						}
+					} catch (err) {
+						console.error('Error:', err);
+						alert('Error logging out.');
+					}
+				}
+				
+				// Close the dropdown if clicked outside
+				window.onclick = function (event) {
+					const dropdown = document.getElementById("dropdownMenu");
+					if (!event.target.closest('.user-profile')) {
+						dropdown.classList.add("hidden");
+					}
+				};
+			</script>
 		</nav>
 		<!-- END SIDEBAR MENU TOP TRAY CONTENT-->
 		
@@ -117,11 +156,11 @@
 							<div class="w-20 h-20 rounded-full bg-blue-600 text-white flex items-center justify-center text-xl font-semibold mr-3 relative overflow-hidden">
 								<% if (user.profilePhoto) { %>
 								
-									<img id="profilePreview" src="/<%= user.profilePhoto %>" class="w-full h-full object-cover block" />
+								<img id="profilePreview" src="/<%= user.profilePhoto %>" class="w-full h-full object-cover block" />
 								<% } else { %>
-							
-									<img id="dpPreview" src="" class="w-full h-full absolute object-cover hidden" />
-									<span id="userInitial" class="block"><%= user.name.charAt(0) %></span>
+								
+								<img id="dpPreview" src="" class="w-full h-full absolute object-cover hidden" />
+								<span id="userInitial" class="block"><%= user.name.charAt(0) %></span>
 								<% } %>
 							</div>
 							
@@ -178,7 +217,7 @@
 						</div>
 					</div>
 					<div id="message" class="mt-4"></div>
-				</form>				
+				</form>
 			</div>
 		</div>
 	</div>

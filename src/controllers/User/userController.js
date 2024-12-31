@@ -310,7 +310,7 @@ export const about = async (req, res) => {
 		const newUser = new User({
 			name,
 			email,
-			password: hashedPassword, 
+			password: hashedPassword,
 			phone: {
 				countryCode,
 				number: phoneNumber,
@@ -323,7 +323,7 @@ export const about = async (req, res) => {
 			industry,
 			jobRole,
 			website,
-			unique_id, 
+			unique_id,
 			userAdmin,
 		});
 
@@ -356,4 +356,17 @@ export const about = async (req, res) => {
 			error: error.message,
 		});
 	}
+};
+
+export const logout = async (req, res) => {
+	req.session.destroy((err) => {
+		if (err) {
+			return res
+				.status(500)
+				.json({ success: false, message: "Failed to log out." });
+		}
+
+		res.clearCookie("connect.sid", { path: "/" });
+		return res.status(200).json({ success: true });
+	});
 };

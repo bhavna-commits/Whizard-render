@@ -35,6 +35,46 @@ body {
 	outline: none !important;
 }
 
+.user-profile {
+	cursor: pointer;
+	position: relative;
+}
+
+.dropdown-menu {
+	position: absolute;
+	top: -100%;
+	left: 100%;
+	background-color: white;
+	border: 1px solid #ccc;
+	padding: 10px;
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+	z-index: 100;
+}
+
+.hidden {
+	display: none;
+}
+
+.dropdown-menu a,
+.dropdown-menu button {
+	padding: 8px 12px;
+	text-decoration: none;
+	color: black;
+	background: #f0f0f0;
+	border: none;
+	cursor: pointer;
+	text-align: center;
+	border-radius: 0.5rem;
+}
+
+.dropdown-menu a:hover,
+.dropdown-menu button:hover {
+	background: #e0e0e0;
+}
+
 :focus {
 	outline: none;
 }
@@ -124,8 +164,8 @@ body {
 
 .form-control {
 	border-radius: 6px;
-	box-shadow: 0px 1px 2px 0px #1018280d;
-	border: 1px solid #b8b8b8;
+	box-shadow: 0px 3px 5px 0px #1018280d;
+	border: 1px solid #404040;
 }
 
 .btn-primary {

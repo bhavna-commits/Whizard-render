@@ -40,45 +40,49 @@ export const profile = async (req, res) => {
 
 export const updateProfile = async (req, res) => {
 	const data = req.body;
-	// console.log(data);
+
+	// Construct the profile picture path
 	const profilePicPath = path.join(
 		"uploads",
 		req.session.user.id,
 		"profile",
 		req.file.filename,
 	);
-	User.findByIdAndUpdate(
-		req.session.user.id,
-		{
-			profilePhoto: profilePicPath,
-			name: data.name,
-			language: data.language,
-		},
-		{ new: true },
-	)
-		.then(() =>
-			ActivityLogs.create({
-				name: req.session.user.name
-					? req.session.user.name
-					: req.session.addedUser.name,
-				actions: "Update",
-				details: `Updated its profile`,
-			}),
-		)
-		.then(() =>
-			res
-				.status(200)
-				.json({
-					success: true,
-					message: "Profile picture uploaded successfully",
-				})
-				.catch((err) =>
-					res.status(500).json({
-						success: false,
-						message: "Database error: " + err.message,
-					}),
-				),
+
+	try {
+		const updatedUser = await User.findOneAndUpdate(
+			{ unique_id: req.session.user.id },
+			{
+				profilePhoto: profilePicPath,
+				name: data.name,
+				language: data.language,
+			},
+			{ new: true },
 		);
+
+		req.session.user.photo = profilePicPath;
+
+		await ActivityLogs.create({
+			name: req.session.user.name
+				? req.session.user.name
+				: req.session.addedUser.name,
+			actions: "Update",
+			details: `Updated its profile`,
+		});
+
+		updatedUser.save();
+		// Send success response
+		res.status(200).json({
+			success: true,
+			message: "Profile picture uploaded successfully",
+		});
+	} catch (err) {
+		// Handle errors and send error response
+		res.status(500).json({
+			success: false,
+			message: "Database error: " + err.message,
+		});
+	}
 };
 
 export const updatePassword = async (req, res) => {
@@ -301,7 +305,7 @@ export const getUserManagement = async (req, res) => {
 
 		// console.log("User Information:", user);
 		const language = "English";
-		res.render("Settings/userMangement", );
+		res.render("Settings/userMangement");
 	} catch (error) {
 		console.error(error);
 		res.status(500).json({
