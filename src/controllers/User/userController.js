@@ -13,9 +13,8 @@ export const generateOTP = async (req, res) => {
 
 	try {
 		const user = await User.findOne({ email });
-		const mobileExists = await User.findOne({ phoneNumber });
-
-		// console.log("first");
+		const phone = `${countryCode}${phoneNumber}`;
+		const mobileExists = await User.findOne({ phone });
 
 		if (user) {
 			return res
@@ -136,7 +135,7 @@ export const login = async (req, res) => {
 				if (rememberMe) {
 					req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000; // 30 days
 				} else {
-					req.session.cookie.maxAge = 60 * 60 * 1000; // 1 hour
+					req.session.cookie.maxAge = 3 * 60 * 60 * 1000; // 3 hour
 				}
 				res.status(200).json({
 					message: "Login successful",
@@ -152,7 +151,7 @@ export const login = async (req, res) => {
 		}
 
 		req.session.user = {
-			id: user._id,
+			id: user.unique_id,
 			name: user.name,
 			WhatsAppConnectStatus: user.WhatsAppConnectStatus,
 		};
@@ -160,7 +159,7 @@ export const login = async (req, res) => {
 		if (rememberMe) {
 			req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000; // 30 days
 		} else {
-			req.session.cookie.maxAge = 60 * 60 * 1000; // 1 hour
+			req.session.cookie.maxAge = 3 * 60 * 60 * 1000; // 3 hour
 		}
 
 		res.status(200).json({
@@ -200,7 +199,6 @@ export const resetPassword = async (req, res) => {
 	const { email } = req.body;
 
 	try {
-		// Find the user by email
 		const user = await User.findOne({ email });
 		// console.log(user);
 		if (!user) {
@@ -209,13 +207,22 @@ export const resetPassword = async (req, res) => {
 		}
 
 		// Generate a random OTP
+		console.log("here 1");
 		const otp = Math.floor(100000 + Math.random() * 900000).toString();
+		req.session.tempUser = {
+			email,
+			otp,
+		};
 
-		// Send the OTP via email (assuming sendEmailVerification is a working function)
+		console.log("here 2");
+		if (!req.session.tempUser) {
+			res.status(500).json({
+				message: "tempUser doesn't exist",
+			});
+		}
+
+		console.log("here 3");
 		await sendEmailVerification(email, otp);
-		req.session.tempUser.email = email;
-		req.session.tempUser.otp = otp;
-
 		// Send a success response to the frontend
 		res.status(200).json({ message: "OTP sent successfully" });
 	} catch (error) {
@@ -243,7 +250,7 @@ export const changePassword = async (req, res) => {
 		if (!user) {
 			return res.status(404).json({ message: "User not found" });
 		}
-
+		// console.log(generateUniqueId());
 		// Hash the new password
 		const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -298,24 +305,15 @@ export const about = async (req, res) => {
 		// Encrypt the password using bcrypt
 		const saltRounds = 10;
 		const hashedPassword = await bcrypt.hash(password, saltRounds);
-
-		// Generate unique alphanumeric key for unique_id
+		const phone = `${countryCode}${phoneNumber}`;
 		const unique_id = generateUniqueId();
 
-		// Find the latest userAdmin number and increment by 1
-		const lastUser = await User.findOne().sort({ useradmin: -1 });
-		const userAdmin = lastUser ? lastUser.useradmin + 1 : 1;
-
-		// Create the new user with hashed password
 		const newUser = new User({
 			name,
 			email,
 			password: hashedPassword,
-			phone: {
-				countryCode,
-				number: phoneNumber,
-			},
-			companyname: companyName,
+			phone,
+			companyName: companyName,
 			companyDescription: description,
 			country,
 			state,
@@ -324,7 +322,6 @@ export const about = async (req, res) => {
 			jobRole,
 			website,
 			unique_id,
-			userAdmin,
 		});
 
 		// Save the new user to the database
@@ -345,7 +342,6 @@ export const about = async (req, res) => {
 				companyName: newUser.companyName,
 				industry: newUser.industry,
 				unique_id: newUser.unique_id, // Return unique_id for reference
-				userAdmin: newUser.userAdmin, // Return userAdmin for reference
 			},
 		});
 	} catch (error) {

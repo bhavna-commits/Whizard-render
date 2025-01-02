@@ -229,13 +229,18 @@ document.getElementById("mediaType").addEventListener("change", (e) => {
 	}
 });
 
-// Footer Input Preview
 document.getElementById("footerInput").addEventListener("input", function () {
-	document.getElementById("previewFooter").textContent = this.value;
-	document.getElementById("previewFoot").textContent = this.value;
+	const footerInput = this.value;
+
+	document.getElementById("previewFooter").innerHTML = footerInput.replace(
+		/\n/g,
+		"<br>",
+	); 
+	document.getElementById("previewFoot").textContent = footerInput;
 	document.getElementById("previewFoot").classList.add("text-left");
+
 	document.querySelector(".footer-count").textContent =
-		this.value.length + "/64";
+		footerInput.length + "/64";
 });
 
 document
@@ -248,9 +253,8 @@ document
 			const selection = window.getSelection();
 			const range = selection.getRangeAt(0);
 			const newLine = document.createElement("div");
-			newLine.classList.add("text-base");
+			newLine.classList.add("text-lg");
 			newLine.innerHTML = "<br>";
-			// Insert the new line at the cursor position
 			range.deleteContents();
 			range.insertNode(newLine);
 
@@ -536,5 +540,3 @@ function getDragAfterElement(y) {
 		},
 	).element;
 }
-
-

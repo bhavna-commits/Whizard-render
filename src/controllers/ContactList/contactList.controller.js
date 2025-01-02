@@ -283,15 +283,34 @@ export const deleteList = async (req, res) => {
 
 export const sampleCSV = async (req, res) => {
 	try {
-		const filePath = path.join(
+		const userId = req.session.user.id;
+		const userDir = path.join(
 			__dirname,
 			"..",
 			"..",
 			"..",
 			"public",
-			"sample.csv",
+			userId,
 		);
+		const userCSVPath = path.join(userDir, "sample.csv");
 
+		// Check if the user's specific CSV file exists
+		let filePath;
+		if (fs.existsSync(userCSVPath)) {
+			filePath = userCSVPath;
+		} else {
+			// Fallback to the default sample.csv if user-specific file doesn't exist
+			filePath = path.join(
+				__dirname,
+				"..",
+				"..",
+				"..",
+				"public",
+				"sample.csv",
+			);
+		}
+
+		// Set response headers for CSV download
 		res.setHeader("Content-Type", "text/csv");
 		res.setHeader(
 			"Content-Disposition",
@@ -301,15 +320,17 @@ export const sampleCSV = async (req, res) => {
 		res.setHeader("Pragma", "no-cache");
 		res.setHeader("Expires", "0");
 
+		// Send the file for download
 		res.download(filePath, "sample.csv", (err) => {
 			if (err) {
 				console.error(err);
 				res.status(500).send({
-					message: err,
+					message: err.message,
 				});
 			}
 		});
 	} catch (error) {
+		console.error(error);
 		res.status(500).send({
 			message: "Unexpected error occurred.",
 		});
@@ -372,11 +393,37 @@ export const createCustomField = async (req, res) => {
 		const userId = req.session.user.id;
 		const { fieldName, fieldType } = req.body;
 
+		const userDir = path.join(
+			__dirname,
+			"..",
+			"..",
+			"..",
+			"public",
+			userId,
+		);
+		const csvFilePath = path.join(userDir, "sample.csv");
+
+		// Ensure the user's folder exists
+		if (!fs.existsSync(userDir)) {
+			fs.mkdirSync(userDir, { recursive: true });
+			// Copy the default sample.csv into the user's folder
+			const defaultCSV = path.join(
+				__dirname,
+				"..",
+				"..",
+				"..",
+				"public",
+				"sample.csv",
+			);
+			fs.copyFileSync(defaultCSV, csvFilePath);
+		}
+
+		// Check if we're adding a custom field of type "input"
 		if (fieldType === "input") {
+			// Read the user's CSV file
 			let csvData = [];
 			let headers = [];
 
-			// Reading the CSV file
 			const fileContent = fs.readFileSync(csvFilePath, "utf8");
 
 			const rows = fileContent
@@ -386,9 +433,12 @@ export const createCustomField = async (req, res) => {
 
 			headers = rows[0].split(",");
 
+			// Check if the custom field already exists
 			if (!headers.includes(fieldName)) {
+				// Add new field
 				headers.push(fieldName);
 
+				// Update the CSV content and save it to the user's file
 				const updatedCsv = [headers.join(",")]
 					.concat(rows.slice(1))
 					.join("\n");
@@ -397,6 +447,7 @@ export const createCustomField = async (req, res) => {
 			}
 		}
 
+		// Save the new field to the database
 		const unique_id = generateUniqueId();
 		const newField = new CustomField({
 			customid: userId,

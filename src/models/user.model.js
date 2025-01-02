@@ -6,10 +6,7 @@ const userSchema = new mongoose.Schema(
 		name: { type: String, required: true },
 		email: { type: String, required: true, unique: true },
 		password: { type: String, required: true },
-		phone: {
-			countryCode: { type: String, required: true },
-			number: { type: String, required: true },
-		},
+		phone: { type: String, required: true },
 		addedUsers: [
 			{ type: mongoose.Schema.Types.ObjectId, ref: "AddedUser" },
 		],
@@ -32,14 +29,16 @@ const userSchema = new mongoose.Schema(
 			type: String,
 			required: true,
 		},
-		useradmin: {
+		createdAt: {
 			type: Number,
-			required: true,
+			default: () => Date.now(),
+		},
+		updatedAt: {
+			type: Number,
+			default: () => Date.now(),
 		},
 	},
-
-	{ timestamps: true },
-	{ strict: false },
+	{ timestamps: false, strict: false },
 );
 
 const User = mongoose.model("User", userSchema);

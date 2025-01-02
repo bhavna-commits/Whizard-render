@@ -109,7 +109,7 @@
 			<div class="flex justify-between items-center">
 				<h1 class="dash-text">Dashboard</h1>
 				<span class="p-text text-lg">WhatsApp API status:
-					<span class="<%= status === 'pending' ? 'text-red-500' : 'text-green-500' %> uppercase text-lg">
+					<span class="<%= status === 'Pending' ? 'text-red-500' : 'text-green-500' %> text-lg">
 						<%= status %>
 					</span>
 				</span>
@@ -287,7 +287,7 @@
 	<script src="assets/plugins/pace/pace.min.js" type="text/javascript"></script>
 	<script src="https://kit.fontawesome.com/44e4e59292.js" crossorigin="anonymous"></script>
 	<script src="/Dashboard/js/filter-sidebar.js"></script>
-	<script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js"></script>
+	<!-- <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js"></script> -->
 	
 	<script>
 		// SDK initialization
@@ -304,6 +304,15 @@
 			});
 		};
 		
+		(function (d, s, id) {
+			var js, fjs = d.getElementsByTagName(s)[0];
+			if (d.getElementById(id)) return;
+			js = d.createElement(s);
+			js.id = id;
+			js.src = "https://connect.facebook.net/en_US/sdk.js";
+			fjs.parentNode.insertBefore(js, fjs);
+		}(document, 'script', 'facebook-jssdk'));
+		
 		// Session logging message event listener
 		window.addEventListener('message', (event) => {
 			if (event.origin !== "https://www.facebook.com" && event.origin !== "https://web.facebook.com") return;
@@ -313,7 +322,7 @@
 					console.log('message event: ', data);
 				}
 			} catch {
-				console.log('message event: ', event.data)
+				console.log('message event catch: ', event.data)
 			}
 		});
 		

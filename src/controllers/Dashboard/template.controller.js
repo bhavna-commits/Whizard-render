@@ -29,7 +29,7 @@ export const createTemplate = async (req, res) => {
 		);
 		// console.log("yah a gya");
 
-		// await submitTemplateToFacebook(savedTemplate);
+		await submitTemplateToFacebook(savedTemplate);
 
 		await ActivityLogs.create({
 			name: req.session.user?.name

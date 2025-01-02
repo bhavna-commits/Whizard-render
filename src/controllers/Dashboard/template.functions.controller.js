@@ -2,9 +2,10 @@ import https from "https";
 import dotenv from "dotenv";
 import path from "path";
 import fs from "fs";
+import axios from "axios";
 import Template from "../../models/templates.model.js";
 import { generateUniqueId } from "../../utils/otpGenerator.js";
-const { WABA_ID, FB_ACCESS_TOKEN } = process.env;
+const { FB_GRAPH_VERSION, WABA_ID, FB_ACCESS_TOKEN } = process.env;
 
 dotenv.config();
 
@@ -95,76 +96,53 @@ export const saveTemplateToDatabase = async (
 	return savedTemplate;
 };
 
-export function submitTemplateToFacebook(savedTemplate) {
-	return new Promise((resolve, reject) => {
-		const options = {
-			hostname: "graph.facebook.com",
-			path: `/v17.0/${WABA_ID}/message_templates`,
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-				Authorization: `Bearer ${FB_ACCESS_TOKEN}`, // Facebook Access Token
+export async function submitTemplateToFacebook(savedTemplate) {
+	try {
+		const response = await axios.post(
+			`https://graph.facebook.com/${FB_GRAPH_VERSION}/${WABA_ID}/message_templates`,
+			{
+				name: savedTemplate.name,
+				language: savedTemplate.language,
+				category: savedTemplate.category,
+				components: savedTemplate.components,
 			},
-		};
+			{
+				headers: {
+					"Content-Type": "application/json",
+					Authorization: `Bearer ${FB_ACCESS_TOKEN}`,
+				},
+			},
+		);
 
-		const req = https.request(options, (res) => {
-			let data = "";
-
-			// Accumulate the data as it's received
-			res.on("data", (chunk) => {
-				data += chunk;
-			});
-
-			// Handle the response when it's complete
-			res.on("end", () => {
-				try {
-					const jsonResponse = JSON.parse(data);
-					if (res.statusCode === 200) {
-						resolve(jsonResponse);
-					} else {
-						reject(
-							new Error(
-								jsonResponse.error?.message || "Unknown error",
-							),
-						);
-					}
-				} catch (error) {
-					reject(new Error("Failed to parse response from Facebook"));
-				}
-			});
-		});
-
-		req.on("error", (error) => {
-			reject(new Error("Error with the request: " + error.message));
-		});
-		// console.log(req);
-		// Prepare the data to send in the body
-		const body = JSON.stringify({
-			name: savedTemplate.name,
-			language: savedTemplate.language,
-			category: savedTemplate.category,
-			components: savedTemplate.components,
-		});
-
-		// Write the data to the request body
-		req.write(body);
-
-		// End the request
-		req.end();
-	});
+		// If the response is successful (status code 200)
+		return response.data;
+	} catch (error) {
+		// Handle any error
+		if (error.response) {
+			// Server responded with a status code outside the 2xx range
+			throw new Error(
+				error.response.data.error?.message ||
+					"Unknown error from Facebook",
+			);
+		} else if (error.request) {
+			// Request was made but no response was received
+			throw new Error("No response received from Facebook");
+		} else {
+			// Something else went wrong
+			throw new Error("Error with the request: " + error.message);
+		}
+	}
 }
 
 export const fetchFacebookTemplates = async () => {
 	try {
-		const wabaId = process.env.WABA_ID;
-		const accessToken = process.env.FB_ACCESS_TOKEN;
-		const url = `https://graph.facebook.com/v17.0/${wabaId}/message_templates`;
+		const url = `https://graph.facebook.com/${FB_GRAPH_VERSION}/${WABA_ID}/message_templates`;
 
 		// Using native fetch API
 		const response = await fetch(url, {
 			method: "GET",
 			headers: {
-				Authorization: `Bearer ${accessToken}`,
+				Authorization: `Bearer ${FB_ACCESS_TOKEN}`,
 			},
 		});
 
