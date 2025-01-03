@@ -23,7 +23,7 @@
 						<div class="card bg-gray-100 relative">
 							<!-- Preview Header -->
 							<div class="py-1 px-2 z-50 relative" id="previewContainer">
-								<div class="py-2 font-bold" id="previewHead"></div>
+								<div class="py-2 font-bold relative" id="previewHead"></div>
 								<div class="text-base leading-5 py-2" id="previewBod"></div>
 								<div class="text-sm text-gray-500 " id="previewFoot"></div>
 								<div class="bg-transparent py-2" id="previewButton"></div>
@@ -44,48 +44,3 @@
 
 
 <% } %>
-
-<!-- JavaScript for Updating Preview -->
-<!--    
-	const templateData = <%- JSON.stringify(templateData) %>;
-	
-	function updatePreview () {
-		const formData = {};
-		
-		// Loop through each input element and update formData based on entered value
-		document.querySelectorAll('.input-variable').forEach(inputElement => {
-			const variable = inputElement.getAttribute('data-variable');
-			const index = inputElement.getAttribute('data-index'); // Get the index of the variable
-			const enteredValue = inputElement.value || ''; // Get entered value
-			formData[index] = enteredValue; // Store in formData by index
-		});
-		
-		// Now update the preview based on formData
-		updatePreviewContent(formData);
-	}
-	
-	function updatePreviewContent (formData) {
-		const previewHeader = document.getElementById("previewHeader");
-		const previewBody = document.getElementById("previewBody");
-		const previewFooter = document.getElementById("previewFooter");
-		
-		// Replace placeholders {0}, {1}, etc., with values from formData
-		if (previewHeader) {
-			previewHeader.innerHTML = previewHeader.innerHTML.replace(/\{(\d+)\}/g, (match, index) => {
-				return formData[index] || match; // Replace with selected value or keep the placeholder
-			});
-		}
-		
-		if (previewBody) {
-			previewBody.innerHTML = previewBody.innerHTML.replace(/\{(\d+)\}/g, (match, index) => {
-				return formData[index] || match;
-			});
-		}
-		
-		if (previewFooter) {
-			previewFooter.innerHTML = previewFooter.innerHTML.replace(/\{(\d+)\}/g, (match, index) => {
-				return formData[index] || match;
-			});
-		}
-	}
-</script> -->

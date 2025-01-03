@@ -4,7 +4,6 @@ const showModalBtn = document.getElementById("create-List");
 const createcloseBtn = modal.querySelector(".close");
 const contactListForm = document.getElementById("contactListForm");
 const downloadBtn = document.getElementById("downloadTemplate");
-const fileInput = document.getElementById("contactFile");
 const previewSection = document.getElementById("previewSection");
 const fileUploadSection = document.getElementById("fileUploadSection");
 const errorMessage = document.getElementById("errorMessage");
@@ -51,13 +50,17 @@ modal.addEventListener("click", function (event) {
 	}
 });
 
-// Handle file selection
+let file = null;
+
+const fileInput = document.getElementById("contactFile");
+const fileLabel = document.getElementById("fileLabel");
+
 fileInput.addEventListener("change", function (e) {
-	const fileName = e.target.files[0]?.name;
-	if (fileName) {
-		const fileLabel = this.parentElement;
-		fileLabel.innerHTML = `<input type="file" id="contactFile" accept=".csv,.xls,.xlsx" class="hidden"> <i class="fa-solid fa-upload pr-2"></i> ${fileName}`;
-	}
+	const fileName = e.target.files[0]?.name || "Choose File";
+	fileLabel.textContent = fileName;
+	file = e.target.files[0];
+	previewButton.classList.remove("hidden");
+	submitButton.classList.add("hidden");
 });
 
 // Form submission and file validation
@@ -67,7 +70,6 @@ contactListForm.addEventListener("submit", async function (e) {
 	previewSection.classList.add("hidden");
 	fileUploadSection.classList.remove("hidden");
 
-	const file = fileInput?.files[0];
 	if (!file) {
 		alert("Please upload a file.");
 		return;
@@ -113,7 +115,7 @@ contactListForm.addEventListener("submit", async function (e) {
 		}
 
 		const listName = document.getElementById("listName").value;
-		const countryCode = document.getElementById("countryCode").value;
+		
 
 		try {
 			const response = await fetch(
@@ -126,11 +128,11 @@ contactListForm.addEventListener("submit", async function (e) {
 					body: JSON.stringify({
 						fileData: JSON.stringify(parsedData),
 						listName,
-						countryCode,
 					}),
 				},
 			);
-
+			
+			errorMessage.innerHTML = "";
 			const data = await response.json();
 
 			if (data.success) {
@@ -163,6 +165,7 @@ contactListForm.addEventListener("submit", async function (e) {
 
 submitButton.addEventListener("click", async () => {
 	try {
+		errorMessage.innerHTML = "";
 		const response = await fetch("/api/contact-list/create-list", {
 			method: "POST",
 			headers: {
@@ -170,7 +173,6 @@ submitButton.addEventListener("click", async () => {
 			},
 			body: JSON.stringify({
 				listName: document.getElementById("listName").value,
-				countryCode: document.getElementById("countryCode").value,
 			}),
 		});
 

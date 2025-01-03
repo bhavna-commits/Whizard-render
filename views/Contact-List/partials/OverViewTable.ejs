@@ -1,28 +1,29 @@
  <div class="py-5">
  	<% if (contacts && contacts.length > 0) { %>
  	<div class="table-responsive ">
- 		<table class="text-center min-w-full bg-white overflow-x-scroll border-separate border-spacing-y-4">
- 			
+ 		<table class="text-center min-w-full bg-white border-separate border-spacing-y-4">
  			<tbody>
-				<tr class="text-gray-500">
-					<td class="px-5">Sno.</td>
-					<td class="px-5">Name</td>
-					<td class="px-5">Number</td>
-					<td class="px-5">Created at</td>
-					<% if (contacts[0].masterExtra) { %>
-					<% Object.keys(contacts[0].masterExtra).forEach(function(key) { %>
-					<td class="px-5 text-gray-500"><%= key %></td>
-					<% }); %>
-					<% } %>
-					<td class="px-5">Actions</td>
-				</tr>
-
+ 				<!-- Table Header -->
+ 				<tr class="text-gray-500">
+ 					<td class="px-5">Sno.</td>
+ 					<td class="px-5">Name</td>
+ 					<td class="px-5">Number</td>
+ 					<td class="px-5">Created at</td>
+ 					<% if (contacts[0]?.masterExtra) { %>
+ 					<% Object.keys(contacts[0].masterExtra).forEach(function(key) { %>
+ 					<td class="px-5 text-gray-500"><%= key %></td>
+ 					<% }); %>
+ 					<% } %>
+ 					<td class="sticky right-0 bg-white px-5">Actions</td>
+ 				</tr>
+ 				
+ 				<!-- Table Rows -->
  				<% contacts.forEach((contact, index) => { %>
  				<tr class="hover:bg-green-100 cursor-pointer border">
- 					<td class="border-l border-t border-b rounded-lg py-4 border-gray-200 text-sm text-gray-500">
+ 					<td class=" border-l border-t border-b rounded-l-lg py-4 border-gray-200 text-sm text-gray-500">
  						<%= index + 1 %>
  					</td>
- 					<td class="border-t border-b border-gray-200 ">
+ 					<td class="border-t border-b border-gray-200">
  						<p class="text-gray-700 pt-3 font-semibold"><%= contact?.Name %></p>
  					</td>
  					<td class="text-gray-500 border-t border-b border-gray-200">
@@ -30,25 +31,23 @@
  					</td>
  					<td class="text-gray-500 border-t border-b border-gray-200">
  						<%= new Date(contact.subscribe_date).toLocaleString('en-GB', {
-							year: 'numeric',
-							month: 'short',
-							day: '2-digit'
-						}) %>
+              year: 'numeric',
+              month: 'short',
+              day: '2-digit'
+            }) %>
  					</td>
  					<% if (contact.masterExtra) { %>
- 					<% Object.keys(contact.masterExtra).forEach(function(key) { %>
+ 					<% Object.entries(contact.masterExtra).forEach(function([key, value]) { %>
  					<td class="text-gray-500 border-t border-b border-gray-200">
- 						<%= contact.masterExtra[key] %>
+ 						<%= value %>
  					</td>
  					<% }); %>
  					<% } %>
- 					<td class="border-r border-t border-b rounded-lg border-gray-200">
- 						<!-- Edit Button -->
- 						<button aria-label="Edit contact" class="text-gray-600 hover:text-blue-600 px-3 border-r" onclick="event.stopPropagation(); openEditModal('<%= JSON.stringify(contact) %>');">
+ 					<td class="sticky right-0 bg-white border-r border-t border-b rounded-r-lg border-gray-200">
+ 						<button onclick="handleEdit('<%= JSON.stringify(contact) %>')" aria-label="Edit contact" class="text-gray-600 hover:text-blue-600 px-3 border-r">
  							<i class="fas fa-edit"></i>
  						</button>
- 						<!-- Delete Button -->
- 						<button aria-label="Delete contact" class="text-gray-600 hover:text-red-600 px-2" onclick="event.stopPropagation(); openDeleteModal('<%= contact._id %>', '<%= contact.ContactListName %>');">
+ 						<button onclick="handleDelete('<%= contact._id %>', '<%= contact.ContactListName %>')" aria-label="Delete contact" class="text-gray-600 hover:text-red-600 px-2">
  							<i class="fa-regular fa-trash-can"></i>
  						</button>
  					</td>
@@ -56,81 +55,81 @@
  				<% }); %>
  			</tbody>
  		</table>
-
- 		</div>
- 		<!-- Pagination -->
- 		<div class="flex items-center justify-center py-4 space-x-4">
- 			<nav class="flex items-center">
- 				<ul class="flex space-x-1">
- 					<!-- Previous Button -->
- 					<li>
- 						<a href="/contact-list/overview/<%= id %>?page=<%= page > 1 ? page - 1 : 1 %>" class="px-3 py-2 rounded-md text-sm font-medium text-gray-500 bg-white border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed" <%= page === 1 ? 'aria-disabled="true"' : '' %>>‹</a>
- 					</li>
- 					
- 					<!-- First Page Button -->
- 					<li>
- 						<a href="/contact-list/overview/<%= id %>?page=1" class="px-3 py-2 rounded-md text-sm font-medium <%= page === 1 ? 'text-white bg-blue-600 border-blue-600' : 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50' %>">1</a>
- 					</li>
- 					
- 					<% if (page > 3) { %>
- 					<!-- Show "..." if current page is greater than 3 -->
- 					<li><span class="px-3 py-2 text-sm text-gray-500">...</span></li>
- 					<% } %>
- 					
- 					<!-- Dynamic Page Numbers based on current page -->
- 					<% for (let i = Math.max(2, page - 1); i <= Math.min(totalPages - 1, page + 1); i++) { %>
- 					<li>
- 						<a href="/contact-list/overview/<%= id %>?page=<%= i %>" class="px-3 py-2 rounded-md text-sm font-medium <%= i === page ? 'text-white bg-blue-600 border-blue-600' : 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50' %>"><%= i %></a>
- 					</li>
- 					<% } %>
- 					
- 					<% if (page < totalPages - 2) { %>
- 					<!-- Show "..." if there are more pages -->
- 					<li><span class="px-3 py-2 text-sm text-gray-500">...</span></li>
- 					<% } %>
- 					
- 					<!-- Last Page Button -->
- 					<% if (totalPages > 1) { %>
- 					<li>
- 						<a href="/contact-list/overview/<%= id %>?page=<%= totalPages %>" class="px-3 py-2 rounded-md text-sm font-medium <%= page === totalPages ? 'text-white bg-blue-600 border-blue-600' : 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50' %>"><%= totalPages %></a>
- 					</li>
- 					<% } %>
- 					
- 					<!-- Next Button -->
- 					<li>
- 						<a href="/contact-list/overview/<%= id %>?page=<%= page < totalPages ? page + 1 : totalPages %>" class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50">›</a>
- 					</li>
- 				</ul>
- 			</nav>
- 			
- 			<!-- "Go to page" input -->
- 			<div class="flex items-center space-x-2">
- 				<span class="text-sm text-gray-700">Go to page</span>
- 				<input type="number" min="1" max="<%= totalPages %>" class="w-16 px-2 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" value="<%= page %>" id="pageInput" />
- 				<button type="button" class="px-3 py-1 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" onclick="goToPage()">Go</button>
- 			</div>
- 		</div>
  		
- 		<script>
- 			function goToPage () {
- 				const pageInput = document.getElementById('pageInput');
- 				const page = parseInt(pageInput.value);
- 				const totalPages = <%= totalPages %>;
+ 	</div>
+ 	<!-- Pagination -->
+ 	<div class="flex items-center justify-center py-4 space-x-4">
+ 		<nav class="flex items-center">
+ 			<ul class="flex space-x-1">
+ 				<!-- Previous Button -->
+ 				<li>
+ 					<a href="/contact-list/overview/<%= id %>?page=<%= page > 1 ? page - 1 : 1 %>" class="px-3 py-2 rounded-md text-sm font-medium text-gray-500 bg-white border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed" <%= page === 1 ? 'aria-disabled="true"' : '' %>>‹</a>
+ 				</li>
  				
- 				if (page > totalPages) {
- 					alert("Page doesn't exist. Try a lower number.");
- 					pageInput.value = <%= page %>; // Reset input to the current page
- 				} else if (page < 1) {
- 					alert("Page number should be at least 1.");
- 					pageInput.value = <%= page %>;
- 				} else {
- 					window.location.href = `/contact-list?page=${page}`;
- 				}
+ 				<!-- First Page Button -->
+ 				<li>
+ 					<a href="/contact-list/overview/<%= id %>?page=1" class="px-3 py-2 rounded-md text-sm font-medium <%= page === 1 ? 'text-white bg-blue-600 border-blue-600' : 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50' %>">1</a>
+ 				</li>
+ 				
+ 				<% if (page > 3) { %>
+ 				<!-- Show "..." if current page is greater than 3 -->
+ 				<li><span class="px-3 py-2 text-sm text-gray-500">...</span></li>
+ 				<% } %>
+ 				
+ 				<!-- Dynamic Page Numbers based on current page -->
+ 				<% for (let i = Math.max(2, page - 1); i <= Math.min(totalPages - 1, page + 1); i++) { %>
+ 				<li>
+ 					<a href="/contact-list/overview/<%= id %>?page=<%= i %>" class="px-3 py-2 rounded-md text-sm font-medium <%= i === page ? 'text-white bg-blue-600 border-blue-600' : 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50' %>"><%= i %></a>
+ 				</li>
+ 				<% } %>
+ 				
+ 				<% if (page < totalPages - 2) { %>
+ 				<!-- Show "..." if there are more pages -->
+ 				<li><span class="px-3 py-2 text-sm text-gray-500">...</span></li>
+ 				<% } %>
+ 				
+ 				<!-- Last Page Button -->
+ 				<% if (totalPages > 1) { %>
+ 				<li>
+ 					<a href="/contact-list/overview/<%= id %>?page=<%= totalPages %>" class="px-3 py-2 rounded-md text-sm font-medium <%= page === totalPages ? 'text-white bg-blue-600 border-blue-600' : 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50' %>"><%= totalPages %></a>
+ 				</li>
+ 				<% } %>
+ 				
+ 				<!-- Next Button -->
+ 				<li>
+ 					<a href="/contact-list/overview/<%= id %>?page=<%= page < totalPages ? page + 1 : totalPages %>" class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50">›</a>
+ 				</li>
+ 			</ul>
+ 		</nav>
+ 		
+ 		<!-- "Go to page" input -->
+ 		<div class="flex items-center space-x-2">
+ 			<span class="text-sm text-gray-700">Go to page</span>
+ 			<input type="number" min="1" max="<%= totalPages %>" class="w-16 px-2 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" value="<%= page %>" id="pageInput" />
+ 			<button type="button" class="px-3 py-1 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" onclick="goToPage()">Go</button>
+ 		</div>
+ 	</div>
+ 	
+ 	<script>
+ 		function goToPage () {
+ 			const pageInput = document.getElementById('pageInput');
+ 			const page = parseInt(pageInput.value);
+ 			const totalPages = <%= totalPages %>;
+ 			
+ 			if (page > totalPages) {
+ 				alert("Page doesn't exist. Try a lower number.");
+ 				pageInput.value = <%= page %>; // Reset input to the current page
+ 			} else if (page < 1) {
+ 				alert("Page number should be at least 1.");
+ 				pageInput.value = <%= page %>;
+ 			} else {
+ 				window.location.href = `/contact-list?page=${page}`;
  			}
- 		</script>
- 		
- 		
- 		
+ 		}
+ 	</script>
+ 	
+ 	
+ 	
  	
  	<% } else { %>
  	<!-- Empty state -->
@@ -148,4 +147,3 @@
  	</div>
  	<% } %>
  </div>
- 

@@ -318,3 +318,48 @@ export const createCampaign = async (req, res) => {
 		res.status(500).json({ message: "Error creating campaign" });
 	}
 };
+
+export const generateTableAndCheckFields = (parsedData, actualColumns) => {
+	const emptyFields = parsedData
+		.map((row, rowIndex) => {
+			return Object.keys(row).map((key) => {
+				if (!row[key] || row[key].trim() === "") {
+					return {
+						row: rowIndex + 1,
+						column: key,
+						value: row[key],
+					};
+				}
+				return null;
+			});
+		})
+		.flat()
+		.filter((item) => item !== null);
+
+	let tableHtml = "<table class='min-w-full table-auto'><thead><tr>";
+
+	tableHtml += "<th class='px-4 py-2 border'>#</th>";
+
+	actualColumns.forEach((header, index) => {
+		tableHtml += `<th class='px-4 py-2 border'>${header} (${
+			index + 1
+		})</th>`;
+	});
+	tableHtml += "</tr></thead><tbody>";
+
+	parsedData.forEach((row, rowIndex) => {
+		tableHtml += "<tr>";
+		tableHtml += `<td class='px-4 py-2 border'>${rowIndex + 1}</td>`;
+		actualColumns.forEach((header) => {
+			tableHtml += `<td class='px-4 py-2 border'>${
+				row[header] || ""
+			}</td>`;
+		});
+		tableHtml += "</tr>";
+	});
+
+	tableHtml += "</tbody></table>";
+
+	return { tableHtml, emptyFields };
+};
+

@@ -16,6 +16,7 @@ import {
 	csvFilePath,
 	updateCSVOnFieldDelete,
 } from "./contacts.controller.js";
+import { generateTableAndCheckFields } from "./contacts.controller.js";
 
 dotenv.config();
 
@@ -56,11 +57,27 @@ export const previewContactList = async (req, res) => {
 		const customFields = await CustomField.find({
 			customid: req.session.user.id,
 		});
+		const contactList = await ContactList.findOne({
+			useradmin: req.session.user.id,
+			contalistName: listName,
+		});
+
+		if (contactList) {
+			return res.status(400).json({
+				success: false,
+				message:
+					"A contact list with this name already exists. Please choose a different name.",
+			});
+		}
+
+		// Prepare expected columns based on required and custom fields
 		const customFieldNames = customFields.map((field) => field.clname);
 		const expectedColumns = [...requiredColumns, ...customFieldNames];
 
+		// Get the actual columns from the file data
 		const actualColumns = Object.keys(parsedData[0]);
 
+		// Check for missing and invalid columns
 		const missingColumns = requiredColumns.filter(
 			(col) => !actualColumns.includes(col),
 		);
@@ -71,55 +88,13 @@ export const previewContactList = async (req, res) => {
 				col !== "Number",
 		);
 
-		const emptyFields = parsedData
-			.map((row, rowIndex) => {
-				return Object.keys(row).map((key) => {
-					if (!row[key] || row[key].trim() === "") {
-						return {
-							row: rowIndex + 1,
-							column: key,
-							value: row[key],
-						};
-					}
-					return null;
-				});
-			})
-			.flat()
-			.filter((item) => item !== null);
+		// Generate table HTML and check for empty fields
+		const { tableHtml, emptyFields } = generateTableAndCheckFields(
+			parsedData,
+			actualColumns,
+		);
 
-		// Generate the HTML table for the preview
-		let tableHtml = "<table class='min-w-full table-auto'><thead><tr>";
-
-		// Add a new header for row numbers (Row Number)
-		tableHtml += "<th class='px-4 py-2 border'>#</th>";
-
-		// Add headers for the actual columns
-		actualColumns.forEach((header, index) => {
-			tableHtml += `<th class='px-4 py-2 border'>${header} (${
-				index + 1
-			})</th>`; // Add index number in header
-		});
-		tableHtml += "</tr></thead><tbody>";
-
-		// Loop through the data and add rows with row numbers
-		parsedData.forEach((row, rowIndex) => {
-			tableHtml += "<tr>";
-
-			// Add a column for row numbers
-			tableHtml += `<td class='px-4 py-2 border'>${rowIndex + 1}</td>`;
-
-			// Add the actual data columns
-			actualColumns.forEach((header) => {
-				tableHtml += `<td class='px-4 py-2 border'>${
-					row[header] || ""
-				}</td>`;
-			});
-			tableHtml += "</tr>";
-		});
-
-		tableHtml += "</tbody></table>";
-
-		// Return validation errors if any
+		// Return error response if there are issues with the columns or empty fields
 		if (
 			missingColumns.length > 0 ||
 			invalidColumns.length > 0 ||
@@ -134,10 +109,14 @@ export const previewContactList = async (req, res) => {
 			});
 		}
 
-		req.session.user.contactListCSV = parsedData;
-		req.session.user.listName = listName;
+		// Store the parsed data in the session for further processing
+		req.session.user = {
+			...req.session.user,
+			contactListCSV: parsedData,
+			listName,
+		};
 
-		// Respond with the preview data
+		// Return success response with the generated table
 		return res.status(200).json({
 			success: true,
 			message: "Data preview successful.",
@@ -169,10 +148,7 @@ export const createList = async (req, res) => {
 		const parsedData = req.session.user.contactListCSV;
 		const listName = req.session.user.listName;
 
-		req.session.user.contactListCSV = null;
-		req.session.user.listName = null;
-
-		const user = await User.findOne({ _id: userId });
+		const user = await User.findOne({ unique_id: userId });
 		if (!user) {
 			return res.status(404).json({
 				success: false,
@@ -180,7 +156,9 @@ export const createList = async (req, res) => {
 			});
 		}
 
-		const number = user.phone.countryCode + user.phone.number;
+		const number = user.phone;
+		req.session.user.name = user.name;
+		console.log(number);
 		const participantCount = parsedData.length;
 
 		// Create a new Contact List
@@ -208,7 +186,6 @@ export const createList = async (req, res) => {
 			})
 			.filter((contact) => contact !== null);
 
-		// Check if there are valid contacts to save
 		if (contactsToSave.length > 0) {
 			await Contacts.insertMany(contactsToSave);
 		} else {
@@ -218,9 +195,8 @@ export const createList = async (req, res) => {
 			});
 		}
 
-		// Extract all the keys (additional attributes) for sending to the frontend
 		const dynamicAttributes = Object.keys(parsedData[0]).filter(
-			(key) => key !== "Name" && key !== "WhatsApp",
+			(key) => key !== "Name" && key !== "Number",
 		);
 
 		await ActivityLogs.create({
@@ -230,6 +206,9 @@ export const createList = async (req, res) => {
 			actions: "Create",
 			details: `Created a contact List named : ${listName}`,
 		});
+
+		req.session.user.contactListCSV = null;
+		req.session.user.listName = null;
 
 		res.json({
 			success: true,
@@ -346,22 +325,18 @@ export const getCustomField = async (req, res) => {
 
 		const result = await CustomField.aggregate([
 			{
-				// Match the documents where customid matches the userId and custom_status is not 0
 				$match: {
 					customid: userId,
-					status: { $ne: 0 }, // Exclude custom fields with custom_status of 0
+					status: { $ne: 0 },
 				},
 			},
 			{
-				// Use $facet to return both paginated results and total count
 				$facet: {
 					paginatedResults: [
-						{ $skip: parseInt(skip) }, // Skip for pagination
-						{ $limit: parseInt(limit) }, // Limit for pagination
+						{ $skip: parseInt(skip) },
+						{ $limit: parseInt(limit) },
 					],
-					totalCount: [
-						{ $count: "total" }, // Count total filtered documents
-					],
+					totalCount: [{ $count: "total" }],
 				},
 			},
 		]);

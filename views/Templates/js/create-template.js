@@ -59,11 +59,10 @@ document
 				img.src = URL.createObjectURL(fileInput);
 				img.style.width = "200px";
 				img.style.height = "100px";
-
+				img.style.objectFit = "contain";
 				// Append to previewHeader
 				previewHeader.appendChild(img);
 
-				// Clone the image and append to previewHead
 				const imgClone = img.cloneNode(true); // Create a deep clone
 				previewHead.appendChild(imgClone);
 			} else if (mediaType === "video" && fileInput) {
@@ -72,7 +71,7 @@ document
 				video.controls = true;
 				video.style.width = "200px";
 				video.style.height = "100px";
-
+				video.style.objectFit = "contain";
 				// Append to previewHeader
 				previewHeader.appendChild(video);
 
@@ -85,7 +84,7 @@ document
 					iframe.src = URL.createObjectURL(fileInput);
 					iframe.style.width = "200px";
 					iframe.style.height = "100px";
-
+					iframe.style.objectFit = "contain";
 					// Append to previewHeader
 					previewHeader.appendChild(iframe);
 
@@ -235,7 +234,7 @@ document.getElementById("footerInput").addEventListener("input", function () {
 	document.getElementById("previewFooter").innerHTML = footerInput.replace(
 		/\n/g,
 		"<br>",
-	); 
+	);
 	document.getElementById("previewFoot").textContent = footerInput;
 	document.getElementById("previewFoot").classList.add("text-left");
 
