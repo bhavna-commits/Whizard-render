@@ -15,120 +15,109 @@ export const saveTemplateToDatabase = async (
 	dynamicVariables,
 	id,
 ) => {
-	const newTemplate = new Template({
-		name: templateData.templateName,
-		category: templateData.category,
-		components: [
-			{
-				type: "BODY",
-				text: templateData.body || "",
-			},
-			{
-				type: "FOOTER",
-				text: templateData.footer || "",
-			},
-			...(templateData.header && templateData.header.type === "text"
-				? [
-						{
-							type: "HEADER",
-							text: templateData.header.content || "",
-							format: templateData.header.type.toUpperCase(),
-						},
-				  ]
-				: templateData.header && templateData.header.type !== "text"
-				? [
-						{
-							type: "HEADER",
-							format: templateData.header.type.toUpperCase(),
-							example: {
-								header_handle: [
-									templateData.header.content || "",
-								],
-							},
-						},
-				  ]
-				: []),
-			...(templateData.buttons && templateData.buttons.length
-				? templateData.buttons.map((button) => ({
-						type: "BUTTON",
-						text: button.text || "",
-						example: {
-							header_handle: [button.urlPhone],
-						},
-				  }))
-				: []),
-		],
-		status: "Pending",
-		unique_id: generateUniqueId(),
-		useradmin: id,
-		dynamicVariables,
-	});
+	try {
+		const components = createComponents(templateData, dynamicVariables);
 
-	if (
-		templateData.header &&
-		templateData.header.type !== "text" &&
-		req.file
-	) {
-		const filePath = path.join(
-			"uploads",
-			req.session.user.id,
-			req.file.filename,
-		);
+		const newTemplate = new Template({
+			name: templateData.templateName,
+			category: templateData.category,
+			components,
+			status: "Pending",
+			unique_id: generateUniqueId(),
+			useradmin: id,
+		});
 
-		if (fs.existsSync(filePath)) {
+		if (req.file) {
+			const filePath = path.join(
+				"uploads",
+				req.session.user.id,
+				req.file.filename,
+			);
 			const headerComponent = newTemplate.components.find(
 				(component) => component.type === "HEADER",
 			);
+
 			if (headerComponent) {
-				headerComponent.example.header_handle = [filePath];
-			}
-		} else {
-			const headerComponent = newTemplate.components.find(
-				(component) => component.type === "HEADER",
-			);
-			if (headerComponent) {
-				headerComponent.example.header_handle = [];
+				// Assuming that the file is an image, video, or document
+				if (headerComponent.format === "IMAGE") {
+					headerComponent.example.header_handle = [filePath];
+				} else if (headerComponent.format === "VIDEO") {
+					headerComponent.example.header_handle = [filePath];
+				} else if (headerComponent.format === "DOCUMENT") {
+					headerComponent.example.header_handle = [filePath];
+				}
 			}
 		}
-	}
 
-	const savedTemplate = await newTemplate.save();
-	return savedTemplate;
+		// Save the template to the database
+		const savedTemplate = await newTemplate.save();
+		return savedTemplate;
+	} catch (error) {
+		console.error("Error saving template to database:", error);
+		throw new Error(`Error saving template to database: ${error.message}`);
+	}
 };
 
 export async function submitTemplateToFacebook(savedTemplate) {
 	try {
+		const plainTemplate = savedTemplate.toObject(); // Convert to plain object
+
+		// Now you can clean up and submit to Facebook
+		plainTemplate.components = plainTemplate.components.map((component) => {
+			const {
+				_id,
+				$__parent,
+				$__,
+				$errors,
+				$isNew,
+				[Symbol("mongoose#documentArrayParent")]: symbol,
+				...cleanComponent
+			} = component;
+			return cleanComponent;
+		});
+
+		// Continue with the request data preparation
+		const requestData = {
+			name: plainTemplate.name,
+			language: plainTemplate.language,
+			category: plainTemplate.category.toUpperCase(),
+			components: plainTemplate.components,
+		};
+		console.log("Submitting template to Facebook: here", requestData);
 		const response = await axios.post(
-			`https://graph.facebook.com/${FB_GRAPH_VERSION}/${WABA_ID}/message_templates`,
-			{
-				name: savedTemplate.name,
-				language: savedTemplate.language,
-				category: savedTemplate.category,
-				components: savedTemplate.components,
-			},
+			`https://graph.facebook.com/${process.env.FB_GRAPH_VERSION}/${process.env.WABA_ID}/message_templates`,
+			requestData,
 			{
 				headers: {
 					"Content-Type": "application/json",
-					Authorization: `Bearer ${FB_ACCESS_TOKEN}`,
+					Authorization: `Bearer ${process.env.FB_ACCESS_TOKEN}`,
 				},
 			},
 		);
 
-		// If the response is successful (status code 200)
+		// If the response is successful, return the response data
 		return response.data;
 	} catch (error) {
-		// Handle any error
+		// Handle different error types
 		if (error.response) {
 			// Server responded with a status code outside the 2xx range
+			console.error(
+				"Facebook API error:",
+				error.response.data.error?.message,
+				"Request data:",
+				error.config.data, // Log the request that was sent
+			);
 			throw new Error(
 				error.response.data.error?.message ||
 					"Unknown error from Facebook",
 			);
 		} else if (error.request) {
-			// Request was made but no response was received
+			// Request was made but no response received
+			console.error("No response received from Facebook:", error.request);
 			throw new Error("No response received from Facebook");
 		} else {
 			// Something else went wrong
+			console.error("Error with the request:", error.message);
 			throw new Error("Error with the request: " + error.message);
 		}
 	}
@@ -164,3 +153,90 @@ export const fetchFacebookTemplates = async () => {
 		throw new Error("Failed to fetch Facebook message templates");
 	}
 };
+
+function createComponents(templateData, dynamicVariables) {
+	const components = [];
+
+	// Add BODY component with dynamic variables
+	if (dynamicVariables.body && dynamicVariables.body.length > 0) {
+		components.push({
+			type: "BODY",
+			text: templateData.body,
+			example: {
+				body_text: [
+					dynamicVariables.body.map((variable) => variable.value),
+				],
+			},
+		});
+	} else if (templateData.body) {
+		components.push({
+			type: "BODY",
+			text: templateData.body,
+		});
+	}
+
+	// Add HEADER component based on type
+	if (templateData.header.type === "text") {
+		if (dynamicVariables.header && dynamicVariables.header.length > 0) {
+			components.push({
+				type: "HEADER",
+				format: "TEXT",
+				text: templateData.header.content,
+				example: {
+					header_text: [
+						dynamicVariables.header.map(
+							(variable) => variable.value,
+						),
+					],
+				},
+			});
+		} else {
+			components.push({
+				type: "HEADER",
+				format: "TEXT",
+				text: templateData.header.content,
+			});
+		}
+	} else if (templateData.header.type === "image") {
+		components.push({
+			type: "HEADER",
+			format: "IMAGE",
+			example: { header_handle: [templateData.header.imageUrl] },
+		});
+	}
+
+	// Add FOOTER component with dynamic variables
+	if (dynamicVariables.footer && dynamicVariables.footer.length > 0) {
+		components.push({
+			type: "FOOTER",
+			text: templateData.footer,
+			example: {
+				footer_text: [
+					dynamicVariables.footer.map((variable) => variable.value),
+				],
+			},
+		});
+	} else if (templateData.footer) {
+		components.push({
+			type: "FOOTER",
+			text: templateData.footer,
+		});
+	}
+
+	// Add BUTTONS component if buttons exist
+	if (templateData.buttons && templateData.buttons.length > 0) {
+		components.push({
+			type: "BUTTONS",
+			buttons: templateData.buttons.map((button) => ({
+				type: button.type,
+				text: button.text,
+				...(button.url ? { url: button.url } : {}),
+				...(button.phone_number
+					? { phone_number: button.phone_number }
+					: {}),
+			})),
+		});
+	}
+
+	return components;
+}

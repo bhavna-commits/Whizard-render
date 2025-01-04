@@ -57,8 +57,8 @@ document
 			if (mediaType === "image" && fileInput) {
 				const img = document.createElement("img");
 				img.src = URL.createObjectURL(fileInput);
-				img.style.width = "200px";
-				img.style.height = "100px";
+				img.style.width = "auto";
+				img.style.height = "auto";
 				img.style.objectFit = "contain";
 				// Append to previewHeader
 				previewHeader.appendChild(img);
@@ -69,8 +69,8 @@ document
 				const video = document.createElement("video");
 				video.src = URL.createObjectURL(fileInput);
 				video.controls = true;
-				video.style.width = "200px";
-				video.style.height = "100px";
+				video.style.width = "auto";
+				video.style.height = "auto";
 				video.style.objectFit = "contain";
 				// Append to previewHeader
 				previewHeader.appendChild(video);
@@ -82,8 +82,8 @@ document
 				if (fileInput.type === "application/pdf") {
 					const iframe = document.createElement("iframe");
 					iframe.src = URL.createObjectURL(fileInput);
-					iframe.style.width = "200px";
-					iframe.style.height = "100px";
+					iframe.style.width = "auto";
+					iframe.style.height = "auto";
 					iframe.style.objectFit = "contain";
 					// Append to previewHeader
 					previewHeader.appendChild(iframe);

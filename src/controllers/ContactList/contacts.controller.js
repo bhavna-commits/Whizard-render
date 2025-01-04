@@ -243,7 +243,7 @@ export const createContact = async (req, res) => {
 	const contactData = req.body;
 
 	const userId = req.session.user.id;
-	const user = await User.findOne({ _id: userId });
+	const user = await User.findOne({ unique_id: userId });
 	if (!user) {
 		return res.status(404).json({
 			success: false,
@@ -292,8 +292,23 @@ export const createContact = async (req, res) => {
 
 export const createCampaign = async (req, res) => {
 	try {
-		const { templateId, contactListId, variables, schedule } = req.body;
+		let { templateId, contactListId, variables, schedule } = req.body;
 
+		// Validate and parse variables
+		variables =
+			typeof variables === "string" ? JSON.parse(variables) : variables;
+		schedule =
+			typeof schedule === "string" ? JSON.parse(schedule) : schedule;
+
+		if (!templateId || !contactListId) {
+			return res
+				.status(400)
+				.json({
+					message: "Template ID and Contact List ID are required",
+				});
+		}
+
+		// Create new campaign object
 		const newCampaign = new Campaign({
 			unique_id: generateUniqueId(),
 			templateId,
@@ -301,21 +316,29 @@ export const createCampaign = async (req, res) => {
 			variables,
 		});
 
-		if (!schedule) {
-			sendMessages(newCampaign);
+		// Schedule the campaign or send immediately
+		if (schedule == null) {
+			await sendMessages(
+				newCampaign,
+				req.session.user.id,
+				generateUniqueId(),
+			);
 		} else {
 			newCampaign.scheduledAt = new Date(schedule);
 			newCampaign.status = "SCHEDULED";
 		}
 
+		// Save the campaign
 		await newCampaign.save();
 		res.status(201).json({
 			message: "Campaign created successfully",
 			campaign: newCampaign,
 		});
 	} catch (error) {
-		console.error("Error creating campaign:", error);
-		res.status(500).json({ message: "Error creating campaign" });
+		console.error("Error creating campaign:", error.message);
+		res.status(500).json({
+			message: `Error creating campaign: ${error.message}`,
+		});
 	}
 };
 
@@ -362,4 +385,3 @@ export const generateTableAndCheckFields = (parsedData, actualColumns) => {
 
 	return { tableHtml, emptyFields };
 };
-

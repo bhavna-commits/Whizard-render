@@ -1,4 +1,17 @@
+// Helper function to retrieve input values for dynamic variables
+function getDynamicValue(inputs, variable) {
+	for (const input of inputs) {
+		if (input.getAttribute("data-variable") == variable) {
+			return input.value || `{{${variable}}}`;
+		}
+	}
+	return `{{${variable}}}`;
+}
+
 async function submit() {
+	if (!validateInputs()) {
+		return; // Prevent submission if inputs are invalid
+	}
 	const submitButton = document.getElementById("submitTemplate");
 	const originalText = submitButton.innerHTML;
 
@@ -11,7 +24,7 @@ async function submit() {
 		const templateData = collectTemplateData();
 		console.log(templateData);
 		if (!templateData) return;
-		// Validate curly braces in header, body, and footer
+
 		let headerValidation = { isValid: true, error: null, numbers: [] };
 
 		// Validate curly braces in header only if the header type is 'text'
@@ -33,12 +46,26 @@ async function submit() {
 			);
 		}
 
-		// Collect all dynamic variables
-		const dynamicVariables = [
-			...headerValidation.numbers,
-			...bodyValidation.numbers,
-			...footerValidation.numbers,
-		].sort((a, b) => a - b);
+		// Collect dynamic variables from modal input fields only if they exist
+		const previewFormInputs =
+			document.querySelectorAll("#previewForm input");
+		const dynamicVariables = {
+			body: bodyValidation.numbers.length
+				? bodyValidation.numbers.map((number) => ({
+						[number]: getDynamicValue(previewFormInputs, number),
+				  }))
+				: [],
+			footer: footerValidation.numbers.length
+				? footerValidation.numbers.map((number) => ({
+						[number]: getDynamicValue(previewFormInputs, number),
+				  }))
+				: [],
+			header: headerValidation.numbers.length
+				? headerValidation.numbers.map((number) => ({
+						[number]: getDynamicValue(previewFormInputs, number),
+				  }))
+				: [],
+		};
 
 		// Create FormData for file upload
 		const formData = new FormData();
@@ -60,7 +87,7 @@ async function submit() {
 			"templateData",
 			JSON.stringify({
 				...templateData,
-				dynamicVariables,
+				dynamicVariables, // Include the dynamic variables here
 			}),
 		);
 
@@ -133,6 +160,140 @@ function generatePreviewCall(templateData) {
 		previewButtons.innerHTML += preview;
 	}
 }
+
+let originalTemplateData = {}; // To store the original template data
+let currentTemplateData = {}; // To store the current state of the template with replacements
+
+function validateInputs() {
+	const inputs = document.querySelectorAll("#previewForm input");
+	let isValid = true;
+
+	inputs.forEach((input) => {
+		if (!input.value.trim()) {
+			alert(
+				`Please fill in the value for variable ${input.dataset.variable}`,
+			);
+			isValid = false;
+		}
+	});
+
+	return isValid;
+}
+
+function openModal() {
+	const templateData = collectTemplateData();
+	if (!templateData) return;
+
+	originalTemplateData = {
+		header: templateData.header.content || "",
+		body: templateData.body || "",
+		footer: templateData.footer || "",
+		headerType: templateData.header.type || "none",
+	};
+
+	currentTemplateData = { ...originalTemplateData };
+
+	document.getElementById("templateModalLabel").innerText =
+		templateData.templateName;
+
+	let headerValidation = { isValid: true, error: null, numbers: [] };
+	if (templateData.header.type === "text") {
+		headerValidation = validateCurlyBraces(templateData.header.content);
+	}
+	const bodyValidation = validateCurlyBraces(templateData.body);
+	const footerValidation = validateCurlyBraces(templateData.footer);
+
+	if (
+		!headerValidation.isValid ||
+		!bodyValidation.isValid ||
+		!footerValidation.isValid
+	) {
+		alert(
+			headerValidation.error ||
+				bodyValidation.error ||
+				footerValidation.error,
+		);
+		return;
+	}
+
+	const dynamicVariables = [
+		...headerValidation.numbers,
+		...bodyValidation.numbers,
+		...footerValidation.numbers,
+	].sort((a, b) => a - b);
+
+	const previewForm = document.getElementById("previewForm");
+	previewForm.innerHTML = "";
+
+	dynamicVariables.forEach((variable, index) => {
+		const formGroup = document.createElement("div");
+		formGroup.className = "form-group py-1";
+
+		formGroup.innerHTML = `
+        <label class="font-semibold">Choose Attributes for ${variable}</label>
+        <input type="text" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm" data-variable="${variable}" data-index="${index}">
+    `;
+
+		previewForm.appendChild(formGroup);
+	});
+
+	previewForm.querySelectorAll("input").forEach((input) => {
+		input.addEventListener("input", handleInputChange);
+	});
+
+	function handleInputChange(event) {
+		const input = event.target;
+		const variable = input.getAttribute("data-variable");
+		const value = input.value;
+		updatePreviewElement(variable, value);
+	}
+
+	function updatePreviewElement(variable, value) {
+		const spanTemplate = `<span id="${variable}">${
+			value || `{{${variable}}}`
+		}</span>`;
+		currentTemplateData.header = replaceVariableWithSpan(
+			currentTemplateData.header,
+			variable,
+			spanTemplate,
+		);
+		currentTemplateData.body = replaceVariableWithSpan(
+			currentTemplateData.body,
+			variable,
+			spanTemplate,
+		);
+		currentTemplateData.footer = replaceVariableWithSpan(
+			currentTemplateData.footer,
+			variable,
+			spanTemplate,
+		);
+		updatePreview();
+	}
+
+	function updatePreview() {
+		document.getElementById("previewHead").innerHTML =
+			currentTemplateData.header.replace(/\n/g, "<br>");
+		document.getElementById("previewBod").innerHTML =
+			currentTemplateData.body.replace(/\n/g, "<br>");
+		document.getElementById("previewFoot").innerHTML =
+			currentTemplateData.footer.replace(/\n/g, "<br>");
+	}
+
+	function replaceVariableWithSpan(templatePart, variable, spanTemplate) {
+		const regex = new RegExp(`{{\\s*${variable}\\s*}}`, "g");
+		return templatePart.replace(regex, spanTemplate);
+	}
+
+	document.getElementById("customModal").classList.remove("hidden");
+}
+
+// Function to close the modal
+function closeModal() {
+	document.getElementById("customModal").classList.add("hidden");
+}
+
+// Attach close button event
+document.getElementById("modalCloseBtn").addEventListener("click", closeModal);
 
 // Validate double curly braces format and extract numbers
 function validateCurlyBraces(text) {

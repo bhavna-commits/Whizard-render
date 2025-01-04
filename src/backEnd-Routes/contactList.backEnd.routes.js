@@ -10,7 +10,6 @@ import {
 	deleteCustomField,
 	searchContactLists,
 	previewContactList,
-	
 } from "../controllers/ContactList/contactList.controller.js";
 import {
 	updateContact,

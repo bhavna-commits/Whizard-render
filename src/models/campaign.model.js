@@ -13,7 +13,7 @@ const CampaignSchema = new mongoose.Schema(
 			ref: "ContactList",
 			required: true,
 		},
-		variables: { type: Map, of: String },
+		variables: { type: Map },
 		scheduledAt: { type: Date },
 		status: {
 			type: String,

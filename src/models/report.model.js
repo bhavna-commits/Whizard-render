@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 const CampaignReportSchema = new mongoose.Schema({
-	owner: { type: String, required: true },
+	useradmin: { type: String, required: true },
 	unique_id: { type: String, required: true },
 	campaignId: {
 		type: String,

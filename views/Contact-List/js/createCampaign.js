@@ -34,7 +34,7 @@ class AttributeManager {
 		}
 
 		const attributes = contacts[0]?.masterExtra || {};
-		console.log(attributes);
+		// console.log(attributes);
 		const options = this.generateAttributeOptions(Object.keys(attributes));
 
 		this.container.innerHTML = template.dynamicVariables
@@ -64,7 +64,7 @@ class AttributeManager {
 	}
 
 	generateAttributeOptions(attributes, includeUserName = true) {
-		const options = includeUserName ? ["userName"] : [];
+		const options = includeUserName ? ["Name"] : [];
 		return [...options, ...attributes].map((attr) => ({
 			value: attr,
 			label: attr.charAt(0).toUpperCase() + attr.slice(1),
@@ -220,8 +220,16 @@ class TemplateManager {
 				.select2()
 				.on("change", (e) => this.handleContactListChange(e));
 
-			// Form submit handler
-			$(this.campaignForm).on("submit", (e) => this.handleFormSubmit(e));
+			document
+				.getElementById("sendNowButton")
+				.addEventListener("click", (e) =>
+					this.handleFormSubmit(e, "sendNow"),
+				);
+			document
+				.getElementById("scheduleButton")
+				.addEventListener("click", (e) =>
+					this.handleFormSubmit(e, "schedule"),
+				);
 
 			this.previewContainer.innerHTML =
 				'<p class="text-center text-gray-500">Select a template to preview</p>';
@@ -316,30 +324,41 @@ class TemplateManager {
 		console.log("Attributes selected:", variables);
 	}
 
-	async handleFormSubmit(event) {
+	async handleFormSubmit(event, actionType) {
 		event.preventDefault();
 
+		// Create form data
 		const formData = new FormData(this.campaignForm);
 		formData.append("templateId", this.templateSelect.val());
 		formData.append("contactListId", this.recipientSelect.val());
 
-		// Combine the date and time fields into a single Unix timestamp
-		const selectedDate = document.getElementById("datePicker").value;
-		const selectedTime = document.getElementById("timePicker").value;
+		// Check if scheduling or sending immediately
+		if (actionType === "schedule") {
+			const selectedDate = document.getElementById("datePicker").value;
+			const selectedTime = document.getElementById("timePicker").value;
 
-		if (selectedDate && selectedTime) {
-			const dateTimeString = `${selectedDate} ${selectedTime}`;
-			const dateTime = new Date(dateTimeString);
+			// Make sure the user selected a valid date and time for scheduling
+			if (selectedDate && selectedTime) {
+				const dateTimeString = `${selectedDate} ${selectedTime}`;
+				const dateTime = new Date(dateTimeString);
 
-			if (!isNaN(dateTime.getTime())) {
-				const unixTimestamp = Math.floor(dateTime.getTime() / 1000);
-				formData.append("schedule", unixTimestamp); 
+				if (!isNaN(dateTime.getTime())) {
+					const unixTimestamp = Math.floor(dateTime.getTime() / 1000);
+					formData.append("schedule", unixTimestamp); // Append the schedule timestamp
+				} else {
+					alert("Invalid date or time. Please check your selection.");
+					return;
+				}
 			} else {
-				alert("Invalid date or time. Please check your selection.");
+				alert("Please select both date and time for scheduling.");
 				return;
 			}
+		} else if (actionType === "sendNow") {
+			// If "Send Now" is clicked, make sure schedule is null
+			formData.append("schedule", null);
 		}
 
+		// Add selected attributes to form data
 		const selectedAttributes = {};
 		$(this.attributesForm)
 			.find(".attribute-select")
@@ -352,6 +371,7 @@ class TemplateManager {
 			formData.append("variables", JSON.stringify(selectedAttributes));
 		}
 
+		// Submit the form
 		try {
 			const response = await fetch("/api/contact-list/create-campaign", {
 				method: "POST",

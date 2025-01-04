@@ -22,10 +22,11 @@ const componentSchema = new mongoose.Schema({
 		},
 	},
 	example: {
-		header_handle: {
-			type: [String],
-			default: [],
-		},
+		body_text: { type: [String], default: undefined },
+		footer_text: { type: [String], default: undefined },
+		header_text: { type: [String], default: undefined },
+		header_handle: { type: [String], default: undefined },
+		button_handle: { type: [String], default: undefined },
 	},
 });
 
@@ -65,9 +66,18 @@ const templateSchema = new Schema({
 		required: true,
 	},
 	dynamicVariables: {
-		type: [Number],
+		type: [],
 		required: true,
 	},
+});
+
+componentSchema.pre("save", function (next) {
+	Object.keys(this.example).forEach((field) => {
+		this.example[field] = this.example[field].filter(
+			(item) => item !== undefined && item !== null,
+		);
+	});
+	next();
 });
 
 templateSchema.pre("save", function (next) {

@@ -1,25 +1,23 @@
 function openModal() {
-	try {
-		const templateData = collectTemplateData();
-		if (!templateData) return;
+	const templateData = collectTemplateData();
+	if (!templateData) return;
 
-		document.getElementById("customModal").classList.remove("hidden");
-		document.getElementById("templateModalLabel").innerText =
-			templateData.templateName;
+	document.getElementById("customModal").classList.remove("hidden");
+	document.getElementById("templateModalLabel").innerText =
+		templateData.templateName;
 
-		const variables = initializePreview(templateData);
-		createVariableInputs(variables);
+	const variables = initializePreview(templateData);
+	createVariableInputs(variables);
 
-		// Add event listeners
-		const previewForm = document.getElementById("previewForm");
-		previewForm.addEventListener("input", handleInputChange);
+	// Add event listeners
+	const previewForm = document.getElementById("previewForm");
+	previewForm.addEventListener("input", handleInputChange);
 
-		// Initial preview update
-		updatePreview();
-	} catch (error) {
-		console.error("Error initializing preview:", error);
-		alert(error.message);
-	}
+	// Initial preview update
+	updatePreview();
+
+	// console.error("Error initializing preview:", error);
+	// alert(error.message);
 }
 // Function to close the modal
 function closeModal() {
@@ -98,6 +96,7 @@ function updatePreview() {
 	};
 
 	Object.entries(sections).forEach(([key, element]) => {
+		console.log(currentTemplateData[key]);
 		if (element && currentTemplateData[key]) {
 			element.innerHTML = currentTemplateData[key].replace(/\n/g, "<br>");
 		}

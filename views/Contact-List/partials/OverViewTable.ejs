@@ -44,10 +44,10 @@
  					<% }); %>
  					<% } %>
  					<td class="sticky right-0 bg-white border-r border-t border-b rounded-r-lg border-gray-200">
- 						<button onclick="handleEdit('<%= JSON.stringify(contact) %>')" aria-label="Edit contact" class="text-gray-600 hover:text-blue-600 px-3 border-r">
+ 						<button onclick="openEditModal('<%= JSON.stringify(contact) %>')" aria-label="Edit contact" class="text-gray-600 hover:text-blue-600 px-3 border-r">
  							<i class="fas fa-edit"></i>
  						</button>
- 						<button onclick="handleDelete('<%= contact._id %>', '<%= contact.ContactListName %>')" aria-label="Delete contact" class="text-gray-600 hover:text-red-600 px-2">
+ 						<button onclick="openDeleteModal('<%= contact._id %>')" aria-label="Delete contact" class="text-gray-600 hover:text-red-600 px-2">
  							<i class="fa-regular fa-trash-can"></i>
  						</button>
  					</td>

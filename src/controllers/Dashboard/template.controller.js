@@ -18,32 +18,36 @@ export const createTemplate = async (req, res) => {
 		const { dynamicVariables } = templateData;
 		const id = req.session.user.id;
 		console.log(templateData);
-		if (req.file) {
-			templateData.header.content = req.file.path;
-		}
+
+		// Save template to DB
 		const savedTemplate = await saveTemplateToDatabase(
 			req,
 			templateData,
 			dynamicVariables,
 			id,
 		);
-		// console.log("yah a gya");
 
+		// Submit template to Facebook
 		await submitTemplateToFacebook(savedTemplate);
 
+		// Log activity
 		await ActivityLogs.create({
-			name: req.session.user?.name
-				? req.session.user?.name
-				: req.session.addedUser?.name,
+			name: req.session.user?.name || req.session.addedUser?.name,
 			actions: "Create",
 			details: `Created new template named: ${savedTemplate.name}`,
 		});
 
+		// Respond success
 		res.status(201).json({
 			success: true,
+			message: "Template created successfully.",
 		});
 	} catch (error) {
-		res.status(500).json({ success: false, message: error.message });
+		console.error("Error creating template:", error);
+		res.status(500).json({
+			success: false,
+			message: `Error creating template: ${error.message}`,
+		});
 	}
 };
 
