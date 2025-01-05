@@ -1,7 +1,5 @@
-import https from "https";
 import dotenv from "dotenv";
 import path from "path";
-import fs from "fs";
 import axios from "axios";
 import Template from "../../models/templates.model.js";
 import { generateUniqueId } from "../../utils/otpGenerator.js";
@@ -17,14 +15,14 @@ export const saveTemplateToDatabase = async (
 ) => {
 	try {
 		const components = createComponents(templateData, dynamicVariables);
-
+		console.log(components);
 		const newTemplate = new Template({
 			name: templateData.templateName,
 			category: templateData.category,
 			components,
-			status: "Pending",
 			unique_id: generateUniqueId(),
 			useradmin: id,
+			dynamicVariables,
 		});
 
 		if (req.file) {
@@ -50,8 +48,8 @@ export const saveTemplateToDatabase = async (
 		}
 
 		// Save the template to the database
-		const savedTemplate = await newTemplate.save();
-		return savedTemplate;
+		
+		return newTemplate;
 	} catch (error) {
 		console.error("Error saving template to database:", error);
 		throw new Error(`Error saving template to database: ${error.message}`);
@@ -144,6 +142,7 @@ export const fetchFacebookTemplates = async () => {
 
 		// Parse and return the JSON response
 		const data = await response.json();
+		// console.log(data);
 		return data;
 	} catch (error) {
 		console.error(
@@ -159,13 +158,16 @@ function createComponents(templateData, dynamicVariables) {
 
 	// Add BODY component with dynamic variables
 	if (dynamicVariables.body && dynamicVariables.body.length > 0) {
+		const bodyExample = dynamicVariables.body.map((variable) => {
+			const values = Object.values(variable);
+			return values[0];
+		});
+
 		components.push({
 			type: "BODY",
 			text: templateData.body,
 			example: {
-				body_text: [
-					dynamicVariables.body.map((variable) => variable.value),
-				],
+				body_text: [bodyExample],
 			},
 		});
 	} else if (templateData.body) {
@@ -178,16 +180,17 @@ function createComponents(templateData, dynamicVariables) {
 	// Add HEADER component based on type
 	if (templateData.header.type === "text") {
 		if (dynamicVariables.header && dynamicVariables.header.length > 0) {
+			const headerExample = dynamicVariables.header.map((variable) => {
+				const values = Object.values(variable);
+				return values[0];
+			});
+
 			components.push({
 				type: "HEADER",
 				format: "TEXT",
 				text: templateData.header.content,
 				example: {
-					header_text: [
-						dynamicVariables.header.map(
-							(variable) => variable.value,
-						),
-					],
+					header_text: [headerExample],
 				},
 			});
 		} else {
@@ -207,13 +210,16 @@ function createComponents(templateData, dynamicVariables) {
 
 	// Add FOOTER component with dynamic variables
 	if (dynamicVariables.footer && dynamicVariables.footer.length > 0) {
+		const footerExample = dynamicVariables.footer.map((variable) => {
+			const values = Object.values(variable);
+			return values[0];
+		});
+
 		components.push({
 			type: "FOOTER",
 			text: templateData.footer,
 			example: {
-				footer_text: [
-					dynamicVariables.footer.map((variable) => variable.value),
-				],
+				footer_text: [footerExample],
 			},
 		});
 	} else if (templateData.footer) {
@@ -227,16 +233,24 @@ function createComponents(templateData, dynamicVariables) {
 	if (templateData.buttons && templateData.buttons.length > 0) {
 		components.push({
 			type: "BUTTONS",
-			buttons: templateData.buttons.map((button) => ({
-				type: button.type,
-				text: button.text,
-				...(button.url ? { url: button.url } : {}),
-				...(button.phone_number
-					? { phone_number: button.phone_number }
-					: {}),
-			})),
+			buttons: templateData.buttons.map((button) => {
+				if (button.type === "PHONE_NUMBER") {
+					// Call-to-Action button for phone numbers
+					return {
+						type: "PHONE_NUMBER",
+						text: button.text,
+						phone_number: button.phone_number,
+					};
+				} else if (button.type === "URL") {
+					// Call-to-Action button for URLs
+					return {
+						type: "URL",
+						text: button.text,
+						url: button.url,
+					};
+				}
+			}),
 		});
 	}
-
 	return components;
 }

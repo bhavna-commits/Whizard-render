@@ -1,84 +1,86 @@
-import mongoose from "mongoose";
+import mongoose, { SchemaType } from "mongoose";
 
 const Schema = mongoose.Schema;
 
-const componentSchema = new mongoose.Schema({
-	text: {
-		type: String,
-		required: function () {
-			return this.type !== "HEADER";
+// const componentSchema = new mongoose.Schema(
+// 	{
+// 		text: {
+// 			type: String,
+// 			required: function () {
+// 				return this.type !== "HEADER";
+// 			},
+// 		},
+// 		type: {
+// 			type: String,
+// 			enum: ["HEADER", "BODY", "FOOTER", "BUTTON"],
+// 			required: true,
+// 		},
+// 		format: {
+// 			type: String,
+// 			enum: ["IMAGE", "VIDEO", "DOCUMENT", "TEXT"],
+// 			required: function () {
+// 				return this.type === "HEADER";
+// 			},
+// 		},
+// 		example: {
+// 			type: Schema.Types.Mixed,
+// 		},
+// 	},
+// 	{ timestamps: false, strict: false },
+// );
+
+const templateSchema = new Schema(
+	{
+		name: {
+			type: String,
+			required: true,
+		},
+		language: {
+			type: String,
+			default: "en_US",
+		},
+		category: {
+			type: String,
+			required: true,
+		},
+		components: [],
+		status: {
+			type: String,
+			enum: ["Approved", "Rejected", "Pending"],
+			default: "Pending",
+		},
+		unique_id: {
+			type: String,
+			required: true,
+		},
+		createdAt: {
+			type: Number,
+			default: () => Date.now(),
+		},
+		updatedAt: {
+			type: Number,
+			default: () => Date.now(),
+		},
+		useradmin: {
+			type: String,
+			required: true,
+		},
+		dynamicVariables: {
+			type: Object,
+			required: true,
 		},
 	},
-	type: {
-		type: String,
-		enum: ["HEADER", "BODY", "FOOTER", "BUTTON"],
-		required: true,
-	},
-	format: {
-		type: String,
-		enum: ["IMAGE", "VIDEO", "DOCUMENT", "TEXT"],
-		required: function () {
-			return this.type === "HEADER";
-		},
-	},
-	example: {
-		body_text: { type: [String], default: undefined },
-		footer_text: { type: [String], default: undefined },
-		header_text: { type: [String], default: undefined },
-		header_handle: { type: [String], default: undefined },
-		button_handle: { type: [String], default: undefined },
-	},
-});
+	{ timestamps: false, strict: false },
+);
 
-const templateSchema = new Schema({
-	name: {
-		type: String,
-		required: true,
-	},
-	language: {
-		type: String,
-		default: "en_US",
-	},
-	category: {
-		type: String,
-		required: true,
-	},
-	components: [componentSchema],
-	status: {
-		type: String,
-		enum: ["Approved", "Rejected", "Pending"],
-		default: "Pending",
-	},
-	unique_id: {
-		type: String,
-		required: true,
-	},
-	createdAt: {
-		type: Number,
-		default: () => Date.now(),
-	},
-	updatedAt: {
-		type: Number,
-		default: () => Date.now(),
-	},
-	useradmin: {
-		type: String,
-		required: true,
-	},
-	dynamicVariables: {
-		type: [],
-		required: true,
-	},
-});
-
-componentSchema.pre("save", function (next) {
-	Object.keys(this.example).forEach((field) => {
-		this.example[field] = this.example[field].filter(
-			(item) => item !== undefined && item !== null,
-		);
-	});
-	next();
-});
+// componentSchema.pre("save", function (next) {
+// 	Object.keys(this.example).forEach((field) => {
+// 		this.example[field] = this.example[field].filter(
+// 			(item) => item !== undefined && item !== null,
+// 		);
+// 	});
+// 	next();
+// });
 
 templateSchema.pre("save", function (next) {
 	this.updatedAt = Date.now();

@@ -4,7 +4,7 @@ import {
 	createTemplate,
 	deleteTemplate,
 	duplicateTemplate,
-	getCampaignTemplates,
+	getCampaignSingleTemplates,
 } from "../controllers/Dashboard/template.controller.js";
 import { multerMiddle } from "../config/multerMiddleware.js";
 
@@ -16,6 +16,6 @@ router.post("/duplicate/:id", duplicateTemplate);
 
 router.delete("/delete/:id", deleteTemplate);
 
-router.get("/:id", getCampaignTemplates);
+router.get("/:id", getCampaignSingleTemplates);
 
 export default router;

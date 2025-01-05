@@ -1,6 +1,6 @@
 // API service for handling data fetching
 async function fetchTemplates() {
-	const response = await fetch("/getTemplates");
+	const response = await fetch("/getCampaignTemplates");
 	return response.json();
 }
 
@@ -34,15 +34,19 @@ class AttributeManager {
 		}
 
 		const attributes = contacts[0]?.masterExtra || {};
-		// console.log(attributes);
 		const options = this.generateAttributeOptions(Object.keys(attributes));
 
-		this.container.innerHTML = template.dynamicVariables
-			.map(
-				(variable) => `
+		console.log(template?.dynamicVariables);
+
+		this.container.innerHTML = "";
+
+		// Process HEADER dynamic variables
+		this.container.innerHTML += template?.dynamicVariables?.header?.map((variableObj, index) => {
+				const variableKey = Object.keys(variableObj)[0]; // Get the variable key, e.g., '1'
+				return `
                 <div class=" mt-3">
-                    <label class="w-full">Variable: {${variable}}</label>
-                    <select class="attribute-select w-full" data-variable="${variable}">
+                    <label class="w-full">Variable: {${variableKey}}</label>
+                    <select class="attribute-select w-full" data-variable="${variableKey}">
                         ${options
 							.map(
 								(opt) => `
@@ -52,8 +56,48 @@ class AttributeManager {
 							.join("")}
                     </select>
                 </div>
-            `,
-			)
+            `;
+			})
+			.join("");
+
+		// Process BODY dynamic variables
+		this.container.innerHTML += template?.dynamicVariables?.body?.map((variableObj, index) => {
+				const variableKey = Object.keys(variableObj)[0]; // Get the variable key, e.g., '1'
+				return `
+                <div class=" mt-3">
+                    <label class="w-full">Variable: {${variableKey}}</label>
+                    <select class="attribute-select w-full" data-variable="${variableKey}">
+                        ${options
+							.map(
+								(opt) => `
+                            <option value="${opt.value}">${opt.label}</option>
+                        `,
+							)
+							.join("")}
+                    </select>
+                </div>
+            `;
+			})
+			.join("");
+
+		// Process FOOTER dynamic variables
+		this.container.innerHTML += template?.dynamicVariables?.footer?.map((variableObj, index) => {
+				const variableKey = Object.keys(variableObj)[0]; // Get the variable key, e.g., '1'
+				return `
+                <div class=" mt-3">
+                    <label class="w-full">Variable: {${variableKey}}</label>
+                    <select class="attribute-select w-full" data-variable="${variableKey}">
+                        ${options
+							.map(
+								(opt) => `
+                            <option value="${opt.value}">${opt.label}</option>
+                        `,
+							)
+							.join("")}
+                    </select>
+                </div>
+            `;
+			})
 			.join("");
 
 		// Initialize Select2 on new dropdowns

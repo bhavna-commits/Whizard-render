@@ -3,7 +3,8 @@ import { checkSession } from "../middleWares/checkSession.js";
 import {
 	templatePreview,
 	getList,
-	getTemplates,
+	getFaceBookTemplates,
+	getCampaignTemplates,
 } from "../controllers/Dashboard/template.controller.js";
 
 const router = express.Router();
@@ -16,6 +17,8 @@ router.get("/create-template", (req, res) => {
 	});
 });
 
-router.get("/getTemplates", getTemplates);
+router.get("/getFaceBookTemplates", getFaceBookTemplates);
+
+router.get("/getCampaignTemplates", getCampaignTemplates);
 
 export default router;

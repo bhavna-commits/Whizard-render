@@ -301,11 +301,9 @@ export const createCampaign = async (req, res) => {
 			typeof schedule === "string" ? JSON.parse(schedule) : schedule;
 
 		if (!templateId || !contactListId) {
-			return res
-				.status(400)
-				.json({
-					message: "Template ID and Contact List ID are required",
-				});
+			return res.status(400).json({
+				message: "Template ID and Contact List ID are required",
+			});
 		}
 
 		// Create new campaign object
@@ -316,8 +314,10 @@ export const createCampaign = async (req, res) => {
 			variables,
 		});
 
+		console.log(variables);
+
 		// Schedule the campaign or send immediately
-		if (schedule == null) {
+		if (!schedule) {
 			await sendMessages(
 				newCampaign,
 				req.session.user.id,

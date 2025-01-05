@@ -67,6 +67,7 @@ async function submit() {
 				: [],
 		};
 
+		// console.log("dynamic variaebledsad",dynamicVariables)
 		// Create FormData for file upload
 		const formData = new FormData();
 		if (templateData.header.type == "media") {
@@ -87,7 +88,7 @@ async function submit() {
 			"templateData",
 			JSON.stringify({
 				...templateData,
-				dynamicVariables, // Include the dynamic variables here
+				dynamicVariables,
 			}),
 		);
 
@@ -376,7 +377,7 @@ function collectTemplateData() {
 	templateData.buttons = Array.from(buttonElements)
 		.filter((btn) => btn.style.display !== "none") // Ignore buttons with display: none
 		.map((btn, index) => {
-			let buttonData = { text: "", urlPhone: "" };
+			let buttonData = { text: "", type: "" };
 
 			// Check for 'Visit Now' (Website) button
 			let websiteText = btn
@@ -395,8 +396,9 @@ function collectTemplateData() {
 				?.value?.trim();
 
 			// If website fields exist, handle 'Visit Now' button validation
-			if (websiteText !== undefined || websiteUrl !== undefined) {
+			if (websiteText || websiteUrl) {
 				buttonData.text = websiteText || "Visit Now"; // Default to 'Visit Now' if text is empty
+				buttonData.type = "URL";
 
 				// Validate URL
 				if (!websiteUrl || !websiteUrl.startsWith("http")) {
@@ -407,12 +409,13 @@ function collectTemplateData() {
 					);
 					return null;
 				}
-				buttonData.urlPhone = websiteUrl;
+				buttonData.url = websiteUrl;
 			}
 
 			// If phone fields exist, handle 'Call Now' button validation
-			if (callText !== undefined || phoneNumber !== undefined) {
+			if (callText || phoneNumber) {
 				buttonData.text = callText || "Call Now"; // Default to 'Call Now' if text is empty
+				buttonData.type = "PHONE_NUMBER";
 
 				// Validate Phone Number
 				if (!phoneNumber) {
@@ -423,11 +426,11 @@ function collectTemplateData() {
 					);
 					return null;
 				}
-				buttonData.urlPhone = `tel:${phoneNumber}`; // Ensure the phone number is prefixed with 'tel:'
+				buttonData.phone_number = phoneNumber;
 			}
 
 			// If neither website nor phone data exists, alert and return null
-			if (!buttonData.urlPhone) {
+			if (!buttonData.url && !buttonData.phone_number) {
 				showError(
 					`Button ${index + 1}: URL or Phone number is required.`,
 				);
@@ -435,7 +438,8 @@ function collectTemplateData() {
 			}
 
 			return buttonData;
-		});
+		})
+		.filter((buttonData) => buttonData !== null); // Filter out any null entries caused by validation errors
 
 	// Check if any button validation failed
 	if (templateData.buttons.includes(null)) {

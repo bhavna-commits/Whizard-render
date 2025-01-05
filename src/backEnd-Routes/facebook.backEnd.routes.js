@@ -10,7 +10,7 @@ router.post("/auth_code", async (req, res) => {
 	const { code } = req.body;
 
 	try {
-		const url = `https://graph.facebook.com/v13.0/oauth/access_token?client_id=${process.env.FB_APP_ID}&client_secret=${process.env.FB_APP_SECRET}&redirect_uri=https://localhost:5000&code=${code}`;
+		const url = `https://graph.facebook.com/${process.env.FB_GRAPH_VERSION}/oauth/access_token?client_id=${process.env.FB_APP_ID}&client_secret=${process.env.FB_APP_SECRET}&redirect_uri=https://localhost:5000&code=${code}`;
 
 		const response = await fetch(url, {
 			method: "POST",

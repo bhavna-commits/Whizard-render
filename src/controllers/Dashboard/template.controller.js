@@ -15,9 +15,17 @@ dotenv.config();
 export const createTemplate = async (req, res) => {
 	try {
 		const templateData = JSON.parse(req.body.templateData);
-		const { dynamicVariables } = templateData;
+		const { dynamicVariables, name } = templateData;
 		const id = req.session.user.id;
-		console.log(templateData);
+
+		// Check if a template with the same name exists for the user
+		const exists = await Template.findOne({ useradmin: id, name });
+		if (exists) {
+			return res.status(500).json({
+				success: false,
+				message: `This template name already exists, choose a different name`,
+			});
+		}
 
 		// Save template to DB
 		const savedTemplate = await saveTemplateToDatabase(
@@ -37,6 +45,7 @@ export const createTemplate = async (req, res) => {
 			details: `Created new template named: ${savedTemplate.name}`,
 		});
 
+		await savedTemplate.save();
 		// Respond success
 		res.status(201).json({
 			success: true,
@@ -175,7 +184,7 @@ export const deleteTemplate = async (req, res) => {
 	}
 };
 
-export const getCampaignTemplates = async (req, res) => {
+export const getCampaignSingleTemplates = async (req, res) => {
 	try {
 		// Fetch the template data by ID
 		const templateData = await Template.findOne({
@@ -218,55 +227,76 @@ export const getCampaignTemplates = async (req, res) => {
 	}
 };
 
-export const getTemplates = async (req, res) => {
+export const getFaceBookTemplates = async (req, res) => {
 	try {
 		const { id } = req.session.user;
 
 		// Fetch templates from MongoDB based on logged-in user
-		// const mongoTemplates = await Template.find({ owner: id });
-
+		const mongoTemplates = await Template.find({ useradmin: id });
+		// console.log(mongoTemplates);
 		// Fetch templates from Facebook Graph API
-		// const facebookTemplatesResponse = await fetchFacebookTemplates();
-		// const facebookTemplates = facebookTemplatesResponse.data;
-
+		const facebookTemplatesResponse = await fetchFacebookTemplates();
+		const facebookTemplates = facebookTemplatesResponse.data;
+		// console.log(facebookTemplates);
 		// Loop through the MongoDB templates and update their status based on Facebook data
-		// for (let mongoTemplate of mongoTemplates) {
-		// 	// Find the matching template in the Facebook templates by name
-		// 	const matchingFacebookTemplate = facebookTemplates.find(
-		// 		(fbTemplate) => fbTemplate.name === mongoTemplate.name,
-		// 	);
+		for (let mongoTemplate of mongoTemplates) {
+			// Find the matching template in the Facebook templates by name
+			const matchingFacebookTemplate = facebookTemplates.find(
+				(fbTemplate) => fbTemplate.name === mongoTemplate.name,
+			);
+			// console.log(matchingFaceboo	kTemplate);
+			// If a match is found, update the status in the MongoDB template
+			if (matchingFacebookTemplate) {
+				let newStatus;
+				let rejectedReason = mongoTemplate.rejected_reason || null;
 
-		// 	// If a match is found, update the status in the MongoDB template
-		// 	if (matchingFacebookTemplate) {
-		// 		let newStatus;
-		// 		let rejectedReason = mongoTemplate.rejected_reason || null;
+				switch (matchingFacebookTemplate.status) {
+					case "APPROVED":
+						newStatus = "Approved";
+						rejectedReason = "NONE"; // Reset reason if approved
+						break;
+					case "REJECTED":
+						console.log(matchingFacebookTemplate);
+						newStatus = "Rejected";
+						rejectedReason =
+							matchingFacebookTemplate.rejected_reason ||
+							"UNKNOWN";
+						break;
+					default:
+						newStatus = "Pending";
+				}
 
-		// 		switch (matchingFacebookTemplate.status) {
-		// 			case "APPROVED":
-		// 				newStatus = "approved";
-		// 				rejectedReason = "NONE"; // Reset reason if approved
-		// 				break;
-		// 			case "REJECTED":
-		// 				newStatus = "rejected";
-		// 				rejectedReason =
-		// 					matchingFacebookTemplate.rejected_reason ||
-		// 					"UNKNOWN"; // Assign rejection reason
-		// 				break;
-		// 			default:
-		// 				newStatus = "pending";
-		// 		}
+				// Only update if the status has changed
+				if (
+					mongoTemplate.status !== newStatus ||
+					mongoTemplate.rejected_reason !== rejectedReason
+				) {
+					mongoTemplate.status = newStatus;
+					mongoTemplate.rejected_reason = rejectedReason; // Update rejected reason
+					await mongoTemplate.save(); // Save the updated template
+				}
+			}
+		}
 
-		// 		// Only update if the status has changed
-		// 		if (
-		// 			mongoTemplate.status !== newStatus ||
-		// 			mongoTemplate.rejected_reason !== rejectedReason
-		// 		) {
-		// 			mongoTemplate.status = newStatus;
-		// 			mongoTemplate.rejected_reason = rejectedReason; // Update rejected reason
-		// 			await mongoTemplate.save(); // Save the updated template
-		// 		}
-		// 	}
-		// }
+		// Respond with the updated templates from MongoDB
+		const updatedTemplates = await Template.find({ useradmin: id });
+		// console.log(updatedTemplates);
+		res.json({
+			success: true,
+			data: updatedTemplates,
+		});
+	} catch (error) {
+		// Handle errors, returning a 500 status code with error message
+		res.status(500).json({
+			success: false,
+			error: error.message,
+		});
+	}
+};
+
+export const getCampaignTemplates = async (req, res) => {
+	try {
+		const { id } = req.session.user;
 
 		// Respond with the updated templates from MongoDB
 		const updatedTemplates = await Template.find({ useradmin: id });

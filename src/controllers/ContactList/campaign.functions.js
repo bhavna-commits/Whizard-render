@@ -40,7 +40,7 @@ export async function sendMessages(campaign, id, unique_id) {
 				campaign.variables,
 				contact,
 			);
-
+			console.log(JSON.stringify(personalizedMessage));
 			// Send message using WhatsApp (assuming wa_id is the phone number)
 			const response = await sendMessageThroughWhatsApp(
 				template.name,
@@ -72,7 +72,7 @@ export async function sendMessages(campaign, id, unique_id) {
 		await Campaign.findByIdAndUpdate(campaign._id, { status: "SENT" });
 	} catch (error) {
 		console.error("Error sending messages:", error.message);
-		throw new Error(`Error sending messages: ${error.message}`);
+		throw new Error(`${error.message}`);
 	}
 }
 
@@ -80,7 +80,7 @@ function replaceDynamicVariables(template, variables, contact) {
 	const messageComponents = [];
 
 	try {
-		// Process dynamic variables in Headers
+		// Process dynamic variables in Header
 		const headerComponent = template.components.find(
 			(c) => c.type === "HEADER",
 		);
@@ -88,9 +88,12 @@ function replaceDynamicVariables(template, variables, contact) {
 			let headerParameters = [];
 			if (headerComponent.format === "TEXT") {
 				let headerText = headerComponent.text || "";
-				for (let [key, value] of Object.entries(variables)) {
+				for (let [key, value] of Object.entries(
+					template.dynamicVariables.header || {},
+				)) {
+					// Replace {key} in header with corresponding value from contact.masterExtra
 					headerText = headerText.replace(
-						`{${key}}`,
+						`{{${key}}}`,
 						contact.masterExtra[value] || "",
 					);
 				}
@@ -120,28 +123,33 @@ function replaceDynamicVariables(template, variables, contact) {
 			(c) => c.type === "BODY",
 		);
 		if (bodyComponent) {
-			let bodyText = bodyComponent.text;
-			for (let [key, value] of Object.entries(variables)) {
-				bodyText = bodyText.replace(
-					`{${key}}`,
-					contact.masterExtra[value] || "",
-				);
+			let bodyParameters = [];
+			for (let [key, value] of Object.entries(
+				template.dynamicVariables.body || {},
+			)) {
+				// Replace {key} in body with corresponding value from contact.masterExtra
+				bodyParameters.push({
+					type: "text",
+					text: contact.masterExtra[value] || "",
+				});
 			}
 			messageComponents.push({
 				type: "body",
-				parameters: [{ type: "text", text: bodyText }],
+				parameters: bodyParameters,
 			});
 		}
 
-		// Process dynamic variables in Footers
+		// Process dynamic variables in Footers (if necessary)
 		const footerComponent = template.components.find(
 			(c) => c.type === "FOOTER",
 		);
 		if (footerComponent) {
-			let footerText = footerComponent.text;
-			for (let [key, value] of Object.entries(variables)) {
+			let footerText = footerComponent.text || "";
+			for (let [key, value] of Object.entries(
+				template.dynamicVariables.footer || {},
+			)) {
 				footerText = footerText.replace(
-					`{${key}}`,
+					`{{${key}}}`,
 					contact.masterExtra[value] || "",
 				);
 			}
@@ -160,18 +168,29 @@ function replaceDynamicVariables(template, variables, contact) {
 
 async function sendMessageThroughWhatsApp(name, phone, messageComponents) {
 	try {
+		// Construct the message payload
+		const requestData = {
+			messaging_product: "whatsapp",
+			recipient_type: "individual",
+			to: phone,
+			type: "template",
+			template: {
+				name: name,
+				language: { code: "en_US" },
+				components: messageComponents,
+			},
+		};
+
+		// Log the request data
+		console.log(
+			"Submitting the following JSON to WhatsApp API:",
+			JSON.stringify(requestData, null, 2),
+		);
+
+		// Send the request
 		const response = await axios.post(
 			`https://graph.facebook.com/${process.env.FB_GRAPH_VERSION}/${process.env.FB_PHONE_ID}/messages`,
-			{
-				messaging_product: "whatsapp",
-				to: phone,
-				type: "template",
-				template: {
-					name: name,
-					language: { code: "en_US" },
-					components: messageComponents,
-				},
-			},
+			requestData,
 			{
 				headers: {
 					Authorization: `Bearer ${process.env.FB_ACCESS_TOKEN}`,
@@ -184,11 +203,11 @@ async function sendMessageThroughWhatsApp(name, phone, messageComponents) {
 	} catch (error) {
 		console.error(
 			"Error sending WhatsApp message:",
-			error.response?.data || error.message,
+			error.response?.data?.error?.message || error.message,
 		);
 		return {
 			status: "FAILED",
-			response: error.response?.data || error.message,
+			response: error.response?.data?.error?.message || error.message,
 		};
 	}
 }
