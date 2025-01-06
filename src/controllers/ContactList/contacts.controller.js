@@ -314,8 +314,9 @@ export const createCampaign = async (req, res) => {
 			variables,
 		});
 
+		//
+		JSON.stringify(variables);
 		console.log(variables);
-
 		// Schedule the campaign or send immediately
 		if (!schedule) {
 			await sendMessages(

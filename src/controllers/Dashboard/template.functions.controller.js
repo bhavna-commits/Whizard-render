@@ -48,7 +48,7 @@ export const saveTemplateToDatabase = async (
 		}
 
 		// Save the template to the database
-		
+
 		return newTemplate;
 	} catch (error) {
 		console.error("Error saving template to database:", error);
@@ -155,7 +155,37 @@ export const fetchFacebookTemplates = async () => {
 
 function createComponents(templateData, dynamicVariables) {
 	const components = [];
+	// Add HEADER component based on type
+	if (templateData.header.type === "text") {
+		if (dynamicVariables.header && dynamicVariables.header.length > 0) {
+			const headerExample = dynamicVariables.header.map((variable) => {
+				const values = Object.values(variable);
+				return values[0];
+			});
 
+			components.push({
+				type: "HEADER",
+				format: "TEXT",
+				text: templateData.header.content,
+				example: {
+					header_text: headerExample,
+				},
+			});
+		} else {
+			components.push({
+				type: "HEADER",
+				format: "TEXT",
+				text: templateData.header.content,
+			});
+		}
+	} else if (templateData.header.type === "image") {
+		components.push({
+			type: "HEADER",
+			format: "IMAGE",
+			example: { link: [templateData.header.imageUrl] },
+		});
+	}
+	
 	// Add BODY component with dynamic variables
 	if (dynamicVariables.body && dynamicVariables.body.length > 0) {
 		const bodyExample = dynamicVariables.body.map((variable) => {
@@ -177,37 +207,6 @@ function createComponents(templateData, dynamicVariables) {
 		});
 	}
 
-	// Add HEADER component based on type
-	if (templateData.header.type === "text") {
-		if (dynamicVariables.header && dynamicVariables.header.length > 0) {
-			const headerExample = dynamicVariables.header.map((variable) => {
-				const values = Object.values(variable);
-				return values[0];
-			});
-
-			components.push({
-				type: "HEADER",
-				format: "TEXT",
-				text: templateData.header.content,
-				example: {
-					header_text: [headerExample],
-				},
-			});
-		} else {
-			components.push({
-				type: "HEADER",
-				format: "TEXT",
-				text: templateData.header.content,
-			});
-		}
-	} else if (templateData.header.type === "image") {
-		components.push({
-			type: "HEADER",
-			format: "IMAGE",
-			example: { header_handle: [templateData.header.imageUrl] },
-		});
-	}
-
 	// Add FOOTER component with dynamic variables
 	if (dynamicVariables.footer && dynamicVariables.footer.length > 0) {
 		const footerExample = dynamicVariables.footer.map((variable) => {
@@ -218,9 +217,9 @@ function createComponents(templateData, dynamicVariables) {
 		components.push({
 			type: "FOOTER",
 			text: templateData.footer,
-			example: {
-				footer_text: [footerExample],
-			},
+			// example: {
+			// 	footer_text: [footerExample],
+			// },
 		});
 	} else if (templateData.footer) {
 		components.push({

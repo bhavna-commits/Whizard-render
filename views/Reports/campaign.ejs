@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+	<meta charset="UTF-8" />
+	<title>Pages - Admin Dashboard UI Kit - Cards</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<!-- <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css"> -->
+	<script src="https://kit.fontawesome.com/44e4e59292.js" crossorigin="anonymous"></script>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+	<link href="assets/plugins/pace/pace-theme-flash.css" rel="stylesheet" type="text/css" />
+	<link href="assets/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+	<link href="assets/plugins/jquery-scrollbar/jquery.scrollbar.css" rel="stylesheet" type="text/css" media="screen" />
+	<link href="assets/plugins/select2/css/select2.min.css" rel="stylesheet" type="text/css" media="screen" />
+	<!-- <link class="main-stylesheet" href="pages/css/themes/corporate.css" rel="stylesheet" type="text/css" /> -->
+	<!-- Please remove the file below for production: Contains demo classes -->
+	<!-- <link class="main-stylesheet" href="assets/css/style.css" rel="stylesheet" type="text/css" /> -->
+	<link rel="preconnect" href="https://fonts.googleapis.com" />
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+	<link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet" />
+	
+	<link href="styles/style.css" rel="stylesheet" type="text/css" />
+	<script src="https://cdn.tailwindcss.com"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.5/xlsx.full.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+	
+	<!-- <link href="styles/createList.css" rel="stylesheet" type="text/css" /> -->
+	
+</head>
+
+<body>
+	<!-- Sidebar -->
+	<div class="layout-container">
+		<nav class="sidebar">
+			<div class="logo py-3">
+				<img src="/assets/img/Wizard_logo.png" alt="Whizard Logo" />
+			</div>
+			<ul class="mt-5 space-y-4">
+				<li>
+					<a href="/" class=""><span class="icon "><i class="fas fa-chart-line"></i></span>
+						Dashboard</a>
+				</li>
+				<li>
+					<a href="/chats"><span class="icon"><i class="fa-regular fa-comment"></i></span>
+						Chats</a>
+				</li>
+				<li>
+					<a href="/contact-list"><span class="icon active"><i class="fa-regular fa-address-book"></i></span>
+						
+						Contact List</a>
+				</li>
+				<li>
+					<a href="/template"><span class="icon"><i class="fa-regular fa-envelope"></i></span>
+						Template</a>
+				</li>
+				<li>
+					<a href="/settings"><span class="icon"><i class="fa-regular fa-user"></i></span>
+						Settings</a>
+				</li>
+				<li>
+					<a href="/reports"><span class="icon"><i class="fa-regular fa-chart-bar"></i></span>
+						Reports</a>
+				</li>
+			</ul>
+			<div class="user-profile " onclick="toggleDropdown()">
+				<img src="https://via.placeholder.com/50" alt="User Profile" />
+				<div id="dropdownMenu" class="dropdown-menu hidden">
+					<a href="/settings/profile">Profile</a>
+					<button onclick="logout()">Logout</button>
+				</div>
+			</div>
+			
+			
+			<script>
+				function toggleDropdown () {
+					const dropdown = document.getElementById("dropdownMenu");
+					dropdown.classList.toggle("hidden");
+				}
+				
+				async function logout () {
+					try {
+						const response = await fetch('/api/users/logout', {
+							method: 'POST',
+							credentials: 'same-origin'
+						});
+						
+						if (response.ok) {
+							window.location.href = '/login';
+						} else {
+							alert('Error logging out.');
+						}
+					} catch (err) {
+						console.error('Error:', err);
+						alert('Error logging out.');
+					}
+				}
+				
+				// Close the dropdown if clicked outside
+				window.onclick = function (event) {
+					const dropdown = document.getElementById("dropdownMenu");
+					if (!event.target.closest('.user-profile')) {
+						dropdown.classList.add("hidden");
+					}
+				};
+			</script>
+		</nav>
+		<!-- END SIDEBAR MENU TOP TRAY CONTENT-->
+		
+		<!-- START PAGE-CONTAINER -->
+		<div class="main-content">
+			<!-- END HEADER -->
+			<div class="logo flex justify-between items-center px-3">
+				<div class=" mt-[30px] flex items-center">
+					<!-- START BREADCRUMB -->
+					
+					<div class="flex items-center">
+						<a href="/" class="text-gray-500 hover:text-gray-700 hover:no-underline text-xl font-medium">Dashboard</a>
+						<svg class="w-4 h-4 mx-2 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+							<path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L11.586 10 7.293 5.707a1 1 0 011.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+						</svg>
+					</div>
+					
+					<a href="/contact-list" class="text-red-600 hover:text-gray-700 text-xl hover:no-underline font-medium">Contact List</a>
+					<!-- END BREADCRUMB -->
+				</div>
+			</div>
+			
+			<!-- START card -->
+			<div class="pt-3">
+				<div class="flex w-full justify-between items-center px-2">
+					<div class="">
+						<h6 class="p-3 text-2xl">Contact List</h6>
+					</div>
+					
+					<div class="flex items-center justify-evenly">
+						<div class="border flex rounded-lg items-center py-2 px-2 w-72 mr-3">
+							<svg xmlns="http://www.w3.org/2000/svg" height="14px" viewBox="0 -960 960 960" width="24px" fill="gray">
+								<path d="M784-120 532-372q-30 24-69 38t-83 14q-109 0-184.5-75.5T120-580q0-109 75.5-184.5T380-840q109 0 184.5 75.5T640-580q0 44-14 83t-38 69l252 252-56 56ZM380-400q75 0 127.5-52.5T560-580q0-75-52.5-127.5T380-760q-75 0-127.5 52.5T200-580q0 75 52.5 127.5T380-400Z" />
+							</svg>
+							<input type="search" id="searchInput" placeholder="Search by template name" class="outline-none focus:outline-none w-full" />
+							
+						</div>
+						
+						<div class="text-center pr-3">
+							<button aria-label="" onclick="document.location='contact-list/custom-field'" type="button" class="border py-2 px-2 rounded-lg transition-colors ease-in-out duration-300 hover:bg-gray-100 text-base font-medium">
+								Manage custom fields
+							</button>
+						</div>
+						
+						<button aria-label="Create new Contact list" type="button" id="create-List" class="inline-flex items-center px-4 py-3 border border-transparent text-sm font-medium rounded-md text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black">
+							<i class="fa-solid fa-plus pr-2"></i>
+							<span>Create new Contact list</span>
+						</button>
+					</div>
+					<!-- Pop-Up Modal to create List -->
+					<%- include('partials/createList') %>
+				</div>
+				
+				<!-- Contact list table -->
+				<div class="flex justify-center w-full pt-2">
+					<div class="w-[95%] ">
+						<%- include('partials/contactListTable') %>
+					</div>
+				</div>
+			</div>
+			
+			<!-- Pop-Up Modal to Edit List -->
+			<%- include('partials/editContactList') %>
+			
+			
+		</div>
+	</div>
+	<!-- END PAGE CONTAINER -->
+	
+	<!-- BEGIN VENDOR JS -->
+	<script src="assets/plugins/pace/pace.min.js" type="text/javascript"></script>
+	<!--  A polyfill for browsers that don't support ligatures: remove liga.js if not needed-->
+	<script src="assets/plugins/liga.js" type="text/javascript"></script>
+	<script src="assets/plugins/jquery/jquery-3.2.1.min.js" type="text/javascript"></script>
+	<script src="assets/plugins/modernizr.custom.js" type="text/javascript"></script>
+	<script src="assets/plugins/jquery-ui/jquery-ui.min.js" type="text/javascript"></script>
+	<script src="assets/plugins/popper/umd/popper.min.js" type="text/javascript"></script>
+	<script src="assets/plugins/bootstrap/js/bootstrap.min.js" type="text/javascript"></script>
+	<script src="assets/plugins/jquery/jquery-easy.js" type="text/javascript"></script>
+	<script src="assets/plugins/jquery-unveil/jquery.unveil.min.js" type="text/javascript"></script>
+	<script src="assets/plugins/jquery-ios-list/jquery.ioslist.min.js" type="text/javascript"></script>
+	<script src="assets/plugins/jquery-actual/jquery.actual.min.js"></script>
+	<script src="assets/plugins/jquery-scrollbar/jquery.scrollbar.min.js"></script>
+	<script type="text/javascript" src="assets/plugins/select2/js/select2.full.min.js"></script>
+	<script type="text/javascript" src="assets/plugins/classie/classie.js"></script>
+	<!-- END VENDOR JS -->
+	<!-- BEGIN CORE TEMPLATE JS -->
+	<!-- BEGIN CORE TEMPLATE JS -->
+	<script src="pages/js/pages.js"></script>
+	<!-- END CORE TEMPLATE JS -->
+	<!-- BEGIN PAGE LEVEL JS -->
+	<script src="assets/js/scripts.js" type="text/javascript"></script>
+	<!-- END PAGE LEVEL JS -->
+	<!-- END CORE TEMPLATE JS -->
+	<!-- BEGIN PAGE LEVEL JS -->
+	<script src="assets/js/card.js" type="text/javascript"></script>
+	<script src="assets/js/scripts.js" type="text/javascript"></script>
+	<!-- <script src="https://kit.fontawesome.com/44e4e59292.js" crossorigin="anonymous"></script> -->
+	<script src="/contact-list/js/createList.js"></script>
+	<script src="/contact-list/js/editContactList.js"></script>
+	<!-- END PAGE LEVEL JS -->
+</body>
+
+</html>

@@ -41,7 +41,8 @@ class AttributeManager {
 		this.container.innerHTML = "";
 
 		// Process HEADER dynamic variables
-		this.container.innerHTML += template?.dynamicVariables?.header?.map((variableObj, index) => {
+		this.container.innerHTML += template?.dynamicVariables?.header
+			?.map((variableObj, index) => {
 				const variableKey = Object.keys(variableObj)[0]; // Get the variable key, e.g., '1'
 				return `
                 <div class=" mt-3">
@@ -61,7 +62,8 @@ class AttributeManager {
 			.join("");
 
 		// Process BODY dynamic variables
-		this.container.innerHTML += template?.dynamicVariables?.body?.map((variableObj, index) => {
+		this.container.innerHTML += template?.dynamicVariables?.body
+			?.map((variableObj, index) => {
 				const variableKey = Object.keys(variableObj)[0]; // Get the variable key, e.g., '1'
 				return `
                 <div class=" mt-3">
@@ -81,7 +83,8 @@ class AttributeManager {
 			.join("");
 
 		// Process FOOTER dynamic variables
-		this.container.innerHTML += template?.dynamicVariables?.footer?.map((variableObj, index) => {
+		this.container.innerHTML += template?.dynamicVariables?.footer
+			?.map((variableObj, index) => {
 				const variableKey = Object.keys(variableObj)[0]; // Get the variable key, e.g., '1'
 				return `
                 <div class=" mt-3">
@@ -371,6 +374,16 @@ class TemplateManager {
 	async handleFormSubmit(event, actionType) {
 		event.preventDefault();
 
+		// Get the target button
+		const button = event.target;
+		const loader = button.querySelector(".loader");
+		const buttonText = button.querySelector(".button-text");
+
+		// Disable the button and show the spinner
+		button.disabled = true;
+		loader.classList.remove("hidden");
+		buttonText.classList.add("hidden");
+
 		// Create form data
 		const formData = new FormData(this.campaignForm);
 		formData.append("templateId", this.templateSelect.val());
@@ -391,10 +404,12 @@ class TemplateManager {
 					formData.append("schedule", unixTimestamp); // Append the schedule timestamp
 				} else {
 					alert("Invalid date or time. Please check your selection.");
+					resetButton(button, loader, buttonText);
 					return;
 				}
 			} else {
 				alert("Please select both date and time for scheduling.");
+				resetButton(button, loader, buttonText);
 				return;
 			}
 		} else if (actionType === "sendNow") {
@@ -431,8 +446,12 @@ class TemplateManager {
 		} catch (error) {
 			console.error("Error submitting campaign:", error);
 			alert("An error occurred while creating the campaign.");
+		} finally {
+			resetButton(button, loader, buttonText);
 		}
 	}
+
+	// Helper function to reset button state after form submission
 }
 $(document).ready(() => {
 	new TemplateManager();
@@ -502,5 +521,9 @@ $(document).ready(() => {
 		allowInput: true,
 	});
 });
-
+function resetButton(button, loader, buttonText) {
+	button.disabled = false;
+	loader.classList.add("hidden");
+	buttonText.classList.remove("hidden");
+}
 function schedule() {}

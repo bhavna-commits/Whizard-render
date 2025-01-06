@@ -40,7 +40,7 @@ export async function sendMessages(campaign, id, unique_id) {
 				campaign.variables,
 				contact,
 			);
-			console.log(JSON.stringify(personalizedMessage));
+			// console.log(JSON.stringify(personalizedMessage));
 			// Send message using WhatsApp (assuming wa_id is the phone number)
 			const response = await sendMessageThroughWhatsApp(
 				template.name,
@@ -84,30 +84,25 @@ function replaceDynamicVariables(template, variables, contact) {
 		const headerComponent = template.components.find(
 			(c) => c.type === "HEADER",
 		);
-		if (headerComponent) {
+		if (headerComponent && template.dynamicVariables.header.length > 0) {
 			let headerParameters = [];
 			if (headerComponent.format === "TEXT") {
-				let headerText = headerComponent.text || "";
-				for (let [key, value] of Object.entries(
-					template.dynamicVariables.header || {},
-				)) {
-					// Replace {key} in header with corresponding value from contact.masterExtra
-					headerText = headerText.replace(
-						`{{${key}}}`,
-						contact.masterExtra[value] || "",
-					);
-				}
-				headerParameters.push({ type: "text", text: headerText });
-			} else if (
-				["IMAGE", "VIDEO", "DOCUMENT"].includes(headerComponent.format)
-			) {
-				const mediaUrl = headerComponent.example?.header_handle[0];
-				if (mediaUrl) {
-					headerParameters.push({
-						type: headerComponent.format.toLowerCase(),
-						link: mediaUrl,
-					});
-				}
+				template.dynamicVariables.header.forEach((headVar) => {
+					let key = Object.keys(headVar)[0];
+					console.log(variables.get(key));
+					if (variables.get(key) === "Name") {
+						headerParameters.push({
+							type: "text",
+							text: contact.Name || "",
+						});
+					} else if (variables.get(key)) {
+						console.log("here");
+						headerParameters.push({
+							type: "text",
+							text: contact.masterExtra[variables.get(key)] || "",
+						});
+					}
+				});
 			}
 
 			if (headerParameters.length > 0) {
@@ -122,40 +117,29 @@ function replaceDynamicVariables(template, variables, contact) {
 		const bodyComponent = template.components.find(
 			(c) => c.type === "BODY",
 		);
-		if (bodyComponent) {
+		if (bodyComponent && template.dynamicVariables.body.length > 0) {
 			let bodyParameters = [];
-			for (let [key, value] of Object.entries(
-				template.dynamicVariables.body || {},
-			)) {
-				// Replace {key} in body with corresponding value from contact.masterExtra
-				bodyParameters.push({
-					type: "text",
-					text: contact.masterExtra[value] || "",
-				});
-			}
+
+			template.dynamicVariables.body.forEach((bodyVar) => {
+				let key = Object.keys(bodyVar)[0];
+				console.log(variables.get(key));
+
+				if (variables.get(key) == "Name") {
+					bodyParameters.push({
+						type: "text",
+						text: contact.Name || "",
+					});
+				} else if (variables.get(key)) {
+					bodyParameters.push({
+						type: "text",
+						text: contact.masterExtra[variables.get(key)] || "",
+					});
+				}
+			});
+
 			messageComponents.push({
 				type: "body",
 				parameters: bodyParameters,
-			});
-		}
-
-		// Process dynamic variables in Footers (if necessary)
-		const footerComponent = template.components.find(
-			(c) => c.type === "FOOTER",
-		);
-		if (footerComponent) {
-			let footerText = footerComponent.text || "";
-			for (let [key, value] of Object.entries(
-				template.dynamicVariables.footer || {},
-			)) {
-				footerText = footerText.replace(
-					`{{${key}}}`,
-					contact.masterExtra[value] || "",
-				);
-			}
-			messageComponents.push({
-				type: "footer",
-				parameters: [{ type: "text", text: footerText }],
 			});
 		}
 

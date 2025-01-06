@@ -14,7 +14,7 @@ const CampaignReportSchema = new mongoose.Schema({
 		enum: ["SENT", "DELIVERED", "READ", "FAILED"],
 		required: true,
 	},
-	timestamp: { type: Date, default: Date.now },
+	timestamp: { type: Date, default: Date.now() },
 });
 
 export default mongoose.model("CampaignReport", CampaignReportSchema);

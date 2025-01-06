@@ -9,6 +9,7 @@ import {
 } from "./template.functions.controller.js";
 import ActivityLogs from "../../models/activityLogs.model.js";
 import Permissions from "../../models/permissions.model.js";
+import { generateUniqueId } from "../../utils/otpGenerator.js";
 
 dotenv.config();
 
@@ -133,12 +134,10 @@ export const duplicateTemplate = async (req, res) => {
 
 		// Create a new template with the same data but a new _id
 		const newTemplate = new Template({
-			...originalTemplate.toObject(), // Copy all properties
-			_id: undefined, // Remove _id to generate a new one
+			...originalTemplate.toObject(), 
 			createdAt: new Date(),
 			updatedAt: new Date(),
-			unique_id: `unique_${Date.now()}`, // Generate a new unique ID
-			status: "pending", // New template starts as pending
+			unique_id: generateUniqueId(), // Generate a new unique ID
 		});
 
 		// Save the duplicated template

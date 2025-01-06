@@ -27,7 +27,22 @@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
 	
 	<!-- <link href="styles/createList.css" rel="stylesheet" type="text/css" /> -->
-	
+	<style>
+		.loader {
+			border: 2px solid rgba(255, 255, 255, 0.2);
+			border-left-color: #fff;
+			border-radius: 50%;
+			width: 1rem;
+			height: 1rem;
+			animation: spin 1s linear infinite;
+		}
+		
+		@keyframes spin {
+			to {
+				transform: rotate(360deg);
+			}
+		}
+	</style>
 </head>
 
 <body>
@@ -202,12 +217,16 @@
 										</div>
 									</div>
 									
+									<!-- Schedule Button -->
 									<button type="button" id="scheduleButton" class="w-full bg-black text-white py-2 rounded-md hover:bg-gray-800 transition-colors hidden">
-										Schedule Campaign
+										<span class="inline-block loader hidden"></span>
+										<span class="button-text">Schedule Campaign</span>
 									</button>
 									
+									<!-- Send Now Button -->
 									<button type="button" id="sendNowButton" class="w-full bg-black text-white py-2 rounded-md hover:bg-gray-800 transition-colors">
-										Send Now
+										<span class="inline-block loader hidden"></span>
+										<span class="button-text">Send Now</span>
 									</button>
 								</div>
 							</form>

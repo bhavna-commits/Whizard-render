@@ -1,0 +1,167 @@
+<div class="py-3">
+	<% if (contacts && contacts.length > 0) { %>
+	<div class="">
+		<table class="text-center min-w-full border-separate border-spacing-y-4">
+			<tbody>
+				<tr class="text-gray-500 ">
+					<td class="">Sno.</td>
+					<td class="w-fit">Contact List Name</td>
+					<td class="">Number of Participants</td>
+					<td class="">Created At</td>
+					<td class="">Actions</td>
+				</tr>
+				<% contacts.forEach((contact, index) => { %>
+				<tr class="hover:bg-green-100 cursor-pointer border" onclick="window.location.href='/contact-list/overview/<%= contact.contactId %>'">
+					<td class="border-l border-t border-b rounded-lg py-4 border-gray-200 text-sm text-gray-500">
+						<%= index + 1 %>
+					</td>
+					<td class="border-t border-b border-gray-200">
+						<a href="#" class="text-blue-600 hover:underline">
+							<div class="">
+								<p class="text-gray-700 font-semibold"><%= contact.contalistName %></p>
+							</div>
+						</a>
+					</td>
+					<td class="text-gray-500 border-t border-b border-gray-200">
+						<%= contact.participantCount %>
+					</td>
+					<td class="text-gray-500 border-t border-b border-gray-200">
+						<%= new Date(contact.adddate).toLocaleString('en-GB', {
+							year: 'numeric',
+							month: 'short',
+							day: '2-digit'
+						}) %>
+					</td>
+					<td class="border-r border-t border-b rounded-lg border-gray-200">
+						<!-- Edit Button -->
+						<button aria-label="Edit contact" class="text-gray-600 hover:text-blue-600 px-3 border-r" onclick="event.stopPropagation(); location.href='/contact-list/createCampaign'">
+							<i class="fa-solid fa-paper-plane"></i>
+						</button>
+						<!-- Delete Button -->
+						<button aria-label="Delete contact" class="text-gray-600 hover:text-red-600 px-2" onclick="event.stopPropagation(); openDeleteModal('<%= contact.contactId %>', '<%= contact.contalistName %>');">
+							<i class="fa-regular fa-trash-can"></i>
+						</button>
+					</td>
+				</tr>
+				<% }); %>
+			</tbody>
+		</table>
+	</div>
+	<!-- Pagination -->
+	<div class="flex items-center justify-center py-4 space-x-4">
+		<nav class="flex items-center">
+			<ul class="flex space-x-1">
+				<!-- Previous Button -->
+				<li>
+					<a href="/contact-list?page=<%= page > 1 ? page - 1 : 1 %>" class="px-3 py-2 rounded-md text-sm font-medium text-gray-500 bg-white border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed" <%= page === 1 ? 'aria-disabled="true"' : '' %>>‹</a>
+				</li>
+				
+				<!-- First Page Button -->
+				<li>
+					<a href="/contact-list?page=1" class="px-3 py-2 rounded-md text-sm font-medium <%= page === 1 ? 'text-white bg-blue-600 border-blue-600' : 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50' %>">1</a>
+				</li>
+				
+				<% if (page > 3) { %>
+				<!-- Show "..." if current page is greater than 3 -->
+				<li><span class="px-3 py-2 text-sm text-gray-500">...</span></li>
+				<% } %>
+				
+				<!-- Dynamic Page Numbers based on current page -->
+				<% for (let i = Math.max(2, page - 1); i <= Math.min(totalPages - 1, page + 1); i++) { %>
+				<li>
+					<a href="/contact-list?page=<%= i %>" class="px-3 py-2 rounded-md text-sm font-medium <%= i === page ? 'text-white bg-blue-600 border-blue-600' : 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50' %>"><%= i %></a>
+				</li>
+				<% } %>
+				
+				<% if (page < totalPages - 2) { %>
+				<!-- Show "..." if there are more pages -->
+				<li><span class="px-3 py-2 text-sm text-gray-500">...</span></li>
+				<% } %>
+				
+				<!-- Last Page Button -->
+				<% if (totalPages > 1) { %>
+				<li>
+					<a href="/contact-list?page=<%= totalPages %>" class="px-3 py-2 rounded-md text-sm font-medium <%= page === totalPages ? 'text-white bg-blue-600 border-blue-600' : 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50' %>"><%= totalPages %></a>
+				</li>
+				<% } %>
+				
+				<!-- Next Button -->
+				<li>
+					<a href="/contact-list?page=<%= page < totalPages ? page + 1 : totalPages %>" class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50">›</a>
+				</li>
+			</ul>
+		</nav>
+		
+		<!-- "Go to page" input -->
+		<div class="flex items-center space-x-2">
+			<span class="text-sm text-gray-700">Go to page</span>
+			<input type="number" min="1" max="<%= totalPages %>" class="w-16 px-2 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" value="<%= page %>" id="pageInput" />
+			<button type="button" class="px-3 py-1 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" onclick="goToPage()">Go</button>
+		</div>
+	</div>
+	
+	<script>
+		function goToPage () {
+			const pageInput = document.getElementById('pageInput');
+			const page = parseInt(pageInput.value);
+			const totalPages = <%= totalPages %>;
+			
+			if (page > totalPages) {
+				alert("Page doesn't exist. Try a lower number.");
+				pageInput.value = <%= page %>; // Reset input to the current page
+			} else if (page < 1) {
+				alert("Page number should be at least 1.");
+				pageInput.value = <%= page %>;
+			} else {
+				window.location.href = `/contact-list?page=${page}`;
+			}
+		}
+	</script>
+	
+	
+	
+	
+	<% } else { %>
+	<!-- Empty state -->
+	<div class="flex flex-col items-center justify-center min-h-[400px]  rounded-lg mt-4">
+		<div class="text-center">
+			<img src="https://img.freepik.com/free-vector/hands-holding-tablet-with-forefinger-clicking-start-button-new-application-launch-flat-illustration_74855-20595.jpg?ga=GA1.1.131490893.1732525963&semt=ais_hybrid" alt="No contacts" class="w-48 h-48 mx-auto mb-4">
+			
+			<h3 class="text-xl font-semibold text-gray-900 mb-2">No contact list yet</h3>
+			<p class="text-gray-600 mb-6">Start adding contacts by clicking on "Create new Contact list"</p>
+			<button onclick="document.getElementById('create-List').click()" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black">
+				<i class="fa-solid fa-plus pr-2"></i>
+				Create new Contact list
+			</button>
+		</div>
+	</div>
+	<% } %>
+</div>
+<!-- Edit Modal Structure -->
+
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="deleteModalLabel">
+					Delete Contact
+				</h5>
+			</div>
+			<div class="modal-body">
+				Are you sure you want to delete
+				<strong id="deleteContactName"></strong>?
+				<input type="text" class="hidden" id="deleteContactId" />
+			</div>
+			<div class="modal-footer">
+				<form id="deleteContactForm">
+					<button type="button" class="btn btn-secondary" id="cancelDeleteBtn">
+						Cancel
+					</button>
+					<button id="confirmDeleteBtn" type="button" class="btn btn-danger">
+						Delete
+					</button>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>

@@ -133,9 +133,9 @@ function replaceVariableWithSpan(templatePart, variable, value) {
 	if (!templatePart) return "";
 
 	const regex = new RegExp(`{{\\s*${variable}\\s*}}`, "g");
-	const spanTemplate = `<span id="${variable}">${
-		value || `{{${variable}}}`
-	}</span>`;
+	// const spanTemplate = `<span id="${variable}">${
 
-	return templatePart.replace(regex, spanTemplate);
+	// }</span>`;
+
+	return templatePart.replace(regex, value || `{{${variable}}}`);
 }
