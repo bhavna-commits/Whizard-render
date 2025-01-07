@@ -7,12 +7,14 @@ import contactListRoute from "./backEnd-Routes/contactList.backEnd.routes.js";
 import settingsFrontRoute from "./frontEnd-Routes/setting.frontEnd.routes.js";
 import settingsbackEndRoute from "./backEnd-Routes/settings.backEnd.routes.js";
 import faceBookBackEndRoute from "./backEnd-Routes/facebook.backEnd.routes.js";
+import reportsFrontEndRoute from "./frontEnd-Routes/reports.frontEnd.routes.js";
 import { checkSession } from "./middleWares/checkSession.js";
 import app from "./static.app.js";
 
 app.use("/", userfrontEndRoutes, tempalteFrontEndRoutes);
 app.use("/api/users", userRoutes);
 app.use("/", checkSession, tempalteFrontEndRoutes);
+app.use("/reports", checkSession, reportsFrontEndRoute);
 app.use("/settings", checkSession, settingsFrontRoute);
 app.use("/contact-list", checkSession, contactFrontEndRoutes);
 app.use("/api/templates", checkSession, templatesRoutes);

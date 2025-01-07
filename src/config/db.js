@@ -1,3 +1,4 @@
+import Agenda from "agenda";
 import mongoose from "mongoose";
 
 // MongoDB connection function
@@ -13,3 +14,8 @@ export const connectDB = async () => {
     process.exit(1); // Exit process if connection fails
   }
 };
+
+const mongoConnectionString = process.env.MONGO_URI;
+export const agenda = new Agenda({
+	db: { address: mongoConnectionString, collection: "agendaJobs" },
+});

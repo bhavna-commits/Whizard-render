@@ -248,3 +248,16 @@ function getSampleCSV() {
 			alert("There was an error downloading the file.");
 		});
 }
+
+document.getElementById("searchInput").addEventListener("input", async () => {
+	try {
+		console.log("here")
+		const res = await fetch(`/contact-list/search?query=${this.value}`);
+		const data = await res.json();
+		const table = document.getElementById("contactListTable");
+		table.innerHTML = "";
+		table.innerHTML += data;
+	} catch (error) {
+		alert(error);
+	}
+});

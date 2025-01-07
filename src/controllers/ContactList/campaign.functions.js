@@ -1,10 +1,13 @@
 import dotenv from "dotenv";
 import cron from "node-cron";
+
 import axios from "axios";
+import { agenda } from "../../config/db.js";
 import Template from "../../models/templates.model.js";
 import Contacts from "../../models/contacts.model.js";
 import Campaign from "../../models/campaign.model.js";
 import Report from "../../models/report.model.js";
+import { generateUniqueId } from "../../utils/otpGenerator.js";
 
 dotenv.config();
 
@@ -61,6 +64,7 @@ export async function sendMessages(campaign, id, unique_id) {
 			const report = new Report({
 				useradmin: id,
 				unique_id,
+				campaignName: campaign.name,
 				campaignId: campaign.unique_id,
 				recipientPhone: contact.wa_id,
 				status: response.status,
@@ -196,18 +200,52 @@ async function sendMessageThroughWhatsApp(name, phone, messageComponents) {
 	}
 }
 
+agenda.define("process campaign", async (job) => {
+	const { campaignId } = job.attrs.data;
+
+	try {
+		// Fetch the campaign details
+		const campaign = await Campaign.findById(campaignId);
+
+		if (campaign && campaign.status === "IN_QUEUE") {
+			await sendMessages(
+				campaign,
+				campaign.useradmin,
+				generateUniqueId(),
+			);
+			await Campaign.findByIdAndUpdate(campaignId, { status: "SENT" });
+			console.log(`Campaign ${campaignId} has been successfully sent.`);
+		}
+	} catch (error) {
+		console.error(`Error processing campaign ${campaignId}:`, error);
+	}
+});
+
+const scheduleCampaign = async (campaign) => {
+	const { scheduledAt, _id } = campaign;
+	// console.log(new Date(scheduledAt));
+	// Schedule the job to run at the specified time (use Date object or timestamp)
+	agenda.schedule(new Date(scheduledAt), "process campaign", {
+		campaignId: _id,
+	});
+
+	// Mark the campaign as IN_QUEUE so it won’t be processed multiple times
+	await Campaign.findByIdAndUpdate(_id, { status: "IN_QUEUE" });
+	console.log(`Campaign ${_id} scheduled successfully.`);
+};
+
 cron.schedule("* * * * *", async () => {
 	try {
-		const now = new Date();
-
+		const now = Date.now();
+		console.log(now);
+		// Find all campaigns that are scheduled to be sent
 		const scheduledCampaigns = await Campaign.find({
 			scheduledAt: { $lte: now },
 			status: "SCHEDULED",
 		});
 
 		for (let campaign of scheduledCampaigns) {
-			await sendMessages(campaign);
-			await Campaign.findByIdAndUpdate(campaign._id, { status: "SENT" });
+			await scheduleCampaign(campaign);
 		}
 	} catch (error) {
 		console.error("Error checking scheduled campaigns:", error);

@@ -18,7 +18,7 @@ router.post("/auth_code", async (req, res) => {
 
 		const data = await response.json();
 
-		if (response.ok) {
+	if (response.ok) {
 			const accessToken = data.access_token;
 			await User.findByIdAndUpdate(req.session.user.id, { accessToken });
 			res.json({ access_token: accessToken });

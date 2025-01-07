@@ -371,6 +371,11 @@ class TemplateManager {
 		console.log("Attributes selected:", variables);
 	}
 
+	
+	convertDateFormat(dateString) {
+		return dateString.replace(/(\d{2})\/(\d{2})\/(\d{4})/g, "$2/$1/$3");
+	}
+
 	async handleFormSubmit(event, actionType) {
 		event.preventDefault();
 
@@ -388,6 +393,7 @@ class TemplateManager {
 		const formData = new FormData(this.campaignForm);
 		formData.append("templateId", this.templateSelect.val());
 		formData.append("contactListId", this.recipientSelect.val());
+		formData.append("name", document.getElementById("campaign-name").value);
 
 		// Check if scheduling or sending immediately
 		if (actionType === "schedule") {
@@ -396,9 +402,11 @@ class TemplateManager {
 
 			// Make sure the user selected a valid date and time for scheduling
 			if (selectedDate && selectedTime) {
-				const dateTimeString = `${selectedDate} ${selectedTime}`;
+				const convertedDateString =
+					this.convertDateFormat(selectedDate);
+				const dateTimeString = `${convertedDateString} ${selectedTime}`;
 				const dateTime = new Date(dateTimeString);
-
+				console.log(dateTime);
 				if (!isNaN(dateTime.getTime())) {
 					const unixTimestamp = Math.floor(dateTime.getTime() / 1000);
 					formData.append("schedule", unixTimestamp); // Append the schedule timestamp
@@ -440,6 +448,7 @@ class TemplateManager {
 			const result = await response.json();
 			if (response.ok) {
 				alert("Campaign created successfully!");
+				// location.href = "/reports/campaign-list";
 			} else {
 				alert(`Error: ${result.message}`);
 			}

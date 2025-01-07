@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import https from "https";
 import fs from "fs";
 import path from "path";
+import { agenda } from "./config/db.js";
 
 dotenv.config();
 
@@ -21,7 +22,17 @@ const certificate = fs.readFileSync(
 );
 const credentials = { key: privateKey, cert: certificate };
 
-// HTTPS server
+agenda.on("ready", async () => {
+	console.log("Agenda started");
+	await agenda.start();
+});
+
+process.on("SIGTERM", async () => {
+	console.log("Stopping Agenda...");
+	await agenda.stop();
+	process.exit(0);
+});
+
 const PORT = process.env.PORT || 5001;
 https.createServer(credentials, app).listen(PORT, () => {
 	console.log(`Server running securely on https://localhost:${PORT}`);

@@ -96,7 +96,7 @@ function updatePreview() {
 	};
 
 	Object.entries(sections).forEach(([key, element]) => {
-		console.log(currentTemplateData[key]);
+		// console.log(currentTemplateData[key]);
 		if (element && currentTemplateData[key]) {
 			element.innerHTML = currentTemplateData[key].replace(/\n/g, "<br>");
 		}
@@ -106,7 +106,7 @@ function updatePreview() {
 function handleInputChange(event) {
 	const variable = event.target.dataset.variable;
 	const value = event.target.value.trim();
-
+	
 	if (originalTemplateData.headerType === "text") {
 		currentTemplateData.header = replaceVariableWithSpan(
 			originalTemplateData.header,
@@ -133,9 +133,9 @@ function replaceVariableWithSpan(templatePart, variable, value) {
 	if (!templatePart) return "";
 
 	const regex = new RegExp(`{{\\s*${variable}\\s*}}`, "g");
-	// const spanTemplate = `<span id="${variable}">${
+	const spanTemplate = `<input class="bg-transparent" id="${variable}" value="${
+		value || `{{${variable}}}`
+	}" />`;
 
-	// }</span>`;
-
-	return templatePart.replace(regex, value || `{{${variable}}}`);
+	return templatePart.replace(regex, spanTemplate);
 }

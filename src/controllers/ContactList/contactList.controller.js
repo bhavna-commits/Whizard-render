@@ -88,6 +88,20 @@ export const previewContactList = async (req, res) => {
 				col !== "Number",
 		);
 
+		// Check for duplicate numbers and add to invalid columns
+		const numbers = parsedData.map((contact) => contact.Number);
+		const uniqueNumbers = new Set(numbers);
+		const duplicateNumbers = numbers.filter(
+			(number, index) => numbers.indexOf(number) !== index,
+		);
+
+		// If duplicates found, treat them as invalid columns
+		if (duplicateNumbers.length > 0) {
+			invalidColumns.push(
+				`Duplicate numbers: ${duplicateNumbers.join(", ")}`,
+			);
+		}
+
 		// Generate table HTML and check for empty fields
 		const { tableHtml, emptyFields } = generateTableAndCheckFields(
 			parsedData,
@@ -158,7 +172,7 @@ export const createList = async (req, res) => {
 
 		const number = user.phone;
 		req.session.user.name = user.name;
-		console.log(number);
+		// console.log(number);
 		const participantCount = parsedData.length;
 
 		// Create a new Contact List
@@ -168,8 +182,6 @@ export const createList = async (req, res) => {
 			participantCount,
 			contactId: generateUniqueId(),
 		});
-
-		await contactList.save();
 
 		const contactsToSave = parsedData
 			.map((contactData) => {
@@ -209,6 +221,8 @@ export const createList = async (req, res) => {
 
 		req.session.user.contactListCSV = null;
 		req.session.user.listName = null;
+
+		await contactList.save();
 
 		res.json({
 			success: true,
@@ -681,14 +695,14 @@ export const getCampaignContacts = async (req, res) => {
 
 export const searchContactLists = async (req, res) => {
 	const { query } = req.query;
-
+	console.log("here");
 	try {
 		// Perform a case-insensitive search on the contact list name
 		const contacts = await ContactList.find({
 			ContactListName: { $regex: query, $options: "i" },
 		});
 
-		res.json({ contacts });
+		res.render("Contact-List/partials/contactListTable", { contacts });
 	} catch (error) {
 		console.error("Error fetching contact lists:", error);
 		res.status(500).json({ message: "Error fetching contact lists" });

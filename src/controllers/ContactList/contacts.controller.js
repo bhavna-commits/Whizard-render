@@ -292,7 +292,7 @@ export const createContact = async (req, res) => {
 
 export const createCampaign = async (req, res) => {
 	try {
-		let { templateId, contactListId, variables, schedule } = req.body;
+		let { templateId, contactListId, variables, schedule, name } = req.body;
 
 		// Validate and parse variables
 		variables =
@@ -308,16 +308,14 @@ export const createCampaign = async (req, res) => {
 
 		// Create new campaign object
 		const newCampaign = new Campaign({
+			useradmin: req.session.user.id,
 			unique_id: generateUniqueId(),
 			templateId,
 			contactListId,
 			variables,
+			name,
 		});
 
-		//
-		JSON.stringify(variables);
-		console.log(variables);
-		// Schedule the campaign or send immediately
 		if (!schedule) {
 			await sendMessages(
 				newCampaign,
@@ -325,7 +323,7 @@ export const createCampaign = async (req, res) => {
 				generateUniqueId(),
 			);
 		} else {
-			newCampaign.scheduledAt = new Date(schedule);
+			newCampaign.scheduledAt = Number(schedule) * 1000;
 			newCampaign.status = "SCHEDULED";
 		}
 

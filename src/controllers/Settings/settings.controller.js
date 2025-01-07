@@ -21,7 +21,7 @@ export const profile = async (req, res) => {
 	const id = req.session.user.id;
 
 	try {
-		const user = await User.findById(id);
+		const user = await User.findOne({ unique_id: id });
 
 		if (!user) {
 			return res.status(404).json({ message: "User not found" });
@@ -92,7 +92,7 @@ export const updatePassword = async (req, res) => {
 		? (id = req.session.addedUser.id)
 		: (id = req.session.user.id);
 
-	const user = await User.findById(id);
+	const user = await User.findOne({ unique_id: id });
 
 	if (!user) {
 		const addedUser = AddedUser.findById(id);
@@ -166,7 +166,7 @@ export const accountDetails = async (req, res) => {
 	const id = req.session.user.id;
 
 	try {
-		const user = await User.findById(id);
+		const user = await User.findOne({ unique_id: id });
 
 		if (!user) {
 			return res.status(404).json({ message: "User not found" });
@@ -187,7 +187,7 @@ export const accountDetails = async (req, res) => {
 	}
 };
 
-export const updateAccountDetails = async (req, res) => {
+export const updateAccountDetails = async (req, res) => {	
 	try {
 		const {
 			name: companyName,
@@ -201,8 +201,8 @@ export const updateAccountDetails = async (req, res) => {
 		} = req.body;
 		// console.log(req.body);
 
-		const updatedUser = await User.findByIdAndUpdate(
-			req.session.user.id,
+		const updatedUser = await User.findOneAndUpdate(
+			{ unique_id: req.session.user.id },
 			{
 				companyName,
 				companyDescription: description,

@@ -9,6 +9,7 @@ app.use("/Contact-List/custom-field", express.static("public"));
 app.use("/Settings/profile", express.static("public"));
 app.use("/Settings/account-details", express.static("public"));
 app.use("/Settings/activity-logs", express.static("public"));
+app.use("/Reports/campaign-list", express.static("public"));
 
 const __dirname = path.resolve();
 
@@ -28,6 +29,11 @@ app.use(
 app.use(
 	"/settings/js",
 	express.static(path.join(__dirname, "views/Settings/js")),
+);
+
+app.use(
+	"/reports/js",
+	express.static(path.join(__dirname, "views/Reports/js")),
 );
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
