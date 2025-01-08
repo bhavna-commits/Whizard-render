@@ -59,7 +59,7 @@ export async function sendMessages(campaign, id, unique_id) {
 					`Failed to send message to ${contact.wa_id}: ${response.response}`,
 				);
 			}
-
+			console.log(JSON.stringify(response));
 			// Create a report for each sent message
 			const report = new Report({
 				useradmin: id,
@@ -68,6 +68,7 @@ export async function sendMessages(campaign, id, unique_id) {
 				campaignId: campaign.unique_id,
 				recipientPhone: contact.wa_id,
 				status: response.status,
+				messageId: response.response.messages[0].id,
 			});
 			await report.save();
 		}
@@ -237,7 +238,7 @@ const scheduleCampaign = async (campaign) => {
 cron.schedule("* * * * *", async () => {
 	try {
 		const now = Date.now();
-		console.log(now);
+		// console.log(now);
 		// Find all campaigns that are scheduled to be sent
 		const scheduledCampaigns = await Campaign.find({
 			scheduledAt: { $lte: now },

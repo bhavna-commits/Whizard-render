@@ -9,42 +9,48 @@ export const getCampaignReports = async (req, res) => {
 		const limit = 6; // Results per page
 		const skip = (page - 1) * limit; // Calculate how many records to skip
 
-		// Prepare the match object for aggregation
-		let matchQuery = {
-			useradmin: userId,
-			deleted: { $ne: true },
-		};
-
-		const result = await Reports.aggregate([
+		// Fetch campaigns created by the user
+		const campaigns = await Campaign.aggregate([
 			{
-				$match: matchQuery,
-			},
-			{
-				$group: {
-					_id: "$campaignId",
-					messagesSent: { $sum: 1 },
-					messagesFailed: {
-						$sum: {
-							$cond: [{ $eq: ["$status", "FAILED"] }, 1, 0],
-						},
-					},
-					totalDelivered: {
-						$sum: {
-							$cond: [{ $eq: ["$status", "DELIVERED"] }, 1, 0],
-						},
-					},
-					createdAt: { $max: "$timestamp" },
+				$match: {
+					useradmin: userId,
+					deleted: { $ne: true }, // If you have a deleted field in campaigns
 				},
 			},
 			{
 				$lookup: {
-					from: "campaigns",
-					localField: "_id",
-					foreignField: "unique_id",
-					as: "campaignDetails",
+					from: "campaignreports", // Use the name of the reports collection
+					localField: "unique_id",
+					foreignField: "campaignId",
+					as: "reports",
 				},
 			},
-			{ $unwind: "$campaignDetails" },
+			{
+				$addFields: {
+					messagesSent: { $size: "$reports" },
+					messagesFailed: {
+						$size: {
+							$filter: {
+								input: "$reports",
+								as: "report",
+								cond: { $eq: ["$$report.status", "FAILED"] },
+							},
+						},
+					},
+					totalDelivered: {
+						$size: {
+							$filter: {
+								input: "$reports",
+								as: "report",
+								cond: { $eq: ["$$report.status", "DELIVERED"] },
+							},
+						},
+					},
+				},
+			},
+			{
+				$sort: { createdAt: -1 },
+			},
 			{
 				$facet: {
 					paginatedResults: [{ $skip: skip }, { $limit: limit }],
@@ -53,11 +59,10 @@ export const getCampaignReports = async (req, res) => {
 			},
 		]);
 
-		const paginatedResults = result[0]?.paginatedResults || [];
-		const totalCount = result[0]?.totalCount[0]?.total || 0;
-
+		const paginatedResults = campaigns[0]?.paginatedResults || [];
+		const totalCount = campaigns[0]?.totalCount[0]?.total || 0;
 		const totalPages = Math.ceil(totalCount / limit);
-
+		// console.log(paginatedResults);
 		res.render("Reports/campaign", {
 			campaigns: paginatedResults,
 			page,
@@ -72,98 +77,84 @@ export const getCampaignReports = async (req, res) => {
 export const getCampaignReportsFilter = async (req, res) => {
 	try {
 		const userId = req.session.user.id;
-		const page = parseInt(req.query.page) || 1; // Current page
-		const limit = 6; // Results per page
-		const skip = (page - 1) * limit; // Calculate how many records to skip
+		const page = parseInt(req.query.page) || 1;
+		const limit = 6;
+		const skip = (page - 1) * limit;
 
 		const { status, timeFrame } = req.query;
-
-		// Initial match object for CampaignReport fields
-		let initialMatch = {
+		// console.log(status);
+		// Match query for campaigns
+		let matchQuery = {
 			useradmin: userId,
-			deleted: { $ne: true },
+			deleted: { $ne: true }, // Adjust based on your campaign schema
 		};
-		console.log(status);
-		// Apply status filter on CampaignReport
+
 		if (status === "scheduled") {
-			initialMatch["status"] = "SCHEDULED";
+			matchQuery["status"] = { $in: ["SCHEDULED", "IN_QUEUE"] };
+		} else if (status === "all") {
+			// Remove any filtering on status for 'all'
+			delete matchQuery["status"];
 		} else {
-			initialMatch["status"] = { $ne: "SCHEDULED" };
+			matchQuery["status"] = { $nin: ["SCHEDULED", "IN_QUEUE"] };
 		}
 
-		let startTimestamp;
-		let endTimestamp;
-		// Apply time frame filter on CampaignReport (if applicable)
-		// Note: Adjust this if you intend to filter based on Campaign's createdAt
+		// console.log(matchQuery);
+		// Apply time frame filter on campaigns
 		if (timeFrame) {
 			const [startDateStr, endDateStr] = timeFrame.split(" to ");
 			if (startDateStr && endDateStr) {
-				console.log(startDateStr, endDateStr);
 				const startDate = new Date(startDateStr);
 				const endDate = new Date(endDateStr);
 
 				startDate.setHours(0, 0, 0, 0);
 				endDate.setHours(23, 59, 59, 999);
 
-				startTimestamp = startDate.getTime();
-				endTimestamp = endDate.getTime();
-				console.log(startTimestamp, endTimestamp);
-
-				initialMatch["timestamp"] = {
-					$gte: startTimestamp,
-					$lte: endTimestamp,
+				matchQuery["createdAt"] = {
+					$gte: startDate.getTime(),
+					$lte: endDate.getTime(),
 				};
 			}
 		}
 
-		const result = await Reports.aggregate([
+		// Fetch filtered campaigns first
+		const result = await Campaign.aggregate([
 			{
-				$match: initialMatch,
+				$match: matchQuery,
 			},
 			{
 				$lookup: {
-					from: "campaigns",
-					localField: "campaignId",
-					foreignField: "unique_id",
-					as: "campaignDetails",
-				},
-			},
-			{ $unwind: "$campaignDetails" },
-			// Secondary match on campaignDetails.createdAt
-			{
-				$match: {
-					"campaignDetails.createdAt": {
-						$gte: startTimestamp, // Replace with dynamic values if needed
-						$lte: endTimestamp,
-					},
+					from: "campaignreports", // Reports collection
+					localField: "unique_id",
+					foreignField: "campaignId",
+					as: "reports",
 				},
 			},
 			{
-				$group: {
-					_id: "$campaignId",
-					messagesSent: { $sum: 1 },
+				$addFields: {
+					messagesSent: { $size: "$reports" },
 					messagesFailed: {
-						$sum: {
-							$cond: [{ $eq: ["$status", "FAILED"] }, 1, 0],
+						$size: {
+							$filter: {
+								input: "$reports",
+								as: "report",
+								cond: { $eq: ["$$report.status", "FAILED"] },
+							},
 						},
 					},
 					totalDelivered: {
-						$sum: {
-							$cond: [{ $eq: ["$status", "DELIVERED"] }, 1, 0],
+						$size: {
+							$filter: {
+								input: "$reports",
+								as: "report",
+								cond: { $eq: ["$$report.status", "DELIVERED"] },
+							},
 						},
 					},
-					createdAt: { $max: "$timestamp" },
 				},
 			},
 			{
-				$lookup: {
-					from: "campaigns",
-					localField: "_id",
-					foreignField: "unique_id",
-					as: "campaignDetails",
-				},
+				$sort: { createdAt: -1 },
 			},
-			{ $unwind: "$campaignDetails" },
 			{
 				$facet: {
 					paginatedResults: [{ $skip: skip }, { $limit: limit }],
@@ -175,7 +166,7 @@ export const getCampaignReportsFilter = async (req, res) => {
 		const paginatedResults = result[0]?.paginatedResults || [];
 		const totalCount = result[0]?.totalCount[0]?.total || 0;
 		const totalPages = Math.ceil(totalCount / limit);
-		console.log(paginatedResults);
+
 		res.render("Reports/partials/campaignTable", {
 			campaigns: paginatedResults,
 			page,

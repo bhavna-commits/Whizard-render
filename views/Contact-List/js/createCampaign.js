@@ -448,7 +448,7 @@ class TemplateManager {
 			const result = await response.json();
 			if (response.ok) {
 				alert("Campaign created successfully!");
-				// location.href = "/reports/campaign-list";
+				location.href = "/reports/campaign-list";
 			} else {
 				alert(`Error: ${result.message}`);
 			}

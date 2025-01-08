@@ -57,6 +57,11 @@
 </head>
 
 <body class="overflow-hidden">
+	<!-- Loader HTML -->
+	<div id="loader" class="loader">
+		<div class="spinner"></div>
+	</div>
+
 	<div class="flex h-screen w-full">
 		<nav class="sidebar ">
 			<div class="logo py-3">
@@ -85,7 +90,7 @@
 						Settings</a>
 				</li>
 				<li>
-					<a href="/reports"><span class="icon"><i class="fa-regular fa-chart-bar"></i></span>
+					<a href="/reports/campaign-list"><span class="icon"><i class="fa-regular fa-chart-bar"></i></span>
 						Reports</a>
 				</li>
 			</ul>
@@ -414,7 +419,18 @@
 	</div>
 	<%- include("template-preview-modal") %>
 	<!-- Preview Section -->
-	
+	<script>
+		window.addEventListener('load', function () {
+			// Fade out the loader smoothly by changing the opacity
+			document.getElementById('loader').style.opacity = '0';
+			
+			// Optionally, hide it completely after the fade-out effect is finished
+			setTimeout(function () {
+				document.getElementById('loader').style.visibility = 'hidden';
+			}, 500); // Match the duration of the fade-out (1 second in this case)
+		});
+	</script>
+
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/js/all.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 	</div>

@@ -9,41 +9,43 @@
 					<td>Type</td>
 					<td>Messages Sent</td>
 					<td>Messages Failed</td>
+					<td>Messages Delivered</td>
 					<td>Date Created</td>
 					<!-- <td>Actions</td> -->
 				</tr>
 			</thead>
 			<tbody>
 				<% campaigns.forEach((campaign, index) => { %>
-				<tr class="hover:bg-gray-100 cursor-pointer border" onclick="window.location.href='/reports/overview/<%= campaign.campaignId %>'">
+				<tr class="hover:bg-gray-100 cursor-pointer border" onclick="window.location.href='/reports/overview/<%= campaign.unique_id %>'">
 					<td class="border-l border-t border-b rounded-lg py-4 border-gray-200 text-sm text-gray-500">
 						<%= (page - 1) * 10 + (index + 1) %>
 						<!-- Display index based on current page -->
 					</td>
 					<td class="border-t border-b border-gray-200">
-						<%= campaign.campaignDetails.name %>
+						<%= campaign.name %>
 					</td>
 					<td class="border-t border-b border-gray-200 px-4 py-2">
 						<p class="inline-flex justify-center items-center h-fit w-fit px-2 py-1 rounded 
-						<% if (campaign.campaignDetails.status == "SCHEDULED") {  %> 
-						bg-yellow-200 text-yellow-500 
+						<% if (campaign.status === "SCHEDULED" || campaign.status === "IN_QUEUE") { %>
+						bg-yellow-100 text-yellow-500
 						<% } else { %>
-						bg-green-100 text-green-500 
+						bg-green-100 text-green-500
 						<% } %>">
-							<% if (campaign.campaignDetails.status !== "SCHEDULED") { %>
-							Broadcast
-							<% } else { %>
+							<% if (campaign.status === "SCHEDULED" || campaign.status === "IN_QUEUE") { %>
 							Scheduled
+							<% } else { %>
+							Broadcast
 							<% } %>
 						</p>
 					</td>
-
-					
 					<td class="text-gray-500 border-t border-b border-gray-200">
 						<%= campaign.messagesSent %>
 					</td>
 					<td class="text-gray-500 border-t border-b border-gray-200">
 						<%= campaign.messagesFailed %>
+					</td>
+					<td class="text-gray-500 border-t border-b border-gray-200">
+						<%= campaign.totalDelivered %>
 					</td>
 					<td class="text-gray-500 border-t border-b border-r rounded-lg border-gray-200">
 						<%= new Date(campaign.createdAt).toLocaleString('en-GB', {

@@ -11,7 +11,8 @@ import reportsFrontEndRoute from "./frontEnd-Routes/reports.frontEnd.routes.js";
 import { checkSession } from "./middleWares/checkSession.js";
 import app from "./static.app.js";
 
-app.use("/", userfrontEndRoutes, tempalteFrontEndRoutes);
+app.use("/api/facebook", faceBookBackEndRoute);
+app.use("/", userfrontEndRoutes);
 app.use("/api/users", userRoutes);
 app.use("/", checkSession, tempalteFrontEndRoutes);
 app.use("/reports", checkSession, reportsFrontEndRoute);
@@ -20,6 +21,5 @@ app.use("/contact-list", checkSession, contactFrontEndRoutes);
 app.use("/api/templates", checkSession, templatesRoutes);
 app.use("/api/contact-list", checkSession, contactListRoute);
 app.use("/api/settings", checkSession, settingsbackEndRoute);
-app.use("/api/facebook", checkSession, faceBookBackEndRoute);
 
 export default app;

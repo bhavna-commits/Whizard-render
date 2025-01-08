@@ -14,6 +14,7 @@ function closeFilterModal() {
 flatpickr("#timeFrame", {
 	mode: "range",
 	dateFormat: "Y-m-d",
+	maxDate: "today", 
 });
 
 // Function to apply the filters

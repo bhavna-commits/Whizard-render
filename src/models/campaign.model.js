@@ -23,6 +23,7 @@ const CampaignSchema = new mongoose.Schema(
 			default: "PENDING",
 		},
 		createdAt: { type: Number, default: () => Date.now() },
+		deleted: { type: Boolean, default: false },
 	},
 	{ strict: false, timestamps: false },
 );

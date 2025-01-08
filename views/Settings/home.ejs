@@ -39,6 +39,11 @@
 </head>
 
 <body>
+	<!-- Loader HTML -->
+	<div id="loader" class="loader">
+		<div class="spinner"></div>
+	</div>
+
 	<div class="layout-container">
 		<nav class="sidebar">
 			<div class="logo pb-2">
@@ -161,6 +166,18 @@
 			
 		</div>
 	</div>
+	 <script>
+	 	window.addEventListener('load', function () {
+	 		// Fade out the loader smoothly by changing the opacity
+	 		document.getElementById('loader').style.opacity = '0';
+	 		
+	 		// Optionally, hide it completely after the fade-out effect is finished
+	 		setTimeout(function () {
+	 			document.getElementById('loader').style.visibility = 'hidden';
+	 		}, 500); // Match the duration of the fade-out (1 second in this case)
+	 	});
+	 </script>
+
 </body>
 
 </html>

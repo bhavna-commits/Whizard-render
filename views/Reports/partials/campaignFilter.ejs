@@ -4,20 +4,20 @@
 <!-- Sidebar Modal -->
 <div id="filterSidebar" class="fixed right-[-400px] top-0 w-96 h-full bg-white shadow-lg z-50 transition-all duration-300">
 	<div class="p-4">
-		<div class="flex justify-between items-center">
-			<h3 class="text-lg font-semibold mb-4">Filters</h3>
+		<div class="flex justify-between items-center mb-4">
+			<h3 class="text-xl font-semibold">Filters</h3>
 			<button class="text-2xl font-semibold" onclick="closeFilterModal()">&times;</button>
 		</div>
 		
 		<!-- Date Range Picker (flatpickr) -->
 		<div class="mb-4">
-			<label for="timeFrame" class="block text-sm mb-2">Time Frame</label>
-			<input type="text" id="timeFrame" placeholder="Select a time frame" class="border p-2 rounded w-full" />
+			<label for="timeFrame" class="block mb-2">Created At</label>
+			<input type="text" id="timeFrame" placeholder="Select a time frame" class="border p-2 rounded w-full placeholder:text-black" />
 		</div>
 		
 		<!-- Filter Options -->
 		<div class="mb-4">
-			<label for="statusFilter" class="block text-sm mb-2">Status</label>
+			<label for="statusFilter" class="block mb-2">Status</label>
 			<select id="statusFilter" class="border p-2 rounded w-full">
 				<option value="all">All Campaigns</option>
 				<option value="scheduled">Scheduled</option>
@@ -26,7 +26,7 @@
 		</div>
 		
 		<!-- Apply Filter Button -->
-		<div class="text-right">
+		<div class="flex items-center justify-between">
 			<button onclick="applyFilters()" class="bg-blue-500 text-white py-2 px-4 rounded">
                 <div id="loadingSpinner" class="absolute inset-0 flex justify-center items-center hidden">
                 	<svg class="animate-spin h-10 w-10 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -37,6 +37,7 @@
                 </div>
 				Apply Filters
 			</button>
+			<div class="text-red-500 hover:underline cursor-pointer" onclick="location.reload()">Clear Filters</div>
 		</div>
 	</div>
 </div>
