@@ -78,10 +78,11 @@ export async function submitTemplateToFacebook(savedTemplate) {
 		const requestData = {
 			name: plainTemplate.name,
 			language: plainTemplate.language,
+			allow_category_change: true,
 			category: plainTemplate.category.toUpperCase(),
 			components: plainTemplate.components,
 		};
-		console.log("Submitting template to Facebook: here", requestData);
+		// console.log("Submitting template to Facebook: here", requestData);
 		const response = await axios.post(
 			`https://graph.facebook.com/${process.env.FB_GRAPH_VERSION}/${process.env.WABA_ID}/message_templates`,
 			requestData,

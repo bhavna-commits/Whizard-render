@@ -268,16 +268,17 @@ class TemplateManager {
 				.on("change", (e) => this.handleContactListChange(e));
 
 			document
-				.getElementById("sendNowButton")
-				.addEventListener("click", (e) =>
-					this.handleFormSubmit(e, "sendNow"),
-				);
-			document
-				.getElementById("scheduleButton")
-				.addEventListener("click", (e) =>
-					this.handleFormSubmit(e, "schedule"),
-				);
+				.getElementById("campaign-form")
+				.addEventListener("submit", (e) => {
+					e.preventDefault();
 
+					// Get the form and action type from the clicked button
+					const form = e.target;
+					const actionType = new FormData(form).get("actionType"); // This gets the value of the clicked button
+
+					// Handle form submission based on the action type
+					this.handleFormSubmit(e, actionType);
+				});
 			this.previewContainer.innerHTML =
 				'<p class="text-center text-gray-500">Select a template to preview</p>';
 
@@ -378,9 +379,8 @@ class TemplateManager {
 
 	async handleFormSubmit(event, actionType) {
 		event.preventDefault();
-
 		// Get the target button
-		const button = event.target;
+		const button = event.submitter;
 		const loader = button.querySelector(".loader");
 		const buttonText = button.querySelector(".button-text");
 

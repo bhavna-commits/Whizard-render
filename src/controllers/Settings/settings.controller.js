@@ -1,6 +1,9 @@
 import path from "path";
 import bcrypt from "bcrypt";
-import { validatePassword } from "../../utils/otpGenerator.js";
+import {
+	generateUniqueId,
+	validatePassword,
+} from "../../utils/otpGenerator.js";
 import User from "../../models/user.model.js";
 import ActivityLogs from "../../models/activityLogs.model.js";
 import AddedUser from "../../models/addedUser.model.js";
@@ -41,19 +44,23 @@ export const profile = async (req, res) => {
 export const updateProfile = async (req, res) => {
 	const data = req.body;
 
-	// Construct the profile picture path
-	const profilePicPath = path.join(
-		"uploads",
-		req.session.user.id,
-		"profile",
-		req.file.filename,
-	);
+	console.log(JSON.stringify(data));
+
+	let profilePicPath;
+	if (req.file?.filename) {
+		profilePicPath = path.join(
+			"uploads",
+			req.session.user.id,
+			"profile",
+			req.file.filename,
+		);
+	}
 
 	try {
 		const updatedUser = await User.findOneAndUpdate(
 			{ unique_id: req.session.user.id },
 			{
-				profilePhoto: profilePicPath,
+				profilePhoto: profilePicPath ? profilePicPath : "",
 				name: data.name,
 				language: data.language,
 			},
@@ -61,16 +68,25 @@ export const updateProfile = async (req, res) => {
 		);
 
 		req.session.user.photo = profilePicPath;
+		// console.log(updatedUser);
+		try {
+			await ActivityLogs.create({
+				useradmin: req.session.user.id,
+				unique_id: generateUniqueId(),
+				name: req.session.user.name
+					? req.session.user.name
+					: req.session.addedUser.name,
+				actions: "Update",
+				details: `Updated its profile`,
+			});
+		} catch (err) {
+			res.status(500).json({
+				success: false,
+				message: "Activity issue: " + err.message,
+			});
+		}
 
-		await ActivityLogs.create({
-			name: req.session.user.name
-				? req.session.user.name
-				: req.session.addedUser.name,
-			actions: "Update",
-			details: `Updated its profile`,
-		});
-
-		updatedUser.save();
+		await updatedUser.save();
 		// Send success response
 		res.status(200).json({
 			success: true,
@@ -118,6 +134,8 @@ export const updatePassword = async (req, res) => {
 		addedUser.save();
 
 		await ActivityLogs.create({
+			useradmin: req.session.user.id,
+			unique_id: generateUniqueId(),
 			name: req.session.user.name
 				? req.session.user.name
 				: req.session.addedUser.name,
@@ -187,7 +205,7 @@ export const accountDetails = async (req, res) => {
 	}
 };
 
-export const updateAccountDetails = async (req, res) => {	
+export const updateAccountDetails = async (req, res) => {
 	try {
 		const {
 			name: companyName,
@@ -222,6 +240,16 @@ export const updateAccountDetails = async (req, res) => {
 				.json({ success: false, message: "User not found" });
 		}
 
+		await ActivityLogs.create({
+			useradmin: req.session.user.id,
+			unique_id: generateUniqueId(),
+			name: req.session.user.name
+				? req.session.user.name
+				: req.session.addedUser.name,
+			actions: "Update",
+			details: `updated their account details`,
+		});
+
 		res.status(200).json({
 			success: true,
 			message: "Account details updated successfully",
@@ -238,7 +266,9 @@ export const updateAccountDetails = async (req, res) => {
 
 export const getActivityLogs = async (req, res) => {
 	try {
-		const logs = await ActivityLogs.find().sort({ createdAt: -1 });
+		const logs = await ActivityLogs.find({
+			useradmin: req.session.user.id,
+		}).sort({ createdAt: -1 });
 
 		res.render("Settings/activityLogs", { logs });
 	} catch (err) {
@@ -250,7 +280,8 @@ export const getActivityLogs = async (req, res) => {
 export const activityLogsFiltered = async (req, res) => {
 	const { action, dateRange } = req.query;
 	let filter = {};
-
+	
+	filter.unique_id = req.session.user.id;
 	// Filter by action type
 	if (action && action !== "All action") {
 		filter.actions = action;

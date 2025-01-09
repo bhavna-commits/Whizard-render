@@ -41,6 +41,8 @@ export const updateContact = async (req, res) => {
 		}
 
 		await ActivityLogs.create({
+			useradmin: req.session.user.id,
+			unique_id: generateUniqueId(),
 			name: req.session.user.name
 				? req.session.user.name
 				: req.session.addedUser.name,
@@ -131,6 +133,8 @@ export const editContact = async (req, res) => {
 			{ new: true, strict: false },
 		);
 		await ActivityLogs.create({
+			useradmin: req.session.user.id,
+			unique_id: generateUniqueId(),
 			name: req.session.user.name
 				? req.session.user.name
 				: req.session.addedUser.name,
@@ -172,6 +176,8 @@ export const deleteContact = async (req, res) => {
 		);
 
 		await ActivityLogs.create({
+			useradmin: req.session.user.id,
+			unique_id: generateUniqueId(),
 			name: req.session.user.name
 				? req.session.user.name
 				: req.session.addedUser.name,
@@ -192,9 +198,18 @@ export const deleteContact = async (req, res) => {
 	}
 };
 
-export const updateCSVOnFieldDelete = async (fieldToDelete) => {
+export const updateCSVOnFieldDelete = async (id, fieldToDelete) => {
 	try {
 		// Read the CSV file content
+		const csvFilePath = path.join(
+			__dirname,
+			"..",
+			"..",
+			"..",
+			"public",
+			id,
+			"sample.csv",
+		);
 		const csvContent = fs.readFileSync(csvFilePath, "utf8");
 
 		// Parse the CSV using Papa Parse
@@ -276,6 +291,8 @@ export const createContact = async (req, res) => {
 
 		// Log the activity
 		await ActivityLogs.create({
+			useradmin: req.session.user.id,
+			unique_id: generateUniqueId(),
 			name: req.session.user.name
 				? req.session.user.name
 				: req.session.addedUser.name,
@@ -318,13 +335,24 @@ export const createCampaign = async (req, res) => {
 
 		if (!schedule) {
 			await sendMessages(
+				name,
 				newCampaign,
 				req.session.user.id,
 				generateUniqueId(),
+				req,
 			);
 		} else {
 			newCampaign.scheduledAt = Number(schedule) * 1000;
 			newCampaign.status = "SCHEDULED";
+			await ActivityLogs.create({
+				useradmin: req.session.user.id,
+				unique_id: generateUniqueId(),
+				name: req.session.user.name
+					? req.session.user.name
+					: req.session.addedUser.name,
+				actions: "Send",
+				details: `Scheduled new campaign named: ${name}`,
+			});
 		}
 
 		// Save the campaign

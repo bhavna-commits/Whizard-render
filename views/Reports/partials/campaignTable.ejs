@@ -5,26 +5,35 @@
 			<thead>
 				<tr class="text-gray-500">
 					<td>Sno.</td>
-					<td>Campaign Name</td>
-					<td>Type</td>
-					<td>Messages Sent</td>
-					<td>Messages Failed</td>
-					<td>Messages Delivered</td>
-					<td>Date Created</td>
+					<td >Campaign Name</td>
+					<td >Type</td>
+					<td >Total</td>
+					<td>Sent</td>
+					<td class="w-20">Delivered</td>
+					<td>Read</td>
+					<td>Failed</td>
+					<td>Replies</td>
+					
 					<!-- <td>Actions</td> -->
 				</tr>
 			</thead>
 			<tbody>
 				<% campaigns.forEach((campaign, index) => { %>
-				<tr class="hover:bg-gray-100 cursor-pointer border" onclick="window.location.href='/reports/overview/<%= campaign.unique_id %>'">
+				<tr class="hover:bg-gray-100 cursor-pointer border" onclick="window.location.href='/reports/campaign-list/<%= campaign.unique_id %>'">
 					<td class="border-l border-t border-b rounded-lg py-4 border-gray-200 text-sm text-gray-500">
 						<%= (page - 1) * 10 + (index + 1) %>
 						<!-- Display index based on current page -->
 					</td>
-					<td class="border-t border-b border-gray-200">
-						<%= campaign.name %>
+					<td class="border-t border-b border-gray-200 text-center">
+						<p class="font-semibold "><%= campaign.name %></p>
+						<p class="text-xs text-gray-500"><%= new Date(campaign.createdAt).toLocaleString('en-GB', {
+                            year: 'numeric',
+                            month: 'short',
+                            day: '2-digit'
+                        }) %></p>
+						
 					</td>
-					<td class="border-t border-b border-gray-200 px-4 py-2">
+					<td class="border-t border-b border-gray-200 ">
 						<p class="inline-flex justify-center items-center h-fit w-fit px-2 py-1 rounded 
 						<% if (campaign.status === "SCHEDULED" || campaign.status === "IN_QUEUE") { %>
 						bg-yellow-100 text-yellow-500
@@ -39,21 +48,24 @@
 						</p>
 					</td>
 					<td class="text-gray-500 border-t border-b border-gray-200">
-						<%= campaign.messagesSent %>
+						<%= campaign.total %>
 					</td>
 					<td class="text-gray-500 border-t border-b border-gray-200">
-						<%= campaign.messagesFailed %>
+						<%= campaign.sent %>
 					</td>
 					<td class="text-gray-500 border-t border-b border-gray-200">
-						<%= campaign.totalDelivered %>
+						<%= campaign.delivered %>
 					</td>
-					<td class="text-gray-500 border-t border-b border-r rounded-lg border-gray-200">
-						<%= new Date(campaign.createdAt).toLocaleString('en-GB', {
-                            year: 'numeric',
-                            month: 'short',
-                            day: '2-digit'
-                        }) %>
+					<td class="text-gray-500 border-t border-b border-gray-200">
+						<%= campaign.read %>
 					</td>
+					<td class="text-gray-500 border-t border-b border-gray-200">
+						<%= campaign.failed %>
+					</td>
+					<td class="text-gray-500 border-r border-t border-b rounded-lg border-gray-200">
+						<%= campaign.replied %>
+					</td>
+					
 				</tr>
 				<% }); %>
 			</tbody>
@@ -70,7 +82,7 @@
 				
 				<!-- First Page Button -->
 				<li>
-					<a href="/reports/campaign-list?page=1" class="px-3 py-2 rounded-md text-sm font-medium <%= page === 1 ? 'text-white bg-blue-600 border-blue-600' : 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50' %>">1</a>
+					<a href="/reports/campaign-list?page=1" class="px-3 py-2 rounded-md text-sm font-medium <%= page === 1 ? 'text-white bg-red-400 border-red-400' : 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50' %>">1</a>
 				</li>
 				
 				<% if (page > 3) { %>
@@ -81,7 +93,7 @@
 				<!-- Dynamic Page Numbers based on current page -->
 				<% for (let i = Math.max(2, page - 1); i <= Math.min(totalPages - 1, page + 1); i++) { %>
 				<li>
-					<a href="/reports/campaign-list?page=<%= i %>" class="px-3 py-2 rounded-md text-sm font-medium <%= i === page ? 'text-white bg-blue-600 border-blue-600' : 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50' %>"><%= i %></a>
+					<a href="/reports/campaign-list?page=<%= i %>" class="px-3 py-2 rounded-md text-sm font-medium <%= i === page ? 'text-white bg-red-400 border-red-400' : 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50' %>"><%= i %></a>
 				</li>
 				<% } %>
 				
@@ -93,7 +105,7 @@
 				<!-- Last Page Button -->
 				<% if (totalPages > 1) { %>
 				<li>
-					<a href="/reports/campaign-list?page=<%= totalPages %>" class="px-3 py-2 rounded-md text-sm font-medium <%= page === totalPages ? 'text-white bg-blue-600 border-blue-600' : 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50' %>"><%= totalPages %></a>
+					<a href="/reports/campaign-list?page=<%= totalPages %>" class="px-3 py-2 rounded-md text-sm font-medium <%= page === totalPages ? 'text-white bg-red-400 border-red-400' : 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50' %>"><%= totalPages %></a>
 				</li>
 				<% } %>
 				
@@ -108,7 +120,7 @@
 		<div class="flex items-center space-x-2">
 			<span class="text-sm text-gray-700">Go to page</span>
 			<input type="number" min="1" max="<%= totalPages %>" class="w-16 px-2 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" value="<%= page %>" id="pageInput" />
-			<button type="button" class="px-3 py-1 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" onclick="goToPage()">Go</button>
+			<button type="button" class="px-3 py-1 text-sm font-medium text-white bg-red-400 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" onclick="goToPage()">Go</button>
 		</div>
 	</div>
 	

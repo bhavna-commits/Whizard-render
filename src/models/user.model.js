@@ -2,6 +2,9 @@ import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema(
 	{
+		WABA_ID: { type: String, required: false },
+		FB_PHONE_ID: { type: String, required: false },
+		FB_ACCESS_TOKEN: { type: String, required: false },
 		profilePhoto: { type: String, required: false },
 		name: { type: String, required: true },
 		email: { type: String, required: true, unique: true },
@@ -24,7 +27,6 @@ const userSchema = new mongoose.Schema(
 			default: "Pending",
 			required: true,
 		},
-		accessToken: String,
 		unique_id: {
 			type: String,
 			required: true,

@@ -9,7 +9,8 @@ app.use("/Contact-List/custom-field", express.static("public"));
 app.use("/Settings/profile", express.static("public"));
 app.use("/Settings/account-details", express.static("public"));
 app.use("/Settings/activity-logs", express.static("public"));
-app.use("/Reports/campaign-list", express.static("public"));
+app.use("/Reports/campaign-list/", express.static("public"));
+app.use("/Reports/campaign-list/:id", express.static("public"));
 
 const __dirname = path.resolve();
 

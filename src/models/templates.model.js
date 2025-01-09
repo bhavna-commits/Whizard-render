@@ -2,33 +2,6 @@ import mongoose, { SchemaType } from "mongoose";
 
 const Schema = mongoose.Schema;
 
-// const componentSchema = new mongoose.Schema(
-// 	{
-// 		text: {
-// 			type: String,
-// 			required: function () {
-// 				return this.type !== "HEADER";
-// 			},
-// 		},
-// 		type: {
-// 			type: String,
-// 			enum: ["HEADER", "BODY", "FOOTER", "BUTTON"],
-// 			required: true,
-// 		},
-// 		format: {
-// 			type: String,
-// 			enum: ["IMAGE", "VIDEO", "DOCUMENT", "TEXT"],
-// 			required: function () {
-// 				return this.type === "HEADER";
-// 			},
-// 		},
-// 		example: {
-// 			type: Schema.Types.Mixed,
-// 		},
-// 	},
-// 	{ timestamps: false, strict: false },
-// );
-
 const templateSchema = new Schema(
 	{
 		name: {
@@ -53,6 +26,7 @@ const templateSchema = new Schema(
 			type: String,
 			required: true,
 		},
+		fb_id: String,
 		createdAt: {
 			type: Number,
 			default: () => Date.now(),
@@ -69,18 +43,10 @@ const templateSchema = new Schema(
 			type: Object,
 			required: true,
 		},
+		rejected_reason: String,
 	},
 	{ timestamps: false, strict: false },
 );
-
-// componentSchema.pre("save", function (next) {
-// 	Object.keys(this.example).forEach((field) => {
-// 		this.example[field] = this.example[field].filter(
-// 			(item) => item !== undefined && item !== null,
-// 		);
-// 	});
-// 	next();
-// });
 
 templateSchema.pre("save", function (next) {
 	this.updatedAt = Date.now();

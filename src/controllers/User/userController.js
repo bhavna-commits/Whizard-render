@@ -3,6 +3,9 @@ import User from "../../models/user.model.js";
 import AddedUser from "../../models/addedUser.model.js";
 import bcrypt from "bcrypt";
 import { generateUniqueId } from "../../utils/otpGenerator.js";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const setOTPExpiry = () => {
 	return Date.now() + 600000; // 10 minutes in milliseconds
@@ -108,9 +111,16 @@ export const verifyEmail = async (req, res) => {
 
 export const login = async (req, res) => {
 	const { email, password, rememberMe } = req.body;
-	console.log("here");
+	// console.log("here");
 	try {
-		const user = await User.findOne({ email });
+		const user = await User.findOneAndUpdate(
+			{ email },
+			{
+				WABA_ID: process.env.WABA_ID,
+				FB_PHONE_ID: process.env.FB_PHONE_ID,
+			},
+			{ new: true, runValidators: true }, 
+		);
 
 		if (!user) {
 			const addedUser = await AddedUser.findOne({ email });
@@ -125,6 +135,7 @@ export const login = async (req, res) => {
 
 				req.session.user = {
 					id: addedUser.owner,
+
 					WhatsAppConnectStatus: user.WhatsAppConnectStatus,
 				};
 				req.session.addedUser = {
@@ -330,6 +341,7 @@ export const about = async (req, res) => {
 		// Update session with the newly created user data to keep them logged in
 		req.session.user = {
 			id: newUser.unique_id,
+			name: newUser.name,
 		};
 
 		// Send success response

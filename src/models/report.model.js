@@ -2,6 +2,8 @@ import mongoose, { Schema } from "mongoose";
 
 const CampaignReportSchema = new mongoose.Schema(
 	{
+		WABA_ID: { type: String, required: true },
+		FB_PHONE_ID: { type: String, required: true },
 		useradmin: { type: String, required: true },
 		unique_id: { type: String, required: true },
 		campaignId: {

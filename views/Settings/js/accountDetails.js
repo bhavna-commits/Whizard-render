@@ -62,10 +62,11 @@ document.addEventListener("DOMContentLoaded", function () {
 			// If the result is successful, redirect to the homepage or next page
 			if (result.success) {
 				errorMessage.classList.remove("hidden");
+				errorMessage.classList.add("text-green-500");
 				errorMessage.innerText = result.message;
 				setTimeout(() => {
-                    errorMessage.classList.add("hidden");
-                    errorMessage.classList.remove("text-green-500");
+					errorMessage.classList.add("hidden");
+					errorMessage.classList.remove("text-green-500");
 				}, 2000);
 			}
 		} catch (error) {
@@ -73,8 +74,8 @@ document.addEventListener("DOMContentLoaded", function () {
 			errorMessage.classList.add("text-red-500");
 			errorMessage.innerText = error.message;
 			setTimeout(() => {
-                errorMessage.classList.add("hidden");
-                errorMessage.classList.remove("text-red-500");
+				errorMessage.classList.add("hidden");
+				errorMessage.classList.remove("text-red-500");
 			}, 2000);
 		} finally {
 			// Re-enable the submit button and restore the original text

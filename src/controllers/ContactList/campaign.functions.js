@@ -1,17 +1,18 @@
 import dotenv from "dotenv";
 import cron from "node-cron";
-
+import ActivityLogs from "../../models/activityLogs.model.js";
 import axios from "axios";
 import { agenda } from "../../config/db.js";
 import Template from "../../models/templates.model.js";
 import Contacts from "../../models/contacts.model.js";
 import Campaign from "../../models/campaign.model.js";
 import Report from "../../models/report.model.js";
+import User from "../../models/user.model.js";
 import { generateUniqueId } from "../../utils/otpGenerator.js";
 
 dotenv.config();
 
-export async function sendMessages(campaign, id, unique_id) {
+export async function sendMessages(name, campaign, id, unique_id, req) {
 	try {
 		// Find the template by unique_id
 		const template = await Template.findOne({
@@ -47,7 +48,7 @@ export async function sendMessages(campaign, id, unique_id) {
 			// Send message using WhatsApp (assuming wa_id is the phone number)
 			const response = await sendMessageThroughWhatsApp(
 				template.name,
-				contact.wa_id, // Use wa_id as the recipient's phone number
+				contact.wa_id,
 				personalizedMessage,
 			);
 
@@ -60,8 +61,11 @@ export async function sendMessages(campaign, id, unique_id) {
 				);
 			}
 			console.log(JSON.stringify(response));
+			const user = await User.findOne({ unique_id: id });
 			// Create a report for each sent message
 			const report = new Report({
+				WABA_ID: user.WABA_ID,
+				FB_PHONE_ID: user.FB_PHONE_ID,
 				useradmin: id,
 				unique_id,
 				campaignName: campaign.name,
@@ -69,6 +73,16 @@ export async function sendMessages(campaign, id, unique_id) {
 				recipientPhone: contact.wa_id,
 				status: response.status,
 				messageId: response.response.messages[0].id,
+			});
+
+			await ActivityLogs.create({
+				useradmin: req.session.user.id,
+				unique_id: generateUniqueId(),
+				name: req.session.user.name
+					? req.session.user.name
+					: req.session.addedUser.name,
+				actions: "Send",
+				details: `Sent campaign named: ${name}`,
 			});
 			await report.save();
 		}

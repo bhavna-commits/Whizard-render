@@ -11,7 +11,7 @@
 					<td class="">Actions</td>
 				</tr>
 				<% contacts.forEach((contact, index) => { %>
-				<tr class="hover:bg-green-100 cursor-pointer border" onclick="window.location.href='/contact-list/overview/<%= contact.contactId %>'">
+				<tr class="hover:bg-gray-100 cursor-pointer border" onclick="window.location.href='/contact-list/overview/<%= contact.contactId %>'">
 					<td class="border-l border-t border-b rounded-lg py-4 border-gray-200 text-sm text-gray-500">
 						<%= index + 1 %>
 					</td>
@@ -58,7 +58,7 @@
 				
 				<!-- First Page Button -->
 				<li>
-					<a href="/contact-list?page=1" class="px-3 py-2 rounded-md text-sm font-medium <%= page === 1 ? 'text-white bg-blue-600 border-blue-600' : 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50' %>">1</a>
+					<a href="/contact-list?page=1" class="px-3 py-2 rounded-md text-sm font-medium <%= page === 1 ? 'text-white bg-red-400 border-red-400' : 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50' %>">1</a>
 				</li>
 				
 				<% if (page > 3) { %>
@@ -69,7 +69,7 @@
 				<!-- Dynamic Page Numbers based on current page -->
 				<% for (let i = Math.max(2, page - 1); i <= Math.min(totalPages - 1, page + 1); i++) { %>
 				<li>
-					<a href="/contact-list?page=<%= i %>" class="px-3 py-2 rounded-md text-sm font-medium <%= i === page ? 'text-white bg-blue-600 border-blue-600' : 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50' %>"><%= i %></a>
+					<a href="/contact-list?page=<%= i %>" class="px-3 py-2 rounded-md text-sm font-medium <%= i === page ? 'text-white bg-red-400 border-red-400' : 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50' %>"><%= i %></a>
 				</li>
 				<% } %>
 				
@@ -81,7 +81,7 @@
 				<!-- Last Page Button -->
 				<% if (totalPages > 1) { %>
 				<li>
-					<a href="/contact-list?page=<%= totalPages %>" class="px-3 py-2 rounded-md text-sm font-medium <%= page === totalPages ? 'text-white bg-blue-600 border-blue-600' : 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50' %>"><%= totalPages %></a>
+					<a href="/contact-list?page=<%= totalPages %>" class="px-3 py-2 rounded-md text-sm font-medium <%= page === totalPages ? 'text-white bg-red-400 border-red-400' : 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50' %>"><%= totalPages %></a>
 				</li>
 				<% } %>
 				
@@ -96,7 +96,7 @@
 		<div class="flex items-center space-x-2">
 			<span class="text-sm text-gray-700">Go to page</span>
 			<input type="number" min="1" max="<%= totalPages %>" class="w-16 px-2 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" value="<%= page %>" id="pageInput" />
-			<button type="button" class="px-3 py-1 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" onclick="goToPage()">Go</button>
+			<button type="button" class="px-3 py-1 text-sm font-medium text-white bg-red-400 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" onclick="goToPage()">Go</button>
 		</div>
 	</div>
 	

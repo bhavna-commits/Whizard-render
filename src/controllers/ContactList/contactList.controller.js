@@ -212,6 +212,8 @@ export const createList = async (req, res) => {
 		);
 
 		await ActivityLogs.create({
+			useradmin: req.session.user.id,
+			unique_id: generateUniqueId(),
 			name: req.session.user.name
 				? req.session.user.name
 				: req.session.addedUser.name,
@@ -254,6 +256,8 @@ export const deleteList = async (req, res) => {
 		await contactList.save();
 
 		await ActivityLogs.create({
+			useradmin: req.session.user.id,
+			unique_id: generateUniqueId(),
 			name: req.session.user.name
 				? req.session.user.name
 				: req.session.addedUser.name,
@@ -446,12 +450,14 @@ export const createCustomField = async (req, res) => {
 		});
 
 		await newField.save();
-
+		console.log(req.session.user.name);
 		// Log activity
 		await ActivityLogs.create({
+			useradmin: req.session.user.id,
+			unique_id: generateUniqueId(),
 			name: req.session.user.name
 				? req.session.user.name
-				: req.session.addedUser.name,
+				: req.session.addedUser?.name,
 			actions: "Create",
 			details: `Created a custom field named: ${fieldName}`,
 		});
@@ -487,10 +493,6 @@ export const deleteCustomField = async (req, res) => {
 			});
 		}
 
-		// Update the status to 0 to mark it as deleted in MongoDB
-		field.status = 0;
-		await field.save();
-
 		// If the field is of type 'input', proceed with updating the CSV file
 		if (field.cltype === "input") {
 			const fieldNameToDelete = field.clname;
@@ -498,15 +500,23 @@ export const deleteCustomField = async (req, res) => {
 			// Function to delete the field from the CSV
 
 			// Call the function to delete the field from the CSV
-			await updateCSVOnFieldDelete(fieldNameToDelete);
-
+			await updateCSVOnFieldDelete(
+				req.session.user.id,
+				fieldNameToDelete,
+			);
+			// console.log(req.session.user.name);
 			// Log the activity
 			await ActivityLogs.create({
-				name: req.session.user.name || req.session.addedUser.name,
+				useradmin: req.session.user.id,
+				unique_id: generateUniqueId(),
+				name: req.session.user.name || req.session.addedUser?.name,
 				actions: "Delete",
 				details: `Marked the custom field named: ${field.clname} as deleted and removed from CSV`,
 			});
 
+			// Update the status to 0 to mark it as deleted in MongoDB
+			field.status = 0;
+			await field.save();
 			// Respond to the client
 			res.json({
 				success: true,
@@ -516,10 +526,16 @@ export const deleteCustomField = async (req, res) => {
 		} else {
 			// For non-input fields, just log the activity and mark it as deleted in the DB
 			await ActivityLogs.create({
+				useradmin: req.session.user.id,
+				unique_id: generateUniqueId(),
 				name: req.session.user.name || req.session.addedUser.name,
 				actions: "Delete",
 				details: `Marked the custom field named: ${field.clname} as deleted`,
 			});
+
+			// Update the status to 0 to mark it as deleted in MongoDB
+			field.status = 0;
+			await field.save();
 
 			// Respond to the client
 			res.json({

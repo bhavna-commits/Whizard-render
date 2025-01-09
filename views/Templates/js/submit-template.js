@@ -162,9 +162,6 @@ function generatePreviewCall(templateData) {
 	}
 }
 
-// let originalTemplateData = {}; // To store the original template data
-// let currentTemplateData = {}; // To store the current state of the template with replacements
-
 function validateInputs() {
 	const inputs = document.querySelectorAll("#previewForm input");
 	let isValid = true;
@@ -180,121 +177,6 @@ function validateInputs() {
 
 	return isValid;
 }
-
-// function openModal() {
-// 	const templateData = collectTemplateData();
-// 	if (!templateData) return;
-
-// 	originalTemplateData = {
-// 		header: templateData.header.content || "",
-// 		body: templateData.body || "",
-// 		footer: templateData.footer || "",
-// 		headerType: templateData.header.type || "none",
-// 	};
-
-// 	currentTemplateData = { ...originalTemplateData };
-
-// 	document.getElementById("templateModalLabel").innerText =
-// 		templateData.templateName;
-
-// 	let headerValidation = { isValid: true, error: null, numbers: [] };
-// 	if (templateData.header.type === "text") {
-// 		headerValidation = validateCurlyBraces(templateData.header.content);
-// 	}
-// 	const bodyValidation = validateCurlyBraces(templateData.body);
-// 	const footerValidation = validateCurlyBraces(templateData.footer);
-
-// 	if (
-// 		!headerValidation.isValid ||
-// 		!bodyValidation.isValid ||
-// 		!footerValidation.isValid
-// 	) {
-// 		alert(
-// 			headerValidation.error ||
-// 				bodyValidation.error ||
-// 				footerValidation.error,
-// 		);
-// 		return;
-// 	}
-
-// 	const dynamicVariables = [
-// 		...headerValidation.numbers,
-// 		...bodyValidation.numbers,
-// 		...footerValidation.numbers,
-// 	].sort((a, b) => a - b);
-
-// 	const previewForm = document.getElementById("previewForm");
-// 	previewForm.innerHTML = "";
-
-// 	dynamicVariables.forEach((variable, index) => {
-// 		const formGroup = document.createElement("div");
-// 		formGroup.className = "form-group py-1";
-
-// 		formGroup.innerHTML = `
-//         <label class="font-semibold">Choose Attributes for ${variable}</label>
-//         <input type="text" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm" data-variable="${variable}" data-index="${index}">
-//     `;
-
-// 		previewForm.appendChild(formGroup);
-// 	});
-
-// 	previewForm.querySelectorAll("input").forEach((input) => {
-// 		input.addEventListener("input", handleInputChange);
-// 	});
-
-// 	function handleInputChange(event) {
-// 		const input = event.target;
-// 		const variable = input.getAttribute("data-variable");
-// 		const value = input.value;
-// 		updatePreviewElement(variable, value);
-// 	}
-
-// 	function updatePreviewElement(variable, value) {
-// 		const spanTemplate = `<span id="${variable}">${
-// 			value || `{{${variable}}}`
-// 		}</span>`;
-// 		currentTemplateData.header = replaceVariableWithSpan(
-// 			currentTemplateData.header,
-// 			variable,
-// 			spanTemplate,
-// 		);
-// 		currentTemplateData.body = replaceVariableWithSpan(
-// 			currentTemplateData.body,
-// 			variable,
-// 			spanTemplate,
-// 		);
-// 		currentTemplateData.footer = replaceVariableWithSpan(
-// 			currentTemplateData.footer,
-// 			variable,
-// 			spanTemplate,
-// 		);
-// 		updatePreview();
-// 	}
-
-// 	function updatePreview() {
-// 		document.getElementById("previewHead").innerHTML =
-// 			currentTemplateData.header.replace(/\n/g, "<br>");
-// 		document.getElementById("previewBod").innerHTML =
-// 			currentTemplateData.body.replace(/\n/g, "<br>");
-// 		document.getElementById("previewFoot").innerHTML =
-// 			currentTemplateData.footer.replace(/\n/g, "<br>");
-// 	}
-
-// 	function replaceVariableWithSpan(templatePart, variable, spanTemplate) {
-// 		const regex = new RegExp(`{{\\s*${variable}\\s*}}`, "g");
-// 		return templatePart.replace(regex, spanTemplate);
-// 	}
-
-// 	document.getElementById("customModal").classList.remove("hidden");
-// }
-
-// Function to close the modal
-// function closeModal() {
-// 	document.getElementById("customModal").classList.add("hidden");
-// }
-
-// Attach close button event
-// document.getElementById("modalCloseBtn").addEventListener("click", closeModal);
 
 // Validate double curly braces format and extract numbers
 function validateCurlyBraces(text) {

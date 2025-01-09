@@ -121,8 +121,11 @@ dropDown.addEventListener("change", (e) => {
 	text.classList.add("hidden");
 	media.classList.add("hidden");
 	none.classList.add("hidden");
+	none.innerHTML = '';
 	// Show the relevant container based on the dropdown value
 	if (value === "none") {
+		document.getElementById("previewHeader").innerHTML = '';
+		document.getElementById("previewHead").innerHTML = '';
 		none.classList.remove("hidden");
 		none.classList.add("flex");
 	} else if (value === "text") {

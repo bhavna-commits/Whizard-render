@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+	<meta charset="UTF-8" />
+	<title>Reports - Campaign list</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<!-- <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css"> -->
+	<script src="https://kit.fontawesome.com/44e4e59292.js" crossorigin="anonymous"></script>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+	<link href="assets/plugins/pace/pace-theme-flash.css" rel="stylesheet" type="text/css" />
+	<link href="assets/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+	<link href="assets/plugins/jquery-scrollbar/jquery.scrollbar.css" rel="stylesheet" type="text/css" media="screen" />
+	<link href="assets/plugins/select2/css/select2.min.css" rel="stylesheet" type="text/css" media="screen" />
+	<!-- <link class="main-stylesheet" href="pages/css/themes/corporate.css" rel="stylesheet" type="text/css" /> -->
+	<!-- Please remove the file below for production: Contains demo classes -->
+	<!-- <link class="main-stylesheet" href="assets/css/style.css" rel="stylesheet" type="text/css" /> -->
+	<link rel="preconnect" href="https://fonts.googleapis.com" />
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+	<link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet" />
+	<!-- Flatpickr CSS CDN -->
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+	
+	<!-- Flatpickr JS CDN -->
+	<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+	
+	<link href="styles/style.css" rel="stylesheet" type="text/css" />
+	<script src="https://cdn.tailwindcss.com"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.5/xlsx.full.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+	<!-- Loader HTML -->
+	<div id="loader" class="loader">
+		<div class="spinner"></div>
+	</div>
+	
+	<!-- Sidebar -->
+	<div class="layout-container">
+		<nav class="sidebar">
+			<div class="logo py-3">
+				<img src="/assets/img/Wizard_logo.png" alt="Whizard Logo" />
+			</div>
+			<ul class="mt-5 space-y-4">
+				<li>
+					<a href="/" class=""><span class="icon "><i class="fas fa-chart-line"></i></span>
+						Dashboard</a>
+				</li>
+				<li>
+					<a href="/chats"><span class="icon"><i class="fa-regular fa-comment"></i></span>
+						Chats</a>
+				</li>
+				<li>
+					<a href="/contact-list"><span class="icon "><i class="fa-regular fa-address-book"></i></span>
+						
+						Contact List</a>
+				</li>
+				<li>
+					<a href="/template"><span class="icon"><i class="fa-regular fa-envelope"></i></span>
+						Template</a>
+				</li>
+				<li>
+					<a href="/settings"><span class="icon"><i class="fa-regular fa-user"></i></span>
+						Settings</a>
+				</li>
+				<li>
+					<a href="/reports/campaign-list"><span class="icon active"><i class="fa-regular fa-chart-bar"></i></span>
+						Reports</a>
+				</li>
+			</ul>
+			<div class="user-profile " onclick="toggleDropdown()">
+				<img src="https://via.placeholder.com/50" alt="User Profile" />
+				<div id="dropdownMenu" class="dropdown-menu hidden">
+					<a href="/settings/profile">Profile</a>
+					<button onclick="logout()">Logout</button>
+				</div>
+			</div>
+			<script>
+				function toggleDropdown () {
+					const dropdown = document.getElementById("dropdownMenu");
+					dropdown.classList.toggle("hidden");
+				}
+				
+				async function logout () {
+					try {
+						const response = await fetch('/api/users/logout', {
+							method: 'POST',
+							credentials: 'same-origin'
+						});
+						
+						if (response.ok) {
+							window.location.href = '/login';
+						} else {
+							alert('Error logging out.');
+						}
+					} catch (err) {
+						console.error('Error:', err);
+						alert('Error logging out.');
+					}
+				}
+				
+				// Close the dropdown if clicked outside
+				window.onclick = function (event) {
+					const dropdown = document.getElementById("dropdownMenu");
+					if (!event.target.closest('.user-profile')) {
+						dropdown.classList.add("hidden");
+					}
+				};
+			</script>
+		</nav>
+		
+		<!-- START PAGE-CONTAINER -->
+		<div class="main-content px-4">
+			<!-- END HEADER -->
+			<div class="logo flex justify-between items-center ">
+				
+				<div class=" mt-[30px] flex items-center ">
+					<!-- START BREADCRUMB -->
+					
+					<div class="flex items-center">
+						<a href="/reports/campaign-list" class="text-gray-500 hover:text-gray-700 hover:no-underline text-xl font-medium">Reports</a>
+						<svg class="w-4 h-4 mx-2 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+							<path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L11.586 10 7.293 5.707a1 1 0 011.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+						</svg>
+					</div>
+					
+					<a onclick="location.reload()" href="/reports/campaign-list" class="text-red-600 hover:text-gray-700 text-xl hover:no-underline font-medium">Campaign Overview</a>
+					<!-- END BREADCRUMB -->
+					
+				</div>
+			</div>
+			<div class="pt-4">
+				<div class="flex items-center h-fit px-2">					
+					<!-- Button for Overview -->
+					<button onclick="location.href = `/reports/campaign-list/${id}`" type="button" class="py-1 px-2 bg-black text-white rounded">Overview</button>
+					<div class="border h-4 m-2"></div>
+					
+					<!-- Button for Sent Messages -->
+					<button onclick="location.href = `/reports/campaign-list/${id}?filter=sent`" type="button" class="p-2">Sent</button>
+					<div class="border h-4 m-2"></div>
+					
+					<!-- Button for Delivered Messages -->
+					<button onclick="location.href = `/reports/campaign-list/${id}?filter=delivered`" type="button" class="p-2">Delivered</button>
+					<div class="border h-4 m-2"></div>
+					
+					<!-- Button for Read Messages -->
+					<button onclick="location.href = `/reports/campaign-list/${id}?filter=read`" type="button" class="p-2">Read</button>
+					<div class="border h-4 m-2"></div>
+					
+					<!-- Button for Replies Received -->
+					<button onclick="location.href = `/reports/campaign-list/${id}?filter=replies`" type="button" class="p-2">Replies received</button>
+					<div class="border h-4 m-2"></div>
+					
+					<!-- Button for Failed Messages -->
+					<button onclick="location.href = `/reports/campaign-list/${id}?filter=failed`" type="button" class="p-2">Failed</button>
+				</div>
+
+			</div>
+			<div class="container">
+				<!-- Header Section -->
+				<h1>Campaign Report</h1>
+				
+				<!-- Overview Stats -->
+				<div class="stats">
+					<div class="stat-box">
+						<h3>Total</h3>
+						<p><%= totalMessages %></p>
+					</div>
+					<div class="stat-box">
+						<h3>Sent</h3>
+						<p><%= messagesSent %> (<%= percentSent %>%)</p>
+					</div>
+					<div class="stat-box">
+						<h3>Delivered</h3>
+						<p><%= messagesDelivered %> (<%= percentDelivered %>%)</p>
+					</div>
+					<div class="stat-box">
+						<h3>Read</h3>
+						<p><%= messagesRead %> (<%= percentRead %>%)</p>
+					</div>
+					<div class="stat-box">
+						<h3>Replies Received</h3>
+						<p><%= messagesReplied %></p>
+					</div>
+					<div class="stat-box">
+						<h3>Failed</h3>
+						<p><%= messagesFailed %></p>
+					</div>
+				</div>
+				
+				<!-- Current Status Chart -->
+				<div>
+					<h2>Current Status</h2>
+					<canvas id="statusChart"></canvas>
+				</div>
+				
+				<!-- Active/Inactive Status Pie Chart -->
+				<div>
+					<h2>Active/Inactive Status</h2>
+					<canvas id="activeInactiveChart"></canvas>
+				</div>
+				
+				<!-- Table for Sent Messages -->
+				<div class="message-list">
+					<table>
+						<thead>
+							<tr>
+								<th>Send Date</th>
+								<th>Status</th>
+								<th>Contact</th>
+								<th>Message Sent</th>
+							</tr>
+						</thead>
+						<tbody>
+							<% campaigns.forEach(campaign => { %>
+							<% campaign.reports.forEach(report => { %>
+							<tr>
+								<td><%= new Date(report.timestamp * 1000).toLocaleDateString() %></td>
+								<td><%= report.status %></td>
+								<td>xxxxxxxxxx</td> <!-- Masking contact info -->
+								<td><%= report.messageTemplate?.text || 'No Message Text Available' %></td>
+							</tr>
+							<% }) %>
+							<% }) %>
+						</tbody>
+					</table>
+				</div>
+				
+				<!-- Pagination -->
+				<div class="flex items-center justify-center py-4 space-x-4">
+					<nav class="flex items-center">
+						<ul class="flex space-x-1">
+							<!-- Previous Button -->
+							<li>
+								<a href="/reports/campaign-list/<%= campaigns[0]?.unique_id %>?page=<%= page > 1 ? page - 1 : 1 %>" class="px-3 py-2 rounded-md text-sm font-medium text-gray-500 bg-white border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed" <%= page === 1 ? 'aria-disabled="true"' : '' %>>‹</a>
+							</li>
+							
+							<!-- First Page Button -->
+							<li>
+								<a href="/reports/campaign-list/<%= campaigns[0]?.unique_id %>?page=1" class="px-3 py-2 rounded-md text-sm font-medium <%= page === 1 ? 'text-white bg-red-400 border-red-400' : 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50' %>">1</a>
+							</li>
+							
+							<% if (page > 3) { %>
+							<!-- Show "..." if current page is greater than 3 -->
+							<li><span class="px-3 py-2 text-sm text-gray-500">...</span></li>
+							<% } %>
+							
+							<!-- Dynamic Page Numbers based on current page -->
+							<% for (let i = Math.max(2, page - 1); i <= Math.min(totalPages - 1, page + 1); i++) { %>
+							<li>
+								<a href="/reports/campaign-list/<%= campaigns[0]?.unique_id %>?page=<%= i %>" class="px-3 py-2 rounded-md text-sm font-medium <%= i === page ? 'text-white bg-red-400 border-red-400' : 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50' %>"><%= i %></a>
+							</li>
+							<% } %>
+							
+							<% if (page < totalPages - 2) { %>
+							<!-- Show "..." if there are more pages -->
+							<li><span class="px-3 py-2 text-sm text-gray-500">...</span></li>
+							<% } %>
+							
+							<!-- Last Page Button -->
+							<% if (totalPages > 1) { %>
+							<li>
+								<a href="/reports/campaign-list/<%= campaigns[0]?.unique_id %>?page=<%= totalPages %>" class="px-3 py-2 rounded-md text-sm font-medium <%= page === totalPages ? 'text-white bg-red-400 border-red-400' : 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50' %>"><%= totalPages %></a>
+							</li>
+							<% } %>
+							
+							<!-- Next Button -->
+							<li>
+								<a href="/reports/campaign-list/<%= campaigns[0]?.unique_id %>?page=<%= page < totalPages ? page + 1 : totalPages %>" class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50">›</a>
+							</li>
+						</ul>
+					</nav>
+					
+					<!-- "Go to page" input -->
+					<div class="flex items-center space-x-2">
+						<span class="text-sm text-gray-700">Go to page</span>
+						<input type="number" min="1" max="<%= totalPages %>" class="w-16 px-2 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" value="<%= page %>" id="pageInput" />
+						<button type="button" class="px-3 py-1 text-sm font-medium text-white bg-red-400 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" onclick="goToPage()">Go</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- END PAGE CONTAINER -->
+	<script>
+		window.addEventListener('load', function () {
+			// Fade out the loader smoothly by changing the opacity
+			document.getElementById('loader').style.opacity = '0';
+			
+			// Optionally, hide it completely after the fade-out effect is finished
+			setTimeout(function () {
+				document.getElementById('loader').style.visibility = 'hidden';
+			}, 300); // Match the duration of the fade-out (1 second in this case)
+		});
+	</script>
+	<script>
+		const ctxStatus = document.getElementById('statusChart').getContext('2d');
+		const statusChart = new Chart(ctxStatus, {
+			type: 'bar',
+			data: {
+				labels: ['Failed', 'Sent', 'Delivered', 'Read', 'Replies'],
+				datasets: [{
+					label: 'Messages',
+					data: [<%= messagesFailed %>, <%= messagesSent %>, <%= messagesDelivered %>, <%= messagesRead %>, <%= messagesReplied %>],
+					backgroundColor: ['#00A3E0', '#6A5ACD', '#F28C8C', '#FFA500', '#6C757D'],
+				}]
+			},
+			options: {
+				responsive: true,
+				scales: {
+					y: {
+						beginAtZero: true
+					}
+				}
+			}
+		});
+		
+		const ctxActiveInactive = document.getElementById('activeInactiveChart').getContext('2d');
+		const activeInactiveChart = new Chart(ctxActiveInactive, {
+			type: 'doughnut',
+			data: {
+				labels: ['Active', 'Inactive'],
+				datasets: [{
+					label: 'Status',
+					data: [<%= messagesReplied %>, <%= messagesFailed %>], // Adjust as per logic for active/inactive
+					backgroundColor: ['#FFD700', '#FF4500'],
+				}]
+			},
+			options: {
+				responsive: true,
+			}
+		});
+		
+		function goToPage () {
+			const inputPage = document.getElementById('pageInput').value;
+			if (inputPage > 0 && inputPage <= <%= totalPages %>) {
+				window.location.href = `/reports/campaign-list/<%= campaigns[0]?.unique_id %>?page=${inputPage}`;
+			}
+		}
+	</script>
+</body>
+
+</html>

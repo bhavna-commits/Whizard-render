@@ -37,11 +37,13 @@ export const createTemplate = async (req, res) => {
 		);
 
 		// Submit template to Facebook
-		await submitTemplateToFacebook(savedTemplate);
-
-		// Log activity
+		const data = await submitTemplateToFacebook(savedTemplate);
+		console.log(JSON.stringify(data));
+		// Log activity	
 		await ActivityLogs.create({
-			name: req.session.user?.name || req.session.addedUser?.name,
+			useradmin: req.session.user.id,
+			unique_id: generateUniqueId(),
+			name: req.session.user.name || req.session.addedUser?.name,
 			actions: "Create",
 			details: `Created new template named: ${savedTemplate.name}`,
 		});
@@ -145,6 +147,8 @@ export const duplicateTemplate = async (req, res) => {
 
 		// Log the duplication activity
 		await ActivityLogs.create({
+			useradmin: req.session.user.id,
+			unique_id: generateUniqueId(),
 			name: req.session.user.name || req.session.addedUser.name,
 			actions: "Create",
 			details: `Duplicated Template named: ${savedTemplate.name}`,
@@ -160,7 +164,6 @@ export const deleteTemplate = async (req, res) => {
 	try {
 		const templateId = req.params.id;
 
-		const one = Template.findById(templateId);
 		const deletedTemplate = await Template.findByIdAndDelete(templateId);
 		if (!deletedTemplate) {
 			return res
@@ -169,9 +172,11 @@ export const deleteTemplate = async (req, res) => {
 		}
 
 		await ActivityLogs.create({
+			useradmin: req.session.user.id,
+			unique_id: generateUniqueId(),
 			name: req.session.user.name || req.session.addedUser.name,
 			actions: "Delete",
-			details: `Deleted Template named: ${one.name}`,
+			details: `Deleted Template named: ${deletedTemplate.name}`,
 		});
 
 		res.status(200).json({

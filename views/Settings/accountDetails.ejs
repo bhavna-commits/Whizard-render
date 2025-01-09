@@ -24,7 +24,7 @@
 	<!-- <link class="main-stylesheet" href="pages/css/themes/corporate.css" rel="stylesheet" type="text/css" /> -->
 	<!-- Please remove the file below for production: Contains demo classes -->
 	<link class="main-stylesheet" href="assets/css/style.css" rel="stylesheet" type="text/css" />
-	<link rel="stylesheet" href="/styles/style.css" />
+	
 	<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
 	<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" />
 	<script src="https://cdn.tailwindcss.com"></script>
@@ -32,7 +32,8 @@
 	<link rel="preconnect" href="https://fonts.googleapis.com" />
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 	<link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
-	<script src="https://kit.fontawesome.com/44e4e59292.js" crossorigin="anonymous"></script>
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+	<link href="styles/style.css" rel="stylesheet" type="text/css" /> <!-- <script src="https://kit.fontawesome.com/44e4e59292.js" crossorigin="anonymous"></script> -->
 	<style>
 		.loading-spinner {
 			border: 3px solid rgba(0, 0, 0, 0.1);
@@ -52,11 +53,6 @@
 				transform: rotate(360deg);
 			}
 		}
-		
-		#errorMessage {
-			color: red;
-			margin-top: 10px;
-		}
 	</style>
 	
 <body>
@@ -64,31 +60,31 @@
 	<div id="loader" class="loader">
 		<div class="spinner"></div>
 	</div>
-
+	
 	<div class="layout-container">
 		<nav class="sidebar">
-			<div class="logo pb-2">
+			<div class="logo py-3">
 				<img src="/assets/img/Wizard_logo.png" alt="Whizard Logo" />
 			</div>
-			<ul class="pt-3">
+			<ul class="mt-4 space-y-4">
 				<li>
 					<a href="/" class=""><span class="icon"><i class="fas fa-chart-line"></i></span>
 						Dashboard</a>
 				</li>
-				<li class="py-1">
+				<li class="">
 					<a href="/chats"><span class="icon"><i class="fa-regular fa-comment"></i></span>
 						Chats</a>
 				</li>
-				<li class="py-1">
+				<li class="">
 					<a href="/contact-list"><span class="icon "><i class="fa-regular fa-address-book"></i></span>
 						
 						Contact List</a>
 				</li>
-				<li class="py-1">
+				<li class="">
 					<a href="/template"><span class="icon "><i class="fa-regular fa-envelope"></i></span>
 						Template</a>
 				</li>
-				<li class="py-1">
+				<li class="">
 					<a href="/settings"><span class="icon active"><i class="fa-regular fa-user"></i></span>
 						Settings</a>
 				</li>
@@ -272,7 +268,7 @@
 							</div>
 						</div>
 						
-						<div id="errorMessage" class="hidden text-green-500"></div>
+						<div id="errorMessage" class="hidden w-full text-center tex"></div>
 					</form>
 				</div>
 				
@@ -293,7 +289,7 @@
 			}, 500); // Match the duration of the fade-out (1 second in this case)
 		});
 	</script>
-
+	
 	<script>
 		const countries = <%- JSON.stringify(countries) %>;
 		const user = <%- JSON.stringify(user) %>;
