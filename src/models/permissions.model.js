@@ -1,109 +1,12 @@
-import { name } from "ejs";
 import mongoose from "mongoose";
 
 const Schema = mongoose.Schema;
 
 const permissionSchema = new Schema(
 	{
-		owner: { type: String, ref: "User", required: true },
+		useradmin: { type: String, ref: "User", required: true },
 		name: { type: String, required: true },
 		unique_id: { type: String, required: true },
-		user: {
-			dashboard: {
-				connectNow: {
-					type: Boolean,
-					default: true,
-				},
-				viewUsers: {
-					type: Boolean,
-					default: true,
-				},
-				quickActions: {
-					type: Boolean,
-					default: true,
-				},
-			},
-			chats: {
-				type: Boolean,
-				default: true,
-
-				redirectToVpchat: {
-					type: Boolean,
-					default: true,
-				},
-			},
-			contactList: {
-				type: Boolean,
-				default: true,
-
-				addContactIndividual: {
-					type: Boolean,
-					default: true,
-				},
-				addContactListCSV: {
-					type: Boolean,
-					default: true,
-				},
-				deleteList: {
-					type: Boolean,
-					default: true,
-				},
-				sendBroadcast: {
-					type: Boolean,
-					default: true,
-				},
-			},
-			reports: {
-				type: Boolean,
-				default: true,
-
-				conversationReports: {
-					viewReports: {
-						type: Boolean,
-						default: true,
-					},
-					retargetingUsers: {
-						type: Boolean,
-						default: true,
-					},
-					redirectToVpchat: {
-						type: Boolean,
-						default: true,
-					},
-				},
-				costReports: {
-					type: Boolean,
-					default: true,
-				},
-			},
-			settings: {
-				type: Boolean,
-				default: true,
-
-				userManagement: {
-					type: Boolean,
-					default: true,
-				},
-				activityLogs: {
-					type: Boolean,
-					default: true,
-				},
-				manageTags: {
-					delete: {
-						type: Boolean,
-						default: true,
-					},
-					add: {
-						type: Boolean,
-						default: true,
-					},
-					view: {
-						type: Boolean,
-						default: true,
-					},
-				},
-			},
-		    },
 		dashboard: {
 			connectNow: {
 				type: Boolean,
@@ -144,6 +47,23 @@ const permissionSchema = new Schema(
 				default: false,
 			},
 			sendBroadcast: {
+				type: Boolean,
+				default: false,
+			},
+		},
+		templates: {
+			type: Boolean,
+			default: false,
+
+			editTemplate: {
+				type: Boolean,
+				default: false,
+			},
+			createTemplate: {
+				type: Boolean,
+				default: false,
+			},
+			deleteTemplate: {
 				type: Boolean,
 				default: false,
 			},

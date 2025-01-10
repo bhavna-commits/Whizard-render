@@ -1,0 +1,80 @@
+<div id="addUserModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
+	<div class="relative top-[20%] mx-auto p-7 border w-[600px] shadow-lg rounded-md bg-white ">
+		<div class="mt-3 space-y-5">
+			<h3 class="text-2xl font-semibold leading-6 text-center text-gray-900">Add new user</h3>
+			<div class="mt-2 ">
+				<form id="addUserForm">
+					<div class="mb-4">
+						<label class="block text-gray-500  mb-2">User Name</label>
+						<input type="text" id="userName" name="userName" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-500 leading-tight focus:outline-none focus:shadow-outline" placeholder="What is name of user">
+					</div>
+					<div class="mb-4">
+						<label class="block text-gray-500  mb-2">Email</label>
+						<input type="email" id="userEmail" name="userEmail" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-500 leading-tight focus:outline-none focus:shadow-outline" placeholder="Enter email address">
+					</div>
+					<div class="mb-4">
+						<label class="block text-gray-500  mb-2">Role</label>
+						<select id="userRole" name="userRole" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-500 leading-tight focus:outline-none focus:shadow-outline">
+							<option value="">Select role</option>
+							<% permissions.forEach(function(permission) { %>
+							<option value="<%= permission.name %>"><%= permission.name %></option>
+							<% }); %>
+						</select>
+					</div>
+					<div class="flex items-center justify-between mt-5">
+						<button type="submit" class="bg-black hover:bg-gray-800 text-white py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+							Invite
+						</button>
+						<button type="button" onclick="closeModal()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+							Cancel
+						</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script>
+	function openModal () {
+		document.getElementById('addUserModal').classList.remove('hidden');
+	}
+	
+	function closeModal () {
+		document.getElementById('addUserModal').classList.add('hidden');
+	}
+	
+	// Update your existing button's onclick
+	function AddUser () {
+		openModal();
+	}
+	
+	document.getElementById('addUserForm').addEventListener('submit', async (e) => {
+		e.preventDefault();
+		
+		const formData = {
+			name: document.getElementById('userName').value,
+			email: document.getElementById('userEmail').value,
+			role: document.getElementById('userRole').value
+		};
+		
+		try {
+			const response = await fetch('/api/settings/user-management/invite', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify(formData)
+			});
+			
+			if (response.ok) {
+				alert('Invitation sent successfully!');
+				closeModal();
+			} else {
+				throw new Error('Failed to send invitation');
+			}
+		} catch (error) {
+			alert(error.message);
+		}
+	});
+</script>

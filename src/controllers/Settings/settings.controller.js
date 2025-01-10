@@ -7,6 +7,7 @@ import {
 import User from "../../models/user.model.js";
 import ActivityLogs from "../../models/activityLogs.model.js";
 import AddedUser from "../../models/addedUser.model.js";
+import Permissions from "../../models/permissions.model.js";
 
 import {
 	languages,
@@ -15,6 +16,7 @@ import {
 	industryCategory,
 	roles,
 } from "../../utils/dropDown.js";
+import sendAddUserMail from "../../services/OTP/addingUserService.js";
 
 export const home = async (req, res) => {
 	res.render("Settings/home");
@@ -280,7 +282,7 @@ export const getActivityLogs = async (req, res) => {
 export const activityLogsFiltered = async (req, res) => {
 	const { action, dateRange } = req.query;
 	let filter = {};
-	
+
 	filter.unique_id = req.session.user.id;
 	// Filter by action type
 	if (action && action !== "All action") {
@@ -326,21 +328,107 @@ export const activityLogsFiltered = async (req, res) => {
 
 export const getUserManagement = async (req, res) => {
 	const id = req.session.user.id;
-
 	try {
-		const user = await User.findOne({ unique_id: id });
-
-		if (!user) {
-			return res.status(404).json({ message: "User not found" });
-		}
-
-		// console.log("User Information:", user);
-		const language = "English";
-		res.render("Settings/userMangement");
+		let users = await AddedUser.find({ useradmin: id });
+		const permissions = await Permissions.find({ useradmin: id });
+		users = users ? users : [];
+		res.render("Settings/userManagement", { users, permissions, id });
 	} catch (error) {
 		console.error(error);
 		res.status(500).json({
 			message: "An error occurred while fetching the user profile",
 		});
 	}
+};
+
+export const getCreatePassword = async (req, res) => {
+	res.render("Settings/createAddedUserPassword");
+};
+
+export const sendUserInvitation = async (req, res) => {
+	const adminId = req.session.user.id;
+	const { name, email, role } = req.body;
+
+	try {
+		let exists = User.findOne({ email });
+		if (exists) {
+			res.status(409).json({ message: "Email already in use" });
+		}
+
+		exists = AddedUser.findOne({ email });
+		if (exists) {
+			res.status(409).json({ message: "Email already in use" });
+		}
+		const newUser = new AddedUser({
+			name,
+			email,
+			role,
+			useradmin: adminId,
+		});
+
+		// Generate unique invitation link
+		const invitationToken = Buffer.from(`${adminId}`).toString("base64");
+		const invitationLink = `https://dee8-2401-4900-1c46-a41b-841f-8a97-fe81-971c.ngrok-free.app/settings/user-management/create-password?token=${invitationToken}`;
+
+		await sendAddUserMail(req.session.user.name, invitationLink);
+		await newUser.save();
+		res.status(200).json({ message: "Invitation sent successfully" });
+	} catch (error) {
+		console.error("Error sending invitation:", error);
+		res.status(500).json({ message: "Failed to send invitation" });
+	}
+};
+
+export const getPermissions = async (req, res) => {
+	res.render("Settings/permissions");
+};
+
+export const createPermissions = async (req, res) => {
+	try {
+		const unique_id = generateUniqueId();
+		const useradmin = req.session.user.id;
+
+		const { name, permissions } = req.body;
+
+		// Check if the role with the same name already exists
+		const existingRole = await Permissions.findOne({ name });
+		if (existingRole) {
+			return res
+				.status(400)
+				.json({ message: "Role with this name already exists" });
+		}
+		console.log(permissions);
+		// Create a new role with permissions
+		const newRole = new Permissions({
+			useradmin,
+			name,
+			unique_id,
+			dashboard: permissions.dashboard,
+			chats: permissions.chats,
+			contactList: permissions.contactList,
+			reports: permissions.reports,
+			settings: permissions.settings,
+		});
+
+		// Save the role
+		await newRole.save();
+
+		return res
+			.status(201)
+			.json({ message: "Role created successfully!", role: newRole });
+	} catch (error) {
+		console.error("Error creating role:", error);
+		return res
+			.status(500)
+			.json({ message: "Failed to create role", error });
+	}
+};
+
+export const createAddedUserPassword = async (req, res) => {
+	const { password, adminId } = req.body;
+	const data = User.findOne({ unique_id: adminId });
+	req.session.user = {
+		id: adminId,
+		name: data.name,
+	};
 };

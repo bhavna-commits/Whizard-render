@@ -4,30 +4,23 @@ const addedUserSchema = new mongoose.Schema(
 	{
 		unique_id: { type: String, required: true, unique: true },
 		email: { type: String, required: true, unique: true },
-		username: { type: String, required: true },
+		name: { type: String, required: true },
 		password: { type: String },
 		useradmin: { type: String, ref: "User" },
-		usertype: {
+		role: {
 			type: String,
-			enum: ["owner, member"],
-			default: "member",
 			required: true,
 		},
-		status: { type: Number, enum: [0, 1], default: 1 },
-		invitedBy: {
-			type: mongoose.Schema.Types.ObjectId,
-			ref: "User",
-			required: true,
-		},
+		deleted: { type: Boolean, default: false },
 		invitationStatus: {
 			type: String,
-			enum: ["invited", "registered", "verified"],
-			default: "invited",
+			enum: ["Invited", "Registered"],
+			default: "Invited",
 		},
-		invitationToken: { type: String },
-		invitationTokenExpiry: { type: Date },
+		createdAt: { type: Number, default: () => Date.now() },
+		updatedAt: { type: Number, default: () => Date.now() },
 	},
-	{ timestamps: true },
+	{ timestamps: false },
 	{ strict: false },
 );
 

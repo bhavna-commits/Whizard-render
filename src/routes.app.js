@@ -10,10 +10,15 @@ import faceBookBackEndRoute from "./backEnd-Routes/facebook.backEnd.routes.js";
 import reportsFrontEndRoute from "./frontEnd-Routes/reports.frontEnd.routes.js";
 import { checkSession } from "./middleWares/checkSession.js";
 import app from "./static.app.js";
+import { createAddedUserPassword } from "./controllers/Settings/settings.controller.js";
 
 app.use("/api/facebook", faceBookBackEndRoute);
 app.use("/", userfrontEndRoutes);
 app.use("/api/users", userRoutes);
+app.post(
+	"/api/settings/user-management/create-user-password",
+	createAddedUserPassword,
+);
 app.use("/", checkSession, tempalteFrontEndRoutes);
 app.use("/reports", checkSession, reportsFrontEndRoute);
 app.use("/settings", checkSession, settingsFrontRoute);

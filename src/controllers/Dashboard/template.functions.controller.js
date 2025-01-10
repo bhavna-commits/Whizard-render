@@ -15,7 +15,7 @@ export const saveTemplateToDatabase = async (
 ) => {
 	try {
 		const components = createComponents(templateData, dynamicVariables);
-		console.log(components);
+		// console.log(components);
 		const newTemplate = new Template({
 			name: templateData.templateName,
 			category: templateData.category,

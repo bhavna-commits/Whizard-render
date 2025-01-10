@@ -24,7 +24,7 @@
 	
 	<!-- Flatpickr JS CDN -->
 	<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-	
+	<link href="styles/campaignOverview.css" rel="stylesheet" type="text/css" />
 	<link href="styles/style.css" rel="stylesheet" type="text/css" />
 	<script src="https://cdn.tailwindcss.com"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.5/xlsx.full.min.js"></script>
@@ -133,7 +133,7 @@
 				</div>
 			</div>
 			<div class="pt-4">
-				<div class="flex items-center h-fit px-2">					
+				<div class="flex items-center h-fit px-2">
 					<!-- Button for Overview -->
 					<button onclick="location.href = `/reports/campaign-list/${id}`" type="button" class="py-1 px-2 bg-black text-white rounded">Overview</button>
 					<div class="border h-4 m-2"></div>
@@ -157,12 +157,9 @@
 					<!-- Button for Failed Messages -->
 					<button onclick="location.href = `/reports/campaign-list/${id}?filter=failed`" type="button" class="p-2">Failed</button>
 				</div>
-
+				
 			</div>
 			<div class="container">
-				<!-- Header Section -->
-				<h1>Campaign Report</h1>
-				
 				<!-- Overview Stats -->
 				<div class="stats">
 					<div class="stat-box">
@@ -171,15 +168,15 @@
 					</div>
 					<div class="stat-box">
 						<h3>Sent</h3>
-						<p><%= messagesSent %> (<%= percentSent %>%)</p>
+						<p><%= messagesSent %> <span class="text-base font-normal">(<%= percentSent %>%)</span></p>
 					</div>
 					<div class="stat-box">
 						<h3>Delivered</h3>
-						<p><%= messagesDelivered %> (<%= percentDelivered %>%)</p>
+						<p><%= messagesDelivered %> <span class="text-base font-normal">(<%= percentDelivered %>%)</span></p>
 					</div>
 					<div class="stat-box">
 						<h3>Read</h3>
-						<p><%= messagesRead %> (<%= percentRead %>%)</p>
+						<p><%= messagesRead %> <span class="text-base font-normal">(<%= percentRead %>%)</span></p>
 					</div>
 					<div class="stat-box">
 						<h3>Replies Received</h3>
@@ -192,41 +189,45 @@
 				</div>
 				
 				<!-- Current Status Chart -->
-				<div>
-					<h2>Current Status</h2>
+				<div class="w-[500px]  border rounded-xl p-3">
+					<h2 class="font-semibold text-gray-500">Current Status</h2>
 					<canvas id="statusChart"></canvas>
-				</div>
-				
-				<!-- Active/Inactive Status Pie Chart -->
-				<div>
-					<h2>Active/Inactive Status</h2>
-					<canvas id="activeInactiveChart"></canvas>
 				</div>
 				
 				<!-- Table for Sent Messages -->
 				<div class="message-list">
-					<table>
+					<table class="text-center min-w-full border-separate border-spacing-y-4">
 						<thead>
-							<tr>
-								<th>Send Date</th>
-								<th>Status</th>
-								<th>Contact</th>
-								<th>Message Sent</th>
+							<tr class="text-gray-500">
+								<th class="py-4">Send Date</th>
+								<th class="py-4">Status</th>
+								<th class="py-4">Contact</th>
+								<th class="py-4">Message Sent</th>
 							</tr>
 						</thead>
 						<tbody>
 							<% campaigns.forEach(campaign => { %>
 							<% campaign.reports.forEach(report => { %>
-							<tr>
-								<td><%= new Date(report.timestamp * 1000).toLocaleDateString() %></td>
-								<td><%= report.status %></td>
-								<td>xxxxxxxxxx</td> <!-- Masking contact info -->
-								<td><%= report.messageTemplate?.text || 'No Message Text Available' %></td>
+							<tr class="hover:bg-gray-100 cursor-pointer border">
+								<td class="border-l border-t border-b rounded-lg py-4 border-gray-200 text-sm text-gray-500">
+									<%= new Date(report.timestamp * 1000).toLocaleDateString() %>
+								</td>
+								<td class="border-t border-b border-gray-200 text-gray-500">
+									<%= report.status %>
+								</td>
+								<td class="border-t border-b border-gray-200 text-gray-500">
+									xxxxxxxxxx
+									<!-- Masked contact info -->
+								</td>
+								<td class="border-r border-t border-b rounded-lg border-gray-200 text-gray-500">
+									<%= report.messageTemplate?.text || 'No Message Text Available' %>
+								</td>
 							</tr>
 							<% }) %>
 							<% }) %>
 						</tbody>
 					</table>
+
 				</div>
 				
 				<!-- Pagination -->
@@ -310,27 +311,12 @@
 			},
 			options: {
 				responsive: true,
+				// maintainAspectRatio: false, // Add this to ensure that resizing works
 				scales: {
 					y: {
 						beginAtZero: true
 					}
 				}
-			}
-		});
-		
-		const ctxActiveInactive = document.getElementById('activeInactiveChart').getContext('2d');
-		const activeInactiveChart = new Chart(ctxActiveInactive, {
-			type: 'doughnut',
-			data: {
-				labels: ['Active', 'Inactive'],
-				datasets: [{
-					label: 'Status',
-					data: [<%= messagesReplied %>, <%= messagesFailed %>], // Adjust as per logic for active/inactive
-					backgroundColor: ['#FFD700', '#FF4500'],
-				}]
-			},
-			options: {
-				responsive: true,
 			}
 		});
 		

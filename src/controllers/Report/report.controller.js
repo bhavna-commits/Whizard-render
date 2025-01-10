@@ -95,7 +95,6 @@ export const getCampaignList = async (req, res) => {
 		const totalCount = campaigns[0]?.totalCount[0]?.total || 0;
 		const totalPages = Math.ceil(totalCount / limit);
 
-		
 		// console.log(paginatedResults);
 		res.render("Reports/campaign", {
 			campaigns: paginatedResults,
@@ -233,9 +232,9 @@ const getCampaignOverview = async (req, res) => {
 	try {
 		const { id } = req.params;
 		const userId = req.session.user.id;
-		const page = parseInt(req.query.page) || 1; // Current page
-		const limit = 6; // Results per page
-		const skip = (page - 1) * limit; // Calculate how many records to skip
+		const page = parseInt(req.query.page) || 1;
+		const limit = 6;
+		const skip = (page - 1) * limit;
 
 		// Fetch campaigns created by the user
 		const campaigns = await Campaign.aggregate([
@@ -249,9 +248,55 @@ const getCampaignOverview = async (req, res) => {
 			{
 				$lookup: {
 					from: "campaignreports",
-					localField: "unique_id",
-					foreignField: "campaignId",
+					let: {
+						campaignUniqueId: "$unique_id",
+						campaignUseradmin: "$useradmin",
+					},
+					pipeline: [
+						{
+							$match: {
+								$expr: {
+									$and: [
+										{
+											$eq: [
+												"$campaignId",
+												"$$campaignUniqueId",
+											],
+										},
+										{
+											$eq: [
+												"$useradmin",
+												"$$campaignUseradmin",
+											],
+										},
+									],
+								},
+							},
+						},
+					],
 					as: "reports",
+				},
+			},
+			{
+				$lookup: {
+					from: "contactlists",
+					localField: "contactListId",
+					foreignField: "_id",
+					as: "contactList",
+				},
+			},
+			{
+				$unwind: {
+					path: "$contactList",
+					preserveNullAndEmptyArrays: true,
+				},
+			},
+			{
+				$lookup: {
+					from: "contacts",
+					localField: "contactList.contacts.contactId",
+					foreignField: "contactId",
+					as: "contacts",
 				},
 			},
 			{
@@ -374,22 +419,43 @@ const getCampaignOverview = async (req, res) => {
 		const totalCount = campaigns[0]?.totalCount[0]?.total || 0;
 		const totalPages = Math.ceil(totalCount / limit);
 
-		// Return the data to render in the view
-		res.render("Reports/campaignOverview", {
-			campaigns: paginatedResults,
-			id,
-			page,
-			totalPages,
-			totalMessages: campaigns[0]?.totalMessages || 0,
-			messagesSent: campaigns[0]?.messagesSent || 0,
-			messagesDelivered: campaigns[0]?.messagesDelivered || 0,
-			messagesRead: campaigns[0]?.messagesRead || 0,
-			messagesReplied: campaigns[0]?.messagesReplied || 0,
-			messagesFailed: campaigns[0]?.messagesFailed || 0,
-			percentSent: campaigns[0]?.percentSent?.toFixed(2) || 0,
-			percentDelivered: campaigns[0]?.percentDelivered?.toFixed(2) || 0,
-			percentRead: campaigns[0]?.percentRead?.toFixed(2) || 0,
-		});
+		if (paginatedResults.length > 0) {
+			const firstCampaign = paginatedResults[0]; // Access the first element of paginatedResults
+
+			res.render("Reports/campaignOverview", {
+				campaigns: paginatedResults,
+				id,
+				page,
+				totalPages,
+				totalMessages: firstCampaign.totalMessages || 0,
+				messagesSent: firstCampaign.messagesSent || 0,
+				messagesDelivered: firstCampaign.messagesDelivered || 0,
+				messagesRead: firstCampaign.messagesRead || 0,
+				messagesReplied: firstCampaign.messagesReplied || 0,
+				messagesFailed: firstCampaign.messagesFailed || 0,
+				percentSent: firstCampaign.percentSent?.toFixed(2) || 0,
+				percentDelivered:
+					firstCampaign.percentDelivered?.toFixed(2) || 0,
+				percentRead: firstCampaign.percentRead?.toFixed(2) || 0,
+			});
+		} else {
+			// Handle the case when no campaigns are returned
+			res.render("Reports/campaignOverview", {
+				campaigns: [],
+				id,
+				page,
+				totalPages,
+				totalMessages: 0,
+				messagesSent: 0,
+				messagesDelivered: 0,
+				messagesRead: 0,
+				messagesReplied: 0,
+				messagesFailed: 0,
+				percentSent: 0,
+				percentDelivered: 0,
+				percentRead: 0,
+			});
+		}
 	} catch (err) {
 		console.error(err);
 		res.status(500).send("Server Error");

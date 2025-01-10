@@ -6,36 +6,18 @@
 	<meta charset="utf-8" />
 	<title>User Management</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no" />
-	<link rel="apple-touch-icon" href="pages/ico/60.png" />
-	<link rel="apple-touch-icon" sizes="76x76" href="pages/ico/76.png" />
-	<link rel="apple-touch-icon" sizes="120x120" href="pages/ico/120.png" />
-	<link rel="apple-touch-icon" sizes="152x152" href="pages/ico/152.png" />
-	<link rel="icon" type="image/x-icon" href="favicon.ico" />
-	<meta name="apple-mobile-web-app-capable" content="yes" />
-	<meta name="apple-touch-fullscreen" content="yes" />
-	<meta name="apple-mobile-web-app-status-bar-style" content="default" />
-	<meta content="Meet pages - The simplest and fastest way to build web UI for your dashboard or app." name="description" />
-	<meta content="Ace" name="author" />
-	<link href="assets/plugins/pace/pace-theme-flash.css" rel="stylesheet" type="text/css" />
-	<link href="assets/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
-	<!-- <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" /> -->
-	<link href="assets/plugins/jquery-scrollbar/jquery.scrollbar.css" rel="stylesheet" type="text/css" media="screen" />
-	<link href="assets/plugins/select2/css/select2.min.css" rel="stylesheet" type="text/css" media="screen" />
-	<!-- <link class="main-stylesheet" href="pages/css/themes/corporate.css" rel="stylesheet" type="text/css" /> -->
-	<!-- Please remove the file below for production: Contains demo classes -->
-	<link class="main-stylesheet" href="assets/css/style.css" rel="stylesheet" type="text/css" />
 	<link rel="preconnect" href="https://fonts.googleapis.com" />
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 	<link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet" />
-	<script src="https://viralpitch.co/insights/app/js/apexcharts-bundle/dist/apexcharts.js"></script>
-	<link rel="stylesheet" href="styles/template.css" />
-	<link rel="stylesheet" href="https://viralpitch.co/insights/app/js/apexcharts-bundle/dist/apexcharts.css" />
+	<!-- <script src="https://viralpitch.co/insights/app/js/apexcharts-bundle/dist/apexcharts.js"></script> -->
+	<!-- <link rel="stylesheet" href="styles/template.css" /> -->
+	<!-- <link rel="stylesheet" href="https://viralpitch.co/insights/app/js/apexcharts-bundle/dist/apexcharts.css" /> -->
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
 	<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
 	<link href="styles/style.css" rel="stylesheet" type="text/css" />
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+	<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script> -->
 	<script src="https://cdn.tailwindcss.com"></script>
-	<link rel="stylesheet" type="text/css" href="styles/template-preview.css" />
+	<!-- <link rel="stylesheet" type="text/css" href="styles/template-preview.css" /> -->
 </head>
 
 <body>
@@ -43,7 +25,7 @@
 	<div id="loader" class="loader">
 		<div class="spinner"></div>
 	</div>
-
+	
 	<div class="layout-container">
 		<nav class="sidebar">
 			<div class="logo py-3">
@@ -124,131 +106,146 @@
 		<div class="main-content  p-2">
 			<!-- END HEADER -->
 			<div class="logo flex justify-between items-center">
-				<div class="">
-					<!-- START BREADCRUMB -->
-					<nav class="flex px-3  mt-4" aria-label="Breadcrumb">
+				
+				<!-- START BREADCRUMB -->
+				<nav class="flex px-3  mt-4" aria-label="Breadcrumb">
+					
+					<div class="flex items-center">
+						<a href="/settings" class="text-gray-500 hover:text-gray-700 text-xl font-medium">Settings</a>
+						<svg class="w-4 h-4 mx-2 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+							<path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L11.586 10 7.293 5.707a1 1 0 011.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+						</svg>
+					</div>
+					
+					<div class="flex items-center">
+						<a href="/settings/user-management" class="text-red-500 hover:text-gray-700 text-xl font-medium ">User Management</a>
 						
-						<div class="flex items-center">
-							<a href="/settings" class="text-gray-500 hover:text-gray-700 text-xl font-medium">Settings</a>
-							<svg class="w-4 h-4 mx-2 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-								<path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L11.586 10 7.293 5.707a1 1 0 011.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
-							</svg>
-						</div>
-						
-						<div class="flex items-center">
-							<a href="/settings/profile" class="text-red-500 hover:text-gray-700 text-xl font-medium ">Profile</a>
-							
-						</div>
-						
-					</nav>
-					<!-- END BREADCRUMB -->
+					</div>
+					
+				</nav>
+				<div class="mt-4 space-x-4 px-3">
+					<button type="button" id="createNewPermissions" onclick="location.href = '/settings/user-management/permissions'" class="inline-flex items-center px-3 py-[10px] border border-transparent text-sm font-medium rounded-md text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black">
+						<i class="fa-solid fa-plus pr-2"></i>
+						<span>Add New Permissions</span>
+					</button>
+					<button type="button" id="AddNewUserSmall" onclick="AddUser()" class="inline-flex items-center px-3 py-[10px] border border-transparent text-sm font-medium rounded-md text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black">
+						<i class="fa-solid fa-plus pr-2"></i>
+						<span>Add New User</span>
+					</button>
 				</div>
+				
 			</div>
-            
-            <body class="bg-gray-100 p-8">
-            	<div class="container mx-auto bg-white p-6 rounded-lg shadow-lg">
-            		<div class="flex items-center justify-between mb-6">
-            			<h1 class="text-2xl font-semibold">Users</h1>
-            			<div class="flex space-x-6">
-            				<button class="px-4 py-2 bg-gray-300 rounded-lg">Invites</button>
-            				<button class="px-4 py-2 bg-gray-300 rounded-lg">Deleted Users</button>
-            			</div>
-            		</div>
-            		
-            		<!-- Table -->
-            		<table class="table-auto w-full text-left border-collapse">
-            			<thead>
-            				<tr class="text-gray-700">
-            					<th class="p-4 border-b">Sno.</th>
-            					<th class="p-4 border-b">User Name</th>
-            					<th class="p-4 border-b">Email</th>
-            					<th class="p-4 border-b">Role</th>
-            					<th class="p-4 border-b">Status</th>
-            					<th class="p-4 border-b">Actions</th>
-            				</tr>
-            			</thead>
-            			<tbody>
-            				<% users.forEach((user, index) => { %>
-            				<tr class="text-gray-900">
-            					<td class="p-4 border-b"><%= index + 1 %></td>
-            					<td class="p-4 border-b"><%= user.name %></td>
-            					<td class="p-4 border-b"><%= user.email %></td>
-            					<td class="p-4 border-b"><%= user.role %></td>
-            					<td class="p-4 border-b">
-            						<% if (user.status === 'Active') { %>
-            						<span class="text-orange-500 font-bold"><%= user.status %></span>
-            						<% } else { %>
-            						<span class="text-gray-500 font-bold"><%= user.status %></span>
-            						<% } %>
-            					</td>
-            					<td class="p-4 border-b">
-            						<div class="relative">
-            							<button class="text-gray-500 hover:text-gray-900 focus:outline-none" onclick="toggleDropdown(<%= index %>)">
-            								&#x22EE;
-            							</button>
-            							<div id="dropdown-<%= index %>" class="hidden absolute bg-white border rounded-lg shadow-lg w-40 right-0 z-10">
-            								<button class="block px-4 py-2 text-left text-gray-700 hover:bg-gray-100" onclick="updateStatus(<%= index %>, 'Inactive')">Mark as Unactive</button>
-            								<button class="block px-4 py-2 text-left text-gray-700 hover:bg-gray-100" onclick="updateRole(<%= index %>)">Update Role</button>
-            								<button class="block px-4 py-2 text-left text-red-500 hover:bg-gray-100" onclick="deleteUser(<%= index %>)">Delete User</button>
-            							</div>
-            						</div>
-            					</td>
-            				</tr>
-            				<% }) %>
-            			</tbody>
-            		</table>
-            	</div>
-            	 <script>
-            	 	window.addEventListener('load', function () {
-            	 		// Fade out the loader smoothly by changing the opacity
-            	 		document.getElementById('loader').style.opacity = '0';
-            	 		
-            	 		// Optionally, hide it completely after the fade-out effect is finished
-            	 		setTimeout(function () {
-            	 			document.getElementById('loader').style.visibility = 'hidden';
-            	 		}, 1000); // Match the duration of the fade-out (1 second in this case)
-            	 	});
-            	 </script>
-
-            	<script>
-            		function toggleDropdown (index) {
-            			const dropdown = document.getElementById('dropdown-' + index);
-            			dropdown.classList.toggle('hidden');
-            		}
-            		
-            		function updateStatus (index, status) {
-            			alert(`Mark user ${index + 1} as ${status}`);
-            			// Add logic to update user status
-            		}
-            		
-            		function updateRole (index) {
-            			alert(`Update role for user ${index + 1}`);
-            			// Add logic to update user role
-            		}
-            		
-            		function deleteUser (index) {
-            			const confirmation = confirm(`Are you sure you want to delete user ${index + 1}?`);
-            			if (confirmation) {
-            				alert(`User ${index + 1} deleted`);
-            				// Add logic to delete user
-            			}
-            		}
-            		
-            		// Close dropdown on clicking outside
-            		window.onclick = function (event) {
-            			if (!event.target.matches('button')) {
-            				document.querySelectorAll("[id^='dropdown']").forEach(dropdown => {
-            					dropdown.classList.add('hidden');
-            				});
-            			}
-            		}
-            	</script>
-            </body>
-            
-            </html>
-
+			
+			
+			<div class="container mx-auto bg-white p-6 rounded-lg">
+						
+				<% if (users.length > 0) { %>
+				<table class="table-auto w-full text-left border-collapse">
+					<thead>
+						<tr class="text-gray-700">
+							<th class="p-4 border-b">Sno.</th>
+							<th class="p-4 border-b">User Name</th>
+							<th class="p-4 border-b">Email</th>
+							<th class="p-4 border-b">Role</th>
+							<th class="p-4 border-b">Status</th>
+							<th class="p-4 border-b">Actions</th>
+						</tr>
+					</thead>
+					<tbody>
+						<% users.forEach((user, index) => { %>
+						<tr class="text-gray-900">
+							<td class="p-4 border-b"><%= index + 1 %></td>
+							<td class="p-4 border-b"><%= user.name %></td>
+							<td class="p-4 border-b"><%= user.email %></td>
+							<td class="p-4 border-b"><%= user.role %></td>
+							<td class="p-4 border-b">
+								<% if (user.status === 'Active') { %>
+								<span class="text-orange-500 font-bold"><%= user.status %></span>
+								<% } else { %>
+								<span class="text-gray-500 font-bold"><%= user.status %></span>
+								<% } %>
+							</td>
+							<td class="p-4 border-b">
+								<div class="relative">
+									<button class="text-gray-500 hover:text-gray-900 focus:outline-none" onclick="toggleDropdown(<%= index %>)">
+										&#x22EE;
+									</button>
+									<div id="dropdown-<%= index %>" class="hidden absolute bg-white border rounded-lg shadow-lg w-40 right-0 z-10">
+										<button class="block px-4 py-2 text-left text-gray-700 hover:bg-gray-100" onclick="updateStatus(<%= index %>, 'Inactive')">Mark as Unactive</button>
+										<button class="block px-4 py-2 text-left text-gray-700 hover:bg-gray-100" onclick="updateRole(<%= index %>)">Update Role</button>
+										<button class="block px-4 py-2 text-left text-red-500 hover:bg-gray-100" onclick="deleteUser(<%= index %>)">Delete User</button>
+									</div>
+								</div>
+							</td>
+						</tr>
+						<% }) %>
+					</tbody>
+				</table>
+				<% } else { %>
+				<!-- Empty state -->
+				<div class="flex flex-col items-center justify-center min-h-[400px]  rounded-lg mt-4">
+					<div class="text-center">
+						<img src="https://img.freepik.com/free-vector/hands-holding-tablet-with-forefinger-clicking-start-button-new-application-launch-flat-illustration_74855-20595.jpg?ga=GA1.1.131490893.1732525963&semt=ais_hybrid" alt="No contacts" class="w-48 h-48 mx-auto mb-4">
+						
+						<h3 class="text-xl font-semibold text-gray-900 mb-2">No members yet</h3>
+						<p class="text-gray-600 mb-6">Start adding users by clicking on "Add New User"</p>
+						<button type="button" id="AddNewUser" onclick="AddUser()" class="inline-flex items-center px-3 py-[10px] border border-transparent text-sm font-medium rounded-md text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black">
+							<i class="fa-solid fa-plus pr-2"></i>
+							<span>Add New User</span>
+						</button>
+					</div>
+				</div>
+				<% } %>
+			</div>
+			<script>
+				document.addEventListener('DOMContentLoaded', function () {
+					// Fade out the loader smoothly by changing the opacity
+					document.getElementById('loader').style.opacity = '0';
+					
+					// Optionally, hide it completely after the fade-out effect is finished
+					setTimeout(function () {
+						document.getElementById('loader').style.visibility = 'hidden';
+					}, 1000); // Match the duration of the fade-out (1 second in this case)
+				});
+			</script>
+			
+			<script>
+				function toggleDropdown (index) {
+					const dropdown = document.getElementById('dropdown-' + index);
+					dropdown.classList.toggle('hidden');
+				}
+				
+				function updateStatus (index, status) {
+					alert(`Mark user ${index + 1} as ${status}`);
+					// Add logic to update user status
+				}
+				
+				function updateRole (index) {
+					alert(`Update role for user ${index + 1}`);
+					// Add logic to update user role
+				}
+				
+				function deleteUser (index) {
+					const confirmation = confirm(`Are you sure you want to delete user ${index + 1}?`);
+					if (confirmation) {
+						alert(`User ${index + 1} deleted`);
+						// Add logic to delete user
+					}
+				}
+				
+				// Close dropdown on clicking outside
+				window.onclick = function (event) {
+					if (!event.target.matches('button')) {
+						document.querySelectorAll("[id^='dropdown']").forEach(dropdown => {
+							dropdown.classList.add('hidden');
+						});
+					}
+				}
+			</script>
 		</div>
 	</div>
+	<%- include("partials/addUser")  %>
 </body>
+
 
 </html>

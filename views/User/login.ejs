@@ -3,9 +3,8 @@
 
 <head>
 	<meta charset="utf-8" />
-	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<title>Login</title>
-	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=yes" />
 	<link rel="apple-touch-icon" href="pages/ico/60.png" />
 	<link rel="apple-touch-icon" sizes="76x76" href="pages/ico/76.png" />
 	<link rel="apple-touch-icon" sizes="120x120" href="pages/ico/120.png" />
@@ -92,15 +91,15 @@
 			<form id="signInForm" class="sign-in-form">
 				<div class="form-group">
 					<label class="p-text" for="email">Email</label>
-					<input type="email" class="form-control" id="email" name="email" placeholder="Enter email address" required>
+					<input type="email" class="form-control placeholder:text-gray-400" id="email" name="email" placeholder="Enter email address" required>
 					<div class="invalid-feedback">Enter a valid email</div>
 				</div>
 				
 				<div class="form-group">
 					<label class="p-text" for="password">Password</label>
 					<div class="input-group form-control ">
-						<input type="password" class="w-[95%]" id="password" name="password" placeholder="Enter password" required>
-						<i id="togglePassword" class="fa-regular cursor-pointer fa-eye pt-1"></i>
+						<input type="password" class="w-[95%] placeholder:text-gray-400" id="password" name="password" placeholder="Enter password" required />
+						<i id="togglePassword" class="fa-regular cursor-pointer text-gray-400 fa-eye pt-1"></i>
 					</div>
 				</div>
 				

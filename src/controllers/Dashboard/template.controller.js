@@ -38,8 +38,8 @@ export const createTemplate = async (req, res) => {
 
 		// Submit template to Facebook
 		const data = await submitTemplateToFacebook(savedTemplate);
-		console.log(JSON.stringify(data));
-		// Log activity	
+		console.log("template creation : ", JSON.stringify(data));
+		// Log activity
 		await ActivityLogs.create({
 			useradmin: req.session.user.id,
 			unique_id: generateUniqueId(),
@@ -136,7 +136,7 @@ export const duplicateTemplate = async (req, res) => {
 
 		// Create a new template with the same data but a new _id
 		const newTemplate = new Template({
-			...originalTemplate.toObject(), 
+			...originalTemplate.toObject(),
 			createdAt: new Date(),
 			updatedAt: new Date(),
 			unique_id: generateUniqueId(), // Generate a new unique ID
@@ -303,7 +303,10 @@ export const getCampaignTemplates = async (req, res) => {
 		const { id } = req.session.user;
 
 		// Respond with the updated templates from MongoDB
-		const updatedTemplates = await Template.find({ useradmin: id });
+		const updatedTemplates = await Template.find({
+			useradmin: id,
+			status: "Approved",
+		});
 		// console.log(updatedTemplates);
 		res.json({
 			success: true,
