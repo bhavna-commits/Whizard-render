@@ -17,9 +17,16 @@ import {
 	roles,
 } from "../../utils/dropDown.js";
 import sendAddUserMail from "../../services/OTP/addingUserService.js";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 export const home = async (req, res) => {
-	res.render("Settings/home");
+	res.render("Settings/home", {
+		photo: req.session.user?.photo,
+		name: req.session.user.name,
+		color: req.session.user.color
+	});
 };
 
 export const profile = async (req, res) => {
@@ -34,7 +41,14 @@ export const profile = async (req, res) => {
 
 		// console.log("User Information:", user);
 		const language = "English";
-		res.render("Settings/profile", { user, languages, language });
+		res.render("Settings/profile", {
+			user,
+			languages,
+			language,
+			photo: req.session.user?.photo,
+			name: req.session.user.name,
+			color: req.session.user.color,
+		});
 	} catch (error) {
 		console.error(error);
 		res.status(500).json({
@@ -198,6 +212,8 @@ export const accountDetails = async (req, res) => {
 			industryCategory,
 			size,
 			roles,
+			photo: req.session.user?.photo,
+			name: req.session.user.name,
 		});
 	} catch (error) {
 		console.error(error);
@@ -272,7 +288,12 @@ export const getActivityLogs = async (req, res) => {
 			useradmin: req.session.user.id,
 		}).sort({ createdAt: -1 });
 
-		res.render("Settings/activityLogs", { logs });
+		res.render("Settings/activityLogs", {
+			logs,
+			photo: req.session.user?.photo,
+			name: req.session.user.name,
+			color: req.session.user.color,
+		});
 	} catch (err) {
 		console.error("Error fetching logs:", err);
 		res.status(500).send("Server error");
@@ -319,7 +340,11 @@ export const activityLogsFiltered = async (req, res) => {
 
 	try {
 		const logs = await ActivityLogs.find(filter).sort({ createdAt: -1 });
-		res.render("Settings/partials/activityLogs", { logs });
+		res.render("Settings/partials/activityLogs", {
+			logs,
+			photo: req.session.user?.photo,
+			name: req.session.user.name,
+		});
 	} catch (err) {
 		console.error("Error fetching logs:", err);
 		res.status(500).send("Server error");
@@ -332,7 +357,14 @@ export const getUserManagement = async (req, res) => {
 		let users = await AddedUser.find({ useradmin: id });
 		const permissions = await Permissions.find({ useradmin: id });
 		users = users ? users : [];
-		res.render("Settings/userManagement", { users, permissions, id });
+		res.render("Settings/userManagement", {
+			users,
+			permissions,
+			id,
+			photo: req.session.user?.photo,
+			name: req.session.user.name,
+			color: req.session.user.color,
+		});
 	} catch (error) {
 		console.error(error);
 		res.status(500).json({
@@ -342,7 +374,11 @@ export const getUserManagement = async (req, res) => {
 };
 
 export const getCreatePassword = async (req, res) => {
-	res.render("Settings/createAddedUserPassword");
+	res.render("Settings/createAddedUserPassword", {
+		photo: req.session.user?.photo,
+		name: req.session.user.name,
+		color: req.session.user.color,
+	});
 };
 
 export const sendUserInvitation = async (req, res) => {
@@ -350,16 +386,21 @@ export const sendUserInvitation = async (req, res) => {
 	const { name, email, role } = req.body;
 
 	try {
-		let exists = User.findOne({ email });
+		// Check if the user already exists in the User collection
+		let exists = await User.findOne({ email });
 		if (exists) {
-			res.status(409).json({ message: "Email already in use" });
+			return res.status(409).json({ message: "Email already in use" }); // return to stop execution
 		}
 
-		exists = AddedUser.findOne({ email });
+		// Check if the user already exists in the AddedUser collection
+		exists = await AddedUser.findOne({ email });
 		if (exists) {
-			res.status(409).json({ message: "Email already in use" });
+			return res.status(409).json({ message: "Email already in use" }); // return to stop execution
 		}
+
+		// If user does not exist, create a new entry
 		const newUser = new AddedUser({
+			unique_id: generateUniqueId(),
 			name,
 			email,
 			role,
@@ -368,19 +409,30 @@ export const sendUserInvitation = async (req, res) => {
 
 		// Generate unique invitation link
 		const invitationToken = Buffer.from(`${adminId}`).toString("base64");
-		const invitationLink = `https://dee8-2401-4900-1c46-a41b-841f-8a97-fe81-971c.ngrok-free.app/settings/user-management/create-password?token=${invitationToken}`;
+		const invitationLink = `https://f362-2401-4900-1c48-acfc-7158-f302-b506-77ae.ngrok-free.app/settings/user-management/create-password?token=${invitationToken}`;
 
-		await sendAddUserMail(req.session.user.name, invitationLink);
+		// Send invitation email
+		await sendAddUserMail(req.session.user.name, invitationLink, email);
+
+		// Save new user to the database
 		await newUser.save();
-		res.status(200).json({ message: "Invitation sent successfully" });
+
+		// Send success response
+		return res
+			.status(200)
+			.json({ message: "Invitation sent successfully" });
 	} catch (error) {
 		console.error("Error sending invitation:", error);
-		res.status(500).json({ message: "Failed to send invitation" });
+		return res.status(500).json({ message: "Failed to send invitation" });
 	}
 };
 
 export const getPermissions = async (req, res) => {
-	res.render("Settings/permissions");
+	res.render("Settings/permissions", {
+		photo: req.session.user?.photo,
+		name: req.session.user.name,
+		color: req.session.user.color,
+	});
 };
 
 export const createPermissions = async (req, res) => {
@@ -425,10 +477,16 @@ export const createPermissions = async (req, res) => {
 };
 
 export const createAddedUserPassword = async (req, res) => {
-	const { password, adminId } = req.body;
-	const data = User.findOne({ unique_id: adminId });
-	req.session.user = {
-		id: adminId,
-		name: data.name,
-	};
+	try {
+		const { password, adminId } = req.body;
+		const data = User.findOne({ unique_id: adminId });
+		req.session.user = {
+			id: adminId,
+			name: data.name,
+		};
+		res.json({ success: true });
+	} catch (err) {
+		console.error(err);
+		res.json({ success: false, message: err });
+	}
 };

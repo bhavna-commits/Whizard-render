@@ -58,7 +58,9 @@
 <body>
 	<!-- Loader HTML -->
 	<div id="loader" class="loader">
-		<div class="spinner"></div>
+		<div class="w-full h-full flex justify-center items-center">
+			<img src="/assets/img/Wizard_logo.png" alt="Whizard Logo" class="animate-pulse loading-image" />
+		</div>
 	</div>
 	
 	<div class="layout-container">
@@ -95,7 +97,7 @@
 			</ul>
 			<div class="user-profile " onclick="toggleDropdown()">
 				<img src="https://via.placeholder.com/50" alt="User Profile" />
-				<div id="dropdownMenu" class="dropdown-menu hidden">
+				<div id="dropdownMenu" class="account-menu hidden">
 					<a href="/settings/profile">Profile</a>
 					<button onclick="logout()">Logout</button>
 				</div>
@@ -278,17 +280,7 @@
 			</div>
 		</div>
 	</div>
-	<script>
-		window.addEventListener('load', function () {
-			// Fade out the loader smoothly by changing the opacity
-			document.getElementById('loader').style.opacity = '0';
-			
-			// Optionally, hide it completely after the fade-out effect is finished
-			setTimeout(function () {
-				document.getElementById('loader').style.visibility = 'hidden';
-			}, 500); // Match the duration of the fade-out (1 second in this case)
-		});
-	</script>
+	
 	
 	<script>
 		const countries = <%- JSON.stringify(countries) %>;
@@ -296,7 +288,19 @@
 		// console.log(typeof user.companyName);
 	</script>
 	<script src="/settings/js/accountDetails.js"></script>
-	
+	<script>
+		window.addEventListener('load', function () {
+			// Fade out the loader smoothly by changing the opacity
+			var loader = document.getElementById('loader');
+			loader.style.transition = 'opacity 0.5s ease'; // Smooth fade out
+			loader.style.opacity = '0';
+			
+			// Completely remove the loader after the fade-out effect is finished
+			setTimeout(function () {
+				loader.style.display = 'none'; // Ensure loader is no longer in the DOM flow
+			}, 300); // Match the duration of the fade-out (0.5 seconds in this case)
+		});
+	</script>
 </body>
 
 </html>

@@ -371,6 +371,9 @@ export const getCustomField = async (req, res) => {
 			customFields: paginatedResults || [],
 			page: parseInt(skip) / parseInt(limit) + 1, // Page number based on skip and limit
 			totalPages,
+			photo: req.session.user?.photo,
+			name: req.session.user.name,
+			color: req.session.user.color,
 		});
 	} catch (error) {
 		console.error(error);
@@ -677,6 +680,9 @@ export const getList = async (req, res) => {
 				headers: [],
 				data: [],
 				errors: [],
+				photo: req.session.user?.photo,
+				name: req.session.user.name,
+				color: req.session.user.color,
 			});
 		}
 	} catch (error) {
@@ -726,7 +732,12 @@ export const searchContactLists = async (req, res) => {
 			ContactListName: { $regex: query, $options: "i" },
 		});
 
-		res.render("Contact-List/partials/contactListTable", { contacts });
+		res.render("Contact-List/partials/contactListTable", {
+			contacts,
+			photo: req.session.user?.photo,
+			name: req.session.user.name,
+			color: req.session.user.color,
+		});
 	} catch (error) {
 		console.error("Error fetching contact lists:", error);
 		res.status(500).json({ message: "Error fetching contact lists" });

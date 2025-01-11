@@ -2,7 +2,7 @@
 
 function openEditModal(contactData) {
 	const contact = JSON.parse(contactData);
-	// console.log(contact);	
+	// console.log(contact);
 	// Set the existing fields
 	document.getElementById("edit-contact-id").value = contact.keyId;
 	document.getElementById("edit-contact-name").value = contact.Name;
@@ -61,7 +61,7 @@ document
 document
 	.getElementById("editContactForm")
 	.addEventListener("submit", function (event) {
-		event.preventDefault(); // Prevent default form submission
+		event.preventDefault();
 
 		const contactId = document.getElementById("edit-contact-id").value;
 		let formData = new FormData(this);
@@ -205,55 +205,4 @@ function closeAddContact() {
 }
 
 // Form submission logic here
-document
-	.getElementById("addContactForm")
-	.addEventListener("submit", function (event) {
-		event.preventDefault(); // Prevent default form submission
 
-		// Collect the form data
-		const formData = new FormData(this);
-
-		// Extract listId from the URL
-		const contactId = window.location.pathname.split("/").pop(); // Extract listId from URL
-		console.log(contactId);
-		// Append listId to formData
-		formData.append("contactId", contactId);
-
-		const saveButton = this.querySelector("button[type='submit']");
-		const originalButtonText = saveButton.innerHTML;
-		saveButton.disabled = true; // Disable button
-		saveButton.innerHTML =
-			'<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving...';
-
-		// Perform the POST request to add the new contact
-		fetch(`/api/contact-list/contacts/create-contact`, {
-			method: "POST",
-			body: formData,
-		})
-			.then((response) => response.json())
-			.then((data) => {
-				if (data.success) {
-					// Handle success (e.g., reload the page or show success message)
-					location.reload();
-				} else {
-					// Show error message near the save button
-					saveButton.innerHTML = originalButtonText; // Reset button text
-					saveButton.disabled = false;
-					const errorMessage = document.createElement("div");
-					errorMessage.className = "text-danger mt-2";
-					errorMessage.innerText =
-						"Error adding contact: " + data.message;
-					saveButton.parentNode.appendChild(errorMessage);
-				}
-			})
-			.catch((err) => {
-				// Handle any network or other errors
-				console.error("Error:", err);
-				saveButton.innerHTML = originalButtonText; // Reset button text
-				saveButton.disabled = false;
-				const errorMessage = document.createElement("div");
-				errorMessage.className = "text-danger mt-2";
-				errorMessage.innerText = "An error occurred. Please try again.";
-				saveButton.parentNode.appendChild(errorMessage);
-			});
-	});

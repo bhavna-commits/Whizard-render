@@ -52,7 +52,7 @@ router.delete("/custom-fields/:id", deleteCustomField);
 
 router.get("/search", searchContactLists);
 
-router.post("/create-contact", createContact);
+// router.post("/create-contact", createContact);
 
 router.post("/create-campaign", upload.none(), createCampaign);
 

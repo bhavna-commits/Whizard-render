@@ -1,4 +1,4 @@
-import { sendEmailVerification } from "./userFunctions.js";
+import { getRandomColor, sendEmailVerification } from "./userFunctions.js";
 import User from "../../models/user.model.js";
 import AddedUser from "../../models/addedUser.model.js";
 import bcrypt from "bcrypt";
@@ -119,7 +119,7 @@ export const login = async (req, res) => {
 				WABA_ID: process.env.WABA_ID,
 				FB_PHONE_ID: process.env.FB_PHONE_ID,
 			},
-			{ new: true, runValidators: true }, 
+			{ new: true, runValidators: true },
 		);
 
 		if (!user) {
@@ -135,8 +135,6 @@ export const login = async (req, res) => {
 
 				req.session.user = {
 					id: addedUser.owner,
-
-					WhatsAppConnectStatus: user.WhatsAppConnectStatus,
 				};
 				req.session.addedUser = {
 					id: addedUser._id,
@@ -164,7 +162,8 @@ export const login = async (req, res) => {
 		req.session.user = {
 			id: user.unique_id,
 			name: user.name,
-			WhatsAppConnectStatus: user.WhatsAppConnectStatus,
+			color: user.color,
+			photo: user.profilePhoto,
 		};
 
 		if (rememberMe) {
@@ -318,7 +317,7 @@ export const about = async (req, res) => {
 		const hashedPassword = await bcrypt.hash(password, saltRounds);
 		const phone = `${countryCode}${phoneNumber}`;
 		const unique_id = generateUniqueId();
-
+		const color = getRandomColor();
 		const newUser = new User({
 			name,
 			email,
@@ -333,6 +332,7 @@ export const about = async (req, res) => {
 			jobRole,
 			website,
 			unique_id,
+			color,
 		});
 
 		// Save the new user to the database
@@ -342,6 +342,7 @@ export const about = async (req, res) => {
 		req.session.user = {
 			id: newUser.unique_id,
 			name: newUser.name,
+			color,
 		};
 
 		// Send success response

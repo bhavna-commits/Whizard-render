@@ -13,7 +13,7 @@ const transporter = nodemailer.createTransport({
 	},
 });
 
-export default async function sendAddUserMail(name, invitationLink) {
+export default async function sendAddUserMail(name, invitationLink, email) {
 	const mailOptions = {
 		from: process.env.EMAIL_USER,
 		to: email,

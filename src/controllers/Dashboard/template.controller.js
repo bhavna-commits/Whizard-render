@@ -70,6 +70,9 @@ export const templatePreview = async (req, res) => {
 		if (template) {
 			res.render("Templates/create-template", {
 				templateData: template,
+				photo: req.session.user?.photo,
+				name: req.session.user.name,
+				color: req.session.user.color,
 			});
 		} else {
 		}
@@ -112,6 +115,9 @@ export const getList = async (req, res) => {
 			list: templates,
 			page,
 			totalPages,
+			color: req.session.user.color,
+			photo: req.session.user?.photo,
+			name: req.session.user.name,
 		});
 	} catch (error) {
 		res.render("Templates/manage_template", {

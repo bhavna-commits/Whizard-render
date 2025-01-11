@@ -1,3 +1,4 @@
+<!-- Edit Contact Sidebar -->
 <!-- Overlay for the sidebar -->
 <div class="overlay" id="overlay" onclick="closeAddContact()"></div>
 
@@ -42,3 +43,61 @@
 		</form>
 	</div>
 </div>
+
+<script>
+	document
+		.getElementById("addContactForm")
+		.addEventListener("submit", function (event) {
+			event.preventDefault(); // Prevent default form submission
+			console.log("here");
+			
+			// Collect the form data
+			const formData = new FormData(this);
+			
+			// Extract contactId from the URL
+			const contactId = window.location.pathname.split("/").pop();
+			console.log(contactId);
+			
+			// Append contactId to formData
+			formData.append("contactId", contactId);
+			
+			const saveButton = this.querySelector("button[type='submit']");
+			const originalButtonText = saveButton.innerHTML;
+			saveButton.disabled = true; // Disable button to prevent double submission
+			saveButton.innerHTML =
+				'<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving...';
+			
+			// Perform the POST request to add the new contact
+			fetch(`/api/contact-list/contacts/create-contact`, {
+					method: "POST",
+					body: formData,
+				})
+				.then((response) => response.json())
+				.then((data) => {
+					if (data.success) {
+						console.log(data.contact);
+						location.reload();
+						// Optionally reload or update the UI after successful submission
+					} else {
+						// Show error message
+						saveButton.innerHTML = originalButtonText; // Reset button text
+						saveButton.disabled = false;
+						const errorMessage = document.createElement("div");
+						errorMessage.className = "text-danger mt-2";
+						errorMessage.innerText =
+							"Error adding contact: " + data.message;
+						saveButton.parentNode.appendChild(errorMessage);
+					}
+				})
+				.catch((err) => {
+					// Handle any network or other errors
+					console.error("Error:", err);
+					saveButton.innerHTML = originalButtonText; // Reset button text
+					saveButton.disabled = false;
+					const errorMessage = document.createElement("div");
+					errorMessage.className = "text-danger mt-2";
+					errorMessage.innerText = "An error occurred. Please try again.";
+					saveButton.parentNode.appendChild(errorMessage);
+				});
+		});
+</script>

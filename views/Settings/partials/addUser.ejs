@@ -55,9 +55,10 @@
 		const formData = {
 			name: document.getElementById('userName').value,
 			email: document.getElementById('userEmail').value,
-			role: document.getElementById('userRole').value
+			role: document.getElementById('userRole').value,
+			url: window.location.origin 
 		};
-		
+				
 		try {
 			const response = await fetch('/api/settings/user-management/invite', {
 				method: 'POST',

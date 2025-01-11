@@ -18,15 +18,6 @@ export const sendEmailVerification = async (email, token) => {
   }
 };
 
-// Send WhatsApp OTP
-// export const sendWhatsAppVerification = async (phoneNumber, countryCode) => {
-//   try {
-//     await sendWhatsAppOTP(phoneNumber, countryCode);
-//   } catch (error) {
-//     throw new Error("Failed to send WhatsApp OTP");
-//   }
-// };
-
 // Verify the email token
 export const verifyEmailToken = (incomingToken, storedToken, tokenExpiry) => {
   const hashedIncomingToken = crypto
@@ -39,8 +30,18 @@ export const verifyEmailToken = (incomingToken, storedToken, tokenExpiry) => {
   return true;
 };
 
-// Verify the WhatsApp OTP
-// export const verifyWhatsAppOTP = (phoneNumber, countryCode, otp) => {
-//   const isValid = verifyOTP(phoneNumber, countryCode, otp);
-//   return isValid;
-// };
+const friendlyColors = [
+	"#FFB6C1",
+	"#FF69B4",
+	"#FFA07A",
+	"#8FBC8F",
+	"#20B2AA",
+	"#87CEFA",
+	"#4682B4",
+	"#9370DB",
+	"#FFD700",
+];
+
+export const getRandomColor = () => {
+	return friendlyColors[Math.floor(Math.random() * friendlyColors.length)];
+};

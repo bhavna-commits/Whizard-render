@@ -99,6 +99,9 @@ export const getContacts = async (req, res) => {
 			totalPages,
 			tags: [],
 			id,
+			photo: req.session.user?.photo,
+			name: req.session.user.name,
+			color: req.session.user.color,
 		});
 	} catch (error) {
 		console.error(error);
@@ -254,33 +257,34 @@ export const updateCSVOnFieldDelete = async (id, fieldToDelete) => {
 };
 
 export const createContact = async (req, res) => {
-	const { contactId } = req.body;
-	const contactData = req.body;
-
-	const userId = req.session.user.id;
-	const user = await User.findOne({ unique_id: userId });
-	if (!user) {
-		return res.status(404).json({
-			success: false,
-			message: "User not found.",
-		});
-	}
-
-	const number = user.phone.countryCode + user.phone.number;
-
-	if (!contactId || !contactData) {
-		return res.status(400).json({
-			success: false,
-			message: "List ID or contact data is missing",
-		});
-	}
-
+	console.log("here");
 	try {
-		// Extract contact data, excluding listId from the body
+		const contactData = req.body;
 		const { Name, contactId, wa_id, ...newContactData } = contactData;
+		const userId = req.session.user.id;
+		const user = await User.findOne({ unique_id: userId });
+		if (!user) {
+			return res.status(404).json({
+				success: false,
+				message: "User not found.",
+			});
+		}
+
+		const number = user.phone.countryCode + user.phone.number;
+
+		if (!contactId || !contactData) {
+			return res.status(400).json({
+				success: false,
+				message: "List ID or contact data is missing",
+			});
+		}
+
+		// Extract contact data, excluding listId from the body
+
 		const keyId = generateUniqueId();
 		// Add the new contact to the Contacts collection
 		const newContact = await Contacts.create({
+			unique_id: generateUniqueId(),
 			keyId,
 			contactId,
 			Name,

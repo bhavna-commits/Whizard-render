@@ -3,9 +3,9 @@
 
 <head>
 	<meta charset="UTF-8" />
-	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<title>Responsive Dashboard</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<link rel="icon" type="image/x-icon" href="favicon.ico" />
 	<!-- <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css"> -->
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
 	<link href="assets/plugins/pace/pace-theme-flash.css" rel="stylesheet" type="text/css" />
@@ -25,14 +25,27 @@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
 	<link rel="stylesheet" href="styles/filter-sidebar.css" />
 	<link rel="stylesheet" href="styles/style.css" />
+	<link rel="stylesheet" href="styles/dashboard.css" />
+	<style>
+		#screenSizeDisplay {
+			font-size: 20px;
+			color: #333;
+			padding: 20px;
+			border: 2px solid #333;
+			width: fit-content;
+			margin: 20px auto;
+			text-align: center;
+		}
+	</style>
 </head>
 
 <body class="bg-white">
 	<!-- Loader HTML -->
 	<div id="loader" class="loader">
-		<div class="spinner"></div>
+		<div class="w-full h-full flex justify-center items-center">
+			<img src="/assets/img/Wizard_logo.png" alt="Whizard Logo" class="animate-pulse loading-image" />
+		</div>
 	</div>
-
 	<!-- Sidebar -->
 	<div class="layout-container">
 		<nav class="sidebar">
@@ -68,7 +81,7 @@
 			</ul>
 			<div class="user-profile " onclick="toggleDropdown()">
 				<img src="https://via.placeholder.com/50" alt="User Profile" />
-				<div id="dropdownMenu" class="dropdown-menu hidden">
+				<div id="dropdownMenu" class="account-menu hidden">
 					<a href="/settings/profile">Profile</a>
 					<button onclick="logout()">Logout</button>
 				</div>
@@ -110,9 +123,10 @@
 		</nav>
 		
 		<!-- Main Content -->
-		<div class="p-4">
+		<div class="p-4 w-full overflow-y-scroll relative">
 			<div class="flex justify-between items-center">
-				<h1 class="dash-text">Dashboard</h1>
+				<h1 class="text-3xl font-bold">Dashboard</h1>
+				<!-- <div id="screenSizeDisplay">Screen Width: 0px, Screen Height: 0px</div> -->
 				<span class="p-text text-lg">WhatsApp API status:
 					<span class="<%= status === 'Pending' ? 'text-red-500' : 'text-green-500' %> text-lg">
 						<%= status %>
@@ -181,7 +195,7 @@
 				<div class="col-lg-4 col-md-6 col-sm-12">
 					<div class="border-gray-500 border card-dashboard">
 						<h5>Messages Sent</h5>
-						<h4>200</h4>
+						<h4><%= messagesSent %></h4>
 						<div class="d-flex justify-content-between">
 							<div class="bg-messages-sent icon-wrapper">
 								<i class="fas fa-paper-plane"></i>
@@ -191,15 +205,15 @@
 							</div>
 						</div>
 						<!-- <div class="progress">
-              <div class="progress-bar progress-bar-green" style="width: 100%"></div>
-            </div> -->
+							<div class="progress-bar progress-bar-green" style="width: 100%"></div>
+							</div> -->
 					</div>
 				</div>
 				
 				<div class="col-lg-4 col-md-6 col-sm-12">
 					<div class="border-gray-500 border card-dashboard">
 						<h5>Replies Received</h5>
-						<h4>175</h4>
+						<h4> <%= messagesReplied %></h4>
 						<div class="d-flex justify-content-between">
 							<div class="bg-replies-received icon-wrapper">
 								<i class="fas fa-reply"></i>
@@ -209,15 +223,15 @@
 							</div>
 						</div>
 						<!-- <div class="progress">
-              <div class="progress-bar progress-bar-yellow" style="width: 85%"></div>
-            </div> -->
+							<div class="progress-bar progress-bar-yellow" style="width: 85%"></div>
+							</div> -->
 					</div>
 				</div>
 				
 				<div class="col-lg-4 col-md-6 col-sm-12">
 					<div class="border-gray-500 border card-dashboard">
 						<h5>Messages Read</h5>
-						<h4>175</h4>
+						<h4><%= messagesRead %></h4>
 						<div class="d-flex justify-content-between">
 							<div class="bg-messages-read icon-wrapper">
 								<i class="fas fa-envelope-open-text"></i>
@@ -227,15 +241,15 @@
 							</div>
 						</div>
 						<!-- <div class="progress">
-              <div class="progress-bar progress-bar-blue" style="width: 85%"></div>
-            </div> -->
+							<div class="progress-bar progress-bar-blue" style="width: 85%"></div>
+							</div> -->
 					</div>
 				</div>
 				
 				<div class="col-lg-4 col-md-6 col-sm-12">
 					<div class="border-gray-500 border card-dashboard">
 						<h5>Messages Delivered</h5>
-						<h4>190</h4>
+						<h4><%= messagesDelivered %></h4>
 						<div class="d-flex justify-content-between">
 							<div class="bg-messages-delivered icon-wrapper">
 								<i class="fas fa-check"></i>
@@ -245,15 +259,15 @@
 							</div>
 						</div>
 						<!-- <div class="progress">
-              <div class="progress-bar progress-bar-grey" style="width: 90%"></div>
-            </div> -->
+							<div class="progress-bar progress-bar-grey" style="width: 90%"></div>
+							</div> -->
 					</div>
 				</div>
 				
 				<div class="col-lg-4 col-md-6 col-sm-12">
 					<div class="border-gray-500 border card-dashboard">
 						<h5>Messages Failed</h5>
-						<h4>10</h4>
+						<h4><%= messagesFailed %></h4>
 						<div class="d-flex justify-content-between">
 							<div class="bg-messages-failed icon-wrapper">
 								<i class="fas fa-exclamation-triangle"></i>
@@ -263,15 +277,15 @@
 							</div>
 						</div>
 						<!-- <div class="progress">
-              <div class="progress-bar progress-bar-red" style="width: 10%"></div>
-            </div> -->
+							<div class="progress-bar progress-bar-red" style="width: 10%"></div>
+							</div> -->
 					</div>
 				</div>
 				
 				<div class="col-lg-4 col-md-6 col-sm-12">
 					<div class="border-gray-500 border card-dashboard">
 						<h5>Number Doesn't Exist</h5>
-						<h4>10</h4>
+						<h4><%= messagesFailed %></h4>
 						<div class="d-flex justify-content-between">
 							<div class="bg-number-invalid icon-wrapper">
 								<i class="fas fa-user-times"></i>
@@ -281,109 +295,111 @@
 							</div>
 						</div>
 						<!-- <div class="progress">
-              <div class="progress-bar progress-bar-orange" style="width: 10%"></div>
-            </div> -->
+							<div class="progress-bar progress-bar-orange" style="width: 10%"></div>
+							</div> -->
+					</div>
+				</div>
+			</div>
+			<div class="container">
+				<!-- Quick Actions Section -->
+				<h2 class="section-title">Quick Actions</h2>
+				<div class="grid-container">
+					<div class="feature-box">
+						<h3 class="feature-title">Broadcast Messages</h3>
+						<p class="feature-description">Quickly send personalized updates or promotions to your audience at scale.</p>
+						<button type="button" onclick="location.href = '/create-template'" class="feature-button">Send Now</button>
+					</div>
+					
+					<div class="feature-box">
+						<h3 class="feature-title">Create Template</h3>
+						<p class="feature-description">Design message templates for WhatsApp approval to streamline your communication.</p>
+						<button type="button" onclick="location.href = '/create-template'" class="feature-button">Create Now</button>
+					</div>
+					
+					<div class="feature-box">
+						<h3 class="feature-title">Import Contacts</h3>
+						<p class="feature-description">Upload your contact database</p>
+						<button class="feature-button">Import</button>
+					</div>
+				</div>
+				
+				<!-- Platform Features Section -->
+				<h2 class="section-title">Platform Features</h2>
+				<div class="grid-container">
+					<div class="feature-box">
+						<h3 class="feature-title">Automated Responses</h3>
+						<p class="feature-description">Set up automated replies for common customer queries</p>
+						<div class="icon-container">
+							<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+								<path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
+							</svg>
+						</div>
+					</div>
+					
+					<div class="feature-box">
+						<h3 class="feature-title">Bulk Messaging</h3>
+						<p class="feature-description">Send messages to multiple contacts at once</p>
+						<div class="icon-container">
+							<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+								<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+								<circle cx="9" cy="7" r="4"></circle>
+								<path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+								<path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+							</svg>
+						</div>
+					</div>
+					
+					<div class="feature-box">
+						<h3 class="feature-title">Analytics</h3>
+						<p class="feature-description">Track message performance and customer engagement</p>
+						<div class="icon-container">
+							<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+								<line x1="18" y1="20" x2="18" y2="10"></line>
+								<line x1="12" y1="20" x2="12" y2="4"></line>
+								<line x1="6" y1="20" x2="6" y2="14"></line>
+							</svg>
+						</div>
+					</div>
+					
+					<div class="feature-box">
+						<h3 class="feature-title">Quick Replies</h3>
+						<p class="feature-description">Create templates for frequently used messages</p>
+						<div class="icon-container">
+							<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+								<path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
+							</svg>
+						</div>
 					</div>
 				</div>
 			</div>
 		</div>
 	</div>
 	<%- include('partials/filter-sidebar') %>
-	 <script>
-	 	window.addEventListener('load', function () {
-	 		// Fade out the loader smoothly by changing the opacity
-	 		document.getElementById('loader').style.opacity = '0';
-	 		
-	 		// Optionally, hide it completely after the fade-out effect is finished
-	 		setTimeout(function () {
-	 			document.getElementById('loader').style.visibility = 'hidden';
-	 		}, 1000); // Match the duration of the fade-out (1 second in this case)
-	 	});
-	 </script>
 
-	<script src="assets/plugins/pace/pace.min.js" type="text/javascript"></script>
-	<script src="https://kit.fontawesome.com/44e4e59292.js" crossorigin="anonymous"></script>
-	<script src="/Dashboard/js/filter-sidebar.js"></script>
-	<!-- <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js"></script> -->
-	
 	<script>
-		// SDK initialization
 		const app_id = <%- JSON.stringify(app) %>;
 		const config_id = <%- JSON.stringify(config) %>;
 		const graph_v = <%- JSON.stringify(graph) %>;
-		
-		window.fbAsyncInit = function () {
-			FB.init({
-				appId: app_id,
-				autoLogAppEvents: true,
-				xfbml: true,
-				version: graph_v,
-			});
-		};
-		
-		(function (d, s, id) {
-			var js, fjs = d.getElementsByTagName(s)[0];
-			if (d.getElementById(id)) return;
-			js = d.createElement(s);
-			js.id = id;
-			js.src = "https://connect.facebook.net/en_US/sdk.js";
-			fjs.parentNode.insertBefore(js, fjs);
-		}(document, 'script', 'facebook-jssdk'));
-		
-		// Session logging message event listener
-		window.addEventListener('message', (event) => {
-			if (event.origin !== "https://www.facebook.com" && event.origin !== "https://web.facebook.com") return;
-			try {
-				const data = JSON.parse(event.data);
-				if (data.type === 'WA_EMBEDDED_SIGNUP') {
-					console.log('message event: ', data);
-				}
-			} catch {
-				console.log('message event catch: ', event.data)
-			}
-		});
-		
-		// Response callback
-		const fbLoginCallback = (response) => {
-			if (response.authResponse) {
-				const code = response.authResponse.code;
-				console.log('response: ', code);
-				fetch('/api/facebook/auth_code', {
-						method: 'POST',
-						headers: {
-							'Content-Type': 'application/json',
-						},
-						body: JSON.stringify({
-							code
-						}),
-					})
-					.then(response => response.json())
-					.then(data => {
-						console.log('Access Token received:', data.access_token);
-					})
-					.catch(error => {
-						console.error('Error:', error);
-					});
-				
-			} else {
-				console.log('response: ', response);
-			}
-		}
-		
-		// Launch method and callback registration
-		const launchWhatsAppSignup = () => {
-			FB.login(fbLoginCallback, {
-				config_id: config_id,
-				response_type: 'code',
-				override_default_response_type: true,
-				extras: {
-					setup: {},
-					featureType: '',
-					sessionInfoVersion: '3',
-				}
-			});
-		}
 	</script>
+	<script src="assets/plugins/pace/pace.min.js" type="text/javascript"></script>
+	<script src="https://kit.fontawesome.com/44e4e59292.js" crossorigin="anonymous"></script>
+	<script src="/Dashboard/js/filter-sidebar.js"></script>
+	<script src="/Dashboard/js/dashboard.js"></script>
+	<!-- <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js"></script> -->
+	<script>
+		window.addEventListener('load', function () {
+			// Fade out the loader smoothly by changing the opacity
+			var loader = document.getElementById('loader');
+			loader.style.transition = 'opacity 0.5s ease'; // Smooth fade out
+			loader.style.opacity = '0';
+			
+			// Completely remove the loader after the fade-out effect is finished
+			setTimeout(function () {
+				loader.style.display = 'none'; // Ensure loader is no longer in the DOM flow
+			}, 300); // Match the duration of the fade-out (0.5 seconds in this case)
+		});
+	</script>
+
 </body>
 
 </html>

@@ -10,9 +10,8 @@ const userSchema = new mongoose.Schema(
 		email: { type: String, required: true, unique: true },
 		password: { type: String, required: true },
 		phone: { type: String, required: true },
-		addedUsers: [
-			{ type: mongoose.Schema.Types.ObjectId, ref: "AddedUser" },
-		],
+		addedUsers: [{ type: String, ref: "AddedUser" }],
+		color: { type: String, required: true },
 		companyName: { type: String, required: true },
 		companyDescription: { type: String, required: true },
 		country: { type: String, required: true },
