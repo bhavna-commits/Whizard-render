@@ -14,14 +14,22 @@ function closeFilterModal() {
 flatpickr("#timeFrame", {
 	mode: "range",
 	dateFormat: "Y-m-d",
-	maxDate: "today", 
+	maxDate: "today",
 });
 
 // Function to apply the filters
 async function applyFilters() {
+	await fetchData();
+}
+
+document.getElementById("searchInput").addEventListener("input", async () => {
+	await fetchData();
+});
+
+async function fetchData() {
 	const timeFrame = document.getElementById("timeFrame").value;
 	const statusFilter = document.getElementById("statusFilter").value;
-
+	const search = document.getElementById("searchInput").value;
 	// Show the loading spinner
 	const spinner = document.getElementById("loadingSpinner");
 	spinner.classList.remove("hidden");
@@ -29,7 +37,7 @@ async function applyFilters() {
 	try {
 		// Fetch the filtered data
 		const res = await fetch(
-			`/reports/campaign-list/filter?timeFrame=${timeFrame}&status=${statusFilter}`,
+			`/reports/campaign-list/filter?timeFrame=${timeFrame}&status=${statusFilter}&search=${search}`,
 		);
 		const data = await res.text();
 

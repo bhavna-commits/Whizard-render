@@ -143,8 +143,17 @@
 	</script>
 	<% } else { %>
 	<!-- Empty state -->
-	<div class="flex flex-col items-center justify-center h-64">
-		<p class="text-gray-500">No campaigns found</p>
+	<div class="flex flex-col items-center justify-center min-h-[400px]  rounded-lg mt-4">
+		<div class="text-center">
+			<img src="https://img.freepik.com/free-vector/hands-holding-tablet-with-forefinger-clicking-start-button-new-application-launch-flat-illustration_74855-20595.jpg?ga=GA1.1.131490893.1732525963&semt=ais_hybrid" alt="No contacts" class="w-48 h-48 mx-auto mb-4">
+			
+			<h3 class="text-xl font-semibold text-gray-900 mb-2">No campaigns yet</h3>
+			<p class="text-gray-600 mb-6">Start creating Campaigns by clicking on "Create new Campaign"</p>
+			<button onclick="location.href = '/contact-list/createCampaign' " class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black">
+				<i class="fa-solid fa-plus pr-2"></i>
+				Create new Campaign
+			</button>
+		</div>
 	</div>
 	<% } %>
 </div>

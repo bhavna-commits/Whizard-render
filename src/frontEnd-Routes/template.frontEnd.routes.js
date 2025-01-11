@@ -14,6 +14,9 @@ router.get("/template", getList);
 router.get("/create-template", (req, res) => {
 	res.render("Templates/create-template", {
 		templateData: [],
+		name: req.session.user.name,
+		photo: req.session.user.photo,
+		color: req.session.user.color,
 	});
 });
 

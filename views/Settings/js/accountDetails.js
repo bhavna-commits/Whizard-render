@@ -128,7 +128,7 @@ document.addEventListener("DOMContentLoaded", function () {
 				// Add state options to the dropdown
 				selectedCountry.states.forEach((state) => {
 					const option = document.createElement("option");
-					option.value = state.code;
+					option.value = state.name;
 					option.textContent = state.name;
 					stateDropdown.appendChild(option);
 				});

@@ -6,22 +6,25 @@
 		
 		<!-- Filters Form -->
 		<div class="mb-4">
-			<label for="dateInterval" class="block text-sm font-medium text-gray-700">Created At</label>
+			<label for="dateInterval" class="block text-sm font-medium text-gray-700">Choose date range</label>
 			<input type="text" id="dateInterval" placeholder="Choose date" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
 		</div>
 		
-		<div class="mb-4 ">
+		<div class="mb-4 filter-row">
 			<label for="attributeSelect" class="block text-sm font-medium text-gray-700">Attributes</label>
 			<div class="flex items-center space-x-2 relative">
 				<select id="attributeSelect" class="w-fit px-2 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-					<option value="name">Name</option>
-					<option value="tags">Tags</option>
-					<option value="contact">Contact</option>
-					<option value="whatsapp">WhatsApp</option>
+					<option value="Name">Name</option>
+					<option value="Number">Name</option>
+					<% if (contacts[0]?.masterExtra) { %>
+					<% Object.keys(contacts[0].masterExtra).forEach(function(key) { %>
+					<option value="<%= key %>"><%= key %></option>
+					<% }); %>
+					<% } %>
 				</select>
 				<select id="conditionSelect" class="w-fit px-2 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-					<option value="is">has</option>
-					<option value="is">does not</option>
+					<option value="has">has</option>
+					<option value="does not">does not</option>
 					<!-- Add more conditions if needed -->
 				</select>
 				<input type="text" id="attributeValue" placeholder="Attribute value" class="w-fit px-2 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">

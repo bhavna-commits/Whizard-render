@@ -37,8 +37,8 @@
 	<!-- Sidebar -->
 	<div class="layout-container">
 		<nav class="sidebar">
-			<div class="logo pb-1">
-				<img src="/assets/img/Wizard_logo.png" alt="Whizard Logo" />
+			<div class="logo py-3">
+				<img onclick="location.href = '/'" class="cursor-pointer" src="/assets/img/Wizard_logo.png" alt="Whizard Logo" />
 			</div>
 			<ul>
 				<li>
@@ -67,8 +67,16 @@
 						Reports</a>
 				</li>
 			</ul>
-			<div class="user-profile " onclick="toggleDropdown()">
-				<img src="https://via.placeholder.com/50" alt="User Profile" />
+			<div class=" user-profile text-white flex justify-center items-center text-center">
+				<% if (photo) { %>
+				<img src="/<%= photo %>" alt="User Profile" class="user-profile-img" onclick="toggleDropdown()" />
+				<% } else { %>
+				<!-- Extract and display the initials -->
+				<div class="user-profile-name bg-[<%= color %>]" onclick="toggleDropdown()">
+					<% let initials = name.split(' ').map(n => n[0].toUpperCase()).join(''); %>
+					<%= initials %>
+				</div>
+				<% } %>
 				<div id="dropdownMenu" class="account-menu hidden">
 					<a href="/settings/profile">Profile</a>
 					<button onclick="logout()">Logout</button>
@@ -78,8 +86,16 @@
 			
 			<script>
 				function toggleDropdown () {
-					const dropdown = document.getElementById("dropdownMenu");
-					dropdown.classList.toggle("hidden");
+					const dropdownMenu = document.getElementById('dropdownMenu');
+					const sidebar = document.querySelector('.sidebar');
+					
+					dropdownMenu.classList.toggle('hidden');
+					
+					if (dropdownMenu.classList.contains('hidden')) {
+						sidebar.style.overflow = 'auto';
+					} else {
+						sidebar.style.overflow = 'visible';
+					}
 				}
 				
 				async function logout () {
@@ -290,7 +306,7 @@
 	</div>
 	<!-- END PAGE CONTAINER -->
 	
-
+	
 	<!-- BEGIN VENDOR JS -->
 	<script src="assets/plugins/pace/pace.min.js" type="text/javascript"></script>
 	<!--  A polyfill for browsers that don't support ligatures: remove liga.js if not needed-->
@@ -325,7 +341,7 @@
 		window.addEventListener('load', function () {
 			// Fade out the loader smoothly by changing the opacity
 			var loader = document.getElementById('loader');
-			loader.style.transition = 'opacity 0.5s ease'; // Smooth fade out
+			loader.style.transition = 'opacity 0.3s ease'; // Smooth fade out
 			loader.style.opacity = '0';
 			
 			// Completely remove the loader after the fade-out effect is finished
@@ -334,7 +350,7 @@
 			}, 300); // Match the duration of the fade-out (0.5 seconds in this case)
 		});
 	</script>
-
+	
 	<!-- END PAGE LEVEL JS -->
 </body>
 

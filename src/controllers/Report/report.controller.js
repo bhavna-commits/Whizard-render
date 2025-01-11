@@ -128,16 +128,15 @@ export const getCampaignReports = async (req, res) => {
 	}
 };
 
-export const getCampaignReportsFilter = async (req, res) => {
+export const getCampaignListFilter = async (req, res) => {
 	try {
 		const userId = req.session.user.id;
 		const page = parseInt(req.query.page) || 1;
 		const limit = 6;
 		const skip = (page - 1) * limit;
 
-		const { status, timeFrame } = req.query;
-		// console.log(status);
-		// Match query for campaigns
+		const { status, timeFrame, search } = req.query;
+		
 		let matchQuery = {
 			useradmin: userId,
 			deleted: { $ne: true }, // Adjust based on your campaign schema
@@ -146,14 +145,20 @@ export const getCampaignReportsFilter = async (req, res) => {
 		if (status === "scheduled") {
 			matchQuery["status"] = { $in: ["SCHEDULED", "IN_QUEUE"] };
 		} else if (status === "all") {
-			// Remove any filtering on status for 'all'
 			delete matchQuery["status"];
 		} else {
 			matchQuery["status"] = { $nin: ["SCHEDULED", "IN_QUEUE"] };
 		}
 
-		// console.log(matchQuery);
-		// Apply time frame filter on campaigns
+		const trimmedQuery = search.trim();
+		const escapeRegex = (text) =>
+			text.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
+		const escapedQuery = escapeRegex(trimmedQuery);
+
+		if (search) {
+			matchQuery["name"] = { $regex: escapedQuery, $options: "imsx" };
+		}
+
 		if (timeFrame) {
 			const [startDateStr, endDateStr] = timeFrame.split(" to ");
 			if (startDateStr && endDateStr) {
@@ -185,8 +190,29 @@ export const getCampaignReportsFilter = async (req, res) => {
 			},
 			{
 				$addFields: {
-					messagesSent: { $size: "$reports" },
-					messagesFailed: {
+					total: { $size: "$reports" }, // Total number of reports
+
+					sent: {
+						$size: {
+							$filter: {
+								input: "$reports",
+								as: "report",
+								cond: { $eq: ["$$report.status", "SENT"] },
+							},
+						},
+					},
+
+					read: {
+						$size: {
+							$filter: {
+								input: "$reports",
+								as: "report",
+								cond: { $eq: ["$$report.status", "READ"] },
+							},
+						},
+					},
+
+					failed: {
 						$size: {
 							$filter: {
 								input: "$reports",
@@ -195,12 +221,23 @@ export const getCampaignReportsFilter = async (req, res) => {
 							},
 						},
 					},
-					totalDelivered: {
+
+					delivered: {
 						$size: {
 							$filter: {
 								input: "$reports",
 								as: "report",
 								cond: { $eq: ["$$report.status", "DELIVERED"] },
+							},
+						},
+					},
+
+					replied: {
+						$size: {
+							$filter: {
+								input: "$reports",
+								as: "report",
+								cond: { $eq: ["$$report.status", "REPLIED"] },
 							},
 						},
 					},

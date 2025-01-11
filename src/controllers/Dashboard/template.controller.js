@@ -98,6 +98,11 @@ export const getList = async (req, res) => {
 				},
 			},
 			{
+				$sort: {
+					createdAt: -1,
+				},
+			},
+			{
 				$facet: {
 					paginatedResults: [{ $skip: skip }, { $limit: limit }],
 					totalCount: [{ $count: "total" }],

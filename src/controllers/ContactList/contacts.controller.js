@@ -7,7 +7,10 @@ import ActivityLogs from "../../models/activityLogs.model.js";
 import Campaign from "../../models/campaign.model.js";
 import User from "../../models/user.model.js";
 import { fileURLToPath } from "url";
-import { generateUniqueId } from "../../utils/otpGenerator.js";
+import {
+	generateUniqueId,
+	convertDateFormat,
+} from "../../utils/otpGenerator.js";
 import { sendMessages } from "./campaign.functions.js";
 
 export const __filename = fileURLToPath(import.meta.url);
@@ -71,8 +74,41 @@ export const getContacts = async (req, res) => {
 		const limit = 6;
 		const skip = (page - 1) * limit;
 
+		// Get filters from the request body
+		const filters = req.body.filters || [];
+
+		// Start with the basic match stage
+		const matchStage = {
+			contactId: id,
+			subscribe: 1,
+		};
+
+		// Add dynamic filters to the match stage
+		filters.forEach((filter) => {
+			if (filter.field === "subscribe_date" && filter.value) {
+				const [startDate, endDate] = filter.value.split(" to "); // Assuming date range format is "startDate to endDate"
+				matchStage.subscribe_date = {
+					$gte: new Date(startDate).getTime(),
+					$lte: new Date(endDate).getTime(),
+				};
+			} else {
+				// Apply dynamic filters (other fields like Name, Number, masterExtra fields)
+				if (filter.condition === "has") {
+					matchStage[filter.field] = {
+						$regex: filter.value,
+						$options: "imsx",
+					};
+				} else if (filter.condition === "does not") {
+					matchStage[filter.field] = {
+						$not: { $regex: filter.value, $options: "imsx" },
+					};
+				}
+			}
+		});
+
+		// Aggregation pipeline to apply filters and paginate
 		const aggregation = [
-			{ $match: { contactId: id, subscribe: 1 } },
+			{ $match: matchStage },
 			{
 				$facet: {
 					paginatedResults: [{ $skip: skip }, { $limit: limit }],
@@ -88,12 +124,12 @@ export const getContacts = async (req, res) => {
 				? result[0].totalContacts[0].totalContacts
 				: 0;
 
-		const name = (await ContactList.findOne({ contactId: id }))
-			.contalistName;
+		const name = await ContactList.findOne({ contactId: id });
 		const totalPages = Math.ceil(totalContacts / limit);
 
+		// Send the filtered results as a response
 		res.render("Contact-List/contactList-overview", {
-			name: name,
+			listName: name.contalistName,
 			contacts: contactLists,
 			page,
 			totalPages,
@@ -415,4 +451,98 @@ export const generateTableAndCheckFields = (parsedData, actualColumns) => {
 	tableHtml += "</tbody></table>";
 
 	return { tableHtml, emptyFields };
+};
+
+export const getFilteredContacts = async (req, res) => {
+	try {
+		const id = req.params.id;
+		const page = parseInt(req.query.page) || 1;
+		const limit = 6;
+		const skip = (page - 1) * limit;
+
+		// Get filters from the request body
+		const filters = req.body.filters || [];
+
+		// Start with the basic match stage
+		const matchStage = {
+			contactId: id,
+			subscribe: 1,
+		};
+
+		// Loop through each filter
+		filters.forEach((filter) => {
+			if (filter.field === "subscribe_date" && filter.value) {
+				matchStage.$and = matchStage.$and || [];
+				// Handle the date range filter for subscribe_date
+				const [startDate, endDate] = filter.value.split(" to ");
+				// console.log(startDate, endDate);
+				const convertedStartDate = new Date(startDate).getTime();
+				const convertedEndDate = new Date(endDate).getTime();
+				// console.log(convertedStartDate, convertedEndDate);
+				// Apply filter for subscribe_date (ensure only one date range per filter)
+				matchStage.$and.push({
+					[filter.field]: {
+						$gte: convertedStartDate,
+						$lte: convertedEndDate,
+					},
+				});
+			} else {
+				if (filter.condition === "has") {
+					matchStage.$or = matchStage.$or || [];
+					matchStage.$or.push({
+						[filter.field]: {
+							$regex: filter.value,
+							$options: "imsx",
+						},
+					});
+				} else {
+					matchStage.$or = matchStage.$or || [];
+					matchStage.$or.push({
+						[filter.field]: {
+							$not: {
+								$regex: filter.value,
+								$options: "imsx",
+							},
+						},
+					});
+				}
+			}
+		});
+
+		// Aggregation pipeline to apply filters and paginate
+		const aggregation = [
+			{ $match: matchStage },
+			{
+				$facet: {
+					paginatedResults: [{ $skip: skip }, { $limit: limit }],
+					totalContacts: [{ $count: "totalContacts" }],
+				},
+			},
+		];
+
+		const result = await Contacts.aggregate(aggregation);
+		const contactLists = result[0].paginatedResults;
+		const totalContacts =
+			result[0].totalContacts.length > 0
+				? result[0].totalContacts[0].totalContacts
+				: 0;
+
+		const totalPages = Math.ceil(totalContacts / limit);
+		// console.log(contactLists);
+
+		// Send the filtered results as a response
+		res.render("Contact-List/partials/OverViewTable", {
+			contacts: contactLists,
+			page,
+			totalPages,
+			tags: [],
+			id,
+		});
+	} catch (error) {
+		console.error(error);
+		res.status(500).json({
+			success: false,
+			message: "Error fetching contacts",
+		});
+	}
 };

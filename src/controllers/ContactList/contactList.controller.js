@@ -586,6 +586,8 @@ export const updateContactListName = async (req, res) => {
 		}
 
 		await ActivityLogs.create({
+			useradmin: req.session.user.id,
+			unique_id: generateUniqueId(),
 			name: req.session.user.name
 				? req.session.user.name
 				: req.session.addedUser.name,
@@ -698,8 +700,10 @@ export const getContactList = async (req, res) => {
 	try {
 		const { id } = req.session.user;
 
-		// Use the .sort() method on the Mongoose query to sort by createdAt in descending order
-		const contactLists = await ContactList.find({ useradmin: id }).sort({
+		const contactLists = await ContactList.find({
+			useradmin: id,
+			contact_status: { $ne: 0 },
+		}).sort({
 			adddate: -1,
 		});
 
@@ -711,9 +715,10 @@ export const getContactList = async (req, res) => {
 
 export const getCampaignContacts = async (req, res) => {
 	try {
-		const contacts = await Contacts.find({ contactId: req.params.id }).sort(
-			{ subscribe_date: -1 },
-		);
+		const contacts = await Contacts.find({
+			contactId: req.params.id,
+			subscribe: { $ne: 0 },
+		}).sort({ subscribe_date: -1 });
 		// console.log(contacts);
 		if (!contacts)
 			return res.status(404).json({ error: "No contacts found" });
@@ -725,15 +730,70 @@ export const getCampaignContacts = async (req, res) => {
 
 export const searchContactLists = async (req, res) => {
 	const { query } = req.query;
-	console.log("here");
+	const userId = req.session.user.id;
+	const page = parseInt(req.query.page) || 1;
+	const limit = 6;
+	const skip = (page - 1) * limit;
+
+	console.log("Searching for:", query);
+	console.log("User ID:", userId);
+
 	try {
-		// Perform a case-insensitive search on the contact list name
-		const contacts = await ContactList.find({
-			ContactListName: { $regex: query, $options: "i" },
-		});
+		// Trim spaces and escape regex special characters
+		const trimmedQuery = query.trim();
+		const escapeRegex = (text) =>
+			text.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
+		const escapedQuery = escapeRegex(trimmedQuery);
+
+		// console.log("Escaped Query:", escapedQuery); // Debugging the query
+
+		// Aggregation pipeline with conditional regex search
+		const matchStage = {
+			useradmin: userId,
+			contact_status: { $ne: 0 },
+		};
+
+		// Only add regex search if query is not empty
+		if (escapedQuery) {
+			matchStage.contalistName = {
+				$regex: escapedQuery,
+				$options: "imsx",
+			};
+		}
+
+		const result = await ContactList.aggregate([
+			{
+				// Match the documents where useradmin matches the userId and contact_status is not 0
+				$match: matchStage,
+			},
+			{
+				$sort: { adddate: -1 },
+			},
+			{
+				// Use $facet to return both paginated results and total count
+				$facet: {
+					paginatedResults: [
+						{ $skip: parseInt(skip) },
+						{ $limit: parseInt(limit) },
+					],
+					totalCount: [{ $count: "total" }],
+				},
+			},
+		]);
+
+		// Extract paginated results and total count from the aggregation result
+		const contactLists = result[0]?.paginatedResults || [];
+		const totalCount = result[0]?.totalCount[0]?.total || 0;
+
+		// Calculate total pages
+		const totalPages = Math.ceil(totalCount / limit);
+
+		// console.log("Found contacts:", contactLists); // Check the returned results
 
 		res.render("Contact-List/partials/contactListTable", {
-			contacts,
+			contacts: contactLists,
+			totalPages,
+			page,
 			photo: req.session.user?.photo,
 			name: req.session.user.name,
 			color: req.session.user.color,

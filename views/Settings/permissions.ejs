@@ -49,7 +49,7 @@
 	<div class="layout-container">
 		<nav class="sidebar">
 			<div class="logo py-3">
-				<img src="/assets/img/Wizard_logo.png" alt="Whizard Logo" />
+				<img onclick="location.href = '/'" class="cursor-pointer" src="/assets/img/Wizard_logo.png" alt="Whizard Logo" />
 			</div>
 			<ul class="mt-4 space-y-4">
 				<li>
@@ -78,19 +78,34 @@
 						Reports</a>
 				</li>
 			</ul>
-			<div class="user-profile " onclick="toggleDropdown()">
-				<img src="https://via.placeholder.com/50" alt="User Profile" />
+			<div class=" user-profile text-white flex justify-center items-center text-center">
+				<% if (photo) { %>
+				<img src="/<%= photo %>" alt="User Profile" class="user-profile-img" onclick="toggleDropdown()" />
+				<% } else { %>
+				<!-- Extract and display the initials -->
+				<div class="user-profile-name bg-[<%= color %>]" onclick="toggleDropdown()">
+					<% let initials = name.split(' ').map(n => n[0].toUpperCase()).join(''); %>
+					<%= initials %>
+				</div>
+				<% } %>
 				<div id="dropdownMenu" class="account-menu hidden">
 					<a href="/settings/profile">Profile</a>
 					<button onclick="logout()">Logout</button>
 				</div>
 			</div>
-			
-			
+				
 			<script>
 				function toggleDropdown () {
-					const dropdown = document.getElementById("dropdownMenu");
-					dropdown.classList.toggle("hidden");
+					const dropdownMenu = document.getElementById('dropdownMenu');
+					const sidebar = document.querySelector('.sidebar');
+					
+					dropdownMenu.classList.toggle('hidden');
+					
+					if (dropdownMenu.classList.contains('hidden')) {
+						sidebar.style.overflow = 'auto';
+					} else {
+						sidebar.style.overflow = 'visible';
+					}
 				}
 				
 				async function logout () {
@@ -174,23 +189,23 @@
 							</div>
 						</div>
 					</div>
-                    <!-- Chats Section -->
-                    <div class="bg-white rounded-xl border p-6">
-                    	<div class="flex items-center justify-between mb-4">
-                    		<h2 class="text-lg font-semibold text-gray-800">Chats</h2>
-                    		<button type="button" class="toggle-section w-14 h-7 flex items-center rounded-full p-1 duration-300 ease-in-out bg-gray-200" data-toggle="chats">
-                    			<div class="bg-white w-5 h-5 rounded-full shadow-md transform duration-300 ease-in-out"></div>
-                    		</button>
-                    	</div>
-                    	<div data-section="chats" class="hidden space-y-4 mt-4">
-                    		<div class="flex items-center justify-between">
-                    			<label class="text-sm font-medium text-gray-700">Redirect to VP Chat</label>
-                    			<button type="button" class="sub-toggle w-14 h-7 flex items-center rounded-full p-1 duration-300 ease-in-out bg-gray-200" data-toggle="chats.redirectToVpchat">
-                    				<div class="bg-white w-5 h-5 rounded-full shadow-md transform duration-300 ease-in-out"></div>
-                    			</button>
-                    		</div>
-                    	</div>
-                    </div>  
+					<!-- Chats Section -->
+					<div class="bg-white rounded-xl border p-6">
+						<div class="flex items-center justify-between mb-4">
+							<h2 class="text-lg font-semibold text-gray-800">Chats</h2>
+							<button type="button" class="toggle-section w-14 h-7 flex items-center rounded-full p-1 duration-300 ease-in-out bg-gray-200" data-toggle="chats">
+								<div class="bg-white w-5 h-5 rounded-full shadow-md transform duration-300 ease-in-out"></div>
+							</button>
+						</div>
+						<div data-section="chats" class="hidden space-y-4 mt-4">
+							<div class="flex items-center justify-between">
+								<label class="text-sm font-medium text-gray-700">Redirect to VP Chat</label>
+								<button type="button" class="sub-toggle w-14 h-7 flex items-center rounded-full p-1 duration-300 ease-in-out bg-gray-200" data-toggle="chats.redirectToVpchat">
+									<div class="bg-white w-5 h-5 rounded-full shadow-md transform duration-300 ease-in-out"></div>
+								</button>
+							</div>
+						</div>
+					</div>
 					<!-- Contacts Section -->
 					<div class="bg-white rounded-xl border p-6">
 						<div class="flex items-center justify-between mb-4">
@@ -255,7 +270,7 @@
 								</button>
 							</div>
 						</div>
-					</div>		
+					</div>
 					<!-- Settings Section -->
 					<div class="bg-white rounded-xl border p-6">
 						<div class="flex items-center justify-between mb-4">
@@ -351,8 +366,8 @@
 							Save Permissions
 						</button>
 					</div>
-				</form>			
-			</div>		
+				</form>
+			</div>
 		</div>
 		
 		<script defer src="/settings/js/permissions.js"></script>
@@ -360,7 +375,7 @@
 			window.addEventListener('load', function () {
 				// Fade out the loader smoothly by changing the opacity
 				var loader = document.getElementById('loader');
-				loader.style.transition = 'opacity 0.5s ease'; // Smooth fade out
+				loader.style.transition = 'opacity 0.3s ease'; // Smooth fade out
 				loader.style.opacity = '0';
 				
 				// Completely remove the loader after the fade-out effect is finished

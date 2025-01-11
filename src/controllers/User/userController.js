@@ -281,28 +281,30 @@ export const changePassword = async (req, res) => {
 };
 
 export const about = async (req, res) => {
-	if (!req.session.tempUser) {
-		return res.status(400).json({
-			success: false,
-			message: "Session expired. Please try again.",
-		});
-	}
-
-	const {
-		name: companyName,
-		description,
-		state,
-		country,
-		companySize,
-		industry,
-		jobRole,
-		website,
-	} = req.body;
-
-	const { name, email, password, phoneNumber, countryCode } =
-		req.session.tempUser;
-
 	try {
+		if (!req.session.tempUser) {
+			return res.status(400).json({
+				success: false,
+				message: "Session expired. Please try again.",
+			});
+		}
+
+		const {
+			name: companyName,
+			description,
+			state,
+			country,
+			companySize,
+			industry,
+			jobRole,
+			website,
+		} = req.body;
+
+		console.log(state);
+
+		const { name, email, password, phoneNumber, countryCode } =
+			req.session.tempUser;
+
 		// Check if user already exists
 		const userExists = await User.findOne({ email });
 		if (userExists) {
@@ -335,9 +337,6 @@ export const about = async (req, res) => {
 			color,
 		});
 
-		// Save the new user to the database
-		await newUser.save();
-
 		// Update session with the newly created user data to keep them logged in
 		req.session.user = {
 			id: newUser.unique_id,
@@ -345,7 +344,8 @@ export const about = async (req, res) => {
 			color,
 		};
 
-		// Send success response
+		await newUser.save();
+
 		res.status(201).json({
 			success: true,
 			message: "User created and logged in successfully.",
@@ -354,7 +354,7 @@ export const about = async (req, res) => {
 				email: newUser.email,
 				companyName: newUser.companyName,
 				industry: newUser.industry,
-				unique_id: newUser.unique_id, // Return unique_id for reference
+				unique_id: newUser.unique_id,
 			},
 		});
 	} catch (error) {

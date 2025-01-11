@@ -30,12 +30,12 @@
 			<img src="/assets/img/Wizard_logo.png" alt="Whizard Logo" class="animate-pulse loading-image" />
 		</div>
 	</div>
-
+	
 	<!-- Sidebar -->
 	<div class="layout-container">
-		<nav class="sidebar ">
+		<nav class=" sidebar ">
 			<div class="logo py-3">
-				<img src="/assets/img/Wizard_logo.png" alt="Whizard Logo" />
+				<img onclick="location.href = '/'" class="cursor-pointer" src="/assets/img/Wizard_logo.png" alt="Whizard Logo" />
 			</div>
 			<ul class="space-y-4 mt-5">
 				<li>
@@ -64,8 +64,16 @@
 						Reports</a>
 				</li>
 			</ul>
-			<div class="user-profile " onclick="toggleDropdown()">
-				<img src="https://via.placeholder.com/50" alt="User Profile" />
+			<div class=" user-profile text-white flex justify-center items-center text-center">
+				<% if (photo) { %>
+				<img src="/<%= photo %>" alt="User Profile" class="user-profile-img" onclick="toggleDropdown()" />
+				<% } else { %>
+				<!-- Extract and display the initials -->
+				<div class="user-profile-name bg-[<%= color %>]" onclick="toggleDropdown()">
+					<% let initials = name.split(' ').map(n => n[0].toUpperCase()).join(''); %>
+					<%= initials %>
+				</div>
+				<% } %>
 				<div id="dropdownMenu" class="account-menu hidden">
 					<a href="/settings/profile">Profile</a>
 					<button onclick="logout()">Logout</button>
@@ -75,8 +83,16 @@
 			
 			<script>
 				function toggleDropdown () {
-					const dropdown = document.getElementById("dropdownMenu");
-					dropdown.classList.toggle("hidden");
+					const dropdownMenu = document.getElementById('dropdownMenu');
+					const sidebar = document.querySelector('.sidebar');
+					
+					dropdownMenu.classList.toggle('hidden');
+					
+					if (dropdownMenu.classList.contains('hidden')) {
+						sidebar.style.overflow = 'auto';
+					} else {
+						sidebar.style.overflow = 'visible';
+					}
 				}
 				
 				async function logout () {
@@ -170,12 +186,12 @@
 			<div id="template-container">
 				<!-- List View (default) -->
 				<div id="list-view" class="block">
-					<%- include('templates-table') %>
+					<%- include('partials/templates-table') %>
 				</div>
 				
 				<!-- Grid View -->
 				<div id="grid-view" class="hidden">
-					<%- include('templates-cards') %>
+					<%- include('partials/templates-cards') %>
 				</div>
 			</div>
 			
@@ -282,7 +298,7 @@
 										</button>
 										<div class="dropdown-menu w-full" style="will-change: transform">
 											<a class="dropdown-item" href="#">Category </a>
-											<a class="dropdown-item" href="#">Indonesia</a>
+											<a class="dropdown-item" href="#">Marketing</a><a class="dropdown-item" href="#">Utility</a><a class="dropdown-item" href="#">Authentication</a>
 										</div>
 									</div>
 								</div>
@@ -290,7 +306,7 @@
 						</div>
 						<div class="modal-footer">
 							<button type="button" class="btn btn-primary btn-cons w-100">
-								Add List
+								Filter
 							</button>
 						</div>
 					</div>
@@ -298,6 +314,49 @@
 			</div>
 			
 			<script>
+				// Open Modal
+				function openModal () {
+					document.getElementById('filter-modal').style.display = 'block';
+				}
+				
+				// Close Modal
+				function closeModal () {
+					document.getElementById('filter-modal').style.display = 'none';
+				}
+				
+				// Toggle Dropdown
+				function toggleDropdown () {
+					const dropdown = document.getElementById('category-options');
+					dropdown.classList.toggle('hidden');
+				}
+				
+				// Select Category and Update Button Text
+				function selectCategory (category) {
+					document.getElementById('categoryDropdown').innerText = category;
+					toggleDropdown(); // Close the dropdown after selection
+				}
+				
+				// Apply Filters Function (for future filter logic)
+				function applyFilters () {
+					const templateName = document.getElementById('templateSearch').value;
+					const category = document.getElementById('categoryDropdown').innerText;
+					
+					// You can add your logic here to apply filters
+					console.log('Template Name:', templateName);
+					console.log('Category:', category);
+					
+					// Close modal after applying filters
+					closeModal();
+				}
+				
+				// Hide modal if clicked outside of it
+				window.onclick = function (event) {
+					const modal = document.getElementById('filter-modal');
+					if (event.target == modal) {
+						closeModal();
+					}
+				}
+				
 				const fileInput = document.getElementById("file-input");
 				const fileList = document.getElementById("file-list");
 				
@@ -370,7 +429,7 @@
 	</div>
 	<!-- END PAGE CONTAINER -->
 	
-
+	
 	<!-- BEGIN VENDOR JS -->
 	<script src="assets/plugins/pace/pace.min.js" type="text/javascript"></script>
 	<!--  A polyfill for browsers that don't support ligatures: remove liga.js if not needed-->
@@ -395,7 +454,7 @@
 		window.addEventListener('load', function () {
 			// Fade out the loader smoothly by changing the opacity
 			var loader = document.getElementById('loader');
-			loader.style.transition = 'opacity 0.5s ease'; // Smooth fade out
+			loader.style.transition = 'opacity 0.3s ease'; // Smooth fade out
 			loader.style.opacity = '0';
 			
 			// Completely remove the loader after the fade-out effect is finished
@@ -404,7 +463,7 @@
 			}, 300); // Match the duration of the fade-out (0.5 seconds in this case)
 		});
 	</script>
-
+	
 	<!-- END PAGE LEVEL JS -->
 </body>
 

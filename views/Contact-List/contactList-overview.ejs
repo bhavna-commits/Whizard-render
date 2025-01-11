@@ -37,12 +37,12 @@
 			<img src="/assets/img/Wizard_logo.png" alt="Whizard Logo" class="animate-pulse loading-image" />
 		</div>
 	</div>
-
+	
 	<!-- Sidebar -->
 	<div class="layout-container">
 		<nav class="sidebar">
 			<div class="logo py-3">
-				<img src="/assets/img/Wizard_logo.png" alt="Whizard Logo" />
+				<img onclick="location.href = '/'" class="cursor-pointer" src="/assets/img/Wizard_logo.png" alt="Whizard Logo" />
 			</div>
 			<ul class="mt-5 space-y-4">
 				<li>
@@ -71,8 +71,16 @@
 						Reports</a>
 				</li>
 			</ul>
-			<div class="user-profile " onclick="toggleDropdown()">
-				<img src="https://via.placeholder.com/50" alt="User Profile" />
+			<div class=" user-profile text-white flex justify-center items-center text-center">
+				<% if (photo) { %>
+				<img src="/<%= photo %>" alt="User Profile" class="user-profile-img" onclick="toggleDropdown()" />
+				<% } else { %>
+				<!-- Extract and display the initials -->
+				<div class="user-profile-name bg-[<%= color %>]" onclick="toggleDropdown()">
+					<% let initials = name.split(' ').map(n => n[0].toUpperCase()).join(''); %>
+					<%= initials %>
+				</div>
+				<% } %>
 				<div id="dropdownMenu" class="account-menu hidden">
 					<a href="/settings/profile">Profile</a>
 					<button onclick="logout()">Logout</button>
@@ -82,8 +90,16 @@
 			
 			<script>
 				function toggleDropdown () {
-					const dropdown = document.getElementById("dropdownMenu");
-					dropdown.classList.toggle("hidden");
+					const dropdownMenu = document.getElementById('dropdownMenu');
+					const sidebar = document.querySelector('.sidebar');
+					
+					dropdownMenu.classList.toggle('hidden');
+					
+					if (dropdownMenu.classList.contains('hidden')) {
+						sidebar.style.overflow = 'auto';
+					} else {
+						sidebar.style.overflow = 'visible';
+					}
 				}
 				
 				async function logout () {
@@ -143,17 +159,18 @@
 			<!-- START card -->
 			<div class="pt-4">
 				<div class="flex w-full justify-between items-center px-3">
-					<div class="flex w-fit items-center">
-						<span class=" text-lg w-[250px] ">Contact List Name</span>
-						<input type="text" id="contactListName" placeholder="Edit Contact List name" class="outline-none focus:outline-none w-full border py-1 px-2 rounded-lg" value="<%= name %>" />
+					<div class="flex w-fit justify-start items-center">
+						<span class=" text-lg  pr-2">Contact List Name</span>
+						<input type="text" id="contactListName" placeholder="Edit Contact List name" class="outline-none focus:outline-none w-fit border py-1 px-2 rounded-lg" value="<%= listName %>" />
+						
+						<button aria-label="" id="saveChangesBtn" type="button" class="border ml-2 py-2 px-2 rounded-lg transition-colors ease-in-out duration-300 hover:bg-gray-100 text-sm font-medium opacity-50 cursor-not-allowed" disabled>
+							Save Changes
+						</button>
+						
 					</div>
 					
 					<div class="flex items-center justify-evenly">
-						<!-- <div class="text-center pr-3">
-							<button aria-label="" id="saveChangesBtn" type="button" class="border py-2 px-2 rounded-lg transition-colors ease-in-out duration-300 hover:bg-gray-100 text-base font-medium opacity-50 cursor-not-allowed" disabled>
-								Save Changes
-							</button>
-						</div> -->
+						
 						<div class="text-center pr-3">
 							<button aria-label="Add-Contact" onclick="openAddContact()" type="button" class="border py-2 px-4 rounded-lg transition-colors ease-in-out duration-300 hover:bg-gray-100 text-sm font-semibold flex items-center">
 								<span class="icon pr-2">
@@ -182,8 +199,8 @@
 				</div>
 				
 				<!-- Contact list table -->
-				<div class="flex w-full justify-center items-center ">
-					<div class="w-[95%]"><%- include('partials/OverViewTable') %></div>
+				<div  class="flex w-full justify-center items-center ">
+					<div id="contactList" class="w-[95%]"><%- include('partials/OverViewTable') %></div>
 				</div>
 			</div>
 			
@@ -236,7 +253,7 @@
 		window.addEventListener('load', function () {
 			// Fade out the loader smoothly by changing the opacity
 			var loader = document.getElementById('loader');
-			loader.style.transition = 'opacity 0.5s ease'; // Smooth fade out
+			loader.style.transition = 'opacity 0.3s ease'; // Smooth fade out
 			loader.style.opacity = '0';
 			
 			// Completely remove the loader after the fade-out effect is finished
@@ -245,7 +262,7 @@
 			}, 300); // Match the duration of the fade-out (0.5 seconds in this case)
 		});
 	</script>
-
+	
 	<!-- END PAGE LEVEL JS -->
 </body>
 

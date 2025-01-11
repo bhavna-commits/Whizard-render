@@ -47,16 +47,11 @@
 </head>
 
 <body>
-  <div id="loader" class="loader">
-  	<div class="w-full h-full flex justify-center items-center">
-  		<img src="/assets/img/Wizard_logo.png" alt="Whizard Logo" class="animate-pulse loading-image" />
-  	</div>
-  </div>
-  <div id="loader" class="loader">
-  	<div class="w-full h-full flex justify-center items-center">
-  		<img id="shimmerLogo" src="/whizardLogo.png" alt="Whizard Logo" />
-  	</div>
-  </div>
+	<div id="loader" class="loader">
+		<div class="w-full h-full flex justify-center items-center">
+			<img id="shimmerLogo" src="/whizardLogo.png" alt="Whizard Logo" />
+		</div>
+	</div>
 	<div class="flex justify-center items-center w-screen h-screen">
 		<!-- Left Section (Info Section) -->
 		<div class="left-section p-5 flex-grow w-1/2 h-full">
@@ -142,19 +137,19 @@
 	<script src="/user/js/verifyEmail.js">
 	
 	</script>
-  <script>
-  	window.addEventListener('load', function () {
-  		// Fade out the loader smoothly by changing the opacity
-  		var loader = document.getElementById('loader');
-  		loader.style.transition = 'opacity 0.5s ease'; // Smooth fade out
-  		loader.style.opacity = '0';
-  		
-  		// Completely remove the loader after the fade-out effect is finished
-  		setTimeout(function () {
-  			loader.style.display = 'none'; // Ensure loader is no longer in the DOM flow
-  		}, 300); // Match the duration of the fade-out (0.5 seconds in this case)
-  	});
-  </script>
+	<script>
+		window.addEventListener('load', function () {
+			// Fade out the loader smoothly by changing the opacity
+			var loader = document.getElementById('loader');
+			loader.style.transition = 'opacity 0.3s ease'; // Smooth fade out
+			loader.style.opacity = '0';
+			
+			// Completely remove the loader after the fade-out effect is finished
+			setTimeout(function () {
+				loader.style.display = 'none'; // Ensure loader is no longer in the DOM flow
+			}, 300); // Match the duration of the fade-out (0.5 seconds in this case)
+		});
+	</script>
 </body>
 
 </html>

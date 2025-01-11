@@ -25,7 +25,7 @@ export const home = async (req, res) => {
 	res.render("Settings/home", {
 		photo: req.session.user?.photo,
 		name: req.session.user.name,
-		color: req.session.user.color
+		color: req.session.user.color,
 	});
 };
 
@@ -34,17 +34,16 @@ export const profile = async (req, res) => {
 
 	try {
 		const user = await User.findOne({ unique_id: id });
-
+		
 		if (!user) {
 			return res.status(404).json({ message: "User not found" });
 		}
 
+		// console.log("color :", user);
 		// console.log("User Information:", user);
-		const language = "English";
 		res.render("Settings/profile", {
 			user,
 			languages,
-			language,
 			photo: req.session.user?.photo,
 			name: req.session.user.name,
 			color: req.session.user.color,
@@ -58,32 +57,36 @@ export const profile = async (req, res) => {
 };
 
 export const updateProfile = async (req, res) => {
-	const data = req.body;
-
-	console.log(JSON.stringify(data));
-
-	let profilePicPath;
-	if (req.file?.filename) {
-		profilePicPath = path.join(
-			"uploads",
-			req.session.user.id,
-			"profile",
-			req.file.filename,
-		);
-	}
-
 	try {
+		const data = req.body;
+
+		console.log(JSON.stringify(data));
+
+		let profilePicPath;
+		if (req.file?.filename) {
+			profilePicPath = path.join(
+				"uploads",
+				req.session.user.id,
+				"profile",
+				req.file.filename,
+			);
+		}
+
+		const updateFields = {
+			name: data.name,
+			language: data.language,
+		};
+
+		if (profilePicPath) {
+			updateFields.profilePhoto = profilePicPath;
+		}
+
 		const updatedUser = await User.findOneAndUpdate(
 			{ unique_id: req.session.user.id },
-			{
-				profilePhoto: profilePicPath ? profilePicPath : "",
-				name: data.name,
-				language: data.language,
-			},
+			updateFields,
 			{ new: true },
 		);
-
-		req.session.user.photo = profilePicPath;
+		req.session.user.photo = updatedUser.profilePhoto;
 		// console.log(updatedUser);
 		try {
 			await ActivityLogs.create({
@@ -118,36 +121,82 @@ export const updateProfile = async (req, res) => {
 };
 
 export const updatePassword = async (req, res) => {
-	const { currentPassword, newPassword, logoutDevices } = req.body;
-	let id;
-	req.session.addedUser
-		? (id = req.session.addedUser.id)
-		: (id = req.session.user.id);
+	try {
+		const { currentPassword, newPassword, logoutDevices } = req.body;
+		let id;
+		req.session.addedUser
+			? (id = req.session.addedUser.id)
+			: (id = req.session.user.id);
 
-	const user = await User.findOne({ unique_id: id });
+		const user = await User.findOne({ unique_id: id });
 
-	if (!user) {
-		const addedUser = AddedUser.findById(id);
-		if (!addedUser)
-			return res.status(400).json({ error: "User not found" });
+		if (!user) {
+			return res
+				.status(400)
+				.json({ success: false, message: "User not found" });
+			// const addedUser = AddedUser.findById(id);
+			// if (!addedUser)
+			// 	return res
+			// 		.status(400)
+			// 		.json({ success: false, message: "User not found" });
+
+			// const isMatch = await bcrypt.compare(
+			// 	currentPassword,
+			// 	addedUser.password,
+			// );
+
+			// if (!isMatch) {
+			// 	return res
+			// 		.status(400)
+			// 		.json({ success: false, message: "incorrect_password" });
+			// }
+
+			// const passwordValid = validatePassword(newPassword);
+			// if (!passwordValid) {
+			// 	return res
+			// 		.status(400)
+			// 		.json({
+			// 			success: false,
+			// 			message: "Password does not meet the criteria.",
+			// 		});
+			// }
+
+			// const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+			// addedUser.password = hashedPassword;
+			// addedUser.save();
+
+			// await ActivityLogs.create({
+			// 	useradmin: req.session.user.id,
+			// 	unique_id: generateUniqueId(),
+			// 	name: req.session.user.name
+			// 		? req.session.user.name
+			// 		: req.session.addedUser.name,
+			// 	actions: "Update",
+			// 	details: `${req.addedUser.name} updated their password`,
+			// });
+		}
 
 		const isMatch = await bcrypt.compare(currentPassword, user.password);
 
 		if (!isMatch) {
-			return res.status(400).json({ error: "incorrect_password" });
+			return res
+				.status(400)
+				.json({ success: false, message: "incorrect_password" });
 		}
 
 		const passwordValid = validatePassword(newPassword);
 		if (!passwordValid) {
-			return res
-				.status(400)
-				.json({ message: "Password does not meet the criteria." });
+			return res.status(400).json({
+				success: false,
+				message: "Password does not meet the criteria.",
+			});
 		}
 
 		const hashedPassword = await bcrypt.hash(newPassword, 10);
+		user.password = hashedPassword;
 
-		addedUser.password = hashedPassword;
-		addedUser.save();
+		await user.save();
 
 		await ActivityLogs.create({
 			useradmin: req.session.user.id,
@@ -156,43 +205,20 @@ export const updatePassword = async (req, res) => {
 				? req.session.user.name
 				: req.session.addedUser.name,
 			actions: "Update",
-			details: `${req.addedUser.name} updated their password`,
+			details: `Updated their password`,
 		});
-	}
 
-	const isMatch = await bcrypt.compare(currentPassword, user.password);
-
-	if (!isMatch) {
-		return res.status(400).json({ error: "incorrect_password" });
-	}
-
-	const passwordValid = validatePassword(newPassword);
-	if (!passwordValid) {
-		return res
-			.status(400)
-			.json({ message: "Password does not meet the criteria." });
-	}
-
-	const hashedPassword = await bcrypt.hash(newPassword, 10);
-	user.password = hashedPassword;
-
-	await user.save();
-
-	await ActivityLogs.create({
-		name: req.session.user.name
-			? req.session.user.name
-			: req.session.addedUser.name,
-		actions: "Update",
-		details: `${req.addedUser.name} updated their password`,
-	});
-
-	if (logoutDevices) {
-		req.session.user = null;
-		res.render("login");
-	} else {
-		return res
-			.status(200)
-			.json({ message: "Password updated successfully" });
+		if (logoutDevices) {
+			req.session.user = null;
+			res.render("login");
+		} else {
+			return res
+				.status(200)
+				.json({ message: "Password updated successfully" });
+		}
+	} catch (error) {
+		console.log(error);
+		res.status(500).json({ success: false, message: error });
 	}
 };
 
@@ -265,7 +291,7 @@ export const updateAccountDetails = async (req, res) => {
 				? req.session.user.name
 				: req.session.addedUser.name,
 			actions: "Update",
-			details: `updated their account details`,
+			details: `Updated their account details`,
 		});
 
 		res.status(200).json({

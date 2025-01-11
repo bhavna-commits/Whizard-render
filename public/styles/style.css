@@ -3,7 +3,12 @@
 	margin: 0;
 	padding: 0;
 	font-family: "Figtree", sans-serif;
-	font-size: 14px;
+	font-size: 12px;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
 }
 
 body {
@@ -69,15 +74,38 @@ input[type="number"] {
 }
 
 .user-profile {
+	height: 4rem;
+	width: 4rem;
 	cursor: pointer;
 	position: relative;
+	border-radius: 100%;
+	margin-top: auto;
+	margin-bottom: 20px;
+	/* border: #000 2px solid; */
+}
+
+.user-profile-img {
+	width: 100%;
+	height: 100%;
+	border-radius: 50%;
+	object-fit: cover; /* Ensures the image fills the container without distortion */
+}
+
+.user-profile-name {
+	width: 100%;
+	height: 100%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	border-radius: 50%;
+	font-size: 1.5rem;
 }
 
 .account-menu {
 	position: absolute;
 	width: 10rem;
-	top: -100%;
-	left: 100%;
+	bottom: 100%;
+	left: 110%;
 	background-color: white;
 	/* border: 1px solid #ccc; */
 	border-radius: 10px;
@@ -87,6 +115,7 @@ input[type="number"] {
 	gap: 10px;
 	box-shadow: 0px 0px 10px rgb(244, 114, 114);
 	z-index: 999999; /* Ensure high z-index */
+	visibility: visible;
 }
 
 .sidebar {
@@ -99,7 +128,7 @@ input[type="number"] {
 	background-color: white;
 	width: 140px;
 	padding-top: 0.75rem;
-	/* overflow: auto; */
+	overflow: auto;
 	/* overflow-y: visible; */
 
 	::-webkit-scrollbar {
@@ -277,18 +306,6 @@ input[type="number"] {
 	size: 30px;
 	font-weight: 500;
 }
-::placeholder {
-	color: #b8b8b8;
-	font-weight: 400;
-	font-size: 14px;
-}
-
-::-ms-input-placeholder {
-	/* Edge 12 -18 */
-	color: #b8b8b8;
-	font-weight: 400;
-	font-size: 14px;
-}
 
 /* For screens smaller than 768px (tablets and phones) */
 @media (max-width: 768px) {
@@ -447,14 +464,11 @@ input[type="number"] {
   );
 } */
 
-.user-profile {
-	position: relative;
-}
 .user-profile::before {
 	content: "";
 	position: absolute;
 	left: 0;
-	top: 0;
+	top: -20px;
 	width: 100%;
 	height: 2px;
 	margin-bottom: 10px;
@@ -483,7 +497,6 @@ input[type="number"] {
 	/* padding: 14px 5px; */
 	color: #959595;
 	text-decoration: none;
-	font-size: 14px;
 	transition: background 0.3s;
 	border-radius: 10px;
 }
@@ -536,17 +549,6 @@ input[type="number"] {
 	text-align: center;
 	/* margin-right: 10px; */
 	color: #f20000 !important;
-}
-
-.user-profile {
-	margin-top: auto;
-	padding: 20px;
-}
-
-.user-profile img {
-	width: 50px;
-	height: 50px;
-	border-radius: 50%;
 }
 
 /* Dashboard Content */
@@ -605,13 +607,13 @@ input[type="number"] {
 
 .card-dashboard h5 {
 	font-weight: normal;
-	font-size: 16px;
 	color: #666;
+	font-size: larger;
 }
 
 .card-dashboard h4 {
 	font-weight: bold;
-	font-size: 32px;
+	font-size: x-large;
 	color: #333;
 }
 
@@ -715,7 +717,7 @@ input[type="number"] {
 }
 
 .dash-text {
-	font-size: 24px;
+	/* font-size: 24px; */
 	font-weight: 600;
 	color: #191919;
 	padding-bottom: 1rem;

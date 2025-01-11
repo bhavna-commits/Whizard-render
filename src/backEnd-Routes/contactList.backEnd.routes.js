@@ -17,6 +17,7 @@ import {
 	editContact,
 	createContact,
 	createCampaign,
+	getFilteredContacts,
 } from "../controllers/ContactList/contacts.controller.js";
 
 const router = express.Router();
@@ -33,6 +34,8 @@ router.delete("/deleteList/:id", deleteList);
 router.put("/overview/:id", updateContact);
 
 router.delete("/overview/:id", deleteContact);
+
+router.post("/overview/:id", getFilteredContacts);
 
 router.get("/sampleCSV", sampleCSV);
 

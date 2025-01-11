@@ -31,17 +31,49 @@ function closeFilterModal(event = null) {
 
 function applyFilters() {
 	const dateInterval = document.getElementById("dateInterval").value;
-	const attribute = document.getElementById("attributeSelect").value;
-	const condition = document.getElementById("conditionSelect").value;
-	const attributeValue = document.getElementById("attributeValue").value;
+	const filters = [];
 
-	// You can send these values to the backend or apply filters on the front-end
-	console.log("Filters Applied: ", {
-		dateInterval,
-		attribute,
-		condition,
-		attributeValue,
+	// Collect the basic filter (dateInterval)
+	if (dateInterval) {
+		filters.push({
+			field: "subscribe_date",
+			value: dateInterval,
+			condition: "has",
+		});
+	}
+
+	// Collect dynamic filters
+	const filterRows = document.querySelectorAll(".filter-row");
+	filterRows.forEach((row) => {
+		const attribute = row.querySelector("#attributeSelect").value;
+		const condition = row.querySelector("#conditionSelect").value;
+		const value = row.querySelector("#attributeValue").value;
+		if (attribute && value) {
+			filters.push({ field: attribute, value, condition });
+		}
 	});
+
+	// You can send these filters to the backend using fetch
+	console.log("Filters Applied: ", filters);
+	const id = location.pathname.split("/").pop();
+	console.log(id);
+	// Make fetch request to apply the filters
+	fetch(`/api/contact-list/overview/${id}`, {
+		method: "POST",
+		headers: {
+			"Content-Type": "application/json",
+		},
+		body: JSON.stringify({ filters }), // Send filters as part of the request body
+	})
+		.then((response) => response.text())
+		.then((data) => {
+			// Replace existing contact list with filtered results
+			const contactListContainer = document.getElementById("contactList");
+			contactListContainer.innerHTML = data; // Clear existing list
+		})
+		.catch((error) => {
+			console.error("Error fetching contacts with filters: ", error);
+		});
 
 	// Close the modal after applying filters
 	closeFilterModal();
@@ -66,15 +98,17 @@ function addFilter() {
 	filterRow.innerHTML = `
 	<div class="flex items-center pt-2 space-x-2 relative">
 		<select placeholder="" id="attributeSelect" class="w-fit px-2 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-			<option value="name">Name</option>
-			<option value="tags">Tags</option>
-			<option value="contact">Contact</option>
-			<option value="whatsapp">WhatsApp</option>
+			<option value="Name">Name</option>
+					<option value="Number">Name</option>
+					<% if (contacts[0]?.masterExtra) { %>
+					<% Object.keys(contacts[0].masterExtra).forEach(function(key) { %>
+					<option value="<%= key %>"><%= key %></option>
+					<% }); %>
+					<% } %>
 		</select>
 		<select id="conditionSelect" class="w-fit px-2 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-			<option value="is">has</option>
-			<option value="is">does not</option>
-			<!-- Add more conditions if needed -->
+			<option value="has">has</option>
+			<option value="does not">does not</option>
 		</select>
 		<input type="text" id="attributeValue" placeholder="Attribute value" class="w-fit px-2 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
 	</div>
@@ -86,8 +120,6 @@ function addFilter() {
 
 flatpickr("#dateInterval", {
 	mode: "range",
-	dateFormat: "d-m-Y", // Format: Year-Month-Day
-	onClose: function (selectedDates, dateStr, instance) {
-		console.log("Selected date range: ", dateStr);
-	},
+	dateFormat: "Y-m-d",
+	maxDate: "today",
 });

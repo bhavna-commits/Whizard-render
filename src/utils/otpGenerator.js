@@ -23,3 +23,11 @@ export function validatePassword(password) {
 export const generateUniqueId = () => {
 	return crypto.randomBytes(5).toString("hex").slice(0, 10);
 };
+
+export function convertDateFormat(date) {
+	// Regex to match mm/dd/yyyy format
+	const regex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
+	return date.replace(regex, (match, month, day, year) => {
+		return `${day}/${month}/${year}`;
+	});
+}
