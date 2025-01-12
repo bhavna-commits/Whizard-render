@@ -88,14 +88,32 @@ export const getList = async (req, res) => {
 	try {
 		const id = req.session.user.id;
 		const page = parseInt(req.query.page) || 1;
+		const { category, search } = req.query;
 		const limit = 6;
 		const skip = (page - 1) * limit;
 
+		const match = {
+			useradmin: id,
+			deleted: { $ne: true },
+		};
+
+		if (category && category != "Category") {
+			match["category"] = category;
+		} else if (category == "Category") {
+			delete match["category"];
+		}
+
+		const searchQuery = search?.trim();
+
+		if (searchQuery) {
+			match["name"] = {
+				$regex: new RegExp(searchQuery, "ims"),
+			};
+		}
+
 		const result = await Template.aggregate([
 			{
-				$match: {
-					useradmin: id,
-				},
+				$match: match,
 			},
 			{
 				$sort: {
@@ -115,7 +133,7 @@ export const getList = async (req, res) => {
 
 		// Calculate total pages
 		const totalPages = Math.ceil(totalCount / limit);
-
+		// console.log();
 		res.render("Templates/manage_template", {
 			list: templates,
 			page,
@@ -125,10 +143,14 @@ export const getList = async (req, res) => {
 			name: req.session.user.name,
 		});
 	} catch (error) {
+		console.log(error);
 		res.render("Templates/manage_template", {
 			list: [],
 			page: 1,
 			totalPages: 0,
+			color: req.session.user.color,
+			photo: req.session.user?.photo,
+			name: req.session.user.name,
 		});
 	}
 };
@@ -175,7 +197,10 @@ export const deleteTemplate = async (req, res) => {
 	try {
 		const templateId = req.params.id;
 
-		const deletedTemplate = await Template.findByIdAndDelete(templateId);
+		const deletedTemplate = await Template.findByIdAndUpdate(
+			{ _id: templateId },
+			{ deleted: true },
+		);
 		if (!deletedTemplate) {
 			return res
 				.status(404)

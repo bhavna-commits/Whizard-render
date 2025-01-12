@@ -1,6 +1,7 @@
 import Reports from "../../models/report.model.js";
 import Campaign from "../../models/campaign.model.js";
 import ContactList from "../../models/contactList.model.js";
+import { overview } from "./reports.functions.js";
 
 // Controller to fetch campaign reports and render them page-wise
 export const getCampaignList = async (req, res) => {
@@ -136,7 +137,7 @@ export const getCampaignListFilter = async (req, res) => {
 		const skip = (page - 1) * limit;
 
 		const { status, timeFrame, search } = req.query;
-		
+
 		let matchQuery = {
 			useradmin: userId,
 			deleted: { $ne: true }, // Adjust based on your campaign schema
@@ -281,228 +282,46 @@ const getCampaignOverview = async (req, res) => {
 		const skip = (page - 1) * limit;
 
 		// Fetch campaigns created by the user
-		const campaigns = await Campaign.aggregate([
-			{
-				$match: {
-					useradmin: userId,
-					unique_id: id,
-					deleted: { $ne: true },
-				},
-			},
-			{
-				$lookup: {
-					from: "campaignreports",
-					let: {
-						campaignUniqueId: "$unique_id",
-						campaignUseradmin: "$useradmin",
-					},
-					pipeline: [
-						{
-							$match: {
-								$expr: {
-									$and: [
-										{
-											$eq: [
-												"$campaignId",
-												"$$campaignUniqueId",
-											],
-										},
-										{
-											$eq: [
-												"$useradmin",
-												"$$campaignUseradmin",
-											],
-										},
-									],
-								},
-							},
-						},
-					],
-					as: "reports",
-				},
-			},
-			{
-				$lookup: {
-					from: "contactlists",
-					localField: "contactListId",
-					foreignField: "_id",
-					as: "contactList",
-				},
-			},
-			{
-				$unwind: {
-					path: "$contactList",
-					preserveNullAndEmptyArrays: true,
-				},
-			},
-			{
-				$lookup: {
-					from: "contacts",
-					localField: "contactList.contacts.contactId",
-					foreignField: "contactId",
-					as: "contacts",
-				},
-			},
-			{
-				$addFields: {
-					totalMessages: { $size: "$reports" },
-					messagesSent: {
-						$size: {
-							$filter: {
-								input: "$reports",
-								as: "report",
-								cond: { $eq: ["$$report.status", "SENT"] },
-							},
-						},
-					},
-					messagesDelivered: {
-						$size: {
-							$filter: {
-								input: "$reports",
-								as: "report",
-								cond: { $eq: ["$$report.status", "DELIVERED"] },
-							},
-						},
-					},
-					messagesRead: {
-						$size: {
-							$filter: {
-								input: "$reports",
-								as: "report",
-								cond: { $eq: ["$$report.status", "READ"] },
-							},
-						},
-					},
-					messagesReplied: {
-						$size: {
-							$filter: {
-								input: "$reports",
-								as: "report",
-								cond: { $eq: ["$$report.status", "REPLIED"] },
-							},
-						},
-					},
-					messagesFailed: {
-						$size: {
-							$filter: {
-								input: "$reports",
-								as: "report",
-								cond: { $eq: ["$$report.status", "FAILED"] },
-							},
-						},
-					},
-				},
-			},
-			{
-				$addFields: {
-					percentSent: {
-						$cond: [
-							{ $eq: ["$totalMessages", 0] },
-							0,
-							{
-								$multiply: [
-									{
-										$divide: [
-											"$messagesSent",
-											"$totalMessages",
-										],
-									},
-									100,
-								],
-							},
-						],
-					},
-					percentDelivered: {
-						$cond: [
-							{ $eq: ["$totalMessages", 0] },
-							0,
-							{
-								$multiply: [
-									{
-										$divide: [
-											"$messagesDelivered",
-											"$totalMessages",
-										],
-									},
-									100,
-								],
-							},
-						],
-					},
-					percentRead: {
-						$cond: [
-							{ $eq: ["$totalMessages", 0] },
-							0,
-							{
-								$multiply: [
-									{
-										$divide: [
-											"$messagesRead",
-											"$totalMessages",
-										],
-									},
-									100,
-								],
-							},
-						],
-					},
-				},
-			},
-			{
-				$sort: { createdAt: -1 },
-			},
-			{
-				$facet: {
-					paginatedResults: [{ $skip: skip }, { $limit: limit }],
-					totalCount: [{ $count: "total" }],
-				},
-			},
-		]);
+		const campaigns = await overview(id, userId, page, limit, skip);
 
 		const paginatedResults = campaigns[0]?.paginatedResults || [];
 		const totalCount = campaigns[0]?.totalCount[0]?.total || 0;
 		const totalPages = Math.ceil(totalCount / limit);
 
-		if (paginatedResults.length > 0) {
-			const firstCampaign = paginatedResults[0]; // Access the first element of paginatedResults
-
-			res.render("Reports/campaignOverview", {
-				campaigns: paginatedResults,
-				id,
-				page,
-				totalPages,
-				totalMessages: firstCampaign.totalMessages || 0,
-				messagesSent: firstCampaign.messagesSent || 0,
-				messagesDelivered: firstCampaign.messagesDelivered || 0,
-				messagesRead: firstCampaign.messagesRead || 0,
-				messagesReplied: firstCampaign.messagesReplied || 0,
-				messagesFailed: firstCampaign.messagesFailed || 0,
-				percentSent: firstCampaign.percentSent?.toFixed(2) || 0,
-				percentDelivered:
-					firstCampaign.percentDelivered?.toFixed(2) || 0,
-				percentRead: firstCampaign.percentRead?.toFixed(2) || 0,
-				photo: req.session.user?.photo,
-				name: req.session.user.name,
-				color: req.session.user.color,
+		paginatedResults.forEach((campaign) => {
+			campaign.reports.forEach((report) => {
+				const contact = campaign.contacts.find(
+					(contact) => `91${contact.wa_id}` === report.recipientPhone,
+				);
+				if (contact) {
+					report.contactName = contact.Name;
+				} else {
+					const contact = campaign.contacts.find(
+						(contact) => contact.wa_id === report.recipientPhone,
+					);
+					report.contactName = contact.Name;
+				}
 			});
-		} else {
-			// Handle the case when no campaigns are returned
-			res.render("Reports/campaignOverview", {
-				campaigns: [],
-				id,
-				page,
-				totalPages,
-				totalMessages: 0,
-				messagesSent: 0,
-				messagesDelivered: 0,
-				messagesRead: 0,
-				messagesReplied: 0,
-				messagesFailed: 0,
-				percentSent: 0,
-				percentDelivered: 0,
-				percentRead: 0,
-			});
-		}
+		});
+		// console.log(firstCampaign);
+		res.render("Reports/campaignOverview", {
+			campaigns: paginatedResults[0].reports,
+			id,
+			page,
+			totalPages,
+			totalMessages: paginatedResults[0].totalMessages || 0,
+			messagesSent: paginatedResults[0].messagesSent || 0,
+			messagesDelivered: paginatedResults[0].messagesDelivered || 0,
+			messagesRead: paginatedResults[0].messagesRead || 0,
+			messagesReplied: paginatedResults[0].messagesReplied || 0,
+			messagesFailed: paginatedResults[0].messagesFailed || 0,
+			percentSent: paginatedResults[0].percentSent?.toFixed(2) || 0,
+			percentDelivered: paginatedResults[0].percentDelivered?.toFixed(2) || 0,
+			percentRead: paginatedResults[0].percentRead?.toFixed(2) || 0,
+			photo: req.session.user?.photo,
+			name: req.session.user.name,
+			color: req.session.user.color,
+		});
 	} catch (err) {
 		console.error(err);
 		res.status(500).send("Server Error");
@@ -529,22 +348,39 @@ const getSentReportsById = async (req, res) => {
 			{
 				$lookup: {
 					from: "campaignreports",
-					localField: "unique_id",
-					foreignField: "campaignId",
+					let: { campaignId: "$unique_id" },
+					pipeline: [
+						{
+							$match: {
+								$expr: {
+									$and: [
+										{
+											$eq: [
+												"$campaignId",
+												"$$campaignId",
+											],
+										},
+										{ $eq: ["$status", "SENT"] },
+									],
+								},
+							},
+						},
+					],
 					as: "reports",
 				},
 			},
 			{
+				$lookup: {
+					from: "contacts",
+					localField: "contactListId",
+					foreignField: "contactId",
+					as: "contacts",
+				},
+			},
+			{
 				$addFields: {
-					messagesSent: {
-						$size: {
-							$filter: {
-								input: "$reports",
-								as: "report",
-								cond: { $eq: ["$$report.status", "SENT"] },
-							},
-						},
-					},
+					// Add messagesSent count for SENT status
+					messagesSent: { $size: "$reports" },
 				},
 			},
 			{ $sort: { createdAt: -1 } },
@@ -560,8 +396,25 @@ const getSentReportsById = async (req, res) => {
 		const totalCount = sentReports[0]?.totalCount[0]?.total || 0;
 		const totalPages = Math.ceil(totalCount / limit);
 
-		res.render("Reports/sentReports", {
-			campaigns: paginatedResults,
+		// Attach the relevant contact information to each report
+		paginatedResults.forEach((campaign) => {
+			campaign.reports.forEach((report) => {
+				const contact = campaign.contacts.find(
+					(contact) => `91${contact.wa_id}` === report.recipientPhone,
+				);
+				if (contact) {
+					report.contactName = contact.Name;
+				} else {
+					const contact = campaign.contacts.find(
+						(contact) => contact.wa_id === report.recipientPhone,
+					);
+					report.contactName = contact.Name;
+				}
+			});
+		});
+
+		res.render("Reports/campaignSent", {
+			campaigns: paginatedResults[0].reports,
 			page,
 			totalPages,
 			id,
@@ -595,22 +448,39 @@ const getDeliveredReportsById = async (req, res) => {
 			{
 				$lookup: {
 					from: "campaignreports",
-					localField: "unique_id",
-					foreignField: "campaignId",
+					let: { campaignId: "$unique_id" },
+					pipeline: [
+						{
+							$match: {
+								$expr: {
+									$and: [
+										{
+											$eq: [
+												"$campaignId",
+												"$$campaignId",
+											],
+										},
+										{ $eq: ["$status", "DELIVERED"] },
+									],
+								},
+							},
+						},
+					],
 					as: "reports",
 				},
 			},
 			{
+				$lookup: {
+					from: "contacts",
+					localField: "contactListId",
+					foreignField: "contactId",
+					as: "contacts",
+				},
+			},
+			{
 				$addFields: {
-					messagesDelivered: {
-						$size: {
-							$filter: {
-								input: "$reports",
-								as: "report",
-								cond: { $eq: ["$$report.status", "DELIVERED"] },
-							},
-						},
-					},
+					// Add messagesDelivered count for DELIVERED status
+					messagesDelivered: { $size: "$reports" },
 				},
 			},
 			{ $sort: { createdAt: -1 } },
@@ -626,8 +496,28 @@ const getDeliveredReportsById = async (req, res) => {
 		const totalCount = deliveredReports[0]?.totalCount[0]?.total || 0;
 		const totalPages = Math.ceil(totalCount / limit);
 
-		res.render("Reports/deliveredReports", {
-			campaigns: paginatedResults,
+		// Attach the relevant contact information to each report
+		paginatedResults.forEach((campaign) => {
+			campaign.reports.forEach((report) => {
+				const contact = campaign.contacts.find(
+					(contact) => `91${contact.wa_id}` === report.recipientPhone,
+				);
+				if (contact) {
+					report.contactName = contact.Name;
+				} else {
+					const contact = campaign.contacts.find(
+						(contact) => contact.wa_id === report.recipientPhone,
+					);
+					report.contactName = contact
+						? contact.Name
+						: "Unknown Contact";
+				}
+			});
+		});
+
+		console.log(paginatedResults[0].reports);
+		res.render("Reports/campaignDelivered", {
+			campaigns: paginatedResults[0].reports,
 			page,
 			totalPages,
 			id,
@@ -661,22 +551,39 @@ const getReadReportsById = async (req, res) => {
 			{
 				$lookup: {
 					from: "campaignreports",
-					localField: "unique_id",
-					foreignField: "campaignId",
+					let: { campaignId: "$unique_id" },
+					pipeline: [
+						{
+							$match: {
+								$expr: {
+									$and: [
+										{
+											$eq: [
+												"$campaignId",
+												"$$campaignId",
+											],
+										},
+										{ $eq: ["$status", "READ"] },
+									],
+								},
+							},
+						},
+					],
 					as: "reports",
 				},
 			},
 			{
+				$lookup: {
+					from: "contacts",
+					localField: "contactListId",
+					foreignField: "contactId",
+					as: "contacts",
+				},
+			},
+			{
 				$addFields: {
-					messagesRead: {
-						$size: {
-							$filter: {
-								input: "$reports",
-								as: "report",
-								cond: { $eq: ["$$report.status", "READ"] },
-							},
-						},
-					},
+					// Add messagesRead count for READ status
+					messagesRead: { $size: "$reports" },
 				},
 			},
 			{ $sort: { createdAt: -1 } },
@@ -692,8 +599,27 @@ const getReadReportsById = async (req, res) => {
 		const totalCount = readReports[0]?.totalCount[0]?.total || 0;
 		const totalPages = Math.ceil(totalCount / limit);
 
-		res.render("Reports/readReports", {
-			campaigns: paginatedResults,
+		// Attach the relevant contact information to each report
+		paginatedResults.forEach((campaign) => {
+			campaign.reports.forEach((report) => {
+				const contact = campaign.contacts.find(
+					(contact) => `91${contact.wa_id}` === report.recipientPhone,
+				);
+				if (contact) {
+					report.contactName = contact.Name;
+				} else {
+					const contact = campaign.contacts.find(
+						(contact) => contact.wa_id === report.recipientPhone,
+					);
+					report.contactName = contact
+						? contact.Name
+						: "Unknown Contact";
+				}
+			});
+		});
+
+		res.render("Reports/campaignRead", {
+			campaigns: paginatedResults[0].reports,
 			page,
 			totalPages,
 			id,
@@ -727,22 +653,39 @@ const getRepliesReportsById = async (req, res) => {
 			{
 				$lookup: {
 					from: "campaignreports",
-					localField: "unique_id",
-					foreignField: "campaignId",
+					let: { campaignId: "$unique_id" },
+					pipeline: [
+						{
+							$match: {
+								$expr: {
+									$and: [
+										{
+											$eq: [
+												"$campaignId",
+												"$$campaignId",
+											],
+										},
+										{ $ne: ["$replyContent", null] }, // Only fetch reports with replies
+									],
+								},
+							},
+						},
+					],
 					as: "reports",
 				},
 			},
 			{
+				$lookup: {
+					from: "contacts",
+					localField: "contactListId",
+					foreignField: "contactId",
+					as: "contacts",
+				},
+			},
+			{
 				$addFields: {
-					messagesReplied: {
-						$size: {
-							$filter: {
-								input: "$reports",
-								as: "report",
-								cond: { $eq: ["$$report.status", "REPLIED"] },
-							},
-						},
-					},
+					// Add messagesReplied count where replies exist
+					messagesReplied: { $size: "$reports" },
 				},
 			},
 			{ $sort: { createdAt: -1 } },
@@ -758,8 +701,27 @@ const getRepliesReportsById = async (req, res) => {
 		const totalCount = repliedReports[0]?.totalCount[0]?.total || 0;
 		const totalPages = Math.ceil(totalCount / limit);
 
-		res.render("Reports/repliedReports", {
-			campaigns: paginatedResults,
+		// Attach the relevant contact information to each report
+		paginatedResults.forEach((campaign) => {
+			campaign.reports.forEach((report) => {
+				const contact = campaign.contacts.find(
+					(contact) => `91${contact.wa_id}` === report.recipientPhone,
+				);
+				if (contact) {
+					report.contactName = contact.Name;
+				} else {
+					const contact = campaign.contacts.find(
+						(contact) => contact.wa_id === report.recipientPhone,
+					);
+					report.contactName = contact
+						? contact.Name
+						: "Unknown Contact";
+				}
+			});
+		});
+
+		res.render("Reports/campaignReplies", {
+			campaigns: paginatedResults[0].reports,
 			page,
 			totalPages,
 			id,
@@ -793,22 +755,39 @@ const getFailedReportsById = async (req, res) => {
 			{
 				$lookup: {
 					from: "campaignreports",
-					localField: "unique_id",
-					foreignField: "campaignId",
+					let: { campaignId: "$unique_id" },
+					pipeline: [
+						{
+							$match: {
+								$expr: {
+									$and: [
+										{
+											$eq: [
+												"$campaignId",
+												"$$campaignId",
+											],
+										},
+										{ $eq: ["$status", "FAILED"] },
+									],
+								},
+							},
+						},
+					],
 					as: "reports",
 				},
 			},
 			{
+				$lookup: {
+					from: "contacts",
+					localField: "contactListId",
+					foreignField: "contactId",
+					as: "contacts",
+				},
+			},
+			{
 				$addFields: {
-					messagesFailed: {
-						$size: {
-							$filter: {
-								input: "$reports",
-								as: "report",
-								cond: { $eq: ["$$report.status", "FAILED"] },
-							},
-						},
-					},
+					// Add messagesFailed count where the status is "FAILED"
+					messagesFailed: { $size: "$reports" },
 				},
 			},
 			{ $sort: { createdAt: -1 } },
@@ -824,8 +803,27 @@ const getFailedReportsById = async (req, res) => {
 		const totalCount = failedReports[0]?.totalCount[0]?.total || 0;
 		const totalPages = Math.ceil(totalCount / limit);
 
-		res.render("Reports/failedReports", {
-			campaigns: paginatedResults,
+		// Attach the relevant contact information to each report
+		paginatedResults.forEach((campaign) => {
+			campaign.reports.forEach((report) => {
+				const contact = campaign.contacts.find(
+					(contact) => `91${contact.wa_id}` === report.recipientPhone,
+				);
+				if (contact) {
+					report.contactName = contact.Name;
+				} else {
+					const contact = campaign.contacts.find(
+						(contact) => contact.wa_id === report.recipientPhone,
+					);
+					report.contactName = contact
+						? contact.Name
+						: "Unknown Contact";
+				}
+			});
+		});
+
+		res.render("Reports/campaignFailed", {
+			campaigns: paginatedResults[0].reports,
 			page,
 			totalPages,
 			id,

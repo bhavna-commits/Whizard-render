@@ -44,6 +44,10 @@ const templateSchema = new Schema(
 			required: true,
 		},
 		rejected_reason: String,
+		deleted: {
+			type: Boolean,
+			default: false,
+		},
 	},
 	{ timestamps: false, strict: false },
 );

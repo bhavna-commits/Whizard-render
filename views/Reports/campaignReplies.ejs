@@ -153,7 +153,7 @@
 			<div class="pt-4">
 				<div class="flex items-center h-fit px-2">
 					<!-- Button for Overview -->
-					<button onclick="location.href = `/reports/campaign-list/<%= id %>`" type="button" class="py-1 px-2 bg-black text-white rounded">Overview</button>
+					<button onclick="location.href = `/reports/campaign-list/<%= id %>`" type="button" class="p-2">Overview</button>
 					<div class="border h-4 m-2"></div>
 					
 					<!-- Button for Sent Messages -->
@@ -169,7 +169,7 @@
 					<div class="border h-4 m-2"></div>
 					
 					<!-- Button for Replies Received -->
-					<button onclick="location.href = `/reports/campaign-list/<%= id %>?filter=replies`" type="button" class="p-2">Replies received</button>
+					<button onclick="location.href = `/reports/campaign-list/<%= id %>?filter=replies`" type="button" class="py-1 px-2 bg-black text-white rounded">Replies received</button>
 					<div class="border h-4 m-2"></div>
 					
 					<!-- Button for Failed Messages -->
@@ -178,40 +178,6 @@
 				
 			</div>
 			<div class="container">
-				<!-- Overview Stats -->
-				<div class="stats">
-					<div class="stat-box">
-						<h3>Total</h3>
-						<p><%= totalMessages %></p>
-					</div>
-					<div class="stat-box">
-						<h3>Sent</h3>
-						<p><%= messagesSent %> <span class="text-base font-normal">(<%= percentSent %>%)</span></p>
-					</div>
-					<div class="stat-box">
-						<h3>Delivered</h3>
-						<p><%= messagesDelivered %> <span class="text-base font-normal">(<%= percentDelivered %>%)</span></p>
-					</div>
-					<div class="stat-box">
-						<h3>Read</h3>
-						<p><%= messagesRead %> <span class="text-base font-normal">(<%= percentRead %>%)</span></p>
-					</div>
-					<div class="stat-box">
-						<h3>Replies Received</h3>
-						<p><%= messagesReplied %></p>
-					</div>
-					<div class="stat-box bg-red-200">
-						<h3>Failed</h3>
-						<p><%= messagesFailed %></p>
-					</div>
-				</div>
-				
-				<!-- Current Status Chart -->
-				<div class="w-[500px]  border rounded-xl p-3">
-					<h2 class="font-semibold text-gray-500">Current Status</h2>
-					<canvas id="statusChart"></canvas>
-				</div>
-				
 				<% if (campaigns.length > 0) { %>
 				<div class="message-list">
 					<table class="text-center min-w-full border-separate border-spacing-y-4">
@@ -318,41 +284,7 @@
 			</div>
 		</div>
 	</div>
-	<!-- END PAGE CONTAINER -->
 	<script>
-		window.addEventListener('load', function () {
-			// Fade out the loader smoothly by changing the opacity
-			document.getElementById('loader').style.opacity = '0';
-			
-			// Optionally, hide it completely after the fade-out effect is finished
-			setTimeout(function () {
-				document.getElementById('loader').style.visibility = 'hidden';
-			}, 300); // Match the duration of the fade-out (1 second in this case)
-		});
-	</script>
-	<script>
-		const ctxStatus = document.getElementById('statusChart').getContext('2d');
-		const statusChart = new Chart(ctxStatus, {
-			type: 'bar',
-			data: {
-				labels: ['Failed', 'Sent', 'Delivered', 'Read', 'Replies'],
-				datasets: [{
-					label: 'Messages',
-					data: [<%= messagesFailed %>, <%= messagesSent %>, <%= messagesDelivered %>, <%= messagesRead %>, <%= messagesReplied %>],
-					backgroundColor: ['#00A3E0', '#6A5ACD', '#F28C8C', '#FFA500', '#6C757D'],
-				}]
-			},
-			options: {
-				responsive: true,
-				// maintainAspectRatio: false, // Add this to ensure that resizing works
-				scales: {
-					y: {
-						beginAtZero: true
-					}
-				}
-			}
-		});
-		
 		function goToPage () {
 			const inputPage = document.getElementById('pageInput').value;
 			if (inputPage > 0 && inputPage <= <%= totalPages %>) {

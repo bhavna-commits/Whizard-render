@@ -153,11 +153,11 @@
 			<div class="pt-4">
 				<div class="flex items-center h-fit px-2">
 					<!-- Button for Overview -->
-					<button onclick="location.href = `/reports/campaign-list/<%= id %>`" type="button" class="py-1 px-2 bg-black text-white rounded">Overview</button>
+					<button onclick="location.href = `/reports/campaign-list/<%= id %>`" type="button" class="p-2">Overview</button>
 					<div class="border h-4 m-2"></div>
 					
 					<!-- Button for Sent Messages -->
-					<button onclick="location.href = `/reports/campaign-list/<%= id %>?filter=sent`" type="button" class="p-2">Sent</button>
+					<button onclick="location.href = `/reports/campaign-list/<%= id %>?filter=sent`" type="button" class="py-1 px-2 bg-black text-white rounded">Sent</button>
 					<div class="border h-4 m-2"></div>
 					
 					<!-- Button for Delivered Messages -->
@@ -178,181 +178,115 @@
 				
 			</div>
 			<div class="container">
-				<!-- Overview Stats -->
-				<div class="stats">
-					<div class="stat-box">
-						<h3>Total</h3>
-						<p><%= totalMessages %></p>
-					</div>
-					<div class="stat-box">
-						<h3>Sent</h3>
-						<p><%= messagesSent %> <span class="text-base font-normal">(<%= percentSent %>%)</span></p>
-					</div>
-					<div class="stat-box">
-						<h3>Delivered</h3>
-						<p><%= messagesDelivered %> <span class="text-base font-normal">(<%= percentDelivered %>%)</span></p>
-					</div>
-					<div class="stat-box">
-						<h3>Read</h3>
-						<p><%= messagesRead %> <span class="text-base font-normal">(<%= percentRead %>%)</span></p>
-					</div>
-					<div class="stat-box">
-						<h3>Replies Received</h3>
-						<p><%= messagesReplied %></p>
-					</div>
-					<div class="stat-box bg-red-200">
-						<h3>Failed</h3>
-						<p><%= messagesFailed %></p>
-					</div>
-				</div>
-				
-				<!-- Current Status Chart -->
-				<div class="w-[500px]  border rounded-xl p-3">
-					<h2 class="font-semibold text-gray-500">Current Status</h2>
-					<canvas id="statusChart"></canvas>
-				</div>
-				
-				<% if (campaigns.length > 0) { %>
-				<div class="message-list">
-					<table class="text-center min-w-full border-separate border-spacing-y-4">
-						<thead>
-							<tr class="text-gray-500">
-								<th class="py-4">Send Date</th>
-								<th class="py-4">Status</th>
-								<th>Name</th>
-								<th class="py-4">Contact</th>
-								<th class="py-4">Message Sent</th>
-							</tr>
-						</thead>
-						<tbody>
-							<% campaigns.forEach(report => { %>
-							<tr class="hover:bg-gray-100 cursor-pointer border">
-								<td class="border-l border-t border-b rounded-lg py-4 border-gray-200 text-sm text-gray-500">
-									<%= new Date(report.timestamp * 1000).toLocaleDateString() %>
-								</td>
-								<td class="border-t border-b border-gray-200 text-gray-500">
-									<%= report.status.charAt(0).toUpperCase() + report.status.slice(1).toLowerCase() %>
-								</td>
-								<td class="border-t border-b border-gray-200 text-gray-500">
-									<%= report.contactName %>
-								</td>
-								<td class="border-t border-b border-gray-200 text-gray-500">
-									<% 
+				<!-- Table for Sent Messages -->
+			<% if (campaigns.length > 0) { %>
+			<div class="message-list">
+				<table class="text-center min-w-full border-separate border-spacing-y-4">
+					<thead>
+						<tr class="text-gray-500">
+							<th class="py-4">Send Date</th>
+							<th class="py-4">Status</th>
+							<th>Name</th>
+							<th class="py-4">Contact</th>
+							<th class="py-4">Message Sent</th>
+						</tr>
+					</thead>
+					<tbody>
+						<% campaigns.forEach(report => { %>
+						<tr class="hover:bg-gray-100 cursor-pointer border">
+							<td class="border-l border-t border-b rounded-lg py-4 border-gray-200 text-sm text-gray-500">
+								<%= new Date(report.timestamp * 1000).toLocaleDateString() %>
+							</td>
+							<td class="border-t border-b border-gray-200 text-gray-500">
+								<%= report.status.charAt(0).toUpperCase() + report.status.slice(1).toLowerCase() %>
+							</td>
+							<td class="border-t border-b border-gray-200 text-gray-500">
+								<%= report.contactName %>
+							</td>
+							<td class="border-t border-b border-gray-200 text-gray-500">
+								<% 
                 						const phoneNumber = report.recipientPhone;
                 						const maskedPhone = phoneNumber.slice(0, -2).replace(/\d/g, 'X') + phoneNumber.slice(-2);
                 					%>
-									<%= maskedPhone %>
-								</td>
-								<td class="border-r border-t border-b rounded-lg border-gray-200 text-gray-500">
-									<%= report.messageTemplate?.text || 'No Message Text Available' %>
-								</td>
-							</tr>
-							<% }) %>
-						</tbody>
-					</table>
-					<!-- Pagination -->
-					<div class="flex items-center justify-center py-4 space-x-4">
-						<nav class="flex items-center">
-							<ul class="flex space-x-1">
-								<!-- Previous Button -->
-								<li>
-									<a href="/reports/campaign-list/<%= campaigns[0]?.unique_id %>?page=<%= page > 1 ? page - 1 : 1 %>" class="px-3 py-2 rounded-md text-sm font-medium text-gray-500 bg-white border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed" <%= page === 1 ? 'aria-disabled="true"' : '' %>>‹</a>
-								</li>
-								
-								<!-- First Page Button -->
-								<li>
-									<a href="/reports/campaign-list/<%= campaigns[0]?.unique_id %>?page=1" class="px-3 py-2 rounded-md text-sm font-medium <%= page === 1 ? 'text-white bg-red-400 border-red-400' : 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50' %>">1</a>
-								</li>
-								
-								<% if (page > 3) { %>
-								<!-- Show "..." if current page is greater than 3 -->
-								<li><span class="px-3 py-2 text-sm text-gray-500">...</span></li>
-								<% } %>
-								
-								<!-- Dynamic Page Numbers based on current page -->
-								<% for (let i = Math.max(2, page - 1); i <= Math.min(totalPages - 1, page + 1); i++) { %>
-								<li>
-									<a href="/reports/campaign-list/<%= campaigns[0]?.unique_id %>?page=<%= i %>" class="px-3 py-2 rounded-md text-sm font-medium <%= i === page ? 'text-white bg-red-400 border-red-400' : 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50' %>"><%= i %></a>
-								</li>
-								<% } %>
-								
-								<% if (page < totalPages - 2) { %>
-								<!-- Show "..." if there are more pages -->
-								<li><span class="px-3 py-2 text-sm text-gray-500">...</span></li>
-								<% } %>
-								
-								<!-- Last Page Button -->
-								<% if (totalPages > 1) { %>
-								<li>
-									<a href="/reports/campaign-list/<%= campaigns[0]?.unique_id %>?page=<%= totalPages %>" class="px-3 py-2 rounded-md text-sm font-medium <%= page === totalPages ? 'text-white bg-red-400 border-red-400' : 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50' %>"><%= totalPages %></a>
-								</li>
-								<% } %>
-								
-								<!-- Next Button -->
-								<li>
-									<a href="/reports/campaign-list/<%= campaigns[0]?.unique_id %>?page=<%= page < totalPages ? page + 1 : totalPages %>" class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50">›</a>
-								</li>
-							</ul>
-						</nav>
-						
-						<!-- "Go to page" input -->
-						<div class="flex items-center space-x-2">
-							<span class="text-sm text-gray-700">Go to page</span>
-							<input type="number" min="1" max="<%= totalPages %>" class="w-16 px-2 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" value="<%= page %>" id="pageInput" />
-							<button type="button" class="px-3 py-1 text-sm font-medium text-white bg-red-400 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" onclick="goToPage()">Go</button>
-						</div>
-					</div>
+								<%= maskedPhone %>
+							</td>
+							<td class="border-r border-t border-b rounded-lg border-gray-200 text-gray-500">
+								<%= report.messageTemplate?.text || 'No Message Text Available' %>
+							</td>
+						</tr>
+						<% }) %>
+					</tbody>
+				</table>
+				<!-- Pagination -->
+				<div class="flex items-center justify-center py-4 space-x-4">
+					<nav class="flex items-center">
+						<ul class="flex space-x-1">
+							<!-- Previous Button -->
+							<li>
+								<a href="/reports/campaign-list/<%= campaigns[0]?.unique_id %>?page=<%= page > 1 ? page - 1 : 1 %>" class="px-3 py-2 rounded-md text-sm font-medium text-gray-500 bg-white border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed" <%= page === 1 ? 'aria-disabled="true"' : '' %>>‹</a>
+							</li>
+							
+							<!-- First Page Button -->
+							<li>
+								<a href="/reports/campaign-list/<%= campaigns[0]?.unique_id %>?page=1" class="px-3 py-2 rounded-md text-sm font-medium <%= page === 1 ? 'text-white bg-red-400 border-red-400' : 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50' %>">1</a>
+							</li>
+							
+							<% if (page > 3) { %>
+							<!-- Show "..." if current page is greater than 3 -->
+							<li><span class="px-3 py-2 text-sm text-gray-500">...</span></li>
+							<% } %>
+							
+							<!-- Dynamic Page Numbers based on current page -->
+							<% for (let i = Math.max(2, page - 1); i <= Math.min(totalPages - 1, page + 1); i++) { %>
+							<li>
+								<a href="/reports/campaign-list/<%= campaigns[0]?.unique_id %>?page=<%= i %>" class="px-3 py-2 rounded-md text-sm font-medium <%= i === page ? 'text-white bg-red-400 border-red-400' : 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50' %>"><%= i %></a>
+							</li>
+							<% } %>
+							
+							<% if (page < totalPages - 2) { %>
+							<!-- Show "..." if there are more pages -->
+							<li><span class="px-3 py-2 text-sm text-gray-500">...</span></li>
+							<% } %>
+							
+							<!-- Last Page Button -->
+							<% if (totalPages > 1) { %>
+							<li>
+								<a href="/reports/campaign-list/<%= campaigns[0]?.unique_id %>?page=<%= totalPages %>" class="px-3 py-2 rounded-md text-sm font-medium <%= page === totalPages ? 'text-white bg-red-400 border-red-400' : 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50' %>"><%= totalPages %></a>
+							</li>
+							<% } %>
+							
+							<!-- Next Button -->
+							<li>
+								<a href="/reports/campaign-list/<%= campaigns[0]?.unique_id %>?page=<%= page < totalPages ? page + 1 : totalPages %>" class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50">›</a>
+							</li>
+						</ul>
+					</nav>
 					
-					
-				</div>
-				<% } else { %>
-				<div class="flex flex-col items-center justify-center min-h-[400px]  rounded-lg mt-4">
-					<div class="text-center">
-						<img src="https://img.freepik.com/free-vector/hands-holding-tablet-with-forefinger-clicking-start-button-new-application-launch-flat-illustration_74855-20595.jpg?ga=GA1.1.131490893.1732525963&semt=ais_hybrid" alt="No contacts" class="w-48 h-48 mx-auto mb-4">
-						
-						<h3 class="text-xl font-semibold text-gray-900 mb-2">No Report available for this status</h3>
-						
+					<!-- "Go to page" input -->
+					<div class="flex items-center space-x-2">
+						<span class="text-sm text-gray-700">Go to page</span>
+						<input type="number" min="1" max="<%= totalPages %>" class="w-16 px-2 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" value="<%= page %>" id="pageInput" />
+						<button type="button" class="px-3 py-1 text-sm font-medium text-white bg-red-400 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" onclick="goToPage()">Go</button>
 					</div>
 				</div>
-				<% } %>
+				
+				
+			</div>
+			<% } else { %>
+			<div class="flex flex-col items-center justify-center min-h-[400px]  rounded-lg mt-4">
+				<div class="text-center">
+					<img src="https://img.freepik.com/free-vector/hands-holding-tablet-with-forefinger-clicking-start-button-new-application-launch-flat-illustration_74855-20595.jpg?ga=GA1.1.131490893.1732525963&semt=ais_hybrid" alt="No contacts" class="w-48 h-48 mx-auto mb-4">
+					
+					<h3 class="text-xl font-semibold text-gray-900 mb-2">No Report available for this status</h3>
+					
+				</div>
+			</div>
+			<% } %>
+				</div>
 			</div>
 		</div>
 	</div>
-	<!-- END PAGE CONTAINER -->
 	<script>
-		window.addEventListener('load', function () {
-			// Fade out the loader smoothly by changing the opacity
-			document.getElementById('loader').style.opacity = '0';
-			
-			// Optionally, hide it completely after the fade-out effect is finished
-			setTimeout(function () {
-				document.getElementById('loader').style.visibility = 'hidden';
-			}, 300); // Match the duration of the fade-out (1 second in this case)
-		});
-	</script>
-	<script>
-		const ctxStatus = document.getElementById('statusChart').getContext('2d');
-		const statusChart = new Chart(ctxStatus, {
-			type: 'bar',
-			data: {
-				labels: ['Failed', 'Sent', 'Delivered', 'Read', 'Replies'],
-				datasets: [{
-					label: 'Messages',
-					data: [<%= messagesFailed %>, <%= messagesSent %>, <%= messagesDelivered %>, <%= messagesRead %>, <%= messagesReplied %>],
-					backgroundColor: ['#00A3E0', '#6A5ACD', '#F28C8C', '#FFA500', '#6C757D'],
-				}]
-			},
-			options: {
-				responsive: true,
-				// maintainAspectRatio: false, // Add this to ensure that resizing works
-				scales: {
-					y: {
-						beginAtZero: true
-					}
-				}
-			}
-		});
-		
 		function goToPage () {
 			const inputPage = document.getElementById('pageInput').value;
 			if (inputPage > 0 && inputPage <= <%= totalPages %>) {

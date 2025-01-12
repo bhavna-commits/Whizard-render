@@ -123,7 +123,7 @@ export const getContacts = async (req, res) => {
 			result[0].totalContacts.length > 0
 				? result[0].totalContacts[0].totalContacts
 				: 0;
-
+		// console.log(contactLists);
 		const name = await ContactList.findOne({ contactId: id });
 		const totalPages = Math.ceil(totalContacts / limit);
 
@@ -544,5 +544,16 @@ export const getFilteredContacts = async (req, res) => {
 			success: false,
 			message: "Error fetching contacts",
 		});
+	}
+};
+
+export const getOverviewFilter = async (req, res) => {
+	try {
+		const { id } = req.params;
+		const contact = await Contacts.findOne({ contactId: id, subscribe: 1 });
+		res.render("Contact-List/partials/filterOptions", { contact });
+	} catch (error) {
+		console.error(error);
+		res.status(500).send("Error rendering filter options");
 	}
 };

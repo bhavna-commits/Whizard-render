@@ -1,0 +1,7 @@
+<option value="Name">Name</option>
+<option value="Number">Number</option>
+<% if (contact.masterExtra) { %>
+<% Object.keys(contact.masterExtra).forEach(function(key) { %>
+<option value="<%= key %>"><%= key %></option>
+<% }); %>
+<% } %>

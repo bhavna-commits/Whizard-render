@@ -3,24 +3,24 @@
 	margin: 0;
 	padding: 0;
 	font-family: "Figtree", sans-serif;
-	font-size: 12px;
+	font-size: 11px;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
 }
 
 html {
-  -webkit-text-size-adjust: 100%;
-  -ms-text-size-adjust: 100%;
+	-webkit-text-size-adjust: 100%;
+	-ms-text-size-adjust: 100%;
 }
 
 body {
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
 	height: 100vh;
 	width: 100vw;
 }
 
 *::-webkit-scrollbar {
-	width: 10px;
-	height: 10px;
+	width: 0.7rem;
+	height: 0.7rem;
 }
 
 *::-webkit-scrollbar-track {
@@ -29,7 +29,7 @@ body {
 
 *::-webkit-scrollbar-thumb {
 	background-color: #d8cdcd;
-	border-radius: 10px;
+	border-radius: 0.7rem;
 }
 
 *::-webkit-scrollbar-thumb:hover {
@@ -80,7 +80,7 @@ input[type="number"] {
 	position: relative;
 	border-radius: 100%;
 	margin-top: auto;
-	margin-bottom: 20px;
+	margin-bottom: 2rem;
 	/* border: #000 2px solid; */
 }
 
@@ -108,34 +108,35 @@ input[type="number"] {
 	left: 110%;
 	background-color: white;
 	/* border: 1px solid #ccc; */
-	border-radius: 10px;
-	padding: 10px;
+	border-radius: 1rem;
+	padding: 1rem;
 	display: flex;
 	flex-direction: column;
-	gap: 10px;
-	box-shadow: 0px 0px 10px rgb(244, 114, 114);
+	gap: 1rem;
+	box-shadow: 0px 0px 1rem rgb(244, 114, 114);
 	z-index: 999999; /* Ensure high z-index */
 	visibility: visible;
 }
 
 .sidebar {
+	padding-left: 1rem;
+	padding-right: 1rem;
 	display: flex;
 	flex-direction: column;
 	align-items: center;
 	height: 100%;
-	box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+	box-shadow: 0.2rem 0 0.5rem rgba(0, 0, 0, 0.1);
 	position: relative;
 	background-color: white;
-	width: 140px;
+	width: 8%;
 	padding-top: 0.75rem;
 	overflow: auto;
 	/* overflow-y: visible; */
-
+	scrollbar-width: none;
+	min-width: 8rem;
 	::-webkit-scrollbar {
 		display: none;
 	}
-
-	scrollbar-width: none;
 }
 
 .hidden {
@@ -144,14 +145,14 @@ input[type="number"] {
 
 .account-menu a,
 .account-menu button {
-	padding: 8px 12px;
+	padding: 0.8rem 1.2rem;
 	text-decoration: none;
 	color: black;
 	background: #fbbfbf;
 	border: none;
 	cursor: pointer;
 	text-align: center;
-	border-radius: 10px;
+	border-radius: 1rem;
 }
 
 .account-menu a:hover,
@@ -168,7 +169,7 @@ input[type="number"] {
 }
 .phone-circles {
 	position: absolute;
-	right: -100px;
+	right: -10rem;
 	top: 50%;
 	transform: translateY(-50%);
 }
@@ -177,7 +178,7 @@ input[type="number"] {
 }
 .connect-btn:hover {
 	transform: translateY(-1px);
-	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+	box-shadow: 0 0.2rem 0.4rem rgba(0, 0, 0, 0.1);
 }
 .connect-btn:active {
 	transform: translateY(0);
@@ -193,7 +194,7 @@ input[type="number"] {
 
 .p-text {
 	color: #959595;
-	size: 16px;
+	size: 1.6rem;
 	font-weight: 400;
 }
 
@@ -206,7 +207,7 @@ input[type="number"] {
 
 .left-section {
 	background-color: #f9f9f9;
-	padding-left: 60px;
+	padding-left: 6rem;
 	text-align: left;
 	display: flex;
 	flex-direction: column;
@@ -227,7 +228,7 @@ input[type="number"] {
 .left-section h1 {
 	font-size: 2.5rem;
 	font-weight: bold;
-	margin-bottom: 20px;
+	margin-bottom: 2rem;
 	color: #3d3d3d;
 }
 
@@ -239,27 +240,27 @@ input[type="number"] {
 .left-section p {
 	color: #666;
 	font-size: 1.1rem;
-	margin-bottom: 20px;
+	margin-bottom: 2rem;
 }
 
 .sign-in-form {
-	margin-top: 30px;
+	margin-top: 3rem;
 }
 
 .form-control {
-	border-radius: 6px;
-	box-shadow: 0px 3px 5px 0px #1018280d;
-	border: 1px solid #404040;
+	border-radius: 0.6rem;
+	box-shadow: 0px 0.3rem 0.5rem 0 #1018280d;
+	border: 0.1rem solid #404040;
 }
 
 .btn-primary {
 	background-color: #000;
 	border: none;
-	border-radius: 5px;
-	padding: 10px 20px;
+	border-radius: 0.5rem;
+	padding: 1rem 2rem;
 	width: 100%;
-	box-shadow: 0px 1px 2px 0px #1018280d;
-	border-radius: 8px;
+	box-shadow: 0 0.1rem 0.2rem 0 #1018280d;
+	border-radius: 0.8rem;
 }
 
 .btn-primary:hover {
@@ -282,7 +283,7 @@ input[type="number"] {
 
 .img-preview {
 	width: 100%;
-	margin-top: 20px;
+	margin-top: 2rem;
 	text-align: center;
 }
 
@@ -303,7 +304,7 @@ input[type="number"] {
 }
 .sign-in-ext {
 	color: #191919;
-	size: 30px;
+	size: 3rem;
 	font-weight: 500;
 }
 
@@ -311,12 +312,12 @@ input[type="number"] {
 @media (max-width: 768px) {
 	.left-section {
 		max-width: 100%;
-		padding: 20px;
+		padding: 2rem;
 	}
 
 	.right-section {
 		max-width: 100%;
-		padding: 30px;
+		padding: 3rem;
 	}
 
 	.left-section h1 {
@@ -336,15 +337,15 @@ input[type="number"] {
 @media (max-width: 576px) {
 	.left-section {
 		text-align: center;
-		padding: 15px;
+		padding: 1.5rem;
 	}
 
 	.right-section {
-		padding: 20px;
+		padding: 2rem;
 	}
 
 	.btn-primary {
-		padding: 10px;
+		padding: 1rem;
 		font-size: 1rem;
 	}
 
@@ -360,12 +361,12 @@ input[type="number"] {
 @media (max-width: 768px) {
 	.left-section {
 		max-width: 100%;
-		padding: 20px;
+		padding: 2rem;
 	}
 
 	.right-section {
 		max-width: 100%;
-		padding: 30px;
+		padding: 3rem;
 	}
 
 	.left-section h1 {
@@ -385,15 +386,15 @@ input[type="number"] {
 @media (max-width: 576px) {
 	.left-section {
 		text-align: center;
-		padding: 15px;
+		padding: 1.5rem;
 	}
 
 	.right-section {
-		padding: 20px;
+		padding: 2rem;
 	}
 
 	.btn-primary {
-		padding: 10px;
+		padding: 1rem;
 		font-size: 1rem;
 	}
 
@@ -407,7 +408,7 @@ input[type="number"] {
 }
 @media (max-width: 768px) {
 	.sign-in-form {
-		margin-top: 20px;
+		margin-top: 2rem;
 	}
 
 	.form-group label {
@@ -415,7 +416,7 @@ input[type="number"] {
 	}
 
 	.btn-primary {
-		padding: 8px;
+		padding: 0.8rem;
 		font-size: 0.9rem;
 	}
 }
@@ -423,7 +424,8 @@ input[type="number"] {
 /* side bar styling and dashboard */
 
 .logo img {
-	width: 100px;
+	width: 10rem;
+	padding: 0.5rem;
 	/* margin-bottom: 30px; */
 }
 .logo {
@@ -436,10 +438,10 @@ input[type="number"] {
 	content: "";
 	position: absolute;
 	left: 0;
-	bottom: -20px;
+	bottom: -1.2rem;
 	width: 100%;
-	height: 2px;
-	margin-bottom: 10px;
+	height: 0.2rem;
+	margin-bottom: 1rem;
 	background: linear-gradient(
 		90deg,
 		rgba(228, 228, 228, 0.2) -2.34%,
@@ -468,10 +470,10 @@ input[type="number"] {
 	content: "";
 	position: absolute;
 	left: 0;
-	top: -20px;
+	top: -1.2rem;
 	width: 100%;
-	height: 2px;
-	margin-bottom: 10px;
+	height: 0.3rem;
+	margin-bottom: 1rem;
 	background: linear-gradient(
 		90deg,
 		rgba(228, 228, 228, 0.2) -2.34%,
@@ -487,7 +489,7 @@ input[type="number"] {
 }
 
 .sidebar ul li {
-	margin-bottom: 5px;
+	margin-bottom: 0.5rem;
 }
 
 .sidebar ul li a {
@@ -498,7 +500,7 @@ input[type="number"] {
 	color: #959595;
 	text-decoration: none;
 	transition: background 0.3s;
-	border-radius: 10px;
+	border-radius: 1rem;
 }
 
 .sidebar ul li a span.active {
@@ -583,25 +585,25 @@ input[type="number"] {
 }
 
 .dashboard-header {
-	margin-bottom: 20px;
+	margin-bottom: 2rem;
 }
 
 .filter-bar {
-	margin-bottom: 20px;
+	margin-bottom: 2rem;
 }
 
 .filter-bar select {
 	max-width: 30%;
-	height: 35px;
+	height: 3.5rem;
 }
 
 /* Card styling */
 .card-dashboard {
 	/* background: #fff; */
-	padding: 20px;
+	padding: 2rem;
 	border-radius: 10px;
-	box-shadow: 0px 1px 2px 0px #1018280d;
-	margin-bottom: 20px;
+	box-shadow: 0px 0.1rem 0.2rem 0px #1018280d;
+	margin-bottom: 2rem;
 	position: relative;
 }
 
@@ -622,13 +624,13 @@ input[type="number"] {
 	/* position: absolute;
     top: 20px;
     left: 20px; */
-	width: 40px;
-	height: 40px;
-	border-radius: 10px;
+	width: 4rem;
+	height: 4rem;
+	border-radius: 1rem;
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	margin-top: 20px;
+	margin-top: 2rem;
 }
 .icon-wrapper:hover {
 	cursor: pointer;
@@ -636,9 +638,9 @@ input[type="number"] {
 
 /* Progress bar styling */
 .progress {
-	height: 5px;
+	height: 0.5rem;
 	background-color: #e9ecef;
-	border-radius: 5px;
+	border-radius: 0.5rem;
 }
 
 .progress-bar-green {
@@ -708,7 +710,7 @@ input[type="number"] {
 	}
 
 	.filter-bar label {
-		margin-bottom: 10px;
+		margin-bottom: 1rem;
 	}
 
 	.card-dashboard h4 {
