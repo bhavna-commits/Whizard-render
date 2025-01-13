@@ -296,7 +296,7 @@ export const getFaceBookTemplates = async (req, res) => {
 						rejectedReason = "NONE"; // Reset reason if approved
 						break;
 					case "REJECTED":
-						console.log(matchingFacebookTemplate);
+						console.log(JSON.stringify(matchingFacebookTemplate));
 						newStatus = "Rejected";
 						rejectedReason =
 							matchingFacebookTemplate.rejected_reason ||

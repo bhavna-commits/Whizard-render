@@ -43,10 +43,10 @@
 	<!-- Sidebar -->
 	<div class="layout-container">
 		<nav class="sidebar">
-			<div class="logo py-1">
+			<div class="logo">
 				<img onclick="location.href = '/'" class="cursor-pointer" src="/assets/img/Wizard_logo.png" alt="Whizard Logo" />
 			</div>
-			<ul class="mt-2 space-y-4">
+			<ul class="">
 				<li>
 					<a href="/" class=""><span class="icon "><i class="fas fa-chart-line"></i></span>
 						Dashboard</a>
@@ -91,9 +91,9 @@
 			<script>
 				function toggleDropdown () {
 					const dropdownMenu = document.getElementById('dropdownMenu');
-					const sidebar = document.querySelector('.sidebar');
-					
 					dropdownMenu.classList.toggle('hidden');
+					
+					const sidebar = document.querySelector('.sidebar');
 					
 					if (dropdownMenu.classList.contains('hidden')) {
 						sidebar.style.overflow = 'auto';
@@ -123,19 +123,21 @@
 				// Close the dropdown if clicked outside
 				window.onclick = function (event) {
 					const dropdown = document.getElementById("dropdownMenu");
+					const sidebar = document.querySelector('.sidebar');
 					if (!event.target.closest('.user-profile')) {
 						dropdown.classList.add("hidden");
+						sidebar.style.overflow = 'auto';
 					}
 				};
 			</script>
 		</nav>
 		
 		<!-- START PAGE-CONTAINER -->
-		<div class="main-content px-4">
+		<div class="main-content">
 			<!-- END HEADER -->
-			<div class="logo flex justify-between items-center ">
+			<div class="logo flex justify-between items-center m-4 py-3">
 				
-				<div class=" mt-3 flex items-center ">
+				<div class="flex items-center ">
 					<!-- START BREADCRUMB -->
 					
 					<div class="flex items-center">
@@ -150,7 +152,7 @@
 					
 				</div>
 			</div>
-			<div class="pt-4">
+			<div class="mainDiv">
 				<div class="flex items-center h-fit px-2">
 					<!-- Button for Overview -->
 					<button onclick="location.href = `/reports/campaign-list/<%= id %>`" type="button" class="p-2">Overview</button>

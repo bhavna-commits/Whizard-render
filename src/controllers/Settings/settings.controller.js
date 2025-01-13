@@ -34,7 +34,7 @@ export const profile = async (req, res) => {
 
 	try {
 		const user = await User.findOne({ unique_id: id });
-		
+
 		if (!user) {
 			return res.status(404).json({ message: "User not found" });
 		}
@@ -330,7 +330,7 @@ export const activityLogsFiltered = async (req, res) => {
 	const { action, dateRange } = req.query;
 	let filter = {};
 
-	filter.unique_id = req.session.user.id;
+	filter.useradmin = req.session.user.id;
 	// Filter by action type
 	if (action && action !== "All action") {
 		filter.actions = action;
@@ -339,7 +339,9 @@ export const activityLogsFiltered = async (req, res) => {
 	// Filter by date range
 	const now = new Date();
 	if (dateRange) {
-		let startDate;
+		let startDate, endDate;
+		const now = new Date();
+
 		switch (dateRange) {
 			case "Past 7 days":
 				startDate = new Date(now.setDate(now.getDate() - 7));
@@ -352,20 +354,28 @@ export const activityLogsFiltered = async (req, res) => {
 				break;
 			case "This month":
 				startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+				endDate = now;
 				break;
 			case "Previous month":
 				startDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+				endDate = new Date(now.getFullYear(), now.getMonth(), 0);
 				break;
 			default:
 				startDate = null;
 		}
+
 		if (startDate) {
-			filter.createdAt = { $gte: startDate };
+			if (endDate) {
+				filter.createdAt = { $gte: startDate, $lt: endDate };
+			} else {
+				filter.createdAt = { $gte: startDate };
+			}
 		}
 	}
 
 	try {
 		const logs = await ActivityLogs.find(filter).sort({ createdAt: -1 });
+		// console.log(logs);
 		res.render("Settings/partials/activityLogs", {
 			logs,
 			photo: req.session.user?.photo,

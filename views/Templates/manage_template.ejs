@@ -35,10 +35,10 @@
 	<!-- Sidebar -->
 	<div class="layout-container">
 		<nav class=" sidebar ">
-			<div class="logo py-3">
+			<div class="logo">
 				<img onclick="location.href = '/'" class="cursor-pointer" src="/assets/img/Wizard_logo.png" alt="Whizard Logo" />
 			</div>
-			<ul class="space-y-4 mt-2">
+			<ul class="">
 				<li>
 					<a href="/" class=""><span class="icon"><i class="fas fa-chart-line"></i></span>
 						Dashboard</a>
@@ -85,9 +85,9 @@
 			<script>
 				function toggleDropdown () {
 					const dropdownMenu = document.getElementById('dropdownMenu');
-					const sidebar = document.querySelector('.sidebar');
-					
 					dropdownMenu.classList.toggle('hidden');
+					
+					const sidebar = document.querySelector('.sidebar');
 					
 					if (dropdownMenu.classList.contains('hidden')) {
 						sidebar.style.overflow = 'auto';
@@ -117,8 +117,10 @@
 				// Close the dropdown if clicked outside
 				window.onclick = function (event) {
 					const dropdown = document.getElementById("dropdownMenu");
+					const sidebar = document.querySelector('.sidebar');
 					if (!event.target.closest('.user-profile')) {
 						dropdown.classList.add("hidden");
+						sidebar.style.overflow = 'auto';
 					}
 				};
 			</script>
@@ -126,43 +128,40 @@
 		<!-- END SIDEBAR MENU TOP TRAY CONTENT-->
 		
 		<!-- START PAGE-CONTAINER -->
-		<div class="main-content p-3 ">
+		<div class="main-content">
 			<!-- END HEADER -->
-			<div class="logo flex justify-between items-center mt-1">
-				<div class="">
-					<!-- START BREADCRUMB -->
-					<nav class="flex" aria-label="Breadcrumb">
-						
-						<div class="flex items-center">
-							<a href="/" class="text-gray-500 hover:text-gray-700 text-xl font-medium">Dashboard</a>
-							<svg class="w-4 h-4 mx-2 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-								<path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L11.586 10 7.293 5.707a1 1 0 011.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
-							</svg>
-						</div>
-						
-						<div class="flex items-center">
-							<a href="/template" class="text-red-600 hover:text-gray-700 text-xl font-medium">Templates</a>
-						</div>
-						
-					</nav>
-					<!-- END BREADCRUMB -->
+			<div class="logo breadCrumb">
+				
+				<!-- START BREADCRUMB -->
+				<nav class="flex" aria-label="Breadcrumb">
 					
-				</div>
+					<div class="flex items-center">
+						<a href="/" class="text-gray-500 hover:text-gray-700 text-xl font-medium">Dashboard</a>
+						<svg class="w-4 h-4 mx-2 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+							<path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L11.586 10 7.293 5.707a1 1 0 011.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+						</svg>
+					</div>
+					
+					<div class="flex items-center">
+						<a href="/template" class="text-red-600 hover:text-gray-700 text-xl font-medium">Templates</a>
+					</div>
+					
+				</nav>
 				<!-- END BREADCRUMB -->
-				<button class="bg-black p-2 flex items-center rounded-lg text-lg text-white font-thin " onclick="document.location='create-template'">
-					<i class="fa-solid fa-plus px-2"></i>
+				<button class="bg-black p-2 px-3 flex items-center rounded-lg text-lg text-white font-thin " onclick="document.location='create-template'">
+					<i class="fa-solid fa-plus pr-2"></i>
 					Create new template
 				</button>
 			</div>
-			<div class="flex justify-between items-center mt-4">
+			<div class="flex justify-between items-center w-[98%] pt-4">
 				<div class="flex items-center justify-start">
 					<h6 class="pr-2 text-black text-lg">List of templates</h6>
-					<div class="relative flex items-center bg-gray-200 w-[5rem] h-8 rounded-full p-1">
+					<div class="relative flex items-center bg-red-200 w-[5rem] h-8 rounded-full p-1">
 						<!-- Toggle Button -->
 						<div id="toggle" class="absolute w-8 h-6 bg-white rounded-full transform transition-transform duration-300"></div>
 						
 						<!-- List Icon -->
-						<i id="option1" class="fas fa-list text-red-500 cursor-pointer z-10 ml-2"></i>
+						<i id="option1" class="fas fa-list text-red-600 text-gray-400 cursor-pointer z-10 ml-2"></i>
 						
 						<!-- Grid Icon -->
 						<i id="option2" class="fas fa-th text-gray-400 cursor-pointer z-10 ml-[15px] mr-2"></i>
@@ -177,256 +176,341 @@
 						</svg>
 						<span class="ml-1">Filter</span>
 					</div>
-					<button type="button" class="flex items-center bg-blue-600 text-white px-4 py-2 rounded" onclick="getStatus()">
+					<button type="button" class="flex items-center bg-blue-500 text-white px-4 py-2 rounded" onclick="getStatus()">
 						<i class="fas fa-sync mr-2"></i>Sync Facebook
 					</button>
 				</div>
 			</div>
-			
+			<% if (list.length > 0) { %>
 			<!-- Templates container -->
-			<div id="template-container">
+			<div id="" class="mainDiv">
 				<!-- List View (default) -->
+				<div id="grid-view" class="hidden">
+					<%- include('partials/templates-cards') %>
+				</div>
 				<div id="list-view" class="block">
 					<%- include('partials/templates-table') %>
 				</div>
 				
-				<!-- Grid View -->
-				<div id="grid-view" class="hidden">
-					<%- include('partials/templates-cards') %>
+				
+			</div>
+			<!-- Grid View -->
+			
+			<div class="flex items-center justify-center py-4 space-x-4">
+				<nav class="flex items-center">
+					<ul class="flex space-x-1">
+						<!-- Previous Button -->
+						<li>
+							<a href="/template?page=<%= page > 1 ? page - 1 : 1 %>" class="px-3 py-2 rounded-md text-sm font-medium text-gray-500 bg-white border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed" <%= page === 1 ? 'aria-disabled="true"' : '' %>>‹</a>
+						</li>
+						
+						<!-- First Page Button -->
+						<li>
+							<a href="/template?page=1" class="px-3 py-2 rounded-md text-sm font-medium <%= page === 1 ? 'text-white bg-red-400 border-red-400' : 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50' %>">1</a>
+						</li>
+						
+						<% if (page > 3) { %>
+						<!-- Show "..." if current page is greater than 3 -->
+						<li><span class="px-3 py-2 text-sm text-gray-500">...</span></li>
+						<% } %>
+						
+						<!-- Dynamic Page Numbers based on current page -->
+						<% for (let i = Math.max(2, page - 1); i <= Math.min(totalPages - 1, page + 1); i++) { %>
+						<li>
+							<a href="/template?page=<%= i %>" class="px-3 py-2 rounded-md text-sm font-medium <%= i === page ? 'text-white bg-red-400 border-red-400' : 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50' %>"><%= i %></a>
+						</li>
+						<% } %>
+						
+						<% if (page < totalPages - 2) { %>
+						<!-- Show "..." if there are more pages -->
+						<li><span class="px-3 py-2 text-sm text-gray-500">...</span></li>
+						<% } %>
+						
+						<!-- Last Page Button -->
+						<% if (totalPages > 1) { %>
+						<li>
+							<a href="/template?page=<%= totalPages %>" class="px-3 py-2 rounded-md text-sm font-medium <%= page === totalPages ? 'text-white bg-red-400 border-red-400' : 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50' %>"><%= totalPages %></a>
+						</li>
+						<% } %>
+						
+						<!-- Next Button -->
+						<li>
+							<a href="/template?page=<%= page < totalPages ? page + 1 : totalPages %>" class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50">›</a>
+						</li>
+					</ul>
+				</nav>
+				
+				<!-- "Go to page" input -->
+				<div class="flex items-center space-x-2">
+					<span class="text-sm text-gray-700">Go to page</span>
+					<input type="number" min="1" max="<%= totalPages %>" class="w-16 px-2 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" value="<%= page %>" id="pageInput" />
+					<button type="button" class="px-3 py-1 text-sm font-medium text-white bg-red-400 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" onclick="goToPage()">Go</button>
 				</div>
 			</div>
 			
 			<script>
-				const toggle = document.getElementById('toggle');
-				const option1 = document.getElementById('option1');
-				const option2 = document.getElementById('option2');
-				const listView = document.getElementById('list-view');
-				const gridView = document.getElementById('grid-view');
-				
-				// Default active state for list view (left position)
-				let isListView = true;
-				
-				// Event listener for List Icon
-				option1.addEventListener('click', () => {
-					if (!isListView) {
-						toggle.classList.remove('translate-x-9'); // Move to the left
-						toggle.classList.add('translate-x-0');
-						option1.classList.add('text-red-500');
-						option2.classList.remove('text-red-500');
-						isListView = true;
-						
-						// Show list view, hide grid view
-						listView.classList.remove('hidden');
-						listView.classList.add('block');
-						gridView.classList.add('hidden');
-						gridView.classList.remove('block');
-					}
-				});
-				
-				// Event listener for Grid Icon
-				option2.addEventListener('click', () => {
-					if (isListView) {
-						toggle.classList.remove('translate-x-0'); // Move to the right
-						toggle.classList.add('translate-x-9');
-						option2.classList.add('text-red-500');
-						option1.classList.remove('text-red-500');
-						isListView = false;
-						
-						// Show grid view, hide list view
-						gridView.classList.remove('hidden');
-						gridView.classList.add('block');
-						listView.classList.add('hidden');
-						listView.classList.remove('block');
-					}
-				});
-				const timestampElements = document.querySelectorAll("[data-timestamp]");
-				
-				timestampElements.forEach((element) => {
-					const timestamp = parseInt(element.getAttribute("data-timestamp"), 10);
+				function goToPage () {
+					const pageInput = document.getElementById('pageInput');
+					const page = parseInt(pageInput.value);
+					const totalPages = <%= totalPages %>;
 					
-					const date = new Date(timestamp);
-					const formattedDate = date.toLocaleDateString("en-US", {
-						year: "numeric",
-						month: "short",
-						day: "numeric",
-						hour: "2-digit",
-						minute: "2-digit",
-					});
-					
-					const parts = formattedDate.split(",");
-					const finalDate =
-						parts.length > 1 ?
-						`${parts[0]}, ${parts[1].trim()} at ${parts[2].trim()}` :
-						formattedDate;
-					element.textContent = finalDate;
-				});
+					if (page > totalPages) {
+						alert("Page doesn't exist. Try a lower number.");
+						pageInput.value = <%= page %>; // Reset input to the current page
+					} else if (page < 1) {
+						alert("Page number should be at least 1.");
+						pageInput.value = <%= page %>;
+					} else {
+						window.location.href = `/contact-list?page=${page}`;
+					}
+				}
 			</script>
+			<% } else { %>
+			<div class="flex flex-col items-center justify-center min-h-[400px]  rounded-lg mt-4">
+				<div class="text-center">
+					<img src="https://img.freepik.com/free-vector/hands-holding-tablet-with-forefinger-clicking-start-button-new-application-launch-flat-illustration_74855-20595.jpg?ga=GA1.1.131490893.1732525963&semt=ais_hybrid" alt="No contacts" class="w-48 h-48 mx-auto mb-4">
+					
+					<h3 class="text-xl font-semibold text-gray-900 mb-2">No Templates yet</h3>
+					<p class="text-gray-600 mb-6">Start adding templates by clicking on "Create new template"</p>
+					<button class="bg-black p-2 flex items-center rounded-lg text-white text-base font-thin w-full justify-center" onclick="document.location='create-template'">
+						<i class="fa-solid fa-plus pr-2"></i>
+						Create new template
+					</button>
+				</div>
+			</div>
+			<% } %>
+		</div>
+		<script>
+			const toggle = document.getElementById('toggle');
+			const option1 = document.getElementById('option1');
+			const option2 = document.getElementById('option2');
+			const listView = document.getElementById('list-view');
+			const gridView = document.getElementById('grid-view');
 			
-			<div id="filter-modal" class="modal bg-slate-500/50">
-				<div class="modal-dialog modal-dialog-centered" role="document">
-					<div class="modal-content">
-						<div class="modal-header align-items-center py-3">
-							<h5 class="text-xl font-medium">Apply Filters</h5>
-							<span class="close-modal text-2xl cursor-pointer" onclick="closeModal()">&times;</span>
-						</div>
-						<div class="modal-body">
-							<!-- Modal Form -->
-							<form class="space-y-5">
-								<div class="space-y-2">
-									<label for="templateSearch" class="block ">Search by template name</label>
-									<input id="templateSearch" type="search" class="w-full border rounded-lg p-2 placeholder:text-gray-600" placeholder="Search template name here..." />
-								</div>
-								
-								<div>
-									<label for="categoryDropdown" class="block">Choose Category</label>
-									<div class="dropdown py-1">
-										<button id="categoryDropdown" class="btn w-100 p-2 border text-left" type="button" onclick="toggleDropdown()">
-											Category
-										</button>
-										<div id="category-options" class="dropdown-options-filter hidden w-full border">
-											<div class="dropdown-item-filter" onclick="selectCategory('Marketing')">Marketing</div>
-											<div class="dropdown-item-filter" onclick="selectCategory('Utility')">Utility</div>
-											<div class="dropdown-item-filter" onclick="selectCategory('Authentication')">Authentication</div>
-										</div>
+			// Default active state for list view (left position)
+			let isListView = true;
+			
+			// Event listener for List Icon
+			option1.addEventListener('click', () => {
+				if (!isListView) {
+					toggle.classList.remove('translate-x-9'); // Move to the left
+					toggle.classList.add('translate-x-0');
+					option1.classList.add('text-red-600');
+					option2.classList.remove('text-red-600');
+					isListView = true;
+					
+					// Show list view, hide grid view
+					listView.classList.remove('hidden');
+					listView.classList.add('block');
+					gridView.classList.add('hidden');
+					gridView.classList.remove('block');
+				}
+			});
+			
+			// Event listener for Grid Icon
+			option2.addEventListener('click', () => {
+				if (isListView) {
+					toggle.classList.remove('translate-x-0'); // Move to the right
+					toggle.classList.add('translate-x-9');
+					option2.classList.add('text-red-600');
+					option1.classList.remove('text-red-600');
+					isListView = false;
+					
+					// Show grid view, hide list view
+					gridView.classList.remove('hidden');
+					gridView.classList.add('block');
+					listView.classList.add('hidden');
+					listView.classList.remove('block');
+				}
+			});
+			const timestampElements = document.querySelectorAll("[data-timestamp]");
+			
+			timestampElements.forEach((element) => {
+				const timestamp = parseInt(element.getAttribute("data-timestamp"), 10);
+				
+				const date = new Date(timestamp);
+				const formattedDate = date.toLocaleDateString("en-US", {
+					year: "numeric",
+					month: "short",
+					day: "numeric",
+					hour: "2-digit",
+					minute: "2-digit",
+				});
+				
+				const parts = formattedDate.split(",");
+				const finalDate =
+					parts.length > 1 ?
+					`${parts[0]}, ${parts[1].trim()} at ${parts[2].trim()}` :
+					formattedDate;
+				element.textContent = finalDate;
+			});
+		</script>
+		
+		<div id="filter-modal" class="modal bg-slate-500/50">
+			<div class="modal-dialog modal-dialog-centered" role="document">
+				<div class="modal-content">
+					<div class="modal-header align-items-center py-3">
+						<h5 class="text-xl font-medium">Apply Filters</h5>
+						<span class="close-modal text-2xl cursor-pointer" onclick="closeModal()">&times;</span>
+					</div>
+					<div class="modal-body">
+						<!-- Modal Form -->
+						<form class="space-y-5">
+							<div class="space-y-2">
+								<label for="templateSearch" class="block ">Search by template name</label>
+								<input id="templateSearch" type="search" class="w-full border rounded-lg p-2 placeholder:text-gray-600" placeholder="Search template name here..." />
+							</div>
+							
+							<div>
+								<label for="categoryDropdown" class="block">Choose Category</label>
+								<div class="dropdown py-1">
+									<button id="categoryDropdown" class="btn w-100 p-2 border text-left" type="button" onclick="toggleDropdown()">
+										Category
+									</button>
+									<div id="category-options" class="dropdown-options-filter hidden w-full border">
+										<div class="dropdown-item-filter" onclick="selectCategory('Marketing')">Marketing</div>
+										<div class="dropdown-item-filter" onclick="selectCategory('Utility')">Utility</div>
+										<div class="dropdown-item-filter" onclick="selectCategory('Authentication')">Authentication</div>
 									</div>
 								</div>
-							</form>
-						</div>
-						<div class=" flex">
-							<button type="button" class="text-white bg-red-400 hover:bg-red-500 p-2 rounded w-100" onclick="applyFilters()">
-								Filter
-							</button>
-							<button type="button" class="text-red-400 underline hover:text-red-500 p-2 rounded w-100" onclick="location.href = '/template' ">
-								Clear filters
-							</button>
-						</div>
+							</div>
+						</form>
+					</div>
+					<div class=" flex">
+						<button type="button" class="text-white bg-blue-400 hover:bg-blue-500 p-2 rounded w-100" onclick="applyFilters()">
+							Filter
+						</button>
+						<button type="button" class="text-red-400 underline hover:text-red-500 p-2 rounded w-100" onclick="location.href = '/template' ">
+							Clear filters
+						</button>
 					</div>
 				</div>
 			</div>
+		</div>
+		
+		
+		<script>
+			// Open Modal
+			// Open Modal with opacity transition
+			function openModal () {
+				const modal = document.getElementById('filter-modal');
+				modal.style.display = 'block';
+				setTimeout(() => {
+					modal.style.opacity = '1';
+				}, 10); // Small delay to ensure display property is applied before opacity
+			}
 			
+			// Close Modal with opacity transition
+			function closeModal () {
+				const modal = document.getElementById('filter-modal');
+				modal.style.opacity = '0';
+				setTimeout(() => {
+					modal.style.display = 'none';
+				}, 300); // Match this duration with the CSS transition duration
+			}
 			
-			<script>
-				// Open Modal
-				// Open Modal with opacity transition
-				function openModal () {
-					const modal = document.getElementById('filter-modal');
-					modal.style.display = 'block';
-					setTimeout(() => {
-						modal.style.opacity = '1';
-					}, 10); // Small delay to ensure display property is applied before opacity
-				}
+			// Toggle Dropdown
+			function toggleDropdown () {
+				const dropdown = document.getElementById('category-options');
+				dropdown.classList.toggle('hidden');
+			}
+			
+			// Select Category and Update Button Text
+			function selectCategory (category) {
+				document.getElementById('categoryDropdown').innerText = category;
+				toggleDropdown(); // Close the dropdown after selection
+			}
+			
+			// Apply Filters Function (for future filter logic)
+			async function applyFilters () {
+				const templateName = document.getElementById('templateSearch').value;
+				const category = document.getElementById('categoryDropdown').innerText;
 				
-				// Close Modal with opacity transition
-				function closeModal () {
-					const modal = document.getElementById('filter-modal');
-					modal.style.opacity = '0';
-					setTimeout(() => {
-						modal.style.display = 'none';
-					}, 300); // Match this duration with the CSS transition duration
-				}
-				
-				// Toggle Dropdown
-				function toggleDropdown () {
-					const dropdown = document.getElementById('category-options');
-					dropdown.classList.toggle('hidden');
-				}
-				
-				// Select Category and Update Button Text
-				function selectCategory (category) {
-					document.getElementById('categoryDropdown').innerText = category;
-					toggleDropdown(); // Close the dropdown after selection
-				}
-				
-				// Apply Filters Function (for future filter logic)
-				async function applyFilters () {
-					const templateName = document.getElementById('templateSearch').value;
-					const category = document.getElementById('categoryDropdown').innerText;
-					
-					// You can add your logic here to apply filters
-					console.log('Template Name:', templateName);
-					console.log('Category:', category);
-					location.href = `/template?search=${templateName}&category=${category}`;
-					// Close modal after applying filters
+				// You can add your logic here to apply filters
+				console.log('Template Name:', templateName);
+				console.log('Category:', category);
+				location.href = `/template?search=${templateName}&category=${category}`;
+				// Close modal after applying filters
+				closeModal();
+			}
+			
+			// Hide modal if clicked outside of it
+			window.onclick = function (event) {
+				const modal = document.getElementById('filter-modal');
+				if (event.target == modal) {
 					closeModal();
 				}
+			}
+			
+			const fileInput = document.getElementById("file-input");
+			const fileList = document.getElementById("file-list");
+			
+			fileInput.addEventListener("change", function () {
+				const files = fileInput.files;
 				
-				// Hide modal if clicked outside of it
-				window.onclick = function (event) {
-					const modal = document.getElementById('filter-modal');
-					if (event.target == modal) {
-						closeModal();
-					}
-				}
-				
-				const fileInput = document.getElementById("file-input");
-				const fileList = document.getElementById("file-list");
-				
-				fileInput.addEventListener("change", function () {
-					const files = fileInput.files;
+				for (const file of files) {
+					const fileItem = document.createElement("div");
+					fileItem.classList.add("file-item");
 					
-					for (const file of files) {
-						const fileItem = document.createElement("div");
-						fileItem.classList.add("file-item");
+					const fileStatus = document.createElement("div");
+					fileStatus.classList.add("file-status");
+					
+					const fileName = document.createElement("span");
+					fileName.textContent = file.name;
+					fileName.classList.add("status-uploading");
+					
+					const loader = document.createElement("div");
+					loader.classList.add("circular-loader");
+					
+					const statusText = document.createElement("span");
+					statusText.textContent = "Uploading...";
+					statusText.classList.add("status-uploading");
+					
+					const removeButton = document.createElement("span");
+					removeButton.textContent = "✖";
+					removeButton.classList.add("remove-file");
+					removeButton.onclick = () => fileItem.remove();
+					
+					fileStatus.appendChild(loader);
+					fileStatus.appendChild(fileName);
+					fileStatus.appendChild(statusText);
+					fileItem.appendChild(fileStatus);
+					fileItem.appendChild(removeButton);
+					fileList.appendChild(fileItem);
+					
+					setTimeout(() => {
+						loader.remove();
+						statusText.textContent = "Uploaded";
+						statusText.classList.remove("status-uploading");
+						statusText.classList.add("status-uploaded");
 						
-						const fileStatus = document.createElement("div");
-						fileStatus.classList.add("file-status");
+						const uploadedIcon = document.createElement("div");
+						uploadedIcon.classList.add("uploaded-icon");
+						uploadedIcon.textContent = "✔";
 						
-						const fileName = document.createElement("span");
-						fileName.textContent = file.name;
-						fileName.classList.add("status-uploading");
-						
-						const loader = document.createElement("div");
-						loader.classList.add("circular-loader");
-						
-						const statusText = document.createElement("span");
-						statusText.textContent = "Uploading...";
-						statusText.classList.add("status-uploading");
-						
-						const removeButton = document.createElement("span");
-						removeButton.textContent = "✖";
-						removeButton.classList.add("remove-file");
-						removeButton.onclick = () => fileItem.remove();
-						
-						fileStatus.appendChild(loader);
-						fileStatus.appendChild(fileName);
-						fileStatus.appendChild(statusText);
-						fileItem.appendChild(fileStatus);
-						fileItem.appendChild(removeButton);
-						fileList.appendChild(fileItem);
-						
-						setTimeout(() => {
-							loader.remove();
-							statusText.textContent = "Uploaded";
-							statusText.classList.remove("status-uploading");
-							statusText.classList.add("status-uploaded");
-							
-							const uploadedIcon = document.createElement("div");
-							uploadedIcon.classList.add("uploaded-icon");
-							uploadedIcon.textContent = "✔";
-							
-							fileStatus.prepend(uploadedIcon);
-						}, 2000);
-					}
-				});
-				
-				async function getStatus () {
-					const icon = document.querySelector(".fa-sync");
-					try {
-						icon.classList.add("animate-spin");
-						const res = await fetch("/getFaceBookTemplates");
-						const data = await res.json();
-						if (!data.success) {
-							alert(data.error);
-						}
-						location.reload();
-					} catch (err) {
-						alert(err);
-					} finally {
-						icon.classList.remove("animate-spin");
-					}
+						fileStatus.prepend(uploadedIcon);
+					}, 2000);
 				}
-			</script>
-		</div>
+			});
+			
+			async function getStatus () {
+				const icon = document.querySelector(".fa-sync");
+				try {
+					icon.classList.add("animate-spin");
+					const res = await fetch("/getFaceBookTemplates");
+					const data = await res.json();
+					if (!data.success) {
+						alert(data.error);
+					}
+					location.reload();
+				} catch (err) {
+					alert(err);
+				} finally {
+					icon.classList.remove("animate-spin");
+				}
+			}
+		</script>
+	</div>
 	</div>
 	<!-- END PAGE CONTAINER -->
 	

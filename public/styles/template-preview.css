@@ -1,45 +1,48 @@
 .iphone-container {
 	position: relative;
-	width: 350px;
-	height: 480px;
+	/* width: 100%;
+	height: 100%; */
 	background: url("./Iphone-png-mockup.png") no-repeat center center;
 	background-size: contain;
-	overflow: hidden;
+	/* overflow: hidden; */
 	/* border: #0984e3 solid 1px; */
+	display: flex;
+	justify-content: center;
+	align-items: center;
 }
 
 .iphone-screen {
 	position: absolute;
-	top: 11px;
-	left: 32px;
-	width: calc(80% - 8px);
-	height: calc(100% - 23px);
-	overflow: hidden;
+	/* top: 1rem; */
+	left: 2rem;
+	width: 80%;
+	/* height: 95%; */
+	/* overflow: hidden; */
 	background-image: url(./BG.jpg);
 	background-size: cover;
 	background-position: center;
-	border-radius: 30px;
+	border-radius: 2rem;
 
 	/* box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2); */
 }
 
 .iphone-container .card {
 	margin: 0;
-	/* border: none;
-	border-radius: 20px; */
+	/* border: none;*/
+	border-radius: 1rem; 
 	/* Smooth edges */
 	/* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); */
 	/* Card shadow */
-	margin-top: 35px;
+	margin-top: 1rem;
 }
 
 .iphone-container .card-body {
-	padding: 10px;
+	/* padding: 1rem; */
 }
 
 .iphone-container .card .btn {
 	width: 100%;
-	margin-bottom: 8px;
+	margin-bottom: .8rem;
 	/* Space between buttons */
 }
 

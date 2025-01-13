@@ -48,10 +48,10 @@
 	
 	<div class="layout-container">
 		<nav class="sidebar">
-			<div class="logo py-3">
+			<div class="logo">
 				<img onclick="location.href = '/'" class="cursor-pointer" src="/assets/img/Wizard_logo.png" alt="Whizard Logo" />
 			</div>
-			<ul class="mt-2 space-y-4">
+			<ul class="">
 				<li>
 					<a href="/" class=""><span class="icon"><i class="fas fa-chart-line"></i></span>
 						Dashboard</a>
@@ -97,9 +97,9 @@
 			<script>
 				function toggleDropdown () {
 					const dropdownMenu = document.getElementById('dropdownMenu');
-					const sidebar = document.querySelector('.sidebar');
-					
 					dropdownMenu.classList.toggle('hidden');
+					
+					const sidebar = document.querySelector('.sidebar');
 					
 					if (dropdownMenu.classList.contains('hidden')) {
 						sidebar.style.overflow = 'auto';
@@ -129,8 +129,10 @@
 				// Close the dropdown if clicked outside
 				window.onclick = function (event) {
 					const dropdown = document.getElementById("dropdownMenu");
+					const sidebar = document.querySelector('.sidebar');
 					if (!event.target.closest('.user-profile')) {
 						dropdown.classList.add("hidden");
+						sidebar.style.overflow = 'auto';
 					}
 				};
 			</script>
@@ -138,8 +140,8 @@
 		<!-- END SIDEBAR MENU TOP TRAY CONTENT-->
 		
 		<!-- START PAGE-CONTAINER -->
-		<div class="main-content  p-2">
-			<nav class="flex px-3 logo mt-4" aria-label="Breadcrumb">
+		<div class="main-content">
+			<nav class="logo breadCrumb" aria-label="Breadcrumb">
 				<div class="flex items-center">
 					<a href="/settings" class="text-gray-500 hover:text-gray-700 text-xl font-medium">Settings</a>
 					<svg class="w-4 h-4 mx-2 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
@@ -157,7 +159,7 @@
 					<a href="/settings/user-management/permissions" class="text-red-500 hover:text-gray-700 text-xl font-medium ">Permissions</a>
 				</div>
 			</nav>
-			<div class=" mx-auto p-6">
+			<div class="mainDiv">
 				<h2 class="text-2xl font-bold mb-6 text-gray-900">Permissions Management</h2>
 				<form id="permissionForm" method="post" class=" mx-auto p-6 space-y-6">
 					<div class="mb-6">

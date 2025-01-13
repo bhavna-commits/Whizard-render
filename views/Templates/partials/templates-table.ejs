@@ -1,5 +1,5 @@
-<% if (list.length > 0) { %>
-<div class="p-4">
+
+<div class="p-4 w-full ">
 	<!-- Responsive Table -->
 	<div class="overflow-x-auto">
 		<table class="text-center min-w-full border-separate border-spacing-y-4">
@@ -52,7 +52,7 @@
 						
 						<!-- Delete Button -->
 						<button type="button" class="text-gray-500 hover:text-red-700 px-2" onclick="confirmDelete('<%= list._id %>')">
-							<i class="fa-regular fa-trash-can"></i> 
+							<i class="fa-regular fa-trash-can"></i>
 						</button>
 					</td>
 				</tr>
@@ -62,145 +62,35 @@
 		</table>
 	</div>
 	
-	<!-- Pagination -->
-	<div class="flex items-center justify-center py-4 space-x-4">
-		<nav class="flex items-center">
-			<ul class="flex space-x-1">
-				<!-- Previous Button -->
-				<li>
-					<a href="/template?page=<%= page > 1 ? page - 1 : 1 %>" class="px-3 py-2 rounded-md text-sm font-medium text-gray-500 bg-white border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed" <%= page === 1 ? 'aria-disabled="true"' : '' %>>‹</a>
-				</li>
-				
-				<!-- First Page Button -->
-				<li>
-					<a href="/template?page=1" class="px-3 py-2 rounded-md text-sm font-medium <%= page === 1 ? 'text-white bg-red-400 border-red-400' : 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50' %>">1</a>
-				</li>
-				
-				<% if (page > 3) { %>
-				<!-- Show "..." if current page is greater than 3 -->
-				<li><span class="px-3 py-2 text-sm text-gray-500">...</span></li>
-				<% } %>
-				
-				<!-- Dynamic Page Numbers based on current page -->
-				<% for (let i = Math.max(2, page - 1); i <= Math.min(totalPages - 1, page + 1); i++) { %>
-				<li>
-					<a href="/template?page=<%= i %>" class="px-3 py-2 rounded-md text-sm font-medium <%= i === page ? 'text-white bg-red-400 border-red-400' : 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50' %>"><%= i %></a>
-				</li>
-				<% } %>
-				
-				<% if (page < totalPages - 2) { %>
-				<!-- Show "..." if there are more pages -->
-				<li><span class="px-3 py-2 text-sm text-gray-500">...</span></li>
-				<% } %>
-				
-				<!-- Last Page Button -->
-				<% if (totalPages > 1) { %>
-				<li>
-					<a href="/template?page=<%= totalPages %>" class="px-3 py-2 rounded-md text-sm font-medium <%= page === totalPages ? 'text-white bg-red-400 border-red-400' : 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50' %>"><%= totalPages %></a>
-				</li>
-				<% } %>
-				
-				<!-- Next Button -->
-				<li>
-					<a href="/template?page=<%= page < totalPages ? page + 1 : totalPages %>" class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50">›</a>
-				</li>
-			</ul>
-		</nav>
-		
-		<!-- "Go to page" input -->
-		<div class="flex items-center space-x-2">
-			<span class="text-sm text-gray-700">Go to page</span>
-			<input type="number" min="1" max="<%= totalPages %>" class="w-16 px-2 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" value="<%= page %>" id="pageInput" />
-			<button type="button" class="px-3 py-1 text-sm font-medium text-white bg-red-400 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" onclick="goToPage()">Go</button>
-		</div>
-	</div>
 	
 	<script>
-		function goToPage () {
-			const pageInput = document.getElementById('pageInput');
-			const page = parseInt(pageInput.value);
-			const totalPages = <%= totalPages %>;
+		// Helper function to format date in "29 Aug-2024 at 02:05 AM" format
+		function formatTimestamp (timestamp) {
+			const date = new Date(timestamp);
+			const options = {
+				day: '2-digit',
+				month: 'short',
+				year: 'numeric',
+				hour: '2-digit',
+				minute: '2-digit',
+				hour12: true
+			};
 			
-			if (page > totalPages) {
-				alert("Page doesn't exist. Try a lower number.");
-				pageInput.value = <%= page %>; // Reset input to the current page
-			} else if (page < 1) {
-				alert("Page number should be at least 1.");
-				pageInput.value = <%= page %>;
-			} else {
-				window.location.href = `/contact-list?page=${page}`;
-			}
+			// Format the date and time string
+			let formattedDate = date.toLocaleString('en-GB', options);
+			formattedDate = formattedDate.replace(',', ' at ');
+			return formattedDate;
 		}
-	</script>
-	
-	
-	
-</div>
-<% } else { %>
-<div class="flex flex-col items-center justify-center min-h-[400px]  rounded-lg mt-4">
-	<div class="text-center">
-		<img src="https://img.freepik.com/free-vector/hands-holding-tablet-with-forefinger-clicking-start-button-new-application-launch-flat-illustration_74855-20595.jpg?ga=GA1.1.131490893.1732525963&semt=ais_hybrid" alt="No contacts" class="w-48 h-48 mx-auto mb-4">
 		
-		<h3 class="text-xl font-semibold text-gray-900 mb-2">No Templates yet</h3>
-		<p class="text-gray-600 mb-6">Start adding templates by clicking on "Create new template"</p>
-		<button class="bg-black p-2 flex items-center rounded-lg text-white text-base font-thin w-full justify-center" onclick="document.location='create-template'">
-			<i class="fa-solid fa-plus pr-2"></i>
-			Create new template
-		</button>
-	</div>
-</div>
-<% } %>
-
-
-<script>
-	// Helper function to format date in "29 Aug-2024 at 02:05 AM" format
-	function formatTimestamp (timestamp) {
-		const date = new Date(timestamp);
-		const options = {
-			day: '2-digit',
-			month: 'short',
-			year: 'numeric',
-			hour: '2-digit',
-			minute: '2-digit',
-			hour12: true
-		};
+		// Format all timestamps with the 'data-timestamp' attribute
+		document.querySelectorAll('[data-timestamp]').forEach((element) => {
+			const timestamp = element.getAttribute('data-timestamp');
+			element.textContent = formatTimestamp(timestamp);
+		});
 		
-		// Format the date and time string
-		let formattedDate = date.toLocaleString('en-GB', options);
-		formattedDate = formattedDate.replace(',', ' at ');
-		return formattedDate;
-	}
-	
-	// Format all timestamps with the 'data-timestamp' attribute
-	document.querySelectorAll('[data-timestamp]').forEach((element) => {
-		const timestamp = element.getAttribute('data-timestamp');
-		element.textContent = formatTimestamp(timestamp);
-	});
-	
-	function duplicateTemplate (templateId) {
-		fetch(`/api/templates/duplicate/${templateId}`, {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-			})
-			.then((response) => response.json())
-			.then((data) => {
-				if (data.success) {
-					// Redirect or refresh the page to see the duplicated template
-					window.location.reload();
-				} else {
-					alert('Error duplicating template: ' + data.error);
-				}
-			})
-			.catch((error) => console.error('Error:', error));
-	}
-	
-	// Function to confirm deletion
-	function confirmDelete (templateId) {
-		if (confirm('Are you sure you want to delete this template?')) {
-			fetch(`/api/templates/delete/${templateId}`, {
-					method: 'DELETE',
+		function duplicateTemplate (templateId) {
+			fetch(`/api/templates/duplicate/${templateId}`, {
+					method: 'POST',
 					headers: {
 						'Content-Type': 'application/json',
 					},
@@ -208,12 +98,33 @@
 				.then((response) => response.json())
 				.then((data) => {
 					if (data.success) {
+						// Redirect or refresh the page to see the duplicated template
 						window.location.reload();
 					} else {
-						alert('Error deleting template: ' + data.error);
+						alert('Error duplicating template: ' + data.error);
 					}
 				})
 				.catch((error) => console.error('Error:', error));
 		}
-	}
-</script>
+		
+		// Function to confirm deletion
+		function confirmDelete (templateId) {
+			if (confirm('Are you sure you want to delete this template?')) {
+				fetch(`/api/templates/delete/${templateId}`, {
+						method: 'DELETE',
+						headers: {
+							'Content-Type': 'application/json',
+						},
+					})
+					.then((response) => response.json())
+					.then((data) => {
+						if (data.success) {
+							window.location.reload();
+						} else {
+							alert('Error deleting template: ' + data.error);
+						}
+					})
+					.catch((error) => console.error('Error:', error));
+			}
+		}
+	</script>

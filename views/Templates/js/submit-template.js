@@ -229,7 +229,16 @@ function collectTemplateData() {
 	if (!templateNameInput || !templateNameInput.value.trim()) {
 		return showError("Please provide a valid template name.");
 	}
-	templateData.templateName = templateNameInput.value.trim();
+
+	// Check that the template name contains no spaces, hyphens, or underscores
+	const templateName = templateNameInput.value.trim();
+	if (/[\s-_]/.test(templateName)) {
+		return showError(
+			"Template name cannot contain spaces, hyphens, or underscores.",
+		);
+	}
+
+	templateData.templateName = templateName;
 
 	// Validate category selection
 	const categoryText = document

@@ -50,7 +50,7 @@
 			<div class="logo">
 				<img onclick="location.href = '/'" class="cursor-pointer" src="/assets/img/Wizard_logo.png" alt="Whizard Logo" />
 			</div>
-			<ul class="mt-3 space-y-4">
+			<ul class="">
 				<li>
 					<a href="/" class=""><span class="icon active"><i class="fas fa-chart-line"></i></span>
 						Dashboard</a>
@@ -92,14 +92,13 @@
 					<button onclick="logout()">Logout</button>
 				</div>
 			</div>
-			
-			
+					
 			<script>
 				function toggleDropdown () {
 					const dropdownMenu = document.getElementById('dropdownMenu');
-					const sidebar = document.querySelector('.sidebar');
-					
 					dropdownMenu.classList.toggle('hidden');
+					
+					const sidebar = document.querySelector('.sidebar');
 					
 					if (dropdownMenu.classList.contains('hidden')) {
 						sidebar.style.overflow = 'auto';
@@ -129,8 +128,10 @@
 				// Close the dropdown if clicked outside
 				window.onclick = function (event) {
 					const dropdown = document.getElementById("dropdownMenu");
+					const sidebar = document.querySelector('.sidebar');
 					if (!event.target.closest('.user-profile')) {
 						dropdown.classList.add("hidden");
+						sidebar.style.overflow = 'auto';
 					}
 				};
 			</script>

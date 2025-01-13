@@ -3,7 +3,7 @@
 
 <head>
 	<meta charset="UTF-8" />
-	<title>Contact List Overview</title>
+	<title>Whizard - Contact List Overview</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<!-- <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css"> -->
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
@@ -41,10 +41,10 @@
 	<!-- Sidebar -->
 	<div class="layout-container">
 		<nav class="sidebar">
-			<div class="logo py-3">
+			<div class="logo">
 				<img onclick="location.href = '/'" class="cursor-pointer" src="/assets/img/Wizard_logo.png" alt="Whizard Logo" />
 			</div>
-			<ul class="mt-2 space-y-4">
+			<ul class="">
 				<li>
 					<a href="/" class=""><span class="icon "><i class="fas fa-chart-line"></i></span>
 						Dashboard</a>
@@ -86,14 +86,12 @@
 					<button onclick="logout()">Logout</button>
 				</div>
 			</div>
-			
-			
 			<script>
 				function toggleDropdown () {
 					const dropdownMenu = document.getElementById('dropdownMenu');
-					const sidebar = document.querySelector('.sidebar');
-					
 					dropdownMenu.classList.toggle('hidden');
+					
+					const sidebar = document.querySelector('.sidebar');
 					
 					if (dropdownMenu.classList.contains('hidden')) {
 						sidebar.style.overflow = 'auto';
@@ -123,8 +121,10 @@
 				// Close the dropdown if clicked outside
 				window.onclick = function (event) {
 					const dropdown = document.getElementById("dropdownMenu");
+					const sidebar = document.querySelector('.sidebar');
 					if (!event.target.closest('.user-profile')) {
 						dropdown.classList.add("hidden");
+						sidebar.style.overflow = 'auto';
 					}
 				};
 			</script>
@@ -134,7 +134,7 @@
 		<!-- START PAGE-CONTAINER -->
 		<div class="main-content">
 			<!-- END HEADER -->
-			<div class="logo flex justify-between items-center m-4 py-4">
+			<div class="logo breadCrumb">
 				<div class=" flex items-center">
 					<!-- START BREADCRUMB -->
 					
@@ -157,7 +157,7 @@
 			</div>
 			
 			<!-- START card -->
-			<div class="pt-4">
+			<div class="mainDiv">
 				<div class="flex w-full justify-between items-center px-3">
 					<div class="flex w-fit justify-start items-center">
 						<span class=" text-lg  pr-2">Contact List Name</span>

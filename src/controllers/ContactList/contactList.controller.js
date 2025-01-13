@@ -89,8 +89,23 @@ export const previewContactList = async (req, res) => {
 		);
 
 		// Check for duplicate numbers and add to invalid columns
-		const numbers = parsedData.map((contact) => contact.Number);
-		const uniqueNumbers = new Set(numbers);
+		const numbers = parsedData.map((contact) => contact.Number.trim());
+
+		// Only numbers allowed
+		const invalidNumbers = numbers.filter(
+			(number) => !/^\d{10,}$/.test(number),
+		);
+
+		// If any invalid numbers found, treat them as invalid columns
+		if (invalidNumbers.length > 0) {
+			invalidColumns.push(
+				`Invalid numbers: ${invalidNumbers.join(
+					", ",
+				)} (must be digits only, with a minimum of 10 digits)`,
+			);
+		}
+
+		// Check for duplicate numbers
 		const duplicateNumbers = numbers.filter(
 			(number, index) => numbers.indexOf(number) !== index,
 		);

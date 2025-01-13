@@ -106,7 +106,7 @@ function updatePreview() {
 function handleInputChange(event) {
 	const variable = event.target.dataset.variable;
 	const value = event.target.value.trim();
-	
+
 	if (originalTemplateData.headerType === "text") {
 		currentTemplateData.header = replaceVariableWithSpan(
 			originalTemplateData.header,
@@ -133,9 +133,20 @@ function replaceVariableWithSpan(templatePart, variable, value) {
 	if (!templatePart) return "";
 
 	const regex = new RegExp(`{{\\s*${variable}\\s*}}`, "g");
-	const spanTemplate = `<input class="bg-transparent" id="${variable}" value="${
+	const spanTemplate = `<span class="bg-transparent" id="${variable}"> ${
 		value || `{{${variable}}}`
-	}" />`;
+	} </span>`;
 
 	return templatePart.replace(regex, spanTemplate);
 }
+
+// function replaceVariableWithSpan(templatePart, variable, value) {
+// 	if (!templatePart) return "";
+
+// 	// Preserve existing values
+// 	const regex = new RegExp(`{{\\s*${variable}\\s*}}`, "g");
+// 	const spanTemplate = <input class="bg-transparent" id="${variable}" value="${value}" />;
+
+// 	// Replace only the specific variable while preserving others
+// 	return templatePart.replace(regex, spanTemplate);
+// }

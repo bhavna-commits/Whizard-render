@@ -9,6 +9,7 @@ document.addEventListener("DOMContentLoaded", function () {
 	function applyFilters() {
 		const selectedDateRange = dateRange.value;
 		const selectedAction = actionFilter.value;
+		// console.log(selectedDateRange, selectedAction);
 
 		fetch(
 			`/settings/activity-logs/filtered?dateRange=${selectedDateRange}&action=${selectedAction}`,

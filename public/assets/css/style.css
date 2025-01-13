@@ -608,9 +608,9 @@
     
     
          .custom-card-container {
-        max-width: 350px;
+        max-width: 35rem;
         /* height: 400px;  */
-        height: 385px; 
+        height: 30rem; 
         border-radius: 6px;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         margin: 0 auto;
