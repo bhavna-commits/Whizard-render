@@ -128,9 +128,6 @@
  		}
  	</script>
  	
- 	
- 	
- 	
  	<% } else { %>
  	<!-- Empty state -->
  	<div class="flex flex-col items-center justify-center min-h-[400px]  rounded-lg mt-4">
@@ -147,3 +144,77 @@
  	</div>
  	<% } %>
  </div>
+ 
+ <script>
+ 	function openAddContact () {
+ 		document.getElementById("addContactSidebar").classList.add("open");
+ 		document.getElementById("overlay").classList.add("active");
+ 	}
+ 	
+ 	function closeAddContact () {
+ 		document.getElementById("addContactSidebar").classList.remove("open");
+ 		document.getElementById("overlay").classList.remove("active");
+ 	}
+ 	
+ 	function openEditModal (contactData) {
+ 		const contact = JSON.parse(contactData);
+ 		document.getElementById("edit-contact-id").value = contact.keyId;
+ 		document.getElementById("edit-contact-name").value = contact.Name;
+ 		// document.getElementById("phone").value = contact.wa_id;
+ 		document.getElementById("edit-contact-tags").value = contact.tags;
+ 		
+ 		const dynamicFieldsContainer = document.getElementById(
+ 			"dynamicFieldsContainer",
+ 		);
+ 		dynamicFieldsContainer.innerHTML = ""; // Clear previous fields
+ 		
+ 		Object.keys(contact.masterExtra).forEach((key) => {
+ 			if (!document.getElementById(`edit-contact-${key}`)) {
+ 				const formGroup = document.createElement("div");
+ 				formGroup.classList.add("form-group");
+ 				
+ 				const label = document.createElement("label");
+ 				label.setAttribute("for", `edit-contact-${key}`);
+ 				label.textContent = key.charAt(0).toUpperCase() + key.slice(1);
+ 				
+ 				const input = document.createElement("input");
+ 				input.setAttribute("type", "text");
+ 				input.setAttribute("id", `edit-contact-${key}`);
+ 				input.setAttribute("name", `masterExtra.${key}`);
+ 				input.setAttribute("class", "date-input");
+ 				
+ 				// Set required attribute using either method:
+ 				input.setAttribute("required", ""); // or input.required = true;
+ 				
+ 				input.value = contact.masterExtra[key];
+ 				
+ 				formGroup.appendChild(label);
+ 				formGroup.appendChild(input);
+ 				dynamicFieldsContainer.appendChild(formGroup);
+ 			}
+ 			
+ 		});
+ 		
+ 		document.getElementById("editContactSidebar").classList.add("open");
+ 		document.getElementById("editContactOverlay").classList.add("active");
+ 	}
+ 	// Close edit contact modal
+ 	function closeEditContact () {
+ 		document.getElementById("editContactSidebar").classList.remove("open");
+ 		document.getElementById("editContactOverlay").classList.remove("active");
+ 	}
+ 	
+ 	function openDeleteModal (id) {
+ 		const deleteModal = new bootstrap.Modal(
+ 			document.getElementById("deleteModal"),
+ 		);
+ 		deleteModal.show();
+ 	}
+ 	
+ 	function closeDeleteContact (id) {
+ 		const deleteModal = new bootstrap.Modal(
+ 			document.getElementById("deleteModal"),
+ 		);
+ 		deleteModal.hide();
+ 	}
+ </script>

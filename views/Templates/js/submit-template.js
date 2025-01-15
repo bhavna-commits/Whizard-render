@@ -213,7 +213,7 @@ function validateCurlyBraces(text) {
 }
 
 // Collect all template data
-function collectTemplateData() {
+function 	collectTemplateData() {
 	const templateData = {};
 
 	// Helper function to display error messages

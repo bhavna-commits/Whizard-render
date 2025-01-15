@@ -1,0 +1,14 @@
+Name,Number,,Duration,Month
+John Doe,916879000000,India - Use country code 91 (10 digits).
+Mark Adams,447677000000,UK - Use country code 44 (10-11 digits).
+Jenifer Winget,497786000000,Germany - Use country code 49 (10-11 digits).
+Sofia ,61876534345,Australia - Use country code 61 (9 digits).
+,,
+,,
+,,
+GUIDELINES,DESCRIPTION,
+Country Code Inclusion,"Always include the country code with the mobile numbers to ensure proper formatting, also  Verify that the number of digits in the mobile number aligns with the standards for the respective country.",
+Custom Field Attributes,"Before using custom attributes in your CSV, ensure they are added to the custom field section in the platform.",
+Country Code Formats,"The country code can be provided in any standard format, such as +91 or 91. Both are acceptable.",
+Default Country Code,"If no country code is specified for a mobile number, the system will automatically assign the default country code, 91 (India).",
+Correct the Number format ,"Right click on the selected cell , go to ""format cell"" ,select the category as number and make the decimal places to 0 with negative number as 1234 only",

@@ -89,31 +89,31 @@ export const previewContactList = async (req, res) => {
 		);
 
 		// Check for duplicate numbers and add to invalid columns
-		const numbers = parsedData.map((contact) => contact.Number.trim());
+		const numbers = parsedData?.map((contact) => contact.Number?.trim());
 
 		// Only numbers allowed
-		const invalidNumbers = numbers.filter(
+		const invalidNumbers = numbers?.filter(
 			(number) => !/^\d{10,}$/.test(number),
 		);
 
 		// If any invalid numbers found, treat them as invalid columns
-		if (invalidNumbers.length > 0) {
-			invalidColumns.push(
-				`Invalid numbers: ${invalidNumbers.join(
+		if (invalidNumbers?.length > 0) {
+			invalidColumns?.push(
+				`Invalid numbers: ${invalidNumbers?.join(
 					", ",
 				)} (must be digits only, with a minimum of 10 digits)`,
 			);
 		}
 
 		// Check for duplicate numbers
-		const duplicateNumbers = numbers.filter(
-			(number, index) => numbers.indexOf(number) !== index,
+		const duplicateNumbers = numbers?.filter(
+			(number, index) => numbers?.indexOf(number) !== index,
 		);
 
 		// If duplicates found, treat them as invalid columns
-		if (duplicateNumbers.length > 0) {
-			invalidColumns.push(
-				`Duplicate numbers: ${duplicateNumbers.join(", ")}`,
+		if (duplicateNumbers?.length > 0) {
+			invalidColumns?.push(
+				`Duplicate numbers: ${duplicateNumbers?.join(", ")}`,
 			);
 		}
 
@@ -125,9 +125,9 @@ export const previewContactList = async (req, res) => {
 
 		// Return error response if there are issues with the columns or empty fields
 		if (
-			missingColumns.length > 0 ||
-			invalidColumns.length > 0 ||
-			emptyFields.length > 0
+			missingColumns?.length > 0 ||
+			invalidColumns?.length > 0 ||
+			emptyFields?.length > 0
 		) {
 			return res.status(400).json({
 				success: false,

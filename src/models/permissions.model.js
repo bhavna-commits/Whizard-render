@@ -8,124 +8,50 @@ const permissionSchema = new Schema(
 		name: { type: String, required: true },
 		unique_id: { type: String, required: true },
 		dashboard: {
-			connectNow: {
-				type: Boolean,
-				default: false,
-			},
-			viewUsers: {
-				type: Boolean,
-				default: false,
-			},
-			quickActions: {
-				type: Boolean,
-				default: false,
-			},
+			connectNow: { type: Boolean, default: false },
+			viewUsers: { type: Boolean, default: false },
+			quickActions: { type: Boolean, default: false },
 		},
 		chats: {
-			type: Boolean,
-			default: false,
-
-			redirectToVpchat: {
-				type: Boolean,
-				default: false,
-			},
+			type: { type: Boolean, default: false },
+			redirectToVpchat: { type: Boolean, default: false },
 		},
 		contactList: {
-			type: Boolean,
-			default: false,
-
-			addContactIndividual: {
-				type: Boolean,
-				default: false,
-			},
-			addContactListCSV: {
-				type: Boolean,
-				default: false,
-			},
-			deleteList: {
-				type: Boolean,
-				default: false,
-			},
-			sendBroadcast: {
-				type: Boolean,
-				default: false,
-			},
+			type: { type: Boolean, default: false },
+			addContactIndividual: { type: Boolean, default: false },
+			addContactListCSV: { type: Boolean, default: false },
+			deleteList: { type: Boolean, default: false },
+			sendBroadcast: { type: Boolean, default: false },
 		},
 		templates: {
-			type: Boolean,
-			default: false,
-
-			editTemplate: {
-				type: Boolean,
-				default: false,
-			},
-			createTemplate: {
-				type: Boolean,
-				default: false,
-			},
-			deleteTemplate: {
-				type: Boolean,
-				default: false,
-			},
+			type: { type: Boolean, default: false },
+			editTemplate: { type: Boolean, default: false },
+			createTemplate: { type: Boolean, default: false },
+			deleteTemplate: { type: Boolean, default: false },
 		},
 		reports: {
-			type: Boolean,
-			default: false,
-
+			type: { type: Boolean, default: false },
 			conversationReports: {
-				viewReports: {
-					type: Boolean,
-					default: false,
-				},
-				retargetingUsers: {
-					type: Boolean,
-					default: false,
-				},
-				redirectToVpchat: {
-					type: Boolean,
-					default: false,
-				},
+				type: { type: Boolean, default: false },
+				viewReports: { type: Boolean, default: false },
+				retargetingUsers: { type: Boolean, default: false },
+				redirectToVpchat: { type: Boolean, default: false },
 			},
-			costReports: {
-				type: Boolean,
-				default: false,
-			},
+			costReports: { type: Boolean, default: false },
 		},
 		settings: {
-			type: Boolean,
-			default: false,
-
-			userManagement: {
-				type: Boolean,
-				default: false,
-			},
-			activityLogs: {
-				type: Boolean,
-				default: false,
-			},
+			type: { type: Boolean, default: false },
+			userManagement: { type: Boolean, default: false },
+			activityLogs: { type: Boolean, default: false },
 			manageTags: {
-				delete: {
-					type: Boolean,
-					default: false,
-				},
-				add: {
-					type: Boolean,
-					default: false,
-				},
-				view: {
-					type: Boolean,
-					default: false,
-				},
+				type: { type: Boolean, default: false },
+				delete: { type: Boolean, default: false },
+				add: { type: Boolean, default: false },
+				view: { type: Boolean, default: false },
 			},
 		},
-		createdAt: {
-			type: Number,
-			default: () => Date.now(),
-		},
-		updatedAt: {
-			type: Number,
-			default: () => Date.now(),
-		},
+		createdAt: { type: Number, default: () => Date.now() },
+		updatedAt: { type: Number, default: () => Date.now() },
 	},
 	{
 		timestamps: false,

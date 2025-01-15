@@ -240,6 +240,7 @@ export const accountDetails = async (req, res) => {
 			roles,
 			photo: req.session.user?.photo,
 			name: req.session.user.name,
+			color: req.session.user.color,
 		});
 	} catch (error) {
 		console.error(error);
@@ -410,16 +411,12 @@ export const getUserManagement = async (req, res) => {
 };
 
 export const getCreatePassword = async (req, res) => {
-	res.render("Settings/createAddedUserPassword", {
-		photo: req.session.user?.photo,
-		name: req.session.user.name,
-		color: req.session.user.color,
-	});
+	res.render("Settings/createAddedUserPassword");
 };
 
 export const sendUserInvitation = async (req, res) => {
 	const adminId = req.session.user.id;
-	const { name, email, role } = req.body;
+	const { name, email, role, url } = req.body;
 
 	try {
 		// Check if the user already exists in the User collection
@@ -445,11 +442,20 @@ export const sendUserInvitation = async (req, res) => {
 
 		// Generate unique invitation link
 		const invitationToken = Buffer.from(`${adminId}`).toString("base64");
-		const invitationLink = `https://f362-2401-4900-1c48-acfc-7158-f302-b506-77ae.ngrok-free.app/settings/user-management/create-password?token=${invitationToken}`;
+		const invitationLink = `${url}/settings/user-management/create-password?token=${invitationToken}`;
 
 		// Send invitation email
 		await sendAddUserMail(req.session.user.name, invitationLink, email);
 
+		await ActivityLogs.create({
+			useradmin: req.session.user.id,
+			unique_id: generateUniqueId(),
+			name: req.session.user.name
+				? req.session.user.name
+				: req.session.addedUser.name,
+			actions: "Send",
+			details: `Sent an invitation link to join the account`,
+		});
 		// Save new user to the database
 		await newUser.save();
 
@@ -478,7 +484,7 @@ export const createPermissions = async (req, res) => {
 
 		const { name, permissions } = req.body;
 
-		// Check if the role with the same name already exists
+		// Check if a role with the same name already exists
 		const existingRole = await Permissions.findOne({ name });
 		if (existingRole) {
 			return res
@@ -491,13 +497,66 @@ export const createPermissions = async (req, res) => {
 			useradmin,
 			name,
 			unique_id,
-			dashboard: permissions.dashboard,
-			chats: permissions.chats,
-			contactList: permissions.contactList,
-			reports: permissions.reports,
-			settings: permissions.settings,
+			dashboard: {
+				connectNow: permissions.dashboard.connectNow,
+				viewUsers: permissions.dashboard.viewUsers,
+				quickActions: permissions.dashboard.quickActions,
+			},
+			chats: {
+				type: permissions.chats.type,
+				redirectToVpchat: permissions.chats.redirectToVpchat,
+			},
+			contactList: {
+				type: permissions.contactList.type,
+				addContactIndividual:
+					permissions.contactList.addContactIndividual,
+				addContactListCSV: permissions.contactList.addContactListCSV,
+				deleteList: permissions.contactList.deleteList,
+				sendBroadcast: permissions.contactList.sendBroadcast,
+			},
+			templates: {
+				type: permissions.templates.type,
+				editTemplate: permissions.templates.editTemplate,
+				createTemplate: permissions.templates.createTemplate,
+				deleteTemplate: permissions.templates.deleteTemplate,
+			},
+			reports: {
+				type: permissions.reports.type,
+				conversationReports: {
+					type: permissions.reports.conversationReports.type,
+					viewReports:
+						permissions.reports.conversationReports.viewReports,
+					retargetingUsers:
+						permissions.reports.conversationReports
+							.retargetingUsers,
+					redirectToVpchat:
+						permissions.reports.conversationReports
+							.redirectToVpchat,
+				},
+				costReports: permissions.reports.costReports,
+			},
+			settings: {
+				type: permissions.settings.type,
+				userManagement: permissions.settings.userManagement,
+				activityLogs: permissions.settings.activityLogs,
+				manageTags: {
+					type: permissions.settings.manageTags.type,
+					delete: permissions.settings.manageTags.delete,
+					add: permissions.settings.manageTags.add,
+					view: permissions.settings.manageTags.view,
+				},
+			},
 		});
 
+		await ActivityLogs.create({
+			useradmin: req.session.user.id,
+			unique_id: generateUniqueId(),
+			name: req.session.user.name
+				? req.session.user.name
+				: req.session.addedUser.name,
+			actions: "Create",
+			details: `Created a new role`,
+		});
 		// Save the role
 		await newRole.save();
 
@@ -515,11 +574,24 @@ export const createPermissions = async (req, res) => {
 export const createAddedUserPassword = async (req, res) => {
 	try {
 		const { password, adminId } = req.body;
-		const data = User.findOne({ unique_id: adminId });
+		// console.log(adminId);
+
+		// Use await to get the actual data
+		const data = await User.findOne({ unique_id: adminId });
+
+		if (!data) {
+			return res.json({ success: false, message: "User not found" });
+		}
+
+		// console.log(data);
+
 		req.session.user = {
 			id: adminId,
 			name: data.name,
+			photo: data.profilePhoto,
+			color: data.color,
 		};
+
 		res.json({ success: true });
 	} catch (err) {
 		console.error(err);

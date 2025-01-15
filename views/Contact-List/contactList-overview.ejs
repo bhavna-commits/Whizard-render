@@ -19,6 +19,7 @@
 	<link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet" />
 	<link href="styles/filter-sidebar.css" rel="stylesheet" type="text/css" />
 	<link href="styles/style.css" rel="stylesheet" type="text/css" />
+	<link href="styles/countrySelector.css" rel="stylesheet" type="text/css" />
 	<script src="https://cdn.tailwindcss.com"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.5/xlsx.full.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
@@ -134,7 +135,7 @@
 		<!-- START PAGE-CONTAINER -->
 		<div class="main-content">
 			<!-- END HEADER -->
-			<div class="logo breadCrumb">
+			<div class="logo breadCrumb py-4">
 				<div class=" flex items-center">
 					<!-- START BREADCRUMB -->
 					
@@ -158,13 +159,13 @@
 			
 			<!-- START card -->
 			<div class="mainDiv">
-				<div class="flex w-full justify-between items-center px-3">
+				<div class="flex w-full justify-between items-center p-3">
 					<div class="flex w-fit justify-start items-center">
 						<span class=" text-lg  pr-2">Contact List Name</span>
 						<input type="text" id="contactListName" placeholder="Edit Contact List name" class="outline-none focus:outline-none w-fit border py-1 px-2 rounded-lg" value="<%= listName %>" />
 						
 						<button aria-label="" id="saveChangesBtn" type="button" class="border ml-2 py-2 px-2 rounded-lg transition-colors ease-in-out duration-300 hover:bg-gray-100 text-sm font-medium opacity-50 cursor-not-allowed" disabled>
-							Save Changes
+							Save name
 						</button>
 						
 					</div>
@@ -199,7 +200,7 @@
 				</div>
 				
 				<!-- Contact list table -->
-				<div  class="flex w-full justify-center items-center ">
+				<div class="flex w-full justify-center items-center ">
 					<div id="contactList" class="w-[95%]"><%- include('partials/OverViewTable') %></div>
 				</div>
 			</div>
@@ -211,8 +212,7 @@
 			
 		</div>
 	</div>
-	<!-- END PAGE CONTAINER -->
-	<!-- BEGIN VENDOR JS -->
+	<script src="/contact-list/js/editContact.js"></script>
 	<script src="assets/plugins/pace/pace.min.js" type="text/javascript"></script>
 	<!--  A polyfill for browsers that don't support ligatures: remove liga.js if not needed-->
 	<script src="assets/plugins/liga.js" type="text/javascript"></script>
@@ -248,7 +248,7 @@
 	<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
 	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 	
-	<script src="/contact-list/js/editContact.js"></script>
+	
 	<script>
 		window.addEventListener('load', function () {
 			// Fade out the loader smoothly by changing the opacity

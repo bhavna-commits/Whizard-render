@@ -93,7 +93,7 @@
 					<button onclick="logout()">Logout</button>
 				</div>
 			</div>
-				
+			
 			<script>
 				function toggleDropdown () {
 					const dropdownMenu = document.getElementById('dropdownMenu');
@@ -141,24 +141,26 @@
 		
 		<!-- START PAGE-CONTAINER -->
 		<div class="main-content">
-			<nav class="logo breadCrumb" aria-label="Breadcrumb">
-				<div class="flex items-center">
-					<a href="/settings" class="text-gray-500 hover:text-gray-700 text-xl font-medium">Settings</a>
-					<svg class="w-4 h-4 mx-2 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-						<path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L11.586 10 7.293 5.707a1 1 0 011.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
-					</svg>
-				</div>
-				
-				<div class="flex items-center">
-					<a href="/settings/user-management" class="text-gray-500 hover:text-gray-700 text-xl font-medium ">User Management</a>
-					<svg class="w-4 h-4 mx-2 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-						<path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L11.586 10 7.293 5.707a1 1 0 011.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
-					</svg>
-				</div>
-				<div class="flex items-center">
-					<a href="/settings/user-management/permissions" class="text-red-500 hover:text-gray-700 text-xl font-medium ">Permissions</a>
-				</div>
-			</nav>
+			<div class="logo breadCrumb">
+				<nav class="flex " aria-label="Breadcrumb">
+					<div class="flex items-center">
+						<a href="/settings" class="text-gray-500 hover:text-gray-700 text-xl font-medium">Settings</a>
+						<svg class="w-4 h-4 mx-2 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+							<path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L11.586 10 7.293 5.707a1 1 0 011.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+						</svg>
+					</div>
+					
+					<div class="flex items-center">
+						<a href="/settings/user-management" class="text-gray-500 hover:text-gray-700 text-xl font-medium ">User Management</a>
+						<svg class="w-4 h-4 mx-2 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+							<path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L11.586 10 7.293 5.707a1 1 0 011.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+						</svg>
+					</div>
+					<div class="flex items-center">
+						<a href="/settings/user-management/permissions" class="text-red-500 hover:text-gray-700 text-xl font-medium ">Permissions</a>
+					</div>
+				</nav>
+			</div>
 			<div class="mainDiv">
 				<h2 class="text-2xl font-bold mb-6 text-gray-900">Permissions Management</h2>
 				<form id="permissionForm" method="post" class=" mx-auto p-6 space-y-6">
@@ -185,7 +187,7 @@
 							</div>
 							<div class="flex items-center justify-between">
 								<label class="text-sm font-medium text-gray-700">Quick Actions</label>
-								<button type="button" class="toggle-button w-14 h-7 flex items-center rounded-full p-1 duration-300 ease-in-out bg-gray-200" data-toggle="dashboard.quickActions">
+								<button type="button" class="toggle-button w-14 h-7 flex items-center rounded-full p-1 duration-300 ease-in-out 	bg-gray-200" data-toggle="dashboard.quickActions">
 									<div class="bg-white w-5 h-5 rounded-full shadow-md transform duration-300 ease-in-out"></div>
 								</button>
 							</div>
@@ -211,7 +213,7 @@
 					<!-- Contacts Section -->
 					<div class="bg-white rounded-xl border p-6">
 						<div class="flex items-center justify-between mb-4">
-							<h2 class="text-lg font-semibold text-gray-800">Contacts</h2>
+							<h2 class="text-lg font-semibold text-gray-800">Contacts List</h2>
 							<button type="button" class="toggle-section w-14 h-7 flex items-center rounded-full p-1 duration-300 ease-in-out bg-gray-200" data-toggle="contacts">
 								<div class="bg-white w-5 h-5 rounded-full shadow-md transform duration-300 ease-in-out"></div>
 							</button>
@@ -296,31 +298,35 @@
 							</div>
 							
 							<!-- Manage Tags Subsection -->
-							<div class="border-l-2 border-gray-200 pl-4 mb-4">
-								<h3 class="text-md font-medium text-gray-700 mb-3">Manage Tags</h3>
-								<div class="space-y-4">
-									<div class="flex items-center justify-between">
-										<label class="text-sm font-medium text-gray-700">View Tags</label>
-										<button type="button" class="sub-toggle w-14 h-7 flex items-center rounded-full p-1 duration-300 ease-in-out bg-gray-200" data-toggle="settings.manageTags.view">
-											<div class="bg-white w-5 h-5 rounded-full shadow-md transform duration-300 ease-in-out"></div>
-										</button>
-									</div>
-									<div class="flex items-center justify-between">
-										<label class="text-sm font-medium text-gray-700">Add Tags</label>
-										<button type="button" class="sub-toggle w-14 h-7 flex items-center rounded-full p-1 duration-300 ease-in-out bg-gray-200" data-toggle="settings.manageTags.add">
-											<div class="bg-white w-5 h-5 rounded-full shadow-md transform duration-300 ease-in-out"></div>
-										</button>
-									</div>
-									<div class="flex items-center justify-between">
-										<label class="text-sm font-medium text-gray-700">Delete Tags</label>
-										<button type="button" class="sub-toggle w-14 h-7 flex items-center rounded-full p-1 duration-300 ease-in-out bg-gray-200" data-toggle="settings.manageTags.delete">
-											<div class="bg-white w-5 h-5 rounded-full shadow-md transform duration-300 ease-in-out"></div>
-										</button>
-									</div>
+							<div class="flex items-center justify-between">
+								<label class="text-sm font-medium text-gray-700">Manage Tags</label>
+								<button type="button" class="sub-toggle w-14 h-7 flex items-center rounded-full p-1 duration-300 ease-in-out bg-gray-200" data-toggle="settings.manageTags">
+									<div class="bg-white w-5 h-5 rounded-full shadow-md transform duration-300 ease-in-out"></div>
+								</button>
+							</div>
+							<div data-section="settings.manageTags" class="border-l-2 border-gray-200 pl-4 mb-4 space-y-4 mt-4 hidden">
+								<div class="flex items-center justify-between">
+									<label class="text-sm font-medium text-gray-700">View Tags</label>
+									<button type="button" class="sub-toggle w-14 h-7 flex items-center rounded-full p-1 duration-300 ease-in-out bg-gray-200" data-toggle="settings.manageTags.view">
+										<div class="bg-white w-5 h-5 rounded-full shadow-md transform duration-300 ease-in-out"></div>
+									</button>
+								</div>
+								<div class="flex items-center justify-between">
+									<label class="text-sm font-medium text-gray-700">Add Tags</label>
+									<button type="button" class="sub-toggle w-14 h-7 flex items-center rounded-full p-1 duration-300 ease-in-out bg-gray-200" data-toggle="settings.manageTags.add">
+										<div class="bg-white w-5 h-5 rounded-full shadow-md transform duration-300 ease-in-out"></div>
+									</button>
+								</div>
+								<div class="flex items-center justify-between">
+									<label class="text-sm font-medium text-gray-700">Delete Tags</label>
+									<button type="button" class="sub-toggle w-14 h-7 flex items-center rounded-full p-1 duration-300 ease-in-out bg-gray-200" data-toggle="settings.manageTags.delete">
+										<div class="bg-white w-5 h-5 rounded-full shadow-md transform duration-300 ease-in-out"></div>
+									</button>
 								</div>
 							</div>
 						</div>
 					</div>
+					
 					<!-- Reports Section -->
 					<div class="bg-white rounded-xl border p-6">
 						<div class="flex items-center justify-between mb-4">
@@ -331,29 +337,33 @@
 						</div>
 						<div data-section="reports" class="hidden space-y-4 mt-4">
 							<!-- Conversation Reports Subsection -->
-							<div class="border-l-2 border-gray-200 pl-4 mb-4">
-								<h3 class="text-md font-medium text-gray-700 mb-3">Conversation Reports</h3>
-								<div class="space-y-4">
-									<div class="flex items-center justify-between">
-										<label class="text-sm font-medium text-gray-700">View Reports</label>
-										<button type="button" class="sub-toggle w-14 h-7 flex items-center rounded-full p-1 duration-300 ease-in-out bg-gray-200" data-toggle="reports.conversationReports.viewReports">
-											<div class="bg-white w-5 h-5 rounded-full shadow-md transform duration-300 ease-in-out"></div>
-										</button>
-									</div>
-									<div class="flex items-center justify-between">
-										<label class="text-sm font-medium text-gray-700">Retargeting Users</label>
-										<button type="button" class="sub-toggle w-14 h-7 flex items-center rounded-full p-1 duration-300 ease-in-out bg-gray-200" data-toggle="reports.conversationReports.retargetingUsers">
-											<div class="bg-white w-5 h-5 rounded-full shadow-md transform duration-300 ease-in-out"></div>
-										</button>
-									</div>
-									<div class="flex items-center justify-between">
-										<label class="text-sm font-medium text-gray-700">Redirect to VP Chat</label>
-										<button type="button" class="sub-toggle w-14 h-7 flex items-center rounded-full p-1 duration-300 ease-in-out bg-gray-200" data-toggle="reports.conversationReports.redirectToVpchat">
-											<div class="bg-white w-5 h-5 rounded-full shadow-md transform duration-300 ease-in-out"></div>
-										</button>
-									</div>
+							<div class="flex items-center justify-between mb-4">
+								<label class="text-sm font-medium text-gray-700">Conversation Reports</label>
+								<button type="button" class="sub-toggle w-14 h-7 flex items-center rounded-full p-1 duration-300 ease-in-out bg-gray-200" data-toggle="reports.conversationReports">
+									<div class="bg-white w-5 h-5 rounded-full shadow-md transform duration-300 ease-in-out"></div>
+								</button>
+							</div>
+							<div data-section="reports.conversationReports" class="border-l-2 border-gray-200 pl-4 mb-4 hidden space-y-4 mt-4">
+								<div class="flex items-center justify-between">
+									<label class="text-sm font-medium text-gray-700">View Reports</label>
+									<button type="button" class="sub-toggle w-14 h-7 flex items-center rounded-full p-1 duration-300 ease-in-out bg-gray-200" data-toggle="reports.conversationReports.viewReports">
+										<div class="bg-white w-5 h-5 rounded-full shadow-md transform duration-300 ease-in-out"></div>
+									</button>
+								</div>
+								<div class="flex items-center justify-between">
+									<label class="text-sm font-medium text-gray-700">Retargeting Users</label>
+									<button type="button" class="sub-toggle w-14 h-7 flex items-center rounded-full p-1 duration-300 ease-in-out bg-gray-200" data-toggle="reports.conversationReports.retargetingUsers">
+										<div class="bg-white w-5 h-5 rounded-full shadow-md transform duration-300 ease-in-out"></div>
+									</button>
+								</div>
+								<div class="flex items-center justify-between">
+									<label class="text-sm font-medium text-gray-700">Redirect to VP Chat</label>
+									<button type="button" class="sub-toggle w-14 h-7 flex items-center rounded-full p-1 duration-300 ease-in-out bg-gray-200" data-toggle="reports.conversationReports.redirectToVpchat">
+										<div class="bg-white w-5 h-5 rounded-full shadow-md transform duration-300 ease-in-out"></div>
+									</button>
 								</div>
 							</div>
+							
 							<!-- Cost Reports -->
 							<div class="flex items-center justify-between">
 								<label class="text-sm font-medium text-gray-700">Cost Reports</label>

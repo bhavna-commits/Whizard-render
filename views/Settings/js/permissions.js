@@ -12,30 +12,39 @@ document.addEventListener("DOMContentLoaded", function () {
 			viewUsers: false,
 			quickActions: false,
 		},
-		chats: false,
+		chats: {
+			type: false, // Boolean for "chats"
+			redirectToVpchat: false,
+		},
 		contactList: {
+			type: false, // Boolean for "contactList"
 			addContactIndividual: false,
 			addContactListCSV: false,
 			deleteList: false,
 			sendBroadcast: false,
 		},
 		templates: {
+			type: false, // Boolean for "templates"
 			editTemplate: false,
 			createTemplate: false,
 			deleteTemplate: false,
 		},
 		reports: {
+			type: false, // Boolean for "reports"
 			conversationReports: {
+				type: false, // Boolean for "conversationReports"
 				viewReports: false,
 				retargetingUsers: false,
 				redirectToVpchat: false,
 			},
-			costReports: false,
+			costReports: false, // Boolean for "costReports"
 		},
 		settings: {
+			type: false, // Boolean for "settings"
 			userManagement: false,
 			activityLogs: false,
 			manageTags: {
+				type: false, // Boolean for "manageTags"
 				delete: false,
 				add: false,
 				view: false,
@@ -68,7 +77,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 		if (isMainToggle) {
 			// Handle main section toggle
-			current[parts[0]] = value;
+			current[parts[0]].type = value;
 
 			// Update UI of sub-toggles
 			const section = document.querySelector(

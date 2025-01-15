@@ -12,6 +12,7 @@ import {
 	convertDateFormat,
 } from "../../utils/otpGenerator.js";
 import { sendMessages } from "./campaign.functions.js";
+import { countries } from "../../utils/dropDown.js";
 
 export const __filename = fileURLToPath(import.meta.url);
 export const __dirname = path.dirname(__filename);
@@ -60,10 +61,7 @@ export const updateContact = async (req, res) => {
 		});
 	} catch (error) {
 		console.error(error);
-		res.status(500).json({
-			success: false,
-			message: "Error updating contact",
-		});
+		res.render("Das")
 	}
 };
 
@@ -131,6 +129,7 @@ export const getContacts = async (req, res) => {
 		res.render("Contact-List/contactList-overview", {
 			listName: name.contalistName,
 			contacts: contactLists,
+			countries,
 			page,
 			totalPages,
 			tags: [],
@@ -149,28 +148,41 @@ export const getContacts = async (req, res) => {
 };
 
 export const editContact = async (req, res) => {
-	const { id } = req.params;
-	// console.log(id);
-	const updatedData = req.body;
-
-	if (!id || !updatedData) {
-		res.status(401).json({
-			success: false,
-			message: "front-end is not providing complete data",
-		});
-	}
-
 	try {
+		const { id } = req.params;
+		const updatedData = req.body;
+
+		console.log(updatedData);
+
+		if (!id || !updatedData) {
+			return res.status(401).json({
+				success: false,
+				message: "front-end is not providing complete data",
+			});
+		}
+
+		let wa_id = "";
+
 		const setData = {};
 		for (const [key, value] of Object.entries(updatedData)) {
-			setData[key] = value;
+			
+			if (key === "countryCode") {
+				wa_id = value.slice(1); 
+			} else if (key === "wa_id" && wa_id) {
+				wa_id += value; 
+				setData["wa_id"] = wa_id; 
+			} else {
+				setData[key] = value;
+			}
 		}
-		// console.log(setData);
+
 		const contacts = await Contacts.findOneAndUpdate(
 			{ keyId: id },
 			{ $set: setData },
 			{ new: true, strict: false },
 		);
+
+		// Log the update activity
 		await ActivityLogs.create({
 			useradmin: req.session.user.id,
 			unique_id: generateUniqueId(),
@@ -180,6 +192,7 @@ export const editContact = async (req, res) => {
 			actions: "Update",
 			details: `Edited contact of : ${contacts.Name}`,
 		});
+
 		res.json({ success: true });
 	} catch (error) {
 		res.json({ success: false, message: error.message });
@@ -328,6 +341,14 @@ export const createContact = async (req, res) => {
 			wa_id,
 			masterExtra: newContactData,
 		});
+
+		const contactListId = newContact.contactId;
+		await ContactList.findOneAndUpdate(
+			{ contactId: contactListId },
+			{
+				$inc: { participantCount: 1 },
+			},
+		);
 
 		// Log the activity
 		await ActivityLogs.create({

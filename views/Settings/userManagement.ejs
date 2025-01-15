@@ -70,18 +70,17 @@
 					<%= initials %>
 				</div>
 				<% } %>
-				<div id="dropdownMenu" class="account-menu hidden">
+				<div id="dropdownMenu" class="account-menu">
 					<a href="/settings/profile">Profile</a>
 					<button onclick="logout()">Logout</button>
 				</div>
 			</div>
-			
-			
 			<script>
 				function toggleDropdown () {
+					;
 					const dropdownMenu = document.getElementById('dropdownMenu');
 					dropdownMenu.classList.toggle('hidden');
-					
+					console.log(dropdownMenu);
 					const sidebar = document.querySelector('.sidebar');
 					
 					if (dropdownMenu.classList.contains('hidden')) {
@@ -143,7 +142,7 @@
 					</div>
 					
 				</nav>
-				<div class="mt-4 space-x-4 px-3">
+				<div class=" space-x-4 px-3">
 					<button type="button" id="createNewPermissions" onclick="location.href = '/settings/user-management/permissions'" class="inline-flex items-center px-3 py-[10px] border border-transparent text-sm font-medium rounded-md text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black">
 						<i class="fa-solid fa-plus pr-2"></i>
 						<span>Add New Permissions</span>
@@ -174,7 +173,7 @@
 					<tbody>
 						<% users.forEach((user, index) => { %>
 						<tr class="text-gray-900">
-							<td class="p-4 border-b"><%= index + 1 %></td>
+							<td class="p-4 border-b border-l rounded"><%= index + 1 %></td>
 							<td class="p-4 border-b"><%= user.name %></td>
 							<td class="p-4 border-b"><%= user.email %></td>
 							<td class="p-4 border-b"><%= user.role %></td>
@@ -185,15 +184,15 @@
 								<span class="text-gray-500 font-bold"><%= user.status %></span>
 								<% } %>
 							</td>
-							<td class="p-4 border-b">
+							<td class="p-4 border-b border-r rounded">
 								<div class="relative">
-									<button class="text-gray-500 hover:text-gray-900 focus:outline-none" onclick="toggleDropdown(<%= index %>)">
+									<button type="button" class="text-gray-500 hover:text-gray-900 focus:outline-none" onclick="toggleDropdownTable(<%= index %>)">
 										&#x22EE;
 									</button>
 									<div id="dropdown-<%= index %>" class="hidden absolute bg-white border rounded-lg shadow-lg w-40 right-0 z-10">
 										<button class="block w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-100" onclick="updateStatus(<%= index %>, 'Inactive')">Mark as Unactive</button>
-										<button class="block w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-100" onclick="updateRole(<%= index %>)">Update Role</button>
-										<button class="block w-full px-4 py-2 text-left text-red-500 hover:bg-gray-100" onclick="deleteUser(<%= index %>)">Delete User</button>
+										<button type="button" class="block w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-100" onclick="updateRole(<%= index %>)">Update Role</button>
+										<button type="button" class="block w-full px-4 py-2 text-left text-red-500 hover:bg-gray-100" onclick="deleteUser(<%= index %>)">Delete User</button>
 									</div>
 								</div>
 							</td>
@@ -220,9 +219,9 @@
 			
 			
 			<script>
-				function toggleDropdown (index) {
-					const dropdown = document.getElementById('dropdown-' + index);
-					dropdown.classList.toggle('hidden');
+				function toggleDropdownTable (index) {
+					const dropdownTable = document.getElementById('dropdown-' + index);
+					dropdownTable.classList.toggle('hidden');
 				}
 				
 				function updateStatus (index, status) {

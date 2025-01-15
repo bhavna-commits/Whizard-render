@@ -1,18 +1,16 @@
-import Agenda from "agenda";
 import mongoose from "mongoose";
+import Agenda from "agenda";
 
 // MongoDB connection function
 export const connectDB = async () => {
-  try {
-    const conn = await mongoose.connect(process.env.MONGO_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
-    console.log(`MongoDB Connected: ${conn.connection.host}`);
-  } catch (error) {
-    console.error(`Error: ${error.message}`);
-    process.exit(1); // Exit process if connection fails
-  }
+	try {
+		// Connect to MongoDB without deprecated options
+		const conn = await mongoose.connect(process.env.MONGO_URI);
+		console.log(`MongoDB Connected: ${conn.connection.host}`);
+	} catch (error) {
+		console.error(`Error: ${error.message}`);
+		process.exit(1); // Exit process if connection fails
+	}
 };
 
 const mongoConnectionString = process.env.MONGO_URI;

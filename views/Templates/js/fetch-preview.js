@@ -2,11 +2,12 @@ function openModal() {
 	const templateData = collectTemplateData();
 	if (!templateData) return;
 
+	const variables = initializePreview(templateData);
+	if (!variables) return;
+
 	document.getElementById("customModal").classList.remove("hidden");
 	document.getElementById("templateModalLabel").innerText =
 		templateData.templateName;
-
-	const variables = initializePreview(templateData);
 	createVariableInputs(variables);
 
 	// Add event listeners
@@ -52,11 +53,8 @@ function initializePreview(templateData) {
 		!bodyValidation.isValid ||
 		!footerValidation.isValid
 	) {
-		throw new Error(
-			headerValidation.error ||
-				bodyValidation.error ||
-				footerValidation.error,
-		);
+		alert(bodyValidation.error);
+		return false;
 	}
 
 	return [
@@ -66,6 +64,36 @@ function initializePreview(templateData) {
 			...footerValidation.numbers,
 		]),
 	].sort();
+}
+
+function handleInputChange(event) {
+	const variable = event.target.dataset.variable;
+	const value = event.target.value.trim();
+	let span = document.getElementById(`dynamic_${variable}`);
+
+	if (span) {
+		const newSpan = `<span class="bg-transparent" id="dynamic_${variable}">${
+			value || `{{${variable}}}`
+		}</span>`;
+
+		originalTemplateData.body = originalTemplateData.body.replace(
+			span.outerHTML,
+			newSpan,
+		);
+	} else {
+		const newSpan = `<span class="bg-transparent" id="dynamic_${variable}">${
+			value || `{{${variable}}}`
+		}</span>`;
+
+		// Find the placeholder in the template body using regex and replace it with the new span
+		const regex = new RegExp(`{{\\s*${variable}\\s*}}`, "g");
+		originalTemplateData.body = originalTemplateData.body.replace(
+			regex,
+			newSpan,
+		);
+	}
+
+	updatePreview();
 }
 
 function createVariableInputs(variables) {
@@ -97,47 +125,13 @@ function updatePreview() {
 
 	Object.entries(sections).forEach(([key, element]) => {
 		// console.log(currentTemplateData[key]);
-		if (element && currentTemplateData[key]) {
-			element.innerHTML = currentTemplateData[key].replace(/\n/g, "<br>");
+		if (element && originalTemplateData[key]) {
+			element.innerHTML = originalTemplateData[key].replace(
+				/\n/g,
+				"<br>",
+			);
 		}
 	});
-}
-
-function handleInputChange(event) {
-	const variable = event.target.dataset.variable;
-	const value = event.target.value.trim();
-
-	if (originalTemplateData.headerType === "text") {
-		currentTemplateData.header = replaceVariableWithSpan(
-			originalTemplateData.header,
-			variable,
-			value,
-		);
-	}
-
-	currentTemplateData.body = replaceVariableWithSpan(
-		originalTemplateData.body,
-		variable,
-		value,
-	);
-	currentTemplateData.footer = replaceVariableWithSpan(
-		originalTemplateData.footer,
-		variable,
-		value,
-	);
-
-	updatePreview();
-}
-
-function replaceVariableWithSpan(templatePart, variable, value) {
-	if (!templatePart) return "";
-
-	const regex = new RegExp(`{{\\s*${variable}\\s*}}`, "g");
-	const spanTemplate = `<span class="bg-transparent" id="${variable}"> ${
-		value || `{{${variable}}}`
-	} </span>`;
-
-	return templatePart.replace(regex, spanTemplate);
 }
 
 // function replaceVariableWithSpan(templatePart, variable, value) {
