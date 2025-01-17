@@ -1,0 +1,132 @@
+/* Global styles */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Figtree', sans-serif;
+  background-color: #FFFFFF;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  position: relative;
+}
+
+.frame-293 {
+  position: absolute;
+  width: 651px;
+  height: 426px;
+  left: calc(50% - 651px / 2);
+  top: calc(50% - 426px / 2);
+  text-align: center;
+}
+
+/* 404 text */
+.error-code {
+  font-size: 200px;
+  font-weight: 700;
+  color: #000000;
+  text-shadow: -9px -4px 0px rgba(245, 0, 0, 0.3);
+}
+
+/* Decoration Group */
+.group-36661 {
+  position: relative;
+  width: 467.01px;
+  height: 81.57px;
+}
+
+.image-60 {
+  position: absolute;
+  width: 182.92px;
+  height: 47.91px;
+  left: 138.62px;
+  top: 29.94px;
+}
+
+.vector-26, .vector-27, .vector-40, .vector-42, .vector-44, .vector-54, .vector-56 {
+  border: 3px solid #110109;
+  position: absolute;
+}
+
+.vector-26 {
+  width: 146.62px;
+  height: 50.54px;
+  left: 320.39px;
+  top: 0px;
+}
+
+.vector-27 {
+  width: 139.76px;
+  height: 24.68px;
+  left: 0px;
+  top: 56.89px;
+}
+
+.vector-40 {
+  width: 30.69px;
+  height: 42.62px;
+  left: 539px;
+  top: 89px;
+}
+
+.vector-42 {
+  width: 31.07px;
+  height: 35.48px;
+  left: 86px;
+  top: 261px;
+}
+
+.vector-44 {
+  width: 29.36px;
+  height: 13.34px;
+  left: 81px;
+  top: 130.87px;
+  transform: rotate(-21.73deg);
+}
+
+.group-36662 {
+  width: 20.65px;
+  height: 20.43px;
+  left: 545.16px;
+  top: 265px;
+  transform: rotate(26.63deg);
+}
+
+.vector-54 {
+  width: 20.65px;
+  height: 8.43px;
+  transform: rotate(26.63deg);
+}
+
+.vector-56 {
+  width: 15.91px;
+  top: 283.26px;
+  transform: rotate(26.63deg);
+}
+
+/* Message Text */
+.message {
+  font-size: 24px;
+  color: #191919;
+  margin-bottom: 24px;
+}
+
+/* Button */
+.button {
+  display: inline-block;
+  padding: 8px 24px;
+  background-color: #191919;
+  color: #FFFFFF;
+  text-decoration: none;
+  border-radius: 6px;
+  font-family: 'Figtree', sans-serif;
+  font-size: 16px;
+}
+
+.button:hover {
+  background-color: #333333;
+}

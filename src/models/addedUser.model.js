@@ -7,16 +7,23 @@ const addedUserSchema = new mongoose.Schema(
 		name: { type: String, required: true },
 		password: { type: String },
 		useradmin: { type: String, ref: "User" },
-		role: {
+		photo: { type: String },
+		color: { type: String },
+		roleId: {
+			type: String,
+			required: true,
+		},
+		roleName: {
 			type: String,
 			required: true,
 		},
 		deleted: { type: Boolean, default: false },
-		invitationStatus: {
+		status: {
 			type: String,
-			enum: ["Invited", "Registered"],
-			default: "Invited",
+			enum: ["In-active", "Active"],
+			default: "In-active",
 		},
+		blocked: { type: Boolean, default: false },
 		createdAt: { type: Number, default: () => Date.now() },
 		updatedAt: { type: Number, default: () => Date.now() },
 	},

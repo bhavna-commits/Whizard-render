@@ -34,13 +34,29 @@
 					</td>
 					<td class="border-r border-t border-b rounded-lg border-gray-200">
 						<!-- Edit Button -->
+						<% if (access?.contactList?.sendBroadcast && whatsAppStatus == "Live") { %>
 						<button aria-label="Edit contact" class="text-gray-600 hover:text-blue-600 px-3 border-r" onclick="event.stopPropagation(); location.href='/contact-list/createCampaign'">
 							<i class="fa-solid fa-paper-plane"></i>
 						</button>
+						<% } else if (whatsAppStatus == "Pending")  { %>
+						<button class="text-gray-600 hover:cursor-not-allowed px-3 border-r" title="Connect with whatsApp Business API to send message" disabled>
+							<i class="fa-solid fa-paper-plane"></i>
+						</button>
+						<% } else { %>
+						<button class="text-gray-600 hover:cursor-not-allowed px-3 border-r" title="You don't have permissions to access this" disabled>
+							<i class="fa-solid fa-paper-plane"></i>
+						</button>
+						<% } %>
+						<% if (access?.contactList?.deleteList) { %>
 						<!-- Delete Button -->
 						<button aria-label="Delete contact" class="text-gray-600 hover:text-red-600 px-2" onclick="event.stopPropagation(); openDeleteModal('<%= contact.contactId %>', '<%= contact.contalistName %>');">
 							<i class="fa-regular fa-trash-can"></i>
 						</button>
+						<% } else { %>
+						<button class="text-gray-600 hover:cursor-not-allowed px-2" title="You don't have permissions to access this">
+							<i class="fa-regular fa-trash-can"></i>
+						</button>
+						<% } %>
 					</td>
 				</tr>
 				<% }); %>

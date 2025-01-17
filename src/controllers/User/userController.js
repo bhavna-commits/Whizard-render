@@ -132,13 +132,17 @@ export const login = async (req, res) => {
 						.status(400)
 						.json({ message: "Invalid credentials" });
 				}
-
-				req.session.user = {
-					id: addedUser.owner,
-				};
+				const data = await User.findOne({
+					unique_id: addedUser.useradmin,
+				});
 				req.session.addedUser = {
-					id: addedUser._id,
+					id: addedUser.unique_id,
 					name: addedUser.name,
+					photo: addedUser?.photo,
+					color: addedUser.color,
+					permissions: addedUser.roleId,
+					owner: addedUser.useradmin,
+					whatsAppStatus: data.WhatsAppConnectStatus,
 				};
 
 				if (rememberMe) {
@@ -164,6 +168,7 @@ export const login = async (req, res) => {
 			name: user.name,
 			color: user.color,
 			photo: user.profilePhoto,
+			whatsAppStatus: user.WhatsAppConnectStatus,
 		};
 
 		if (rememberMe) {

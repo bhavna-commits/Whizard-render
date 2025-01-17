@@ -2,6 +2,7 @@ import User from "../../models/user.model.js";
 import Campaign from "../../models/campaign.model.js";
 import Report from "../../models/report.model.js";
 import ContactList from "../../models/contactList.model.js";
+import Permissions from "../../models/permissions.model.js";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -9,7 +10,7 @@ dotenv.config();
 export const getDashboard = async (req, res) => {
 	try {
 		const { startDate, endDate } = req.query;
-		const id = req.session.user.id;
+		const id = req.session?.user?.id || req.session?.addedUser?.owner;
 
 		const user = await User.findOne({ unique_id: id });
 		// Convert startDate and endDate to timestamps
@@ -131,30 +132,64 @@ export const getDashboard = async (req, res) => {
 				  100
 				: 0;
 
-		// Send the data to the view
-		res.render("Dashboard/dashboard", {
-			// Add your config and app information here
-			config: process.env.CONFIG_ID,
-			app: process.env.FB_APP_ID,
-			graph: process.env.FB_GRAPH_VERSION,
-			status: user.WhatsAppConnectStatus,
-			secret: process.env.FB_APP_SECRET,
-			totalMessages: campaignStats.totalMessages,
-			messagesSent: campaignStats.messagesSent,
-			messagesDelivered: campaignStats.messagesDelivered,
-			messagesRead: campaignStats.messagesRead,
-			messagesReplied: campaignStats.messagesReplied,
-			messagesFailed: campaignStats.messagesFailed,
-			totalCampaigns: campaignStats.totalCampaigns,
-			percentSent: percentSent.toFixed(2),
-			percentDelivered: percentDelivered.toFixed(2),
-			percentRead: percentRead.toFixed(2),
-			totalContacts: contactOverview.totalContacts,
-			totalLists: contactOverview.totalLists,
-			photo: req.session.user?.photo,
-			name: req.session.user.name,
-			color: req.session.user.color,
-		});
+		const permissions = req.session?.addedUser?.permissions;
+		if (permissions) {
+			const access = Permissions.findOne({ unique_id: permissions });
+			if (access) {
+				res.render("Dashboard/dashboard", {
+					access,
+					config: process.env.CONFIG_ID,
+					app: process.env.FB_APP_ID,
+					graph: process.env.FB_GRAPH_VERSION,
+					status: user.WhatsAppConnectStatus,
+					secret: process.env.FB_APP_SECRET,
+					totalMessages: campaignStats.totalMessages,
+					messagesSent: campaignStats.messagesSent,
+					messagesDelivered: campaignStats.messagesDelivered,
+					messagesRead: campaignStats.messagesRead,
+					messagesReplied: campaignStats.messagesReplied,
+					messagesFailed: campaignStats.messagesFailed,
+					totalCampaigns: campaignStats.totalCampaigns,
+					percentSent: percentSent.toFixed(2),
+					percentDelivered: percentDelivered.toFixed(2),
+					percentRead: percentRead.toFixed(2),
+					totalContacts: contactOverview.totalContacts,
+					totalLists: contactOverview.totalLists,
+					photo: req.session?.addedUser?.photo,
+					name: req.session?.addedUser?.name,
+					color: req.session?.addedUser?.color,
+				});
+			} else {
+				res.render("errors/notAllowed");
+			}
+		} else {
+			const access = await User.findOne({
+				unique_id: req.session?.user?.id,
+			});
+			res.render("Dashboard/dashboard", {
+				access: access.access,
+				config: process.env.CONFIG_ID,
+				app: process.env.FB_APP_ID,
+				graph: process.env.FB_GRAPH_VERSION,
+				status: user.WhatsAppConnectStatus,
+				secret: process.env.FB_APP_SECRET,
+				totalMessages: campaignStats.totalMessages,
+				messagesSent: campaignStats.messagesSent,
+				messagesDelivered: campaignStats.messagesDelivered,
+				messagesRead: campaignStats.messagesRead,
+				messagesReplied: campaignStats.messagesReplied,
+				messagesFailed: campaignStats.messagesFailed,
+				totalCampaigns: campaignStats.totalCampaigns,
+				percentSent: percentSent.toFixed(2),
+				percentDelivered: percentDelivered.toFixed(2),
+				percentRead: percentRead.toFixed(2),
+				totalContacts: contactOverview.totalContacts,
+				totalLists: contactOverview.totalLists,
+				photo: req.session?.user?.photo,
+				name: req.session?.user?.name,
+				color: req.session?.user?.color,
+			});
+		}
 	} catch (error) {
 		console.error(error);
 		res.status(500).send("Server error");

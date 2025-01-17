@@ -19,13 +19,15 @@ const permissionSchema = new Schema(
 		contactList: {
 			type: { type: Boolean, default: false },
 			addContactIndividual: { type: Boolean, default: false },
+			editContactIndividual: { type: Boolean, default: false },
+			deleteContactIndividual: { type: Boolean, default: false },
 			addContactListCSV: { type: Boolean, default: false },
 			deleteList: { type: Boolean, default: false },
 			sendBroadcast: { type: Boolean, default: false },
 		},
 		templates: {
 			type: { type: Boolean, default: false },
-			editTemplate: { type: Boolean, default: false },
+			duplicateTemplate: { type: Boolean, default: false },
 			createTemplate: { type: Boolean, default: false },
 			deleteTemplate: { type: Boolean, default: false },
 		},

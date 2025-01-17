@@ -52,30 +52,87 @@
 				<img onclick="location.href = '/'" class="cursor-pointer" src="/assets/img/Wizard_logo.png" alt="Whizard Logo" />
 			</div>
 			<ul class="">
+				<!-- Dashboard: Always enabled -->
 				<li>
-					<a href="/" class=""><span class="icon"><i class="fas fa-chart-line"></i></span>
-						Dashboard</a>
+					<a href="/" class="">
+						<span class="icon"><i class="fas fa-chart-line"></i></span>
+						Dashboard
+					</a>
 				</li>
-				<li class="">
-					<a href="/chats"><span class="icon"><i class="fa-regular fa-comment"></i></span>
-						Chats</a>
+				
+				<!-- Chats: Conditionally rendered based on permissions -->
+				<li>
+					<% if (access?.chats?.type) { %>
+					<a href="/chats" class="">
+						<span class="icon"><i class="fa-regular fa-comment"></i></span>
+						Chats
+					</a>
+					<% } else { %>
+					<a href="javascript:void(0);" title="You don't have permissions to access this" class="cursor-not-allowed">
+						<span class="icon"><i class="fa-regular fa-comment"></i></span>
+						Chats
+					</a>
+					<% } %>
 				</li>
-				<li class="">
-					<a href="/contact-list"><span class="icon "><i class="fa-regular fa-address-book"></i></span>
-						
-						Contact List</a>
+				
+				<!-- Contact List: Conditionally rendered based on permissions -->
+				<li>
+					<% if (access?.contactList?.type) { %>
+					<a href="/contact-list">
+						<span class="icon "><i class="fa-regular fa-address-book"></i></span>
+						Contact List
+					</a>
+					<% } else { %>
+					<a href="javascript:void(0);" title="You don't have permissions to access this" class="cursor-not-allowed">
+						<span class="icon"><i class="fa-regular fa-address-book"></i></span>
+						Contact List
+					</a>
+					<% } %>
 				</li>
-				<li class="">
-					<a href="/template"><span class="icon "><i class="fa-regular fa-envelope"></i></span>
-						Template</a>
+				
+				<!-- Template: Conditionally rendered based on permissions -->
+				<li>
+					<% if (access?.templates?.type) { %>
+					<a href="/template">
+						<span class="icon"><i class="fa-regular fa-envelope"></i></span>
+						Template
+					</a>
+					<% } else { %>
+					<a href="javascript:void(0);" title="You don't have permissions to access this" class="cursor-not-allowed">
+						<span class="icon"><i class="fa-regular fa-envelope"></i></span>
+						Template
+					</a>
+					<% } %>
 				</li>
-				<li class="">
-					<a href="/settings"><span class="icon active"><i class="fa-regular fa-user"></i></span>
-						Settings</a>
+				
+				<!-- Settings: Conditionally rendered based on permissions -->
+				<li>
+					<% if (access?.settings?.type) { %>
+					<a href="/settings">
+						<span class="icon active"><i class="fa-regular fa-user"></i></span>
+						Settings
+					</a>
+					<% } else { %>
+					<a href="javascript:void(0);" title="You don't have permissions to access this" class="cursor-not-allowed">
+						<span class="icon"><i class="fa-regular fa-user"></i></span>
+						Settings
+					</a>
+					<% } %>
 				</li>
-				<li class="py-1">
-					<a href="/reports/campaign-list"><span class="icon"><i class="fa-regular fa-chart-bar"></i></span>
-						Reports</a>
+				
+				<!-- Reports: Conditionally rendered based on permissions -->
+				<li>
+					<% if (access?.reports?.type) { %>
+					<a href="/reports/campaign-list">
+						<span class="icon"><i class="fa-regular fa-chart-bar"></i></span>
+						Reports
+					</a>
+					<% } else { %>
+					<a href="javascript:void(0);" title="You don't have permissions to access this" class="cursor-not-allowed">
+						<span class="icon"><i class="fa-regular fa-chart-bar"></i></span>
+						Reports
+					</a>
+					<% } %>
 				</li>
 			</ul>
 			<div class=" user-profile text-white flex justify-center items-center text-center">
@@ -95,48 +152,48 @@
 			</div>
 			
 			
-		<script>
-			function toggleDropdown () {
-				const dropdownMenu = document.getElementById('dropdownMenu');
-				dropdownMenu.classList.toggle('hidden');
-				
-				const sidebar = document.querySelector('.sidebar');
-				
-				if (dropdownMenu.classList.contains('hidden')) {
-					sidebar.style.overflow = 'auto';
-				} else {
-					sidebar.style.overflow = 'visible';
-				}
-			}
-			
-			async function logout () {
-				try {
-					const response = await fetch('/api/users/logout', {
-						method: 'POST',
-						credentials: 'same-origin'
-					});
+			<script>
+				function toggleDropdown () {
+					const dropdownMenu = document.getElementById('dropdownMenu');
+					dropdownMenu.classList.toggle('hidden');
 					
-					if (response.ok) {
-						window.location.href = '/login';
+					const sidebar = document.querySelector('.sidebar');
+					
+					if (dropdownMenu.classList.contains('hidden')) {
+						sidebar.style.overflow = 'auto';
 					} else {
+						sidebar.style.overflow = 'visible';
+					}
+				}
+				
+				async function logout () {
+					try {
+						const response = await fetch('/api/users/logout', {
+							method: 'POST',
+							credentials: 'same-origin'
+						});
+						
+						if (response.ok) {
+							window.location.href = '/login';
+						} else {
+							alert('Error logging out.');
+						}
+					} catch (err) {
+						console.error('Error:', err);
 						alert('Error logging out.');
 					}
-				} catch (err) {
-					console.error('Error:', err);
-					alert('Error logging out.');
 				}
-			}
-			
-			// Close the dropdown if clicked outside
-			window.onclick = function (event) {
-				const dropdown = document.getElementById("dropdownMenu");
-				const sidebar = document.querySelector('.sidebar');
-				if (!event.target.closest('.user-profile')) {
-					dropdown.classList.add("hidden");
-					sidebar.style.overflow = 'auto';
-				}
-			};
-		</script>
+				
+				// Close the dropdown if clicked outside
+				window.onclick = function (event) {
+					const dropdown = document.getElementById("dropdownMenu");
+					const sidebar = document.querySelector('.sidebar');
+					if (!event.target.closest('.user-profile')) {
+						dropdown.classList.add("hidden");
+						sidebar.style.overflow = 'auto';
+					}
+				};
+			</script>
 		</nav>
 		<!-- END SIDEBAR MENU TOP TRAY CONTENT-->
 		
@@ -161,26 +218,51 @@
 						<h2 class="text-2xl text-black">Profile</h2>
 						<p>Manage personal details such as name, email, password, language preferences, and user role.</p>
 					</div>
+					
 					<div onclick="location.href='/settings/account-details'" class="border cursor-pointer rounded-xl text-slate-500 space-y-3 p-3 hover:bg-slate-100">
 						<i class="fas fa-info-circle text-black text-xl"></i>
 						<h2 class="text-2xl text-black">Account Details</h2>
 						<p>View and update business information and contact information.</p>
 					</div>
+					<% if (access?.settings?.userManagement) { %>
 					<div onclick="location.href='/settings/user-management'" class="border cursor-pointer rounded-xl text-slate-500 space-y-3 p-3 hover:bg-slate-100">
 						<i class="fa fa-users text-black text-xl" aria-hidden="true"></i>
 						<h2 class="text-2xl text-black">User Management</h2>
 						<p>Add, edit, remove users, and assign roles to manage team access and permissions effectively.</p>
 					</div>
+					<% } else { %>
+					<div title="You don't have permissions to access this" class="border hover:cursor-not-allowed cursor-pointer rounded-xl text-slate-500 space-y-3 p-3">
+						<i class="fa fa-users text-black text-xl" aria-hidden="true"></i>
+						<h2 class="text-2xl text-black">User Management</h2>
+						<p>Add, edit, remove users, and assign roles to manage team access and permissions effectively.</p>
+					</div>
+					<% } %>
+					<% if (access?.settings?.manageTags?.type) { %>
 					<!-- <div onclick="location.href='/settings/tags'" class="border cursor-pointer text-slate-500 rounded-xl space-y-3 p-3 hover:bg-slate-100">
 						<i class="fa-solid fa-tags text-black text-xl"></i>
 						<h2 class="text-2xl text-black">Tags</h2>
 						<p>Create, edit, and manage tags to organize and categorize data for better searchability and segmentation.</p>
 					</div> -->
+					<% } else { %>
+						<!-- <div title="You don't have permissions to access this" class="border cursor-pointer text-slate-500 rounded-xl space-y-3 p-3 hover:cursor-not-allowed">
+						<i class="fa-solid fa-tags text-black text-xl"></i>
+						<h2 class="text-2xl text-black">Tags</h2>
+						<p>Create, edit, and manage tags to organize and categorize data for better searchability and segmentation.</p>
+					</div> -->
+					<% } %>
+					<% if (access?.settings?.activityLogs) { %>
 					<div onclick="location.href='/settings/activity-logs'" class="border cursor-pointer rounded-xl text-slate-500 space-y-3 p-3 hover:bg-slate-100">
 						<i class="fas fa-history text-black text-xl"></i>
 						<h2 class="text-2xl text-black">Activity Logs</h2>
 						<p>Track user activity and display a timeline of actions, including activity type, user details, and timestamps.</p>
 					</div>
+					<% } else { %>
+						<div title="You don't have permissions to access this" class="border rounded-xl text-slate-500 space-y-3 p-3 hover:cursor-not-allowed">
+							<i class="fas fa-history text-black text-xl"></i>
+							<h2 class="text-2xl text-black">Activity Logs</h2>
+							<p>Track user activity and display a timeline of actions, including activity type, user details, and timestamps.</p>
+						</div>
+					<% } %>
 				</div>
 			</div>
 			

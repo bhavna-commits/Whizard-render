@@ -2,6 +2,11 @@ import path from "path";
 import fs from "fs";
 import ContactList from "../../models/contactList.model.js";
 import Contacts from "../../models/contacts.model.js";
+import {
+	isNumber,
+	isString,
+	isBoolean,
+} from "../../middleWares/sanitiseInput.js";
 // import Template from "../../models/templates.model.js";
 import Permissions from "../../models/permissions.model.js";
 import CustomField from "../../models/customField.model.js";
@@ -356,6 +361,9 @@ export const getCustomField = async (req, res) => {
 		const limit = 6;
 		const skip = (page - 1) * limit;
 
+		if (!isNumber(page)) next();
+		if (!isString(userId)) next();
+
 		const result = await CustomField.aggregate([
 			{
 				$match: {
@@ -381,21 +389,39 @@ export const getCustomField = async (req, res) => {
 		// Calculate total pages
 		const totalPages = Math.ceil(totalCount / limit);
 
-		// Render the page with custom fields and pagination info
-		res.render("Contact-List/custom-field", {
-			customFields: paginatedResults || [],
-			page: parseInt(skip) / parseInt(limit) + 1, // Page number based on skip and limit
-			totalPages,
-			photo: req.session.user?.photo,
-			name: req.session.user.name,
-			color: req.session.user.color,
-		});
+		const permissions = req.session?.addedUser?.permissions;
+		if (permissions) {
+			const access = Permissions.findOne({ unique_id: permissions });
+			if (access.contactList.customFields.type) {
+				res.render("Contact-List/custom-field", {
+					access,
+					customFields: paginatedResults || [],
+					page: parseInt(skip) / parseInt(limit) + 1,
+					totalPages,
+					countries,
+					photo: req.session?.addedUser?.photo,
+					name: req.session?.addedUser?.name,
+					color: req.session?.addedUser?.color,
+				});
+			} else {
+				res.render("errors/notAllowed");
+			}
+		} else {
+			const access = Permissions.findOne({ useradmin: userId });
+			res.render("Contact-List/custom-field", {
+				access: access.access,
+				customFields: paginatedResults || [],
+				page: parseInt(skip) / parseInt(limit) + 1,
+				totalPages,
+				countries,
+				photo: req.session.user?.photo,
+				name: req.session.user.name,
+				color: req.session.user.color,
+			});
+		}
 	} catch (error) {
 		console.error(error);
-		res.status(500).json({
-			success: false,
-			message: "Error fetching custom fields",
-		});
+		res.render("errors/serverError");
 	}
 };
 
@@ -627,10 +653,12 @@ export const updateContactListName = async (req, res) => {
 
 export const getList = async (req, res) => {
 	try {
-		const userId = req.session.user.id;
+		const userId = req.session?.user?.id || req.session?.addedUser?.owner;
 		const page = parseInt(req.query.page) || 1;
 		const limit = 6;
 		const skip = (page - 1) * limit;
+
+		if (!isNumber(page)) next();
 
 		const result = await ContactList.aggregate([
 			{
@@ -667,7 +695,7 @@ export const getList = async (req, res) => {
 			const access = Permissions.findOne({ unique_id: permissions });
 			if (access.contactList) {
 				res.render("Contact-List/contact-list", {
-					access: access.contactList,
+					access: access,
 					countries: countries,
 					contacts: contactLists,
 					page,
@@ -675,21 +703,21 @@ export const getList = async (req, res) => {
 					headers: [],
 					data: [],
 					errors: [],
+					photo: req.session?.addedUser?.photo,
+					name: req.session?.addedUser?.name,
+					color: req.session?.addedUser?.color,
+					whatsAppStatus: req.session?.addedUser?.whatsAppStatus,
 				});
 			} else {
-				res.render("Dashboard/dashboard", {
-					access: access.dashboard,
-					config: process.env.CONFIG_ID,
-					app: process.env.FB_APP_ID,
-					graph: process.env.FB_GRAPH_VERSION,
-					status: req.session.user.WhatsAppConnectStatus,
-					secret: process.env.FB_APP_SECRET,
-				});
+				res.render("errors/notAllowed");
 			}
 		} else {
-			const access = Permissions.findOne({ owner: userId });
+			const access = await User.findOne({
+				unique_id: req.session?.user?.id,
+			});
+			// console.log(access.access);
 			res.render("Contact-List/contact-list", {
-				access: access.user?.contactList,
+				access: access.access,
 				countries: countries,
 				contacts: contactLists,
 				page,
@@ -698,22 +726,20 @@ export const getList = async (req, res) => {
 				data: [],
 				errors: [],
 				photo: req.session.user?.photo,
-				name: req.session.user.name,
-				color: req.session.user.color,
+				name: req.session.user?.name,
+				color: req.session.user?.color,
+				whatsAppStatus: req.session?.user?.whatsAppStatus,
 			});
 		}
 	} catch (error) {
 		console.error(error);
-		res.status(500).json({
-			success: false,
-			message: "Error fetching contact lists",
-		});
+		res.render("errors/serverError");
 	}
 };
 
 export const getContactList = async (req, res) => {
 	try {
-		const { id } = req.session.user;
+		const id = req.session?.user?.id || req.session?.addedUser?.owner;
 
 		const contactLists = await ContactList.find({
 			useradmin: id,
@@ -724,7 +750,8 @@ export const getContactList = async (req, res) => {
 
 		res.json(contactLists);
 	} catch (error) {
-		res.status(500).json({ success: false, error: error.message });
+		console.error(error);
+		res.render("errors/serverError");
 	}
 };
 

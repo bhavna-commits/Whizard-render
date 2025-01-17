@@ -2,7 +2,6 @@
 <html lang="en">
 
 <head>
-	<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
 	<meta charset="UTF-8" />
 	<title>Whizard - Contact List</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -13,7 +12,7 @@
 	<link href="assets/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
 	<link href="assets/plugins/jquery-scrollbar/jquery.scrollbar.css" rel="stylesheet" type="text/css" media="screen" />
 	<link href="assets/plugins/select2/css/select2.min.css" rel="stylesheet" type="text/css" media="screen" />
-	<!-- <link class="main-stylesheet" href="pages/css/themes/corporate.css" rel="stylesheet" type="text/css" /> -->
+	<!-- <link class="main-stylesheet" href="pages/css/themes/corporate.css" rel="stylesheet" type="text/css" /> 
 	<!-- Please remove the file below for production: Contains demo classes -->
 	<!-- <link class="main-stylesheet" href="assets/css/style.css" rel="stylesheet" type="text/css" /> -->
 	<link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -44,32 +43,90 @@
 				<img onclick="location.href = '/'" class="cursor-pointer" src="/assets/img/Wizard_logo.png" alt="Whizard Logo" />
 			</div>
 			<ul class="">
+				<!-- Dashboard: Always enabled -->
 				<li>
-					<a href="/" class=""><span class="icon "><i class="fas fa-chart-line"></i></span>
-						Dashboard</a>
+					<a href="/" class="">
+						<span class="icon"><i class="fas fa-chart-line"></i></span>
+						Dashboard
+					</a>
 				</li>
+				
+				<!-- Chats: Conditionally rendered based on permissions -->
 				<li>
-					<a href="/chats"><span class="icon"><i class="fa-regular fa-comment"></i></span>
-						Chats</a>
+					<% if (access?.chats?.type) { %>
+					<a href="/chats" class="">
+						<span class="icon"><i class="fa-regular fa-comment"></i></span>
+						Chats
+					</a>
+					<% } else { %>
+					<a href="javascript:void(0);" class="cursor-not-allowed">
+						<span class=""><i class="fa-regular fa-comment"></i></span>
+						Chats
+					</a>
+					<% } %>
 				</li>
+				
+				<!-- Contact List: Conditionally rendered based on permissions -->
 				<li>
-					<a href="/contact-list"><span class="icon active"><i class="fa-regular fa-address-book"></i></span>
-						
-						Contact List</a>
+					<% if (access?.contactList?.type) { %>
+					<a href="/contact-list">
+						<span class="icon active"><i class="fa-regular fa-address-book"></i></span>
+						Contact List
+					</a>
+					<% } else { %>
+					<a href="javascript:void(0);" class="cursor-not-allowed">
+						<span class=""><i class="fa-regular fa-address-book"></i></span>
+						Contact List
+					</a>
+					<% } %>
 				</li>
+				
+				<!-- Template: Conditionally rendered based on permissions -->
 				<li>
-					<a href="/template"><span class="icon"><i class="fa-regular fa-envelope"></i></span>
-						Template</a>
+					<% if (access?.templates?.type) { %>
+					<a href="/template">
+						<span class="icon"><i class="fa-regular fa-envelope"></i></span>
+						Template
+					</a>
+					<% } else { %>
+					<a href="javascript:void(0);" class="cursor-not-allowed">
+						<span class=""><i class="fa-regular fa-envelope"></i></span>
+						Template
+					</a>
+					<% } %>
 				</li>
+				
+				<!-- Settings: Conditionally rendered based on permissions -->
 				<li>
-					<a href="/settings"><span class="icon"><i class="fa-regular fa-user"></i></span>
-						Settings</a>
+					<% if (access?.settings?.type) { %>
+					<a href="/settings">
+						<span class="icon"><i class="fa-regular fa-user"></i></span>
+						Settings
+					</a>
+					<% } else { %>
+					<a href="javascript:void(0);" class="cursor-not-allowed">
+						<span class=""><i class="fa-regular fa-user"></i></span>
+						Settings
+					</a>
+					<% } %>
 				</li>
+				
+				<!-- Reports: Conditionally rendered based on permissions -->
 				<li>
-					<a href="/reports/campaign-list"><span class="icon"><i class="fa-regular fa-chart-bar"></i></span>
-						Reports</a>
+					<% if (access?.reports?.type) { %>
+					<a href="/reports/campaign-list">
+						<span class="icon"><i class="fa-regular fa-chart-bar"></i></span>
+						Reports
+					</a>
+					<% } else { %>
+					<a href="javascript:void(0);" class="cursor-not-allowed">
+						<span class=""><i class="fa-regular fa-chart-bar"></i></span>
+						Reports
+					</a>
+					<% } %>
 				</li>
 			</ul>
+			
 			<div class=" user-profile text-white flex justify-center items-center text-center">
 				<% if (photo) { %>
 				<img src="/<%= photo %>" alt="User Profile" class="user-profile-img" onclick="toggleDropdown()" />
@@ -85,8 +142,6 @@
 					<button onclick="logout()">Logout</button>
 				</div>
 			</div>
-			
-			
 			<script>
 				function toggleDropdown () {
 					const dropdownMenu = document.getElementById('dropdownMenu');
@@ -145,9 +200,11 @@
 							<path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L11.586 10 7.293 5.707a1 1 0 011.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
 						</svg>
 					</div>
-					
+					<% if (access?.contactList?.type) { %>
 					<a href="/contact-list" class="text-red-600 hover:text-gray-700 text-xl hover:no-underline font-medium">Contact List</a>
-					<!-- END BREADCRUMB -->
+					<% } else { %>
+					<a href="javascript:void(0);" class="cursor-not-allowed text-red-300 hover:text-gray-300 text-xl hover:no-underline font-medium">Contact List</a>
+					<% } %>
 				</div>
 			</div>
 			
@@ -165,20 +222,37 @@
 							</svg>
 							<input type="search" id="searchInput" placeholder="Search by contact list name" class="outline-none focus:outline-none w-full" />
 						</div>
-						
+						<% if (access?.contactList?.customFields?.type) { %>
 						<div class="text-center pr-3">
-							<button aria-label="" onclick="document.location='contact-list/custom-field'" type="button" class="border py-2 px-2 rounded-lg transition-colors ease-in-out duration-300 hover:bg-gray-100 text-base font-medium">
+							<button aria-label="" onclick="document.location='/contact-list/custom-field'" type="button" class="border py-2 px-2 rounded-lg transition-colors ease-in-out duration-300 hover:bg-gray-100 text-base font-medium">
 								Manage custom fields
 							</button>
 						</div>
+						<% } else { %>
+						<div class="text-center pr-3">
+							<button aria-label="" type="button" class="border py-2 cursor-not-allowed px-2 rounded-lg transition-colors ease-in-out duration-300 hover:text-gray-400 text-base font-medium">
+								Manage custom fields
+							</button>
+						</div>
+						<% } %>
 						
-						<button aria-label="Create new Contact list" type="button" id="create-List" class="inline-flex items-center py-[0.70rem] px-[0.8rem] border border-transparent text-sm font-medium rounded-md text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black">
+						<% if (access?.contactList?.addContactListCSV) { %>
+						<button aria-label="Create new Contact list" type="button" id="create-List" class="inline-flex items-center py-[0.70rem] px-[0.8rem] border border-transparent text-sm font-medium rounded-md text-white  bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black">
 							<i class="fa-solid fa-plus pr-2"></i>
 							<span>Create new Contact list</span>
 						</button>
+						<% } else { %>
+						<button aria-label="Create new Contact list" class="inline-flex items-center py-[0.70rem] px-[0.8rem] border border-transparent text-sm font-medium rounded-md text-white bg-black cursor-not-allowed hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black" disabled>
+							<i class="fa-solid fa-plus pr-2"></i>
+							<span>Create new Contact list</span>
+						</button>
+						<% } %>
+						
 					</div>
+					<% if (access?.contactList?.addContactListCSV) { %>
 					<!-- Pop-Up Modal to create List -->
 					<%- include('partials/createList') %>
+					<% } %>
 				</div>
 				
 				<!-- Contact list table -->

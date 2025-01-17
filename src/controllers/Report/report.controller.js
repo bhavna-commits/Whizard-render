@@ -6,22 +6,22 @@ import { overview } from "./reports.functions.js";
 // Controller to fetch campaign reports and render them page-wise
 export const getCampaignList = async (req, res) => {
 	try {
-		const userId = req.session.user.id;
-		const page = parseInt(req.query.page) || 1; // Current page
-		const limit = 6; // Results per page
-		const skip = (page - 1) * limit; // Calculate how many records to skip
+		const userId = req.session?.user?.id || req.session?.addedUser.owner;
+		const page = parseInt(req.query.page) || 1;
+		const limit = 6;
+		const skip = (page - 1) * limit;
 
 		// Fetch campaigns created by the user
 		const campaigns = await Campaign.aggregate([
 			{
 				$match: {
 					useradmin: userId,
-					deleted: { $ne: true }, // If you have a deleted field in campaigns
+					deleted: { $ne: true },
 				},
 			},
 			{
 				$lookup: {
-					from: "campaignreports", // Use the name of the reports collection
+					from: "campaignreports",
 					localField: "unique_id",
 					foreignField: "campaignId",
 					as: "reports",
@@ -97,15 +97,31 @@ export const getCampaignList = async (req, res) => {
 		const totalCount = campaigns[0]?.totalCount[0]?.total || 0;
 		const totalPages = Math.ceil(totalCount / limit);
 
-		// console.log(paginatedResults);
-		res.render("Reports/campaign", {
-			campaigns: paginatedResults,
-			page,
-			totalPages,
-			photo: req.session.user?.photo,
-			name: req.session.user.name,
-			color: req.session.user.color,
-		});
+		const permissions = req.session?.addedUser?.permissions;
+		if (permissions) {
+			const access = Permissions.findOne({ unique_id: permissions });
+			res.render("Contact-List/custom-field", {
+				access: access.contactList,
+				customFields: paginatedResults || [],
+				page: parseInt(skip) / parseInt(limit) + 1,
+				totalPages,
+				countries,
+				photo: req.session?.addedUser?.photo,
+				name: req.session?.addedUser?.name,
+				color: req.session?.addedUser?.color,
+			});
+		} else {
+			const access = Permissions.findOne({ useradmin: userId });
+			res.render("Reports/campaign", {
+				access: access.user?.reports,
+				campaigns: paginatedResults,
+				page,
+				totalPages,
+				photo: req.session.user?.photo,
+				name: req.session.user.name,
+				color: req.session.user.color,
+			});
+		}
 	} catch (err) {
 		console.error(err);
 		res.status(500).send("Server Error");
@@ -316,7 +332,8 @@ const getCampaignOverview = async (req, res) => {
 			messagesReplied: paginatedResults[0].messagesReplied || 0,
 			messagesFailed: paginatedResults[0].messagesFailed || 0,
 			percentSent: paginatedResults[0].percentSent?.toFixed(2) || 0,
-			percentDelivered: paginatedResults[0].percentDelivered?.toFixed(2) || 0,
+			percentDelivered:
+				paginatedResults[0].percentDelivered?.toFixed(2) || 0,
 			percentRead: paginatedResults[0].percentRead?.toFixed(2) || 0,
 			photo: req.session.user?.photo,
 			name: req.session.user.name,

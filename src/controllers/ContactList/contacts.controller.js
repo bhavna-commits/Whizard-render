@@ -3,6 +3,7 @@ import path from "path";
 import Papa from "papaparse";
 import ContactList from "../../models/contactList.model.js";
 import Contacts from "../../models/contacts.model.js";
+import Permissions from "../../models/permissions.model.js";
 import ActivityLogs from "../../models/activityLogs.model.js";
 import Campaign from "../../models/campaign.model.js";
 import User from "../../models/user.model.js";
@@ -13,6 +14,11 @@ import {
 } from "../../utils/otpGenerator.js";
 import { sendMessages } from "./campaign.functions.js";
 import { countries } from "../../utils/dropDown.js";
+import {
+	isNumber,
+	isString,
+	isBoolean,
+} from "../../middleWares/sanitiseInput.js";
 
 export const __filename = fileURLToPath(import.meta.url);
 export const __dirname = path.dirname(__filename);
@@ -25,7 +31,7 @@ export const csvFilePath = path.join(
 	"sample.csv",
 );
 
-export const updateContact = async (req, res) => {
+export const updateContact = async (req, res, next) => {
 	const contactId = req.params.id;
 	const { name, tags, validated } = req.body;
 
@@ -61,17 +67,20 @@ export const updateContact = async (req, res) => {
 		});
 	} catch (error) {
 		console.error(error);
-		res.render("Das")
+		res.render("Das");
 	}
 };
 
 export const getContacts = async (req, res) => {
 	try {
 		const id = req.params.id;
+
 		const page = parseInt(req.query.page) || 1;
 		const limit = 6;
 		const skip = (page - 1) * limit;
 
+		if (!isNumber(page)) next();
+		if (!isString(id)) next();
 		// Get filters from the request body
 		const filters = req.body.filters || [];
 
@@ -125,25 +134,49 @@ export const getContacts = async (req, res) => {
 		const name = await ContactList.findOne({ contactId: id });
 		const totalPages = Math.ceil(totalContacts / limit);
 
-		// Send the filtered results as a response
-		res.render("Contact-List/contactList-overview", {
-			listName: name.contalistName,
-			contacts: contactLists,
-			countries,
-			page,
-			totalPages,
-			tags: [],
-			id,
-			photo: req.session.user?.photo,
-			name: req.session.user.name,
-			color: req.session.user.color,
-		});
+		const permissions = req.session?.addedUser?.permissions;
+		if (permissions) {
+			const access = Permissions.findOne({ unique_id: permissions });
+			if (access.contactList) {
+				res.render("Contact-List/contactList-overview", {
+					access,
+					listName: name.contalistName,
+					contacts: contactLists,
+					countries,
+					page,
+					totalPages,
+					tags: [],
+					id,
+					photo: req.session?.addedUser?.photo,
+					name: req.session?.addedUser?.name,
+					color: req.session?.addedUser?.color,
+					whatsAppStatus: req.session?.addedUser?.whatsAppStatus,
+				});
+			} else {
+				res.render("errors/notAllowed");
+			}
+		} else {
+			const access = await User.findOne({
+				unique_id: req.session?.user?.id,
+			});
+			res.render("Contact-List/contactList-overview", {
+				access: access.access,
+				listName: name.contalistName,
+				contacts: contactLists,
+				countries,
+				page,
+				totalPages,
+				tags: [],
+				id,
+				photo: req.session?.user?.photo,
+				name: req.session?.user.name,
+				color: req.session?.user.color,
+				whatsAppStatus: req.session?.user?.whatsAppStatus,
+			});
+		}
 	} catch (error) {
 		console.error(error);
-		res.status(500).json({
-			success: false,
-			message: "Error fetching contacts",
-		});
+		res.render("errors/serverError");
 	}
 };
 
@@ -165,12 +198,11 @@ export const editContact = async (req, res) => {
 
 		const setData = {};
 		for (const [key, value] of Object.entries(updatedData)) {
-			
 			if (key === "countryCode") {
-				wa_id = value.slice(1); 
+				wa_id = value.slice(1);
 			} else if (key === "wa_id" && wa_id) {
-				wa_id += value; 
-				setData["wa_id"] = wa_id; 
+				wa_id += value;
+				setData["wa_id"] = wa_id;
 			} else {
 				setData[key] = value;
 			}
@@ -571,10 +603,39 @@ export const getFilteredContacts = async (req, res) => {
 export const getOverviewFilter = async (req, res) => {
 	try {
 		const { id } = req.params;
+		if (!isString(id)) next();
 		const contact = await Contacts.findOne({ contactId: id, subscribe: 1 });
 		res.render("Contact-List/partials/filterOptions", { contact });
 	} catch (error) {
 		console.error(error);
-		res.status(500).send("Error rendering filter options");
+		res.render("errors/serverError");
+	}
+};
+
+export const getCreateCampaign = async (req, res) => {
+	const permissions = req.session?.addedUser?.permissions;
+	if (permissions) {
+		const access = Permissions.findOne({ unique_id: permissions });
+		if (
+			access.contactList.sendBroadcast &&
+			req.session?.addedUser?.whatsAppStatus
+		) {
+			// const access = Permissions.findOne({ unique_id: permissions });
+			res.render("Contact-List/createCampaign", {
+				name: req.session?.addedUser?.name,
+				photo: req.session?.addedUser?.photo,
+				color: req.session?.addedUser?.color,
+			});
+		} else {
+			res.render("errors/notAllowed");
+		}
+	} else if (req.session?.user?.whatsAppStatus) {
+		res.render("Contact-List/createCampaign", {
+			name: req.session?.user?.name,
+			photo: req.session?.user?.photo,
+			color: req.session?.user?.color,
+		});
+	} else {
+		res.render("errors/notAllowed");
 	}
 };

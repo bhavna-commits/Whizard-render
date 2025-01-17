@@ -2,6 +2,10 @@ import express from "express";
 import { checkSession } from "../middleWares/checkSession.js";
 import { countries, roles, size, industryCategory } from "../utils/dropDown.js";
 import { getDashboard } from "../controllers/Dashboard/dashboard.controller.js";
+import {
+	getCreatePassword,
+	createAddedUserPassword,
+} from "../controllers/Settings/settings.controller.js";
 
 const router = express.Router();
 
@@ -47,5 +51,12 @@ router.get("/about", (req, res) => {
 		industryCategory: industryCategory,
 	});
 });
+
+router.get("/settings/user-management/create-password", getCreatePassword);
+
+router.post(
+	"/api/settings/user-management/create-user-password",
+	createAddedUserPassword,
+);
 
 export default router;

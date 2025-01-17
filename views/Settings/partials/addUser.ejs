@@ -1,19 +1,20 @@
-<div id="addUserModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
-	<div class="relative top-[20%] mx-auto p-7 border w-[600px] shadow-lg rounded-md bg-white ">
+<div id="addUserModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full transition-opacity duration-300 ease-in-out" onclick="closeModal()">
+	<!-- Modal content container with stopPropagation to prevent closing when clicked inside -->
+	<div class="relative top-[20%] mx-auto p-7 border w-[600px] shadow-lg rounded-md bg-white transition-transform transform opacity-0 scale-95" onclick="event.stopPropagation()">
 		<div class="mt-3 space-y-5">
 			<h3 class="text-2xl font-semibold leading-6 text-center text-gray-900">Add new user</h3>
 			<div class="mt-2 ">
 				<form id="addUserForm">
 					<div class="mb-4">
-						<label class="block text-gray-500  mb-2">User Name</label>
+						<label class="block text-gray-500 mb-2">User Name</label>
 						<input type="text" id="userName" name="userName" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-500 leading-tight focus:outline-none focus:shadow-outline" placeholder="What is name of user">
 					</div>
 					<div class="mb-4">
-						<label class="block text-gray-500  mb-2">Email</label>
+						<label class="block text-gray-500 mb-2">Email</label>
 						<input type="email" id="userEmail" name="userEmail" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-500 leading-tight focus:outline-none focus:shadow-outline" placeholder="Enter email address">
 					</div>
 					<div class="mb-4">
-						<label class="block text-gray-500  mb-2">Role</label>
+						<label class="block text-gray-500 mb-2">Role</label>
 						<select id="userRole" name="userRole" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-500 leading-tight focus:outline-none focus:shadow-outline">
 							<option value="">Select role</option>
 							<% permissions.forEach(function(permission) { %>
@@ -22,8 +23,13 @@
 						</select>
 					</div>
 					<div class="flex items-center justify-between mt-5">
-						<button type="submit" class="bg-black hover:bg-gray-800 text-white py-2 px-4 rounded focus:outline-none focus:shadow-outline">
-							Invite
+						<button type="submit" id="inviteButton" class="bg-black hover:bg-gray-800 text-white py-2 px-4 rounded focus:outline-none focus:shadow-outline flex items-center justify-center">
+							<span id="buttonText">Invite</span>
+							<!-- Loading spinner -->
+							<svg id="spinner" class="hidden w-5 h-5 ml-2 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+								<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+								<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 1116 0A8 8 0 014 12z"></path>
+							</svg>
 						</button>
 						<button type="button" onclick="closeModal()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 py-2 px-4 rounded focus:outline-none focus:shadow-outline">
 							Cancel
@@ -36,29 +42,43 @@
 </div>
 
 <script>
+	const permissions = <%- JSON.stringify(permissions) %>;
 	function openModal () {
-		document.getElementById('addUserModal').classList.remove('hidden');
+		// Show modal with fade and scale effect
+		const modal = document.getElementById('addUserModal');
+		const modalContent = modal.querySelector('.relative');
+		
+		modal.classList.remove('hidden');
+		modal.classList.add('opacity-100');
+		modalContent.classList.add('scale-100', 'opacity-100'); // Add scale and opacity transition
 	}
 	
 	function closeModal () {
-		document.getElementById('addUserModal').classList.add('hidden');
-	}
-	
-	// Update your existing button's onclick
-	function AddUser () {
-		openModal();
+		// Hide modal with fade and scale effect
+		const modal = document.getElementById('addUserModal');
+		const modalContent = modal.querySelector('.relative');
+		
+		modal.classList.add('hidden');
+		modal.classList.remove('opacity-100');
+		modalContent.classList.remove('scale-100', 'opacity-100');
 	}
 	
 	document.getElementById('addUserForm').addEventListener('submit', async (e) => {
 		e.preventDefault();
-		
+		const role = document.getElementById('userRole').value;
+		const permission = permissions.find(p => p.name === role);
 		const formData = {
 			name: document.getElementById('userName').value,
 			email: document.getElementById('userEmail').value,
-			role: document.getElementById('userRole').value,
-			url: window.location.origin,
+			roleId: permission.unique_id,
+			roleName: role,
+			url: window.location.origin
 		};
-				
+		
+		// Show spinner and hide the button text
+		document.getElementById('buttonText').classList.add('hidden');
+		document.getElementById('spinner').classList.remove('hidden');
+		
 		try {
 			const response = await fetch('/api/settings/user-management/invite', {
 				method: 'POST',
@@ -72,10 +92,15 @@
 				alert('Invitation sent successfully!');
 				closeModal();
 			} else {
-				throw new Error('Failed to send invitation');
+				const error = await response.json();
+				alert(error.message || 'Error occurred');
 			}
 		} catch (error) {
 			alert(error.message);
+		} finally {
+			// Hide spinner and show the button text again
+			document.getElementById('buttonText').classList.remove('hidden');
+			document.getElementById('spinner').classList.add('hidden');
 		}
 	});
 </script>

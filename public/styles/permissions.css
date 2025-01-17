@@ -1,0 +1,70 @@
+/* Custom checkbox styling */
+.checkbox {
+	appearance: none;
+	-webkit-appearance: none;
+	width: 1rem;
+	height: 1rem;
+	border: 2px solid #e5e7eb;
+	border-radius: 4px;
+	outline: none;
+	cursor: pointer;
+	position: relative;
+	background-color: transparent;
+}
+
+.checkboxSmall {
+	appearance: none;
+	-webkit-appearance: none;
+	width: .8rem;
+	height: .8rem;
+	border: 1px solid #e5e7eb;
+	border-radius: 2px;
+	outline: none;
+	cursor: pointer;
+	position: relative;
+	background-color: transparent;
+}
+
+.checkbox:checked {
+	border-color: #111827;
+	background-color: transparent;
+}
+
+.checkbox:checked::before {
+	content: "✓";
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	color: #111827;
+	font-size: 12px;
+	font-weight: bold;
+}
+
+.checkboxSmall:focus {
+	--tw-ring-color: transparent;
+}
+
+.checkboxSmall:checked {
+	border-color: #111827;
+	background-color: transparent;
+}
+
+.checkboxSmall:checked::before {
+	content: "✓";
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	color: #111827;
+	font-size: 12px;
+	font-weight: bold;
+}
+
+.checkboxSmall:focus {
+	--tw-ring-color: transparent;
+}
+/* Remove the default Tailwind checkbox styles */
+.rounded {
+	border-radius: 4px;
+}

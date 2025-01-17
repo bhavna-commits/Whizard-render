@@ -1,0 +1,55 @@
+/* List */
+
+/* Auto layout */
+.list-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 0px 24px;
+  gap: 12px;
+  isolation: isolate;
+
+  width: 1300.44px;
+  height: 704px;
+  background: #FFFFFF;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Error Content */
+.error-content {
+  text-align: center;
+}
+
+.error-content h1 {
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 200px;
+  line-height: 242px;
+  color: #000;
+}
+
+.error-content p {
+  font-family: 'Inter', sans-serif;
+  font-size: 24px;
+  line-height: 29px;
+  color: #191919;
+}
+
+.error-content button {
+  margin-top: 24px;
+  padding: 8px 24px;
+  background-color: #191919;
+  color: #fff;
+  font-family: 'Figtree', sans-serif;
+  font-weight: 500;
+  font-size: 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  box-shadow: 0px 1px 2px rgba(16, 24, 40, 0.05);
+}
+
+.error-content button:hover {
+  background-color: #333;
+}

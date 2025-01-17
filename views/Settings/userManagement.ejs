@@ -147,10 +147,11 @@
 						<i class="fa-solid fa-plus pr-2"></i>
 						<span>Add New Permissions</span>
 					</button>
-					<button type="button" id="AddNewUserSmall" onclick="AddUser()" class="inline-flex items-center px-3 py-[10px] border border-transparent text-sm font-medium rounded-md text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black">
+					<button type="button" id="AddNewUserSmall" onclick="openModal()" class="inline-flex items-center px-3 py-[10px] border border-transparent text-sm font-medium rounded-md text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black">
 						<i class="fa-solid fa-plus pr-2"></i>
 						<span>Add New User</span>
 					</button>
+					
 				</div>
 				
 			</div>
@@ -176,7 +177,7 @@
 							<td class="p-4 border-b border-l rounded"><%= index + 1 %></td>
 							<td class="p-4 border-b"><%= user.name %></td>
 							<td class="p-4 border-b"><%= user.email %></td>
-							<td class="p-4 border-b"><%= user.role %></td>
+							<td class="p-4 border-b"><%= user.roleName %></td>
 							<td class="p-4 border-b">
 								<% if (user.status === 'Active') { %>
 								<span class="text-orange-500 font-bold"><%= user.status %></span>
@@ -208,7 +209,7 @@
 						
 						<h3 class="text-xl font-semibold text-gray-900 mb-2">No members yet</h3>
 						<p class="text-gray-600 mb-6">Start adding users by clicking on "Add New User"</p>
-						<button type="button" id="AddNewUser" onclick="AddUser()" class="inline-flex items-center px-3 py-[10px] border border-transparent text-sm font-medium rounded-md text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black">
+						<button type="button" id="AddNewUser" onclick="openModal()" class="inline-flex items-center px-3 py-[10px] border border-transparent text-sm font-medium rounded-md text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black">
 							<i class="fa-solid fa-plus pr-2"></i>
 							<span>Add New User</span>
 						</button>

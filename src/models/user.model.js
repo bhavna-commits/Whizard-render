@@ -20,6 +20,7 @@ const userSchema = new mongoose.Schema(
 		industry: { type: String, required: true },
 		jobRole: { type: String, required: true },
 		website: { type: String, required: true },
+		blocked: { type: Boolean, default: false },
 		WhatsAppConnectStatus: {
 			type: String,
 			enum: ["Pending", "Live"],
@@ -29,6 +30,58 @@ const userSchema = new mongoose.Schema(
 		unique_id: {
 			type: String,
 			required: true,
+		},
+		access: {
+			dashboard: {
+				connectNow: { type: Boolean, default: true },
+				viewUsers: { type: Boolean, default: true },
+				quickActions: { type: Boolean, default: true },
+			},
+			chats: {
+				type: { type: Boolean, default: true },
+				redirectToVpchat: { type: Boolean, default: true },
+			},
+			contactList: {
+				type: { type: Boolean, default: true },
+				addContactIndividual: { type: Boolean, default: true },
+				editContactIndividual: { type: Boolean, default: true },
+				deleteContactIndividual: { type: Boolean, default: true },
+				addContactListCSV: { type: Boolean, default: true },
+				deleteList: { type: Boolean, default: true },
+				sendBroadcast: { type: Boolean, default: true },
+				customFields: {
+					type: { type: Boolean, default: true },
+					view: { type: Boolean, default: true },
+					add: { type: Boolean, default: true },
+				},
+			},
+			templates: {
+				type: { type: Boolean, default: true },
+				duplicateTemplate: { type: Boolean, default: true },
+				createTemplate: { type: Boolean, default: true },
+				deleteTemplate: { type: Boolean, default: true },
+			},
+			reports: {
+				type: { type: Boolean, default: true },
+				conversationReports: {
+					type: { type: Boolean, default: true },
+					viewReports: { type: Boolean, default: true },
+					retargetingUsers: { type: Boolean, default: true },
+					redirectToVpchat: { type: Boolean, default: true },
+				},
+				costReports: { type: Boolean, default: true },
+			},
+			settings: {
+				type: { type: Boolean, default: true },
+				userManagement: { type: Boolean, default: true },
+				activityLogs: { type: Boolean, default: true },
+				manageTags: {
+					type: { type: Boolean, default: true },
+					delete: { type: Boolean, default: true },
+					add: { type: Boolean, default: true },
+					view: { type: Boolean, default: true },
+				},
+			},
 		},
 		createdAt: {
 			type: Number,

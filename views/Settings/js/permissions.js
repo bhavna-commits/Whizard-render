@@ -1,163 +1,252 @@
-document.addEventListener("DOMContentLoaded", function () {
-	const form = document.getElementById("permissionForm");
-	const toggleButtons = document.querySelectorAll(
-		".toggle-button, .sub-toggle",
-	);
-	const toggleSectionButtons = document.querySelectorAll(".toggle-section");
+// Initialize permission state with all values set to false
+const permissionState = {
+    dashboard: {
+        connectNow: false,
+        viewUsers: false,
+        quickActions: false,
+    },
+    chats: {
+        type: false,
+        redirectToVpchat: false,
+    },
+    contactList: {
+        type: false,
+        addContactIndividual: false,
+        addContactListCSV: false,
+        editContactIndividual: false,
+        deleteContactIndividual: false,
+        deleteList: false,
+        sendBroadcast: false,
+        customField: {
+            type: false,
+            view: false,
+            add: false,
+        },
+    },
+    templates: {
+        type: false,
+        editTemplate: false,
+        createTemplate: false,
+        deleteTemplate: false,
+    },
+    reports: {
+        type: false,
+        conversationReports: {
+            type: false,
+            viewReports: false,
+            retargetingUsers: false,
+            redirectToVpchat: false,
+        },
+        costReports: false,
+    },
+    settings: {
+        type: false,
+        userManagement: false,
+        activityLogs: false,
+        manageTags: {
+            type: false,
+            delete: false,
+            add: false,
+            view: false,
+        },
+    },
+};
 
-	// Initialize permission state
-	const permissionState = {
-		dashboard: {
-			connectNow: false,
-			viewUsers: false,
-			quickActions: false,
-		},
-		chats: {
-			type: false, // Boolean for "chats"
-			redirectToVpchat: false,
-		},
-		contactList: {
-			type: false, // Boolean for "contactList"
-			addContactIndividual: false,
-			addContactListCSV: false,
-			deleteList: false,
-			sendBroadcast: false,
-		},
-		templates: {
-			type: false, // Boolean for "templates"
-			editTemplate: false,
-			createTemplate: false,
-			deleteTemplate: false,
-		},
-		reports: {
-			type: false, // Boolean for "reports"
-			conversationReports: {
-				type: false, // Boolean for "conversationReports"
-				viewReports: false,
-				retargetingUsers: false,
-				redirectToVpchat: false,
-			},
-			costReports: false, // Boolean for "costReports"
-		},
-		settings: {
-			type: false, // Boolean for "settings"
-			userManagement: false,
-			activityLogs: false,
-			manageTags: {
-				type: false, // Boolean for "manageTags"
-				delete: false,
-				add: false,
-				view: false,
-			},
-		},
-	};
+function handleSectionToggle(section, isEnabled) {
+    const sectionName = section.querySelector('h2').textContent.toLowerCase().replace(/\s+/g, '');
+    const toggleLabel = section.querySelector('.toggle-label');
+    const optionCheckboxes = section.querySelectorAll('.option-checkbox');
+    
+    // Update toggle label
+    toggleLabel.textContent = isEnabled ? 'Yes' : 'No';
+    toggleLabel.classList.toggle('text-gray-900', isEnabled);
+    toggleLabel.classList.toggle('text-gray-500', !isEnabled);
+    
+    // Update permission state
+    permissionState[sectionName].type = isEnabled;
+    
+    // Handle option checkboxes
+    optionCheckboxes.forEach(checkbox => {
+        checkbox.disabled = !isEnabled;
+        if (!isEnabled) {
+            checkbox.checked = false;
+            updatePermissionState(checkbox, false);
+            
+            // Find and handle nested options if they exist
+            const nestedOptions = checkbox.closest('.nested-option-group, div')?.querySelector('.nested-options');
+            if (nestedOptions) {
+                const nestedCheckboxes = nestedOptions.querySelectorAll('.nested-checkbox');
+                nestedCheckboxes.forEach(nestedCheckbox => {
+                    nestedCheckbox.disabled = true;
+                    nestedCheckbox.checked = false;
+                    updatePermissionState(nestedCheckbox, false);
+                    updateCheckboxLabel(nestedCheckbox);
+                });
+            }
+        }
+        updateCheckboxLabel(checkbox);
+    });
+}
 
-	// Toggle button handler
-	function handleToggle(button, isMainToggle = false) {
-		const isActive = button.classList.contains("bg-red-400");
-		const togglePath = button.dataset.toggle;
+function handleOptionToggle(checkbox) {
+    const isChecked = checkbox.checked;
+    const nestedOptions = checkbox.closest('div')?.querySelector('.nested-options');
+    
+    if (nestedOptions) {
+        const nestedCheckboxes = nestedOptions.querySelectorAll('.nested-checkbox');
+        nestedCheckboxes.forEach(nestedCheckbox => {
+            nestedCheckbox.disabled = !isChecked;
+            if (!isChecked) {
+                nestedCheckbox.checked = false;
+                updatePermissionState(nestedCheckbox, false);
+            }
+            updateCheckboxLabel(nestedCheckbox);
+        });
+    }
+    
+    updatePermissionState(checkbox, isChecked);
+    updateCheckboxLabel(checkbox);
+}
 
-		if (isActive) {
-			button.classList.remove("bg-red-400");
-			button.classList.add("bg-gray-200");
-			button.querySelector("div").classList.remove("translate-x-7");
-		} else {
-			button.classList.remove("bg-gray-200");
-			button.classList.add("bg-red-400");
-			button.querySelector("div").classList.add("translate-x-7");
-		}
+function updateCheckboxLabel(checkbox) {
+    const label = checkbox.nextElementSibling;
+    if (label) {
+        label.classList.toggle('text-gray-900', !checkbox.disabled && checkbox.closest('.toggle-section').querySelector('.section-toggle').checked);
+        label.classList.toggle('text-gray-500', checkbox.disabled || !checkbox.closest('.toggle-section').querySelector('.section-toggle').checked);
+    }
+}
 
-		updatePermissionState(togglePath, !isActive, isMainToggle);
-	}
+function updatePermissionState(checkbox, value) {
+    const section = checkbox.closest('.toggle-section');
+    const sectionName = section.querySelector('h2').textContent.toLowerCase().replace(/\s+/g, '');
+    const checkboxValue = checkbox.value;
 
-	// Update permission state
-	function updatePermissionState(path, value, isMainToggle) {
-		const parts = path.split(".");
-		let current = permissionState;
+    // Special handling for nested checkboxes
+    if (checkbox.classList.contains('nested-checkbox')) {
+        const parentDiv = checkbox.closest('div').parentElement;
+        const parentCheckbox = parentDiv.querySelector('.option-checkbox');
+        const parentValue = parentCheckbox.value;
 
-		if (isMainToggle) {
-			// Handle main section toggle
-			current[parts[0]].type = value;
+        if (sectionName === 'reports' && parentValue === 'conversationReports') {
+            permissionState.reports.conversationReports[checkboxValue] = value;
+        } else if (sectionName === 'settings' && parentValue === 'manageTags') {
+            permissionState.settings.manageTags[checkboxValue] = value;
+        }
+    } else {
+        // Handle regular checkboxes
+        if (permissionState[sectionName].hasOwnProperty(checkboxValue)) {
+            permissionState[sectionName][checkboxValue] = value;
+        } else if (checkboxValue === 'conversationReports') {
+            permissionState.reports.conversationReports.type = value;
+        } else if (checkboxValue === 'manageTags') {
+            permissionState.settings.manageTags.type = value;
+        }
+    }
+}
 
-			// Update UI of sub-toggles
-			const section = document.querySelector(
-				`[data-section="${parts[0]}"]`,
-			);
-			if (section) {
-				const subToggles = section.querySelectorAll(".sub-toggle");
-				subToggles.forEach((toggle) => {
-					if (!value) {
-						toggle.classList.remove("bg-red-400");
-						toggle.classList.add("bg-gray-200");
-						toggle
-							.querySelector("div")
-							.classList.remove("translate-x-7");
-					}
-					toggle.disabled = !value;
-				});
-			}
-		} else {
-			// Handle sub-toggles
-			for (let i = 0; i < parts.length - 1; i++) {
-				if (!current[parts[i]]) current[parts[i]] = {};
-				current = current[parts[i]];
-			}
-			current[parts[parts.length - 1]] = value;
-		}
-	}
+function initializeForm() {
+    // Initialize all checkboxes as disabled
+    document.querySelectorAll('.option-checkbox, .nested-checkbox').forEach(checkbox => {
+        checkbox.disabled = true;
+    });
 
-	// Initialize toggle buttons
-	toggleButtons.forEach((button) => {
-		button.addEventListener("click", () => handleToggle(button));
-	});
+    // Initialize section toggles
+    document.querySelectorAll('.section-toggle').forEach(toggle => {
+        toggle.addEventListener('change', (e) => {
+            const section = e.target.closest('.toggle-section');
+            handleSectionToggle(section, e.target.checked);
+        });
+    });
+    
+    // Initialize option checkboxes
+    document.querySelectorAll('.option-checkbox').forEach(checkbox => {
+        checkbox.addEventListener('change', () => handleOptionToggle(checkbox));
+    });
+    
+    // Initialize nested checkboxes
+    document.querySelectorAll('.nested-checkbox').forEach(checkbox => {
+        checkbox.addEventListener('change', () => {
+            updatePermissionState(checkbox, checkbox.checked);
+            updateCheckboxLabel(checkbox);
+        });
+    });
+}
 
-	// Initialize section toggles
-	toggleSectionButtons.forEach((button) => {
-		button.addEventListener("click", function () {
-			handleToggle(this, true);
-			const section = document.querySelector(
-				`[data-section="${this.dataset.toggle}"]`,
-			);
-			if (section) {
-				if (section.classList.contains("hidden")) {
-					section.classList.remove("hidden");
-				} else {
-					section.classList.add("hidden");
-				}
-			}
-		});
-	});
+function initializeFormSubmission() {
+    const form = document.getElementById('roleForm');
+    const submitButton = form.querySelector('button[type="submit"]');
+    const submitButtonText = submitButton.textContent.trim();
+    
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        submitButton.disabled = true;
+        submitButton.innerHTML = `
+            <svg class="animate-spin -ml-1 mr-3 h-5 w-5 inline-block text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Adding Role...
+        `;
+        
+        const formData = {
+            name: form.querySelector('input[id="roleName"]').value,
+            permissions: permissionState,
+        };
+        
+        try {
+            const response = await fetch('/api/settings/user-management/permissions/update', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData),
+            });
+            
+            if (response.ok) {
+                alert('Role added successfully!');
+                form.reset();
+                resetPermissionState();
+            } else {
+                const error = await response.json();
+                alert(`Error adding role: ${error.message}`);
+            }
+        } catch (error) {
+            console.error('Error submitting form:', error);
+            alert(`Error adding role: ${error.message}`);
+        } finally {
+            submitButton.disabled = false;
+            submitButton.textContent = submitButtonText;
+        }
+    });
+}
 
-	// Form submission
-	form.addEventListener("submit", async function (e) {
-		e.preventDefault();
+function resetPermissionState() {
+    // Reset permission state object
+    Object.keys(permissionState).forEach(key => {
+        if (typeof permissionState[key] === 'object') {
+            Object.keys(permissionState[key]).forEach(subKey => {
+                if (typeof permissionState[key][subKey] === 'object') {
+                    Object.keys(permissionState[key][subKey]).forEach(nestedKey => {
+                        permissionState[key][subKey][nestedKey] = false;
+                    });
+                } else {
+                    permissionState[key][subKey] = false;
+                }
+            });
+        } else {
+            permissionState[key] = false;
+        }
+    });
+    
+    // Reset all form elements
+    document.querySelectorAll('.section-toggle').forEach(toggle => {
+        toggle.checked = false;
+        handleSectionToggle(toggle.closest('.toggle-section'), false);
+    });
+}
 
-		const formData = {
-			name: form.querySelector('input[name="role"]').value,
-			permissions: permissionState,
-		};
-
-		try {
-			const response = await fetch(
-				"/api/settings/user-management/permissions/update",
-				{
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-					},
-					body: JSON.stringify(formData),
-				},
-			);
-
-			if (response.ok) {
-				alert("Permissions saved successfully!");
-			} else {
-				const error = await response.json();
-				alert(`Error saving permissions: ${error.message}`);
-			}
-		} catch (error) {
-			console.error("Error submitting form:", error);
-			alert(`Error saving permissions: ${error.message}`);
-		}
-	});
+document.addEventListener('DOMContentLoaded', function() {
+    initializeForm();
+    initializeFormSubmission();
 });

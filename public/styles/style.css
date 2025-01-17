@@ -4,7 +4,7 @@
 	margin: 0;
 	padding: 0;
 	font-family: "Figtree", sans-serif;
-	font-size: 11px; /* 0.875rem = 14px */
+	font-size: 12px; /* 0.875rem = 14px */
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 }
@@ -19,21 +19,21 @@
 /* Media query for lower DPI screens (between 96dpi and 110dpi) */
 @media (min-resolution: 96dpi) and (max-resolution: 110dpi) {
 	* {
-		font-size: 11px; /* Starting at 10px for lower resolution */
+		font-size: 12px; /* Starting at 10px for lower resolution */
 	}
 }
 
 /* Media query for medium DPI screens (between 110dpi and 130dpi) */
 @media (min-resolution: 110dpi) and (max-resolution: 130dpi) {
 	* {
-		font-size: 12px; /* Slightly larger, 11px for medium range */
+		font-size: 14px; /* Slightly larger, 11px for medium range */
 	}
 }
 
 /* Media query for higher DPI screens (between 130dpi and 150dpi) */
 @media (min-resolution: 130dpi) and (max-resolution: 150dpi) {
 	* {
-		font-size: 12px; /* Highest value for this range, 12px */
+		font-size: 14px; /* Highest value for this range, 12px */
 	}
 }
 
@@ -54,7 +54,7 @@
 /* Responsive design using viewport width for layout */
 @media screen and (max-width: 768px) {
 	* {
-		font-size: 11px; /* 0.875rem = 14px */
+		font-size: 12px; /* 0.875rem = 14px */
 	}
 }
 
@@ -326,6 +326,12 @@ input[type="number"] {
 
 .hidden {
 	display: none;
+}
+
+.disabled-link {
+    pointer-events: none;
+    cursor: not-allowed;
+    color: #aaa; /* Make the text look disabled */
 }
 
 .account-menu a,

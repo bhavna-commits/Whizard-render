@@ -35,7 +35,7 @@
 	<link href="styles/style.css" rel="stylesheet" type="text/css" />
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
 	<script src="https://cdn.tailwindcss.com"></script>
-	<link rel="stylesheet" type="text/css" href="styles/template-preview.css" />
+	<link rel="stylesheet" type="text/css" href="styles/permissions.css" />
 </head>
 
 <body>
@@ -162,240 +162,277 @@
 				</nav>
 			</div>
 			<div class="mainDiv">
-				<h2 class="text-2xl font-bold mb-6 text-gray-900">Permissions Management</h2>
-				<form id="permissionForm" method="post" class=" mx-auto p-6 space-y-6">
-					<div class="mb-6">
-						<label for="role" class="block text-gray-700 text-sm font-bold mb-2">Role Name:</label>
-						<input type="text" id="role" name="role" class="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter role name" required />
-					</div>
-					
-					<!-- Dashboard Permissions -->
-					<div class="bg-white rounded-xl border p-6">
-						<h2 class="text-lg font-semibold mb-4 text-gray-800">Dashboard</h2>
-						<div class="space-y-4">
-							<div class="flex items-center justify-between">
-								<label class="text-sm font-medium text-gray-700">View Users</label>
-								<button type="button" class="toggle-button w-14 h-7 flex items-center rounded-full p-1 duration-300 ease-in-out bg-gray-200" data-toggle="dashboard.viewUsers">
-									<div class="bg-white w-5 h-5 rounded-full shadow-md transform duration-300 ease-in-out"></div>
-								</button>
-							</div>
-							<div class="flex items-center justify-between">
-								<label class="text-sm font-medium text-gray-700">Connect Now</label>
-								<button type="button" class="toggle-button w-14 h-7 flex items-center rounded-full p-1 duration-300 ease-in-out bg-gray-200" data-toggle="dashboard.connectNow">
-									<div class="bg-white w-5 h-5 rounded-full shadow-md transform duration-300 ease-in-out"></div>
-								</button>
-							</div>
-							<div class="flex items-center justify-between">
-								<label class="text-sm font-medium text-gray-700">Quick Actions</label>
-								<button type="button" class="toggle-button w-14 h-7 flex items-center rounded-full p-1 duration-300 ease-in-out 	bg-gray-200" data-toggle="dashboard.quickActions">
-									<div class="bg-white w-5 h-5 rounded-full shadow-md transform duration-300 ease-in-out"></div>
-								</button>
-							</div>
+				
+				<div class="container mx-auto px-4 py-8">
+					<div class="">
+						<div class="flex justify-between items-center mb-6">
+							<h1 class="text-xl font-medium">Role Management</h1>
+							<div id="statusMessage" class="hidden"></div>
 						</div>
-					</div>
-					<!-- Chats Section -->
-					<div class="bg-white rounded-xl border p-6">
-						<div class="flex items-center justify-between mb-4">
-							<h2 class="text-lg font-semibold text-gray-800">Chats</h2>
-							<button type="button" class="toggle-section w-14 h-7 flex items-center rounded-full p-1 duration-300 ease-in-out bg-gray-200" data-toggle="chats">
-								<div class="bg-white w-5 h-5 rounded-full shadow-md transform duration-300 ease-in-out"></div>
-							</button>
-						</div>
-						<div data-section="chats" class="hidden space-y-4 mt-4">
-							<div class="flex items-center justify-between">
-								<label class="text-sm font-medium text-gray-700">Redirect to VP Chat</label>
-								<button type="button" class="sub-toggle w-14 h-7 flex items-center rounded-full p-1 duration-300 ease-in-out bg-gray-200" data-toggle="chats.redirectToVpchat">
-									<div class="bg-white w-5 h-5 rounded-full shadow-md transform duration-300 ease-in-out"></div>
-								</button>
-							</div>
-						</div>
-					</div>
-					<!-- Contacts Section -->
-					<div class="bg-white rounded-xl border p-6">
-						<div class="flex items-center justify-between mb-4">
-							<h2 class="text-lg font-semibold text-gray-800">Contacts List</h2>
-							<button type="button" class="toggle-section w-14 h-7 flex items-center rounded-full p-1 duration-300 ease-in-out bg-gray-200" data-toggle="contacts">
-								<div class="bg-white w-5 h-5 rounded-full shadow-md transform duration-300 ease-in-out"></div>
-							</button>
-						</div>
-						<div data-section="contacts" class="hidden space-y-4 mt-4">
-							<div class="flex items-center justify-between">
-								<label class="text-sm font-medium text-gray-700">Add Contact Individual</label>
-								<button type="button" class="sub-toggle w-14 h-7 flex items-center rounded-full p-1 duration-300 ease-in-out bg-gray-200" data-toggle="contacts.addContactIndividual">
-									<div class="bg-white w-5 h-5 rounded-full shadow-md transform duration-300 ease-in-out"></div>
-								</button>
-							</div>
-							<div class="flex items-center justify-between">
-								<label class="text-sm font-medium text-gray-700">Add Contact List CSV</label>
-								<button type="button" class="sub-toggle w-14 h-7 flex items-center rounded-full p-1 duration-300 ease-in-out bg-gray-200" data-toggle="contacts.addContactListCSV">
-									<div class="bg-white w-5 h-5 rounded-full shadow-md transform duration-300 ease-in-out"></div>
-								</button>
-							</div>
-							<div class="flex items-center justify-between">
-								<label class="text-sm font-medium text-gray-700">Delete List</label>
-								<button type="button" class="sub-toggle w-14 h-7 flex items-center rounded-full p-1 duration-300 ease-in-out bg-gray-200" data-toggle="contacts.deleteList">
-									<div class="bg-white w-5 h-5 rounded-full shadow-md transform duration-300 ease-in-out"></div>
-								</button>
-							</div>
-							<div class="flex items-center justify-between">
-								<label class="text-sm font-medium text-gray-700">Send Broadcast</label>
-								<button type="button" class="sub-toggle w-14 h-7 flex items-center rounded-full p-1 duration-300 ease-in-out bg-gray-200" data-toggle="contacts.sendBroadcast">
-									<div class="bg-white w-5 h-5 rounded-full shadow-md transform duration-300 ease-in-out"></div>
-								</button>
-							</div>
-						</div>
-					</div>
-					
-					<!-- Templates Section -->
-					<div class="bg-white rounded-xl border p-6">
-						<div class="flex items-center justify-between mb-4">
-							<h2 class="text-lg font-semibold text-gray-800">Templates</h2>
-							<button type="button" class="toggle-section w-14 h-7 flex items-center rounded-full p-1 duration-300 ease-in-out bg-gray-200" data-toggle="templates">
-								<div class="bg-white w-5 h-5 rounded-full shadow-md transform duration-300 ease-in-out"></div>
-							</button>
-						</div>
-						<div data-section="templates" class="hidden space-y-4 mt-4">
-							<div class="flex items-center justify-between">
-								<label class="text-sm font-medium text-gray-700">Edit Template</label>
-								<button type="button" class="sub-toggle w-14 h-7 flex items-center rounded-full p-1 duration-300 ease-in-out bg-gray-200" data-toggle="templates.editTemplate">
-									<div class="bg-white w-5 h-5 rounded-full shadow-md transform duration-300 ease-in-out"></div>
-								</button>
-							</div>
-							<div class="flex items-center justify-between">
-								<label class="text-sm font-medium text-gray-700">Create Template</label>
-								<button type="button" class="sub-toggle w-14 h-7 flex items-center rounded-full p-1 duration-300 ease-in-out bg-gray-200" data-toggle="templates.createTemplate">
-									<div class="bg-white w-5 h-5 rounded-full shadow-md transform duration-300 ease-in-out"></div>
-								</button>
-							</div>
-							<div class="flex items-center justify-between">
-								<label class="text-sm font-medium text-gray-700">Delete Template</label>
-								<button type="button" class="sub-toggle w-14 h-7 flex items-center rounded-full p-1 duration-300 ease-in-out bg-gray-200" data-toggle="templates.deleteTemplate">
-									<div class="bg-white w-5 h-5 rounded-full shadow-md transform duration-300 ease-in-out"></div>
-								</button>
-							</div>
-						</div>
-					</div>
-					<!-- Settings Section -->
-					<div class="bg-white rounded-xl border p-6">
-						<div class="flex items-center justify-between mb-4">
-							<h2 class="text-lg font-semibold text-gray-800">Settings</h2>
-							<button type="button" class="toggle-section w-14 h-7 flex items-center rounded-full p-1 duration-300 ease-in-out bg-gray-200" data-toggle="settings">
-								<div class="bg-white w-5 h-5 rounded-full shadow-md transform duration-300 ease-in-out"></div>
-							</button>
-						</div>
-						<div data-section="settings" class="hidden space-y-4 mt-4">
-							<div class="flex items-center justify-between">
-								<label class="text-sm font-medium text-gray-700">User Management</label>
-								<button type="button" class="sub-toggle w-14 h-7 flex items-center rounded-full p-1 duration-300 ease-in-out bg-gray-200" data-toggle="settings.userManagement">
-									<div class="bg-white w-5 h-5 rounded-full shadow-md transform duration-300 ease-in-out"></div>
-								</button>
-							</div>
-							<div class="flex items-center justify-between">
-								<label class="text-sm font-medium text-gray-700">Activity Logs</label>
-								<button type="button" class="sub-toggle w-14 h-7 flex items-center rounded-full p-1 duration-300 ease-in-out bg-gray-200" data-toggle="settings.activityLogs">
-									<div class="bg-white w-5 h-5 rounded-full shadow-md transform duration-300 ease-in-out"></div>
-								</button>
+						
+						<form id="roleForm" class="space-y-6 border rounded-xl p-6">
+							<!-- Role Name Section -->
+							<div class="space-x-2 flex items-center justify-between ">
+								<label for="roleName" class="block text-lg font-medium pt-2">Role Name</label>
+								<input type="text" id="roleName" placeholder="Enter role name" name="roleName" required class="w-[60%] p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500">
 							</div>
 							
-							<!-- Manage Tags Subsection -->
-							<div class="flex items-center justify-between">
-								<label class="text-sm font-medium text-gray-700">Manage Tags</label>
-								<button type="button" class="sub-toggle w-14 h-7 flex items-center rounded-full p-1 duration-300 ease-in-out bg-gray-200" data-toggle="settings.manageTags">
-									<div class="bg-white w-5 h-5 rounded-full shadow-md transform duration-300 ease-in-out"></div>
-								</button>
-							</div>
-							<div data-section="settings.manageTags" class="border-l-2 border-gray-200 pl-4 mb-4 space-y-4 mt-4 hidden">
-								<div class="flex items-center justify-between">
-									<label class="text-sm font-medium text-gray-700">View Tags</label>
-									<button type="button" class="sub-toggle w-14 h-7 flex items-center rounded-full p-1 duration-300 ease-in-out bg-gray-200" data-toggle="settings.manageTags.view">
-										<div class="bg-white w-5 h-5 rounded-full shadow-md transform duration-300 ease-in-out"></div>
-									</button>
-								</div>
-								<div class="flex items-center justify-between">
-									<label class="text-sm font-medium text-gray-700">Add Tags</label>
-									<button type="button" class="sub-toggle w-14 h-7 flex items-center rounded-full p-1 duration-300 ease-in-out bg-gray-200" data-toggle="settings.manageTags.add">
-										<div class="bg-white w-5 h-5 rounded-full shadow-md transform duration-300 ease-in-out"></div>
-									</button>
-								</div>
-								<div class="flex items-center justify-between">
-									<label class="text-sm font-medium text-gray-700">Delete Tags</label>
-									<button type="button" class="sub-toggle w-14 h-7 flex items-center rounded-full p-1 duration-300 ease-in-out bg-gray-200" data-toggle="settings.manageTags.delete">
-										<div class="bg-white w-5 h-5 rounded-full shadow-md transform duration-300 ease-in-out"></div>
-									</button>
-								</div>
-							</div>
-						</div>
-					</div>
-					
-					<!-- Reports Section -->
-					<div class="bg-white rounded-xl border p-6">
-						<div class="flex items-center justify-between mb-4">
-							<h2 class="text-lg font-semibold text-gray-800">Reports</h2>
-							<button type="button" class="toggle-section w-14 h-7 flex items-center rounded-full p-1 duration-300 ease-in-out bg-gray-200" data-toggle="reports">
-								<div class="bg-white w-5 h-5 rounded-full shadow-md transform duration-300 ease-in-out"></div>
-							</button>
-						</div>
-						<div data-section="reports" class="hidden space-y-4 mt-4">
-							<!-- Conversation Reports Subsection -->
-							<div class="flex items-center justify-between mb-4">
-								<label class="text-sm font-medium text-gray-700">Conversation Reports</label>
-								<button type="button" class="sub-toggle w-14 h-7 flex items-center rounded-full p-1 duration-300 ease-in-out bg-gray-200" data-toggle="reports.conversationReports">
-									<div class="bg-white w-5 h-5 rounded-full shadow-md transform duration-300 ease-in-out"></div>
-								</button>
-							</div>
-							<div data-section="reports.conversationReports" class="border-l-2 border-gray-200 pl-4 mb-4 hidden space-y-4 mt-4">
-								<div class="flex items-center justify-between">
-									<label class="text-sm font-medium text-gray-700">View Reports</label>
-									<button type="button" class="sub-toggle w-14 h-7 flex items-center rounded-full p-1 duration-300 ease-in-out bg-gray-200" data-toggle="reports.conversationReports.viewReports">
-										<div class="bg-white w-5 h-5 rounded-full shadow-md transform duration-300 ease-in-out"></div>
-									</button>
-								</div>
-								<div class="flex items-center justify-between">
-									<label class="text-sm font-medium text-gray-700">Retargeting Users</label>
-									<button type="button" class="sub-toggle w-14 h-7 flex items-center rounded-full p-1 duration-300 ease-in-out bg-gray-200" data-toggle="reports.conversationReports.retargetingUsers">
-										<div class="bg-white w-5 h-5 rounded-full shadow-md transform duration-300 ease-in-out"></div>
-									</button>
-								</div>
-								<div class="flex items-center justify-between">
-									<label class="text-sm font-medium text-gray-700">Redirect to VP Chat</label>
-									<button type="button" class="sub-toggle w-14 h-7 flex items-center rounded-full p-1 duration-300 ease-in-out bg-gray-200" data-toggle="reports.conversationReports.redirectToVpchat">
-										<div class="bg-white w-5 h-5 rounded-full shadow-md transform duration-300 ease-in-out"></div>
-									</button>
+							<!-- Dashboard Section -->
+							<div class="border-t pt-4 flex items-center justify-between ">
+								<h2 class="text-lg font-medium mb-4">Dashboard</h2>
+								<div class="grid grid-cols-1 md:grid-cols-5   w-[60%]">
+									<label class="flex items-center space-x-2 min-w-fit">
+										<input type="checkbox" name="conntectNow" value="connectNow" class="rounded checkbox text-blue-600">
+										<span>Connect Now</span>
+									</label>
+									<label class="flex items-center space-x-2 min-w-fit">
+										<input type="checkbox" name="viewUsers" value="viewUsers" class="rounded checkbox text-blue-600">
+										<span>View Users</span>
+									</label>
+									<label class="flex items-center space-x-2 min-w-fit">
+										<input type="checkbox" name="quickActions" value="quickActions" class="rounded checkbox text-blue-600">
+										<span>Quick Actions</span>
+									</label>
 								</div>
 							</div>
 							
-							<!-- Cost Reports -->
-							<div class="flex items-center justify-between">
-								<label class="text-sm font-medium text-gray-700">Cost Reports</label>
-								<button type="button" class="sub-toggle w-14 h-7 flex items-center rounded-full p-1 duration-300 ease-in-out bg-gray-200" data-toggle="reports.costReports">
-									<div class="bg-white w-5 h-5 rounded-full shadow-md transform duration-300 ease-in-out"></div>
+							<!-- Chats Section -->
+							<div class="border-t pt-4 flex justify-between items-center toggle-section">
+								<div class="flex justify-between items-center w-[15%] relative">
+									<h2 class="text-lg font-semibold">Chats</h2>
+									<div class="flex items-center space-x-2">
+										<label class="relative flex pt-2 items-center cursor-pointer ">
+											<!-- Hidden checkbox input -->
+											<input type="checkbox" name="permissions[chats]" class="sr-only peer section-toggle">
+											
+											<!-- Toggle switch -->
+											<div class="w-11 h-6  bg-gray-200 peer-focus:outline-none peer-focus:ring-4 
+												peer-focus:ring-blue-300 rounded-full peer 
+												peer-checked:after:translate-x-full peer-checked:after:border-white 
+												after:content-[''] after:absolute after:top-[.65rem] after:left-[.12rem] 
+												after:bg-white after:border-gray-300 after:border after:rounded-full 
+												after:h-5 after:w-5 after:transition-all peer-checked:bg-black"></div>
+											
+											<!-- Label text -->
+											<span class="ml-3 text-sm font-medium toggle-label text-gray-500">No</span>
+										</label>
+										
+									</div>
+								</div>
+								<div class="options-container grid grid-cols-1 md:grid-cols-5 w-[60%]">
+									<label class="flex items-center space-x-2 min-w-fit">
+										<input type="checkbox" name="permissions[dashboard][]" value="connectNow" class="rounded checkbox option-checkbox text-black" disabled />
+										<span class="option-label text-gray-500">Redirected to VP chat</span>
+									</label>
+								</div>
+							</div>
+							
+							<!-- Contact List Section -->
+							<div class="border-t pt-4 flex justify-between toggle-section">
+								<div class="flex justify-between items-center w-[15%] mb-4">
+									<h2 class="text-lg font-semibold">Contact List</h2>
+									<div class="flex items-center space-x-2">
+										<label class="relative inline-flex pt-2 items-center cursor-pointer">
+											<input type="checkbox" name="permissions[contactList][enabled]" class="sr-only peer section-toggle">
+											<div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 
+                                          peer-focus:ring-blue-300 rounded-full peer 
+                                          peer-checked:after:translate-x-full peer-checked:after:border-white 
+                                          after:content-[''] after:absolute after:top-[.65rem] after:left-[.12rem]
+                                          after:bg-white after:border-gray-300 after:border after:rounded-full 
+                                          after:h-5 after:w-5 after:transition-all peer-checked:bg-black"></div>
+											<span class="ml-3 text-sm font-medium toggle-label text-gray-500">No</span>
+										</label>
+									</div>
+								</div>
+								<div class="options-container grid grid-cols-1 md:grid-cols-5 w-[60%]">
+									<label class="flex items-center space-x-2">
+										<input type="checkbox" name="permissions[contactList][]" value="addContact" class="rounded checkbox option-checkbox  text-blue-600" />
+										<span class="option-label text-gray-500">Add Contact</span>
+									</label>
+									<label class="flex items-center space-x-2">
+										<input type="checkbox" name="permissions[contactList][]" value="editContact" class="rounded checkbox  option-checkbox   text-blue-600" />
+										<span class="option-label text-gray-500">Edit Contact</span>
+									</label>
+									<label class="flex items-center space-x-2">
+										<input type="checkbox" name="permissions[contactList][]" value="deleteContact" class="rounded checkbox  option-checkbox  text-blue-600" />
+										<span class="option-label text-gray-500">Delete Contact</span>
+									</label>
+									<label class="flex items-center space-x-2">
+										<input type="checkbox" name="permissions[contactList][]" value="addContactListCSV" class=" rounded checkbox  option-checkbox text-blue-600" />
+										<span class="option-label text-gray-500">Add Contact List</span>
+									</label>
+									<label class="flex items-center space-x-2">
+										<input type="checkbox" name="permissions[contactList][]" value="deleteList" class="rounded checkbox  option-checkbox text-blue-600" />
+										<span class="option-label text-gray-500">Delete List</span>
+									</label>
+									<label class="flex items-center space-x-2">
+										<input type="checkbox" name="permissions[contactList][]" value="sendBroadcast" class="rounded checkbox  option-checkbox text-blue-600" />
+										<span class="option-label text-gray-500">Send Broadcast</span>
+									</label>
+								</div>
+							</div>
+							
+							<!-- Templates Section -->
+							<div class="border-t pt-4 flex justify-between toggle-section">
+								<div class="flex justify-between items-center  w-[15%] mb-4">
+									<h2 class="text-lg font-semibold">Templates</h2>
+									<div class="flex items-center space-x-2">
+										<label class="relative inline-flex  pt-2 items-center cursor-pointer">
+											<input type="checkbox" name="permissions[templates][enabled]" class="sr-only peer section-toggle">
+											<div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 
+                                          peer-focus:ring-blue-300 rounded-full peer 
+                                          peer-checked:after:translate-x-full peer-checked:after:border-white 
+                                          after:content-[''] after:absolute after:top-[.65rem] after:left-[.12rem]
+                                          after:bg-white after:border-gray-300 after:border after:rounded-full 
+                                          after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+											<span class="ml-3 text-sm font-medium toggle-label text-gray-500">No</span>
+										</label>
+									</div>
+								</div>
+								<div class="options-container grid grid-cols-1 md:grid-cols-5 w-[60%]">
+									<label class="flex items-center space-x-2">
+										<input type="checkbox" name="permissions[templates][]" value="editTemplate" class="rounded checkbox option-checkbox  text-blue-600">
+										<span class="option-label text-gray-500">Edit Template</span>
+									</label>
+									<label class="flex items-center space-x-2">
+										<input type="checkbox" name="permissions[templates][]" value="createTemplate" class="rounded checkbox option-checkbox  text-blue-600">
+										<span class="option-label text-gray-500">Create Template</span>
+									</label>
+									<label class="flex items-center space-x-2">
+										<input type="checkbox" name="permissions[templates][]" value="deleteTemplate" class="rounded checkbox option-checkbox  text-blue-600">
+										<span class="option-label text-gray-500">Delete Template</span>
+									</label>
+								</div>
+							</div>
+							
+							<!-- Reports Section -->
+							<div class="border-t pt-4 flex justify-between toggle-section">
+								<div class="flex justify-between items-center w-[15%] mb-4">
+									<h2 class="text-lg font-semibold">Reports</h2>
+									<div class="flex items-center space-x-2">
+										<label class="relative inline-flex pt-2 items-center cursor-pointer">
+											<input type="checkbox" name="permissions[reports][enabled]" class="sr-only peer section-toggle">
+											<div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 
+                  peer-focus:ring-blue-300 rounded-full peer 
+                  peer-checked:after:translate-x-full peer-checked:after:border-white 
+                  after:content-[''] after:absolute after:top-[.625rem] after:left-[.12rem]
+                  after:bg-white after:border-gray-300 after:border after:rounded-full 
+                  after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+											<span class="ml-3 text-sm font-medium toggle-label text-gray-500">No</span>
+										</label>
+									</div>
+								</div>
+								
+								<div class="options-container grid grid-cols-1 md:grid-cols-5 gap-4 mb-4 w-[60%]">
+									<div>
+										<label class="flex items-center space-x-2">
+											<input type="checkbox" name="permissions[reports][]" value="conversationReports" class="rounded option-checkbox  checkbox text-blue-600 toggle-option conversation-toggle">
+											<span class="option-label text-gray-500">Conversation Reports</span>
+										</label>
+										
+										<div class="grid-flow-col gap-4 pl-3 nested-options">
+											<label class="flex items-center space-x-2">
+												<input type="checkbox" name="permissions[reports][]" value="viewReports" class="rounded nested-checkbox  checkboxSmall text-blue-600 text-sm toggle-option">
+												<span class="text-sm nested-label text-gray-500">View Reports</span>
+											</label>
+											<label class="flex text-sm items-center space-x-2">
+												<input type="checkbox" name="permissions[reports][]" value="retargetingUsers" class="rounded nested-checkbox  checkboxSmall text-blue-600 text-sm toggle-option">
+												<span class="text-sm nested-label text-gray-500">Retargeting Users</span>
+											</label>
+											<label class="flex text-sm items-center space-x-2">
+												<input type="checkbox" name="permissions[reports][]" value="redirectedToVPChat" class="rounded nested-checkbox checkboxSmall text-blue-600 text-sm toggle-option">
+												<span class="text-sm nested-label text-gray-500">Redirected to VP chat</span>
+											</label>
+										</div>
+									</div>
+									
+									<label class="flex space-x-2">
+										<input type="checkbox" name="permissions[reports][]" value="costReports" class="rounded option-checkbox checkbox text-blue-600 toggle-option">
+										<span class="option-label text-gray-500">Cost Reports</span>
+									</label>
+								</div>
+							</div>
+							
+							<!-- Settings Section -->
+							<div class="border-t pt-4 flex justify-between toggle-section">
+								<div class="flex justify-between items-center mb-4 w-[15%]">
+									<h2 class="text-lg font-semibold">Settings</h2>
+									<div class="flex items-center space-x-2">
+										<label class="relative inline-flex items-center cursor-pointer">
+											<input type="checkbox" name="permissions[settings][enabled]" class="sr-only peer section-toggle" id="settings-toggle">
+											<div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 
+                peer-focus:ring-blue-300 rounded-full peer 
+                peer-checked:after:translate-x-full peer-checked:after:border-white 
+                after:content-[''] after:absolute after:top-[2px] after:left-[2px] 
+                after:bg-white after:border-gray-300 after:border after:rounded-full 
+                after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+											<span class="ml-3 text-sm font-medium toggle-label text-gray-500">No</span>
+										</label>
+									</div>
+								</div>
+								
+								<div class="options-container grid grid-cols-1 md:grid-cols-5 gap-4 mb-4 w-[60%]">
+									<div class="permission-group" id="manage-tags-section">
+										<label class="flex items-center space-x-2">
+											<input type="checkbox" name="permissions[settings][]" value="manageTags" class="rounded option-checkbox checkbox text-blue-600 toggle-option" id="manage-tags-toggle">
+											<span class="option-label text-gray-500">Manage Tags</span>
+										</label>
+										<div class="grid-flow-col gap-4 pl-3 nested-options" id="manage-tags-options">
+											<label class="flex items-center space-x-2">
+												<input type="checkbox" name="permissions[settings][]" value="addTags" class="rounded checkboxSmall text-blue-600 text-sm nested-checkbox" id="add-tags">
+												<span class="text-sm nested-label text-gray-500">Add Tags</span>
+											</label>
+											<label class="flex items-center space-x-2">
+												<input type="checkbox" name="permissions[settings][]" value="deleteTags" class="rounded checkboxSmall text-blue-600 text-sm nested-checkbox" id="delete-tags">
+												<span class="text-sm nested-label text-gray-500">Delete Tags</span>
+											</label>
+											<label class="flex items-center space-x-2">
+												<input type="checkbox" name="permissions[settings][]" value="viewTags" class="rounded checkboxSmall text-blue-600 text-sm nested-checkbox" id="view-tags">
+												<span class="text-sm nested-label text-gray-500">View Tags</span>
+											</label>
+										</div>
+									</div>
+									
+									<label class="flex space-x-2">
+										<input type="checkbox" name="permissions[settings][]" value="userManagement" class="rounded option-checkbox checkbox text-blue-600" id="user-management">
+										<span class="option-label text-gray-500">User Management</span>
+									</label>
+									<label class="flex space-x-2">
+										<input type="checkbox" name="permissions[settings][]" value="activityLogs" class="rounded option-checkbox checkbox text-blue-600" id="activity-logs">
+										<span class="option-label text-gray-500">Activity Logs</span>
+									</label>
+								</div>
+							</div>
+							
+							<!-- Form Action Buttons -->
+							<div class="flex justify-end space-x-4 pt-6 border-t">
+								<button type="button" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+									Cancel
+								</button>
+								<button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+									Add Role
 								</button>
 							</div>
-						</div>
+						</form>
 					</div>
-					<div class="mt-8">
-						<button type="submit" class="w-full bg-red-400  text-white px-4 py-2 rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors">
-							Save Permissions
-						</button>
-					</div>
-				</form>
+				</div>
 			</div>
 		</div>
-		
-		<script defer src="/settings/js/permissions.js"></script>
-		<script>
-			window.addEventListener('load', function () {
-				// Fade out the loader smoothly by changing the opacity
-				var loader = document.getElementById('loader');
-				loader.style.transition = 'opacity 0.3s ease'; // Smooth fade out
-				loader.style.opacity = '0';
-				
-				// Completely remove the loader after the fade-out effect is finished
-				setTimeout(function () {
-					loader.style.display = 'none'; // Ensure loader is no longer in the DOM flow
-				}, 300); // Match the duration of the fade-out (0.5 seconds in this case)
-			});
-		</script>
+	</div>
+	<script src="/settings/js/permissions.js"></script>
+	<script>
+		window.addEventListener('load', function () {
+			// Fade out the loader smoothly by changing the opacity
+			var loader = document.getElementById('loader');
+			loader.style.transition = 'opacity 0.3s ease'; // Smooth fade out
+			loader.style.opacity = '0';
+			
+			// Completely remove the loader after the fade-out effect is finished
+			setTimeout(function () {
+				loader.style.display = 'none'; // Ensure loader is no longer in the DOM flow
+			}, 300); // Match the duration of the fade-out (0.5 seconds in this case)
+		});
+	</script>
 </body>
 
 </html>

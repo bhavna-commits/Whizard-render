@@ -9,6 +9,7 @@ import {
 } from "./template.functions.controller.js";
 import ActivityLogs from "../../models/activityLogs.model.js";
 import Permissions from "../../models/permissions.model.js";
+import User from "../../models/user.model.js";
 import { generateUniqueId } from "../../utils/otpGenerator.js";
 
 dotenv.config();
@@ -86,7 +87,7 @@ export const templatePreview = async (req, res) => {
 
 export const getList = async (req, res) => {
 	try {
-		const id = req.session.user.id;
+		const id = req.session?.user?.id || req.session?.addedUser?.id;
 		const page = parseInt(req.query.page) || 1;
 		const { category, search } = req.query;
 		const limit = 6;
@@ -131,27 +132,42 @@ export const getList = async (req, res) => {
 		const templates = result[0]?.paginatedResults || [];
 		const totalCount = result[0]?.totalCount[0]?.total || 0;
 
-		// Calculate total pages
 		const totalPages = Math.ceil(totalCount / limit);
-		// console.log();
-		res.render("Templates/manage_template", {
-			list: templates,
-			page,
-			totalPages,
-			color: req.session.user.color,
-			photo: req.session.user?.photo,
-			name: req.session.user.name,
-		});
+
+		const permissions = req.session?.addedUser?.permissions;
+		if (permissions) {
+			const access = Permissions.findOne({ unique_id: permissions });
+			if (access.templates.type) {
+				res.render("Templates/manage_template", {
+					access,
+					list: templates,
+					page,
+					totalPages,
+					color: req.session?.addedUser?.color,
+					photo: req.session?.addedUser?.photo,
+					name: req.session?.addedUser?.name,
+					whatsAppStatus: req.session?.addedUser?.whatsAppStatus,
+				});
+			} else {
+				res.render("errors/notAllowed");
+			}
+		} else {
+			const access = await User.findOne({ unique_id: id });
+			console.log(access.access);
+			res.render("Templates/manage_template", {
+				access: access.access,
+				list: templates,
+				page,
+				totalPages,
+				color: req.session.user.color,
+				photo: req.session.user?.photo,
+				name: req.session.user.name,
+				whatsAppStatus: req.session?.user?.whatsAppStatus,
+			});
+		}
 	} catch (error) {
 		console.log(error);
-		res.render("Templates/manage_template", {
-			list: [],
-			page: 1,
-			totalPages: 0,
-			color: req.session.user.color,
-			photo: req.session.user?.photo,
-			name: req.session.user.name,
-		});
+		res.render("errors/serverError");
 	}
 };
 
@@ -354,5 +370,39 @@ export const getCampaignTemplates = async (req, res) => {
 			success: false,
 			error: error.message,
 		});
+	}
+};
+
+export const getCreateTemplate = async (req, res) => {
+	const permissions = req.session?.addedUser?.permissions;
+	if (permissions) {
+		const access = Permissions.findOne({ unique_id: permissions });
+		if (
+			access.templates.createTemplate &&
+			req.session?.addedUser?.whatsAppStatus
+		) {
+			res.render("Templates/create-template", {
+				access,
+				templateData: [],
+				name: req.session?.addedUser?.name,
+				photo: req.session?.addedUser?.photo,
+				color: req.session?.addedUser?.color,
+				whatsAppStatus: req.session?.addedUser?.whatsAppStatus,
+			});
+		} else {
+			res.render("errors/notAllowed");
+		}
+	} else if (req.session?.user?.whatsAppStatus) {
+		const access = Permissions.findOne({ useradmin: userId });
+		res.render("Templates/create-template", {
+			access: access.access,
+			templateData: [],
+			name: req.session?.user?.name,
+			photo: req.session?.user?.photo,
+			color: req.session?.user?.color,
+			whatsAppStatus: req.session?.user?.whatsAppStatus,
+		});
+	} else {
+		res.render("errors/notAllowed");
 	}
 };

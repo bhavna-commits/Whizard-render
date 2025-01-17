@@ -43,13 +43,26 @@
  					</td>
  					<% }); %>
  					<% } %>
+ 					
  					<td class="sticky right-0 bg-white border-r border-t border-b rounded-r-lg border-gray-200">
+ 						<% if (access?.contactList?.editContactIndividual) { %>
  						<button onclick="openEditModal('<%= JSON.stringify(contact) %>')" aria-label="Edit contact" class="text-gray-600 hover:text-blue-600 px-3 border-r">
  							<i class="fas fa-edit"></i>
  						</button>
+ 						<% } else { %>
+ 						<button class="text-gray-400 hover:cursor-not-allowed px-3 border-r">
+ 							<i class="fas fa-edit"></i>
+ 						</button>
+ 						<% } %>
+ 						<% if (access?.contactList?.deleteContactIndividual) { %>
  						<button onclick="openDeleteModal('<%= contact._id %>')" aria-label="Delete contact" class="text-gray-600 hover:text-red-600 px-2">
  							<i class="fa-regular fa-trash-can"></i>
  						</button>
+ 						<% } else { %>
+ 						<button class="text-gray-400 hover:cursor-not-allowed px-2">
+ 							<i class="fa-regular fa-trash-can"></i>
+ 						</button>
+ 						<% } %>
  					</td>
  				</tr>
  				<% }); %>

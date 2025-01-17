@@ -3,6 +3,7 @@ import path from "path";
 import app from "./app.js";
 
 app.use(express.static("public"));
+app.use("/contact-list", express.static("public"));
 app.use("/contact-list/overview", express.static("public"));
 app.use("/Contact-List/createCampaign", express.static("public"));
 app.use("/Contact-List/custom-field", express.static("public"));

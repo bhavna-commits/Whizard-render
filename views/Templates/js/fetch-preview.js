@@ -30,7 +30,6 @@ document.getElementById("modalCloseBtn").addEventListener("click", closeModal);
 
 // Template preview functionality
 let originalTemplateData = {};
-let currentTemplateData = {};
 
 function initializePreview(templateData) {
 	originalTemplateData = {
@@ -40,7 +39,6 @@ function initializePreview(templateData) {
 		headerType: templateData.header.type || "none",
 	};
 
-	currentTemplateData = { ...originalTemplateData };
 	let headerValidation = { isValid: true, error: null, numbers: [] };
 	if (templateData.header.type == "text") {
 		headerValidation = validateCurlyBraces(templateData.header.content);

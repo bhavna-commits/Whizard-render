@@ -46,32 +46,90 @@
 				<img onclick="location.href = '/'" class="cursor-pointer" src="/assets/img/Wizard_logo.png" alt="Whizard Logo" />
 			</div>
 			<ul class="">
+				<!-- Dashboard: Always enabled -->
 				<li>
-					<a href="/" class=""><span class="icon "><i class="fas fa-chart-line"></i></span>
-						Dashboard</a>
+					<a href="/" class="">
+						<span class="icon"><i class="fas fa-chart-line"></i></span>
+						Dashboard
+					</a>
 				</li>
+				
+				<!-- Chats: Conditionally rendered based on permissions -->
 				<li>
-					<a href="/chats"><span class="icon"><i class="fa-regular fa-comment"></i></span>
-						Chats</a>
+					<% if (access?.chats?.type) { %>
+					<a href="/chats" class="">
+						<span class="icon"><i class="fa-regular fa-comment"></i></span>
+						Chats
+					</a>
+					<% } else { %>
+					<a href="javascript:void(0);" class="cursor-not-allowed">
+						<span class="icon"><i class="fa-regular fa-comment"></i></span>
+						Chats
+					</a>
+					<% } %>
 				</li>
+				
+				<!-- Contact List: Conditionally rendered based on permissions -->
 				<li>
-					<a href="/contact-list"><span class="icon active"><i class="fa-regular fa-address-book"></i></span>
-						
-						Contact List</a>
+					<% if (access?.contactList?.type) { %>
+					<a href="/contact-list">
+						<span class="icon active"><i class="fa-regular fa-address-book"></i></span>
+						Contact List
+					</a>
+					<% } else { %>
+					<a href="javascript:void(0);" class="cursor-not-allowed">
+						<span class="icon"><i class="fa-regular fa-address-book"></i></span>
+						Contact List
+					</a>
+					<% } %>
 				</li>
+				
+				<!-- Template: Conditionally rendered based on permissions -->
 				<li>
-					<a href="/template"><span class="icon"><i class="fa-regular fa-envelope"></i></span>
-						Template</a>
+					<% if (access?.templates?.type) { %>
+					<a href="/template">
+						<span class="icon"><i class="fa-regular fa-envelope"></i></span>
+						Template
+					</a>
+					<% } else { %>
+					<a href="javascript:void(0);" class="cursor-not-allowed">
+						<span class="icon"><i class="fa-regular fa-envelope"></i></span>
+						Template
+					</a>
+					<% } %>
 				</li>
+				
+				<!-- Settings: Conditionally rendered based on permissions -->
 				<li>
-					<a href="/settings"><span class="icon"><i class="fa-regular fa-user"></i></span>
-						Settings</a>
+					<% if (access?.settings?.type) { %>
+					<a href="/settings">
+						<span class="icon"><i class="fa-regular fa-user"></i></span>
+						Settings
+					</a>
+					<% } else { %>
+					<a href="javascript:void(0);" class="cursor-not-allowed">
+						<span class="icon"><i class="fa-regular fa-user"></i></span>
+						Settings
+					</a>
+					<% } %>
 				</li>
+				
+				<!-- Reports: Conditionally rendered based on permissions -->
 				<li>
-					<a href="/reports/campaign-list"><span class="icon"><i class="fa-regular fa-chart-bar"></i></span>
-						Reports</a>
+					<% if (access?.reports?.type) { %>
+					<a href="/reports/campaign-list">
+						<span class="icon"><i class="fa-regular fa-chart-bar"></i></span>
+						Reports
+					</a>
+					<% } else { %>
+					<a href="javascript:void(0);" class="cursor-not-allowed">
+						<span class="icon"><i class="fa-regular fa-chart-bar"></i></span>
+						Reports
+					</a>
+					<% } %>
 				</li>
 			</ul>
+			
 			<div class=" user-profile text-white flex justify-center items-center text-center">
 				<% if (photo) { %>
 				<img src="/<%= photo %>" alt="User Profile" class="user-profile-img" onclick="toggleDropdown()" />
@@ -171,7 +229,7 @@
 					</div>
 					
 					<div class="flex items-center justify-evenly">
-						
+						<% if (access.contactList.addContactIndividual) { %>
 						<div class="text-center pr-3">
 							<button aria-label="Add-Contact" onclick="openAddContact()" type="button" class="border py-2 px-4 rounded-lg transition-colors ease-in-out duration-300 hover:bg-gray-100 text-sm font-semibold flex items-center">
 								<span class="icon pr-2">
@@ -181,9 +239,19 @@
 							</button>
 						</div>
 						<%- include("partials/addContact") %>
+						<% } else { %>
+						<div class="text-center pr-3">
+							<button type="button" class="border py-2 px-4 rounded-lg transition-colors ease-in-out duration-300 text-gray-500 hover:cursor-not-allowed text-sm font-semibold flex items-center" disabled>
+								<span class="icon pr-2">
+									<i class="fa-solid fa-user-plus"></i>
+								</span>
+								Add Contact
+							</button>
+						</div>
+						<% } %>
 						<!-- Filters Button -->
 						<div class="text-center pr-3">
-							<button aria-label="Filters" onclick="openFilterModal()" type="button" class="border py-2 px-4 rounded-lg transition-colors ease-in-out duration-300 hover:bg-gray-100 text-sm font-semibold flex items-center">
+							<button onclick="openFilterModal()" type="button" class="border py-2 px-4 rounded-lg transition-colors ease-in-out duration-300 hover:bg-gray-100 text-sm font-semibold flex items-center">
 								<span class="icon pr-1">
 									<i class="fa-solid fa-filter"></i>
 								</span>
@@ -191,10 +259,19 @@
 							</button>
 						</div>
 						<%- include("partials/filters") %>
-						
+						<% if (access?.contactList?.sendBroadcast && whatsAppStatus == "Live") { %>
 						<button aria-label="Create new Contact list" type="button" id="create-List" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" onclick="location.href='/contact-list/createCampaign'">
 							<span>Send message</span>
 						</button>
+						<% } else if (whatsAppStatus == "Pending")  { %>
+						<button type="button" title="Connect with whatsApp Business API to send message" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-gray-500 hover:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" disabled>
+							<span>Send message</span>
+						</button>					
+						<% } else { %>
+						<button type="button" title="You don't have permissions to access this" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-gray-500 hover:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" disabled>
+							<span>Send message</span>
+						</button>
+						<% } %>
 					</div>
 					<!-- Pop-Up Modal to create List -->
 				</div>
