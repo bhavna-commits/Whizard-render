@@ -391,7 +391,7 @@ export const getCustomField = async (req, res) => {
 
 		const permissions = req.session?.addedUser?.permissions;
 		if (permissions) {
-			const access = Permissions.findOne({ unique_id: permissions });
+			const access = await Permissions.findOne({ unique_id: permissions });
 			if (access.contactList.customFields.type) {
 				res.render("Contact-List/custom-field", {
 					access,
@@ -692,7 +692,7 @@ export const getList = async (req, res) => {
 
 		const permissions = req.session?.addedUser?.permissions;
 		if (permissions) {
-			const access = Permissions.findOne({ unique_id: permissions });
+			const access = await Permissions.findOne({ unique_id: permissions });
 			if (access.contactList) {
 				res.render("Contact-List/contact-list", {
 					access: access,

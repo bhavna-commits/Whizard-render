@@ -136,7 +136,7 @@ export const getContacts = async (req, res) => {
 
 		const permissions = req.session?.addedUser?.permissions;
 		if (permissions) {
-			const access = Permissions.findOne({ unique_id: permissions });
+			const access = await Permissions.findOne({ unique_id: permissions });
 			if (access.contactList) {
 				res.render("Contact-List/contactList-overview", {
 					access,
@@ -593,10 +593,7 @@ export const getFilteredContacts = async (req, res) => {
 		});
 	} catch (error) {
 		console.error(error);
-		res.status(500).json({
-			success: false,
-			message: "Error fetching contacts",
-		});
+		res.render("errors/serverError");
 	}
 };
 

@@ -24,56 +24,73 @@ import { getRandomColor } from "../User/userFunctions.js";
 dotenv.config();
 
 export const home = async (req, res) => {
-	const permissions = req.session?.addedUser?.permissions;
-	if (permissions) {
-		const access = Permissions.findOne({ unique_id: permissions });
-		if (access.settings.type) {
+	try {
+		const permissions = req.session?.addedUser?.permissions;
+		if (permissions) {
+			const access = await Permissions.findOne({
+				unique_id: permissions,
+			});
+			if (access.settings.type) {
+				res.render("Settings/home", {
+					access,
+					photo: req.session.user?.photo,
+					name: req.session.user.name,
+					color: req.session.user.color,
+				});
+			} else {
+				res.render("errors/notAllowed");
+			}
+		} else {
+			const id = req.session?.user?.id;
+			const access = await User.findOne({ unique_id: id });
+			console.log(access.access);
 			res.render("Settings/home", {
-				access,
+				access: access.access,
+				photo: req.session.user?.photo,
+				name: req.session.user.name,
+				color: req.session.user.color,
+			});
+		}
+	} catch (err) {
+		console.log(err);
+		res.render("errors/serverError");
+	}
+};
+
+export const profile = async (req, res) => {
+	try {
+		let id;
+		let user;
+		if (req.session?.user?.id) {
+			id = req.session?.user?.id;
+			user = await User.findOne({ unique_id: id });
+			if (!user) {
+				return res.status(404).json({ message: "User not found" });
+			}
+			res.render("Settings/profile", {
+				user,
+				languages,
 				photo: req.session.user?.photo,
 				name: req.session.user.name,
 				color: req.session.user.color,
 			});
 		} else {
-			res.render("errors/notAllowed");
+			id = req.session?.addedUser?.owner;
+			user = await AddedUser.findOne({ unique_id: id });
+			if (!user) {
+				return res.status(404).json({ message: "User not found" });
+			}
+			res.render("Settings/profile", {
+				user,
+				languages,
+				photo: req.session.addedUser?.photo,
+				name: req.session.addedUser?.name,
+				color: req.session.addedUser?.color,
+			});
 		}
-	} else {
-		const id = req.session?.user?.id;
-		const access = await User.findOne({ unique_id: id });
-		console.log(access.access);
-		res.render("Settings/home", {
-			access: access.access,
-			photo: req.session.user?.photo,
-			name: req.session.user.name,
-			color: req.session.user.color,
-		});
-	}
-};
-
-export const profile = async (req, res) => {
-	const id = req.session.user.id;
-
-	try {
-		const user = await User.findOne({ unique_id: id });
-
-		if (!user) {
-			return res.status(404).json({ message: "User not found" });
-		}
-
-		// console.log("color :", user);
-		// console.log("User Information:", user);
-		res.render("Settings/profile", {
-			user,
-			languages,
-			photo: req.session.user?.photo,
-			name: req.session.user.name,
-			color: req.session.user.color,
-		});
 	} catch (error) {
 		console.error(error);
-		res.status(500).json({
-			message: "An error occurred while fetching the user profile",
-		});
+		res.render("errors/serverError");
 	}
 };
 
@@ -337,36 +354,37 @@ export const getActivityLogs = async (req, res) => {
 			useradmin: id,
 		}).sort({ createdAt: -1 });
 
-		
 		const permissions = req.session?.addedUser?.permissions;
-	if (permissions) {
-		const access = Permissions.findOne({ unique_id: permissions });
-		if (access.settings?.activityLogs) {
-			res.render("Settings/activityLogs", {
-				access,
-				logs,
-				photo: req.session?.addedUser?.photo,
-				name: req.session?.addedUser?.name,
-				color: req.session?.addedUser?.color,
+		if (permissions) {
+			const access = await Permissions.findOne({
+				unique_id: permissions,
 			});
+			if (access.settings?.activityLogs) {
+				res.render("Settings/activityLogs", {
+					access,
+					logs,
+					photo: req.session?.addedUser?.photo,
+					name: req.session?.addedUser?.name,
+					color: req.session?.addedUser?.color,
+				});
+			} else {
+				res.render("errors/notAllowed");
+			}
 		} else {
-			res.render("errors/notAllowed");
+			const id = req.session?.user?.id;
+			const access = await User.findOne({ unique_id: id });
+			console.log(access.access);
+			res.render("Settings/activityLogs", {
+				access: access.access,
+				logs,
+				photo: req.session.user?.photo,
+				name: req.session.user?.name,
+				color: req.session.user?.color,
+			});
 		}
-	} else {
-		const id = req.session?.user?.id;
-		const access = await User.findOne({ unique_id: id });
-		console.log(access.access);
-		res.render("Settings/activityLogs", {
-			access: access.access,
-			logs,
-			photo: req.session.user?.photo,
-			name: req.session.user?.name,
-			color: req.session.user?.color,
-		});
-	}
 	} catch (err) {
 		console.error("Error fetching logs:", err);
-		res.status(500).send("Server error");
+		res.render("errors/serverError");
 	}
 };
 
@@ -432,19 +450,39 @@ export const activityLogsFiltered = async (req, res) => {
 };
 
 export const getUserManagement = async (req, res) => {
-	const id = req.session.user.id;
+	const id = req.session?.user?.id || req.session?.addedUser?.owner;
 	try {
 		let users = await AddedUser.find({ useradmin: id });
 		const permissions = await Permissions.find({ useradmin: id });
 		users = users ? users : [];
-		res.render("Settings/userManagement", {
-			users,
-			permissions,
-			id,
-			photo: req.session.user?.photo,
-			name: req.session.user.name,
-			color: req.session.user.color,
-		});
+
+		const permission = req.session?.addedUser?.permissions;
+		if (permission) {
+			const access = await Permissions.findOne({ unique_id: permission });
+			if (access.settings.userManagement) {
+				res.render("Settings/userManagement", {
+					users,
+					permissions,
+					id,
+					photo: req.session.user?.photo,
+					name: req.session.user.name,
+					color: req.session.user.color,
+				});
+			} else {
+				res.render("errors/notAllowed");
+			}
+		} else {
+			const access = await User.findOne({ unique_id: id });
+			console.log(access.access);
+			res.render("Settings/userManagement", {
+				users,
+				permissions,
+				id,
+				photo: req.session.user?.photo,
+				name: req.session.user.name,
+				color: req.session.user.color,
+			});
+		}
 	} catch (error) {
 		console.error(error);
 		res.status(500).json({
@@ -518,11 +556,19 @@ export const sendUserInvitation = async (req, res) => {
 };
 
 export const getPermissions = async (req, res) => {
-	res.render("Settings/permissions", {
-		photo: req.session.user?.photo,
-		name: req.session.user.name,
-		color: req.session.user.color,
-	});
+	if (req.session?.user) {
+		res.render("Settings/permissions", {
+			photo: req.session?.user?.photo,
+			name: req.session?.user.name,
+			color: req.session?.user.color,
+		});
+	} else {
+		res.render("Settings/permissions", {
+			photo: req.session?.addedUser?.photo,
+			name: req.session?.addedUser?.name,
+			color: req.session?.addedUser?.color,
+		});
+	}
 };
 
 export const createPermissions = async (req, res) => {

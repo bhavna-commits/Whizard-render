@@ -1,7 +1,14 @@
 import Reports from "../../models/report.model.js";
 import Campaign from "../../models/campaign.model.js";
 import ContactList from "../../models/contactList.model.js";
+import Permissions from "../../models/permissions.model.js";
+import User from "../../models/user.model.js";
 import { overview } from "./reports.functions.js";
+import {
+	isNumber,
+	isString,
+	isBoolean,
+} from "../../middleWares/sanitiseInput.js";
 
 // Controller to fetch campaign reports and render them page-wise
 export const getCampaignList = async (req, res) => {
@@ -99,21 +106,24 @@ export const getCampaignList = async (req, res) => {
 
 		const permissions = req.session?.addedUser?.permissions;
 		if (permissions) {
-			const access = Permissions.findOne({ unique_id: permissions });
-			res.render("Contact-List/custom-field", {
-				access: access.contactList,
-				customFields: paginatedResults || [],
-				page: parseInt(skip) / parseInt(limit) + 1,
-				totalPages,
-				countries,
-				photo: req.session?.addedUser?.photo,
-				name: req.session?.addedUser?.name,
-				color: req.session?.addedUser?.color,
-			});
+			const access = await Permissions.findOne({ unique_id: permissions });
+			if (access.reports.conversationReports.type) {
+				res.render("Reports/campaign", {
+					access: access,
+					campaigns: paginatedResults,
+					page,
+					totalPages,
+					photo: req.session.user?.photo,
+					name: req.session.user.name,
+					color: req.session.user.color,
+				});
+			} else {
+				res.render("errors/notAllowed");
+			}
 		} else {
-			const access = Permissions.findOne({ useradmin: userId });
+			const access = await User.findOne({ unique_id: userId });
 			res.render("Reports/campaign", {
-				access: access.user?.reports,
+				access: access.access,
 				campaigns: paginatedResults,
 				page,
 				totalPages,
@@ -122,6 +132,7 @@ export const getCampaignList = async (req, res) => {
 				color: req.session.user.color,
 			});
 		}
+		
 	} catch (err) {
 		console.error(err);
 		res.status(500).send("Server Error");
@@ -292,8 +303,10 @@ export const getCampaignListFilter = async (req, res) => {
 const getCampaignOverview = async (req, res) => {
 	try {
 		const { id } = req.params;
-		const userId = req.session.user.id;
 		const page = parseInt(req.query.page) || 1;
+		if (!isNumber(page)) next();
+		if (!isString(id)) next();
+		const userId = req.session?.user?.id || req.session?.addedUser?.owner;
 		const limit = 6;
 		const skip = (page - 1) * limit;
 
@@ -319,26 +332,63 @@ const getCampaignOverview = async (req, res) => {
 				}
 			});
 		});
-		// console.log(firstCampaign);
-		res.render("Reports/campaignOverview", {
-			campaigns: paginatedResults[0].reports,
-			id,
-			page,
-			totalPages,
-			totalMessages: paginatedResults[0].totalMessages || 0,
-			messagesSent: paginatedResults[0].messagesSent || 0,
-			messagesDelivered: paginatedResults[0].messagesDelivered || 0,
-			messagesRead: paginatedResults[0].messagesRead || 0,
-			messagesReplied: paginatedResults[0].messagesReplied || 0,
-			messagesFailed: paginatedResults[0].messagesFailed || 0,
-			percentSent: paginatedResults[0].percentSent?.toFixed(2) || 0,
-			percentDelivered:
-				paginatedResults[0].percentDelivered?.toFixed(2) || 0,
-			percentRead: paginatedResults[0].percentRead?.toFixed(2) || 0,
-			photo: req.session.user?.photo,
-			name: req.session.user.name,
-			color: req.session.user.color,
-		});
+		const permissions = req.session?.addedUser?.permissions;
+		if (permissions) {
+			const access = await Permissions.findOne({
+				unique_id: permissions,
+			});
+			if (access?.reports?.conversationReports?.viewReports) {
+				res.render("Reports/campaignOverview", {
+					campaigns: paginatedResults[0].reports,
+					id,
+					page,
+					totalPages,
+					totalMessages: paginatedResults[0].totalMessages || 0,
+					messagesSent: paginatedResults[0].messagesSent || 0,
+					messagesDelivered:
+						paginatedResults[0].messagesDelivered || 0,
+					messagesRead: paginatedResults[0].messagesRead || 0,
+					messagesReplied: paginatedResults[0].messagesReplied || 0,
+					messagesFailed: paginatedResults[0].messagesFailed || 0,
+					percentSent:
+						paginatedResults[0].percentSent?.toFixed(2) || 0,
+					percentDelivered:
+						paginatedResults[0].percentDelivered?.toFixed(2) || 0,
+					percentRead:
+						paginatedResults[0].percentRead?.toFixed(2) || 0,
+					photo: req.session?.user?.photo,
+					name: req.session?.user?.name,
+					color: req.session?.user?.color,
+				});
+			} else {
+				res.render("errors/notAllowed");
+			}
+		} else {
+			const access = await User.findOne({
+				unique_id: req.session?.user?.id,
+			});
+			// console.log(access.access);
+			res.render("Reports/campaignOverview", {
+				campaigns: paginatedResults[0].reports,
+				id,
+				page,
+				totalPages,
+				totalMessages: paginatedResults[0].totalMessages || 0,
+				messagesSent: paginatedResults[0].messagesSent || 0,
+				messagesDelivered: paginatedResults[0].messagesDelivered || 0,
+				messagesRead: paginatedResults[0].messagesRead || 0,
+				messagesReplied: paginatedResults[0].messagesReplied || 0,
+				messagesFailed: paginatedResults[0].messagesFailed || 0,
+				percentSent: paginatedResults[0].percentSent?.toFixed(2) || 0,
+				percentDelivered:
+					paginatedResults[0].percentDelivered?.toFixed(2) || 0,
+				percentRead: paginatedResults[0].percentRead?.toFixed(2) || 0,
+				photo: req.session?.addedUser?.photo,
+				name: req.session?.addedUser?.name,
+				color: req.session?.addedUser?.color,
+			});
+		}
+		
 	} catch (err) {
 		console.error(err);
 		res.status(500).send("Server Error");
@@ -348,8 +398,10 @@ const getCampaignOverview = async (req, res) => {
 const getSentReportsById = async (req, res) => {
 	try {
 		const { id } = req.params;
-		const userId = req.session.user.id;
+		const userId = req.session?.user?.id || req.session?.addedUser?.owner;
 		const page = parseInt(req.query.page) || 1;
+		if (!isNumber(page)) next();
+		if (!isString(id)) next();
 		const limit = 6;
 		const skip = (page - 1) * limit;
 
@@ -429,7 +481,7 @@ const getSentReportsById = async (req, res) => {
 				}
 			});
 		});
-
+		
 		res.render("Reports/campaignSent", {
 			campaigns: paginatedResults[0].reports,
 			page,
@@ -854,195 +906,195 @@ const getFailedReportsById = async (req, res) => {
 	}
 };
 
-export const getUserAccountOverview = async (req, res) => {
-	try {
-		const userId = req.session.user.id;
+// export const getUserAccountOverview = async (req, res) => {
+// 	try {
+// 		const userId = req.session.user.id;
 
-		// Fetch all campaigns created by the user
-		const campaigns = await Campaign.aggregate([
-			{
-				$match: {
-					useradmin: userId,
-					deleted: { $ne: true },
-				},
-			},
-			{
-				$lookup: {
-					from: "campaignreports",
-					let: {
-						campaignId: "$_id",
-						campaignUseradmin: "$useradmin",
-					},
-					pipeline: [
-						{
-							$match: {
-								$expr: {
-									$and: [
-										{
-											$eq: [
-												"$campaignId",
-												"$$campaignId",
-											],
-										},
-										{
-											$eq: [
-												"$useradmin",
-												"$$campaignUseradmin",
-											],
-										},
-									],
-								},
-							},
-						},
-					],
-					as: "reports",
-				},
-			},
-			{
-				$group: {
-					_id: null,
-					totalMessages: { $sum: { $size: "$reports" } },
-					messagesSent: {
-						$sum: {
-							$size: {
-								$filter: {
-									input: "$reports",
-									as: "report",
-									cond: { $eq: ["$$report.status", "SENT"] },
-								},
-							},
-						},
-					},
-					messagesDelivered: {
-						$sum: {
-							$size: {
-								$filter: {
-									input: "$reports",
-									as: "report",
-									cond: {
-										$eq: ["$$report.status", "DELIVERED"],
-									},
-								},
-							},
-						},
-					},
-					messagesRead: {
-						$sum: {
-							$size: {
-								$filter: {
-									input: "$reports",
-									as: "report",
-									cond: { $eq: ["$$report.status", "READ"] },
-								},
-							},
-						},
-					},
-					messagesReplied: {
-						$sum: {
-							$size: {
-								$filter: {
-									input: "$reports",
-									as: "report",
-									cond: {
-										$eq: ["$$report.status", "REPLIED"],
-									},
-								},
-							},
-						},
-					},
-					messagesFailed: {
-						$sum: {
-							$size: {
-								$filter: {
-									input: "$reports",
-									as: "report",
-									cond: {
-										$eq: ["$$report.status", "FAILED"],
-									},
-								},
-							},
-						},
-					},
-					totalCampaigns: { $sum: 1 },
-				},
-			},
-		]);
+// 		// Fetch all campaigns created by the user
+// 		const campaigns = await Campaign.aggregate([
+// 			{
+// 				$match: {
+// 					useradmin: userId,
+// 					deleted: { $ne: true },
+// 				},
+// 			},
+// 			{
+// 				$lookup: {
+// 					from: "campaignreports",
+// 					let: {
+// 						campaignId: "$_id",
+// 						campaignUseradmin: "$useradmin",
+// 					},
+// 					pipeline: [
+// 						{
+// 							$match: {
+// 								$expr: {
+// 									$and: [
+// 										{
+// 											$eq: [
+// 												"$campaignId",
+// 												"$$campaignId",
+// 											],
+// 										},
+// 										{
+// 											$eq: [
+// 												"$useradmin",
+// 												"$$campaignUseradmin",
+// 											],
+// 										},
+// 									],
+// 								},
+// 							},
+// 						},
+// 					],
+// 					as: "reports",
+// 				},
+// 			},
+// 			{
+// 				$group: {
+// 					_id: null,
+// 					totalMessages: { $sum: { $size: "$reports" } },
+// 					messagesSent: {
+// 						$sum: {
+// 							$size: {
+// 								$filter: {
+// 									input: "$reports",
+// 									as: "report",
+// 									cond: { $eq: ["$$report.status", "SENT"] },
+// 								},
+// 							},
+// 						},
+// 					},
+// 					messagesDelivered: {
+// 						$sum: {
+// 							$size: {
+// 								$filter: {
+// 									input: "$reports",
+// 									as: "report",
+// 									cond: {
+// 										$eq: ["$$report.status", "DELIVERED"],
+// 									},
+// 								},
+// 							},
+// 						},
+// 					},
+// 					messagesRead: {
+// 						$sum: {
+// 							$size: {
+// 								$filter: {
+// 									input: "$reports",
+// 									as: "report",
+// 									cond: { $eq: ["$$report.status", "READ"] },
+// 								},
+// 							},
+// 						},
+// 					},
+// 					messagesReplied: {
+// 						$sum: {
+// 							$size: {
+// 								$filter: {
+// 									input: "$reports",
+// 									as: "report",
+// 									cond: {
+// 										$eq: ["$$report.status", "REPLIED"],
+// 									},
+// 								},
+// 							},
+// 						},
+// 					},
+// 					messagesFailed: {
+// 						$sum: {
+// 							$size: {
+// 								$filter: {
+// 									input: "$reports",
+// 									as: "report",
+// 									cond: {
+// 										$eq: ["$$report.status", "FAILED"],
+// 									},
+// 								},
+// 							},
+// 						},
+// 					},
+// 					totalCampaigns: { $sum: 1 },
+// 				},
+// 			},
+// 		]);
 
-		// If no campaigns were found
-		const campaignOverview =
-			campaigns.length > 0
-				? campaigns[0]
-				: {
-						totalMessages: 0,
-						messagesSent: 0,
-						messagesDelivered: 0,
-						messagesRead: 0,
-						messagesReplied: 0,
-						messagesFailed: 0,
-						totalCampaigns: 0,
-				  };
+// 		// If no campaigns were found
+// 		const campaignOverview =
+// 			campaigns.length > 0
+// 				? campaigns[0]
+// 				: {
+// 						totalMessages: 0,
+// 						messagesSent: 0,
+// 						messagesDelivered: 0,
+// 						messagesRead: 0,
+// 						messagesReplied: 0,
+// 						messagesFailed: 0,
+// 						totalCampaigns: 0,
+// 				  };
 
-		// Fetch contact lists and total number of contacts
-		const contactLists = await ContactList.aggregate([
-			{ $match: { useradmin: userId, deleted: { $ne: true } } },
-			{
-				$group: {
-					_id: null,
-					totalContacts: { $sum: { $size: "$contacts" } },
-					totalLists: { $sum: 1 },
-				},
-			},
-		]);
+// 		// Fetch contact lists and total number of contacts
+// 		const contactLists = await ContactList.aggregate([
+// 			{ $match: { useradmin: userId, deleted: { $ne: true } } },
+// 			{
+// 				$group: {
+// 					_id: null,
+// 					totalContacts: { $sum: { $size: "$contacts" } },
+// 					totalLists: { $sum: 1 },
+// 				},
+// 			},
+// 		]);
 
-		const contactOverview =
-			contactLists.length > 0
-				? contactLists[0]
-				: {
-						totalContacts: 0,
-						totalLists: 0,
-				  };
+// 		const contactOverview =
+// 			contactLists.length > 0
+// 				? contactLists[0]
+// 				: {
+// 						totalContacts: 0,
+// 						totalLists: 0,
+// 				  };
 
-		// Calculate percentages
-		const percentSent =
-			campaignOverview.totalMessages > 0
-				? (campaignOverview.messagesSent /
-						campaignOverview.totalMessages) *
-				  100
-				: 0;
-		const percentDelivered =
-			campaignOverview.totalMessages > 0
-				? (campaignOverview.messagesDelivered /
-						campaignOverview.totalMessages) *
-				  100
-				: 0;
-		const percentRead =
-			campaignOverview.totalMessages > 0
-				? (campaignOverview.messagesRead /
-						campaignOverview.totalMessages) *
-				  100
-				: 0;
+// 		// Calculate percentages
+// 		const percentSent =
+// 			campaignOverview.totalMessages > 0
+// 				? (campaignOverview.messagesSent /
+// 						campaignOverview.totalMessages) *
+// 				  100
+// 				: 0;
+// 		const percentDelivered =
+// 			campaignOverview.totalMessages > 0
+// 				? (campaignOverview.messagesDelivered /
+// 						campaignOverview.totalMessages) *
+// 				  100
+// 				: 0;
+// 		const percentRead =
+// 			campaignOverview.totalMessages > 0
+// 				? (campaignOverview.messagesRead /
+// 						campaignOverview.totalMessages) *
+// 				  100
+// 				: 0;
 
-		// Render account overview page
-		res.render("Reports/accountOverview", {
-			user,
-			totalMessages: campaignOverview.totalMessages,
-			messagesSent: campaignOverview.messagesSent,
-			messagesDelivered: campaignOverview.messagesDelivered,
-			messagesRead: campaignOverview.messagesRead,
-			messagesReplied: campaignOverview.messagesReplied,
-			messagesFailed: campaignOverview.messagesFailed,
-			totalCampaigns: campaignOverview.totalCampaigns,
-			percentSent: percentSent.toFixed(2),
-			percentDelivered: percentDelivered.toFixed(2),
-			percentRead: percentRead.toFixed(2),
-			totalContacts: contactOverview.totalContacts,
-			totalLists: contactOverview.totalLists,
-			photo: req.session.user?.photo,
-			name: req.session.user.name,
-			color: req.session.user.color,
-		});
-	} catch (err) {
-		console.error(err);
-		res.status(500).send("Server Error");
-	}
-};
+// 		// Render account overview page
+// 		res.render("Reports/accountOverview", {
+// 			user,
+// 			totalMessages: campaignOverview.totalMessages,
+// 			messagesSent: campaignOverview.messagesSent,
+// 			messagesDelivered: campaignOverview.messagesDelivered,
+// 			messagesRead: campaignOverview.messagesRead,
+// 			messagesReplied: campaignOverview.messagesReplied,
+// 			messagesFailed: campaignOverview.messagesFailed,
+// 			totalCampaigns: campaignOverview.totalCampaigns,
+// 			percentSent: percentSent.toFixed(2),
+// 			percentDelivered: percentDelivered.toFixed(2),
+// 			percentRead: percentRead.toFixed(2),
+// 			totalContacts: contactOverview.totalContacts,
+// 			totalLists: contactOverview.totalLists,
+// 			photo: req.session.user?.photo,
+// 			name: req.session.user.name,
+// 			color: req.session.user.color,
+// 		});
+// 	} catch (err) {
+// 		console.error(err);
+// 		res.status(500).send("Server Error");
+// 	}
+// };
