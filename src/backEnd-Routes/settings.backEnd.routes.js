@@ -6,6 +6,7 @@ import {
 	updateAccountDetails,
 	sendUserInvitation,
 	createPermissions,
+	updateUserManagement,
 } from "../controllers/Settings/settings.controller.js";
 
 const router = express.Router();
@@ -15,5 +16,6 @@ router.post("/update-password", updatePassword);
 router.post("/account-details", updateAccountDetails);
 router.post("/user-management/invite", sendUserInvitation);
 router.post("/user-management/permissions/update", createPermissions);
+router.post("/updateUserManagement", updateUserManagement);
 
 export default router;

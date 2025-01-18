@@ -10,35 +10,90 @@ dotenv.config();
 
 const router = express.Router();
 
+
 router.post("/auth_code", async (req, res) => {
 	const { code } = req.body;
 
 	try {
 		const url = `https://graph.facebook.com/${process.env.FB_GRAPH_VERSION}/oauth/access_token?client_id=${process.env.FB_APP_ID}&client_secret=${process.env.FB_APP_SECRET}&redirect_uri=https://localhost:5000&code=${code}`;
 
-		const response = await fetch(url, {
-			method: "POST",
-		});
+		// Step 1: Exchange authorization code for access token
+		const response = await axios.post(url);
 
-		const data = await response.json();
+		if (response.status === 200) {
+			const { access_token, expires_in } = response.data;
 
-		if (response.ok) {
-			const accessToken = data.access_token;
-			await User.findByIdAndUpdate(req.session.user.id, { accessToken });
-			res.json({ access_token: accessToken });
+			// Step 2: Store access token and calculate expiration time (current time + expires_in)
+			const expirationTime = Date.now() + expires_in * 1000; // expires_in is in seconds
+			await User.findOneAndUpdate(req.session?.user?.id || req.session?.addedUser?.owner, {
+				accessToken: access_token,
+				tokenExpiresAt: expirationTime,
+			});
+
+			// Step 3: Automatically exchange short-lived token for a long-lived token
+			const longLivedToken = await exchangeForLongLivedToken(
+				access_token,
+			);
+			if (longLivedToken) {
+				// Store the long-lived token and update its expiration time
+				const longLivedExpirationTime =
+					Date.now() + 60 * 24 * 60 * 60 * 1000; // 60 days in milliseconds
+				await User.findByIdAndUpdate(req.session.user.id, {
+					accessToken: longLivedToken,
+					tokenExpiresAt: longLivedExpirationTime,
+				});
+
+				res.json({ access_token: longLivedToken });
+			} else {
+				res.status(500).json({
+					error: "Failed to exchange for a long-lived token",
+				});
+			}
 		} else {
-			console.error("Error exchanging code for access token:", data);
+			console.error(
+				"Error exchanging code for access token:",
+				response.data,
+			);
 			res.status(500).json({
 				error: "Failed to exchange authorization code",
 			});
 		}
 	} catch (error) {
-		console.error("Error making fetch request:", error);
+		console.error("Error making axios request:", error);
 		res.status(500).json({
 			error: "Failed to exchange authorization code",
 		});
 	}
 });
+
+// Function to exchange the short-lived token for a long-lived one
+const exchangeForLongLivedToken = async (shortLivedToken) => {
+	try {
+		const url = `https://graph.facebook.com/${process.env.FB_GRAPH_VERSION}/oauth/access_token`;
+		const response = await axios.get(url, {
+			params: {
+				grant_type: "fb_exchange_token",
+				client_id: process.env.FB_APP_ID,
+				client_secret: process.env.FB_APP_SECRET,
+				fb_exchange_token: shortLivedToken,
+			},
+		});
+
+		if (response.status === 200) {
+			return response.data.access_token;
+		} else {
+			console.error(
+				"Failed to exchange for long-lived token:",
+				response.data,
+			);
+			return null;
+		}
+	} catch (error) {
+		console.error("Error refreshing token:", error);
+		return null;
+	}
+};
+
 
 router.post("/webhook", async (req, res) => {
 	try {

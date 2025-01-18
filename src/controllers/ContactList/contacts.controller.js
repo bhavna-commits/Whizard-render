@@ -18,6 +18,7 @@ import {
 	isNumber,
 	isString,
 	isBoolean,
+	isObject,
 } from "../../middleWares/sanitiseInput.js";
 
 export const __filename = fileURLToPath(import.meta.url);
@@ -32,8 +33,21 @@ export const csvFilePath = path.join(
 );
 
 export const updateContact = async (req, res, next) => {
-	const contactId = req.params.id;
+	const contactId = req.params?.id;
 	const { name, tags, validated } = req.body;
+	if (!contactId) {
+		return res.status(401).json({
+			success: false,
+			message: "No id found",
+		});
+	}
+	if (!name || !tags || !validated) {
+		return res.status(401).json({
+			success: false,
+			message: "No data found",
+		});
+	}
+	if (!isString(contactId, name, tags, validated)) next();
 
 	try {
 		// Find the contact by ID and update the fields
@@ -51,7 +65,7 @@ export const updateContact = async (req, res, next) => {
 		}
 
 		await ActivityLogs.create({
-			useradmin: req.session.user.id,
+			useradmin: req.session?.user?.id || req.session?.addedUser?.owner,
 			unique_id: generateUniqueId(),
 			name: req.session.user.name
 				? req.session.user.name
@@ -67,14 +81,22 @@ export const updateContact = async (req, res, next) => {
 		});
 	} catch (error) {
 		console.error(error);
-		res.render("Das");
+		res.json({
+			success: false,
+			message: error,
+		});
 	}
 };
 
-export const getContacts = async (req, res) => {
+export const getContacts = async (req, res, next) => {
 	try {
 		const id = req.params.id;
-
+		if (!id) {
+			return res.status(401).json({
+				success: false,
+				message: "No id found",
+			});
+		}
 		const page = parseInt(req.query.page) || 1;
 		const limit = 6;
 		const skip = (page - 1) * limit;
@@ -136,7 +158,9 @@ export const getContacts = async (req, res) => {
 
 		const permissions = req.session?.addedUser?.permissions;
 		if (permissions) {
-			const access = await Permissions.findOne({ unique_id: permissions });
+			const access = await Permissions.findOne({
+				unique_id: permissions,
+			});
 			if (access.contactList) {
 				res.render("Contact-List/contactList-overview", {
 					access,
@@ -180,19 +204,21 @@ export const getContacts = async (req, res) => {
 	}
 };
 
-export const editContact = async (req, res) => {
+export const editContact = async (req, res, next) => {
 	try {
+		console.log("here");
 		const { id } = req.params;
 		const updatedData = req.body;
 
-		console.log(updatedData);
-
+		// console.log(updatedData);
 		if (!id || !updatedData) {
 			return res.status(401).json({
 				success: false,
 				message: "front-end is not providing complete data",
 			});
 		}
+		if (!isObject(updatedData)) next();
+		if (!isString(id)) next();
 
 		let wa_id = "";
 
@@ -202,11 +228,14 @@ export const editContact = async (req, res) => {
 				wa_id = value.slice(1);
 			} else if (key === "wa_id" && wa_id) {
 				wa_id += value;
+				// console.log(wa_id);
 				setData["wa_id"] = wa_id;
 			} else {
 				setData[key] = value;
 			}
 		}
+
+		// console.log(setData);
 
 		const contacts = await Contacts.findOneAndUpdate(
 			{ keyId: id },
@@ -216,7 +245,7 @@ export const editContact = async (req, res) => {
 
 		// Log the update activity
 		await ActivityLogs.create({
-			useradmin: req.session.user.id,
+			useradmin: req.session?.user?.id || req.session?.addedUser?.owner,
 			unique_id: generateUniqueId(),
 			name: req.session.user.name
 				? req.session.user.name
@@ -231,14 +260,17 @@ export const editContact = async (req, res) => {
 	}
 };
 
-export const deleteContact = async (req, res) => {
+export const deleteContact = async (req, res, next) => {
 	const { id } = req.params;
 	if (!id) {
-		res.status(401).json({
+		return res.status(401).json({
 			success: false,
-			message: "front-end is not providing contact id",
+			message: "No id found",
 		});
 	}
+	// console.log("here");
+	if (!isString(id)) next();
+
 	try {
 		const contact = await Contacts.findOne({ _id: id });
 		if (!contact) {
@@ -260,7 +292,7 @@ export const deleteContact = async (req, res) => {
 		);
 
 		await ActivityLogs.create({
-			useradmin: req.session.user.id,
+			useradmin: req.session?.user?.id || req.session?.addedUser?.owner,
 			unique_id: generateUniqueId(),
 			name: req.session.user.name
 				? req.session.user.name
@@ -337,20 +369,24 @@ export const updateCSVOnFieldDelete = async (id, fieldToDelete) => {
 	}
 };
 
-export const createContact = async (req, res) => {
+export const createContact = async (req, res, next) => {
 	console.log("here");
 	try {
 		const contactData = req.body;
-		const { Name, contactId, wa_id, ...newContactData } = contactData;
-		const userId = req.session.user.id;
+		const { Name, contactId, wa_id, countryCode, ...newContactData } =
+			contactData;
+
+		if (!isObject(contactData)) next();
+
+		const userId = req.session?.user?.id || req.session?.addedUser?.owner;
 		const user = await User.findOne({ unique_id: userId });
+
 		if (!user) {
 			return res.status(404).json({
 				success: false,
 				message: "User not found.",
 			});
 		}
-
 		const number = user.phone.countryCode + user.phone.number;
 
 		if (!contactId || !contactData) {
@@ -360,7 +396,7 @@ export const createContact = async (req, res) => {
 			});
 		}
 
-		// Extract contact data, excluding listId from the body
+		// console.log(`${countryCode.slice(1)}${wa_id}`);
 
 		const keyId = generateUniqueId();
 		// Add the new contact to the Contacts collection
@@ -370,7 +406,7 @@ export const createContact = async (req, res) => {
 			contactId,
 			Name,
 			wa_idK: `${number}_${keyId}`,
-			wa_id,
+			wa_id: `${countryCode.slice(1)}${wa_id}`,
 			masterExtra: newContactData,
 		});
 
@@ -384,7 +420,7 @@ export const createContact = async (req, res) => {
 
 		// Log the activity
 		await ActivityLogs.create({
-			useradmin: req.session.user.id,
+			useradmin: req.session?.user?.id || req.session?.addedUser?.owner,
 			unique_id: generateUniqueId(),
 			name: req.session.user.name
 				? req.session.user.name
@@ -400,11 +436,13 @@ export const createContact = async (req, res) => {
 	}
 };
 
-export const createCampaign = async (req, res) => {
+export const createCampaign = async (req, res, next) => {
 	try {
 		let { templateId, contactListId, variables, schedule, name } = req.body;
 
-		// Validate and parse variables
+		if (!isString(templateId, contactListId, variables, schedule, name))
+			next();
+
 		variables =
 			typeof variables === "string" ? JSON.parse(variables) : variables;
 		schedule =
@@ -418,7 +456,7 @@ export const createCampaign = async (req, res) => {
 
 		// Create new campaign object
 		const newCampaign = new Campaign({
-			useradmin: req.session.user.id,
+			useradmin: req.session?.user?.id || req.session?.addedUser?.owner,
 			unique_id: generateUniqueId(),
 			templateId,
 			contactListId,
@@ -430,15 +468,16 @@ export const createCampaign = async (req, res) => {
 			await sendMessages(
 				name,
 				newCampaign,
-				req.session.user.id,
+				req.session?.user?.id || req.session?.addedUser?.owner,
 				generateUniqueId(),
 				req,
 			);
 		} else {
 			newCampaign.scheduledAt = Number(schedule) * 1000;
 			newCampaign.status = "SCHEDULED";
+
 			await ActivityLogs.create({
-				useradmin: req.session.user.id,
+				useradmin: req.session?.user?.id || req.session?.addedUser?.owner,
 				unique_id: generateUniqueId(),
 				name: req.session.user.name
 					? req.session.user.name
@@ -506,15 +545,17 @@ export const generateTableAndCheckFields = (parsedData, actualColumns) => {
 	return { tableHtml, emptyFields };
 };
 
-export const getFilteredContacts = async (req, res) => {
+export const getFilteredContacts = async (req, res, next) => {
 	try {
-		const id = req.params.id;
+		const id = req.params?.id;
 		const page = parseInt(req.query.page) || 1;
 		const limit = 6;
 		const skip = (page - 1) * limit;
 
 		// Get filters from the request body
 		const filters = req.body.filters || [];
+
+		if (!isString(id)) next(); 
 
 		// Start with the basic match stage
 		const matchStage = {

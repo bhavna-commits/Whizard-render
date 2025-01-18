@@ -2,19 +2,30 @@ import { getRandomColor, sendEmailVerification } from "./userFunctions.js";
 import User from "../../models/user.model.js";
 import AddedUser from "../../models/addedUser.model.js";
 import bcrypt from "bcrypt";
-import { generateUniqueId } from "../../utils/otpGenerator.js";
+import {
+	generate6DigitOTP,
+	generateUniqueId,
+	setOTPExpiry,
+} from "../../utils/otpGenerator.js";
 import dotenv from "dotenv";
+import { isString } from "../../middleWares/sanitiseInput.js";
+import { incrementLoginAttempts } from "../../middleWares/rateLimiter.js";
 
 dotenv.config();
 
-const setOTPExpiry = () => {
-	return Date.now() + 600000; // 10 minutes in milliseconds
-};
-
-export const generateOTP = async (req, res) => {
-	const { name, email, password, phoneNumber, countryCode } = req.body;
-
+export const generateOTP = async (req, res, next) => {
 	try {
+		const { name, email, password, phoneNumber, countryCode } = req.body;
+		if (!(name && email && password && phoneNumber && countryCode)) {
+			return res.json({
+				success: false,
+				message: "input invalid: all values must be present",
+			});
+		}
+
+		if (!isString(name, email, password, phoneNumber, countryCode))
+			return next();
+
 		const user = await User.findOne({ email });
 		const phone = `${countryCode}${phoneNumber}`;
 		const mobileExists = await User.findOne({ phone });
@@ -32,34 +43,20 @@ export const generateOTP = async (req, res) => {
 			});
 		}
 
-		const otp = Math.floor(100000 + Math.random() * 900000).toString();
+		const otp = generate6DigitOTP();
+		const otpExpiry = setOTPExpiry(); // Set the expiration time
 
-		try {
-			req.session.tempUser = {
-				name,
-				email,
-				password,
-				phoneNumber,
-				countryCode,
-				otp,
-			};
-		} catch (error) {
-			console.error("Error in creating req session:", error);
-		}
+		req.session.tempUser = {
+			name,
+			email,
+			password,
+			phoneNumber,
+			countryCode,
+			otp,
+			otpExpiry, // Store expiration time
+		};
 
-		try {
-			await sendEmailVerification(email, otp);
-			console.log("sendEmailVerification passed");
-		} catch (error) {
-			console.error("Error in sendEmailVerification:", error);
-		}
-
-		try {
-			setOTPExpiry();
-			console.log("setOTPExpiry passed");
-		} catch (error) {
-			console.error("Error in setOTPExpiry:", error);
-		}
+		await sendEmailVerification(email, otp);
 
 		res.status(200).json({
 			success: true,
@@ -75,18 +72,34 @@ export const generateOTP = async (req, res) => {
 	}
 };
 
-export const verifyEmail = async (req, res) => {
+export const verifyEmail = async (req, res, next) => {
 	const { otp, email } = req.body;
+	if (!otp || !email) {
+		return res.json({
+			success: false,
+			message: "Invalid input: Please enter all the required values",
+		});
+	}
+
+	if (!isString(otp, email)) return next();
 
 	try {
-		const tempUser = req.session.tempUser;
-		tempUser.email = email;
-		console.log(typeof tempUser.otp, typeof otp);
+		const tempUser = req.session?.tempUser;
 
 		if (!tempUser) {
-			return res
-				.status(400)
-				.json({ message: "Session expired. Please try again." });
+			return res.status(400).json({
+				success: false,
+				message: "Session expired. Please try again.",
+			});
+		}
+
+		// Check if OTP has expired
+		const currentTime = Date.now();
+		if (currentTime > tempUser.otpExpiry) {
+			return res.status(400).json({
+				success: false,
+				message: "OTP expired. Please request a new one.",
+			});
 		}
 
 		if (tempUser.otp !== otp) {
@@ -98,20 +111,28 @@ export const verifyEmail = async (req, res) => {
 
 		res.status(200).json({
 			success: true,
-			message: "OTP verfied Succesfully",
+			message: "OTP verified successfully",
 		});
 	} catch (error) {
 		res.status(500).json({
 			success: false,
 			message: "Error verifying email.",
-			error,
+			error: error.message,
 		});
 	}
 };
 
-export const login = async (req, res) => {
+export const login = async (req, res, next) => {
 	const { email, password, rememberMe } = req.body;
-	// console.log("here");
+
+	if (!email || !password)
+		return res.json({
+			success: false,
+			message: "Invalid input: Please check entered values",
+		});
+
+	if (!isString(email, password)) next();
+
 	try {
 		const user = await User.findOneAndUpdate(
 			{ email },
@@ -125,16 +146,39 @@ export const login = async (req, res) => {
 		if (!user) {
 			const addedUser = await AddedUser.findOne({ email });
 			if (addedUser) {
-				const isMatch = bcrypt.compare(password, addedUser.password);
+				if (addedUser.blocked) {
+					return res
+						.status(403)
+						.json({ message: "Account is blocked." });
+				}
+
+				const now = Date.now();
+				if (addedUser.lockUntil && addedUser.lockUntil > now) {
+					return res.status(429).json({
+						message: `Account locked. Please try again later.`,
+					});
+				}
+
+				const isMatch = await bcrypt.compare(
+					password,
+					addedUser.password,
+				);
 
 				if (!isMatch) {
+					await incrementLoginAttempts(addedUser);
 					return res
 						.status(400)
 						.json({ message: "Invalid credentials" });
 				}
+
+				addedUser.loginAttempts = 0; // Reset login attempts on successful login
+				addedUser.lockUntil = null; // Clear any lock period
+				await addedUser.save();
+
 				const data = await User.findOne({
 					unique_id: addedUser.useradmin,
 				});
+
 				req.session.addedUser = {
 					id: addedUser.unique_id,
 					name: addedUser.name,
@@ -148,47 +192,65 @@ export const login = async (req, res) => {
 				if (rememberMe) {
 					req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000; // 30 days
 				} else {
-					req.session.cookie.maxAge = 3 * 60 * 60 * 1000; // 3 hour
+					req.session.cookie.maxAge = 3 * 60 * 60 * 1000; // 3 hours
 				}
-				res.status(200).json({
+
+				return res.status(200).json({
 					message: "Login successful",
 				});
 			}
+
 			return res.status(400).json({ message: "User not found" });
-		}
-
-		const isMatch = await bcrypt.compare(password, user.password);
-
-		if (!isMatch) {
-			return res.status(400).json({ message: "Invalid credentials" });
-		}
-
-		req.session.user = {
-			id: user.unique_id,
-			name: user.name,
-			color: user.color,
-			photo: user.profilePhoto,
-			whatsAppStatus: user.WhatsAppConnectStatus,
-		};
-
-		if (rememberMe) {
-			req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000; // 30 days
 		} else {
-			req.session.cookie.maxAge = 3 * 60 * 60 * 1000; // 3 hour
-		}
+			if (user.blocked) {
+				return res.status(403).json({ message: "Account is blocked." });
+			}
 
-		res.status(200).json({
-			message: "Login successful",
-		});
+			const now = Date.now();
+			if (user.lockUntil && user.lockUntil > now) {
+				return res.status(429).json({
+					message: `Account locked. Please try again later.`,
+				});
+			}
+
+			const isMatch = await bcrypt.compare(password, user.password);
+
+			if (!isMatch) {
+				await incrementLoginAttempts(user);
+				return res.status(400).json({ message: "Invalid credentials" });
+			}
+
+			user.loginAttempts = 0; // Reset login attempts on successful login
+			user.lockUntil = null; // Clear any lock period
+			await user.save();
+
+			req.session.user = {
+				id: user.unique_id,
+				name: user.name,
+				color: user.color,
+				photo: user.profilePhoto,
+				whatsAppStatus: user.WhatsAppConnectStatus,
+			};
+
+			if (rememberMe) {
+				req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000; // 30 days
+			} else {
+				req.session.cookie.maxAge = 3 * 60 * 60 * 1000; // 3 hours
+			}
+
+			return res.status(200).json({
+				message: "Login successful",
+			});
+		}
 	} catch (error) {
-		res.status(500).json({ message: "Error logging in", error });
+		return res.status(500).json({ message: "Error logging in", error });
 	}
 };
 
 export const resendEmailOTP = async (req, res) => {
 	const { email } = req.body;
 	try {
-		const tempUser = req.session.tempUser;
+		const tempUser = req.session?.tempUser;
 
 		if (!tempUser) {
 			return res
@@ -198,9 +260,11 @@ export const resendEmailOTP = async (req, res) => {
 
 		tempUser.email = email;
 
-		const otp = Math.floor(100000 + Math.random() * 900000).toString();
+		const otp = generate6DigitOTP();
+		const otpExpiry = setOTPExpiry();
 
 		tempUser.otp = otp;
+		tempUser.otpExpiry = otpExpiry; // Update expiry time
 
 		await sendEmailVerification(email, otp);
 
@@ -230,7 +294,7 @@ export const resetPassword = async (req, res) => {
 		};
 
 		console.log("here 2");
-		if (!req.session.tempUser) {
+		if (!req.session?.tempUser) {
 			res.status(500).json({
 				message: "tempUser doesn't exist",
 			});
@@ -248,7 +312,7 @@ export const resetPassword = async (req, res) => {
 	}
 };
 
-export const changePassword = async (req, res) => {
+export const changePassword = async (req, res, next) => {
 	const { email, password } = req.body;
 
 	// Validate input
@@ -257,6 +321,8 @@ export const changePassword = async (req, res) => {
 			.status(400)
 			.json({ message: "Email and password are required" });
 	}
+
+	if (!isString(email, password)) next();
 
 	try {
 		// Find the user by email
@@ -285,7 +351,7 @@ export const changePassword = async (req, res) => {
 	}
 };
 
-export const about = async (req, res) => {
+export const about = async (req, res, next) => {
 	try {
 		if (!req.session.tempUser) {
 			return res.status(400).json({
@@ -305,7 +371,34 @@ export const about = async (req, res) => {
 			website,
 		} = req.body;
 
-		console.log(state);
+		if (
+			companyName ||
+			description ||
+			state ||
+			country ||
+			companySize ||
+			industry ||
+			jobRole ||
+			website
+		)
+			return res.json({
+				success: true,
+				message: "invalid input: There are some empty fields ",
+			});
+
+		if (
+			!isString(
+				companyName,
+				description,
+				state,
+				country,
+				companySize,
+				industry,
+				jobRole,
+				website,
+			)
+		)
+			next();
 
 		const { name, email, password, phoneNumber, countryCode } =
 			req.session.tempUser;

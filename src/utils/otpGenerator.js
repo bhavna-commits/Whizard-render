@@ -1,7 +1,11 @@
 import crypto from "crypto";
 
-export const generateOTP = () => {
+export const generate6DigitOTP = () => {
 	return Math.floor(100000 + Math.random() * 900000).toString();
+};
+
+export const setOTPExpiry = () => {
+	return Date.now() + 60000 * 3; // 3 minutes in milliseconds
 };
 
 export function validatePassword(password) {

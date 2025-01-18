@@ -1,7 +1,6 @@
 import express from "express";
 import { checkSession } from "../middleWares/checkSession.js";
 import {
-	templatePreview,
 	getList,
 	getFaceBookTemplates,
 	getCampaignTemplates,

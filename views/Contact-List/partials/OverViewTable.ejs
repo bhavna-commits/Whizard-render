@@ -27,7 +27,7 @@
  						<p class="text-gray-700 pt-3 font-semibold"><%= contact?.Name %></p>
  					</td>
  					<td class="text-gray-500 border-t border-b border-gray-200">
- 						XXXXXXXXXX
+ 						XXXXX-XXX<%= contact?.wa_id?.slice(-2) %>
  					</td>
  					<td class="text-gray-500 border-t border-b border-gray-200">
  						<%= new Date(contact.subscribe_date).toLocaleString('en-GB', {
@@ -50,16 +50,16 @@
  							<i class="fas fa-edit"></i>
  						</button>
  						<% } else { %>
- 						<button class="text-gray-400 hover:cursor-not-allowed px-3 border-r">
+ 						<button title="You don't have permissions to access this" class="text-gray-400 hover:cursor-not-allowed px-3 border-r">
  							<i class="fas fa-edit"></i>
  						</button>
  						<% } %>
  						<% if (access?.contactList?.deleteContactIndividual) { %>
- 						<button onclick="openDeleteModal('<%= contact._id %>')" aria-label="Delete contact" class="text-gray-600 hover:text-red-600 px-2">
+ 						<button onclick="openDeleteModal('<%= contact._id %>','<%= contact.Name %>' )" class="text-gray-600 hover:text-red-600 px-2">
  							<i class="fa-regular fa-trash-can"></i>
  						</button>
  						<% } else { %>
- 						<button class="text-gray-400 hover:cursor-not-allowed px-2">
+ 						<button title="You don't have permissions to access this" class="text-gray-400 hover:cursor-not-allowed px-2">
  							<i class="fa-regular fa-trash-can"></i>
  						</button>
  						<% } %>
@@ -159,6 +159,9 @@
  </div>
  
  <script>
+ 	// Delete confirmation logic
+ 	
+ 	
  	function openAddContact () {
  		document.getElementById("addContactSidebar").classList.add("open");
  		document.getElementById("overlay").classList.add("active");

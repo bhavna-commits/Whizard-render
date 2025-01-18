@@ -11,13 +11,14 @@ import {
 } from "../../middleWares/sanitiseInput.js";
 
 // Controller to fetch campaign reports and render them page-wise
-export const getCampaignList = async (req, res) => {
+export const getCampaignList = async (req, res, next) => {
 	try {
 		const userId = req.session?.user?.id || req.session?.addedUser.owner;
 		const page = parseInt(req.query.page) || 1;
 		const limit = 6;
 		const skip = (page - 1) * limit;
 
+		if (!isNumber(page)) next();
 		// Fetch campaigns created by the user
 		const campaigns = await Campaign.aggregate([
 			{
@@ -106,16 +107,18 @@ export const getCampaignList = async (req, res) => {
 
 		const permissions = req.session?.addedUser?.permissions;
 		if (permissions) {
-			const access = await Permissions.findOne({ unique_id: permissions });
+			const access = await Permissions.findOne({
+				unique_id: permissions,
+			});
 			if (access.reports.conversationReports.type) {
 				res.render("Reports/campaign", {
 					access: access,
 					campaigns: paginatedResults,
 					page,
 					totalPages,
-					photo: req.session.user?.photo,
-					name: req.session.user.name,
-					color: req.session.user.color,
+					photo: req.session.addedUser?.photo,
+					name: req.session.addedUser.name,
+					color: req.session.addedUser.color,
 				});
 			} else {
 				res.render("errors/notAllowed");
@@ -132,10 +135,9 @@ export const getCampaignList = async (req, res) => {
 				color: req.session.user.color,
 			});
 		}
-		
 	} catch (err) {
 		console.error(err);
-		res.status(500).send("Server Error");
+		res.render("errors/serverError");
 	}
 };
 
@@ -156,14 +158,17 @@ export const getCampaignReports = async (req, res) => {
 	}
 };
 
-export const getCampaignListFilter = async (req, res) => {
+export const getCampaignListFilter = async (req, res, next) => {
 	try {
-		const userId = req.session.user.id;
+		const userId = req.session?.user?.id || req.session?.addedUser?.owner;
 		const page = parseInt(req.query.page) || 1;
 		const limit = 6;
 		const skip = (page - 1) * limit;
 
 		const { status, timeFrame, search } = req.query;
+
+		if (!isString(status, timeFrame, search)) next();
+		if (!isNumber(page)) next();
 
 		let matchQuery = {
 			useradmin: userId,
@@ -286,17 +291,41 @@ export const getCampaignListFilter = async (req, res) => {
 		const totalCount = result[0]?.totalCount[0]?.total || 0;
 		const totalPages = Math.ceil(totalCount / limit);
 
-		res.render("Reports/partials/campaignTable", {
-			campaigns: paginatedResults,
-			page,
-			totalPages,
-			photo: req.session.user?.photo,
-			name: req.session.user.name,
-			color: req.session.user.color,
-		});
+		const permissions = req.session?.addedUser?.permissions;
+		if (permissions) {
+			const access = await Permissions.findOne({
+				unique_id: permissions,
+			});
+			if (access.reports.conversationReports.type) {
+				res.render("Reports/partials/campaignTable", {
+					access: access,
+					campaigns: paginatedResults,
+					page,
+					totalPages,
+					photo: req.session.addedUser?.photo,
+					name: req.session.addedUser.name,
+					color: req.session.addedUser.color,
+				});
+			} else {
+				res.render("errors/notAllowed");
+			}
+		} else {
+			const access = await User.findOne({ unique_id: userId });
+			res.render("Reports/partials/campaignTable", {
+				access: access.access,
+				campaigns: paginatedResults,
+				page,
+				totalPages,
+				photo: req.session.user?.photo,
+				name: req.session.user.name,
+				color: req.session.user.color,
+			});
+		}
+
+		
 	} catch (err) {
 		console.error(err);
-		res.status(500).send("Server Error");
+		res.render("errors/serverError");
 	}
 };
 
@@ -356,9 +385,9 @@ const getCampaignOverview = async (req, res) => {
 						paginatedResults[0].percentDelivered?.toFixed(2) || 0,
 					percentRead:
 						paginatedResults[0].percentRead?.toFixed(2) || 0,
-					photo: req.session?.user?.photo,
-					name: req.session?.user?.name,
-					color: req.session?.user?.color,
+					photo: req.session?.addedUser?.photo,
+					name: req.session?.addedUser?.name,
+					color: req.session?.addedUser?.color,
 				});
 			} else {
 				res.render("errors/notAllowed");
@@ -383,12 +412,12 @@ const getCampaignOverview = async (req, res) => {
 				percentDelivered:
 					paginatedResults[0].percentDelivered?.toFixed(2) || 0,
 				percentRead: paginatedResults[0].percentRead?.toFixed(2) || 0,
-				photo: req.session?.addedUser?.photo,
-				name: req.session?.addedUser?.name,
-				color: req.session?.addedUser?.color,
+				
+				photo: req.session?.user?.photo,
+				name: req.session?.user?.name,
+				color: req.session?.user?.color,
 			});
 		}
-		
 	} catch (err) {
 		console.error(err);
 		res.status(500).send("Server Error");
@@ -481,27 +510,58 @@ const getSentReportsById = async (req, res) => {
 				}
 			});
 		});
-		
-		res.render("Reports/campaignSent", {
-			campaigns: paginatedResults[0].reports,
-			page,
-			totalPages,
-			id,
-			photo: req.session.user?.photo,
-			name: req.session.user.name,
-			color: req.session.user.color,
-		});
+
+		const permissions = req.session?.addedUser?.permissions;
+		if (permissions) {
+			const access = await Permissions.findOne({
+				unique_id: permissions,
+			});
+			if (access.reports.conversationReports.viewReports) {
+				res.render("Reports/campaignSent", {
+					access,
+					campaigns: paginatedResults[0].reports,
+					page,
+					totalPages,
+					id,
+					photo: req.session?.addedUser?.photo,
+					name: req.session?.addedUser?.name,
+					color: req.session?.addedUser?.color,
+				});
+			} else {
+				res.render("errors/notAllowed");
+			}
+		} else {
+			const access = await User.findOne({
+				unique_id: req.session?.user?.id,
+			});
+			// console.log(access.access);
+			res.render("Reports/campaignSent", {
+				access: access.access,
+				campaigns: paginatedResults[0].reports,
+				page,
+				totalPages,
+				id,
+				
+				photo: req.session?.user?.photo,
+				name: req.session?.user?.name,
+				color: req.session?.user?.color,
+			});
+		}
 	} catch (err) {
 		console.error(err);
-		res.status(500).send("Server Error");
+		res.render("errors/serverError");
 	}
 };
 
 const getDeliveredReportsById = async (req, res) => {
 	try {
 		const { id } = req.params;
-		const userId = req.session.user.id;
+		const userId = req.session?.user?.id || req.session?.addedUser?.owner;
 		const page = parseInt(req.query.page) || 1;
+
+		if (!isNumber(page)) next();
+		if (!isString(id)) next();
+
 		const limit = 6;
 		const skip = (page - 1) * limit;
 
@@ -584,27 +644,58 @@ const getDeliveredReportsById = async (req, res) => {
 			});
 		});
 
+		const permissions = req.session?.addedUser?.permissions;
+		if (permissions) {
+			const access = await Permissions.findOne({
+				unique_id: permissions,
+			});
+			if (access.reports.conversationReports.viewReports) {
+				res.render("Reports/campaignDelivered", {
+					access,
+					campaigns: paginatedResults[0].reports,
+					page,
+					totalPages,
+					id,
+					photo: req.session?.addedUser?.photo,
+					name: req.session?.addedUser?.name,
+					color: req.session?.addedUser?.color,
+				});
+			} else {
+				res.render("errors/notAllowed");
+			}
+		} else {
+			const access = await User.findOne({
+				unique_id: req.session?.user?.id,
+			});
+			// console.log(access.access);
+			res.render("Reports/campaignDelivered", {
+				access: access.access,
+				campaigns: paginatedResults[0].reports,
+				page,
+				totalPages,
+				id,
+				
+				photo: req.session?.user?.photo,
+				name: req.session?.user?.name,
+				color: req.session?.user?.color,
+			});
+		}
 		console.log(paginatedResults[0].reports);
-		res.render("Reports/campaignDelivered", {
-			campaigns: paginatedResults[0].reports,
-			page,
-			totalPages,
-			id,
-			photo: req.session.user?.photo,
-			name: req.session.user.name,
-			color: req.session.user.color,
-		});
 	} catch (err) {
 		console.error(err);
-		res.status(500).send("Server Error");
+		res.render("errors/serverError");
 	}
 };
 
 const getReadReportsById = async (req, res) => {
 	try {
 		const { id } = req.params;
-		const userId = req.session.user.id;
+		const userId = req.session?.user?.id || req.session?.addedUser?.owner;
 		const page = parseInt(req.query.page) || 1;
+
+		if (!isNumber(page)) next();
+		if (!isString(id)) next();
+
 		const limit = 6;
 		const skip = (page - 1) * limit;
 
@@ -687,26 +778,55 @@ const getReadReportsById = async (req, res) => {
 			});
 		});
 
-		res.render("Reports/campaignRead", {
-			campaigns: paginatedResults[0].reports,
-			page,
-			totalPages,
-			id,
-			photo: req.session.user?.photo,
-			name: req.session.user.name,
-			color: req.session.user.color,
-		});
+		const permissions = req.session?.addedUser?.permissions;
+		if (permissions) {
+			const access = await Permissions.findOne({
+				unique_id: permissions,
+			});
+			if (access.reports.conversationReports.viewReports) {
+				res.render("Reports/campaignRead", {
+					access,
+					campaigns: paginatedResults[0].reports,
+					page,
+					totalPages,
+					id,
+					photo: req.session?.addedUser?.photo,
+					name: req.session?.addedUser?.name,
+					color: req.session?.addedUser?.color,
+				});
+			} else {
+				res.render("errors/notAllowed");
+			}
+		} else {
+			const access = await User.findOne({
+				unique_id: req.session?.user?.id,
+			});
+			res.render("Reports/campaignRead", {
+				access: access.access,
+				campaigns: paginatedResults[0].reports,
+				page,
+				totalPages,
+				id,
+				photo: req.session?.user?.photo,
+				name: req.session?.user?.name,
+				color: req.session?.user?.color,
+			});
+		}
 	} catch (err) {
 		console.error(err);
-		res.status(500).send("Server Error");
+		res.render("errors/serverError");
 	}
 };
 
 const getRepliesReportsById = async (req, res) => {
 	try {
 		const { id } = req.params;
-		const userId = req.session.user.id;
+		const userId = req.session?.user?.id || req.session?.addedUser?.owner;
 		const page = parseInt(req.query.page) || 1;
+
+		if (!isNumber(page)) next();
+		if (!isString(id)) next();
+
 		const limit = 6;
 		const skip = (page - 1) * limit;
 
@@ -789,26 +909,57 @@ const getRepliesReportsById = async (req, res) => {
 			});
 		});
 
-		res.render("Reports/campaignReplies", {
-			campaigns: paginatedResults[0].reports,
-			page,
-			totalPages,
-			id,
-			photo: req.session.user?.photo,
-			name: req.session.user.name,
-			color: req.session.user.color,
-		});
+		const permissions = req.session?.addedUser?.permissions;
+		if (permissions) {
+			const access = await Permissions.findOne({
+				unique_id: permissions,
+			});
+			if (access.reports.conversationReports.viewReports) {
+				res.render("Reports/campaignReplies", {
+					access,
+					campaigns: paginatedResults[0].reports,
+					page,
+					totalPages,
+					id,
+					photo: req.session?.addedUser?.photo,
+					name: req.session?.addedUser?.name,
+					color: req.session?.addedUser?.color,
+				});
+			} else {
+				res.render("errors/notAllowed");
+			}
+		} else {
+			const access = await User.findOne({
+				unique_id: req.session?.user?.id,
+			});
+			// console.log(access.access);
+			res.render("Reports/campaignReplies", {
+				access: access.access,
+				campaigns: paginatedResults[0].reports,
+				page,
+				totalPages,
+				id,
+				
+				photo: req.session?.user?.photo,
+				name: req.session?.user?.name,
+				color: req.session?.user?.color,
+			});
+		}
 	} catch (err) {
 		console.error(err);
-		res.status(500).send("Server Error");
+		res.render("errors/serverError");
 	}
 };
 
-const getFailedReportsById = async (req, res) => {
+const getFailedReportsById = async (req, res) => { 
 	try {
 		const { id } = req.params;
-		const userId = req.session.user.id;
+		const userId = req.session?.user?.id || req.session?.addedUser?.owner;
 		const page = parseInt(req.query.page) || 1;
+
+		if (!isNumber(page)) next();
+		if (!isString(id)) next();
+
 		const limit = 6;
 		const skip = (page - 1) * limit;
 
@@ -891,18 +1042,45 @@ const getFailedReportsById = async (req, res) => {
 			});
 		});
 
-		res.render("Reports/campaignFailed", {
-			campaigns: paginatedResults[0].reports,
-			page,
-			totalPages,
-			id,
-			photo: req.session.user?.photo,
-			name: req.session.user.name,
-			color: req.session.user.color,
-		});
+		const permissions = req.session?.addedUser?.permissions;
+		if (permissions) {
+			const access = await Permissions.findOne({
+				unique_id: permissions,
+			});
+			if (access.reports.conversationReports.viewReports) {
+				res.render("Reports/campaignFailed", {
+					access,
+					campaigns: paginatedResults[0].reports,
+					page,
+					totalPages,
+					id,
+					
+					photo: req.session?.addedUser?.photo,
+					name: req.session?.addedUser?.name,
+					color: req.session?.addedUser?.color,
+				});
+			} else {
+				res.render("errors/notAllowed");
+			}
+		} else {
+			const access = await User.findOne({
+				unique_id: req.session?.user?.id,
+			});
+			// console.log(access.access);
+			res.render("Reports/campaignFailed", {
+				access: access.access,
+				campaigns: paginatedResults[0].reports,
+				page,
+				totalPages,
+				id,
+				photo: req.session?.user?.photo,
+				name: req.session?.user?.name,
+				color: req.session?.user?.color,
+			});
+		}
 	} catch (err) {
 		console.error(err);
-		res.status(500).send("Server Error");
+		res.render("errors/serverError");
 	}
 };
 

@@ -11,14 +11,17 @@ import ActivityLogs from "../../models/activityLogs.model.js";
 import Permissions from "../../models/permissions.model.js";
 import User from "../../models/user.model.js";
 import { generateUniqueId } from "../../utils/otpGenerator.js";
+import { isObject, isString } from "../../middleWares/sanitiseInput.js";
 
 dotenv.config();
 
-export const createTemplate = async (req, res) => {
+export const createTemplate = async (req, res, next) => {
 	try {
 		const templateData = JSON.parse(req.body.templateData);
 		const { dynamicVariables, name } = templateData;
-		const id = req.session.user.id;
+		const id = req.session?.user?.id || req.session?.addedUser?.owner;
+
+		if (!isObject(templateData)) next();
 
 		// Check if a template with the same name exists for the user
 		const exists = await Template.findOne({ useradmin: id, name });
@@ -42,9 +45,9 @@ export const createTemplate = async (req, res) => {
 		console.log("template creation : ", JSON.stringify(data));
 		// Log activity
 		await ActivityLogs.create({
-			useradmin: req.session.user.id,
+			useradmin: req.session?.user?.id || req.session?.addedUser?.owner,
 			unique_id: generateUniqueId(),
-			name: req.session.user.name || req.session.addedUser?.name,
+			name: req.session?.user?.name || req.session?.addedUser?.name,
 			actions: "Create",
 			details: `Created new template named: ${savedTemplate.name}`,
 		});
@@ -64,30 +67,30 @@ export const createTemplate = async (req, res) => {
 	}
 };
 
-export const templatePreview = async (req, res) => {
-	try {
-		const id = req.session.user.id;
-		const template = await Template.find({ owner: id });
-		if (template) {
-			res.render("Templates/create-template", {
-				templateData: template,
-				photo: req.session.user?.photo,
-				name: req.session.user.name,
-				color: req.session.user.color,
-			});
-		} else {
-		}
-	} catch (error) {
-		res.status(400).json({
-			success: false,
-			error: error.message,
-		});
-	}
-};
+// export const templatePreview = async (req, res) => {
+// 	try {
+// 		const id = req.session?.user?.id || req.session?.addedUser?.owner;
+// 		const template = await Template.find({ owner: id });
+// 		if (template) {
+// 			res.render("Templates/create-template", {
+// 				templateData: template,
+// 				photo: req.session.user?.photo,
+// 				name: req.session.user.name,
+// 				color: req.session.user.color,
+// 			});
+// 		} else {
+// 		}
+// 	} catch (error) {
+// 		res.status(400).json({
+// 			success: false,
+// 			error: error.message,
+// 		});
+// 	}
+// };
 
 export const getList = async (req, res) => {
 	try {
-		const id = req.session?.user?.id || req.session?.addedUser?.id;
+		const id = req.session?.user?.id || req.session?.addedUser?.owner;
 		const page = parseInt(req.query.page) || 1;
 		const { category, search } = req.query;
 		const limit = 6;
@@ -136,8 +139,12 @@ export const getList = async (req, res) => {
 
 		const permissions = req.session?.addedUser?.permissions;
 		if (permissions) {
-			const access = Permissions.findOne({ unique_id: permissions });
+			const access = await Permissions.findOne({
+				unique_id: permissions,
+			});
+			// console.log(access);
 			if (access.templates.type) {
+				// console.log(templates);
 				res.render("Templates/manage_template", {
 					access,
 					list: templates,
@@ -173,8 +180,14 @@ export const getList = async (req, res) => {
 
 export const duplicateTemplate = async (req, res) => {
 	try {
-		const templateId = req.params.id;
+		const templateId = req.params?.id;
 
+		if (!templateId)
+			return res
+				.status(404)
+				.json({ success: false, error: "Template id not found" });
+
+		if (!isString(templateId)) next();
 		// Find the template by its ID
 		const originalTemplate = await Template.findById(templateId);
 		if (!originalTemplate) {
@@ -196,9 +209,9 @@ export const duplicateTemplate = async (req, res) => {
 
 		// Log the duplication activity
 		await ActivityLogs.create({
-			useradmin: req.session.user.id,
+			useradmin: req.session?.user?.id || req.session?.addedUser?.owner,
 			unique_id: generateUniqueId(),
-			name: req.session.user.name || req.session.addedUser.name,
+			name: req.session?.user?.name || req.session?.addedUser?.name,
 			actions: "Create",
 			details: `Duplicated Template named: ${savedTemplate.name}`,
 		});
@@ -209,9 +222,15 @@ export const duplicateTemplate = async (req, res) => {
 	}
 };
 
-export const deleteTemplate = async (req, res) => {
+export const deleteTemplate = async (req, res, next) => {
 	try {
-		const templateId = req.params.id;
+		const templateId = req.params?.id;
+		if (!templateId)
+			return res
+				.status(404)
+				.json({ success: false, error: "Template id not found" });
+
+		if (!isString(templateId)) next();
 
 		const deletedTemplate = await Template.findByIdAndUpdate(
 			{ _id: templateId },
@@ -224,9 +243,9 @@ export const deleteTemplate = async (req, res) => {
 		}
 
 		await ActivityLogs.create({
-			useradmin: req.session.user.id,
+			useradmin: req.session?.user?.id || req.session?.addedUser?.owner,
 			unique_id: generateUniqueId(),
-			name: req.session.user.name || req.session.addedUser.name,
+			name: req.session?.user?.name || req.session?.addedUser?.name,
 			actions: "Delete",
 			details: `Deleted Template named: ${deletedTemplate.name}`,
 		});
@@ -285,7 +304,7 @@ export const getCampaignSingleTemplates = async (req, res) => {
 
 export const getFaceBookTemplates = async (req, res) => {
 	try {
-		const { id } = req.session.user;
+		const id = req.session?.user?.id || req.session?.addedUser?.owner;
 
 		// Fetch templates from MongoDB based on logged-in user
 		const mongoTemplates = await Template.find({ useradmin: id });
@@ -352,12 +371,12 @@ export const getFaceBookTemplates = async (req, res) => {
 
 export const getCampaignTemplates = async (req, res) => {
 	try {
-		const { id } = req.session.user;
+		const id = req.session?.user?.id || req.session?.addedUser?.owner;
 
 		// Respond with the updated templates from MongoDB
 		const updatedTemplates = await Template.find({
 			useradmin: id,
-			status: "Approved",
+			status: "Approved", 
 		});
 		// console.log(updatedTemplates);
 		res.json({
@@ -393,7 +412,7 @@ export const getCreateTemplate = async (req, res) => {
 			res.render("errors/notAllowed");
 		}
 	} else if (req.session?.user?.whatsAppStatus) {
-		const access = Permissions.findOne({ useradmin: userId });
+		const access = User.findOne({ unique_id: req.session?.user?.id });
 		res.render("Templates/create-template", {
 			access: access.access,
 			templateData: [],

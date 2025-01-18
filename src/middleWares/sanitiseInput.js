@@ -53,9 +53,9 @@ export function sanitizeInput(data, schema) {
 }
 
 /**
- * Sanitizes string input.
+ * Checks if string input does not have any script or any hacking logic.
  * @param {string} input - Input string.
- * @returns {string} - Sanitized string.
+ * @returns {boolean} output - True or False.
  */
 export function isString(...inputs) {
 	// Recursively check each input
@@ -72,6 +72,52 @@ export function isString(...inputs) {
 
 		// Check if input contains any harmful scripts or HTML
 		if (input !== xss(input)) {
+			return false;
+		}
+	}
+	
+	// If all checks pass for every input, return true
+	return true;
+}
+
+export function isObject(...inputs) {
+	// Helper function to validate individual strings
+	function validateString(input) {
+		// Check if input is trimmed (no leading/trailing whitespace)
+		if (input !== validator.trim(input)) {
+			return false;
+		}
+
+		// Check if input contains any characters that would need to be escaped
+		if (input !== validator.escape(input)) {
+			return false;
+		}
+
+		// Check if input contains any harmful scripts or HTML
+		if (input !== xss(input)) {
+			return false;
+		}
+
+		return true; // Passes all validation
+	}
+
+	// Recursively check each input
+	for (const input of inputs) {
+		// If the input is an object, check all its values
+		if (typeof input === 'object' && input !== null) {
+			for (const value of Object.values(input)) {
+				// Ensure all values are strings and validate them
+				if (typeof value !== 'string' || !validateString(value)) {
+					return false;
+				}
+			}
+		} else if (typeof input === 'string') {
+			// If it's a string, validate it
+			if (!validateString(input)) {
+				return false;
+			}
+		} else {
+			// If input is neither string nor object, it's invalid
 			return false;
 		}
 	}

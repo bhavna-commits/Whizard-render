@@ -134,8 +134,9 @@ export const getDashboard = async (req, res) => {
 
 		const permissions = req.session?.addedUser?.permissions;
 		if (permissions) {
-			const access = Permissions.findOne({ unique_id: permissions });
+			const access = await Permissions.findOne({ unique_id: permissions });
 			if (access) {
+				// console.log(access);
 				res.render("Dashboard/dashboard", {
 					access,
 					config: process.env.CONFIG_ID,

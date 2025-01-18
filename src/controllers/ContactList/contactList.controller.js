@@ -25,7 +25,7 @@ import { generateTableAndCheckFields } from "./contacts.controller.js";
 
 dotenv.config();
 
-export const previewContactList = async (req, res) => {
+export const previewContactList = async (req, res, next) => {
 	try {
 		const { fileData, listName } = req.body;
 
@@ -37,6 +37,7 @@ export const previewContactList = async (req, res) => {
 			});
 		}
 
+		if (!isString(fileData, listName)) next();
 		// Parse file data
 		let parsedData;
 		try {
@@ -60,10 +61,10 @@ export const previewContactList = async (req, res) => {
 		// Validate columns
 		const requiredColumns = ["Name", "Number"];
 		const customFields = await CustomField.find({
-			customid: req.session.user.id,
+			customid: req.session?.user?.id || req.session?.addedUser?.owner,
 		});
 		const contactList = await ContactList.findOne({
-			useradmin: req.session.user.id,
+			useradmin: req.session?.user?.id || req.session?.addedUser?.owner,
 			contalistName: listName,
 		});
 
@@ -144,11 +145,19 @@ export const previewContactList = async (req, res) => {
 		}
 
 		// Store the parsed data in the session for further processing
-		req.session.user = {
-			...req.session.user,
-			contactListCSV: parsedData,
-			listName,
-		};
+		if (req.session?.user) {
+			req.session.user = {
+				...req.session.user,
+				contactListCSV: parsedData,
+				listName,
+			};
+		} else {
+			req.session.addedUser = {
+				...req.session.addedUser,
+				contactListCSV: parsedData,
+				listName,
+			};
+		}
 
 		// Return success response with the generated table
 		return res.status(200).json({
@@ -165,12 +174,21 @@ export const previewContactList = async (req, res) => {
 	}
 };
 
-export const createList = async (req, res) => {
+export const createList = async (req, res, next) => {
 	try {
 		if (
-			!req.session.user ||
-			!req.session.user.contactListCSV ||
-			!req.session.user.listName
+			!req.session?.user ||
+			!req.session?.user?.contactListCSV ||
+			!req.session?.user?.listName
+		) {
+			return res.status(400).json({
+				success: false,
+				message: "Session data missing or incomplete.",
+			});
+		} else if (
+			!req.session?.addedUser ||
+			!req.session?.addedUser?.contactListCSV ||
+			!req.session?.addedUser?.listName
 		) {
 			return res.status(400).json({
 				success: false,
@@ -178,9 +196,12 @@ export const createList = async (req, res) => {
 			});
 		}
 
-		const userId = req.session.user.id;
-		const parsedData = req.session.user.contactListCSV;
-		const listName = req.session.user.listName;
+		const userId = req.session?.user?.id || req.session?.addedUser?.owner;
+		const parsedData =
+			req.session?.user?.contactListCSV ||
+			req.session?.addedUser?.contactListCSV;
+		const listName =
+			req.session?.user?.listName || req.session?.addedUser?.listName;
 
 		const user = await User.findOne({ unique_id: userId });
 		if (!user) {
@@ -190,9 +211,6 @@ export const createList = async (req, res) => {
 			});
 		}
 
-		const number = user.phone;
-		req.session.user.name = user.name;
-		// console.log(number);
 		const participantCount = parsedData.length;
 
 		// Create a new Contact List
@@ -232,17 +250,22 @@ export const createList = async (req, res) => {
 		);
 
 		await ActivityLogs.create({
-			useradmin: req.session.user.id,
+			useradmin: req.session?.user?.id || req.session?.addedUser?.owner,
 			unique_id: generateUniqueId(),
-			name: req.session.user.name
-				? req.session.user.name
-				: req.session.addedUser.name,
+			name: req.session?.user?.name
+				? req.session?.user?.name
+				: req.session?.addedUser?.name,
 			actions: "Create",
 			details: `Created a contact List named : ${listName}`,
 		});
 
-		req.session.user.contactListCSV = null;
-		req.session.user.listName = null;
+		if (req.session?.user) {
+			req.session.user.contactListCSV = null;
+			req.session.user.listName = null;
+		} else {
+			req.session.addedUser.contactListCSV = null;
+			req.session.addedUser.listName = null;
+		}
 
 		await contactList.save();
 
@@ -260,10 +283,10 @@ export const createList = async (req, res) => {
 	}
 };
 
-export const deleteList = async (req, res) => {
+export const deleteList = async (req, res, next) => {
 	try {
 		const { id } = req.params;
-		// console.log("here");
+		if (!isString(id)) next();
 		const contactList = await ContactList.findOne({ contactId: id });
 		// console.log(contactList);
 		if (!contactList) {
@@ -276,7 +299,7 @@ export const deleteList = async (req, res) => {
 		await contactList.save();
 
 		await ActivityLogs.create({
-			useradmin: req.session.user.id,
+			useradmin: req.session?.user?.id || req.session?.addedUser?.owner,
 			unique_id: generateUniqueId(),
 			name: req.session.user.name
 				? req.session.user.name
@@ -354,9 +377,9 @@ export const sampleCSV = async (req, res) => {
 	}
 };
 
-export const getCustomField = async (req, res) => {
+export const getCustomField = async (req, res, next) => {
 	try {
-		const userId = req.session.user.id;
+		const userId = req.session?.user?.id || req.session?.addedUser?.owner;
 		const page = parseInt(req.query.page) || 1;
 		const limit = 6;
 		const skip = (page - 1) * limit;
@@ -391,7 +414,9 @@ export const getCustomField = async (req, res) => {
 
 		const permissions = req.session?.addedUser?.permissions;
 		if (permissions) {
-			const access = await Permissions.findOne({ unique_id: permissions });
+			const access = await Permissions.findOne({
+				unique_id: permissions,
+			});
 			if (access.contactList.customFields.type) {
 				res.render("Contact-List/custom-field", {
 					access,
@@ -425,10 +450,11 @@ export const getCustomField = async (req, res) => {
 	}
 };
 
-export const createCustomField = async (req, res) => {
+export const createCustomField = async (req, res, next) => {
 	try {
-		const userId = req.session.user.id;
+		const userId = req.session?.user?.id || req.session?.addedUser?.owner;
 		const { fieldName, fieldType } = req.body;
+		if (!isString(fieldName)) next();
 
 		const userDir = path.join(
 			__dirname,
@@ -494,10 +520,10 @@ export const createCustomField = async (req, res) => {
 		});
 
 		await newField.save();
-		console.log(req.session.user.name);
+		// console.log(req.session.user.name);
 		// Log activity
 		await ActivityLogs.create({
-			useradmin: req.session.user.id,
+			useradmin: req.session?.user?.id || req.session?.addedUser?.owner,
 			unique_id: generateUniqueId(),
 			name: req.session.user.name
 				? req.session.user.name
@@ -521,10 +547,10 @@ export const createCustomField = async (req, res) => {
 	}
 };
 
-export const deleteCustomField = async (req, res) => {
+export const deleteCustomField = async (req, res, next) => {
 	try {
-		const fieldId = req.params.id;
-
+		const fieldId = req.params?.id;
+		if (!isString(fieldId)) next();
 		// Find the custom field based on the field ID
 		const field = await CustomField.findOne({
 			unique_id: fieldId,
@@ -551,9 +577,10 @@ export const deleteCustomField = async (req, res) => {
 			// console.log(req.session.user.name);
 			// Log the activity
 			await ActivityLogs.create({
-				useradmin: req.session.user.id,
+				useradmin:
+					req.session?.user?.id || req.session?.addedUser?.owner,
 				unique_id: generateUniqueId(),
-				name: req.session.user.name || req.session.addedUser?.name,
+				name: req.session?.user?.name || req.session?.addedUser?.name,
 				actions: "Delete",
 				details: `Marked the custom field named: ${field.clname} as deleted and removed from CSV`,
 			});
@@ -570,11 +597,12 @@ export const deleteCustomField = async (req, res) => {
 		} else {
 			// For non-input fields, just log the activity and mark it as deleted in the DB
 			await ActivityLogs.create({
-				useradmin: req.session.user.id,
+				useradmin:
+					req.session?.user?.id || req.session?.addedUser?.owner,
 				unique_id: generateUniqueId(),
-				name: req.session.user.name || req.session.addedUser.name,
+				name: req.session?.user?.name || req.session?.addedUser?.name,
 				actions: "Delete",
-				details: `Marked the custom field named: ${field.clname} as deleted`,
+				details: `Marked the custom field named: ${field.clname} as deleted and removed from CSV`,
 			});
 
 			// Update the status to 0 to mark it as deleted in MongoDB
@@ -599,6 +627,8 @@ export const deleteCustomField = async (req, res) => {
 export const updateContactListName = async (req, res) => {
 	const contactListId = req.params.id;
 	const { updatedValue } = req.body;
+
+	if (!isString(contactListId, updatedValue)) next();
 
 	if (!updatedValue) {
 		return res.status(400).json({
@@ -627,7 +657,7 @@ export const updateContactListName = async (req, res) => {
 		}
 
 		await ActivityLogs.create({
-			useradmin: req.session.user.id,
+			useradmin: req.session?.user?.id || req.session?.addedUser?.owner,
 			unique_id: generateUniqueId(),
 			name: req.session.user.name
 				? req.session.user.name
@@ -692,7 +722,9 @@ export const getList = async (req, res) => {
 
 		const permissions = req.session?.addedUser?.permissions;
 		if (permissions) {
-			const access = await Permissions.findOne({ unique_id: permissions });
+			const access = await Permissions.findOne({
+				unique_id: permissions,
+			});
 			if (access.contactList) {
 				res.render("Contact-List/contact-list", {
 					access: access,
@@ -770,12 +802,15 @@ export const getCampaignContacts = async (req, res) => {
 	}
 };
 
-export const searchContactLists = async (req, res) => {
+export const searchContactLists = async (req, res, next) => {
 	const { query } = req.query;
-	const userId = req.session.user.id;
+	const userId = req.session?.user?.id || req.session?.addedUser?.owner;
 	const page = parseInt(req.query.page) || 1;
 	const limit = 6;
 	const skip = (page - 1) * limit;
+
+	if (!isString(query)) next();
+	if (!isNumber(page)) next();
 
 	console.log("Searching for:", query);
 	console.log("User ID:", userId);
@@ -842,6 +877,6 @@ export const searchContactLists = async (req, res) => {
 		});
 	} catch (error) {
 		console.error("Error fetching contact lists:", error);
-		res.status(500).json({ message: "Error fetching contact lists" });
+		res.render("errors/serverError")
 	}
 };

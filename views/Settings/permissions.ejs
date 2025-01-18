@@ -16,20 +16,12 @@
 	<meta name="apple-mobile-web-app-status-bar-style" content="default" />
 	<meta content="Meet pages - The simplest and fastest way to build web UI for your dashboard or app." name="description" />
 	<meta content="Ace" name="author" />
-	<link href="assets/plugins/pace/pace-theme-flash.css" rel="stylesheet" type="text/css" />
-	<link href="assets/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
-	<!-- <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" /> -->
-	<link href="assets/plugins/jquery-scrollbar/jquery.scrollbar.css" rel="stylesheet" type="text/css" media="screen" />
-	<link href="assets/plugins/select2/css/select2.min.css" rel="stylesheet" type="text/css" media="screen" />
-	<!-- <link class="main-stylesheet" href="pages/css/themes/corporate.css" rel="stylesheet" type="text/css" /> -->
-	<!-- Please remove the file below for production: Contains demo classes -->
-	<link class="main-stylesheet" href="assets/css/style.css" rel="stylesheet" type="text/css" />
 	<link rel="preconnect" href="https://fonts.googleapis.com" />
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 	<link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet" />
-	<script src="https://viralpitch.co/insights/app/js/apexcharts-bundle/dist/apexcharts.js"></script>
+	<!-- <script src="https://viralpitch.co/insights/app/js/apexcharts-bundle/dist/apexcharts.js"></script>
 	<link rel="stylesheet" href="styles/template.css" />
-	<link rel="stylesheet" href="https://viralpitch.co/insights/app/js/apexcharts-bundle/dist/apexcharts.css" />
+	<link rel="stylesheet" href="https://viralpitch.co/insights/app/js/apexcharts-bundle/dist/apexcharts.css" /> -->
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
 	<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
 	<link href="styles/style.css" rel="stylesheet" type="text/css" />
@@ -52,30 +44,87 @@
 				<img onclick="location.href = '/'" class="cursor-pointer" src="/assets/img/Wizard_logo.png" alt="Whizard Logo" />
 			</div>
 			<ul class="">
+				<!-- Dashboard: Always enabled -->
 				<li>
-					<a href="/" class=""><span class="icon"><i class="fas fa-chart-line"></i></span>
-						Dashboard</a>
+					<a href="/" class="">
+						<span class="icon"><i class="fas fa-chart-line"></i></span>
+						Dashboard
+					</a>
 				</li>
-				<li class="">
-					<a href="/chats"><span class="icon"><i class="fa-regular fa-comment"></i></span>
-						Chats</a>
+				
+				<!-- Chats: Conditionally rendered based on permissions -->
+				<li>
+					<% if (access?.chats?.type) { %>
+					<a href="/chats" class="">
+						<span class="icon"><i class="fa-regular fa-comment"></i></span>
+						Chats
+					</a>
+					<% } else { %>
+					<a href="javascript:void(0);" title="You don't have permissions to access this" class="cursor-not-allowed">
+						<span class="icon"><i class="fa-regular fa-comment"></i></span>
+						Chats
+					</a>
+					<% } %>
 				</li>
-				<li class="">
-					<a href="/contact-list"><span class="icon "><i class="fa-regular fa-address-book"></i></span>
-						
-						Contact List</a>
+				
+				<!-- Contact List: Conditionally rendered based on permissions -->
+				<li>
+					<% if (access?.contactList?.type) { %>
+					<a href="/contact-list">
+						<span class="icon "><i class="fa-regular fa-address-book"></i></span>
+						Contact List
+					</a>
+					<% } else { %>
+					<a href="javascript:void(0);" title="You don't have permissions to access this" class="cursor-not-allowed">
+						<span class="icon"><i class="fa-regular fa-address-book"></i></span>
+						Contact List
+					</a>
+					<% } %>
 				</li>
-				<li class="">
-					<a href="/template"><span class="icon "><i class="fa-regular fa-envelope"></i></span>
-						Template</a>
+				
+				<!-- Template: Conditionally rendered based on permissions -->
+				<li>
+					<% if (access?.templates?.type) { %>
+					<a href="/template">
+						<span class="icon"><i class="fa-regular fa-envelope"></i></span>
+						Template
+					</a>
+					<% } else { %>
+					<a href="javascript:void(0);" title="You don't have permissions to access this" class="cursor-not-allowed">
+						<span class="icon"><i class="fa-regular fa-envelope"></i></span>
+						Template
+					</a>
+					<% } %>
 				</li>
-				<li class="">
-					<a href="/settings"><span class="icon active"><i class="fa-regular fa-user"></i></span>
-						Settings</a>
+				
+				<!-- Settings: Conditionally rendered based on permissions -->
+				<li>
+					<% if (access?.settings?.type) { %>
+					<a href="/settings">
+						<span class="icon active"><i class="fa-regular fa-user"></i></span>
+						Settings
+					</a>
+					<% } else { %>
+					<a href="javascript:void(0);" title="You don't have permissions to access this" class="cursor-not-allowed">
+						<span class="icon"><i class="fa-regular fa-user"></i></span>
+						Settings
+					</a>
+					<% } %>
 				</li>
-				<li class="py-1">
-					<a href="/reports/campaign-list"><span class="icon"><i class="fa-regular fa-chart-bar"></i></span>
-						Reports</a>
+				
+				<!-- Reports: Conditionally rendered based on permissions -->
+				<li>
+					<% if (access?.reports?.type) { %>
+					<a href="/reports/campaign-list">
+						<span class="icon"><i class="fa-regular fa-chart-bar"></i></span>
+						Reports
+					</a>
+					<% } else { %>
+					<a href="javascript:void(0);" title="You don't have permissions to access this" class="cursor-not-allowed">
+						<span class="icon"><i class="fa-regular fa-chart-bar"></i></span>
+						Reports
+					</a>
+					<% } %>
 				</li>
 			</ul>
 			<div class=" user-profile text-white flex justify-center items-center text-center">
@@ -233,40 +282,41 @@
 									<h2 class="text-lg font-semibold">Contact List</h2>
 									<div class="flex items-center space-x-2">
 										<label class="relative inline-flex pt-2 items-center cursor-pointer">
-											<input type="checkbox" name="permissions[contactList][enabled]" class="sr-only peer section-toggle">
+											<input type="checkbox" name="permissions[contactList]" class="sr-only peer section-toggle">
 											<div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 
-                                          peer-focus:ring-blue-300 rounded-full peer 
-                                          peer-checked:after:translate-x-full peer-checked:after:border-white 
-                                          after:content-[''] after:absolute after:top-[.65rem] after:left-[.12rem]
-                                          after:bg-white after:border-gray-300 after:border after:rounded-full 
-                                          after:h-5 after:w-5 after:transition-all peer-checked:bg-black"></div>
+												peer-focus:ring-blue-300 rounded-full peer 
+												peer-checked:after:translate-x-full peer-checked:after:border-white 
+												after:content-[''] after:absolute after:top-[.65rem] after:left-[.12rem]
+												after:bg-white after:border-gray-300 after:border after:rounded-full 
+												after:h-5 after:w-5 after:transition-all peer-checked:bg-black">
+											</div>
 											<span class="ml-3 text-sm font-medium toggle-label text-gray-500">No</span>
 										</label>
 									</div>
 								</div>
 								<div class="options-container grid grid-cols-1 md:grid-cols-5 w-[60%]">
 									<label class="flex items-center space-x-2">
-										<input type="checkbox" name="permissions[contactList][]" value="addContact" class="rounded checkbox option-checkbox  text-blue-600" />
+										<input type="checkbox" name="permissions[contactList][]" value="addContactIndividual" class="rounded option-checkbox text-blue-600 checkbox" />
 										<span class="option-label text-gray-500">Add Contact</span>
 									</label>
 									<label class="flex items-center space-x-2">
-										<input type="checkbox" name="permissions[contactList][]" value="editContact" class="rounded checkbox  option-checkbox   text-blue-600" />
+										<input type="checkbox" name="permissions[contactList][]" value="editContactIndividual" class="rounded option-checkbox text-blue-600 checkbox" />
 										<span class="option-label text-gray-500">Edit Contact</span>
 									</label>
 									<label class="flex items-center space-x-2">
-										<input type="checkbox" name="permissions[contactList][]" value="deleteContact" class="rounded checkbox  option-checkbox  text-blue-600" />
+										<input type="checkbox" name="permissions[contactList][]" value="deleteContactIndividual" class="rounded option-checkbox text-blue-600 checkbox" />
 										<span class="option-label text-gray-500">Delete Contact</span>
 									</label>
 									<label class="flex items-center space-x-2">
-										<input type="checkbox" name="permissions[contactList][]" value="addContactListCSV" class=" rounded checkbox  option-checkbox text-blue-600" />
-										<span class="option-label text-gray-500">Add Contact List</span>
+										<input type="checkbox" name="permissions[contactList][]" value="addContactListCSV" class="rounded option-checkbox text-blue-600 checkbox" />
+										<span class="option-label text-gray-500">Upload Contact List</span>
 									</label>
 									<label class="flex items-center space-x-2">
-										<input type="checkbox" name="permissions[contactList][]" value="deleteList" class="rounded checkbox  option-checkbox text-blue-600" />
+										<input type="checkbox" name="permissions[contactList][]" value="deleteList" class="rounded option-checkbox text-blue-600 checkbox" />
 										<span class="option-label text-gray-500">Delete List</span>
 									</label>
 									<label class="flex items-center space-x-2">
-										<input type="checkbox" name="permissions[contactList][]" value="sendBroadcast" class="rounded checkbox  option-checkbox text-blue-600" />
+										<input type="checkbox" name="permissions[contactList][]" value="sendBroadcast" class="rounded option-checkbox text-blue-600 checkbox" />
 										<span class="option-label text-gray-500">Send Broadcast</span>
 									</label>
 								</div>
@@ -284,7 +334,7 @@
                                           peer-checked:after:translate-x-full peer-checked:after:border-white 
                                           after:content-[''] after:absolute after:top-[.65rem] after:left-[.12rem]
                                           after:bg-white after:border-gray-300 after:border after:rounded-full 
-                                          after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                          after:h-5 after:w-5 after:transition-all peer-checked:bg-black"></div>
 											<span class="ml-3 text-sm font-medium toggle-label text-gray-500">No</span>
 										</label>
 									</div>
@@ -365,7 +415,7 @@
                 peer-checked:after:translate-x-full peer-checked:after:border-white 
                 after:content-[''] after:absolute after:top-[2px] after:left-[2px] 
                 after:bg-white after:border-gray-300 after:border after:rounded-full 
-                after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                after:h-5 after:w-5 after:transition-all peer-checked:bg-black"></div>
 											<span class="ml-3 text-sm font-medium toggle-label text-gray-500">No</span>
 										</label>
 									</div>
@@ -406,10 +456,10 @@
 							
 							<!-- Form Action Buttons -->
 							<div class="flex justify-end space-x-4 pt-6 border-t">
-								<button type="button" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+								<button type="button" onclick="location.href = '/settings/user-management'" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
 									Cancel
 								</button>
-								<button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+								<button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-gray-700 border border-transparent rounded-md hover:bg-black focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
 									Add Role
 								</button>
 							</div>

@@ -34,30 +34,87 @@
 				<img onclick="location.href = '/'" class="cursor-pointer" src="/assets/img/Wizard_logo.png" alt="Whizard Logo" />
 			</div>
 			<ul class="">
+				<!-- Dashboard: Always enabled -->
 				<li>
-					<a href="/" class=""><span class="icon"><i class="fas fa-chart-line"></i></span>
-						Dashboard</a>
+					<a href="/" class="">
+						<span class="icon"><i class="fas fa-chart-line"></i></span>
+						Dashboard
+					</a>
 				</li>
-				<li class="">
-					<a href="/chats"><span class="icon"><i class="fa-regular fa-comment"></i></span>
-						Chats</a>
+				
+				<!-- Chats: Conditionally rendered based on permissions -->
+				<li>
+					<% if (access?.chats?.type) { %>
+					<a href="/chats" class="">
+						<span class="icon"><i class="fa-regular fa-comment"></i></span>
+						Chats
+					</a>
+					<% } else { %>
+					<a href="javascript:void(0);" title="You don't have permissions to access this" class="cursor-not-allowed">
+						<span class="icon"><i class="fa-regular fa-comment"></i></span>
+						Chats
+					</a>
+					<% } %>
 				</li>
-				<li class="">
-					<a href="/contact-list"><span class="icon "><i class="fa-regular fa-address-book"></i></span>
-						
-						Contact List</a>
+				
+				<!-- Contact List: Conditionally rendered based on permissions -->
+				<li>
+					<% if (access?.contactList?.type) { %>
+					<a href="/contact-list">
+						<span class="icon "><i class="fa-regular fa-address-book"></i></span>
+						Contact List
+					</a>
+					<% } else { %>
+					<a href="javascript:void(0);" title="You don't have permissions to access this" class="cursor-not-allowed">
+						<span class="icon"><i class="fa-regular fa-address-book"></i></span>
+						Contact List
+					</a>
+					<% } %>
 				</li>
-				<li class="">
-					<a href="/template"><span class="icon "><i class="fa-regular fa-envelope"></i></span>
-						Template</a>
+				
+				<!-- Template: Conditionally rendered based on permissions -->
+				<li>
+					<% if (access?.templates?.type) { %>
+					<a href="/template">
+						<span class="icon"><i class="fa-regular fa-envelope"></i></span>
+						Template
+					</a>
+					<% } else { %>
+					<a href="javascript:void(0);" title="You don't have permissions to access this" class="cursor-not-allowed">
+						<span class="icon"><i class="fa-regular fa-envelope"></i></span>
+						Template
+					</a>
+					<% } %>
 				</li>
-				<li class="">
-					<a href="/settings"><span class="icon active"><i class="fa-regular fa-user"></i></span>
-						Settings</a>
+				
+				<!-- Settings: Conditionally rendered based on permissions -->
+				<li>
+					<% if (access?.settings?.type) { %>
+					<a href="/settings">
+						<span class="icon active"><i class="fa-regular fa-user"></i></span>
+						Settings
+					</a>
+					<% } else { %>
+					<a href="javascript:void(0);" title="You don't have permissions to access this" class="cursor-not-allowed">
+						<span class="icon"><i class="fa-regular fa-user"></i></span>
+						Settings
+					</a>
+					<% } %>
 				</li>
-				<li class="py-1">
-					<a href="/reports/campaign-list"><span class="icon"><i class="fa-regular fa-chart-bar"></i></span>
-						Reports</a>
+				
+				<!-- Reports: Conditionally rendered based on permissions -->
+				<li>
+					<% if (access?.reports?.type) { %>
+					<a href="/reports/campaign-list">
+						<span class="icon"><i class="fa-regular fa-chart-bar"></i></span>
+						Reports
+					</a>
+					<% } else { %>
+					<a href="javascript:void(0);" title="You don't have permissions to access this" class="cursor-not-allowed">
+						<span class="icon"><i class="fa-regular fa-chart-bar"></i></span>
+						Reports
+					</a>
+					<% } %>
 				</li>
 			</ul>
 			<div class=" user-profile text-white flex justify-center items-center text-center">
@@ -187,18 +244,18 @@
 							</td>
 							<td class="p-4 border-b border-r rounded">
 								<div class="relative">
-									<button type="button" class="text-gray-500 hover:text-gray-900 focus:outline-none" onclick="toggleDropdownTable(<%= index %>)">
+									<button type="button" class="text-gray-500 hover:text-gray-900 focus:outline-none" onclick="toggleDropdownTable('<%= user.email.replace(/\./g, '-') %>')">
 										&#x22EE;
 									</button>
-									<div id="dropdown-<%= index %>" class="hidden absolute bg-white border rounded-lg shadow-lg w-40 right-0 z-10">
-										<button class="block w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-100" onclick="updateStatus(<%= index %>, 'Inactive')">Mark as Unactive</button>
-										<button type="button" class="block w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-100" onclick="updateRole(<%= index %>)">Update Role</button>
-										<button type="button" class="block w-full px-4 py-2 text-left text-red-500 hover:bg-gray-100" onclick="deleteUser(<%= index %>)">Delete User</button>
+									<div id="dropdown-<%= user.email.replace(/\./g, '-') %>" class="hidden absolute bg-white border rounded-lg shadow-lg w-40 right-0 z-10">
+										
+										<button type="button" class="block w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-100" onclick="updateRole('<%= user.email %>', '<%= user.name %>' , 'dropdown-<%= user.email.replace(/\./g, '-') %>')">Update Role</button>
+										<button type="button" class="block w-full px-4 py-2 text-left text-red-500 hover:bg-gray-100" onclick="deleteUser('<%= user.unique_id %>', '<%= user.name %>')">Delete User</button>
 									</div>
 								</div>
-							</td>
-						</tr>
-						<% }) %>
+							</td>						
+						</tr> 
+					<% }) %>
 					</tbody>
 				</table>
 				<% } else { %>
@@ -219,29 +276,44 @@
 			</div>
 			
 			
+			
 			<script>
 				function toggleDropdownTable (index) {
+					// console.log(index);
 					const dropdownTable = document.getElementById('dropdown-' + index);
 					dropdownTable.classList.toggle('hidden');
 				}
 				
-				function updateStatus (index, status) {
-					alert(`Mark user ${index + 1} as ${status}`);
-					// Add logic to update user status
-				}
-				
-				function updateRole (index) {
-					alert(`Update role for user ${index + 1}`);
-					// Add logic to update user role
-				}
-				
-				function deleteUser (index) {
-					const confirmation = confirm(`Are you sure you want to delete user ${index + 1}?`);
+				function deleteUser (userId, name) {
+					const confirmation = confirm(`Are you sure you want to delete user ${name}?`);
+					
 					if (confirmation) {
-						alert(`User ${index + 1} deleted`);
-						// Add logic to delete user
+						fetch('/api/settings/updateUserManagement', {
+								method: 'POST',
+								headers: {
+									'Content-Type': 'application/json',
+								},
+								body: JSON.stringify({
+									action: 'deleteUser',
+									userId
+								}),
+							})
+							.then(response => response.json())
+							.then(data => {
+								if (data.success) {
+									alert(`User ${name} deleted successfully`);
+									location.reload(); // Reload the page to reflect the changes
+								} else {
+									alert('Failed to delete user');
+								}
+							})
+							.catch(error => {
+								console.error('Error:', error);
+								alert('An error occurred while deleting user');
+							});
 					}
 				}
+				
 				
 				// Close dropdown on clicking outside
 				window.onclick = function (event) {
@@ -255,6 +327,7 @@
 		</div>
 	</div>
 	<%- include("partials/addUser")  %>
+	<%- include("partials/updateRole")  %>
 	<script>
 		window.addEventListener('load', function () {
 			// Fade out the loader smoothly by changing the opacity

@@ -20,6 +20,7 @@ import {
 import sendAddUserMail from "../../services/OTP/addingUserService.js";
 import dotenv from "dotenv";
 import { getRandomColor } from "../User/userFunctions.js";
+import { access } from "fs";
 
 dotenv.config();
 
@@ -33,9 +34,9 @@ export const home = async (req, res) => {
 			if (access.settings.type) {
 				res.render("Settings/home", {
 					access,
-					photo: req.session.user?.photo,
-					name: req.session.user.name,
-					color: req.session.user.color,
+					photo: req.session?.addedUser?.photo,
+					name: req.session?.addedUser?.name,
+					color: req.session?.user?.color,
 				});
 			} else {
 				res.render("errors/notAllowed");
@@ -68,6 +69,7 @@ export const profile = async (req, res) => {
 				return res.status(404).json({ message: "User not found" });
 			}
 			res.render("Settings/profile", {
+				access: user.access,
 				user,
 				languages,
 				photo: req.session.user?.photo,
@@ -76,11 +78,15 @@ export const profile = async (req, res) => {
 			});
 		} else {
 			id = req.session?.addedUser?.owner;
-			user = await AddedUser.findOne({ unique_id: id });
+			user = await AddedUser.findOne({ useradmin: id });
 			if (!user) {
 				return res.status(404).json({ message: "User not found" });
 			}
+			const access = await Permissions.findOne({
+				unique_id: user.roleId,
+			});
 			res.render("Settings/profile", {
+				access,
 				user,
 				languages,
 				photo: req.session.addedUser?.photo,
@@ -158,71 +164,45 @@ export const updateProfile = async (req, res) => {
 	}
 };
 
-export const updatePassword = async (req, res) => {
+export const updatePassword = async (req, res, next) => {
 	try {
 		const { currentPassword, newPassword, logoutDevices } = req.body;
-		let id;
-		req.session.addedUser
-			? (id = req.session.addedUser.id)
-			: (id = req.session.user.id);
+		let id, isAddedUser;
 
-		const user = await User.findOne({ unique_id: id });
+		if (!isString(currentPassword, newPassword)) next();
+		// Determine whether it's a regular user or an added user
+		if (req.session?.addedUser) {
+			id = req.session?.addedUser?.id;
+			isAddedUser = true;
+		} else {
+			id = req.session?.user?.id;
+			isAddedUser = false;
+		}
+
+		// Check if the user is found based on the session type
+		let user;
+		if (isAddedUser) {
+			user = await AddedUser.findOne({ unique_id: id });
+		} else {
+			user = await User.findOne({ unique_id: id });
+		}
 
 		if (!user) {
 			return res
 				.status(400)
 				.json({ success: false, message: "User not found" });
-			// const addedUser = AddedUser.findById(id);
-			// if (!addedUser)
-			// 	return res
-			// 		.status(400)
-			// 		.json({ success: false, message: "User not found" });
-
-			// const isMatch = await bcrypt.compare(
-			// 	currentPassword,
-			// 	addedUser.password,
-			// );
-
-			// if (!isMatch) {
-			// 	return res
-			// 		.status(400)
-			// 		.json({ success: false, message: "incorrect_password" });
-			// }
-
-			// const passwordValid = validatePassword(newPassword);
-			// if (!passwordValid) {
-			// 	return res
-			// 		.status(400)
-			// 		.json({
-			// 			success: false,
-			// 			message: "Password does not meet the criteria.",
-			// 		});
-			// }
-
-			// const hashedPassword = await bcrypt.hash(newPassword, 10);
-
-			// addedUser.password = hashedPassword;
-			// addedUser.save();
-
-			// await ActivityLogs.create({
-			// 	useradmin: req.session.user.id,
-			// 	unique_id: generateUniqueId(),
-			// 	name: req.session.user.name
-			// 		? req.session.user.name
-			// 		: req.session.addedUser.name,
-			// 	actions: "Update",
-			// 	details: `${req.addedUser.name} updated their password`,
-			// });
 		}
 
-		const isMatch = await bcrypt.compare(currentPassword, user.password);
+		// Check if the current password matches the one in the database
+		const isMatch = bcrypt.compare(currentPassword, user.password);
 
 		if (!isMatch) {
 			return res
 				.status(400)
-				.json({ success: false, message: "incorrect_password" });
+				.json({ success: false, message: "Incorrect password" });
 		}
 
+		// Validate the new password
 		const passwordValid = validatePassword(newPassword);
 		if (!passwordValid) {
 			return res.status(400).json({
@@ -231,64 +211,97 @@ export const updatePassword = async (req, res) => {
 			});
 		}
 
+		// Hash the new password
 		const hashedPassword = await bcrypt.hash(newPassword, 10);
-		user.password = hashedPassword;
 
+		// Update the password for the respective user
+		user.password = hashedPassword;
 		await user.save();
 
+		// Log the password update activity
 		await ActivityLogs.create({
-			useradmin: req.session.user.id,
+			useradmin: req.session.user
+				? req.session.user.id
+				: req.session.addedUser.owner,
 			unique_id: generateUniqueId(),
-			name: req.session.user.name
+			name: req.session.user
 				? req.session.user.name
 				: req.session.addedUser.name,
 			actions: "Update",
-			details: `Updated their password`,
+			details: `${user.name} updated their password`,
 		});
 
+		// If logoutDevices is true, clear the session and redirect to login
 		if (logoutDevices) {
 			req.session.user = null;
-			res.render("login");
+			req.session.addedUser = null;
+			return res.render("login");
 		} else {
+			// Otherwise, return success response
 			return res
 				.status(200)
 				.json({ message: "Password updated successfully" });
 		}
 	} catch (error) {
-		console.log(error);
-		res.status(500).json({ success: false, message: error });
+		console.error(error);
+		res.status(500).json({ success: false, message: error.message });
 	}
 };
 
 export const accountDetails = async (req, res) => {
-	const id = req.session.user.id;
-
 	try {
-		const user = await User.findOne({ unique_id: id });
+		const id = req.session?.user?.id || req.session?.addedUser?.owner;
+		let user;
+
+		user = await User.findOne({ unique_id: id });
 
 		if (!user) {
 			return res.status(404).json({ message: "User not found" });
 		}
 
-		res.render("Settings/accountDetails", {
-			user,
-			countries,
-			industryCategory,
-			size,
-			roles,
-			photo: req.session.user?.photo,
-			name: req.session.user.name,
-			color: req.session.user.color,
-		});
+		const permissions = req.session?.addedUser?.permissions;
+		if (permissions) {
+			const access = await Permissions.findOne({
+				unique_id: permissions,
+			});
+			if (access.settings.type) {
+				res.render("Settings/accountDetails", {
+					access,
+					user,
+					countries,
+					industryCategory,
+					size,
+					roles,
+					photo: req.session.user?.photo,
+					name: req.session.user.name,
+					color: req.session.user.color,
+				});
+			} else {
+				res.render("errors/notAllowed");
+			}
+		} else {
+			const id = req.session?.user?.id;
+			const access = await User.findOne({ unique_id: id });
+			console.log(access.access);
+			res.render("Settings/accountDetails", {
+				access: access.access,
+				user,
+				countries,
+				industryCategory,
+				size,
+				roles,
+				photo: req.session.user?.photo,
+				name: req.session.user.name,
+				color: req.session.user.color,
+			});
+		}
 	} catch (error) {
 		console.error(error);
-		res.status(500).json({
-			message: "An error occurred while fetching the user profile",
-		});
+		res.render("errors/serverError");
 	}
 };
 
-export const updateAccountDetails = async (req, res) => {
+export const updateAccountDetails = async (req, res, next) => {
 	try {
 		const {
 			name: companyName,
@@ -302,8 +315,25 @@ export const updateAccountDetails = async (req, res) => {
 		} = req.body;
 		// console.log(req.body);
 
+		if (
+			!isString(
+				companyName,
+				description,
+				state,
+				country,
+				companySize,
+				industry,
+				jobRole,
+				website,
+			)
+		)
+			next();
+
 		const updatedUser = await User.findOneAndUpdate(
-			{ unique_id: req.session.user.id },
+			{
+				unique_id:
+					req.session?.user?.id || req.session?.addedUser?.owner,
+			},
 			{
 				companyName,
 				companyDescription: description,
@@ -324,7 +354,7 @@ export const updateAccountDetails = async (req, res) => {
 		}
 
 		await ActivityLogs.create({
-			useradmin: req.session.user.id,
+			useradmin: req.session?.user?.id || req.session?.addedUser?.owner,
 			unique_id: generateUniqueId(),
 			name: req.session.user.name
 				? req.session.user.name
@@ -388,72 +418,97 @@ export const getActivityLogs = async (req, res) => {
 	}
 };
 
-export const activityLogsFiltered = async (req, res) => {
-	const { action, dateRange } = req.query;
-	let filter = {};
+export const activityLogsFiltered = async (req, res, next) => {
+	try {
+		const { action, dateRange } = req.query;
+		let filter = {};
 
-	filter.useradmin = req.session.user.id;
-	// Filter by action type
-	if (action && action !== "All action") {
-		filter.actions = action;
-	}
+		if (!isString(action, dateRange)) next();
 
-	// Filter by date range
-	const now = new Date();
-	if (dateRange) {
-		let startDate, endDate;
-		const now = new Date();
-
-		switch (dateRange) {
-			case "Past 7 days":
-				startDate = new Date(now.setDate(now.getDate() - 7));
-				break;
-			case "Past 30 days":
-				startDate = new Date(now.setDate(now.getDate() - 30));
-				break;
-			case "Past 90 days":
-				startDate = new Date(now.setDate(now.getDate() - 90));
-				break;
-			case "This month":
-				startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-				endDate = now;
-				break;
-			case "Previous month":
-				startDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-				endDate = new Date(now.getFullYear(), now.getMonth(), 0);
-				break;
-			default:
-				startDate = null;
+		filter.useradmin =
+			req.session?.user?.id || req.session?.addedUser?.owner;
+		// Filter by action type
+		if (action && action !== "All action") {
+			filter.actions = action;
 		}
 
-		if (startDate) {
-			if (endDate) {
-				filter.createdAt = { $gte: startDate, $lt: endDate };
-			} else {
-				filter.createdAt = { $gte: startDate };
+		// Filter by date range
+		const now = new Date();
+		if (dateRange) {
+			let startDate, endDate;
+			const now = new Date();
+
+			switch (dateRange) {
+				case "Past 7 days":
+					startDate = new Date(now.setDate(now.getDate() - 7));
+					break;
+				case "Past 30 days":
+					startDate = new Date(now.setDate(now.getDate() - 30));
+					break;
+				case "Past 90 days":
+					startDate = new Date(now.setDate(now.getDate() - 90));
+					break;
+				case "This month":
+					startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+					endDate = now;
+					break;
+				case "Previous month":
+					startDate = new Date(
+						now.getFullYear(),
+						now.getMonth() - 1,
+						1,
+					);
+					endDate = new Date(now.getFullYear(), now.getMonth(), 0);
+					break;
+				default:
+					startDate = null;
+			}
+
+			if (startDate) {
+				if (endDate) {
+					filter.createdAt = { $gte: startDate, $lt: endDate };
+				} else {
+					filter.createdAt = { $gte: startDate };
+				}
 			}
 		}
-	}
 
-	try {
 		const logs = await ActivityLogs.find(filter).sort({ createdAt: -1 });
-		// console.log(logs);
-		res.render("Settings/partials/activityLogs", {
-			logs,
-			photo: req.session.user?.photo,
-			name: req.session.user.name,
-		});
+		if (req.session?.user) {
+			const acesss = await User.findOne({
+				unique_id: req.session?.user?.id,
+			});
+			res.render("Settings/partials/activityLogs", {
+				access: access.access,
+				logs,
+				photo: req.session.user?.photo,
+				name: req.session.user.name,
+			});
+		} else {
+			const access = await Permissions.findOne({
+				unique_id: req.session?.addedUser?.permissions,
+			});
+			res.render("Settings/partials/activityLogs", {
+				access,
+				logs,
+				photo: req.session.user?.photo,
+				name: req.session.user.name,
+			});
+		}
 	} catch (err) {
 		console.error("Error fetching logs:", err);
-		res.status(500).send("Server error");
+		res.render("errors/serverError");
 	}
 };
 
 export const getUserManagement = async (req, res) => {
-	const id = req.session?.user?.id || req.session?.addedUser?.owner;
 	try {
-		let users = await AddedUser.find({ useradmin: id });
-		const permissions = await Permissions.find({ useradmin: id });
+		const id = req.session?.user?.id || req.session?.addedUser?.owner;
+
+		let users = await AddedUser.find({ useradmin: id, deleted: false });
+		const permissions = await Permissions.find({
+			useradmin: id,
+		});
 		users = users ? users : [];
 
 		const permission = req.session?.addedUser?.permissions;
@@ -461,12 +516,13 @@ export const getUserManagement = async (req, res) => {
 			const access = await Permissions.findOne({ unique_id: permission });
 			if (access.settings.userManagement) {
 				res.render("Settings/userManagement", {
+					access,
 					users,
 					permissions,
 					id,
-					photo: req.session.user?.photo,
-					name: req.session.user.name,
-					color: req.session.user.color,
+					photo: req.session.addedUser?.photo,
+					name: req.session.addedUser.name,
+					color: req.session.addedUser.color,
 				});
 			} else {
 				res.render("errors/notAllowed");
@@ -475,6 +531,7 @@ export const getUserManagement = async (req, res) => {
 			const access = await User.findOne({ unique_id: id });
 			console.log(access.access);
 			res.render("Settings/userManagement", {
+				access: access.access,
 				users,
 				permissions,
 				id,
@@ -485,9 +542,7 @@ export const getUserManagement = async (req, res) => {
 		}
 	} catch (error) {
 		console.error(error);
-		res.status(500).json({
-			message: "An error occurred while fetching the user profile",
-		});
+		res.render("errors/serverError");
 	}
 };
 
@@ -495,22 +550,25 @@ export const getCreatePassword = async (req, res) => {
 	res.render("Settings/createAddedUserPassword");
 };
 
-export const sendUserInvitation = async (req, res) => {
+export const sendUserInvitation = async (req, res, next) => {
 	try {
-		const adminId = req.session.user.id;
+		const adminId = req?.session?.user?.id || req.session?.addedUser?.owner;
 
 		let { name, email, roleId, roleName, url } = req.body;
 
-		// Check if the user already exists in the User collection
+		if (!isString(name, email, roleId, roleName, url)) next();
+
 		let exists = await User.findOne({ email });
 		if (exists) {
-			res.status(409).json({ message: "Email already in use" }); // return to stop execution
+			res.status(409).json({ message: "Email already in use" });
+			return;
 		}
 
 		// Check if the user already exists in the AddedUser collection
-		exists = await AddedUser.findOne({ email });
+		exists = await AddedUser.findOne({ email, deleted: false });
 		if (exists) {
-			res.status(409).json({ message: "Email already in use" }); // return to stop execution
+			res.status(409).json({ message: "Email already in use" });
+			return;
 		}
 
 		// If user does not exist, create a new entry
@@ -531,10 +589,14 @@ export const sendUserInvitation = async (req, res) => {
 		const invitationLink = `${url}/settings/user-management/create-password?token=${invitationToken}`;
 
 		// Send invitation email
-		await sendAddUserMail(req.session.user.name, invitationLink, email);
+		await sendAddUserMail(
+			req.session?.user?.name || req.session?.addedUser?.name,
+			invitationLink,
+			email,
+		);
 		console.log("email sent");
 		await ActivityLogs.create({
-			useradmin: req.session.user.id,
+			useradmin: req.session?.user?.id || req.session?.addedUser?.owner,
 			unique_id: generateUniqueId(),
 			name: req.session.user.name
 				? req.session.user.name
@@ -556,28 +618,51 @@ export const sendUserInvitation = async (req, res) => {
 };
 
 export const getPermissions = async (req, res) => {
-	if (req.session?.user) {
-		res.render("Settings/permissions", {
-			photo: req.session?.user?.photo,
-			name: req.session?.user.name,
-			color: req.session?.user.color,
-		});
-	} else {
-		res.render("Settings/permissions", {
-			photo: req.session?.addedUser?.photo,
-			name: req.session?.addedUser?.name,
-			color: req.session?.addedUser?.color,
-		});
+	try {
+		const id = req.session?.addedUser?.owner || req.session?.user?.id;
+		const permission = req.session?.addedUser?.permissions;
+		if (permission) {
+			const access = await Permissions.findOne({ unique_id: permission });
+			if (access.settings.userManagement) {
+				res.render("Settings/permissions", {
+					access,
+					photo: req.session?.addedUser?.photo,
+					name: req.session?.addedUser?.name,
+					color: req.session?.addedUser?.color,
+				});
+			} else {
+				res.render("errors/notAllowed");
+			}
+		} else {
+			const access = await User.findOne({ unique_id: id });
+			// console.log(access.access);
+			res.render("Settings/permissions", {
+				access: access.access,
+				photo: req.session?.user?.photo,
+				name: req.session?.user.name,
+				color: req.session?.user.color,
+			});
+		}
+	} catch (err) {
+		console.error("Error getting permissions :", err);
+		res.render("errors/serverError");
 	}
 };
 
-export const createPermissions = async (req, res) => {
+export const createPermissions = async (req, res, next) => {
 	try {
 		const unique_id = generateUniqueId();
-		const useradmin = req.session.user.id;
+		const useradmin =
+			req.session?.user?.id || req.session?.addedUser?.owner;
 
 		const { name, permissions } = req.body;
-
+		if (!name || !permissions)
+			return res.status(401).json({
+				success: false,
+				message: "Invalid input : please fill the required fields",
+			});
+		
+		if (!isString(name)) next();
 		// Check if a role with the same name already exists
 		const existingRole = await Permissions.findOne({ useradmin, name });
 		if (existingRole) {
@@ -585,7 +670,7 @@ export const createPermissions = async (req, res) => {
 				.status(400)
 				.json({ message: "Role with this name already exists" });
 		}
-		console.log(permissions);
+		// console.log(permissions);
 		// Create a new role with permissions
 		const newRole = new Permissions({
 			useradmin,
@@ -601,16 +686,20 @@ export const createPermissions = async (req, res) => {
 				redirectToVpchat: permissions.chats.redirectToVpchat,
 			},
 			contactList: {
-				type: permissions.contactList.type,
+				type: permissions.contactlist.type,
 				addContactIndividual:
-					permissions.contactList.addContactIndividual,
-				addContactListCSV: permissions.contactList.addContactListCSV,
-				deleteList: permissions.contactList.deleteList,
-				sendBroadcast: permissions.contactList.sendBroadcast,
+					permissions.contactlist.addContactIndividual,
+				editContactIndividual:
+					permissions.contactlist.editContactIndividual,
+				deleteContactIndividual:
+					permissions.contactlist.deleteContactIndividual,
+				addContactListCSV: permissions.contactlist.addContactListCSV,
+				deleteList: permissions.contactlist.deleteList,
+				sendBroadcast: permissions.contactlist.sendBroadcast,
 				customField: {
-					type: permissions.contactList.customField.type,
-					view: permissions.contactList.customField.view,
-					add: permissions.contactList.customField.add,
+					type: permissions.contactlist.customField.type,
+					view: permissions.contactlist.customField.view,
+					add: permissions.contactlist.customField.add,
 				},
 			},
 			templates: {
@@ -648,7 +737,7 @@ export const createPermissions = async (req, res) => {
 		});
 
 		await ActivityLogs.create({
-			useradmin: req.session.user.id,
+			useradmin: req.session?.user?.id || req.session?.addedUser?.owner,
 			unique_id: generateUniqueId(),
 			name: req.session.user.name
 				? req.session.user.name
@@ -664,15 +753,17 @@ export const createPermissions = async (req, res) => {
 			.json({ message: "Role created successfully!", role: newRole });
 	} catch (error) {
 		console.error("Error creating role:", error);
-		return res
-			.status(500)
-			.json({ message: "Failed to create role", error });
+		return res.status(500).json({ message: error });
 	}
 };
 
 export const createAddedUserPassword = async (req, res, next) => {
 	try {
 		let { password, adminId, role } = req.body;
+
+		if (!password || !adminId || !role) return res.json({ success: false, message: "Invaild input : Please fill all fields" });
+
+		if (!isString(password, adminId, role)) next();
 
 		const data = await User.findOne({ unique_id: adminId });
 
@@ -685,7 +776,10 @@ export const createAddedUserPassword = async (req, res, next) => {
 
 		const addedUser = await AddedUser.findOneAndUpdate(
 			{ unique_id: role },
-			{ password },
+			{
+				password,
+				status: "Active",
+			},
 		);
 
 		req.session.addedUser = {
@@ -703,5 +797,74 @@ export const createAddedUserPassword = async (req, res, next) => {
 	} catch (err) {
 		console.error(err);
 		res.json({ success: false, message: err });
+	}
+};
+
+export const updateUserManagement = async (req, res) => {
+	const action = req.body?.action;
+	const userId = req.body?.userId;
+	const status = req.body?.status;
+	const newRoleId = req.body?.newRoleId;
+	const newRoleName = req.body?.newRoleName;
+	const email = req.body?.email;
+
+	try {
+		let user;
+		switch (action) {
+			case "updateStatus":
+				user = await AddedUser.findOneAndUpdate(
+					{ unique_id: userId },
+					{ status },
+					{ new: true },
+				);
+				if (!user) {
+					return res
+						.status(404)
+						.json({ success: false, message: "User not found" });
+				}
+				return res
+					.status(200)
+					.json({ success: true, message: "Status updated" });
+
+			case "updateRole":
+				user = await AddedUser.findOneAndUpdate(
+					{ email },
+					{ roleName: newRoleName, roleId: newRoleId },
+					{ new: true },
+				);
+				if (!user) {
+					return res
+						.status(404)
+						.json({ success: false, message: "User not found" });
+				}
+				return res
+					.status(200)
+					.json({ success: true, message: "Role updated" });
+
+			case "deleteUser":
+				user = await AddedUser.findOneAndUpdate(
+					{ unique_id: userId },
+					{ deleted: true },
+					{ new: true },
+				);
+				if (!user) {
+					return res
+						.status(404)
+						.json({ success: false, message: "User not found" });
+				}
+				return res
+					.status(200)
+					.json({ success: true, message: "User deleted" });
+
+			default:
+				return res
+					.status(400)
+					.json({ success: false, message: "Invalid action" });
+		}
+	} catch (error) {
+		console.error(error);
+		return res
+			.status(500)
+			.json({ success: false, message: "Server error", error });
 	}
 };

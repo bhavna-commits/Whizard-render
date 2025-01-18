@@ -7,6 +7,8 @@
 	font-size: 12px; /* 0.875rem = 14px */
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
+	-webkit-text-size-adjust: none;
+	-ms-text-size-adjust: none;
 }
 
 /* Media query for devices with lower resolution (96 dpi or lower) */
@@ -65,8 +67,8 @@
 }
 
 html {
-	-webkit-text-size-adjust: 100%;
-	-ms-text-size-adjust: 100%;
+	-webkit-text-size-adjust: none;
+	-ms-text-size-adjust: none;
 }
 
 body {
@@ -329,9 +331,9 @@ input[type="number"] {
 }
 
 .disabled-link {
-    pointer-events: none;
-    cursor: not-allowed;
-    color: #aaa; /* Make the text look disabled */
+	pointer-events: none;
+	cursor: not-allowed;
+	color: #aaa; /* Make the text look disabled */
 }
 
 .account-menu a,

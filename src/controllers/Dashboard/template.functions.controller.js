@@ -28,8 +28,8 @@ export const saveTemplateToDatabase = async (
 		if (req.file) {
 			const filePath = path.join(
 				"uploads",
-				req.session.user.id,
-				req.file.filename,
+				req.session?.user?.id || req.session?.addedUser?.owner,
+				req.file?.filename,
 			);
 			const headerComponent = newTemplate.components.find(
 				(component) => component.type === "HEADER",
@@ -46,8 +46,6 @@ export const saveTemplateToDatabase = async (
 				}
 			}
 		}
-
-		// Save the template to the database
 
 		return newTemplate;
 	} catch (error) {
