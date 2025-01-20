@@ -136,7 +136,7 @@
 					<a href="/settings/profile">Profile</a>
 					<button onclick="logout()">Logout</button>
 				</div>
-			</div>	
+			</div>
 		</nav>
 		<!-- END SIDEBAR MENU TOP TRAY CONTENT-->
 		
@@ -168,6 +168,11 @@
 				</button>
 				<% } else if (whatsAppStatus == "Pending")  { %>
 				<button class="bg-gray-700 p-2 px-3 flex items-center rounded-lg text-lg hover:cursor-not-allowed text-white font-thin" title="Connect with whatsApp Business API to send message" disabled>
+					<i class="fa-solid fa-plus pr-2"></i>
+					Create new template
+				</button>
+				<% } else if (access?.templates?.createTemplate)  { %>
+				<button class="bg-black p-2 px-3 flex items-center rounded-lg text-lg text-white font-thin " onclick="document.location='create-template'">
 					<i class="fa-solid fa-plus pr-2"></i>
 					Create new template
 				</button>
@@ -207,6 +212,10 @@
 					</button>
 					<% } else if (whatsAppStatus == "Pending")  { %>
 					<button type="button" class="flex items-center bg-blue-300 text-white px-4 py-2 rounded hover:cursor-not-allowed" title="Connect with whatsApp Business API to send message" disabled>
+						<i class="fas fa-sync mr-2"></i>Sync Facebook
+					</button>
+					<% } else if (access?.templates?.createTemplate)  { %>
+					<button type="button" class="flex items-center bg-blue-500 text-white px-4 py-2 rounded" onclick="getStatus()">
 						<i class="fas fa-sync mr-2"></i>Sync Facebook
 					</button>
 					<% } else { %>
@@ -314,6 +323,11 @@
 					</button>
 					<% } else if (whatsAppStatus == "Pending")  { %>
 					<button class="bg-gray-700 p-2 px-3 flex items-center rounded-lg text-lg hover:cursor-not-allowed text-white font-thin w-full justify-center" title="Connect with whatsApp Business API to send message" disabled>
+						<i class="fa-solid fa-plus pr-2"></i>
+						Create new template
+					</button>
+					<% } else if (access?.templates?.createTemplate)  { %>
+					<button class="bg-black p-2 px-3 flex items-center rounded-lg text-lg text-white font-thin w-full justify-center" onclick="document.location='create-template'">
 						<i class="fa-solid fa-plus pr-2"></i>
 						Create new template
 					</button>

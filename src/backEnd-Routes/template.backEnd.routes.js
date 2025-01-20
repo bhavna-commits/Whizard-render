@@ -7,15 +7,21 @@ import {
 	getCampaignSingleTemplates,
 } from "../controllers/Dashboard/template.controller.js";
 import { multerMiddle } from "../config/multerMiddleware.js";
+import { trackSanitationFailures } from "../middleWares/sanitiseInput.js";
 
 const router = express.Router();
 
-router.post("/createTemplate", multerMiddle, createTemplate);
+router.post(
+	"/createTemplate",
+	multerMiddle,
+	createTemplate,
+	trackSanitationFailures,
+);
 
-router.post("/duplicate/:id", duplicateTemplate);
+router.post("/duplicate/:id", duplicateTemplate, trackSanitationFailures);
 
-router.delete("/delete/:id", deleteTemplate);
+router.delete("/delete/:id", deleteTemplate, trackSanitationFailures);
 
-router.get("/:id", getCampaignSingleTemplates);
+router.get("/:id", getCampaignSingleTemplates, trackSanitationFailures);
 
 export default router;

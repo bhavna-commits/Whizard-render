@@ -10,19 +10,23 @@ import {
 	getOverviewFilter,
 	getCreateCampaign,
 } from "../controllers/ContactList/contacts.controller.js";
-
+import { trackSanitationFailures } from "../middleWares/sanitiseInput.js";
 const router = express.Router();
 
-router.get("/", getList);
+router.get("/", getList, trackSanitationFailures);
 
-router.get("/overview/:id", getContacts);
+router.get("/overview/:id", getContacts, trackSanitationFailures);
 
-router.get("/custom-field", getCustomField);
+router.get("/custom-field", getCustomField, trackSanitationFailures);
 
-router.get("/getContactList", getContactList);
+router.get("/getContactList", getContactList, trackSanitationFailures);
 
-router.get("/get-overview-filter/:id", getOverviewFilter);
+router.get(
+	"/get-overview-filter/:id",
+	getOverviewFilter,
+	trackSanitationFailures,
+);
 
-router.get("/createCampaign", getCreateCampaign);
+router.get("/createCampaign", getCreateCampaign, trackSanitationFailures);
 
 export default router;

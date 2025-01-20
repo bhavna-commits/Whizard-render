@@ -37,7 +37,7 @@ async function fetchData() {
 	try {
 		// Fetch the filtered data
 		const res = await fetch(
-			`/reports/campaign-list/filter?timeFrame=${timeFrame}&status=${statusFilter}&search=${search}`,
+			`/api/reports/campaign-list/filter?timeFrame=${timeFrame}&status=${statusFilter}&search=${search}`,
 		);
 		const data = await res.text();
 

@@ -1,14 +1,16 @@
-import Reports from "../../models/report.model.js";
 import Campaign from "../../models/campaign.model.js";
+import Contacts from "../../models/contacts.model.js";
 import ContactList from "../../models/contactList.model.js";
 import Permissions from "../../models/permissions.model.js";
 import User from "../../models/user.model.js";
 import { overview } from "./reports.functions.js";
+import { sendMessages } from "./reports.functions.js";
 import {
 	isNumber,
 	isString,
 	isBoolean,
 } from "../../middleWares/sanitiseInput.js";
+import { generateUniqueId } from "../../utils/otpGenerator.js";
 
 // Controller to fetch campaign reports and render them page-wise
 export const getCampaignList = async (req, res, next) => {
@@ -141,8 +143,11 @@ export const getCampaignList = async (req, res, next) => {
 	}
 };
 
-export const getCampaignReports = async (req, res) => {
+export const getCampaignReports = async (req, res, next) => {
 	const { filter } = req.query;
+
+	if (!isString(filter)) return next();
+	
 	if (filter == "sent") {
 		await getSentReportsById(req, res);
 	} else if (filter == "delivered") {
@@ -321,20 +326,20 @@ export const getCampaignListFilter = async (req, res, next) => {
 				color: req.session.user.color,
 			});
 		}
-
-		
 	} catch (err) {
 		console.error(err);
 		res.render("errors/serverError");
 	}
 };
 
-const getCampaignOverview = async (req, res) => {
+const getCampaignOverview = async (req, res, next) => {
 	try {
 		const { id } = req.params;
 		const page = parseInt(req.query.page) || 1;
-		if (!isNumber(page)) next();
-		if (!isString(id)) next();
+
+		if (!isNumber(page)) return next();
+		if (!isString(id)) return next();
+
 		const userId = req.session?.user?.id || req.session?.addedUser?.owner;
 		const limit = 6;
 		const skip = (page - 1) * limit;
@@ -368,6 +373,7 @@ const getCampaignOverview = async (req, res) => {
 			});
 			if (access?.reports?.conversationReports?.viewReports) {
 				res.render("Reports/campaignOverview", {
+					access,
 					campaigns: paginatedResults[0].reports,
 					id,
 					page,
@@ -398,6 +404,7 @@ const getCampaignOverview = async (req, res) => {
 			});
 			// console.log(access.access);
 			res.render("Reports/campaignOverview", {
+				access: access.access,
 				campaigns: paginatedResults[0].reports,
 				id,
 				page,
@@ -412,7 +419,6 @@ const getCampaignOverview = async (req, res) => {
 				percentDelivered:
 					paginatedResults[0].percentDelivered?.toFixed(2) || 0,
 				percentRead: paginatedResults[0].percentRead?.toFixed(2) || 0,
-				
 				photo: req.session?.user?.photo,
 				name: req.session?.user?.name,
 				color: req.session?.user?.color,
@@ -424,13 +430,15 @@ const getCampaignOverview = async (req, res) => {
 	}
 };
 
-const getSentReportsById = async (req, res) => {
+const getSentReportsById = async (req, res, next) => {
 	try {
 		const { id } = req.params;
 		const userId = req.session?.user?.id || req.session?.addedUser?.owner;
 		const page = parseInt(req.query.page) || 1;
-		if (!isNumber(page)) next();
-		if (!isString(id)) next();
+
+		if (!isNumber(page)) return next();
+		if (!isString(id)) return next();
+
 		const limit = 6;
 		const skip = (page - 1) * limit;
 
@@ -510,7 +518,7 @@ const getSentReportsById = async (req, res) => {
 				}
 			});
 		});
-
+		// console.log(paginatedResults[0].reports);
 		const permissions = req.session?.addedUser?.permissions;
 		if (permissions) {
 			const access = await Permissions.findOne({
@@ -519,7 +527,9 @@ const getSentReportsById = async (req, res) => {
 			if (access.reports.conversationReports.viewReports) {
 				res.render("Reports/campaignSent", {
 					access,
+					totalCount: paginatedResults[0].messagesSent,
 					campaigns: paginatedResults[0].reports,
+					contact: paginatedResults[0].contacts[0],
 					page,
 					totalPages,
 					id,
@@ -538,10 +548,11 @@ const getSentReportsById = async (req, res) => {
 			res.render("Reports/campaignSent", {
 				access: access.access,
 				campaigns: paginatedResults[0].reports,
+				contact: paginatedResults[0].contacts[0],
 				page,
 				totalPages,
 				id,
-				
+				totalCount: paginatedResults[0].messagesSent,
 				photo: req.session?.user?.photo,
 				name: req.session?.user?.name,
 				color: req.session?.user?.color,
@@ -553,14 +564,14 @@ const getSentReportsById = async (req, res) => {
 	}
 };
 
-const getDeliveredReportsById = async (req, res) => {
+const getDeliveredReportsById = async (req, res, next) => {
 	try {
 		const { id } = req.params;
 		const userId = req.session?.user?.id || req.session?.addedUser?.owner;
 		const page = parseInt(req.query.page) || 1;
 
-		if (!isNumber(page)) next();
-		if (!isString(id)) next();
+		if (!isNumber(page)) return next();
+		if (!isString(id)) return next();
 
 		const limit = 6;
 		const skip = (page - 1) * limit;
@@ -653,6 +664,8 @@ const getDeliveredReportsById = async (req, res) => {
 				res.render("Reports/campaignDelivered", {
 					access,
 					campaigns: paginatedResults[0].reports,
+					contact: paginatedResults[0].contacts[0],
+					totalCount: paginatedResults[0].messagesDelivered,
 					page,
 					totalPages,
 					id,
@@ -671,10 +684,11 @@ const getDeliveredReportsById = async (req, res) => {
 			res.render("Reports/campaignDelivered", {
 				access: access.access,
 				campaigns: paginatedResults[0].reports,
+				contact: paginatedResults[0].contacts[0],
+				totalCount: paginatedResults[0].messagesDelivered,
 				page,
 				totalPages,
 				id,
-				
 				photo: req.session?.user?.photo,
 				name: req.session?.user?.name,
 				color: req.session?.user?.color,
@@ -687,14 +701,14 @@ const getDeliveredReportsById = async (req, res) => {
 	}
 };
 
-const getReadReportsById = async (req, res) => {
+const getReadReportsById = async (req, res, next) => {
 	try {
 		const { id } = req.params;
 		const userId = req.session?.user?.id || req.session?.addedUser?.owner;
 		const page = parseInt(req.query.page) || 1;
 
-		if (!isNumber(page)) next();
-		if (!isString(id)) next();
+		if (!isNumber(page)) return next();
+		if (!isString(id)) return next();
 
 		const limit = 6;
 		const skip = (page - 1) * limit;
@@ -787,6 +801,8 @@ const getReadReportsById = async (req, res) => {
 				res.render("Reports/campaignRead", {
 					access,
 					campaigns: paginatedResults[0].reports,
+					contact: paginatedResults[0].contacts[0],
+					totalCount: paginatedResults[0].messagesRead,
 					page,
 					totalPages,
 					id,
@@ -804,6 +820,8 @@ const getReadReportsById = async (req, res) => {
 			res.render("Reports/campaignRead", {
 				access: access.access,
 				campaigns: paginatedResults[0].reports,
+				contact: paginatedResults[0].contacts[0],
+				totalCount: paginatedResults[0].messagesRead,
 				page,
 				totalPages,
 				id,
@@ -818,14 +836,14 @@ const getReadReportsById = async (req, res) => {
 	}
 };
 
-const getRepliesReportsById = async (req, res) => {
+const getRepliesReportsById = async (req, res, next) => {
 	try {
 		const { id } = req.params;
 		const userId = req.session?.user?.id || req.session?.addedUser?.owner;
 		const page = parseInt(req.query.page) || 1;
 
-		if (!isNumber(page)) next();
-		if (!isString(id)) next();
+		if (!isNumber(page)) return next();
+		if (!isString(id)) return next();
 
 		const limit = 6;
 		const skip = (page - 1) * limit;
@@ -854,7 +872,18 @@ const getRepliesReportsById = async (req, res) => {
 												"$$campaignId",
 											],
 										},
-										{ $ne: ["$replyContent", null] }, // Only fetch reports with replies
+										{
+											$and: [
+												{
+													$ne: [
+														"$replyContent",
+														null,
+													],
+												}, // Not null
+												{ $ne: ["$replyContent", ""] }, // Not empty string
+												{ $type: "$replyContent" }, // Ensure field exists
+											],
+										},
 									],
 								},
 							},
@@ -918,6 +947,8 @@ const getRepliesReportsById = async (req, res) => {
 				res.render("Reports/campaignReplies", {
 					access,
 					campaigns: paginatedResults[0].reports,
+					contact: paginatedResults[0].contacts[0],
+					totalCount: paginatedResults[0].messagesReplied,
 					page,
 					totalPages,
 					id,
@@ -936,10 +967,11 @@ const getRepliesReportsById = async (req, res) => {
 			res.render("Reports/campaignReplies", {
 				access: access.access,
 				campaigns: paginatedResults[0].reports,
+				contact: paginatedResults[0].contacts[0],
+				totalCount: paginatedResults[0].messagesReplied,
 				page,
 				totalPages,
 				id,
-				
 				photo: req.session?.user?.photo,
 				name: req.session?.user?.name,
 				color: req.session?.user?.color,
@@ -951,14 +983,14 @@ const getRepliesReportsById = async (req, res) => {
 	}
 };
 
-const getFailedReportsById = async (req, res) => { 
+const getFailedReportsById = async (req, res, next) => {
 	try {
 		const { id } = req.params;
 		const userId = req.session?.user?.id || req.session?.addedUser?.owner;
 		const page = parseInt(req.query.page) || 1;
 
-		if (!isNumber(page)) next();
-		if (!isString(id)) next();
+		if (!isNumber(page)) return next();
+		if (!isString(id)) return next();
 
 		const limit = 6;
 		const skip = (page - 1) * limit;
@@ -1051,10 +1083,11 @@ const getFailedReportsById = async (req, res) => {
 				res.render("Reports/campaignFailed", {
 					access,
 					campaigns: paginatedResults[0].reports,
+					contact: paginatedResults[0].contacts[0],
+					totalCount: paginatedResults[0].messagesRead,
 					page,
 					totalPages,
 					id,
-					
 					photo: req.session?.addedUser?.photo,
 					name: req.session?.addedUser?.name,
 					color: req.session?.addedUser?.color,
@@ -1070,6 +1103,8 @@ const getFailedReportsById = async (req, res) => {
 			res.render("Reports/campaignFailed", {
 				access: access.access,
 				campaigns: paginatedResults[0].reports,
+				contact: paginatedResults[0].contacts[0],
+				totalCount: paginatedResults[0].messagesRead,
 				page,
 				totalPages,
 				id,
@@ -1084,195 +1119,159 @@ const getFailedReportsById = async (req, res) => {
 	}
 };
 
-// export const getUserAccountOverview = async (req, res) => {
-// 	try {
-// 		const userId = req.session.user.id;
+export const getSendBroadcast = async (req, res, next) => {
+	// console.log(req.body);
+	const data = req.session?.tempData;
+	// console.log(data);
+	if (data) {
+		delete req.session.tempData;
+	} else {
+		console.log("broadcast data not found");
+		return res.render("errors/serverError");
+	}
+	const permissions = req.session?.addedUser?.permissions;
+	if (permissions) {
+		const access = Permissions.findOne({ unique_id: permissions });
+		if (
+			access.contactList.sendBroadcast &&
+			req.session?.addedUser?.whatsAppStatus
+		) {
+			// const access = Permissions.findOne({ unique_id: permissions });
+			res.render("Reports/createCampaign", {
+				access,
+				name: req.session?.addedUser?.name,
+				photo: req.session?.addedUser?.photo,
+				color: req.session?.addedUser?.color,
+				data,
+			});
+		} else {
+			res.render("errors/notAllowed");
+		}
+	} else if (req.session?.user?.whatsAppStatus) {
+		const access = await User.findOne({ unique_id: req.session?.user?.id });
+		res.render("Reports/createCampaign", {
+			access: access.access,
+			name: req.session?.user?.name,
+			photo: req.session?.user?.photo,
+			color: req.session?.user?.color,
+			data,
+		});
+	} else {
+		const access = await User.findOne({
+			unique_id: req.session?.user?.id,
+		});
 
-// 		// Fetch all campaigns created by the user
-// 		const campaigns = await Campaign.aggregate([
-// 			{
-// 				$match: {
-// 					useradmin: userId,
-// 					deleted: { $ne: true },
-// 				},
-// 			},
-// 			{
-// 				$lookup: {
-// 					from: "campaignreports",
-// 					let: {
-// 						campaignId: "$_id",
-// 						campaignUseradmin: "$useradmin",
-// 					},
-// 					pipeline: [
-// 						{
-// 							$match: {
-// 								$expr: {
-// 									$and: [
-// 										{
-// 											$eq: [
-// 												"$campaignId",
-// 												"$$campaignId",
-// 											],
-// 										},
-// 										{
-// 											$eq: [
-// 												"$useradmin",
-// 												"$$campaignUseradmin",
-// 											],
-// 										},
-// 									],
-// 								},
-// 							},
-// 						},
-// 					],
-// 					as: "reports",
-// 				},
-// 			},
-// 			{
-// 				$group: {
-// 					_id: null,
-// 					totalMessages: { $sum: { $size: "$reports" } },
-// 					messagesSent: {
-// 						$sum: {
-// 							$size: {
-// 								$filter: {
-// 									input: "$reports",
-// 									as: "report",
-// 									cond: { $eq: ["$$report.status", "SENT"] },
-// 								},
-// 							},
-// 						},
-// 					},
-// 					messagesDelivered: {
-// 						$sum: {
-// 							$size: {
-// 								$filter: {
-// 									input: "$reports",
-// 									as: "report",
-// 									cond: {
-// 										$eq: ["$$report.status", "DELIVERED"],
-// 									},
-// 								},
-// 							},
-// 						},
-// 					},
-// 					messagesRead: {
-// 						$sum: {
-// 							$size: {
-// 								$filter: {
-// 									input: "$reports",
-// 									as: "report",
-// 									cond: { $eq: ["$$report.status", "READ"] },
-// 								},
-// 							},
-// 						},
-// 					},
-// 					messagesReplied: {
-// 						$sum: {
-// 							$size: {
-// 								$filter: {
-// 									input: "$reports",
-// 									as: "report",
-// 									cond: {
-// 										$eq: ["$$report.status", "REPLIED"],
-// 									},
-// 								},
-// 							},
-// 						},
-// 					},
-// 					messagesFailed: {
-// 						$sum: {
-// 							$size: {
-// 								$filter: {
-// 									input: "$reports",
-// 									as: "report",
-// 									cond: {
-// 										$eq: ["$$report.status", "FAILED"],
-// 									},
-// 								},
-// 							},
-// 						},
-// 					},
-// 					totalCampaigns: { $sum: 1 },
-// 				},
-// 			},
-// 		]);
+		res.render("Reports/createCampaign", {
+			access: access.access,
+			name: req.session?.user?.name,
+			photo: req.session?.user?.photo,
+			color: req.session?.user?.color,
+			data,
+		});
+		// res.render("errors/notAllowed");
+	}
+};
 
-// 		// If no campaigns were found
-// 		const campaignOverview =
-// 			campaigns.length > 0
-// 				? campaigns[0]
-// 				: {
-// 						totalMessages: 0,
-// 						messagesSent: 0,
-// 						messagesDelivered: 0,
-// 						messagesRead: 0,
-// 						messagesReplied: 0,
-// 						messagesFailed: 0,
-// 						totalCampaigns: 0,
-// 				  };
+export const createCampaignData = async (req, res, next) => {
+	try {
+		// console.log(req.body);
+		req.session.tempData = req.body;
+		res.json({ success: true, message: "got the details" });
+	} catch (error) {
+		console.log(error);
+		res.json({ success: false, message: error });
+	}
+};
 
-// 		// Fetch contact lists and total number of contacts
-// 		const contactLists = await ContactList.aggregate([
-// 			{ $match: { useradmin: userId, deleted: { $ne: true } } },
-// 			{
-// 				$group: {
-// 					_id: null,
-// 					totalContacts: { $sum: { $size: "$contacts" } },
-// 					totalLists: { $sum: 1 },
-// 				},
-// 			},
-// 		]);
+export const createCampaign = async (req, res, next) => {
+	try {
+		let {
+			templateId,
+			contactListId,
+			variables,
+			schedule,
+			name,
+			contactList,
+		} = req.body;
 
-// 		const contactOverview =
-// 			contactLists.length > 0
-// 				? contactLists[0]
-// 				: {
-// 						totalContacts: 0,
-// 						totalLists: 0,
-// 				  };
+		if (!templateId || !contactListId || name) {
+			return res.status(400).json({
+				message: "All fields are required",
+			});
+		}
 
-// 		// Calculate percentages
-// 		const percentSent =
-// 			campaignOverview.totalMessages > 0
-// 				? (campaignOverview.messagesSent /
-// 						campaignOverview.totalMessages) *
-// 				  100
-// 				: 0;
-// 		const percentDelivered =
-// 			campaignOverview.totalMessages > 0
-// 				? (campaignOverview.messagesDelivered /
-// 						campaignOverview.totalMessages) *
-// 				  100
-// 				: 0;
-// 		const percentRead =
-// 			campaignOverview.totalMessages > 0
-// 				? (campaignOverview.messagesRead /
-// 						campaignOverview.totalMessages) *
-// 				  100
-// 				: 0;
+		if (!isString(templateId, contactListId, variables, schedule, name))
+			return next();
 
-// 		// Render account overview page
-// 		res.render("Reports/accountOverview", {
-// 			user,
-// 			totalMessages: campaignOverview.totalMessages,
-// 			messagesSent: campaignOverview.messagesSent,
-// 			messagesDelivered: campaignOverview.messagesDelivered,
-// 			messagesRead: campaignOverview.messagesRead,
-// 			messagesReplied: campaignOverview.messagesReplied,
-// 			messagesFailed: campaignOverview.messagesFailed,
-// 			totalCampaigns: campaignOverview.totalCampaigns,
-// 			percentSent: percentSent.toFixed(2),
-// 			percentDelivered: percentDelivered.toFixed(2),
-// 			percentRead: percentRead.toFixed(2),
-// 			totalContacts: contactOverview.totalContacts,
-// 			totalLists: contactOverview.totalLists,
-// 			photo: req.session.user?.photo,
-// 			name: req.session.user.name,
-// 			color: req.session.user.color,
-// 		});
-// 	} catch (err) {
-// 		console.error(err);
-// 		res.status(500).send("Server Error");
-// 	}
-// };
+		variables =
+			typeof variables === "string" ? JSON.parse(variables) : variables;
+		schedule =
+			typeof schedule === "string" ? JSON.parse(schedule) : schedule;
+
+		// Create new campaign object
+		const newCampaign = new Campaign({
+			useradmin: req.session?.user?.id || req.session?.addedUser?.owner,
+			unique_id: generateUniqueId(),
+			templateId,
+			contactListId,
+			variables,
+			name,
+			contactList,
+		});
+
+		// Find contacts by contactListId
+		const contactLists = await Contacts.find({
+			contactId: contactListId,
+		});
+
+		contactList = contactLists.map((c) =>
+			contactList.forEach((cl) => c.wa_id == cl.recipientPhone),
+		);
+
+		if (!schedule) {
+			await sendMessages(
+				newCampaign,
+				req.session?.user?.id || req.session?.addedUser?.owner,
+				generateUniqueId(),
+				contactList,
+			);
+
+			await ActivityLogs.create({
+				useradmin:
+					req.session?.user?.id || req.session?.addedUser?.owner,
+				unique_id: generateUniqueId(),
+				name: req.session.user.name
+					? req.session.user.name
+					: req.session.addedUser.name,
+				actions: "Send",
+				details: `Sent campaign named: ${name}`,
+			});
+		} else {
+			newCampaign.scheduledAt = Number(schedule) * 1000;
+			newCampaign.status = "SCHEDULED";
+
+			await ActivityLogs.create({
+				useradmin:
+					req.session?.user?.id || req.session?.addedUser?.owner,
+				unique_id: generateUniqueId(),
+				name: req.session.user.name
+					? req.session.user.name
+					: req.session.addedUser.name,
+				actions: "Send",
+				details: `Scheduled new campaign named: ${name}`,
+			});
+		}
+
+		// Save the campaign
+		await newCampaign.save();
+		res.status(201).json({
+			message: "Campaign created successfully",
+			campaign: newCampaign,
+		});
+	} catch (error) {
+		console.error("Error creating campaign:", error.message);
+		res.status(500).json({
+			message: `Error creating campaign: ${error.message}`,
+		});
+	}
+};

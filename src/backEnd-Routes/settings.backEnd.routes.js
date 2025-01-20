@@ -8,14 +8,27 @@ import {
 	createPermissions,
 	updateUserManagement,
 } from "../controllers/Settings/settings.controller.js";
+import { trackSanitationFailures } from "../middleWares/sanitiseInput.js";
 
 const router = express.Router();
 
-router.post("/profile", uploadProfilePicController, updateProfile);
-router.post("/update-password", updatePassword);
-router.post("/account-details", updateAccountDetails);
-router.post("/user-management/invite", sendUserInvitation);
-router.post("/user-management/permissions/update", createPermissions);
-router.post("/updateUserManagement", updateUserManagement);
+router.post("/profile", uploadProfilePicController, updateProfile, trackSanitationFailures);
+router.post("/update-password", updatePassword, trackSanitationFailures);
+router.post("/account-details", updateAccountDetails, trackSanitationFailures);
+router.post(
+	"/user-management/invite",
+	sendUserInvitation,
+	trackSanitationFailures,
+);
+router.post(
+	"/user-management/permissions/update",
+	createPermissions,
+	trackSanitationFailures,
+);
+router.post(
+	"/updateUserManagement",
+	updateUserManagement,
+	trackSanitationFailures,
+);
 
 export default router;

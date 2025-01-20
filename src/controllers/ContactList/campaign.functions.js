@@ -12,7 +12,7 @@ import { generateUniqueId } from "../../utils/otpGenerator.js";
 
 dotenv.config();
 
-export async function sendMessages(name, campaign, id, unique_id, req) {
+export async function sendMessages(campaign, id, unique_id) {
 	try {
 		// Find the template by unique_id
 		const template = await Template.findOne({
@@ -73,16 +73,6 @@ export async function sendMessages(name, campaign, id, unique_id, req) {
 				recipientPhone: contact.wa_id,
 				status: response.status,
 				messageId: response.response.messages[0].id,
-			});
-
-			await ActivityLogs.create({
-				useradmin: req.session.user.id,
-				unique_id: generateUniqueId(),
-				name: req.session.user.name
-					? req.session.user.name
-					: req.session.addedUser.name,
-				actions: "Send",
-				details: `Sent campaign named: ${name}`,
 			});
 			await report.save();
 		}

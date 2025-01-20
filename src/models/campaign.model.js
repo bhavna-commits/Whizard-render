@@ -24,6 +24,7 @@ const CampaignSchema = new mongoose.Schema(
 		},
 		createdAt: { type: Number, default: () => Date.now() },
 		deleted: { type: Boolean, default: false },
+		contactList: { type: mongoose.Schema.Types.Mixed, default: null },
 	},
 	{ strict: false, timestamps: false },
 );

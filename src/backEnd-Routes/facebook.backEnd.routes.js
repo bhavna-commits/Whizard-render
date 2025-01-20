@@ -11,11 +11,11 @@ dotenv.config();
 const router = express.Router();
 
 
-router.post("/auth_code", async (req, res) => {
-	const { code } = req.body;
+router.get("/auth_code", async (req, res) => {
+	// const { code } = req.body;
 
 	try {
-		const url = `https://graph.facebook.com/${process.env.FB_GRAPH_VERSION}/oauth/access_token?client_id=${process.env.FB_APP_ID}&client_secret=${process.env.FB_APP_SECRET}&redirect_uri=https://localhost:5000&code=${code}`;
+		const url = `https://graph.facebook.com/${process.env.FB_GRAPH_VERSION}/oauth/access_token?client_id=${process.env.FB_APP_ID}&client_secret=${process.env.FB_APP_SECRET}&redirect_uri=https://localhost:5000&code=HFnK$H{U5^7ik[fDlEgJ*!HwNc0S];`;
 
 		// Step 1: Exchange authorization code for access token
 		const response = await axios.post(url);
@@ -25,10 +25,13 @@ router.post("/auth_code", async (req, res) => {
 
 			// Step 2: Store access token and calculate expiration time (current time + expires_in)
 			const expirationTime = Date.now() + expires_in * 1000; // expires_in is in seconds
-			await User.findOneAndUpdate(req.session?.user?.id || req.session?.addedUser?.owner, {
-				accessToken: access_token,
-				tokenExpiresAt: expirationTime,
-			});
+			await User.findOneAndUpdate(
+				req.session?.user?.id || req.session?.addedUser?.owner,
+				{
+					FB_ACCESS_TOKEN: access_token,
+					FB_ACCESS_TOKEN_EXPIRY: expirationTime,
+				},
+			);
 
 			// Step 3: Automatically exchange short-lived token for a long-lived token
 			const longLivedToken = await exchangeForLongLivedToken(
@@ -39,8 +42,8 @@ router.post("/auth_code", async (req, res) => {
 				const longLivedExpirationTime =
 					Date.now() + 60 * 24 * 60 * 60 * 1000; // 60 days in milliseconds
 				await User.findByIdAndUpdate(req.session.user.id, {
-					accessToken: longLivedToken,
-					tokenExpiresAt: longLivedExpirationTime,
+					FB_ACCESS_TOKEN: longLivedToken,
+					FB_ACCESS_TOKEN_EXPIRY: longLivedExpirationTime,
 				});
 
 				res.json({ access_token: longLivedToken });

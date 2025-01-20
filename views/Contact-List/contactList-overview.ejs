@@ -266,7 +266,11 @@
 						<% } else if (whatsAppStatus == "Pending")  { %>
 						<button type="button" title="Connect with whatsApp Business API to send message" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-gray-500 hover:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" disabled>
 							<span>Send message</span>
-						</button>					
+						</button>
+						<% } else if(access?.contactList?.sendBroadcast) { %>
+						<button aria-label="Create new Contact list" type="button" id="create-List" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" onclick="location.href='/contact-list/createCampaign'">
+							<span>Send message</span>
+						</button>
 						<% } else { %>
 						<button type="button" title="You don't have permissions to access this" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-gray-500 hover:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" disabled>
 							<span>Send message</span>

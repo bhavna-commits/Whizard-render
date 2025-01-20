@@ -131,7 +131,7 @@ export const login = async (req, res, next) => {
 			message: "Invalid input: Please check entered values",
 		});
 
-	if (!isString(email, password)) next();
+	if (!isString(email, password)) return next();
 
 	try {
 		const user = await User.findOneAndUpdate(
@@ -158,11 +158,9 @@ export const login = async (req, res, next) => {
 						message: `Account locked. Please try again later.`,
 					});
 				}
-
-				const isMatch = await bcrypt.compare(
-					password,
-					addedUser.password,
-				);
+				console.log("here : login");
+				const isMatch = bcrypt.compare(password, addedUser.password);
+				console.log("here: passed");
 
 				if (!isMatch) {
 					await incrementLoginAttempts(addedUser);
@@ -278,35 +276,46 @@ export const resetPassword = async (req, res) => {
 	const { email } = req.body;
 
 	try {
-		const user = await User.findOne({ email });
-		// console.log(user);
+		// Check if the email exists in the User collection
+		let user = await User.findOne({ email });
+
+		// If not found in the User collection, check the AddedUser collection
 		if (!user) {
-			// If no user is found, send an error response
+			user = await AddedUser.findOne({ email, deleted: false });
+		}
+
+		// If no user is found in either collection, send an error response
+		if (!user) {
 			return res.status(400).json({ message: "User not found" });
 		}
 
 		// Generate a random OTP
-		console.log("here 1");
+		console.log("Generating OTP");
 		const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+		// Store the OTP and email in session for verification later
 		req.session.tempUser = {
 			email,
 			otp,
 		};
 
-		console.log("here 2");
+		// Verify that tempUser has been set correctly in the session
 		if (!req.session?.tempUser) {
-			res.status(500).json({
-				message: "tempUser doesn't exist",
+			return res.status(500).json({
+				message: "Failed to store OTP in session",
 			});
 		}
 
-		console.log("here 3");
+		// Send OTP via email
+		console.log("Sending OTP via email");
 		await sendEmailVerification(email, otp);
-		// Send a success response to the frontend
-		res.status(200).json({ message: "OTP sent successfully" });
+
+		// Send success response to the frontend
+		return res.status(200).json({ message: "OTP sent successfully" });
 	} catch (error) {
+		console.error("Error occurred while sending OTP:", error);
 		// If any error occurs, send an error response
-		res.status(500).json({
+		return res.status(500).json({
 			message: "An error occurred while sending OTP",
 		});
 	}
@@ -322,16 +331,22 @@ export const changePassword = async (req, res, next) => {
 			.json({ message: "Email and password are required" });
 	}
 
-	if (!isString(email, password)) next();
+	if (!isString(email, password)) return next();
 
 	try {
-		// Find the user by email
-		const user = await User.findOne({ email });
+		// Find the user by email in the User collection first
+		let user = await User.findOne({ email });
 
+		// If not found in the User collection, check the AddedUser collection
+		if (!user) {
+			user = await AddedUser.findOne({ email, deleted: false });
+		}
+
+		// If no user is found in either collection, return an error
 		if (!user) {
 			return res.status(404).json({ message: "User not found" });
 		}
-		// console.log(generateUniqueId());
+
 		// Hash the new password
 		const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -344,7 +359,7 @@ export const changePassword = async (req, res, next) => {
 			.status(200)
 			.json({ message: "Password changed successfully" });
 	} catch (error) {
-		console.error(error);
+		console.error("Error changing password:", error);
 		return res
 			.status(500)
 			.json({ message: "Server error, please try again later" });

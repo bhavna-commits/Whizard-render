@@ -169,7 +169,7 @@ export const updatePassword = async (req, res, next) => {
 		const { currentPassword, newPassword, logoutDevices } = req.body;
 		let id, isAddedUser;
 
-		if (!isString(currentPassword, newPassword)) next();
+		if (!isString(currentPassword, newPassword)) return next();
 		// Determine whether it's a regular user or an added user
 		if (req.session?.addedUser) {
 			id = req.session?.addedUser?.id;
@@ -327,7 +327,7 @@ export const updateAccountDetails = async (req, res, next) => {
 				website,
 			)
 		)
-			next();
+			return next();
 
 		const updatedUser = await User.findOneAndUpdate(
 			{
@@ -423,7 +423,7 @@ export const activityLogsFiltered = async (req, res, next) => {
 		const { action, dateRange } = req.query;
 		let filter = {};
 
-		if (!isString(action, dateRange)) next();
+		if (!isString(action, dateRange)) return next();
 
 		filter.useradmin =
 			req.session?.user?.id || req.session?.addedUser?.owner;
@@ -556,19 +556,21 @@ export const sendUserInvitation = async (req, res, next) => {
 
 		let { name, email, roleId, roleName, url } = req.body;
 
-		if (!isString(name, email, roleId, roleName, url)) next();
+		// Validate input
+		if (!isString(name, email, roleId, roleName)) {
+			return next(); // Ensure that execution stops here if validation fails
+		}
 
+		// Check if the user already exists in the User collection
 		let exists = await User.findOne({ email });
 		if (exists) {
-			res.status(409).json({ message: "Email already in use" });
-			return;
+			return res.status(409).json({ message: "Email already in use" }); // Use return to stop further execution
 		}
 
 		// Check if the user already exists in the AddedUser collection
 		exists = await AddedUser.findOne({ email, deleted: false });
 		if (exists) {
-			res.status(409).json({ message: "Email already in use" });
-			return;
+			return res.status(409).json({ message: "Email already in use" }); // Use return to stop further execution
 		}
 
 		// If user does not exist, create a new entry
@@ -582,6 +584,7 @@ export const sendUserInvitation = async (req, res, next) => {
 			color: getRandomColor(),
 		});
 		console.log("user added");
+
 		// Generate unique invitation link
 		const invitationToken = Buffer.from(
 			`${adminId}:${newUser.unique_id}`,
@@ -595,6 +598,8 @@ export const sendUserInvitation = async (req, res, next) => {
 			email,
 		);
 		console.log("email sent");
+
+		// Log activity
 		await ActivityLogs.create({
 			useradmin: req.session?.user?.id || req.session?.addedUser?.owner,
 			unique_id: generateUniqueId(),
@@ -604,16 +609,21 @@ export const sendUserInvitation = async (req, res, next) => {
 			actions: "Send",
 			details: `Sent an invitation link to join the account`,
 		});
+
 		// Save new user to the database
 		await newUser.save();
 		console.log("last");
+
 		// Send success response
 		return res
 			.status(200)
 			.json({ message: "Invitation sent successfully" });
 	} catch (error) {
 		console.error("Error sending invitation:", error);
-		res.status(500).json({ message: "Failed to send invitation" });
+		// Send error response only if no response has been sent yet
+		if (!res.headersSent) {
+			res.status(500).json({ message: "Failed to send invitation" });
+		}
 	}
 };
 
@@ -661,7 +671,7 @@ export const createPermissions = async (req, res, next) => {
 				success: false,
 				message: "Invalid input : please fill the required fields",
 			});
-		
+
 		if (!isString(name)) next();
 		// Check if a role with the same name already exists
 		const existingRole = await Permissions.findOne({ useradmin, name });
@@ -761,7 +771,11 @@ export const createAddedUserPassword = async (req, res, next) => {
 	try {
 		let { password, adminId, role } = req.body;
 
-		if (!password || !adminId || !role) return res.json({ success: false, message: "Invaild input : Please fill all fields" });
+		if (!password || !adminId || !role)
+			return res.json({
+				success: false,
+				message: "Invaild input : Please fill all fields",
+			});
 
 		if (!isString(password, adminId, role)) next();
 

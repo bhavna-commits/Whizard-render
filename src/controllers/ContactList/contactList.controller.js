@@ -37,7 +37,7 @@ export const previewContactList = async (req, res, next) => {
 			});
 		}
 
-		if (!isString(fileData, listName)) next();
+		if (!isString(fileData, listName)) return next();
 		// Parse file data
 		let parsedData;
 		try {
@@ -286,7 +286,7 @@ export const createList = async (req, res, next) => {
 export const deleteList = async (req, res, next) => {
 	try {
 		const { id } = req.params;
-		if (!isString(id)) next();
+		if (!isString(id))  return next();
 		const contactList = await ContactList.findOne({ contactId: id });
 		// console.log(contactList);
 		if (!contactList) {
@@ -384,8 +384,8 @@ export const getCustomField = async (req, res, next) => {
 		const limit = 6;
 		const skip = (page - 1) * limit;
 
-		if (!isNumber(page)) next();
-		if (!isString(userId)) next();
+		if (!isNumber(page)) return next();
+		if (!isString(userId)) return next();
 
 		const result = await CustomField.aggregate([
 			{
@@ -454,7 +454,7 @@ export const createCustomField = async (req, res, next) => {
 	try {
 		const userId = req.session?.user?.id || req.session?.addedUser?.owner;
 		const { fieldName, fieldType } = req.body;
-		if (!isString(fieldName)) next();
+		if (!isString(fieldName)) return next();
 
 		const userDir = path.join(
 			__dirname,
@@ -550,7 +550,7 @@ export const createCustomField = async (req, res, next) => {
 export const deleteCustomField = async (req, res, next) => {
 	try {
 		const fieldId = req.params?.id;
-		if (!isString(fieldId)) next();
+		if (!isString(fieldId)) return next();
 		// Find the custom field based on the field ID
 		const field = await CustomField.findOne({
 			unique_id: fieldId,
@@ -628,7 +628,7 @@ export const updateContactListName = async (req, res) => {
 	const contactListId = req.params.id;
 	const { updatedValue } = req.body;
 
-	if (!isString(contactListId, updatedValue)) next();
+	if (!isString(contactListId, updatedValue)) return next();
 
 	if (!updatedValue) {
 		return res.status(400).json({
@@ -688,7 +688,7 @@ export const getList = async (req, res) => {
 		const limit = 6;
 		const skip = (page - 1) * limit;
 
-		if (!isNumber(page)) next();
+		if (!isNumber(page)) return next();
 
 		const result = await ContactList.aggregate([
 			{
@@ -809,8 +809,8 @@ export const searchContactLists = async (req, res, next) => {
 	const limit = 6;
 	const skip = (page - 1) * limit;
 
-	if (!isString(query)) next();
-	if (!isNumber(page)) next();
+	if (!isString(query)) return next();
+	if (!isNumber(page)) return next();
 
 	console.log("Searching for:", query);
 	console.log("User ID:", userId);

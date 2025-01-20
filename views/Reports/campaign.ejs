@@ -76,30 +76,87 @@
 				<img onclick="location.href = '/'" class="cursor-pointer" src="/assets/img/Wizard_logo.png" alt="Whizard Logo" />
 			</div>
 			<ul class="">
+				<!-- Dashboard: Always enabled -->
 				<li>
-					<a href="/" class=""><span class="icon "><i class="fas fa-chart-line"></i></span>
-						Dashboard</a>
+					<a href="/" class="">
+						<span class="icon"><i class="fas fa-chart-line"></i></span>
+						Dashboard
+					</a>
 				</li>
+				
+				<!-- Chats: Conditionally rendered based on permissions -->
 				<li>
-					<a href="/#"><span class="icon"><i class="fa-regular fa-comment"></i></span>
-						Chats</a>
+					<% if (access?.chats?.type) { %>
+					<a href="/chats" class="">
+						<span class="icon"><i class="fa-regular fa-comment"></i></span>
+						Chats
+					</a>
+					<% } else { %>
+					<a href="javascript:void(0);" title="You don't have permissions to access this" class="cursor-not-allowed">
+						<span class="icon"><i class="fa-regular fa-comment"></i></span>
+						Chats
+					</a>
+					<% } %>
 				</li>
+				
+				<!-- Contact List: Conditionally rendered based on permissions -->
 				<li>
-					<a href="/contact-list"><span class="icon "><i class="fa-regular fa-address-book"></i></span>
-						
-						Contact List</a>
+					<% if (access?.contactList?.type) { %>
+					<a href="/contact-list">
+						<span class="icon "><i class="fa-regular fa-address-book"></i></span>
+						Contact List
+					</a>
+					<% } else { %>
+					<a href="javascript:void(0);" title="You don't have permissions to access this" class="cursor-not-allowed">
+						<span class="icon"><i class="fa-regular fa-address-book"></i></span>
+						Contact List
+					</a>
+					<% } %>
 				</li>
+				
+				<!-- Template: Conditionally rendered based on permissions -->
 				<li>
-					<a href="/template"><span class="icon"><i class="fa-regular fa-envelope"></i></span>
-						Template</a>
+					<% if (access?.templates?.type) { %>
+					<a href="/template">
+						<span class="icon"><i class="fa-regular fa-envelope"></i></span>
+						Template
+					</a>
+					<% } else { %>
+					<a href="javascript:void(0);" title="You don't have permissions to access this" class="cursor-not-allowed">
+						<span class="icon"><i class="fa-regular fa-envelope"></i></span>
+						Template
+					</a>
+					<% } %>
 				</li>
+				
+				<!-- Settings: Conditionally rendered based on permissions -->
 				<li>
-					<a href="/settings"><span class="icon"><i class="fa-regular fa-user"></i></span>
-						Settings</a>
+					<% if (access?.settings?.type) { %>
+					<a href="/settings">
+						<span class="icon "><i class="fa-regular fa-user"></i></span>
+						Settings
+					</a>
+					<% } else { %>
+					<a href="javascript:void(0);" title="You don't have permissions to access this" class="cursor-not-allowed">
+						<span class="icon"><i class="fa-regular fa-user"></i></span>
+						Settings
+					</a>
+					<% } %>
 				</li>
+				
+				<!-- Reports: Conditionally rendered based on permissions -->
 				<li>
-					<a href="/reports/campaign-list"><span class="icon active"><i class="fa-regular fa-chart-bar"></i></span>
-						Reports</a>
+					<% if (access?.reports?.type) { %>
+					<a href="/reports/campaign-list">
+						<span class="icon active"><i class="fa-regular fa-chart-bar"></i></span>
+						Reports
+					</a>
+					<% } else { %>
+					<a href="javascript:void(0);" title="You don't have permissions to access this" class="cursor-not-allowed">
+						<span class="icon"><i class="fa-regular fa-chart-bar"></i></span>
+						Reports
+					</a>
+					<% } %>
 				</li>
 			</ul>
 			<div class=" user-profile text-white flex justify-center items-center text-center">

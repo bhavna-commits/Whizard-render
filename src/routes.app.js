@@ -8,6 +8,8 @@ import settingsFrontRoute from "./frontEnd-Routes/setting.frontEnd.routes.js";
 import settingsbackEndRoute from "./backEnd-Routes/settings.backEnd.routes.js";
 import faceBookBackEndRoute from "./backEnd-Routes/facebook.backEnd.routes.js";
 import reportsFrontEndRoute from "./frontEnd-Routes/reports.frontEnd.routes.js";
+import reportsBackEndRoute from "./backEnd-Routes/reports.backEnd.routes.js";
+
 import { checkSession } from "./middleWares/checkSession.js";
 import app from "./static.app.js";
 
@@ -22,5 +24,6 @@ app.use("/contact-list", checkSession, contactFrontEndRoutes);
 app.use("/api/templates", checkSession, templatesRoutes);
 app.use("/api/contact-list", checkSession, contactListRoute);
 app.use("/api/settings", checkSession, settingsbackEndRoute);
+app.use("/api/reports", checkSession, reportsBackEndRoute);
 
 export default app;

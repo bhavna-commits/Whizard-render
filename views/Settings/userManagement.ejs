@@ -217,35 +217,35 @@
 			<div class="container mx-auto bg-white p-6 rounded-lg">
 				
 				<% if (users.length > 0) { %>
-				<table class="table-auto w-full text-left border-collapse">
-					<thead>
-						<tr class="text-gray-700">
-							<th class="p-4 border-b">Sno.</th>
-							<th class="p-4 border-b">User Name</th>
-							<th class="p-4 border-b">Email</th>
-							<th class="p-4 border-b">Role</th>
-							<th class="p-4 border-b">Status</th>
-							<th class="p-4 border-b">Actions</th>
+				<table class=" w-full text-left border-collapse">
+					<thead class="font-thin">
+						<tr class="text-gray-500 font-normal">
+							<td class="p-4 text-center">Sno.</td>
+							<td class="p-4 text-center">User Name</td>
+							<td class="p-4 text-center">Email</td>
+							<td class="p-4 text-center">Role</td>
+							<td class="p-4 text-center">Status</td>
+							<td class="p-4 text-center">Actions</td>
 						</tr>
 					</thead>
 					<tbody>
 						<% users.forEach((user, index) => { %>
 						<tr class="text-gray-900">
-							<td class="p-4 border-b border-l rounded"><%= index + 1 %></td>
-							<td class="p-4 border-b"><%= user.name %></td>
-							<td class="p-4 border-b"><%= user.email %></td>
-							<td class="p-4 border-b"><%= user.roleName %></td>
-							<td class="p-4 border-b">
+							<td class="p-4 text-center"><%= index + 1 %></td>
+							<td class="p-4 text-center"><%= user.name %></td>
+							<td class="p-4 text-center"><%= user.email %></td>
+							<td class="p-4 text-center"><%= user.roleName %></td>
+							<td class="p-4 text-center">
 								<% if (user.status === 'Active') { %>
-								<span class="text-orange-500 font-bold"><%= user.status %></span>
+								<span class="text-orange-500 bg-orange-100 p-2 rounded"><%= user.status %></span>
 								<% } else { %>
-								<span class="text-gray-500 font-bold"><%= user.status %></span>
+								<span class="text-gray-500 bg-gray-100 p-2 rounded"><%= user.status %></span>
 								<% } %>
 							</td>
-							<td class="p-4 border-b border-r rounded">
+							<td class="p-4 text-center">
 								<div class="relative">
-									<button type="button" class="text-gray-500 hover:text-gray-900 focus:outline-none" onclick="toggleDropdownTable('<%= user.email.replace(/\./g, '-') %>')">
-										&#x22EE;
+									<button type="button" class="text-gray-500 font-bold hover:text-gray-900 focus:outline-none" onclick="toggleDropdownTable('<%= user.email.replace(/\./g, '-') %>')">
+										. . .
 									</button>
 									<div id="dropdown-<%= user.email.replace(/\./g, '-') %>" class="hidden absolute bg-white border rounded-lg shadow-lg w-40 right-0 z-10">
 										
@@ -253,9 +253,9 @@
 										<button type="button" class="block w-full px-4 py-2 text-left text-red-500 hover:bg-gray-100" onclick="deleteUser('<%= user.unique_id %>', '<%= user.name %>')">Delete User</button>
 									</div>
 								</div>
-							</td>						
-						</tr> 
-					<% }) %>
+							</td>
+						</tr>
+						<% }) %>
 					</tbody>
 				</table>
 				<% } else { %>

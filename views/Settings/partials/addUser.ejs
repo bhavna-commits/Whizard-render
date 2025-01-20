@@ -24,12 +24,7 @@
 					</div>
 					<div class="flex items-center justify-between mt-5">
 						<button type="submit" id="inviteButton" class="bg-black hover:bg-gray-800 text-white py-2 px-4 rounded focus:outline-none focus:shadow-outline flex items-center justify-center">
-							<span id="buttonText">Invite</span>
-							<!-- Loading spinner -->
-							<svg id="spinner" class="hidden w-5 h-5 ml-2 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-								<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-								<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 1116 0A8 8 0 014 12z"></path>
-							</svg>
+							Invite
 						</button>
 						<button type="button" onclick="closeModal()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 py-2 px-4 rounded focus:outline-none focus:shadow-outline">
 							Cancel
@@ -43,6 +38,7 @@
 
 <script>
 	const permissions = <%- JSON.stringify(permissions) %>;
+	
 	function openModal () {
 		// Show modal with fade and scale effect
 		const modal = document.getElementById('addUserModal');
@@ -76,8 +72,13 @@
 		};
 		
 		// Show spinner and hide the button text
-		document.getElementById('buttonText').classList.add('hidden');
-		document.getElementById('spinner').classList.remove('hidden');
+		document.getElementById('inviteButton').innerHTML = `
+		<svg class="animate-spin -ml-1 mr-3 h-5 w-5 inline-block text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+			<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+			<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+		</svg>
+		Sending Invite...
+		`;
 		
 		try {
 			const response = await fetch('/api/settings/user-management/invite', {
@@ -90,7 +91,7 @@
 			
 			if (response.ok) {
 				alert('Invitation sent successfully!');
-				closeModal();
+				location.href = "/settings/user-management";
 			} else {
 				const error = await response.json();
 				alert(error.message || 'Error occurred');
@@ -99,8 +100,8 @@
 			alert(error.message);
 		} finally {
 			// Hide spinner and show the button text again
-			document.getElementById('buttonText').classList.remove('hidden');
-			document.getElementById('spinner').classList.add('hidden');
+			document.getElementById('inviteButton').innerHTML = "Invite";
+			
 		}
 	});
 </script>

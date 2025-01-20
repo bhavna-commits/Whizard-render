@@ -47,7 +47,7 @@ export const updateContact = async (req, res, next) => {
 			message: "No data found",
 		});
 	}
-	if (!isString(contactId, name, tags, validated)) next();
+	if (!isString(contactId, name, tags, validated)) return next();
 
 	try {
 		// Find the contact by ID and update the fields
@@ -101,8 +101,8 @@ export const getContacts = async (req, res, next) => {
 		const limit = 6;
 		const skip = (page - 1) * limit;
 
-		if (!isNumber(page)) next();
-		if (!isString(id)) next();
+		if (!isNumber(page)) return next();
+		if (!isString(id)) return next();
 		// Get filters from the request body
 		const filters = req.body.filters || [];
 
@@ -217,8 +217,8 @@ export const editContact = async (req, res, next) => {
 				message: "front-end is not providing complete data",
 			});
 		}
-		if (!isObject(updatedData)) next();
-		if (!isString(id)) next();
+		if (!isObject(updatedData)) return next();
+		if (!isString(id)) return next();
 
 		let wa_id = "";
 
@@ -376,7 +376,7 @@ export const createContact = async (req, res, next) => {
 		const { Name, contactId, wa_id, countryCode, ...newContactData } =
 			contactData;
 
-		if (!isObject(contactData)) next();
+		if (!isObject(contactData)) return next();
 
 		const userId = req.session?.user?.id || req.session?.addedUser?.owner;
 		const user = await User.findOne({ unique_id: userId });
@@ -422,9 +422,9 @@ export const createContact = async (req, res, next) => {
 		await ActivityLogs.create({
 			useradmin: req.session?.user?.id || req.session?.addedUser?.owner,
 			unique_id: generateUniqueId(),
-			name: req.session.user.name
-				? req.session.user.name
-				: req.session.addedUser.name,
+			name: req.session?.user?.name
+				? req.session?.user?.name
+				: req.session?.addedUser?.name,
 			actions: "Create",
 			details: `Created a new contact: ${newContact.Name}`,
 		});
@@ -441,7 +441,7 @@ export const createCampaign = async (req, res, next) => {
 		let { templateId, contactListId, variables, schedule, name } = req.body;
 
 		if (!isString(templateId, contactListId, variables, schedule, name))
-			next();
+			return next();
 
 		variables =
 			typeof variables === "string" ? JSON.parse(variables) : variables;
@@ -466,18 +466,28 @@ export const createCampaign = async (req, res, next) => {
 
 		if (!schedule) {
 			await sendMessages(
-				name,
 				newCampaign,
 				req.session?.user?.id || req.session?.addedUser?.owner,
 				generateUniqueId(),
-				req,
 			);
+
+			await ActivityLogs.create({
+				useradmin:
+					req.session?.user?.id || req.session?.addedUser?.owner,
+				unique_id: generateUniqueId(),
+				name: req.session.user.name
+					? req.session.user.name
+					: req.session.addedUser.name,
+				actions: "Send",
+				details: `Sent campaign named: ${name}`,
+			});
 		} else {
 			newCampaign.scheduledAt = Number(schedule) * 1000;
 			newCampaign.status = "SCHEDULED";
 
 			await ActivityLogs.create({
-				useradmin: req.session?.user?.id || req.session?.addedUser?.owner,
+				useradmin:
+					req.session?.user?.id || req.session?.addedUser?.owner,
 				unique_id: generateUniqueId(),
 				name: req.session.user.name
 					? req.session.user.name
@@ -555,7 +565,8 @@ export const getFilteredContacts = async (req, res, next) => {
 		// Get filters from the request body
 		const filters = req.body.filters || [];
 
-		if (!isString(id)) next(); 
+		if (!isString(id)) return next();
+		if (!isNumber(page)) return next();
 
 		// Start with the basic match stage
 		const matchStage = {
@@ -641,7 +652,7 @@ export const getFilteredContacts = async (req, res, next) => {
 export const getOverviewFilter = async (req, res) => {
 	try {
 		const { id } = req.params;
-		if (!isString(id)) next();
+		if (!isString(id)) return next();
 		const contact = await Contacts.findOne({ contactId: id, subscribe: 1 });
 		res.render("Contact-List/partials/filterOptions", { contact });
 	} catch (error) {

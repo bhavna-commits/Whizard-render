@@ -21,6 +21,7 @@ const userSchema = new mongoose.Schema(
 		jobRole: { type: String, required: true },
 		website: { type: String, required: true },
 		blocked: { type: Boolean, default: false },
+		FB_ACCESS_TOKEN_EXPIRY: { type: String, required: false },
 		WhatsAppConnectStatus: {
 			type: String,
 			enum: ["Pending", "Live"],

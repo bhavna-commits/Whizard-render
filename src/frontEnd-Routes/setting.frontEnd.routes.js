@@ -9,15 +9,24 @@ import {
 	getCreatePassword,
 	getPermissions,
 } from "../controllers/Settings/settings.controller.js";
+import { trackSanitationFailures } from "../middleWares/sanitiseInput.js";
 
 const router = express.Router();
 
-router.get("/", home);
-router.get("/profile", profile);
-router.get("/account-details", accountDetails);
-router.get("/activity-logs", getActivityLogs);
-router.get("/activity-logs/filtered", activityLogsFiltered);
-router.get("/user-management", getUserManagement);
-router.get("/user-management/permissions", getPermissions);
+router.get("/", home, trackSanitationFailures);
+router.get("/profile", profile, trackSanitationFailures);
+router.get("/account-details", accountDetails, trackSanitationFailures);
+router.get("/activity-logs", getActivityLogs, trackSanitationFailures);
+router.get(
+	"/activity-logs/filtered",
+	activityLogsFiltered,
+	trackSanitationFailures,
+);
+router.get("/user-management", getUserManagement, trackSanitationFailures);
+router.get(
+	"/user-management/permissions",
+	getPermissions,
+	trackSanitationFailures,
+);
 
 export default router;

@@ -252,8 +252,7 @@ function initializeFormSubmission() {
 
 			if (response.ok) {
 				alert("Role added successfully!");
-				form.reset();
-				resetPermissionState();
+				location.href = "/settings/user-management";
 			} else {
 				const error = await response.json();
 				alert(`Error adding role: ${error.message}`);

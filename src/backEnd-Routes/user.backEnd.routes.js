@@ -9,16 +9,17 @@ import {
 	changePassword,
 	logout,
 } from "../controllers/User/userController.js";
+import { trackSanitationFailures } from "../middleWares/sanitiseInput.js";
 
 const router = express.Router();
 
-router.post("/generateOTP", generateOTP);
-router.post("/verify-email", verifyEmail);
-router.post("/resend-email-otp", resendEmailOTP);
-router.post("/resetPassword", resetPassword);
-router.post("/about", about);
-router.post("/login", login);
-router.post("/logout", logout);
-router.post("/changePassword", changePassword);
+router.post("/generateOTP", generateOTP, trackSanitationFailures);
+router.post("/verify-email", verifyEmail, trackSanitationFailures);
+router.post("/resend-email-otp", resendEmailOTP, trackSanitationFailures);
+router.post("/resetPassword", resetPassword, trackSanitationFailures);
+router.post("/about", about, trackSanitationFailures);
+router.post("/login", login, trackSanitationFailures);
+router.post("/logout", logout, trackSanitationFailures);
+router.post("/changePassword", changePassword, trackSanitationFailures);
 
 export default router;

@@ -17,23 +17,28 @@ const CampaignReportSchema = new mongoose.Schema(
 			enum: ["SENT", "DELIVERED", "READ", "FAILED", "REPLIED"],
 			required: true,
 		},
-		timestamp: {
+		createdAt: {
 			type: Number,
-			default: () => Math.floor(Date.now() / 1000),
-		}, // Unix timestamp in seconds
+			default: () => Date.now(),
+		},
+		updatedAt: {
+			type: Number,
+			default: () => Date.now(),
+		},
 		deleted: { type: Boolean, default: false },
 		messageId: { type: String, required: true },
 		messageTemplate: { type: Schema.Types.Mixed },
-		replyContent: { type: String },
+		replyContent: { type: String, default: null },
 	},
 	{
 		timestamps: false,
+		strict: false,
 	},
 );
 
 CampaignReportSchema.pre("save", function (next) {
 	if (this.isNew) {
-		this.timestamp = Math.floor(Date.now() / 1000); // Set current Unix timestamp
+		this.updatedAt = () => Date.now();
 	}
 	next();
 });

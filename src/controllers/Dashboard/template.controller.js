@@ -11,7 +11,7 @@ import ActivityLogs from "../../models/activityLogs.model.js";
 import Permissions from "../../models/permissions.model.js";
 import User from "../../models/user.model.js";
 import { generateUniqueId } from "../../utils/otpGenerator.js";
-import { isObject, isString } from "../../middleWares/sanitiseInput.js";
+import { isNumber, isObject, isString } from "../../middleWares/sanitiseInput.js";
 
 dotenv.config();
 
@@ -21,7 +21,7 @@ export const createTemplate = async (req, res, next) => {
 		const { dynamicVariables, name } = templateData;
 		const id = req.session?.user?.id || req.session?.addedUser?.owner;
 
-		if (!isObject(templateData)) next();
+		if (!isObject(templateData)) return next();
 
 		// Check if a template with the same name exists for the user
 		const exists = await Template.findOne({ useradmin: id, name });
@@ -88,13 +88,16 @@ export const createTemplate = async (req, res, next) => {
 // 	}
 // };
 
-export const getList = async (req, res) => {
+export const getList = async (req, res, next) => {
 	try {
 		const id = req.session?.user?.id || req.session?.addedUser?.owner;
 		const page = parseInt(req.query.page) || 1;
 		const { category, search } = req.query;
 		const limit = 6;
 		const skip = (page - 1) * limit;
+
+		// if (!isString(category, search)) return next();
+		// if (!isNumber(page)) return next();
 
 		const match = {
 			useradmin: id,
@@ -143,7 +146,7 @@ export const getList = async (req, res) => {
 				unique_id: permissions,
 			});
 			// console.log(access);
-			if (access.templates.type) {
+			if (access?.templates?.type) {
 				// console.log(templates);
 				res.render("Templates/manage_template", {
 					access,
@@ -160,7 +163,7 @@ export const getList = async (req, res) => {
 			}
 		} else {
 			const access = await User.findOne({ unique_id: id });
-			console.log(access.access);
+			// console.log(access.access);
 			res.render("Templates/manage_template", {
 				access: access.access,
 				list: templates,
@@ -187,7 +190,7 @@ export const duplicateTemplate = async (req, res) => {
 				.status(404)
 				.json({ success: false, error: "Template id not found" });
 
-		if (!isString(templateId)) next();
+		if (!isString(templateId)) return next();
 		// Find the template by its ID
 		const originalTemplate = await Template.findById(templateId);
 		if (!originalTemplate) {
@@ -230,7 +233,7 @@ export const deleteTemplate = async (req, res, next) => {
 				.status(404)
 				.json({ success: false, error: "Template id not found" });
 
-		if (!isString(templateId)) next();
+		if (!isString(templateId)) return next();
 
 		const deletedTemplate = await Template.findByIdAndUpdate(
 			{ _id: templateId },
