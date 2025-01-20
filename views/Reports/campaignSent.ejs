@@ -301,58 +301,7 @@
 							const contact = <%- JSON.stringify(contact) %>;
 						</script>
 					</table>
-					<!-- Pagination -->
-					<div class="flex items-center justify-center py-4 space-x-4">
-						<nav class="flex items-center">
-							<ul class="flex space-x-1">
-								<!-- Previous Button -->
-								<li>
-									<a href="/reports/campaign-list/<%= campaigns[0]?.unique_id %>?page=<%= page > 1 ? page - 1 : 1 %>" class="px-3 py-2 rounded-md text-sm font-medium text-gray-500 bg-white border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed" <%= page === 1 ? 'aria-disabled="true"' : '' %>>‹</a>
-								</li>
-								
-								<!-- First Page Button -->
-								<li>
-									<a href="/reports/campaign-list/<%= campaigns[0]?.unique_id %>?page=1" class="px-3 py-2 rounded-md text-sm font-medium <%= page === 1 ? 'text-white bg-red-400 border-red-400' : 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50' %>">1</a>
-								</li>
-								
-								<% if (page > 3) { %>
-								<!-- Show "..." if current page is greater than 3 -->
-								<li><span class="px-3 py-2 text-sm text-gray-500">...</span></li>
-								<% } %>
-								
-								<!-- Dynamic Page Numbers based on current page -->
-								<% for (let i = Math.max(2, page - 1); i <= Math.min(totalPages - 1, page + 1); i++) { %>
-								<li>
-									<a href="/reports/campaign-list/<%= campaigns[0]?.unique_id %>?page=<%= i %>" class="px-3 py-2 rounded-md text-sm font-medium <%= i === page ? 'text-white bg-red-400 border-red-400' : 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50' %>"><%= i %></a>
-								</li>
-								<% } %>
-								
-								<% if (page < totalPages - 2) { %>
-								<!-- Show "..." if there are more pages -->
-								<li><span class="px-3 py-2 text-sm text-gray-500">...</span></li>
-								<% } %>
-								
-								<!-- Last Page Button -->
-								<% if (totalPages > 1) { %>
-								<li>
-									<a href="/reports/campaign-list/<%= campaigns[0]?.unique_id %>?page=<%= totalPages %>" class="px-3 py-2 rounded-md text-sm font-medium <%= page === totalPages ? 'text-white bg-red-400 border-red-400' : 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50' %>"><%= totalPages %></a>
-								</li>
-								<% } %>
-								
-								<!-- Next Button -->
-								<li>
-									<a href="/reports/campaign-list/<%= campaigns[0]?.unique_id %>?page=<%= page < totalPages ? page + 1 : totalPages %>" class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50">›</a>
-								</li>
-							</ul>
-						</nav>
-						
-						<!-- "Go to page" input -->
-						<div class="flex items-center space-x-2">
-							<span class="text-sm text-gray-700">Go to page</span>
-							<input type="number" min="1" max="<%= totalPages %>" class="w-16 px-2 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" value="<%= page %>" id="pageInput" />
-							<button type="button" class="px-3 py-1 text-sm font-medium text-white bg-red-400 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" onclick="goToPage()">Go</button>
-						</div>
-					</div>
+				
 					
 					
 				</div>
@@ -370,14 +319,7 @@
 		</div>
 	</div>
 	</div>
-	<script>
-		function goToPage () {
-			const inputPage = document.getElementById('pageInput').value;
-			if (inputPage > 0 && inputPage <= <%= totalPages %>) {
-				window.location.href = `/reports/campaign-list/<%= campaigns[0]?.unique_id %>?page=${inputPage}`;
-			}
-		}
-	</script>
+	
 	
 	<script src="/reports/js/campaignSentBroadcast.js"></script>
 	<script>

@@ -7,6 +7,7 @@ const selectAllCheckbox = document.querySelector(
 );
 const checkboxes = document.querySelectorAll('tbody input[type="checkbox"]');
 const broadcastButton = document.getElementById("broadcast");
+const uploadCSV = document.getElementById("exportCSV");
 
 // Initially disable the broadcast button
 broadcastButton.disabled = true;
@@ -89,4 +90,50 @@ broadcastButton.addEventListener("click", function () {
 			console.error("Error broadcasting reports:", error);
 			alert("An error occurred");
 		});
+});
+
+uploadCSV.addEventListener("click", function () {
+	const table = document.querySelector("table");
+
+	// Initialize an empty array to store rows
+	let csv = [];
+
+	// Get table headers, skipping the first checkbox column
+	const headers = [];
+	table.querySelectorAll("thead td:not(:first-child)").forEach((header) => {
+		headers.push(header.textContent.trim());
+	});
+	csv.push(headers.join(","));
+
+	// Get table rows
+	table.querySelectorAll("tbody tr").forEach((row) => {
+		const cells = [];
+		row.querySelectorAll("td").forEach((cell, index) => {
+			// Exclude checkboxes and handle contact differently
+			if (index !== 0) {
+				// Skip the first checkbox column
+				if (index === 2) {
+					// Contact column: get the real phone number from the aria-label
+					const phoneNumber = cell.getAttribute("aria-label");
+					cells.push(phoneNumber);
+				} else {
+					cells.push(cell.textContent.trim());
+				}
+			}
+		});
+		csv.push(cells.join(","));
+	});
+
+	// Create CSV Blob
+	const csvFile = new Blob([csv.join("\n")], { type: "text/csv" });
+
+	// Create a link element and trigger the download
+	const downloadLink = document.createElement("a");
+	downloadLink.download = "campaign_reports.csv";
+	downloadLink.href = window.URL.createObjectURL(csvFile);
+	downloadLink.style.display = "none";
+
+	document.body.appendChild(downloadLink);
+	downloadLink.click();
+	document.body.removeChild(downloadLink);
 });

@@ -12,7 +12,6 @@ import {
 } from "../../middleWares/sanitiseInput.js";
 import { generateUniqueId } from "../../utils/otpGenerator.js";
 
-// Controller to fetch campaign reports and render them page-wise
 export const getCampaignList = async (req, res, next) => {
 	try {
 		const userId = req.session?.user?.id || req.session?.addedUser.owner;
@@ -147,7 +146,7 @@ export const getCampaignReports = async (req, res, next) => {
 	const { filter } = req.query;
 
 	if (!isString(filter)) return next();
-	
+
 	if (filter == "sent") {
 		await getSentReportsById(req, res);
 	} else if (filter == "delivered") {
@@ -434,13 +433,8 @@ const getSentReportsById = async (req, res, next) => {
 	try {
 		const { id } = req.params;
 		const userId = req.session?.user?.id || req.session?.addedUser?.owner;
-		const page = parseInt(req.query.page) || 1;
 
-		if (!isNumber(page)) return next();
 		if (!isString(id)) return next();
-
-		const limit = 6;
-		const skip = (page - 1) * limit;
 
 		// Fetch Sent campaign reports
 		const sentReports = await Campaign.aggregate([
@@ -490,20 +484,10 @@ const getSentReportsById = async (req, res, next) => {
 				},
 			},
 			{ $sort: { createdAt: -1 } },
-			{
-				$facet: {
-					paginatedResults: [{ $skip: skip }, { $limit: limit }],
-					totalCount: [{ $count: "total" }],
-				},
-			},
 		]);
 
-		const paginatedResults = sentReports[0]?.paginatedResults || [];
-		const totalCount = sentReports[0]?.totalCount[0]?.total || 0;
-		const totalPages = Math.ceil(totalCount / limit);
-
 		// Attach the relevant contact information to each report
-		paginatedResults.forEach((campaign) => {
+		sentReports.forEach((campaign) => {
 			campaign.reports.forEach((report) => {
 				const contact = campaign.contacts.find(
 					(contact) => `91${contact.wa_id}` === report.recipientPhone,
@@ -518,7 +502,7 @@ const getSentReportsById = async (req, res, next) => {
 				}
 			});
 		});
-		// console.log(paginatedResults[0].reports);
+
 		const permissions = req.session?.addedUser?.permissions;
 		if (permissions) {
 			const access = await Permissions.findOne({
@@ -527,11 +511,9 @@ const getSentReportsById = async (req, res, next) => {
 			if (access.reports.conversationReports.viewReports) {
 				res.render("Reports/campaignSent", {
 					access,
-					totalCount: paginatedResults[0].messagesSent,
-					campaigns: paginatedResults[0].reports,
-					contact: paginatedResults[0].contacts[0],
-					page,
-					totalPages,
+					totalCount: sentReports[0]?.messagesSent,
+					campaigns: sentReports[0]?.reports,
+					contact: sentReports[0]?.contacts[0],
 					id,
 					photo: req.session?.addedUser?.photo,
 					name: req.session?.addedUser?.name,
@@ -544,15 +526,12 @@ const getSentReportsById = async (req, res, next) => {
 			const access = await User.findOne({
 				unique_id: req.session?.user?.id,
 			});
-			// console.log(access.access);
 			res.render("Reports/campaignSent", {
 				access: access.access,
-				campaigns: paginatedResults[0].reports,
-				contact: paginatedResults[0].contacts[0],
-				page,
-				totalPages,
+				campaigns: sentReports[0]?.reports,
+				contact: sentReports[0]?.contacts[0],
+				totalCount: sentReports[0]?.messagesSent,
 				id,
-				totalCount: paginatedResults[0].messagesSent,
 				photo: req.session?.user?.photo,
 				name: req.session?.user?.name,
 				color: req.session?.user?.color,
@@ -568,13 +547,8 @@ const getDeliveredReportsById = async (req, res, next) => {
 	try {
 		const { id } = req.params;
 		const userId = req.session?.user?.id || req.session?.addedUser?.owner;
-		const page = parseInt(req.query.page) || 1;
 
-		if (!isNumber(page)) return next();
 		if (!isString(id)) return next();
-
-		const limit = 6;
-		const skip = (page - 1) * limit;
 
 		// Fetch Delivered campaign reports
 		const deliveredReports = await Campaign.aggregate([
@@ -624,20 +598,10 @@ const getDeliveredReportsById = async (req, res, next) => {
 				},
 			},
 			{ $sort: { createdAt: -1 } },
-			{
-				$facet: {
-					paginatedResults: [{ $skip: skip }, { $limit: limit }],
-					totalCount: [{ $count: "total" }],
-				},
-			},
 		]);
 
-		const paginatedResults = deliveredReports[0]?.paginatedResults || [];
-		const totalCount = deliveredReports[0]?.totalCount[0]?.total || 0;
-		const totalPages = Math.ceil(totalCount / limit);
-
 		// Attach the relevant contact information to each report
-		paginatedResults.forEach((campaign) => {
+		deliveredReports.forEach((campaign) => {
 			campaign.reports.forEach((report) => {
 				const contact = campaign.contacts.find(
 					(contact) => `91${contact.wa_id}` === report.recipientPhone,
@@ -663,11 +627,9 @@ const getDeliveredReportsById = async (req, res, next) => {
 			if (access.reports.conversationReports.viewReports) {
 				res.render("Reports/campaignDelivered", {
 					access,
-					campaigns: paginatedResults[0].reports,
-					contact: paginatedResults[0].contacts[0],
-					totalCount: paginatedResults[0].messagesDelivered,
-					page,
-					totalPages,
+					campaigns: deliveredReports[0]?.reports,
+					contact: deliveredReports[0]?.contacts[0],
+					totalCount: deliveredReports[0]?.messagesDelivered,
 					id,
 					photo: req.session?.addedUser?.photo,
 					name: req.session?.addedUser?.name,
@@ -680,21 +642,17 @@ const getDeliveredReportsById = async (req, res, next) => {
 			const access = await User.findOne({
 				unique_id: req.session?.user?.id,
 			});
-			// console.log(access.access);
 			res.render("Reports/campaignDelivered", {
 				access: access.access,
-				campaigns: paginatedResults[0].reports,
-				contact: paginatedResults[0].contacts[0],
-				totalCount: paginatedResults[0].messagesDelivered,
-				page,
-				totalPages,
+				campaigns: deliveredReports[0]?.reports,
+				contact: deliveredReports[0]?.contacts[0],
+				totalCount: deliveredReports[0]?.messagesDelivered,
 				id,
 				photo: req.session?.user?.photo,
 				name: req.session?.user?.name,
 				color: req.session?.user?.color,
 			});
 		}
-		console.log(paginatedResults[0].reports);
 	} catch (err) {
 		console.error(err);
 		res.render("errors/serverError");
@@ -705,13 +663,8 @@ const getReadReportsById = async (req, res, next) => {
 	try {
 		const { id } = req.params;
 		const userId = req.session?.user?.id || req.session?.addedUser?.owner;
-		const page = parseInt(req.query.page) || 1;
 
-		if (!isNumber(page)) return next();
 		if (!isString(id)) return next();
-
-		const limit = 6;
-		const skip = (page - 1) * limit;
 
 		// Fetch Read campaign reports
 		const readReports = await Campaign.aggregate([
@@ -761,17 +714,9 @@ const getReadReportsById = async (req, res, next) => {
 				},
 			},
 			{ $sort: { createdAt: -1 } },
-			{
-				$facet: {
-					paginatedResults: [{ $skip: skip }, { $limit: limit }],
-					totalCount: [{ $count: "total" }],
-				},
-			},
 		]);
 
-		const paginatedResults = readReports[0]?.paginatedResults || [];
-		const totalCount = readReports[0]?.totalCount[0]?.total || 0;
-		const totalPages = Math.ceil(totalCount / limit);
+		const paginatedResults = readReports || [];
 
 		// Attach the relevant contact information to each report
 		paginatedResults.forEach((campaign) => {
@@ -803,8 +748,6 @@ const getReadReportsById = async (req, res, next) => {
 					campaigns: paginatedResults[0].reports,
 					contact: paginatedResults[0].contacts[0],
 					totalCount: paginatedResults[0].messagesRead,
-					page,
-					totalPages,
 					id,
 					photo: req.session?.addedUser?.photo,
 					name: req.session?.addedUser?.name,
@@ -822,8 +765,6 @@ const getReadReportsById = async (req, res, next) => {
 				campaigns: paginatedResults[0].reports,
 				contact: paginatedResults[0].contacts[0],
 				totalCount: paginatedResults[0].messagesRead,
-				page,
-				totalPages,
 				id,
 				photo: req.session?.user?.photo,
 				name: req.session?.user?.name,
@@ -840,13 +781,8 @@ const getRepliesReportsById = async (req, res, next) => {
 	try {
 		const { id } = req.params;
 		const userId = req.session?.user?.id || req.session?.addedUser?.owner;
-		const page = parseInt(req.query.page) || 1;
 
-		if (!isNumber(page)) return next();
 		if (!isString(id)) return next();
-
-		const limit = 6;
-		const skip = (page - 1) * limit;
 
 		// Fetch campaign reports where there are replies
 		const repliedReports = await Campaign.aggregate([
@@ -907,20 +843,10 @@ const getRepliesReportsById = async (req, res, next) => {
 				},
 			},
 			{ $sort: { createdAt: -1 } },
-			{
-				$facet: {
-					paginatedResults: [{ $skip: skip }, { $limit: limit }],
-					totalCount: [{ $count: "total" }],
-				},
-			},
 		]);
 
-		const paginatedResults = repliedReports[0]?.paginatedResults || [];
-		const totalCount = repliedReports[0]?.totalCount[0]?.total || 0;
-		const totalPages = Math.ceil(totalCount / limit);
-
 		// Attach the relevant contact information to each report
-		paginatedResults.forEach((campaign) => {
+		repliedReports.forEach((campaign) => {
 			campaign.reports.forEach((report) => {
 				const contact = campaign.contacts.find(
 					(contact) => `91${contact.wa_id}` === report.recipientPhone,
@@ -946,11 +872,9 @@ const getRepliesReportsById = async (req, res, next) => {
 			if (access.reports.conversationReports.viewReports) {
 				res.render("Reports/campaignReplies", {
 					access,
-					campaigns: paginatedResults[0].reports,
-					contact: paginatedResults[0].contacts[0],
-					totalCount: paginatedResults[0].messagesReplied,
-					page,
-					totalPages,
+					campaigns: repliedReports[0]?.reports,
+					contact: repliedReports[0]?.contacts[0],
+					totalCount: repliedReports[0]?.messagesReplied,
 					id,
 					photo: req.session?.addedUser?.photo,
 					name: req.session?.addedUser?.name,
@@ -963,14 +887,11 @@ const getRepliesReportsById = async (req, res, next) => {
 			const access = await User.findOne({
 				unique_id: req.session?.user?.id,
 			});
-			// console.log(access.access);
 			res.render("Reports/campaignReplies", {
 				access: access.access,
-				campaigns: paginatedResults[0].reports,
-				contact: paginatedResults[0].contacts[0],
-				totalCount: paginatedResults[0].messagesReplied,
-				page,
-				totalPages,
+				campaigns: repliedReports[0]?.reports,
+				contact: repliedReports[0]?.contacts[0],
+				totalCount: repliedReports[0]?.messagesReplied,
 				id,
 				photo: req.session?.user?.photo,
 				name: req.session?.user?.name,
@@ -987,13 +908,8 @@ const getFailedReportsById = async (req, res, next) => {
 	try {
 		const { id } = req.params;
 		const userId = req.session?.user?.id || req.session?.addedUser?.owner;
-		const page = parseInt(req.query.page) || 1;
 
-		if (!isNumber(page)) return next();
 		if (!isString(id)) return next();
-
-		const limit = 6;
-		const skip = (page - 1) * limit;
 
 		// Fetch Failed campaign reports
 		const failedReports = await Campaign.aggregate([
@@ -1043,20 +959,10 @@ const getFailedReportsById = async (req, res, next) => {
 				},
 			},
 			{ $sort: { createdAt: -1 } },
-			{
-				$facet: {
-					paginatedResults: [{ $skip: skip }, { $limit: limit }],
-					totalCount: [{ $count: "total" }],
-				},
-			},
 		]);
 
-		const paginatedResults = failedReports[0]?.paginatedResults || [];
-		const totalCount = failedReports[0]?.totalCount[0]?.total || 0;
-		const totalPages = Math.ceil(totalCount / limit);
-
 		// Attach the relevant contact information to each report
-		paginatedResults.forEach((campaign) => {
+		failedReports.forEach((campaign) => {
 			campaign.reports.forEach((report) => {
 				const contact = campaign.contacts.find(
 					(contact) => `91${contact.wa_id}` === report.recipientPhone,
@@ -1082,11 +988,9 @@ const getFailedReportsById = async (req, res, next) => {
 			if (access.reports.conversationReports.viewReports) {
 				res.render("Reports/campaignFailed", {
 					access,
-					campaigns: paginatedResults[0].reports,
-					contact: paginatedResults[0].contacts[0],
-					totalCount: paginatedResults[0].messagesRead,
-					page,
-					totalPages,
+					campaigns: failedReports[0]?.reports || [],
+					contact: failedReports[0]?.contacts[0] || {},
+					totalCount: failedReports[0]?.messagesFailed || 0,
 					id,
 					photo: req.session?.addedUser?.photo,
 					name: req.session?.addedUser?.name,
@@ -1099,14 +1003,11 @@ const getFailedReportsById = async (req, res, next) => {
 			const access = await User.findOne({
 				unique_id: req.session?.user?.id,
 			});
-			// console.log(access.access);
 			res.render("Reports/campaignFailed", {
 				access: access.access,
-				campaigns: paginatedResults[0].reports,
-				contact: paginatedResults[0].contacts[0],
-				totalCount: paginatedResults[0].messagesRead,
-				page,
-				totalPages,
+				campaigns: failedReports[0]?.reports || [],
+				contact: failedReports[0]?.contacts[0] || {},
+				totalCount: failedReports[0]?.messagesFailed || 0,
 				id,
 				photo: req.session?.user?.photo,
 				name: req.session?.user?.name,
