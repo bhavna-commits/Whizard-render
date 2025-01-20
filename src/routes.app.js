@@ -26,4 +26,8 @@ app.use("/api/contact-list", checkSession, contactListRoute);
 app.use("/api/settings", checkSession, settingsbackEndRoute);
 app.use("/api/reports", checkSession, reportsBackEndRoute);
 
+app.use((req, res) => {
+	res.status(404).render("errors/notFound");
+});
+
 export default app;

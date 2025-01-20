@@ -229,7 +229,7 @@ reUpload.addEventListener("click", function () {
 // Handle template download
 function getSampleCSV() {
 	console.log("click");
-	fetch("api/contact-list/sampleCSV")
+	fetch("/api/contact-list/sampleCSV")
 		.then((response) => response.blob())
 		.then((blob) => {
 			const filename = "sample.csv";

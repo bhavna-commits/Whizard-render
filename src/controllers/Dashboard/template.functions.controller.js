@@ -2,8 +2,9 @@ import dotenv from "dotenv";
 import path from "path";
 import axios from "axios";
 import Template from "../../models/templates.model.js";
+import User from "../../models/user.model.js";
 import { generateUniqueId } from "../../utils/otpGenerator.js";
-const { FB_GRAPH_VERSION, WABA_ID, FB_ACCESS_TOKEN } = process.env;
+const { FB_GRAPH_VERSION } = process.env;
 
 dotenv.config();
 
@@ -28,7 +29,7 @@ export const saveTemplateToDatabase = async (
 		if (req.file) {
 			const filePath = path.join(
 				"uploads",
-				req.session?.user?.id || req.session?.addedUser?.owner,
+				id,
 				req.file?.filename,
 			);
 			const headerComponent = newTemplate.components.find(
@@ -80,14 +81,16 @@ export async function submitTemplateToFacebook(savedTemplate) {
 			category: plainTemplate.category.toUpperCase(),
 			components: plainTemplate.components,
 		};
-		// console.log("Submitting template to Facebook: here", requestData);
+		
+		const user = await User.findOne({ unique_id: id });
+
 		const response = await axios.post(
-			`https://graph.facebook.com/${process.env.FB_GRAPH_VERSION}/${process.env.WABA_ID}/message_templates`,
+			`https://graph.facebook.com/${process.env.FB_GRAPH_VERSION}/${user.WABA_ID}/message_templates`,
 			requestData,
 			{
 				headers: {
 					"Content-Type": "application/json",
-					Authorization: `Bearer ${process.env.FB_ACCESS_TOKEN}`,
+					Authorization: `Bearer ${user.FB_ACCESS_TOKEN}`,
 				},
 			},
 		);
@@ -120,15 +123,17 @@ export async function submitTemplateToFacebook(savedTemplate) {
 	}
 }
 
-export const fetchFacebookTemplates = async () => {
+export const fetchFacebookTemplates = async (id) => {
 	try {
-		const url = `https://graph.facebook.com/${FB_GRAPH_VERSION}/${WABA_ID}/message_templates`;
+		const user = await User.findOne({ unique_id: id });
+
+		const url = `https://graph.facebook.com/${FB_GRAPH_VERSION}/${user.WABA_ID}/message_templates`;
 
 		// Using native fetch API
 		const response = await fetch(url, {
 			method: "GET",
 			headers: {
-				Authorization: `Bearer ${FB_ACCESS_TOKEN}`,
+				Authorization: `Bearer ${user.FB_ACCESS_TOKEN}`,
 			},
 		});
 

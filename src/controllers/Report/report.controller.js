@@ -1,4 +1,5 @@
 import Campaign from "../../models/campaign.model.js";
+import dotenv from "dotenv";
 import Contacts from "../../models/contacts.model.js";
 import ContactList from "../../models/contactList.model.js";
 import Permissions from "../../models/permissions.model.js";
@@ -11,6 +12,8 @@ import {
 	isBoolean,
 } from "../../middleWares/sanitiseInput.js";
 import { generateUniqueId } from "../../utils/otpGenerator.js";
+
+dotenv.config();
 
 export const getCampaignList = async (req, res, next) => {
 	try {
@@ -1022,61 +1025,64 @@ const getFailedReportsById = async (req, res, next) => {
 
 export const getSendBroadcast = async (req, res, next) => {
 	// console.log(req.body);
-	const data = req.session?.tempData;
+	const data = req.session?.sendBroadcast;
 	// console.log(data);
 	if (data) {
-		delete req.session.tempData;
+		// delete req.session.tempData;
+		const permissions = req.session?.addedUser?.permissions;
+		if (permissions) {
+			const access = Permissions.findOne({ unique_id: permissions });
+			if (
+				access.contactList.sendBroadcast &&
+				req.session?.addedUser?.whatsAppStatus
+			) {
+				// const access = Permissions.findOne({ unique_id: permissions });
+				res.render("Reports/createCampaign", {
+					access,
+					name: req.session?.addedUser?.name,
+					photo: req.session?.addedUser?.photo,
+					color: req.session?.addedUser?.color,
+					data,
+				});
+			} else {
+				res.render("errors/notAllowed");
+			}
+		} else if (req.session?.user?.whatsAppStatus) {
+			const access = await User.findOne({
+				unique_id: req.session?.user?.id,
+			});
+			res.render("Reports/createCampaign", {
+				access: access.access,
+				name: req.session?.user?.name,
+				photo: req.session?.user?.photo,
+				color: req.session?.user?.color,
+				data,
+			});
+		} else {
+			const access = await User.findOne({
+				unique_id: req.session?.user?.id,
+			});
+
+			res.render("Reports/createCampaign", {
+				access: access.access,
+				name: req.session?.user?.name,
+				photo: req.session?.user?.photo,
+				color: req.session?.user?.color,
+				data,
+			});
+			// res.render("errors/notAllowed");
+		}
 	} else {
 		console.log("broadcast data not found");
 		return res.render("errors/serverError");
 	}
-	const permissions = req.session?.addedUser?.permissions;
-	if (permissions) {
-		const access = Permissions.findOne({ unique_id: permissions });
-		if (
-			access.contactList.sendBroadcast &&
-			req.session?.addedUser?.whatsAppStatus
-		) {
-			// const access = Permissions.findOne({ unique_id: permissions });
-			res.render("Reports/createCampaign", {
-				access,
-				name: req.session?.addedUser?.name,
-				photo: req.session?.addedUser?.photo,
-				color: req.session?.addedUser?.color,
-				data,
-			});
-		} else {
-			res.render("errors/notAllowed");
-		}
-	} else if (req.session?.user?.whatsAppStatus) {
-		const access = await User.findOne({ unique_id: req.session?.user?.id });
-		res.render("Reports/createCampaign", {
-			access: access.access,
-			name: req.session?.user?.name,
-			photo: req.session?.user?.photo,
-			color: req.session?.user?.color,
-			data,
-		});
-	} else {
-		const access = await User.findOne({
-			unique_id: req.session?.user?.id,
-		});
-
-		res.render("Reports/createCampaign", {
-			access: access.access,
-			name: req.session?.user?.name,
-			photo: req.session?.user?.photo,
-			color: req.session?.user?.color,
-			data,
-		});
-		// res.render("errors/notAllowed");
-	}
+	
 };
 
 export const createCampaignData = async (req, res, next) => {
 	try {
 		// console.log(req.body);
-		req.session.tempData = req.body;
+		req.session.sendBroadcast = req.body;
 		res.json({ success: true, message: "got the details" });
 	} catch (error) {
 		console.log(error);
@@ -1174,5 +1180,83 @@ export const createCampaign = async (req, res, next) => {
 		res.status(500).json({
 			message: `Error creating campaign: ${error.message}`,
 		});
+	}
+};
+
+export const getCostReport = async (req, res) => {
+	try {
+		const userId = req.session?.user?.id || req.session?.addedUser?.owner;
+		const user = await User.findOne({ unique_id: userId });
+
+		const WABA_ID = process.env.WABA_ID;
+		const accessToken = process.env.FB_ACCESS_TOKEN;
+		const graph = process.env.FB_GRAPH_VERSION;
+
+		if (!user || !WABA_ID || !accessToken || !graph) {
+			return res
+				.status(400)
+				.json({ error: "User does not have required credentials" });
+		}
+
+		// Get query parameters for start, end, and granularity
+		const start = req.query.start
+			? Math.floor(new Date(req.query.start).getTime() / 1000)
+			: Math.floor(new Date("2025-01-01T00:00:00Z").getTime() / 1000);
+		const end = req.query.end
+			? Math.floor(new Date(req.query.end).getTime() / 1000)
+			: Math.floor(new Date("2025-01-07T23:59:59Z").getTime() / 1000);
+		const granularity = req.query.granularity || "DAY"; // Default to 'DAY' if not provided
+
+		// Meta API Endpoint for fetching WABA cost reports
+		const apiURL = `https://graph.facebook.com/${graph}/${WABA_ID}?fields=analytics.start(${start}).end(${end}).granularity(${granularity})&access_token=${accessToken}`;
+
+		const response = await fetch(apiURL, {
+			method: "GET",
+			headers: {
+				Authorization: `Bearer ${accessToken}`,
+			},
+		});
+
+		const data = await response.json();
+		console.log(JSON.stringify(data));
+
+		if (!response.ok) {
+			console.log("Error fetching cost report:", data.error.message);
+			return res.render("errors/serverError");
+		}
+
+		const permissions = req.session?.addedUser?.permissions;
+		if (permissions) {
+			const access = await Permissions.findOne({
+				unique_id: permissions,
+			});
+			if (access.reports?.costReports) {
+				res.render("Reports/costReport", {
+					access,
+					name: req.session?.addedUser?.name,
+					photo: req.session?.addedUser?.photo,
+					color: req.session?.addedUser?.color,
+					data,
+					WABA_ID,
+				});
+			} else {
+				res.render("errors/notAllowed");
+			}
+		} else {
+			const access = await User.findOne({
+				unique_id: req.session?.user?.id,
+			});
+			res.render("Reports/costReport", {
+				access: access.access,
+				name: req.session?.user?.name,
+				photo: req.session?.user?.photo,
+				color: req.session?.user?.color,
+				data,
+				WABA_ID,
+			});
+		}
+	} catch (error) {
+		console.error("Error:", error);
+		return res.render("errors/serverError");
 	}
 };

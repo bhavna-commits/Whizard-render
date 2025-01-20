@@ -18,7 +18,7 @@ router.post(
 	trackSanitationFailures,
 );
 
-router.post("/duplicate/:id", duplicateTemplate, trackSanitationFailures);
+router.get("/duplicate/:id", duplicateTemplate, trackSanitationFailures);
 
 router.delete("/delete/:id", deleteTemplate, trackSanitationFailures);
 

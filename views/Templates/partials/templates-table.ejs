@@ -101,22 +101,7 @@
 		});
 		
 		function duplicateTemplate (templateId) {
-			fetch(`/api/templates/duplicate/${templateId}`, {
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-				})
-				.then((response) => response.json())
-				.then((data) => {
-					if (data.success) {
-						// Redirect or refresh the page to see the duplicated template
-						window.location.reload();
-					} else {
-						alert('Error duplicating template: ' + data.error);
-					}
-				})
-				.catch((error) => console.error('Error:', error));
+			location.href = `/api/templates/duplicate/${templateId}`;
 		}
 		
 		// Function to confirm deletion

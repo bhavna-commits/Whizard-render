@@ -11,7 +11,11 @@ import ActivityLogs from "../../models/activityLogs.model.js";
 import Permissions from "../../models/permissions.model.js";
 import User from "../../models/user.model.js";
 import { generateUniqueId } from "../../utils/otpGenerator.js";
-import { isNumber, isObject, isString } from "../../middleWares/sanitiseInput.js";
+import {
+	isNumber,
+	isObject,
+	isString,
+} from "../../middleWares/sanitiseInput.js";
 
 dotenv.config();
 
@@ -186,9 +190,10 @@ export const duplicateTemplate = async (req, res) => {
 		const templateId = req.params?.id;
 
 		if (!templateId)
-			return res
-				.status(404)
-				.json({ success: false, error: "Template id not found" });
+			return res.status(404).json({
+				success: false,
+				error: "Template id not found",
+			});
 
 		if (!isString(templateId)) return next();
 		// Find the template by its ID
@@ -199,29 +204,44 @@ export const duplicateTemplate = async (req, res) => {
 				.json({ success: false, error: "Template not found" });
 		}
 
-		// Create a new template with the same data but a new _id
-		const newTemplate = new Template({
-			...originalTemplate.toObject(),
-			createdAt: new Date(),
-			updatedAt: new Date(),
-			unique_id: generateUniqueId(), // Generate a new unique ID
-		});
+		console.log(originalTemplate);
+		// console.log(req.session?.user);
+		const permissions = req.session?.addedUser?.permissions;
+		if (permissions) {
+			const access = await Permissions.findOne({ unique_id: permissions });
+			if (
+				access.templates.createTemplate &&
+				req.session?.addedUser?.whatsAppStatus
+			) {
+				res.status(201).render("Templates/duplicateTemplate", {
+					access,
+					templateData: originalTemplate,
+					name: req.session?.addedUser?.name,
+					photo: req.session?.addedUser?.photo,
+					color: req.session?.addedUser?.color,
+					whatsAppStatus: req.session?.addedUser?.whatsAppStatus,
+				});
+			} else {
+				res.render("errors/notAllowed");
+			}
 
-		// Save the duplicated template
-		const savedTemplate = await newTemplate.save();
-
-		// Log the duplication activity
-		await ActivityLogs.create({
-			useradmin: req.session?.user?.id || req.session?.addedUser?.owner,
-			unique_id: generateUniqueId(),
-			name: req.session?.user?.name || req.session?.addedUser?.name,
-			actions: "Create",
-			details: `Duplicated Template named: ${savedTemplate.name}`,
-		});
-
-		res.status(201).json({ success: true, template: savedTemplate });
+		} else if (req.session?.user?.whatsAppStatus) {
+			const access = await User.findOne({ unique_id: req.session?.user?.id });
+			// console.log(access);
+			res.render("Templates/duplicateTemplate", {
+				access: access.access,
+				templateData: originalTemplate,
+				name: req.session?.user?.name,
+				photo: req.session?.user?.photo,
+				color: req.session?.user?.color,
+				whatsAppStatus: access.whatsAppStatus,
+			});
+		} else {
+			res.render("errors/notAllowed");
+		}
 	} catch (error) {
-		res.status(500).json({ success: false, error: error.message });
+		console.error(error);
+		res.status(500).render("errors/serverError");
 	}
 };
 
@@ -313,7 +333,7 @@ export const getFaceBookTemplates = async (req, res) => {
 		const mongoTemplates = await Template.find({ useradmin: id });
 		// console.log(mongoTemplates);
 		// Fetch templates from Facebook Graph API
-		const facebookTemplatesResponse = await fetchFacebookTemplates();
+		const facebookTemplatesResponse = await fetchFacebookTemplates(id);
 		const facebookTemplates = facebookTemplatesResponse.data;
 		// console.log(facebookTemplates);
 		// Loop through the MongoDB templates and update their status based on Facebook data
@@ -379,7 +399,7 @@ export const getCampaignTemplates = async (req, res) => {
 		// Respond with the updated templates from MongoDB
 		const updatedTemplates = await Template.find({
 			useradmin: id,
-			status: "Approved", 
+			status: "Approved",
 		});
 		// console.log(updatedTemplates);
 		res.json({

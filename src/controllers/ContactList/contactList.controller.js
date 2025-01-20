@@ -329,7 +329,7 @@ export const sampleCSV = async (req, res) => {
 			"..",
 			"..",
 			"..",
-			"public",
+			"CSV",
 			userId,
 		);
 		const userCSVPath = path.join(userDir, "sample.csv");
@@ -345,7 +345,7 @@ export const sampleCSV = async (req, res) => {
 				"..",
 				"..",
 				"..",
-				"public",
+				"CSV",
 				"sample.csv",
 			);
 		}

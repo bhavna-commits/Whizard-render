@@ -4,7 +4,7 @@ import fs from "fs";
 import User from "../models/user.model.js";
 import Reports from "../models/report.model.js";
 import axios from "axios";
-import { dummyPayload } from "../utils/dummy.js";
+// import { dummyPayload } from "../utils/dummy.js";
 
 dotenv.config();
 
@@ -96,7 +96,6 @@ const exchangeForLongLivedToken = async (shortLivedToken) => {
 		return null;
 	}
 };
-
 
 router.post("/webhook", async (req, res) => {
 	try {

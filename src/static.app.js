@@ -3,6 +3,7 @@ import path from "path";
 import app from "./app.js";
 
 app.use(express.static("public"));
+app.use("/api/templates/duplicate/:id", express.static("public"));
 app.use("/contact-list", express.static("public"));
 app.use("/contact-list/overview", express.static("public"));
 app.use("/Contact-List/createCampaign", express.static("public"));
@@ -13,6 +14,7 @@ app.use("/Settings/activity-logs", express.static("public"));
 app.use("/Settings/user-management", express.static("public"));
 app.use("/Reports/campaign-list/", express.static("public"));
 app.use("/Reports/campaign-list/:id", express.static("public"));
+app.use("/Reports/cost-report", express.static("public"));
 
 const __dirname = path.resolve();
 

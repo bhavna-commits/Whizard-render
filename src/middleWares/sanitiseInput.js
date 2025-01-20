@@ -60,7 +60,10 @@ export function sanitizeInput(data, schema) {
 export function isString(...inputs) {
 	// Recursively check each input
 	for (const input of inputs) {
-		// Check if input is trimmed (no leading/trailing whitespace)
+		if (!input) {
+			continue;
+		}
+
 		if (input !== validator.trim(input)) {
 			return false;
 		}
@@ -75,7 +78,7 @@ export function isString(...inputs) {
 			return false;
 		}
 	}
-	
+
 	// If all checks pass for every input, return true
 	return true;
 }
@@ -104,14 +107,14 @@ export function isObject(...inputs) {
 	// Recursively check each input
 	for (const input of inputs) {
 		// If the input is an object, check all its values
-		if (typeof input === 'object' && input !== null) {
+		if (typeof input === "object" && input !== null) {
 			for (const value of Object.values(input)) {
 				// Ensure all values are strings and validate them
-				if (typeof value !== 'string' || !validateString(value)) {
+				if (typeof value !== "string" || !validateString(value)) {
 					return false;
 				}
 			}
-		} else if (typeof input === 'string') {
+		} else if (typeof input === "string") {
 			// If it's a string, validate it
 			if (!validateString(input)) {
 				return false;

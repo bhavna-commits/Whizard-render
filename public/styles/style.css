@@ -252,7 +252,7 @@ input[type="number"] {
 	margin: 0;
 	padding: 0;
 	/* You can use gap for consistent spacing between elements */
-	gap: 1rem; /* Default spacing */
+	gap: 1.2rem; /* Default spacing */
 }
 
 .sidebar ul li:nth-child(6) {
@@ -276,7 +276,7 @@ input[type="number"] {
 	border-radius: 1rem;
 }
 
-.sidebar ul li a span.active {
+.active {
 	background-color: #fce9e9;
 	color: #e02424;
 }
@@ -303,13 +303,13 @@ input[type="number"] {
 	background-color: #fdd0d0; /* Background color change only on the span */
 }
 
-.sidebar ul li a i {
+.sidebar ul li a svg {
 	/* transform: scale(1.5); */
-	transition: transform 0.3s ease-in;
+	transition: transform 0.3s ease-in-out;
 }
 
 /* Apply scaling effect to the icon (i) only on hover */
-.sidebar ul li a:hover i {
+.sidebar ul li a:hover svg {
 	transform: scale(1.5); /* Icon grows on hover */
 	/* transition: transform 0.3s ease-in;  */
 }

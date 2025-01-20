@@ -4,6 +4,7 @@ import {
 	getCampaignReports,
 	getCampaignListFilter,
 	getSendBroadcast,
+	getCostReport,
 } from "../controllers/Report/report.controller.js";
 import { trackSanitationFailures } from "../middleWares/sanitiseInput.js";
 
@@ -25,6 +26,8 @@ router.get(
 
 
 router.get("/campaign-list/:id", getCampaignReports, trackSanitationFailures);
+
+router.get("/cost-report", getCostReport, trackSanitationFailures);
 
 
 export default router;
