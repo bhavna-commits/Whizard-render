@@ -69,9 +69,9 @@ export function isString(...inputs) {
 		}
 
 		// Check if input contains any characters that would need to be escaped
-		if (input !== validator.escape(input)) {
-			return false;
-		}
+		// if (input !== validator.escape(input)) {
+		// 	return false;
+		// }
 
 		// Check if input contains any harmful scripts or HTML
 		if (input !== xss(input)) {
@@ -86,15 +86,14 @@ export function isString(...inputs) {
 export function isObject(...inputs) {
 	// Helper function to validate individual strings
 	function validateString(input) {
-		// Check if input is trimmed (no leading/trailing whitespace)
 		if (input !== validator.trim(input)) {
 			return false;
 		}
 
 		// Check if input contains any characters that would need to be escaped
-		if (input !== validator.escape(input)) {
-			return false;
-		}
+		// if (input !== validator.escape(input)) {
+		// 	return false;
+		// }
 
 		// Check if input contains any harmful scripts or HTML
 		if (input !== xss(input)) {
@@ -106,6 +105,9 @@ export function isObject(...inputs) {
 
 	// Recursively check each input
 	for (const input of inputs) {
+		if (!input) {
+			continue;
+		}
 		// If the input is an object, check all its values
 		if (typeof input === "object" && input !== null) {
 			for (const value of Object.values(input)) {

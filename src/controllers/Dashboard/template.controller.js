@@ -11,6 +11,7 @@ import ActivityLogs from "../../models/activityLogs.model.js";
 import Permissions from "../../models/permissions.model.js";
 import User from "../../models/user.model.js";
 import { generateUniqueId } from "../../utils/otpGenerator.js";
+import { languagesCode } from "../../utils/dropDown.js";
 import {
 	isNumber,
 	isObject,
@@ -22,10 +23,10 @@ dotenv.config();
 export const createTemplate = async (req, res, next) => {
 	try {
 		const templateData = JSON.parse(req.body.templateData);
-		const { dynamicVariables, name } = templateData;
+		const { dynamicVariables, name, selectedLanguageCode } = templateData;
 		const id = req.session?.user?.id || req.session?.addedUser?.owner;
 
-		if (!isObject(templateData)) return next();
+		// if (!isObject(templateData)) return next();
 
 		// Check if a template with the same name exists for the user
 		const exists = await Template.findOne({ useradmin: id, name });
@@ -41,11 +42,12 @@ export const createTemplate = async (req, res, next) => {
 			req,
 			templateData,
 			dynamicVariables,
+			selectedLanguageCode,
 			id,
 		);
 
 		// Submit template to Facebook
-		const data = await submitTemplateToFacebook(savedTemplate);
+		const data = await submitTemplateToFacebook(savedTemplate, id);
 		console.log("template creation : ", JSON.stringify(data));
 		// Log activity
 		await ActivityLogs.create({
@@ -70,27 +72,6 @@ export const createTemplate = async (req, res, next) => {
 		});
 	}
 };
-
-// export const templatePreview = async (req, res) => {
-// 	try {
-// 		const id = req.session?.user?.id || req.session?.addedUser?.owner;
-// 		const template = await Template.find({ owner: id });
-// 		if (template) {
-// 			res.render("Templates/create-template", {
-// 				templateData: template,
-// 				photo: req.session.user?.photo,
-// 				name: req.session.user.name,
-// 				color: req.session.user.color,
-// 			});
-// 		} else {
-// 		}
-// 	} catch (error) {
-// 		res.status(400).json({
-// 			success: false,
-// 			error: error.message,
-// 		});
-// 	}
-// };
 
 export const getList = async (req, res, next) => {
 	try {
@@ -208,7 +189,9 @@ export const duplicateTemplate = async (req, res) => {
 		// console.log(req.session?.user);
 		const permissions = req.session?.addedUser?.permissions;
 		if (permissions) {
-			const access = await Permissions.findOne({ unique_id: permissions });
+			const access = await Permissions.findOne({
+				unique_id: permissions,
+			});
 			if (
 				access.templates.createTemplate &&
 				req.session?.addedUser?.whatsAppStatus
@@ -219,14 +202,16 @@ export const duplicateTemplate = async (req, res) => {
 					name: req.session?.addedUser?.name,
 					photo: req.session?.addedUser?.photo,
 					color: req.session?.addedUser?.color,
+					languagesCode,
 					whatsAppStatus: req.session?.addedUser?.whatsAppStatus,
 				});
 			} else {
 				res.render("errors/notAllowed");
 			}
-
 		} else if (req.session?.user?.whatsAppStatus) {
-			const access = await User.findOne({ unique_id: req.session?.user?.id });
+			const access = await User.findOne({
+				unique_id: req.session?.user?.id,
+			});
 			// console.log(access);
 			res.render("Templates/duplicateTemplate", {
 				access: access.access,
@@ -234,6 +219,7 @@ export const duplicateTemplate = async (req, res) => {
 				name: req.session?.user?.name,
 				photo: req.session?.user?.photo,
 				color: req.session?.user?.color,
+				languagesCode,
 				whatsAppStatus: access.whatsAppStatus,
 			});
 		} else {
@@ -416,9 +402,10 @@ export const getCampaignTemplates = async (req, res) => {
 };
 
 export const getCreateTemplate = async (req, res) => {
+	
 	const permissions = req.session?.addedUser?.permissions;
 	if (permissions) {
-		const access = Permissions.findOne({ unique_id: permissions });
+		const access = await Permissions.findOne({ unique_id: permissions });
 		if (
 			access.templates.createTemplate &&
 			req.session?.addedUser?.whatsAppStatus
@@ -430,12 +417,13 @@ export const getCreateTemplate = async (req, res) => {
 				photo: req.session?.addedUser?.photo,
 				color: req.session?.addedUser?.color,
 				whatsAppStatus: req.session?.addedUser?.whatsAppStatus,
+				languagesCode,
 			});
 		} else {
 			res.render("errors/notAllowed");
 		}
 	} else if (req.session?.user?.whatsAppStatus) {
-		const access = User.findOne({ unique_id: req.session?.user?.id });
+		const access = await User.findOne({ unique_id: req.session?.user?.id });
 		res.render("Templates/create-template", {
 			access: access.access,
 			templateData: [],
@@ -443,6 +431,7 @@ export const getCreateTemplate = async (req, res) => {
 			photo: req.session?.user?.photo,
 			color: req.session?.user?.color,
 			whatsAppStatus: req.session?.user?.whatsAppStatus,
+			languagesCode,
 		});
 	} else {
 		res.render("errors/notAllowed");

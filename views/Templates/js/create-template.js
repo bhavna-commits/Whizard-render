@@ -280,8 +280,8 @@ document
 			this.textContent.length + "/1024";
 	});
 
-let websiteBtnCount = 0;
-let callBtnCount = 0;
+	let websiteBtnCount = 0;
+	let callBtnCount = 0;
 
 document.getElementById("addWebsiteBtn").addEventListener("click", function () {
 	if (websiteBtnCount >= 1) {

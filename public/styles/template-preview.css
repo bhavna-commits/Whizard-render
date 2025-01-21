@@ -11,6 +11,8 @@
 	align-items: center;
 }
 
+
+
 .iphone-screen {
 	position: absolute;
 	/* top: 1rem; */
@@ -29,11 +31,18 @@
 .iphone-container .card {
 	margin: 0;
 	/* border: none;*/
-	border-radius: 1rem; 
+	border-radius: 1rem;
 	/* Smooth edges */
 	/* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); */
 	/* Card shadow */
 	margin-top: 1rem;
+}
+
+@media screen and (min-width: 769px) {
+	.iphone-screen {
+		left: 3.2rem;
+		width: 68%; /* Width for larger screens */
+	}
 }
 
 .iphone-container .card-body {
@@ -42,7 +51,7 @@
 
 .iphone-container .card .btn {
 	width: 100%;
-	margin-bottom: .8rem;
+	margin-bottom: 0.8rem;
 	/* Space between buttons */
 }
 

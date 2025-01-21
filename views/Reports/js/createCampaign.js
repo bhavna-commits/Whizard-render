@@ -25,7 +25,7 @@ class AttributeManager {
 		this.onAttributeChange = onAttributeChange;
 	}
 
-	update(template, contacts) {
+	update(template) {
 		// console.log(template?.dynamicVariables);
 		if (!template?.dynamicVariables) {
 			this.container.innerHTML =
@@ -40,27 +40,6 @@ class AttributeManager {
 
 		this.container.innerHTML = "";
 
-		// Process HEADER dynamic variables
-		this.container.innerHTML += template?.dynamicVariables?.header
-			?.map((variableObj, index) => {
-				const variableKey = Object.keys(variableObj)[0]; // Get the variable key, e.g., '1'
-				return `
-                <div class=" mt-3">
-                    <label class="w-full">Variable: {${variableKey}}</label>
-                    <select class="attribute-select w-full" data-variable="${variableKey}">
-                        ${options
-							.map(
-								(opt) => `
-                            <option value="${opt.value}">${opt.label}</option>
-                        `,
-							)
-							.join("")}
-                    </select>
-                </div>
-            `;
-			})
-			.join("");
-
 		// Process BODY dynamic variables
 		this.container.innerHTML += template?.dynamicVariables?.body
 			?.map((variableObj, index) => {
@@ -69,27 +48,7 @@ class AttributeManager {
                 <div class=" mt-3">
                     <label class="w-full">Variable: {${variableKey}}</label>
                     <select class="attribute-select w-full" data-variable="${variableKey}">
-                        ${options
-							.map(
-								(opt) => `
-                            <option value="${opt.value}">${opt.label}</option>
-                        `,
-							)
-							.join("")}
-                    </select>
-                </div>
-            `;
-			})
-			.join("");
-
-		// Process FOOTER dynamic variables
-		this.container.innerHTML += template?.dynamicVariables?.footer
-			?.map((variableObj, index) => {
-				const variableKey = Object.keys(variableObj)[0]; // Get the variable key, e.g., '1'
-				return `
-                <div class=" mt-3">
-                    <label class="w-full">Variable: {${variableKey}}</label>
-                    <select class="attribute-select w-full" data-variable="${variableKey}">
+						<option disabled selected>Select a value</option>
                         ${options
 							.map(
 								(opt) => `
@@ -283,7 +242,6 @@ class TemplateManager {
 				.addEventListener("submit", async (e) => {
 					e.preventDefault();
 
-					const form = e.target;
 					const submitterButton = e.submitter; // This gets the clicked button
 
 					const actionType = submitterButton.value; // Retrieve value of clicked button (schedule/sendNow)
@@ -400,11 +358,12 @@ class TemplateManager {
 		buttonText.classList.add("hidden");
 
 		// Create form data
-		const formData = new FormData(this.campaignForm);
-		formData.append("templateId", this.templateSelect.val());
-		formData.append("contactListId", contactListId);
-		formData.append("name", document.getElementById("campaign-name").value);
-		formData.append("contactList", contactLists);
+		const formData = {
+			templateId: this.templateSelect.val(),
+			contactListId: contactListId,
+			name: document.getElementById("campaign-name").value,
+			contactList: contactLists,
+		};
 
 		// Check if scheduling or sending immediately
 		if (actionType === "schedule") {
@@ -420,7 +379,7 @@ class TemplateManager {
 				console.log(dateTime);
 				if (!isNaN(dateTime.getTime())) {
 					const unixTimestamp = Math.floor(dateTime.getTime() / 1000);
-					formData.append("schedule", unixTimestamp); // Append the schedule timestamp
+					formData.schedule = unixTimestamp;
 				} else {
 					alert("Invalid date or time. Please check your selection.");
 					resetButton(button, loader, buttonText);
@@ -433,32 +392,44 @@ class TemplateManager {
 			}
 		} else if (actionType === "sendNow") {
 			// If "Send Now" is clicked, make sure schedule is null
-			formData.append("schedule", null);
+			formData.schedule = null;
 		}
 
 		// Add selected attributes to form data
+		// Validate attribute selects
+		let isValid = true;
 		const selectedAttributes = {};
+
 		$(this.attributesForm)
-			.find(".attribute-select")
-			.each(function () {
+			?.find(".attribute-select")
+			?.each(function () {
 				const variable = $(this).data("variable");
-				selectedAttributes[variable] = $(this).val();
+				const value = $(this).val();
+				if (value === null || value === "Select a value") {
+					isValid = false;
+					alert(`Please select a value for variable: {${variable}}`);
+					resetButton(button, loader, buttonText);
+					return false; // Exit early if invalid
+				}
+				selectedAttributes[variable] = value;
 			});
 
-		if (Object.keys(selectedAttributes).length > 0) {
-			formData.append("variables", JSON.stringify(selectedAttributes));
+		if (!isValid) {
+			return;
 		}
 
-		// Submit the form
-		try {
-			const response = await fetch(
-				"/api/reports/broadcast",
-				{
-					method: "POST",
-					body: formData,
-				},
-			);
+		if (Object.keys(selectedAttributes).length > 0) {
+			formData.variables = selectedAttributes;
+		}
 
+		try {
+			const response = await fetch("/api/reports/broadcast", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify(formData),
+			});
 			const result = await response.json();
 			if (response.ok) {
 				alert("Campaign created successfully!");

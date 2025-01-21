@@ -24,10 +24,8 @@ router.get(
 	trackSanitationFailures,
 );
 
-
 router.get("/campaign-list/:id", getCampaignReports, trackSanitationFailures);
 
 router.get("/cost-report", getCostReport, trackSanitationFailures);
-
 
 export default router;

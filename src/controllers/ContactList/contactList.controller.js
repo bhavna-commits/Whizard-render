@@ -301,9 +301,9 @@ export const deleteList = async (req, res, next) => {
 		await ActivityLogs.create({
 			useradmin: req.session?.user?.id || req.session?.addedUser?.owner,
 			unique_id: generateUniqueId(),
-			name: req.session.user.name
-				? req.session.user.name
-				: req.session.addedUser.name,
+			name: req.session?.user?.name
+				? req.session?.user?.name
+				: req.session?.addedUser?.name,
 			actions: "Delete",
 			details: `Deleted a contact List named : ${contactList.contalistName}`,
 		});
@@ -525,9 +525,9 @@ export const createCustomField = async (req, res, next) => {
 		await ActivityLogs.create({
 			useradmin: req.session?.user?.id || req.session?.addedUser?.owner,
 			unique_id: generateUniqueId(),
-			name: req.session.user.name
-				? req.session.user.name
-				: req.session.addedUser?.name,
+			name: req.session?.user?.name
+				? req.session?.user?.name
+				: req.session?.addedUser?.name,
 			actions: "Create",
 			details: `Created a custom field named: ${fieldName}`,
 		});
@@ -659,9 +659,9 @@ export const updateContactListName = async (req, res) => {
 		await ActivityLogs.create({
 			useradmin: req.session?.user?.id || req.session?.addedUser?.owner,
 			unique_id: generateUniqueId(),
-			name: req.session.user.name
-				? req.session.user.name
-				: req.session.addedUser.name,
+			name: req.session?.user?.name
+				? req.session?.user?.name
+				: req.session?.addedUser?.name,
 			actions: "Update",
 			details: `Updated a contact List Name to : ${updatedValue}`,
 		});

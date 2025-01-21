@@ -89,6 +89,7 @@ async function submit() {
 			JSON.stringify({
 				...templateData,
 				dynamicVariables,
+				selectedLanguageCode,
 			}),
 		);
 
@@ -213,12 +214,17 @@ function validateCurlyBraces(text) {
 }
 
 // Collect all template data
-function 	collectTemplateData() {
+function collectTemplateData() {
 	const templateData = {};
 
 	// Helper function to display error messages
 	function showError(message) {
 		alert(message);
+		return false;
+	}
+
+	if (selectedLanguageCode === null) {
+		alert("Please select a language before proceeding.");
 		return false;
 	}
 
@@ -232,9 +238,9 @@ function 	collectTemplateData() {
 
 	// Check that the template name contains no spaces, hyphens, or underscores
 	const templateName = templateNameInput.value.trim();
-	if (/[\s-_]/.test(templateName)) {
+	if (/[^a-z0-9_]/.test(templateName)) {
 		return showError(
-			"Template name cannot contain spaces, hyphens, or underscores.",
+			"Template name must be lowercase and cannot contain spaces, hyphens, or special characters (except underscores).",
 		);
 	}
 

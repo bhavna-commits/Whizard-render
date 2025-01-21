@@ -67,9 +67,9 @@ export const updateContact = async (req, res, next) => {
 		await ActivityLogs.create({
 			useradmin: req.session?.user?.id || req.session?.addedUser?.owner,
 			unique_id: generateUniqueId(),
-			name: req.session.user.name
-				? req.session.user.name
-				: req.session.addedUser.name,
+			name: req.session?.user?.name
+				? req.session?.user?.name
+				: req.session?.addedUser?.name,
 			actions: "Update",
 			details: `updated contact of ${name}`,
 		});
@@ -247,9 +247,9 @@ export const editContact = async (req, res, next) => {
 		await ActivityLogs.create({
 			useradmin: req.session?.user?.id || req.session?.addedUser?.owner,
 			unique_id: generateUniqueId(),
-			name: req.session.user.name
-				? req.session.user.name
-				: req.session.addedUser.name,
+			name: req.session?.user?.name
+				? req.session?.user?.name
+				: req.session?.addedUser?.name,
 			actions: "Update",
 			details: `Edited contact of : ${contacts.Name}`,
 		});
@@ -294,9 +294,9 @@ export const deleteContact = async (req, res, next) => {
 		await ActivityLogs.create({
 			useradmin: req.session?.user?.id || req.session?.addedUser?.owner,
 			unique_id: generateUniqueId(),
-			name: req.session.user.name
-				? req.session.user.name
-				: req.session.addedUser.name,
+			name: req.session?.user?.name
+				? req.session?.user?.name
+				: req.session?.addedUser?.name,
 			actions: "Update",
 			details: `Deleted contact of : ${contact.Name}`,
 		});
@@ -475,9 +475,9 @@ export const createCampaign = async (req, res, next) => {
 				useradmin:
 					req.session?.user?.id || req.session?.addedUser?.owner,
 				unique_id: generateUniqueId(),
-				name: req.session.user.name
-					? req.session.user.name
-					: req.session.addedUser.name,
+				name: req.session?.user?.name
+					? req.session?.user?.name
+					: req.session?.addedUser?.name,
 				actions: "Send",
 				details: `Sent campaign named: ${name}`,
 			});
@@ -489,9 +489,9 @@ export const createCampaign = async (req, res, next) => {
 				useradmin:
 					req.session?.user?.id || req.session?.addedUser?.owner,
 				unique_id: generateUniqueId(),
-				name: req.session.user.name
-					? req.session.user.name
-					: req.session.addedUser.name,
+				name: req.session?.user?.name
+					? req.session?.user?.name
+					: req.session?.addedUser?.name,
 				actions: "Send",
 				details: `Scheduled new campaign named: ${name}`,
 			});
@@ -664,13 +664,14 @@ export const getOverviewFilter = async (req, res) => {
 export const getCreateCampaign = async (req, res) => {
 	const permissions = req.session?.addedUser?.permissions;
 	if (permissions) {
-		const access = Permissions.findOne({ unique_id: permissions });
+		const access = await Permissions.findOne({ unique_id: permissions });
 		if (
 			access.contactList.sendBroadcast &&
 			req.session?.addedUser?.whatsAppStatus
 		) {
 			// const access = Permissions.findOne({ unique_id: permissions });
 			res.render("Contact-List/createCampaign", {
+				access,
 				name: req.session?.addedUser?.name,
 				photo: req.session?.addedUser?.photo,
 				color: req.session?.addedUser?.color,
@@ -679,7 +680,9 @@ export const getCreateCampaign = async (req, res) => {
 			res.render("errors/notAllowed");
 		}
 	} else if (req.session?.user?.whatsAppStatus) {
+		const access = await User.findOne({ unique_id: req.session?.user?.id });
 		res.render("Contact-List/createCampaign", {
+			access: access.access,
 			name: req.session?.user?.name,
 			photo: req.session?.user?.photo,
 			color: req.session?.user?.color,

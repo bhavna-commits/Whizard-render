@@ -47,9 +47,9 @@ export const home = async (req, res) => {
 			console.log(access.access);
 			res.render("Settings/home", {
 				access: access.access,
-				photo: req.session.user?.photo,
-				name: req.session.user.name,
-				color: req.session.user.color,
+				photo: req.session?.user?.photo,
+				name: req.session?.user?.name,
+				color: req.session?.user?.color,
 			});
 		}
 	} catch (err) {
@@ -749,9 +749,9 @@ export const createPermissions = async (req, res, next) => {
 		await ActivityLogs.create({
 			useradmin: req.session?.user?.id || req.session?.addedUser?.owner,
 			unique_id: generateUniqueId(),
-			name: req.session.user.name
-				? req.session.user.name
-				: req.session.addedUser.name,
+			name: req.session?.user?.name
+				? req.session?.user?.name
+				: req.session?.addedUser?.name,
 			actions: "Create",
 			details: `Created a new role`,
 		});

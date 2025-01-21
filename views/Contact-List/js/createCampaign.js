@@ -40,27 +40,6 @@ class AttributeManager {
 
 		this.container.innerHTML = "";
 
-		// Process HEADER dynamic variables
-		this.container.innerHTML += template?.dynamicVariables?.header
-			?.map((variableObj, index) => {
-				const variableKey = Object.keys(variableObj)[0]; // Get the variable key, e.g., '1'
-				return `
-                <div class=" mt-3">
-                    <label class="w-full">Variable: {${variableKey}}</label>
-                    <select class="attribute-select w-full" data-variable="${variableKey}">
-                        ${options
-							.map(
-								(opt) => `
-                            <option value="${opt.value}">${opt.label}</option>
-                        `,
-							)
-							.join("")}
-                    </select>
-                </div>
-            `;
-			})
-			.join("");
-
 		// Process BODY dynamic variables
 		this.container.innerHTML += template?.dynamicVariables?.body
 			?.map((variableObj, index) => {
@@ -69,27 +48,7 @@ class AttributeManager {
                 <div class=" mt-3">
                     <label class="w-full">Variable: {${variableKey}}</label>
                     <select class="attribute-select w-full" data-variable="${variableKey}">
-                        ${options
-							.map(
-								(opt) => `
-                            <option value="${opt.value}">${opt.label}</option>
-                        `,
-							)
-							.join("")}
-                    </select>
-                </div>
-            `;
-			})
-			.join("");
-
-		// Process FOOTER dynamic variables
-		this.container.innerHTML += template?.dynamicVariables?.footer
-			?.map((variableObj, index) => {
-				const variableKey = Object.keys(variableObj)[0]; // Get the variable key, e.g., '1'
-				return `
-                <div class=" mt-3">
-                    <label class="w-full">Variable: {${variableKey}}</label>
-                    <select class="attribute-select w-full" data-variable="${variableKey}">
+						<option disabled selected>Select a value</option>
                         ${options
 							.map(
 								(opt) => `
@@ -271,13 +230,11 @@ class TemplateManager {
 				.getElementById("campaign-form")
 				.addEventListener("submit", (e) => {
 					e.preventDefault();
-
 					// Get the form and action type from the clicked button
-					const form = e.target;
-					const actionType = new FormData(form).get("actionType"); // This gets the value of the clicked button
-
+					const submitterButton = e.submitter; // This gets the clicked button
+					const actionType = submitterButton.value; // This gets the value of the clicked button
 					// Handle form submission based on the action type
-					this.handleFormSubmit(e, actionType);
+					this.handleFormSubmit(e, actionType, submitterButton);
 				});
 			this.previewContainer.innerHTML =
 				'<p class="text-center text-gray-500">Select a template to preview</p>';
@@ -372,15 +329,13 @@ class TemplateManager {
 		console.log("Attributes selected:", variables);
 	}
 
-	
 	convertDateFormat(dateString) {
 		return dateString.replace(/(\d{2})\/(\d{2})\/(\d{4})/g, "$2/$1/$3");
 	}
 
-	async handleFormSubmit(event, actionType) {
+	async handleFormSubmit(event, actionType, button) {
 		event.preventDefault();
 		// Get the target button
-		const button = event.submitter;
 		const loader = button.querySelector(".loader");
 		const buttonText = button.querySelector(".button-text");
 
@@ -426,13 +381,26 @@ class TemplateManager {
 		}
 
 		// Add selected attributes to form data
+		let isValid = true;
 		const selectedAttributes = {};
+
 		$(this.attributesForm)
-			.find(".attribute-select")
-			.each(function () {
+			?.find(".attribute-select")
+			?.each(function () {
 				const variable = $(this).data("variable");
-				selectedAttributes[variable] = $(this).val();
+				const value = $(this).val();
+				if (value === null || value === "Select a value") {
+					isValid = false;
+					alert(`Please select a value for variable: {${variable}}`);
+					resetButton(button, loader, buttonText);
+					return false; // Exit early if invalid
+				}
+				selectedAttributes[variable] = value;
 			});
+
+		if (!isValid) {
+			return;
+		}
 
 		if (Object.keys(selectedAttributes).length > 0) {
 			formData.append("variables", JSON.stringify(selectedAttributes));

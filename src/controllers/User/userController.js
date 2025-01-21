@@ -139,6 +139,7 @@ export const login = async (req, res, next) => {
 			{
 				WABA_ID: process.env.WABA_ID,
 				FB_PHONE_ID: process.env.FB_PHONE_ID,
+				FB_ACCESS_TOKEN: process.env.FB_ACCESS_TOKEN,
 			},
 			{ new: true, runValidators: true },
 		);
@@ -368,13 +369,14 @@ export const changePassword = async (req, res, next) => {
 
 export const about = async (req, res, next) => {
 	try {
+	
 		if (!req.session.tempUser) {
 			return res.status(400).json({
 				success: false,
 				message: "Session expired. Please try again.",
 			});
 		}
-
+	
 		const {
 			name: companyName,
 			description,
@@ -385,19 +387,19 @@ export const about = async (req, res, next) => {
 			jobRole,
 			website,
 		} = req.body;
-
+		
 		if (
-			companyName ||
-			description ||
-			state ||
-			country ||
-			companySize ||
-			industry ||
-			jobRole ||
-			website
+			!companyName ||
+			!description ||
+			!state ||
+			!country ||
+			!companySize ||
+			!industry ||
+			!jobRole ||
+			!website
 		)
 			return res.json({
-				success: true,
+				success: false,
 				message: "invalid input: There are some empty fields ",
 			});
 
@@ -412,8 +414,9 @@ export const about = async (req, res, next) => {
 				jobRole,
 				website,
 			)
-		)
-			next();
+		) {
+			return next();
+		}
 
 		const { name, email, password, phoneNumber, countryCode } =
 			req.session.tempUser;
@@ -450,11 +453,13 @@ export const about = async (req, res, next) => {
 			color,
 		});
 
+		// console.log(newUser);
 		// Update session with the newly created user data to keep them logged in
 		req.session.user = {
 			id: newUser.unique_id,
 			name: newUser.name,
 			color,
+			whatsAppStatus: newUser.WhatsAppConnectStatus,
 		};
 
 		await newUser.save();

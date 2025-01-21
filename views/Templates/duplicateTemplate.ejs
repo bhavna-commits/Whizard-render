@@ -296,7 +296,67 @@
 							</div>
 						</div>
 					</div>
+					<div class="relative mt-3 w-full">
+						<label for="language" class="block font-semibold ">Select Language</label>
+						
+						<div class="relative mt-3">
+							<!-- Trigger button for dropdown -->
+							<button type="button" id="language-button" onclick="toggleDropdown()" class="block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm text-left text-gray-500">
+								Select a language
+							</button>
+							
+							<!-- Dropdown content -->
+							<div id="dropdown-menu" class="hidden absolute z-10 w-full bg-white border border-gray-300 rounded-md shadow-lg mt-1">
+								<!-- Search input inside the dropdown -->
+								<input type="text" id="language-search" onkeyup="filterLanguages()" placeholder="Search languages..." class="block w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
+								
+								<!-- Dropdown options (initially hidden) -->
+								<ul id="language-options" class="max-h-48 overflow-y-auto">
+									<% languagesCode.forEach(language => { %>
+									<li class="hover:bg-indigo-300 hover:text-white px-4 py-2 cursor-pointer rounded" onclick="selectLanguage('<%= language.language %>', '<%= language.code %>')">
+										<%= language.language %>
+									</li>
+									<% }); %>
+								</ul>
+							</div>
+						</div>
+					</div>
 					
+					<script>
+						// Toggle the dropdown
+						function toggleDropdown () {
+							const dropdown = document.getElementById("dropdown-menu");
+							dropdown.classList.toggle("hidden");
+						}
+						
+						// Filter languages based on search input
+						function filterLanguages () {
+							const input = document.getElementById("language-search");
+							const filter = input.value.toLowerCase();
+							const ul = document.getElementById("language-options");
+							const li = ul.getElementsByTagName("li");
+							
+							for (let i = 0; i < li.length; i++) {
+								const txtValue = li[i].textContent || li[i].innerText;
+								if (txtValue.toLowerCase().indexOf(filter) > -1) {
+									li[i].style.display = "";
+								} else {
+									li[i].style.display = "none";
+								}
+							}
+						}
+						
+						// Function to select a language and close the dropdown
+						function selectLanguage (language, code) {
+							const button = document.getElementById("language-button");
+							button.textContent = language; // Update button text to selected language
+							document.getElementById("dropdown-menu").classList.add("hidden"); // Close dropdown
+							selectedLanguageCode = {
+								language,
+								code
+							}; 
+						}
+					</script>
 					<script>
 						document.getElementById("categoryButton").textContent = '<%= templateData.category %>';
 						
@@ -375,8 +435,7 @@
 						you&apos;ll use for this header.
 					</div>
 					<div id="headerInputContainer" class="hidden form-group mt-1">
-						<label class="text-sm text-secondary font-semibold pb-2">Add a title. Add {{1}}, {{2}}, {{3}} (Curly Braceses
-							and numbers) to add Dynamic values</label>
+						<label class="text-sm text-secondary font-semibold pb-2">Add a title text</label>
 						<input type="text" class="form-control border-0" id="headerInput" placeholder="Enter header title" />
 					</div>
 					
@@ -500,7 +559,7 @@
 							</div>
 							<div class="col-4">
 								<label>Website URL</label>
-								<input type="url" class="form-control" id="websiteUrl" placeholder="example.com">
+								<input type="url" class="form-control w-full" id="websiteUrl" placeholder="example.com">
 							</div>
 						</div>
 						<div class="col-1 close-icon">
@@ -520,7 +579,7 @@
 							</div>
 							<div class="col-4">
 								<label>Phone Number</label>
-								<input type="tel" class="form-control" id="phoneNumber" placeholder="9999999999">
+								<input type="tel" class="form-control w-full" id="phoneNumber" placeholder="9999999999">
 							</div>
 						</div>
 						<div class="col-1 close-icon">
@@ -576,37 +635,12 @@
 	
 	<script src="/template/js/fetch-preview.js"></script>
 	<script src="/template/js/create-template.js"></script>
-	<!-- <script src="template/js/fetch-preview.js"></script> -->
+	
 	<script>
 		const data = <%- JSON.stringify(templateData) %>;
-		console.log(data);
-		
-		// Access the BODY component from the `data` object
-		const bodyText = data.components.find((c) => c.type == "BODY")?.text || "";
-		document.getElementById("bodyInput").innerHTML = bodyText.replace(
-			/\n/g,
-			"<br>",
-		);;
-		
-		// Access the FOOTER component from the `data` object
-		const footerText = data.components.find((c) => c.type == "FOOTER")?.text || "";
-		document.getElementById("footerInput").innerHTML = footerText.replace(
-			/\n/g,
-			"<br>",
-		);;
-		
-		document.getElementById("previewBody").innerHTML = bodyText.replace(
-			/\n/g,
-			"<br>",
-		);;
-		document.getElementById("previewBod").innerHTML = bodyText;
-		document.getElementById("charCount").textContent = bodyText.length;
-		
-		document.getElementById("previewFooter").innerHTML = footerText.replace(
-			/\n/g,
-			"<br>",
-		);
+		// console.log(JSON.stringify(data));
 	</script>
+	<script src="/template/js/duplicateTemplate.js"></script>
 	<script>
 		window.addEventListener('load', function () {
 			// Fade out the loader smoothly by changing the opacity

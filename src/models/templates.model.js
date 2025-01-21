@@ -1,4 +1,4 @@
-import mongoose, { SchemaType } from "mongoose";
+import mongoose from "mongoose";
 
 const Schema = mongoose.Schema;
 
@@ -9,8 +9,11 @@ const templateSchema = new Schema(
 			required: true,
 		},
 		language: {
-			type: String,
-			default: "en_US",
+			code: {
+				type: String,
+				default: "en_US",
+			},
+			language: { type: String, default: "English (US)" },
 		},
 		category: {
 			type: String,

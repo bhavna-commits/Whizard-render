@@ -12,7 +12,9 @@ export const saveTemplateToDatabase = async (
 	req,
 	templateData,
 	dynamicVariables,
+	selectedLanguageCode,
 	id,
+
 ) => {
 	try {
 		const components = createComponents(templateData, dynamicVariables);
@@ -24,6 +26,7 @@ export const saveTemplateToDatabase = async (
 			unique_id: generateUniqueId(),
 			useradmin: id,
 			dynamicVariables,
+			language: selectedLanguageCode,
 		});
 
 		if (req.file) {
@@ -55,7 +58,7 @@ export const saveTemplateToDatabase = async (
 	}
 };
 
-export async function submitTemplateToFacebook(savedTemplate) {
+export async function submitTemplateToFacebook(savedTemplate, id) {
 	try {
 		const plainTemplate = savedTemplate.toObject(); // Convert to plain object
 
@@ -76,7 +79,7 @@ export async function submitTemplateToFacebook(savedTemplate) {
 		// Continue with the request data preparation
 		const requestData = {
 			name: plainTemplate.name,
-			language: plainTemplate.language,
+			language: plainTemplate.language.code,
 			allow_category_change: true,
 			category: plainTemplate.category.toUpperCase(),
 			components: plainTemplate.components,
@@ -90,7 +93,7 @@ export async function submitTemplateToFacebook(savedTemplate) {
 			{
 				headers: {
 					"Content-Type": "application/json",
-					Authorization: `Bearer ${user.FB_ACCESS_TOKEN}`,
+					Authorization: `Bearer ${process.env.FB_ACCESS_TOKEN}`,
 				},
 			},
 		);

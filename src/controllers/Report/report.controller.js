@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import Contacts from "../../models/contacts.model.js";
 import ContactList from "../../models/contactList.model.js";
 import Permissions from "../../models/permissions.model.js";
+import ActivityLogs from "../../models/activityLogs.model.js";
 import User from "../../models/user.model.js";
 import { overview } from "./reports.functions.js";
 import { sendMessages } from "./reports.functions.js";
@@ -1076,7 +1077,6 @@ export const getSendBroadcast = async (req, res, next) => {
 		console.log("broadcast data not found");
 		return res.render("errors/serverError");
 	}
-	
 };
 
 export const createCampaignData = async (req, res, next) => {
@@ -1092,6 +1092,7 @@ export const createCampaignData = async (req, res, next) => {
 
 export const createCampaign = async (req, res, next) => {
 	try {
+		// console.log(req.body);
 		let {
 			templateId,
 			contactListId,
@@ -1101,14 +1102,15 @@ export const createCampaign = async (req, res, next) => {
 			contactList,
 		} = req.body;
 
-		if (!templateId || !contactListId || name) {
+		// console.log(JSON.parse(contactList));
+
+		if (!templateId || !contactListId || !name) {
 			return res.status(400).json({
 				message: "All fields are required",
 			});
 		}
 
-		if (!isString(templateId, contactListId, variables, schedule, name))
-			return next();
+		if (!isString(templateId, contactListId, schedule, name)) return next();
 
 		variables =
 			typeof variables === "string" ? JSON.parse(variables) : variables;
@@ -1131,9 +1133,17 @@ export const createCampaign = async (req, res, next) => {
 			contactId: contactListId,
 		});
 
-		contactList = contactLists.map((c) =>
-			contactList.forEach((cl) => c.wa_id == cl.recipientPhone),
-		);
+		// console.log(contactLists);
+
+		contactList = contactLists.filter((c) => {
+			console.log(c.wa_id);
+			return contactList.some((cl) => {
+				console.log(cl.recipientPhone);
+				return "91" + c.wa_id === cl.recipientPhone;
+			});
+		});
+
+		// console.log(contactList);
 
 		if (!schedule) {
 			await sendMessages(
@@ -1147,9 +1157,9 @@ export const createCampaign = async (req, res, next) => {
 				useradmin:
 					req.session?.user?.id || req.session?.addedUser?.owner,
 				unique_id: generateUniqueId(),
-				name: req.session.user.name
-					? req.session.user.name
-					: req.session.addedUser.name,
+				name: req.session?.user?.name
+					? req.session?.user?.name
+					: req.session?.addedUser?.name,
 				actions: "Send",
 				details: `Sent campaign named: ${name}`,
 			});
@@ -1161,9 +1171,9 @@ export const createCampaign = async (req, res, next) => {
 				useradmin:
 					req.session?.user?.id || req.session?.addedUser?.owner,
 				unique_id: generateUniqueId(),
-				name: req.session.user.name
-					? req.session.user.name
-					: req.session.addedUser.name,
+				name: req.session?.user?.name
+					? req.session?.user?.name
+					: req.session?.addedUser?.name,
 				actions: "Send",
 				details: `Scheduled new campaign named: ${name}`,
 			});
