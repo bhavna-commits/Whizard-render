@@ -1195,6 +1195,7 @@ export const createCampaign = async (req, res, next) => {
 
 export const getCostReport = async (req, res) => {
 	try {
+		console.log("here");
 		const userId = req.session?.user?.id || req.session?.addedUser?.owner;
 		const user = await User.findOne({ unique_id: userId });
 
@@ -1203,22 +1204,27 @@ export const getCostReport = async (req, res) => {
 		const graph = process.env.FB_GRAPH_VERSION;
 
 		if (!user || !WABA_ID || !accessToken || !graph) {
-			return res
-				.status(400)
-				.json({ error: "User does not have required credentials" });
+			return res.status(400).json({
+				error: "User does not have required credentials",
+			});
 		}
 
-		// Get query parameters for start, end, and granularity
-		const start = req.query.start
-			? Math.floor(new Date(req.query.start).getTime() / 1000)
-			: Math.floor(new Date("2025-01-01T00:00:00Z").getTime() / 1000);
-		const end = req.query.end
-			? Math.floor(new Date(req.query.end).getTime() / 1000)
-			: Math.floor(new Date("2025-01-07T23:59:59Z").getTime() / 1000);
-		const granularity = req.query.granularity || "DAY"; // Default to 'DAY' if not provided
+		// Get timestamps from query parameters
+		const start =
+			req.query.start ||
+			Math.floor(Date.now() / 1000) - 90 * 24 * 60 * 60; // Default 90 days ago
+		const end = req.query.end || Math.floor(Date.now() / 1000);
+		const categories = ["MARKETING", "UTILITY", "AUTHENTICATION"];
 
-		// Meta API Endpoint for fetching WABA cost reports
-		const apiURL = `https://graph.facebook.com/${graph}/${WABA_ID}?fields=analytics.start(${start}).end(${end}).granularity(${granularity})&access_token=${accessToken}`;
+		// Meta API Endpoint for conversation analytics
+		const apiURL =
+			`https://graph.facebook.com/${graph}/${WABA_ID}?fields=conversation_analytics` +
+			`.start(${start})` +
+			`.end(${end})` +
+			`.granularity(DAILY)` +
+			`.conversation_categories(${JSON.stringify(categories)})` +
+			`.dimensions(["CONVERSATION_CATEGORY"])` +
+			`&access_token=${accessToken}`;
 
 		const response = await fetch(apiURL, {
 			method: "GET",
@@ -1228,31 +1234,115 @@ export const getCostReport = async (req, res) => {
 		});
 
 		const data = await response.json();
-		console.log(JSON.stringify(data));
 
 		if (!response.ok) {
-			console.log("Error fetching cost report:", data.error.message);
-			return res.render("errors/serverError");
+			console.error(
+				"Error fetching conversation analytics:",
+				data.error?.message,
+			);
+			return res.status(response.status).json({
+				error:
+					data.error?.message ||
+					"Failed to fetch conversation analytics",
+			});
 		}
 
+		// Process the data into a more usable format
+		const processedData = {
+			conversation_analytics: {
+				data: [
+					{
+						data_points: [],
+					},
+				],
+			},
+		};
+
+		if (data.conversation_analytics?.data?.[0]?.data_points) {
+			// Group data points by date and category
+			const groupedData = new Map();
+
+			data.conversation_analytics.data[0].data_points.forEach((point) => {
+				const date = new Date(point.start * 1000)
+					.toISOString()
+					.split("T")[0];
+				if (!groupedData.has(date)) {
+					groupedData.set(date, {
+						MARKETING: { conversations: 0, cost: 0 },
+						UTILITY: { conversations: 0, cost: 0 },
+						AUTHENTICATION: { conversations: 0, cost: 0 },
+					});
+				}
+
+				const category = point.conversation_category;
+				const categoryData = groupedData.get(date)[category] || {
+					conversations: 0,
+					cost: 0,
+				};
+				categoryData.conversations += point.conversation || 0;
+				categoryData.cost += point.cost || 0;
+				groupedData.get(date)[category] = categoryData;
+			});
+
+			// Convert grouped data back to array format
+			for (const [date, categoryData] of groupedData) {
+				for (const category of categories) {
+					processedData.conversation_analytics.data[0].data_points.push(
+						{
+							start: new Date(date).getTime() / 1000,
+							end: new Date(date).getTime() / 1000 + 86400, // Add 24 hours
+							conversation_category: category,
+							conversation: categoryData[category].conversations,
+							cost: categoryData[category].cost,
+						},
+					);
+				}
+			}
+		}
+		console.log(processedData);
+		// Check permissions and render response
 		const permissions = req.session?.addedUser?.permissions;
 		if (permissions) {
 			const access = await Permissions.findOne({
 				unique_id: permissions,
 			});
+
 			if (access.reports?.costReports) {
+				return res.json(processedData);
+			} else {
+				return res.status(403).json({ error: "Not allowed" });
+			}
+		} else {
+			const access = await User.findOne({
+				unique_id: req.session?.user?.id,
+			});
+			return res.json(processedData);
+		}
+	} catch (error) {
+		console.error("Error fetching cost report :", error);
+		return res.status(500).json({ error: "Internal server error" });
+	}
+};
+
+export const renderGetCostReport = async (req, res) => {
+	try {
+		const permissions = req.session?.addedUser?.permissions;
+		if (permissions) {
+			const access = Permissions.findOne({ unique_id: permissions });
+			if (
+				access.contactList.sendBroadcast &&
+				req.session?.addedUser?.whatsAppStatus
+			) {
 				res.render("Reports/costReport", {
 					access,
 					name: req.session?.addedUser?.name,
 					photo: req.session?.addedUser?.photo,
 					color: req.session?.addedUser?.color,
-					data,
-					WABA_ID,
 				});
 			} else {
 				res.render("errors/notAllowed");
 			}
-		} else {
+		} else if (req.session?.user?.whatsAppStatus) {
 			const access = await User.findOne({
 				unique_id: req.session?.user?.id,
 			});
@@ -1261,12 +1351,22 @@ export const getCostReport = async (req, res) => {
 				name: req.session?.user?.name,
 				photo: req.session?.user?.photo,
 				color: req.session?.user?.color,
-				data,
-				WABA_ID,
 			});
+		} else {
+			const access = await User.findOne({
+				unique_id: req.session?.user?.id,
+			});
+
+			res.render("Reports/costReport", {
+				access: access.access,
+				name: req.session?.user?.name,
+				photo: req.session?.user?.photo,
+				color: req.session?.user?.color,
+			});
+			// res.render("errors/notAllowed");
 		}
-	} catch (error) {
-		console.error("Error:", error);
+	} catch (err) {
+		console.log("Error rendering costReports :" ,err);
 		return res.render("errors/serverError");
 	}
 };

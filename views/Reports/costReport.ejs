@@ -8,12 +8,11 @@
 	<link rel="preconnect" href="https://fonts.googleapis.com" />
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 	<link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet" />
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.css">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-	<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
-	<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment"></script>
-	<script src="https://cdn.jsdelivr.net/npm/moment@2.29.1"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+	<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@2.0.0"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.3.4/axios.min.js"></script>
 	<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 	<link href="styles/style.css" rel="stylesheet" type="text/css" />
 </head>
@@ -228,52 +227,88 @@
 			</div>
 			<div class="mainDiv">
 				
-				<!-- Filter Section -->
-				<form action="/reports/cost-report" method="get" class="flex justify-between items-center mb-4">
-					<label for="dateRange">Select Date Range:</label>
-					<input type="text" id="dateRange" name="dateRange" class="bg-white p-2 rounded border" placeholder="Select a date range" required>
+				<div class="container mx-auto px-4 py-8">
+					<!-- Date Range Picker -->
+					<div class="mb-8">
+						<div class="bg-white rounded-lg shadow p-4">
+							<div class="flex items-center space-x-2">
+								<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+								</svg>
+								<input type="text" id="dateRange" class="flex-1 p-2 border rounded" placeholder="Select date range" readonly>
+							</div>
+						</div>
+					</div>
 					
-					<!-- <label for="granularity">Granularity:</label>
-					<select id="granularity" name="granularity" required>
-						<option value="HALF_HOUR">Half Hour</option>
-						<option value="DAY">Day</option>
-						<option value="MONTH">Month</option>
-					</select> -->
+					<!-- Summary Boxes -->
+					<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+						<!-- Left box group -->
+						<div class="bg-white rounded-lg shadow p-6">
+							<h2 class="text-lg font-semibold mb-4">All Conversations</h2>
+							<div class="space-y-4">
+								<div class="flex items-center justify-between">
+									<div class="flex items-center">
+										<span class="w-2 h-2 bg-orange-400 rounded-full mr-2"></span>
+										<span>Marketing</span>
+									</div>
+									<span class="font-medium conversation-count" id="marketingCount">0</span>
+								</div>
+								<div class="flex items-center justify-between">
+									<div class="flex items-center">
+										<span class="w-2 h-2 bg-purple-400 rounded-full mr-2"></span>
+										<span>Utility</span>
+									</div>
+									<span class="font-medium conversation-count" id="utilityCount">0</span>
+								</div>
+								<div class="flex items-center justify-between">
+									<div class="flex items-center">
+										<span class="w-2 h-2 bg-blue-400 rounded-full mr-2"></span>
+										<span>Authentication</span>
+									</div>
+									<span class="font-medium conversation-count" id="authCount">0</span>
+								</div>
+							</div>
+						</div>
+						
+						<!-- Right box group -->
+						<div class="bg-white rounded-lg shadow p-6">
+							<h2 class="text-lg font-semibold mb-4">Approximate Charges</h2>
+							<div class="space-y-4">
+								<div class="flex items-center justify-between">
+									<div class="flex items-center">
+										<span class="w-2 h-2 bg-orange-400 rounded-full mr-2"></span>
+										<span>Marketing</span>
+									</div>
+									<span class="font-medium cost" id="marketingCost">₹0.0</span>
+								</div>
+								<div class="flex items-center justify-between">
+									<div class="flex items-center">
+										<span class="w-2 h-2 bg-purple-400 rounded-full mr-2"></span>
+										<span>Utility</span>
+									</div>
+									<span class="font-medium cost" id="utilityCost">₹0.0</span>
+								</div>
+								<div class="flex items-center justify-between">
+									<div class="flex items-center">
+										<span class="w-2 h-2 bg-blue-400 rounded-full mr-2"></span>
+										<span>Authentication</span>
+									</div>
+									<span class="font-medium cost" id="authCost">₹0.0</span>
+								</div>
+							</div>
+						</div>
+					</div>
 					
-					<button type="submit" class="bg-blue-500 text-white p-2 rounded">Get Report</button>
-				</form>
-				
-				<!-- Display Metrics -->
-				<div class="flex justify-between items-center mb-6">
-					<div class="bg-white p-4 shadow rounded">
-						<h4 class="text-gray-600">All Conversations</h4>
-						<p id="all-conversations" class="text-2xl font-bold">14</p>
-					</div>
-					<div class="bg-white p-4 shadow rounded">
-						<h4 class="text-gray-600">Marketing</h4>
-						<p id="marketing-cost" class="text-2xl font-bold">₹0.0</p>
-					</div>
-					<div class="bg-white p-4 shadow rounded">
-						<h4 class="text-gray-600">Utility</h4>
-						<p id="utility-cost" class="text-2xl font-bold">₹0.0</p>
-					</div>
-					<div class="bg-white p-4 shadow rounded">
-						<h4 class="text-gray-600">Authentication</h4>
-						<p id="authentication-cost" class="text-2xl font-bold">₹0.0</p>
+					<!-- Graph -->
+					<div class="bg-white rounded-lg shadow p-6">
+						<canvas id="analyticsChart" height="200"></canvas>
 					</div>
 				</div>
-				
-				<!-- Graph -->
-				<div class="bg-white p-6 shadow rounded">
-					<canvas id="conversationChart"></canvas>
-				</div>				
 			</div>
 		</div>
 	</div>
-	<script>
-		const chartData = JSON.parse('<%- JSON.stringify(data.analytics.data_points) %>');		
-	</script>
 	<script src="/reports/js/costReport.js"></script>
+	
 	<script>
 		window.addEventListener('load', function () {
 			// Fade out the loader smoothly by changing the opacity
