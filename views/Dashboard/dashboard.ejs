@@ -255,7 +255,7 @@
 						Start engaging with your customers through WhatsApp
 						Business API
 					</p>
-					<% if ( access?.dashboard?.connectNow )  {%>
+					<% if ( access?.dashboard?.connectNow ) { %>
 					<button id="connectBtn" onclick="launchWhatsAppSignup()" class="connect-btn bg-white text-gray-900 px-4 py-2 rounded-full text-sm font-medium inline-flex items-center w-fit hover:bg-gray-50">
 						Connect Now
 					</button>
@@ -291,119 +291,114 @@
 			</div>
 			<% } %>
 			<!-- Filter Bar -->
-			<div class="filter-bar mt-5 border w-fit flex p-2 rounded-md hover:cursor-pointer" id="filterBtn">
+			<div class="filter-bar mt-5 border w-fit flex p-2 rounded-md hover:cursor-pointer" id="filterDate">
 				<svg xmlns="http://www.w3.org/2000/svg" height="1.5rem" viewBox="0 -960 960 960" width="1.5rem" fill="#000000">
 					<path d="M200-80q-33 0-56.5-23.5T120-160v-560q0-33 23.5-56.5T200-800h40v-80h80v80h320v-80h80v80h40q33 0 56.5 23.5T840-720v560q0 33-23.5 56.5T760-80H200Zm0-80h560v-400H200v400Zm0-480h560v-80H200v80Zm0 0v-80 80Zm280 240q-17 0-28.5-11.5T440-440q0-17 11.5-28.5T480-480q17 0 28.5 11.5T520-440q0 17-11.5 28.5T480-400Zm-160 0q-17 0-28.5-11.5T280-440q0-17 11.5-28.5T320-480q17 0 28.5 11.5T360-440q0 17-11.5 28.5T320-400Zm320 0q-17 0-28.5-11.5T600-440q0-17 11.5-28.5T640-480q17 0 28.5 11.5T680-440q0 17-11.5 28.5T640-400ZM480-240q-17 0-28.5-11.5T440-280q0-17 11.5-28.5T480-320q17 0 28.5 11.5T520-280q0 17-11.5 28.5T480-240Zm-160 0q-17 0-28.5-11.5T280-280q0-17 11.5-28.5T320-320q17 0 28.5 11.5T360-280q0 17-11.5 28.5T320-240Zm320 0q-17 0-28.5-11.5T600-280q0-17 11.5-28.5T640-320q17 0 28.5 11.5T680-280q0 17-11.5 28.5T640-240Z" />
-				</svg><span class="pl-2">Select the Filter Date</span>
+				</svg><span id="showDateFilter" class="pl-2">Select the Filter Date</span>
 			</div>
 			
 			<!-- Statistics Cards -->
 			<div class="row w-full flex justify-center items-center">
 				<div class="col-lg-4 col-md-6 col-sm-12">
-					<div class="border-gray-500 border card-dashboard">
+					<div class="border-gray-500 border relative overflow-hidden card-dashboard">
 						<h5>Messages Sent</h5>
-						<h4><%= messagesSent %></h4>
-						<div class="d-flex justify-content-between">
-							<div class="bg-messages-sent icon-wrapper">
-								<i class="fas fa-paper-plane"></i>
+						<h4 class="mt-2"><%= messagesSent %></h4>
+						<div class="d-flex justify-content-between mt-3">
+							<button type="button" onclick="viewSent()" class="border rounded-2xl px-3 py-1 shadow-sm text-sm h-fit">
+								View user
+							</button>
+							<div class="absolute bottom-[-8rem] right-[-7rem] w-[200px] h-[200px]">
+								<div class="absolute inset-0 rounded-full icon-gradient"></div>
+								<div class="absolute inset-10 rounded-full icon-gradient"></div>							
 							</div>
-							<div class="border icon-wrapper">
-								<i class="fa-solid fa-list"></i>
-							</div>
+							<img class="absolute bottom-3 right-3" src="Vector.svg" alt="sent" />
 						</div>
-						<!-- <div class="progress">
-							<div class="progress-bar progress-bar-green" style="width: 100%"></div>
-							</div> -->
+						
 					</div>
 				</div>
 				
 				<div class="col-lg-4 col-md-6 col-sm-12">
-					<div class="border-gray-500 border card-dashboard">
+					<div class="border-gray-500 border relative overflow-hidden card-dashboard">
 						<h5>Replies Received</h5>
-						<h4> <%= messagesReplied %></h4>
-						<div class="d-flex justify-content-between">
-							<div class="bg-replies-received icon-wrapper">
-								<i class="fas fa-reply"></i>
+						<h4 class="mt-2"> <%= messagesReplied %></h4>
+						<div class="d-flex justify-content-between mt-3">
+							<button type="button" onclick="viewReplied()" class="border rounded-2xl px-3 py-1 shadow-sm text-sm h-fit">
+								View user
+							</button>
+							<div class="absolute bottom-[-8rem] right-[-7rem] w-[200px] h-[200px]">
+								<div class="absolute inset-0 rounded-full icon-gradient"></div>
+								<div class="absolute inset-10 rounded-full icon-gradient"></div>							
 							</div>
-							<div class="border icon-wrapper">
-								<i class="fa-solid fa-list"></i>
-							</div>
+							<img class="absolute bottom-3 right-3" src="arrow.svg" alt="sent" />
 						</div>
-						<!-- <div class="progress">
-							<div class="progress-bar progress-bar-yellow" style="width: 85%"></div>
-							</div> -->
 					</div>
 				</div>
 				
 				<div class="col-lg-4 col-md-6 col-sm-12">
-					<div class="border-gray-500 border card-dashboard">
+					<div class="border-gray-500 border relative overflow-hidden card-dashboard">
 						<h5>Messages Read</h5>
-						<h4><%= messagesRead %></h4>
-						<div class="d-flex justify-content-between">
-							<div class="bg-messages-read icon-wrapper">
-								<i class="fas fa-envelope-open-text"></i>
+						<h4 class="mt-2"><%= messagesRead %></h4>
+						<div class="d-flex justify-content-between mt-3">
+							<button type="button" onclick="viewRead()" class="border rounded-2xl px-3 py-1 shadow-sm text-sm h-fit">
+								View user
+							</button>
+							<div class="absolute bottom-[-8rem] right-[-7rem] w-[200px] h-[200px]">
+								<div class="absolute inset-0 rounded-full icon-gradient"></div>
+								<div class="absolute inset-10 rounded-full icon-gradient"></div>						
 							</div>
-							<div class="border icon-wrapper">
-								<i class="fa-solid fa-list"></i>
-							</div>
+							<img class="absolute bottom-3 right-3" src="tick.svg" alt="sent" />
 						</div>
-						<!-- <div class="progress">
-							<div class="progress-bar progress-bar-blue" style="width: 85%"></div>
-							</div> -->
 					</div>
 				</div>
 				
 				<div class="col-lg-4 col-md-6 col-sm-12">
-					<div class="border-gray-500 border card-dashboard">
+					<div class="border-gray-500 border relative overflow-hidden card-dashboard">
 						<h5>Messages Delivered</h5>
-						<h4><%= messagesDelivered %></h4>
-						<div class="d-flex justify-content-between">
-							<div class="bg-messages-delivered icon-wrapper">
-								<i class="fas fa-check"></i>
+						<h4 class="mt-2"><%= messagesDelivered %></h4>
+						<div class="d-flex justify-content-between mt-3">
+							<button type="button" onclick="viewDelivered()" class="border rounded-2xl px-3 py-1 shadow-sm text-sm h-fit">
+								View user
+							</button>
+							<div class="absolute bottom-[-8rem] right-[-7rem] w-[200px] h-[200px]">
+								<div class="absolute inset-0 rounded-full icon-gradient"></div>
+								<div class="absolute inset-10 rounded-full icon-gradient"></div>							
 							</div>
-							<div class="border icon-wrapper">
-								<i class="fa-solid fa-list"></i>
-							</div>
+							<img class="absolute bottom-3 right-3" src="tick dark.svg" alt="sent" />
 						</div>
-						<!-- <div class="progress">
-							<div class="progress-bar progress-bar-grey" style="width: 90%"></div>
-							</div> -->
 					</div>
 				</div>
 				
 				<div class="col-lg-4 col-md-6 col-sm-12">
-					<div class="border-gray-500 border card-dashboard">
+					<div class="border-gray-500 border relative overflow-hidden card-dashboard">
 						<h5>Messages Failed</h5>
-						<h4><%= messagesFailed %></h4>
-						<div class="d-flex justify-content-between">
-							<div class="bg-messages-failed icon-wrapper">
-								<i class="fas fa-exclamation-triangle"></i>
+						<h4 class="mt-2"><%= messagesFailed %></h4>
+						<div class="d-flex justify-content-between mt-3">
+							<button type="button" onclick="viewFailed()" class="border rounded-2xl px-3 py-1 shadow-sm text-sm h-fit">
+								View user
+							</button>
+							<div class="absolute bottom-[-8rem] right-[-7rem] w-[200px] h-[200px]">
+								<div class="absolute inset-0 rounded-full icon-gradient"></div>
+								<div class="absolute inset-10 rounded-full icon-gradient"></div>								
 							</div>
-							<div class="border icon-wrapper">
-								<i class="fa-solid fa-list"></i>
-							</div>
+							<img class="absolute bottom-3 right-3" src="warning.svg" alt="sent" />
 						</div>
-						<!-- <div class="progress">
-							<div class="progress-bar progress-bar-red" style="width: 10%"></div>
-							</div> -->
 					</div>
 				</div>
 				
 				<div class="col-lg-4 col-md-6 col-sm-12">
-					<div class="border-gray-500 border card-dashboard">
+					<div class="border-gray-500 border relative overflow-hidden card-dashboard">
 						<h5>Number Doesn't Exist</h5>
-						<h4><%= messagesFailed %></h4>
-						<div class="d-flex justify-content-between">
-							<div class="bg-number-invalid icon-wrapper">
-								<i class="fas fa-user-times"></i>
+						<h4 class="mt-2"><%= messagesFailed %></h4>
+						<div class="d-flex justify-content-between mt-3">
+							<button type="button" onclick="viewFailed()" class="border rounded-2xl px-3 py-1 shadow-sm text-sm h-fit">
+								View user
+							</button>
+							<div class="absolute bottom-[-8rem] right-[-7rem] w-[200px] h-[200px]">
+								<div class="absolute inset-0 rounded-full icon-gradient"></div>
+								<div class="absolute inset-10 rounded-full icon-gradient"></div>							
 							</div>
-							<div class="border icon-wrapper">
-								<i class="fa-solid fa-list"></i>
-							</div>
+							<img class="absolute bottom-3 right-3" src="User.svg" alt="sent" />
 						</div>
-						<!-- <div class="progress">
-							<div class="progress-bar progress-bar-orange" style="width: 10%"></div>
-							</div> -->
 					</div>
 				</div>
 			</div>
@@ -464,38 +459,47 @@
 						</div>
 					</div> -->
 					
-					<div class="feature-box">
+					<div class="feature-box relative overflow-hidden">
 						<h3 class="feature-title">Bulk Messaging</h3>
 						<p class="feature-description">Send messages to multiple contacts at once</p>
-						<div class="icon-container">
-							<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-								<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-								<circle cx="9" cy="7" r="4"></circle>
-								<path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-								<path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-							</svg>
+						<div class="w-full flex justify-end">
+							<div class="mt-4">
+								<div class="absolute bottom-[-9rem] right-[-8rem] w-[200px] h-[200px]">
+									<div class="absolute inset-0 rounded-full icon-gradient-platform"></div>
+									<div class="absolute inset-6 rounded-full icon-gradient-platform"></div>
+								</div>
+								<img class="absolute bottom-3 right-3" src="bulk messaging.svg" alt="sent" />
+								
+							</div>
 						</div>
 					</div>
 					
-					<div class="feature-box">
+					<div class="feature-box relative overflow-hidden">
 						<h3 class="feature-title">Analytics</h3>
 						<p class="feature-description">Track message performance and customer engagement</p>
-						<div class="icon-container">
-							<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-								<line x1="18" y1="20" x2="18" y2="10"></line>
-								<line x1="12" y1="20" x2="12" y2="4"></line>
-								<line x1="6" y1="20" x2="6" y2="14"></line>
-							</svg>
+						<div class="w-full flex justify-end">
+							<div class="mt-4">
+								<div class="absolute bottom-[-9rem] right-[-8rem] w-[200px] h-[200px]">
+									<div class="absolute inset-0 rounded-full icon-gradient-platform"></div>
+									<div class="absolute inset-6 rounded-full icon-gradient-platform"></div>
+								</div>
+								<img class="absolute bottom-3 right-3" src="analytics.svg" alt="sent" />
+								
+							</div>
 						</div>
 					</div>
 					
-					<div class="feature-box">
+					<div class="feature-box relative overflow-hidden">
 						<h3 class="feature-title">Quick Replies</h3>
 						<p class="feature-description">Create templates for frequently used messages</p>
-						<div class="icon-container">
-							<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-								<path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
-							</svg>
+						<div class="w-full flex justify-end">
+							<div class="mt-4">
+								<div class="absolute bottom-[-9rem] right-[-8rem] w-[200px] h-[200px]">
+									<div class="absolute inset-0 rounded-full icon-gradient-platform"></div>
+									<div class="absolute inset-6 rounded-full icon-gradient-platform"></div>
+								</div>
+								<img class="absolute bottom-3 right-3" src="replies.svg" alt="sent" />							
+							</div>
 						</div>
 					</div>
 				</div>

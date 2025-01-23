@@ -28,12 +28,27 @@ function hideModal() {
 	createModal.classList.add("scale-95");
 	previewSection.classList.add("hidden");
 	fileUploadSection.classList.remove("hidden");
-	errorMessage.classList.add("hidden");
+	// errorMessage.classList.add("hidden");
+
+	// Reset form inputs
+	fileInput.value = null;
+	fileLabel.textContent = "Choose File";
+	document.getElementById("listName").value = ""; // Reset list name input
+	file = null; // Reset file variable
+
+	// Reset preview and buttons
+	previewSection.innerHTML = ""; // Clear the preview section
+	errorMessage.innerHTML = ""; // Clear the error messages
+	// previewButton.classList.add("hidden"); // Hide preview button
+	// submitButton.classList.add("hidden"); // Hide submit button
+
+	// Reset main div size if needed
 	if (!mainDiv.classList.contains("max-w-3xl")) {
 		mainDiv.classList.add("max-w-3xl");
 		mainDiv.classList.add("mt-[5%]");
 		mainDiv.classList.remove("mt-[2%]");
 	}
+
 	modal.classList.add("pointer-events-none");
 }
 

@@ -6,6 +6,8 @@ import {
 	isNumber,
 	isString,
 	isBoolean,
+	isObject,
+	isValidArrayOrObject
 } from "../../middleWares/sanitiseInput.js";
 // import Template from "../../models/templates.model.js";
 import Permissions from "../../models/permissions.model.js";
@@ -49,7 +51,7 @@ export const previewContactList = async (req, res, next) => {
 					"Invalid file format. Please upload a valid JSON file.",
 			});
 		}
-
+		if (!isValidArrayOrObject(parsedData)) return next();
 		// Check if the parsed data contains contacts
 		if (!parsedData.length) {
 			return res.status(400).json({
@@ -226,6 +228,7 @@ export const createList = async (req, res, next) => {
 				let { Name, Number, ...additionalFields } = contactData;
 				const keyId = generateUniqueId();
 				return new Contacts({
+					useradmin: userId,
 					Name,
 					wa_idK: `${number}_${keyId}`,
 					keyId,
@@ -286,7 +289,7 @@ export const createList = async (req, res, next) => {
 export const deleteList = async (req, res, next) => {
 	try {
 		const { id } = req.params;
-		if (!isString(id))  return next();
+		if (!isString(id)) return next();
 		const contactList = await ContactList.findOne({ contactId: id });
 		// console.log(contactList);
 		if (!contactList) {
@@ -324,14 +327,7 @@ export const deleteList = async (req, res, next) => {
 export const sampleCSV = async (req, res) => {
 	try {
 		const userId = req.session.user.id;
-		const userDir = path.join(
-			__dirname,
-			"..",
-			"..",
-			"..",
-			"CSV",
-			userId,
-		);
+		const userDir = path.join(__dirname, "..", "..", "..", "CSV", userId);
 		const userCSVPath = path.join(userDir, "sample.csv");
 
 		// Check if the user's specific CSV file exists
@@ -432,7 +428,7 @@ export const getCustomField = async (req, res, next) => {
 				res.render("errors/notAllowed");
 			}
 		} else {
-			const access = Permissions.findOne({ useradmin: userId });
+			const access = await User.findOne({ unique_id: userId });
 			res.render("Contact-List/custom-field", {
 				access: access.access,
 				customFields: paginatedResults || [],
@@ -461,7 +457,7 @@ export const createCustomField = async (req, res, next) => {
 			"..",
 			"..",
 			"..",
-			"public",
+			"CSV",
 			userId,
 		);
 		const csvFilePath = path.join(userDir, "sample.csv");
@@ -475,7 +471,7 @@ export const createCustomField = async (req, res, next) => {
 				"..",
 				"..",
 				"..",
-				"public",
+				"CSV",
 				"sample.csv",
 			);
 			fs.copyFileSync(defaultCSV, csvFilePath);
@@ -877,6 +873,6 @@ export const searchContactLists = async (req, res, next) => {
 		});
 	} catch (error) {
 		console.error("Error fetching contact lists:", error);
-		res.render("errors/serverError")
+		res.render("errors/serverError");
 	}
 };

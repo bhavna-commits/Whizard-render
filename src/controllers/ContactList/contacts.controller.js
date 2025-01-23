@@ -28,7 +28,7 @@ export const csvFilePath = path.join(
 	"..",
 	"..",
 	"..",
-	"public",
+	"CSV",
 	"sample.csv",
 );
 
@@ -322,7 +322,7 @@ export const updateCSVOnFieldDelete = async (id, fieldToDelete) => {
 			"..",
 			"..",
 			"..",
-			"public",
+			"CSV",
 			id,
 			"sample.csv",
 		);
@@ -401,6 +401,7 @@ export const createContact = async (req, res, next) => {
 		const keyId = generateUniqueId();
 		// Add the new contact to the Contacts collection
 		const newContact = await Contacts.create({
+			useradmin: userId,
 			unique_id: generateUniqueId(),
 			keyId,
 			contactId,

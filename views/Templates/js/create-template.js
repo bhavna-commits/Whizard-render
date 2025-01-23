@@ -54,6 +54,7 @@ document
 
 			const mediaType = document.getElementById("mediaType").value;
 			const fileInput = document.getElementById("file-upload").files[0];
+			console.log(fileInput);
 			if (mediaType === "image" && fileInput) {
 				const img = document.createElement("img");
 				img.src = URL.createObjectURL(fileInput);
@@ -63,7 +64,8 @@ document
 				// Append to previewHeader
 				previewHeader.appendChild(img);
 
-				const imgClone = img.cloneNode(true); // Create a deep clone
+				const imgClone = img.cloneNode(true);
+				previewHead.innerHTML = "";
 				previewHead.appendChild(imgClone);
 			} else if (mediaType === "video" && fileInput) {
 				const video = document.createElement("video");
@@ -76,7 +78,8 @@ document
 				previewHeader.appendChild(video);
 
 				// Clone the video and append to previewHead
-				const videoClone = video.cloneNode(true); // Create a deep clone
+				const videoClone = video.cloneNode(true);
+				previewHead.innerHTML = "";
 				previewHead.appendChild(videoClone);
 			} else if (mediaType === "document" && fileInput) {
 				if (fileInput.type === "application/pdf") {
@@ -87,7 +90,7 @@ document
 					iframe.style.objectFit = "contain";
 					// Append to previewHeader
 					previewHeader.appendChild(iframe);
-
+					previewHead.innerHTML = "";
 					// Clone the iframe and append to previewHead
 					const iframeClone = iframe.cloneNode(true); // Create a deep clone
 					previewHead.appendChild(iframeClone);
@@ -121,11 +124,11 @@ dropDown.addEventListener("change", (e) => {
 	text.classList.add("hidden");
 	media.classList.add("hidden");
 	none.classList.add("hidden");
-	none.innerHTML = '';
+	none.innerHTML = "";
 	// Show the relevant container based on the dropdown value
 	if (value === "none") {
-		document.getElementById("previewHeader").innerHTML = '';
-		document.getElementById("previewHead").innerHTML = '';
+		document.getElementById("previewHeader").innerHTML = "";
+		document.getElementById("previewHead").innerHTML = "";
 		none.classList.remove("hidden");
 		none.classList.add("flex");
 	} else if (value === "text") {
@@ -255,7 +258,7 @@ document
 			const selection = window.getSelection();
 			const range = selection.getRangeAt(0);
 			const newLine = document.createElement("div");
-			newLine.classList.add("text-lg");
+			newLine.classList.add("text-base");
 			newLine.innerHTML = "<br>";
 			range.deleteContents();
 			range.insertNode(newLine);
@@ -280,8 +283,8 @@ document
 			this.textContent.length + "/1024";
 	});
 
-	let websiteBtnCount = 0;
-	let callBtnCount = 0;
+let websiteBtnCount = 0;
+let callBtnCount = 0;
 
 document.getElementById("addWebsiteBtn").addEventListener("click", function () {
 	if (websiteBtnCount >= 1) {
@@ -377,7 +380,7 @@ function makeButtonsDraggable() {
 
 // Allow elements to be dragged over the previewContainer
 previewContainer.addEventListener("dragover", (e) => {
-	e.preventDefault(); // Prevent default to allow drop
+	e.preventDefault();
 	e.dataTransfer.dropEffect = "move";
 });
 
@@ -405,7 +408,7 @@ function generatePreviewWebsite() {
 	let url = document.getElementById("websiteUrl").value || "#";
 
 	let preview = `
-        <button class="btn  " id="websiteBtn" draggable="true" onclick="window.open('${url}', '_blank')" style="color: #6A67FF;">
+        <button class="btn" id="websiteBtn" draggable="true" onclick="window.open('${url}', '_blank')" style="color: #6A67FF;">
             <i class="fa fa-external-link mx-2"></i>${label}
         </button>
     `;
@@ -459,6 +462,11 @@ const dropdownMenu = document.getElementById("buttonDropdown");
 buttonDropdown.addEventListener("click", function (e) {
 	e.stopPropagation();
 	console.log(dropdownMenu.classList.toggle("hidden"));
+});
+
+dropdownMenu.addEventListener("click", function (e) {
+	e.stopPropagation();
+	this.classList.toggle("hidden");
 });
 
 window.addEventListener("click", function (e) {

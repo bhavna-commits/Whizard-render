@@ -28,7 +28,7 @@ const CampaignReportSchema = new mongoose.Schema(
 		deleted: { type: Boolean, default: false },
 		messageId: { type: String, required: true },
 		messageTemplate: { type: Schema.Types.Mixed },
-		replyContent: { type: String, default: null },
+		replyContent: { type: String, default: "" },
 	},
 	{
 		timestamps: false,

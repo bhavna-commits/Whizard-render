@@ -14,7 +14,6 @@ export const saveTemplateToDatabase = async (
 	dynamicVariables,
 	selectedLanguageCode,
 	id,
-
 ) => {
 	try {
 		const components = createComponents(templateData, dynamicVariables);
@@ -30,11 +29,7 @@ export const saveTemplateToDatabase = async (
 		});
 
 		if (req.file) {
-			const filePath = path.join(
-				"uploads",
-				id,
-				req.file?.filename,
-			);
+			const filePath = path.join("uploads", id, req.file?.filename);
 			const headerComponent = newTemplate.components.find(
 				(component) => component.type === "HEADER",
 			);
@@ -42,7 +37,9 @@ export const saveTemplateToDatabase = async (
 			if (headerComponent) {
 				// Assuming that the file is an image, video, or document
 				if (headerComponent.format === "IMAGE") {
-					headerComponent.example.header_handle = [filePath];
+					headerComponent.example.header_handle = [
+						"https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.mbaskool.com%2Fmarketing-mix%2Fproducts%2F17539-maybelline.html&psig=AOvVaw3TNjajoA6KOvQsRqezGyAi&ust=1737634380133000&source=images&cd=vfe&opi=89978449&ved=0CBQQjRxqFwoTCJDz79WmiYsDFQAAAAAdAAAAABAJ",
+					];
 				} else if (headerComponent.format === "VIDEO") {
 					headerComponent.example.header_handle = [filePath];
 				} else if (headerComponent.format === "DOCUMENT") {
@@ -84,11 +81,11 @@ export async function submitTemplateToFacebook(savedTemplate, id) {
 			category: plainTemplate.category.toUpperCase(),
 			components: plainTemplate.components,
 		};
-		
+
 		const user = await User.findOne({ unique_id: id });
 
 		const response = await axios.post(
-			`https://graph.facebook.com/${process.env.FB_GRAPH_VERSION}/${user.WABA_ID}/message_templates`,
+			`https://graph.facebook.com/${process.env.FB_GRAPH_VERSION}/${process.env.WABA_ID}/message_templates`,
 			requestData,
 			{
 				headers: {
@@ -136,7 +133,7 @@ export const fetchFacebookTemplates = async (id) => {
 		const response = await fetch(url, {
 			method: "GET",
 			headers: {
-				Authorization: `Bearer ${user.FB_ACCESS_TOKEN}`,
+				Authorization: `Bearer ${process.env.FB_ACCESS_TOKEN}`,
 			},
 		});
 
@@ -189,10 +186,10 @@ function createComponents(templateData, dynamicVariables) {
 		components.push({
 			type: "HEADER",
 			format: "IMAGE",
-			example: { link: [templateData.header.imageUrl] },
+			example: {},
 		});
 	}
-	
+
 	// Add BODY component with dynamic variables
 	if (dynamicVariables.body && dynamicVariables.body.length > 0) {
 		const bodyExample = dynamicVariables.body.map((variable) => {

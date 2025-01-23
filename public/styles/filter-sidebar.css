@@ -9,6 +9,7 @@
   transition: right 0.3s ease-in-out;
   z-index: 1000;
   padding: 2rem;
+  overflow-y: scroll;
 }
 
 .filter-sidebar.open {

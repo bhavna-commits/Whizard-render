@@ -506,84 +506,85 @@
 				
 				<div id="bodyInput" class="focus:outline-none p-2 text-sm" contenteditable="true" maxlength="1024" style="min-height: 50px; height: auto"></div>
 			</div>
-		</div>
-		
-		<!-- Footer -->
-		<div class="form-group mt-2">
-			<h6 class="font-semibold text-lg pb-2">Footer</h6>
-			<label class="font-medium text-secondary pb-2 text-sm">Add a short line of text to bottom of your
-				message template, if you add the marketing
-				opt-out button, the associated footer will be
-				shown here by default.</label>
-			<div class="border rounded shadow-sm d-flex align-items-center justify-content-between p-2">
-				<textarea class="border-0 w-full text-sm bg-transparent focus:outline-none outline-none focus-within:outline-none" maxlength="64" rows="1" id="footerInput" placeholder="Enter footer text"></textarea>
-				<div class="count">
-					<small class="text-secondary footer-count float-end">0/64</small>
+			
+			
+			<!-- Footer -->
+			<div class="form-group mt-2">
+				<h6 class="font-semibold text-lg pb-2">Footer</h6>
+				<label class="font-medium text-secondary pb-2 text-sm">Add a short line of text to bottom of your
+					message template, if you add the marketing
+					opt-out button, the associated footer will be
+					shown here by default.</label>
+				<div class="border rounded shadow-sm d-flex align-items-center justify-content-between p-2">
+					<textarea class="border-0 w-full text-sm bg-transparent focus:outline-none outline-none focus-within:outline-none" maxlength="64" rows="1" id="footerInput" placeholder="Enter footer text"></textarea>
+					<div class="count">
+						<small class="text-secondary footer-count float-end">0/64</small>
+					</div>
 				</div>
 			</div>
-		</div>
-		
-		<!-- Buttons -->
-		<div class="form-group mt-2 mb-32">
-			<h6 class="font-semibold text-lg pb-2">
-				Buttons
-				<span class="text-secondary small text-sm">(optional)</span>
-			</h6>
-			<label class="font-medium text-secondary pb-2 text-sm">Create buttons that let customers respond to
-				your message or take action.
-			</label>
-			<!-- Button Dropdown -->
-			<div class="w-fit mt-4">
-				<div class="relative w-full">
-					<!-- Button to toggle dropdown -->
-					<button id="addButtonDropdown" class="text-sm w-fit h-fit bg-transparent border border-gray-300 rounded px-4 py-2 cursor-pointer text-left text-black focus:outline-none" type="button">
-						+ Add a button
-					</button>
+			
+			<!-- Buttons -->
+			<div class="form-group mt-2 mb-32">
+				<h6 class="font-semibold text-lg pb-2">
+					Buttons
+					<span class="text-secondary small text-sm">(optional)</span>
+				</h6>
+				<label class="font-medium text-secondary pb-2 text-sm">Create buttons that let customers respond to
+					your message or take action.
+				</label>
+				<!-- Button Dropdown -->
+				<div class="w-fit mt-4">
+					<div class="relative w-full">
+						<!-- Button to toggle dropdown -->
+						<button id="addButtonDropdown" class="text-sm w-fit h-fit bg-transparent border border-gray-300 rounded px-4 py-2 cursor-pointer text-left text-black focus:outline-none" type="button">
+							+ Add a button
+						</button>
+						
+						<!-- Dropdown with options -->
+						<div id="buttonDropdown" class="hidden absolute bg-white border border-gray-200 rounded mt-2 py-2 shadow-lg w-full z-50">
+							<div class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer" id="addWebsiteBtn">Visit Website</div>
+							<div class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer" id="addCallBtn">Call Phone Number</div>
+						</div>
+					</div>
+				</div>
+				<div id="buttonOptions" class="space-y-3">
+					<!-- Hidden Website Button Form -->
+					<div id="websiteForm" class="border rounded shadow-sm action-card mt-3 draggable" style="display: none;" draggable="true">
+						<div class="d-flex justify-evenly items-center">
+							<div class="drag-handle">::</div>
+							<div class="row w-100">
+								<div class="col-4">
+									<label>Button label</label>
+									<input type="text" class="form-control" id="websiteBtnLabel" placeholder="Visit Now">
+								</div>
+								<div class="col-4">
+									<label>Website URL</label>
+									<input type="url" class="form-control" id="websiteUrl" placeholder="example.com">
+								</div>
+							</div>
+							<div class="col-1 close-icon">
+								<span class="remove-btn" id="closeWebsite">&times;</span>
+							</div>
+						</div>
+					</div>
 					
-					<!-- Dropdown with options -->
-					<div id="buttonDropdown" class="hidden absolute bg-white border border-gray-200 rounded mt-2 py-2 shadow-lg w-full z-50">
-						<div class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer" id="addWebsiteBtn">Visit Website</div>
-						<div class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer" id="addCallBtn">Call Phone Number</div>
-					</div>
-				</div>
-			</div>
-			<div id="buttonOptions" class="space-y-3">
-				<!-- Hidden Website Button Form -->
-				<div id="websiteForm" class="border rounded shadow-sm action-card mt-3 draggable" style="display: none;" draggable="true">
-					<div class="d-flex justify-evenly items-center">
-						<div class="drag-handle">::</div>
-						<div class="row w-100">
-							<div class="col-4">
-								<label>Button label</label>
-								<input type="text" class="form-control" id="websiteBtnLabel" placeholder="Visit Now">
+					<!-- Hidden Call Button Form -->
+					<div id="callForm" class="border rounded shadow-sm action-card mt-3 draggable" style="display: none;" draggable="true">
+						<div class="d-flex justify-evenly items-center">
+							<div class="drag-handle">::</div>
+							<div class="row w-100">
+								<div class="col-4">
+									<label>Button label</label>
+									<input type="text" class="form-control" id="callBtnLabel" placeholder="Call Now">
+								</div>
+								<div class="col-4">
+									<label>Phone Number</label>
+									<input type="tel" class="form-control" id="phoneNumber" placeholder="9999999999">
+								</div>
 							</div>
-							<div class="col-4">
-								<label>Website URL</label>
-								<input type="url" class="form-control" id="websiteUrl" placeholder="example.com">
+							<div class="col-1 close-icon">
+								<span class="remove-btn" id="closeCall">&times;</span>
 							</div>
-						</div>
-						<div class="col-1 close-icon">
-							<span class="remove-btn" id="closeWebsite">&times;</span>
-						</div>
-					</div>
-				</div>
-				
-				<!-- Hidden Call Button Form -->
-				<div id="callForm" class="border rounded shadow-sm action-card mt-3 draggable" style="display: none;" draggable="true">
-					<div class="d-flex justify-evenly items-center">
-						<div class="drag-handle">::</div>
-						<div class="row w-100">
-							<div class="col-4">
-								<label>Button label</label>
-								<input type="text" class="form-control" id="callBtnLabel" placeholder="Call Now">
-							</div>
-							<div class="col-4">
-								<label>Phone Number</label>
-								<input type="tel" class="form-control" id="phoneNumber" placeholder="9999999999">
-							</div>
-						</div>
-						<div class="col-1 close-icon">
-							<span class="remove-btn" id="closeCall">&times;</span>
 						</div>
 					</div>
 				</div>
@@ -591,7 +592,7 @@
 		</div>
 	</div>
 	</div>
-	<div class="px-1 bg-white min-w-[25rem] max-w-[35rem]">
+	<div class="px-1 bg-white min-w-[25rem] max-w-[25rem]">
 		<div class="p-3">
 			<div class="title logo w-full">
 				<h4 class="page-title text-xl font-bold text-center">
@@ -600,7 +601,7 @@
 			</div>
 			<!-- Preview Section -->
 			<div class="bg-orange-50 py-3 px-2 mt-3" id="previewContainer">
-				<div id="previewHeader"></div>
+				<div id="previewHeader" class="text-lg font-semibold"></div>
 				<p id="previewBody" class="text-base"></p>
 				<div id="previewFooter"></div>
 				<div class="py-2" id="previewButtons"></div>
@@ -608,11 +609,13 @@
 		</div>
 	</div>
 	</div>
+	</div>
+	
 	<%- include("partials/template-preview-modal") %>
 	
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/js/all.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-	</div>
+	
 	<script src=" assets/plugins/pace/pace.min.js" type="text/javascript"></script>
 	<script src="assets/plugins/liga.js" type="text/javascript"></script>
 	<script src="assets/plugins/jquery/jquery-3.2.1.min.js" type="text/javascript"></script>

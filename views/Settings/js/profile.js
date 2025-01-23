@@ -70,12 +70,21 @@ document
 				document.getElementById(
 					"message",
 				).innerHTML = `<p class="text-green-500">Profile updated successfully!</p>`;
+
+				setTimeout(() => {
+					document.getElementById(
+						"message",
+					).innerHTML = '';
+				}, 2000);
 			} else {
 				document.getElementById(
 					"message",
 				).innerHTML = `<p class="text-red-500">Error updating profile: ${
 					response.message || "An error occurred"
-				}</p>`;
+					}</p>`;
+				setTimeout(() => {
+					document.getElementById("message").innerHTML = "";
+				}, 2000);
 			}
 		} catch (error) {
 			// Handle error response
@@ -83,6 +92,9 @@ document
 				"message",
 			).innerHTML = `<p class="text-red-500">Error updating profile: ${
 				error.message || "An error occurred"
-			}</p>`;
+				}</p>`;
+			setTimeout(() => {
+				document.getElementById("message").innerHTML = "";
+			}, 2000);
 		}
 	});

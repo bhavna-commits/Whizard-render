@@ -1,88 +1,480 @@
-document.addEventListener("DOMContentLoaded", function () {
-	// Initialize Flatpickr
-	flatpickr("#startDate", {
-		dateFormat: "Y-m-d",
-		maxDate: "today",
-	});
+const urlt = new URL(window.location.href);
 
-	flatpickr("#endDate", {
-		dateFormat: "Y-m-d",
-		maxDate: "today",
-	});
+const startDate1 = urlt.searchParams.get("startDate");
+const endDate1 = urlt.searchParams.get("endDate");
+if (startDate1 && endDate1) {
+	const span = document.getElementById("showDateFilter");
+	span.textContent = `${startDate1} to ${endDate1}`;
+}
 
-	const filterBtn = document.getElementById("filterBtn");
-	const filterSidebar = document.getElementById("filterSidebar");
-	const overlay = document.getElementById("overlay");
-	const closeBtn = document.getElementById("closeBtn");
-	const applyBtn = document.getElementById("applyBtn");
-	const lastMonthOptions = document.querySelectorAll(".last-month-option");
+flatpickr("#filterDate", {
+	mode: "range",
+	dateFormat: "Y-m-d",
+	maxDate: "today",
+	onChange: function (selectedDates, dateStr, instance) {
+		console.log("Selected range:", dateStr);
 
-	// Open sidebar
-	filterBtn.addEventListener("click", () => {
-		filterSidebar.classList.add("open");
-		overlay.classList.add("active");
-		document.body.style.overflow = "hidden";
-	});
-
-	// Close sidebar
-	function closeSidebar() {
-		filterSidebar.classList.remove("open");
-		overlay.classList.remove("active");
-		document.body.style.overflow = "auto";
-	}
-
-	closeBtn.addEventListener("click", closeSidebar);
-	overlay.addEventListener("click", closeSidebar);
-
-	// Handle last month options
-	lastMonthOptions.forEach((option) => {
-		option.addEventListener("click", () => {
-			const value = option.dataset.value;
-			const today = new Date();
-			let startDate = new Date();
-
-			switch (value) {
-				case "week":
-					startDate.setDate(today.getDate() - 7);
-					break;
-				case "twoWeeks":
-					startDate.setDate(today.getDate() - 14);
-					break;
-				case "month":
-					startDate.setMonth(today.getMonth() - 1);
-					break;
-			}
-
-			document.getElementById("startDate").value = startDate
-				.toISOString()
-				.split("T")[0];
-			document.getElementById("endDate").value = today
-				.toISOString()
-				.split("T")[0];
-		});
-	});
-
-	// Handle apply button
-	applyBtn.addEventListener("click", () => {
-		const startDate = document.getElementById("startDate").value;
-		const endDate = document.getElementById("endDate").value;
-
+		const [startDate, endDate] = dateStr.split("to");
+		const url = new URL(window.location.href);
+		startDate = startDate.trim();
+		endDate = endDate.trim();
 		if (startDate && endDate) {
-			// Build the URL with the date and status filters
-			// const status = document.getElementById("statusFilter").value; // Assuming you have a status filter
-			const url = new URL(window.location.href);
-
-			// Append the filters as query parameters
 			url.searchParams.set("startDate", startDate);
 			url.searchParams.set("endDate", endDate);
-			// url.searchParams.set("status", status);
-
-			// Redirect to the updated URL
 			window.location.href = url.toString();
-
-			closeSidebar();
-		} else {
-			alert("Please select both start and end dates");
 		}
-	});
+	},
 });
+
+const filterSidebar = document.getElementById("filterSidebar");
+const dataSection = document.getElementById("dataSection");
+const userName = document.getElementById("userName");
+const userDate = document.getElementById("userDate");
+const overlay = document.getElementById("overlay");
+const closeBtn = document.getElementById("closeBtn");
+const loading = document.getElementById("loading");
+
+// Close sidebar
+function closeSidebar() {
+	filterSidebar.classList.remove("open");
+	overlay.classList.remove("active");
+	document.body.style.overflow = "auto";
+}
+
+closeBtn.addEventListener("click", closeSidebar);
+overlay.addEventListener("click", closeSidebar);
+
+// Event listener for close button
+document.getElementById("closeBtn").addEventListener("click", () => {
+	const filterSidebar = document.getElementById("filterSidebar");
+	const overlay = document.getElementById("overlay");
+
+	filterSidebar.classList.remove("open");
+	overlay.classList.remove("active");
+	document.body.style.overflow = "auto";
+});
+
+async function viewSent() {
+	const url = new URL(window.location.href);
+	const startDate = url.searchParams.get("startDate");
+	const endDate = url.searchParams.get("endDate");
+
+	// DOM elements
+	const filterSidebar = document.getElementById("filterSidebar");
+	const overlay = document.getElementById("overlay");
+	const loading = document.getElementById("loading");
+	const dataSection = document.getElementById("dataSection");
+	const userName = document.getElementById("userName");
+	const userDate = document.getElementById("userDate");
+
+	// Open sidebar and show loading
+	filterSidebar.classList.add("open");
+	overlay.classList.add("active");
+	document.body.style.overflow = "hidden";
+	loading.classList.remove("hidden");
+
+	try {
+		// Fetch data
+		const res = await fetch(
+			`/dashboard?value=SENT&startDate=${startDate}&endDate=${endDate}`,
+		);
+		const data = await res.json();
+
+		// Clear previous data
+		userName.innerHTML = "";
+		userDate.innerHTML = "";
+
+		// Handle empty or error response
+		if (!data || data.success === false) {
+			const noDataDiv = document.createElement("div");
+			noDataDiv.textContent = "No data available";
+			noDataDiv.classList.add("text-center", "text-gray-500", "py-4");
+			userName.appendChild(noDataDiv);
+			return;
+		}
+
+		// Populate data
+		data.forEach((element) => {
+			// Create row container
+			const rowContainer = document.createElement("div");
+			rowContainer.classList.add(
+				"flex",
+				"justify-between",
+				"w-full",
+				"px-4",
+				"py-2",
+				"border-b",
+				"hover:bg-gray-100",
+				"transition-colors",
+			);
+
+			// Name column
+			const nameDiv = document.createElement("div");
+			nameDiv.textContent = element.contactName;
+			nameDiv.classList.add("text-left", "flex-1");
+
+			// Date column
+			const dateDiv = document.createElement("div");
+			const formattedDate = new Date(
+				element.createdAt,
+			).toLocaleDateString();
+			dateDiv.textContent = formattedDate;
+			dateDiv.classList.add("text-right", "text-gray-600");
+
+			// Append to row
+			rowContainer.appendChild(nameDiv);
+			rowContainer.appendChild(dateDiv);
+
+			// Add to parent containers
+			userName.appendChild(rowContainer);
+		});
+
+		// Show data section
+		dataSection.classList.remove("hidden");
+	} catch (err) {
+		console.error("Error fetching data:", err);
+		alert("Failed to fetch data. Please try again.");
+	} finally {
+		loading.classList.add("hidden");
+	}
+}
+
+async function viewDelivered() {
+	const url = new URL(window.location.href);
+	const startDate = url.searchParams.get("startDate");
+	const endDate = url.searchParams.get("endDate");
+
+	// DOM elements
+	const filterSidebar = document.getElementById("filterSidebar");
+	const overlay = document.getElementById("overlay");
+	const loading = document.getElementById("loading");
+	const dataSection = document.getElementById("dataSection");
+	const userName = document.getElementById("userName");
+	const userDate = document.getElementById("userDate");
+
+	// Open sidebar and show loading
+	filterSidebar.classList.add("open");
+	overlay.classList.add("active");
+	document.body.style.overflow = "hidden";
+	loading.classList.remove("hidden");
+
+	try {
+		// Fetch data
+		const res = await fetch(
+			`/dashboard?value=DELIVERED&startDate=${startDate}&endDate=${endDate}`,
+		);
+		const data = await res.json();
+
+		// Clear previous data
+		userName.innerHTML = "";
+		userDate.innerHTML = "";
+
+		// Handle empty or error response
+		if (!data || data.success === false) {
+			const noDataDiv = document.createElement("div");
+			noDataDiv.textContent = "No data available";
+			noDataDiv.classList.add("text-center", "text-gray-500", "py-4");
+			userName.appendChild(noDataDiv);
+			return;
+		}
+
+		// Populate data
+		data.forEach((element) => {
+			// Create row container
+			const rowContainer = document.createElement("div");
+			rowContainer.classList.add(
+				"flex",
+				"justify-between",
+				"w-full",
+				"px-4",
+				"py-2",
+				"border-b",
+				"hover:bg-gray-100",
+				"transition-colors",
+			);
+
+			// Name column
+			const nameDiv = document.createElement("div");
+			nameDiv.textContent = element.contactName;
+			nameDiv.classList.add("text-left", "flex-1");
+
+			// Date column
+			const dateDiv = document.createElement("div");
+			const formattedDate = new Date(
+				element.createdAt,
+			).toLocaleDateString();
+			dateDiv.textContent = formattedDate;
+			dateDiv.classList.add("text-right", "text-gray-600");
+
+			// Append to row
+			rowContainer.appendChild(nameDiv);
+			rowContainer.appendChild(dateDiv);
+
+			// Add to parent containers
+			userName.appendChild(rowContainer);
+		});
+
+		// Show data section
+		dataSection.classList.remove("hidden");
+	} catch (err) {
+		console.error("Error fetching data:", err);
+		alert("Failed to fetch data. Please try again.");
+	} finally {
+		loading.classList.add("hidden");
+	}
+}
+
+async function viewFailed() {
+	const url = new URL(window.location.href);
+	const startDate = url.searchParams.get("startDate");
+	const endDate = url.searchParams.get("endDate");
+
+	// DOM elements
+	const filterSidebar = document.getElementById("filterSidebar");
+	const overlay = document.getElementById("overlay");
+	const loading = document.getElementById("loading");
+	const dataSection = document.getElementById("dataSection");
+	const userName = document.getElementById("userName");
+	const userDate = document.getElementById("userDate");
+
+	// Open sidebar and show loading
+	filterSidebar.classList.add("open");
+	overlay.classList.add("active");
+	document.body.style.overflow = "hidden";
+	loading.classList.remove("hidden");
+
+	try {
+		// Fetch data
+		const res = await fetch(
+			`/dashboard?value=FAILED&startDate=${startDate}&endDate=${endDate}`,
+		);
+		const data = await res.json();
+
+		// Clear previous data
+		userName.innerHTML = "";
+		userDate.innerHTML = "";
+
+		// Handle empty or error response
+		if (!data || data.success === false) {
+			const noDataDiv = document.createElement("div");
+			noDataDiv.textContent = "No data available";
+			noDataDiv.classList.add("text-center", "text-gray-500", "py-4");
+			userName.appendChild(noDataDiv);
+			return;
+		}
+
+		// Populate data
+		data.forEach((element) => {
+			// Create row container
+			const rowContainer = document.createElement("div");
+			rowContainer.classList.add(
+				"flex",
+				"justify-between",
+				"w-full",
+				"px-4",
+				"py-2",
+				"border-b",
+				"hover:bg-gray-100",
+				"transition-colors",
+			);
+
+			// Name column
+			const nameDiv = document.createElement("div");
+			nameDiv.textContent = element.contactName;
+			nameDiv.classList.add("text-left", "flex-1");
+
+			// Date column
+			const dateDiv = document.createElement("div");
+			const formattedDate = new Date(
+				element.createdAt,
+			).toLocaleDateString();
+			dateDiv.textContent = formattedDate;
+			dateDiv.classList.add("text-right", "text-gray-600");
+
+			// Append to row
+			rowContainer.appendChild(nameDiv);
+			rowContainer.appendChild(dateDiv);
+
+			// Add to parent containers
+			userName.appendChild(rowContainer);
+		});
+
+		// Show data section
+		dataSection.classList.remove("hidden");
+	} catch (err) {
+		console.error("Error fetching data:", err);
+		alert("Failed to fetch data. Please try again.");
+	} finally {
+		loading.classList.add("hidden");
+	}
+}
+
+async function viewReplied() {
+	const url = new URL(window.location.href);
+	const startDate = url.searchParams.get("startDate");
+	const endDate = url.searchParams.get("endDate");
+
+	// DOM elements
+	const filterSidebar = document.getElementById("filterSidebar");
+	const overlay = document.getElementById("overlay");
+	const loading = document.getElementById("loading");
+	const dataSection = document.getElementById("dataSection");
+	const userName = document.getElementById("userName");
+	const userDate = document.getElementById("userDate");
+
+	// Open sidebar and show loading
+	filterSidebar.classList.add("open");
+	overlay.classList.add("active");
+	document.body.style.overflow = "hidden";
+	loading.classList.remove("hidden");
+
+	try {
+		// Fetch data
+		const res = await fetch(
+			`/dashboard?value=REPLIED&startDate=${startDate}&endDate=${endDate}`,
+		);
+		const data = await res.json();
+
+		// Clear previous data
+		userName.innerHTML = "";
+		userDate.innerHTML = "";
+
+		// Handle empty or error response
+		if (!data || data.success === false) {
+			const noDataDiv = document.createElement("div");
+			noDataDiv.textContent = "No data available";
+			noDataDiv.classList.add("text-center", "text-gray-500", "py-4");
+			userName.appendChild(noDataDiv);
+			return;
+		}
+
+		// Populate data
+		data.forEach((element) => {
+			// Create row container
+			const rowContainer = document.createElement("div");
+			rowContainer.classList.add(
+				"flex",
+				"justify-between",
+				"w-full",
+				"px-4",
+				"py-2",
+				"border-b",
+				"hover:bg-gray-100",
+				"transition-colors",
+			);
+
+			// Name column
+			const nameDiv = document.createElement("div");
+			nameDiv.textContent = element.contactName;
+			nameDiv.classList.add("text-left", "flex-1");
+
+			// Date column
+			const dateDiv = document.createElement("div");
+			const formattedDate = new Date(
+				element.createdAt,
+			).toLocaleDateString();
+			dateDiv.textContent = formattedDate;
+			dateDiv.classList.add("text-right", "text-gray-600");
+
+			// Append to row
+			rowContainer.appendChild(nameDiv);
+			rowContainer.appendChild(dateDiv);
+
+			// Add to parent containers
+			userName.appendChild(rowContainer);
+		});
+
+		// Show data section
+		dataSection.classList.remove("hidden");
+	} catch (err) {
+		console.error("Error fetching data:", err);
+		alert("Failed to fetch data. Please try again.");
+	} finally {
+		loading.classList.add("hidden");
+	}
+}
+
+async function viewRead() {
+	const url = new URL(window.location.href);
+	const startDate = url.searchParams.get("startDate");
+	const endDate = url.searchParams.get("endDate");
+
+	// DOM elements
+	const filterSidebar = document.getElementById("filterSidebar");
+	const overlay = document.getElementById("overlay");
+	const loading = document.getElementById("loading");
+	const dataSection = document.getElementById("dataSection");
+	const userName = document.getElementById("userName");
+	const userDate = document.getElementById("userDate");
+
+	// Open sidebar and show loading
+	filterSidebar.classList.add("open");
+	overlay.classList.add("active");
+	document.body.style.overflow = "hidden";
+	loading.classList.remove("hidden");
+
+	try {
+		// Fetch data
+		const res = await fetch(
+			`/dashboard?value=READ&startDate=${startDate}&endDate=${endDate}`,
+		);
+		const data = await res.json();
+
+		// Clear previous data
+		userName.innerHTML = "";
+		userDate.innerHTML = "";
+
+		// Handle empty or error response
+		if (!data || data.success === false) {
+			const noDataDiv = document.createElement("div");
+			noDataDiv.textContent = "No data available";
+			noDataDiv.classList.add("text-center", "text-gray-500", "py-4");
+			userName.appendChild(noDataDiv);
+			return;
+		}
+
+		// Populate data
+		data.forEach((element) => {
+			// Create row container
+			const rowContainer = document.createElement("div");
+			rowContainer.classList.add(
+				"flex",
+				"justify-between",
+				"w-full",
+				"px-4",
+				"py-2",
+				"border-b",
+				"hover:bg-gray-100",
+				"transition-colors",
+			);
+
+			// Name column
+			const nameDiv = document.createElement("div");
+			nameDiv.textContent = element.contactName;
+			nameDiv.classList.add("text-left", "flex-1");
+
+			// Date column
+			const dateDiv = document.createElement("div");
+			const formattedDate = new Date(
+				element.createdAt,
+			).toLocaleDateString();
+			dateDiv.textContent = formattedDate;
+			dateDiv.classList.add("text-right", "text-gray-600");
+
+			// Append to row
+			rowContainer.appendChild(nameDiv);
+			rowContainer.appendChild(dateDiv);
+
+			// Add to parent containers
+			userName.appendChild(rowContainer);
+		});
+
+		// Show data section
+		dataSection.classList.remove("hidden");
+	} catch (err) {
+		console.error("Error fetching data:", err);
+		alert("Failed to fetch data. Please try again.");
+	} finally {
+		loading.classList.add("hidden");
+	}
+}

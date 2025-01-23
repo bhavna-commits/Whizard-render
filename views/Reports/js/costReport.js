@@ -1,46 +1,43 @@
-// import "chartjs-adapter-date-fns"; // Ensure this is present in your setup
-
-let chart = null;
-
-function getLastMonthDates() {
+// Helper function to get quarter dates
+function getQuarterDates() {
 	const now = new Date();
-	const startLastMonth = new Date(
-		now.getFullYear(),
-		now.getMonth() - 1,
-		now.getDate(),
-	);
-	return [startLastMonth, now];
+	const quarter = Math.floor(now.getMonth() / 3);
+	const startQuarter = new Date(now.getFullYear(), quarter * 3, 1);
+	return [startQuarter, now];
 }
 
-// Initialize Flatpickr with default selection of last month
-const fpInstance = flatpickr("#dateRange", {
-	mode: "range",
-	dateFormat: "d M Y",
-	defaultDate: getLastMonthDates(),
-	maxDate: "today",
-	onChange: async function (selectedDates) {
-		if (selectedDates.length === 2) {
-			const [startDate, endDate] = selectedDates;
-			const data = await fetchAnalytics(startDate, endDate);
-			if (data) {
-				updateUI(data);
-			}
-		}
-	},
-});
+// Initialize Flatpickr with simpler configuration
+let fpInstance;
 
-// Add custom quarter selector button
-const quarterButton = document.createElement("button");
-quarterButton.textContent = "This Quarter";
-quarterButton.className = "px-4 py-2 bg-blue-500 text-white rounded mt-2";
-quarterButton.onclick = () => {
-	const [startQuarter, now] = getQuarterDates();
-	fpInstance.setDate([startQuarter, now]);
-};
-document.querySelector("#dateRange").parentNode.appendChild(quarterButton);
+// Initialize date picker after DOM content is loaded
+function initializeDatePicker() {
+	fpInstance = flatpickr("#dateRange", {
+		mode: "range",
+		dateFormat: "d M Y",
+		defaultDate: getQuarterDates(),
+		maxDate: "today",
+		onChange: async function (selectedDates) {
+			if (selectedDates.length === 2) {
+				const [startDate, endDate] = selectedDates;
+				const data = await fetchAnalytics(startDate, endDate);
+				if (data) {
+					updateUI(data);
+				}
+			}
+		},
+	});
+}
 
 async function fetchAnalytics(startDate, endDate) {
 	try {
+		if (!startDate || !endDate) {
+			console.error("Invalid dates:", {
+				startDate,
+				endDate,
+			});
+			return null;
+		}
+
 		const startUnix = Math.floor(startDate.getTime() / 1000);
 		const endUnix = Math.floor(endDate.getTime() / 1000);
 
@@ -58,121 +55,198 @@ async function fetchAnalytics(startDate, endDate) {
 	}
 }
 
+const timeseriesMap = new Map();
+let timeseriesData;
+
 function processAnalyticsData(rawData) {
 	const summaryData = {
-		marketing: { count: 0, cost: 0 },
-		utility: { count: 0, cost: 0 },
-		authentication: { count: 0, cost: 0 },
+		total: {
+			count: 0,
+			cost: 0,
+		},
+		marketing: {
+			count: 0,
+			cost: 0,
+		},
+		utility: {
+			count: 0,
+			cost: 0,
+		},
+		authentication: {
+			count: 0,
+			cost: 0,
+		},
 	};
 
-	const timeseriesData = {};
-
-	if (rawData.conversation_analytics?.data?.[0]?.data_points) {
-		rawData.conversation_analytics.data[0].data_points.forEach((point) => {
-			const date = new Date(point.start * 1000)
-				.toISOString()
-				.split("T")[0];
-
-			if (!timeseriesData[date]) {
-				timeseriesData[date] = {
-					marketing: 0,
-					utility: 0,
-					authentication: 0,
-				};
-			}
-
-			const category = point.conversation_category.toLowerCase();
-			timeseriesData[date][category] = point.conversation;
-			summaryData[category].count += point.conversation || 0;
-			summaryData[category].cost += point.cost || 0;
-		});
+	if (!Array.isArray(rawData)) {
+		console.error("Invalid data format received:", rawData);
+		return {
+			summaryData,
+			timeseriesData: [],
+		};
 	}
 
-	return { summaryData, timeseriesData };
+	
+	rawData.forEach((point) => {
+		if (!point || typeof point.start !== "number") {
+			return;
+		}
+
+		// Create date in IST by adding 5 hours and 30 minutes to UTC
+		const utcDate = new Date(point.start * 1000);
+		const istOffset = 5.5 * 60 * 60 * 1000; // 5.5 hours in milliseconds
+		const istDate = new Date(utcDate.getTime() + istOffset);
+
+		// Store full date object for proper sorting later
+		const dateKey = istDate.toLocaleDateString("en", {
+			month: "short",
+			day: "numeric",
+		});
+
+		if (!timeseriesMap.has(dateKey)) {
+			timeseriesMap.set(dateKey, {
+				date: dateKey,
+				// Store the full date object for sorting
+				fullDate: istDate,
+				marketing: {
+					count: 0,
+					cost: 0,
+				},
+				utility: {
+					count: 0,
+					cost: 0,
+				},
+				authentication: {
+					count: 0,
+					cost: 0,
+				},
+			});
+		}
+
+		const category = (point.conversation_category || "").toLowerCase();
+		if (summaryData[category]) {
+			const entry = timeseriesMap.get(dateKey);
+			entry[category].count = point.conversation || 0;
+			entry[category].cost = point.cost || 0;
+			summaryData[category].count += point.conversation || 0;
+			summaryData[category].cost += point.cost || 0;
+			summaryData.total.count += point.conversation || 0;
+			summaryData.total.cost += point.cost || 0;
+		}
+	});
+
+	// Sort using the full date object instead of strings
+	timeseriesData = Array.from(timeseriesMap.values())
+		.sort((a, b) => a.fullDate - b.fullDate)
+		.map((entry) => {
+			// Remove the fullDate property from the final output if not needed
+			const { fullDate, ...rest } = entry;
+			return rest;
+		});
+
+	// console.log(timeseriesData);
+	return {
+		summaryData,
+		timeseriesData,
+	};
 }
 
 function updateUI(data) {
-	// Destroy existing chart if it exists
-	if (chart !== null && typeof chart.destroy === "function") {
-		chart.destroy();
-		chart = null; // Reset chart variable after destroying
+	if (!data || !data.summaryData) {
+		console.error("Invalid data for UI update:", data);
+		return;
 	}
 
-	const ctx = document.getElementById("analyticsChart").getContext("2d");
-	const labels = Object.keys(data.timeseriesData).sort();
+	// Update total counts and costs
+	document.getElementById("totalCount").textContent =
+		data.summaryData.total.count || 0;
+	document.getElementById("totalCost").textContent = `₹${(
+		data.summaryData.total.cost || 0
+	).toFixed(2)}`;
 
-	const chartData = {
-		labels,
-		datasets: [
-			{
-				label: "Marketing",
-				data: labels.map(
-					(date) => data.timeseriesData[date]?.marketing || 0,
-				),
-				borderColor: "#FB923C",
-				tension: 0.4,
-				fill: false,
-			},
-			{
-				label: "Utility",
-				data: labels.map(
-					(date) => data.timeseriesData[date]?.utility || 0,
-				),
-				borderColor: "#C084FC",
-				tension: 0.4,
-				fill: false,
-			},
-			{
-				label: "Authentication",
-				data: labels.map(
-					(date) => data.timeseriesData[date]?.authentication || 0,
-				),
-				borderColor: "#60A5FA",
-				tension: 0.4,
-				fill: false,
-			},
-		],
-	};
+	// Update category counts
+	document.getElementById("marketingCount").textContent =
+		data.summaryData.marketing.count || 0;
+	document.getElementById("utilityCount").textContent =
+		data.summaryData.utility.count || 0;
+	document.getElementById("authCount").textContent =
+		data.summaryData.authentication.count || 0;
 
-	// Create new chart instance
-	chart = new Chart(ctx, {
-		type: "line",
-		data: chartData,
-		options: {
-			responsive: true,
-			interaction: {
-				intersect: false,
-				mode: "index",
-			},
-			plugins: {
-				legend: {
-					position: "top",
-				},
-			},
-			scales: {
-				y: {
-					beginAtZero: true,
-					ticks: {
-						stepSize: 1,
-					},
-				},
-				x: {
-					type: "time",
-					time: {
-						unit: "day",
-					},
-				},
-			},
-		},
-	});
+	// Update category costs
+	document.getElementById("marketingCost").textContent = `₹${(
+		data.summaryData.marketing.cost || 0
+	).toFixed(2)}`;
+	document.getElementById("utilityCost").textContent = `₹${(
+		data.summaryData.utility.cost || 0
+	).toFixed(2)}`;
+	document.getElementById("authCost").textContent = `₹${(
+		data.summaryData.authentication.cost || 0
+	).toFixed(2)}`;
+
+	updateConversationChart(data);
+	updateCostChart(data);
 }
 
+function createCSV() {
+	// Define CSV headers
+	const headers = [
+		"Date",
+		"Marketing Count",
+		"Marketing Cost",
+		"Utility Count",
+		"Utility Cost",
+		"Authentication Count",
+		"Authentication Cost",
+	];
 
-// Initialize with default date range
-document.addEventListener("DOMContentLoaded", async () => {
-	const [startDate, endDate] = fpInstance.selectedDates;
-	const data = await fetchAnalytics(startDate, endDate);
-	if (data) {
-		updateUI(data);
-	}
-});
+	// Convert data to CSV rows
+	const csvRows = timeseriesData.map((row) => [
+		row.date,
+		row.marketing.count,
+		row.marketing.cost,
+		row.utility.count,
+		row.utility.cost,
+		row.authentication.count,
+		row.authentication.cost,
+	]);
+
+	// Add headers to the beginning of the array
+	csvRows.unshift(headers);
+
+	// Convert to CSV string
+	const csvString = csvRows
+		.map((row) =>
+			row
+				.map((cell) => {
+					// Handle numbers and strings appropriately
+					if (typeof cell === "number") {
+						return cell.toString();
+					}
+					// Wrap strings in quotes and escape existing quotes
+					return `"${cell.toString().replace(/"/g, '""')}"`;
+				})
+				.join(","),
+		)
+		.join("\n");
+
+	// Create a Blob with the CSV data
+	const blob = new Blob([csvString], { type: "text/csv;charset=utf-8;" });
+
+	// Create a download link
+	const link = document.createElement("a");
+
+	// Create the download URL
+	const url = window.URL.createObjectURL(blob);
+	link.setAttribute("href", url);
+
+	// Set the filename
+	const today = new Date();
+	const filename = `timeseries_data_${today.toISOString().split("T")[0]}.csv`;
+	link.setAttribute("download", filename);
+
+	// Append to body, click, and remove
+	document.body.appendChild(link);
+	link.click();
+	document.body.removeChild(link);
+	window.URL.revokeObjectURL(url);
+}

@@ -1,7 +1,10 @@
 import express from "express";
 import { checkSession } from "../middleWares/checkSession.js";
 import { countries, roles, size, industryCategory } from "../utils/dropDown.js";
-import { getDashboard } from "../controllers/Dashboard/dashboard.controller.js";
+import {
+	getDashboard,
+	getFilters,
+} from "../controllers/Dashboard/dashboard.controller.js";
 import {
 	getCreatePassword,
 	createAddedUserPassword,
@@ -10,6 +13,8 @@ import {
 const router = express.Router();
 
 router.get("/", checkSession, getDashboard);
+
+router.get("/dashboard", checkSession, getFilters);
 
 router.get("/register", (req, res) => {
 	res.render("User/register", {

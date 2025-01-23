@@ -4,6 +4,7 @@ import Report from "../../models/report.model.js";
 import ContactList from "../../models/contactList.model.js";
 import Permissions from "../../models/permissions.model.js";
 import dotenv from "dotenv";
+import Contacts from "../../models/contacts.model.js";
 
 dotenv.config();
 
@@ -22,7 +23,7 @@ export const getDashboard = async (req, res) => {
 			: null;
 
 		// Build the filter for the query
-		const filter = { useradmin: id };
+		const filter = { useradmin: id, deleted: false };
 
 		if (startTimestamp && endTimestamp) {
 			filter.timestamp = { $gte: startTimestamp, $lte: endTimestamp };
@@ -134,7 +135,9 @@ export const getDashboard = async (req, res) => {
 
 		const permissions = req.session?.addedUser?.permissions;
 		if (permissions) {
-			const access = await Permissions.findOne({ unique_id: permissions });
+			const access = await Permissions.findOne({
+				unique_id: permissions,
+			});
 			if (access) {
 				// console.log(access);
 				res.render("Dashboard/dashboard", {
@@ -194,5 +197,119 @@ export const getDashboard = async (req, res) => {
 	} catch (error) {
 		console.error(error);
 		res.status(500).send("Server error");
+	}
+};
+
+export const getFilters = async (req, res) => {
+	try {
+		const id = req.session?.user?.id || req.session?.addedUser?.owner;
+		const query = req.query.value;
+		const { startDate, endDate } = req.query;
+
+		const startTimestamp = startDate
+			? new Date(startDate).getTime() / 1000
+			: null;
+		const endTimestamp = endDate
+			? new Date(endDate).getTime() / 1000
+			: null;
+
+		// Build the filter for the query
+		const filter = {
+			useradmin: id,
+			deleted: { $ne: true },
+		};
+
+		if (startTimestamp && endTimestamp) {
+			filter.timestamp = { $gte: startTimestamp, $lte: endTimestamp };
+		}
+
+		const sentReports = await Campaign.aggregate([
+			{
+				$match: filter,
+			},
+			{
+				$lookup: {
+					from: "campaignreports",
+					let: { campaignId: "$unique_id" },
+					pipeline: [
+						{
+							$match: {
+								$expr: {
+									$and: [
+										{
+											$eq: [
+												"$campaignId",
+												"$$campaignId",
+											],
+										},
+										{ $eq: ["$status", query] },
+									],
+								},
+							},
+						},
+					],
+					as: "reports",
+				},
+			},
+			{
+				$lookup: {
+					from: "contacts",
+					localField: "contactListId",
+					foreignField: "contactId",
+					as: "contacts",
+				},
+			},
+			{
+				$addFields: {
+					messagesSent: { $size: "$reports" },
+				},
+			},
+			{ $sort: { createdAt: -1 } },
+		]);
+		const allData = [];
+		
+		// console.log(sentReports);
+		
+		sentReports.forEach((campaign) => {
+			campaign.reports.forEach((report) => {
+				const perUser = {};
+				const contact = campaign.contacts.find(
+					(contact) => `91${contact.wa_id}` === report.recipientPhone,
+				);
+				if (contact) {
+					perUser.contactName = contact?.Name;
+					perUser.createdAt = report.timestamp || report.createdAt;
+				} else {
+					const contact = campaign.contacts.find(
+						(contact) => contact.wa_id === report.recipientPhone,
+					);
+					perUser.contactName = contact?.Name;
+					perUser.createdAt = report.timestamp || report.createdAt;
+				}
+				allData.push(perUser);
+			});
+		});
+
+		console.log(allData);
+
+		if (allData.length == 0)
+			return res.json({ success: false, message: "No Data found" });
+
+		const permissions = req.session?.addedUser?.permissions;
+		if (permissions) {
+			const access = await Permissions.findOne({
+				unique_id: permissions,
+			});
+			if (access?.viewUsers) {
+				res.json(allData);
+			} else {
+				res.json({ success: false, message: "Not Allowed" });
+			}
+		} else {
+			res.json(allData);
+		}
+	} catch (err) {
+		console.log(err);
+		res.json({ success: false, message: err });
 	}
 };

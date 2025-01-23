@@ -131,6 +131,85 @@ export function isObject(...inputs) {
 	return true;
 }
 
+
+/**
+ * Sanitizes Array input.
+ * @param {Array | Object } input - Input value.
+ * @returns {Boolean} - if sanitised or not.
+ */
+
+export function isValidArrayOrObject(...inputs) {
+	// Helper function to validate individual strings
+	function validateString(input) {
+		// Trim leading/trailing spaces
+		if (input !== validator.trim(input)) {
+			return false;
+		}
+
+		// Prevent potential XSS injections
+		if (input !== xss(input)) {
+			return false;
+		}
+
+		return true; // Passes validation
+	}
+
+	// Recursive function to check arrays or objects
+	function recursiveCheck(value) {
+		// If value is null or undefined, it's considered valid
+		if (value === null || value === undefined) {
+			return true;
+		}
+
+		// Check for strings and validate
+		if (typeof value === "string") {
+			return validateString(value);
+		}
+
+		// Check for numbers, booleans, or empty values
+		if (typeof value === "number" || typeof value === "boolean") {
+			return true;
+		}
+
+		// Check for arrays and recursively validate each element
+		if (Array.isArray(value)) {
+			for (const item of value) {
+				if (!recursiveCheck(item)) {
+					return false;
+				}
+			}
+			return true;
+		}
+
+		// If value is an object, recursively check all its properties
+		if (typeof value === "object") {
+			for (const key in value) {
+				if (value.hasOwnProperty(key)) {
+					// Recursively check each key's value
+					if (!recursiveCheck(value[key])) {
+						return false;
+					}
+				}
+			}
+			return true;
+		}
+
+		// If value is any other type (unsupported), return false
+		return false;
+	}
+
+	// Check each input recursively
+	for (const input of inputs) {
+		if (!recursiveCheck(input)) {
+			return false;
+		}
+	}
+
+	// If all inputs are valid, return true
+	return true;
+}
+
+
 /**
  * Sanitizes number input.
  * @param {number|string} input - Input value.

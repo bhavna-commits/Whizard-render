@@ -307,7 +307,7 @@
 	table-layout: fixed;
 }
 
-#previewContainer {
+/* #previewContainer {
 	padding-top: 10px;
 }
 
@@ -342,11 +342,11 @@
 	box-shadow: none;
 	width: 100%;
 	padding: 13px;
-}
+} */
 
-.bg-preview {
+/* .bg-preview {
 	background-color: #fafafa;
-}
+} */
 
 .action-card {
 	/* display: flex; */

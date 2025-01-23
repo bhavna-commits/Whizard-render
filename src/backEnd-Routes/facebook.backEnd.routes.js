@@ -10,7 +10,6 @@ dotenv.config();
 
 const router = express.Router();
 
-
 router.get("/auth_code", async (req, res) => {
 	// const { code } = req.body;
 
@@ -101,9 +100,10 @@ router.post("/webhook", async (req, res) => {
 	try {
 		const { entry } = req.body;
 		console.log(JSON.stringify(entry));
+
 		// Iterate over all the entries (since multiple events can be sent at once)
 		for (const entryItem of entry) {
-			// Check if the entryItem has changes
+			const user = await User.findOne({ WABA_ID: entryItem.id });
 			if (entryItem.changes) {
 				for (const change of entryItem.changes) {
 					const messagingEvent = change.value;
@@ -120,19 +120,26 @@ router.post("/webhook", async (req, res) => {
 
 							// Check if we already have a report for this messageId
 							let report = await Reports.findOne({ messageId });
+
 							if (report) {
 								// Update the existing report
 								report.status = status.toUpperCase();
-								report.timestamp = timestamp;
+								report.updatedAt = timestamp;
 								report.recipientPhone = recipientPhone;
-								await report.save();
 							} else {
-								// If no report found, log or handle the scenario (optional)
-								console.log(
-									"Report not found for message ID:",
+								// Create a new report if none exists
+								report = new Reports({
+									WABA_ID: user.WABA_ID,
+									FB_PHONE_ID: user.FB_PHONE_ID,
+									useradmin: user.unique_id,
 									messageId,
-								);
+									status: status.toUpperCase(),
+									updatedAt: timestamp,
+									recipientPhone,
+									// Populate other necessary fields (depending on your schema)
+								});
 							}
+							await report.save();
 						}
 					}
 
@@ -151,24 +158,26 @@ router.post("/webhook", async (req, res) => {
 							// Create or update the report for this message
 							let report = await Reports.findOne({ messageId });
 
+							if (!report) {
+								// Create a new report if it doesn't exist
+								report = new Reports({
+									messageId,
+									recipientPhone,
+									// Set any default values required in your schema
+								});
+							}
+
 							// Capture reply content based on the type of message
 							if (type === "text") {
-								
-								report.replyContent = text?.body;
+								report.replyContent = text.body; // Update reply content
 							} else if (type === "image" && image) {
 								const { id: imageId, mime_type: mimeType } =
 									image;
 
-								// const imageBuffer = await downloadImage(imageSrc);
-								// fs.writeFileSync(
-								// 	`uploads/${report.campaignId}/${messageId}/${imageId}.${
-								// 		mimeType.split("/")[1]
-								// 	}`,
-								// 	imageBuffer,
-								// );
+								// Handle image if needed, e.g. save to disk or cloud
 							}
 
-							await report.save();
+							await report.save(); // Save the report
 						}
 					}
 				}

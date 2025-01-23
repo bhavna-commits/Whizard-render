@@ -276,7 +276,7 @@ input[type="number"] {
 	border-radius: 1rem;
 }
 
-.active {
+.sidebar ul li a .icon.active {
 	background-color: #fce9e9;
 	color: #e02424;
 }
@@ -376,6 +376,7 @@ input[type="number"] {
 .connect-btn:active {
 	transform: translateY(0);
 }
+
 .circle-gradient {
 	background: radial-gradient(
 		circle at right,
@@ -384,6 +385,25 @@ input[type="number"] {
 		transparent 0%
 	);
 }
+
+.icon-gradient {
+	background: radial-gradient(
+		circle at bottom,
+		rgb(255, 255, 255) 0%,
+		rgba(224, 255, 229, 0.293) 100%,
+		transparent 0%
+	);
+}
+
+.icon-gradient-platform {
+	background: radial-gradient(
+		circle at bottom,
+		rgb(255, 255, 255) 0%,
+		rgba(255, 224, 224, 0.293) 100%,
+		transparent 0%
+	);
+}
+
 
 .p-text {
 	color: #959595;
@@ -672,8 +692,8 @@ input[type="number"] {
 /* Card styling */
 .card-dashboard {
 	/* background: #fff; */
-	padding: 2rem;
-	border-radius: 10px;
+	padding: 1rem;
+	border-radius: 1rem;
 	box-shadow: 0px 0.1rem 0.2rem 0px #1018280d;
 	margin-bottom: 2rem;
 	position: relative;
@@ -681,33 +701,31 @@ input[type="number"] {
 
 .card-dashboard h5 {
 	font-weight: normal;
-	color: #666;
+	color: #3f3f3f;
 	font-size: larger;
 }
 
 .card-dashboard h4 {
 	font-weight: bold;
-	font-size: x-large;
+	font-size: 2.5rem;
 	color: #333;
 }
 
 /* Background colors for icons */
 .icon-wrapper {
-	/* position: absolute;
-    top: 20px;
-    left: 20px; */
-	width: 4rem;
-	height: 4rem;
-	border-radius: 1rem;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	margin-top: 2rem;
+  background: radial-gradient(circle at 100% 100%, 
+    rgba(209, 255, 209, 0.5) 20%, /* First circle */
+    rgba(209, 255, 209, 0) 40%,   /* Fading out */
+    rgba(209, 255, 209, 0.2) 60%, /* Second circle */
+    rgba(255, 255, 255, 0) 80%);  /* Complete fade */
+  /* padding: 10px;
+  border-radius: 50%; */
+  display: inline-flex;
+  height: 2rem;
+  width: 2rem;
+  justify-content: center;
+  align-items: center;
 }
-.icon-wrapper:hover {
-	cursor: pointer;
-}
-
 /* Progress bar styling */
 .progress {
 	height: 0.5rem;

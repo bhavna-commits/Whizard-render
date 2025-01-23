@@ -1234,7 +1234,7 @@ export const getCostReport = async (req, res) => {
 		});
 
 		const data = await response.json();
-
+		// console.log(data);
 		if (!response.ok) {
 			console.error(
 				"Error fetching conversation analytics:",
@@ -1248,15 +1248,7 @@ export const getCostReport = async (req, res) => {
 		}
 
 		// Process the data into a more usable format
-		const processedData = {
-			conversation_analytics: {
-				data: [
-					{
-						data_points: [],
-					},
-				],
-			},
-		};
+		const data_points = [];
 
 		if (data.conversation_analytics?.data?.[0]?.data_points) {
 			// Group data points by date and category
@@ -1287,19 +1279,17 @@ export const getCostReport = async (req, res) => {
 			// Convert grouped data back to array format
 			for (const [date, categoryData] of groupedData) {
 				for (const category of categories) {
-					processedData.conversation_analytics.data[0].data_points.push(
-						{
-							start: new Date(date).getTime() / 1000,
-							end: new Date(date).getTime() / 1000 + 86400, // Add 24 hours
-							conversation_category: category,
-							conversation: categoryData[category].conversations,
-							cost: categoryData[category].cost,
-						},
-					);
+					data_points.push({
+						start: new Date(date).getTime() / 1000,
+						end: new Date(date).getTime() / 1000 + 86400, // Add 24 hours
+						conversation_category: category,
+						conversation: categoryData[category].conversations,
+						cost: categoryData[category].cost,
+					});
 				}
 			}
 		}
-		console.log(processedData);
+		console.log(data_points);
 		// Check permissions and render response
 		const permissions = req.session?.addedUser?.permissions;
 		if (permissions) {
@@ -1308,7 +1298,7 @@ export const getCostReport = async (req, res) => {
 			});
 
 			if (access.reports?.costReports) {
-				return res.json(processedData);
+				return res.json(data_points);
 			} else {
 				return res.status(403).json({ error: "Not allowed" });
 			}
@@ -1316,7 +1306,7 @@ export const getCostReport = async (req, res) => {
 			const access = await User.findOne({
 				unique_id: req.session?.user?.id,
 			});
-			return res.json(processedData);
+			return res.json(data_points);
 		}
 	} catch (error) {
 		console.error("Error fetching cost report :", error);
@@ -1366,7 +1356,7 @@ export const renderGetCostReport = async (req, res) => {
 			// res.render("errors/notAllowed");
 		}
 	} catch (err) {
-		console.log("Error rendering costReports :" ,err);
+		console.log("Error rendering costReports :", err);
 		return res.render("errors/serverError");
 	}
 };
