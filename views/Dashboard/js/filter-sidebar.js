@@ -14,7 +14,7 @@ flatpickr("#filterDate", {
 	onChange: function (selectedDates, dateStr, instance) {
 		console.log("Selected range:", dateStr);
 
-		const [startDate, endDate] = dateStr.split("to");
+		let [startDate, endDate] = dateStr.split("to");
 		const url = new URL(window.location.href);
 		startDate = startDate.trim();
 		endDate = endDate.trim();

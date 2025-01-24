@@ -1,9 +1,12 @@
 import express from "express";
 import dotenv from "dotenv";
 import fs from "fs";
+import Template from "../models/templates.model.js";
+import Campaign from "../models/campaign.model.js";
 import User from "../models/user.model.js";
 import Reports from "../models/report.model.js";
 import axios from "axios";
+import { generateUniqueId } from "../utils/otpGenerator.js";
 // import { dummyPayload } from "../utils/dummy.js";
 
 dotenv.config();
@@ -99,16 +102,18 @@ const exchangeForLongLivedToken = async (shortLivedToken) => {
 router.post("/webhook", async (req, res) => {
 	try {
 		const { entry } = req.body;
-		console.log(JSON.stringify(entry));
 
-		// Iterate over all the entries (since multiple events can be sent at once)
 		for (const entryItem of entry) {
 			const user = await User.findOne({ WABA_ID: entryItem.id });
+			if (!user) continue; // Skip if no user found
+			console.log(JSON.stringify(entryItem));
+
 			if (entryItem.changes) {
 				for (const change of entryItem.changes) {
 					const messagingEvent = change.value;
+					console.log(messagingEvent);
 
-					// Handle statuses (SENT, DELIVERED, READ, etc.)
+					// Handle template status updates
 					if (messagingEvent.statuses) {
 						for (const statusEvent of messagingEvent.statuses) {
 							const {
@@ -118,32 +123,36 @@ router.post("/webhook", async (req, res) => {
 								recipient_id: recipientPhone,
 							} = statusEvent;
 
-							// Check if we already have a report for this messageId
 							let report = await Reports.findOne({ messageId });
 
-							if (report) {
-								// Update the existing report
-								report.status = status.toUpperCase();
-								report.updatedAt = timestamp;
-								report.recipientPhone = recipientPhone;
-							} else {
-								// Create a new report if none exists
-								report = new Reports({
-									WABA_ID: user.WABA_ID,
-									FB_PHONE_ID: user.FB_PHONE_ID,
-									useradmin: user.unique_id,
-									messageId,
-									status: status.toUpperCase(),
-									updatedAt: timestamp,
-									recipientPhone,
-									// Populate other necessary fields (depending on your schema)
-								});
-							}
+							report.status = status.toUpperCase();
+							report.updatedAt = timestamp;
+							report.recipientPhone = recipientPhone;
+
 							await report.save();
 						}
 					}
 
-					// Handle replies (TEXT, IMAGE, etc.)
+					// Check for template rejection
+					if (messagingEvent.event == "REJECTED") {
+						const {
+							message_template_id: templateId,
+							reason: rejectedReason,
+						} = messagingEvent;
+
+							// Update the template status and rejection reason in the database
+							let template = await Template.findOne({
+								fb_id: templateId,
+							});
+							if (template) {
+								template.status = "Rejected";
+								template.rejected_reason = rejectedReason;
+								await template.save();
+							}
+						
+					}
+
+					// Handle incoming messages/replies
 					if (messagingEvent.messages) {
 						for (const messageEvent of messagingEvent.messages) {
 							const {
@@ -155,21 +164,38 @@ router.post("/webhook", async (req, res) => {
 								image,
 							} = messageEvent;
 
-							// Create or update the report for this message
-							let report = await Reports.findOne({ messageId });
+							const campaign = await Campaign.findOne({
+								useradmin: user.unique_id,
+								deleted: false,
+							})
+								.sort({ createdAt: -1 })
+								.limit(1);
+
+							let report = await Reports.findOne({
+								campaignId: campaign.unique_id,
+								recipientPhone,
+							});
 
 							if (!report) {
-								// Create a new report if it doesn't exist
 								report = new Reports({
 									messageId,
 									recipientPhone,
-									// Set any default values required in your schema
+									WABA_ID: user.WABA_ID || "",
+									FB_PHONE_ID: user.FB_PHONE_ID || "",
+									useradmin: user.unique_id || "",
+									messageId,
+									status: "REPLIED",
+									updatedAt: timestamp,
+									recipientPhone,
+									campaignId: campaign
+										? campaign.unique_id
+										: "",
+									unique_id: generateUniqueId(),
 								});
 							}
 
-							// Capture reply content based on the type of message
 							if (type === "text") {
-								report.replyContent = text.body; // Update reply content
+								report.replyContent = text.body;
 							} else if (type === "image" && image) {
 								const { id: imageId, mime_type: mimeType } =
 									image;
@@ -184,7 +210,6 @@ router.post("/webhook", async (req, res) => {
 			}
 		}
 
-		// Respond to the webhook with a success message
 		res.status(200).send("EVENT_RECEIVED");
 	} catch (err) {
 		console.error("Error processing webhook:", err);

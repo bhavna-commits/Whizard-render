@@ -179,53 +179,13 @@
 					<%= initials %>
 				</div>
 				<% } %>
-				<div id="dropdownMenu" class="account-menu hidden">
-					<a href="/settings/profile">Profile</a>
-					<button onclick="logout()">Logout</button>
+				<div id="downMenu" class="account-menu hidden">
+					<a href="/settings/profile" class="flex items-center"><img src="profileLogo.svg" class="pr-2" />View profile</a>
+					<button onclick="logout()" class="flex items-center"><img src="logOut.svg" class="pr-2" />Log out</button>
 				</div>
+				<script src="/menu.js"></script>
 			</div>
-			<script>
-				function toggleDropdown () {
-					const dropdownMenu = document.getElementById('dropdownMenu');
-					dropdownMenu.classList.toggle('hidden');
-					
-					const sidebar = document.querySelector('.sidebar');
-					
-					if (dropdownMenu.classList.contains('hidden')) {
-						sidebar.style.overflow = 'auto';
-					} else {
-						sidebar.style.overflow = 'visible';
-					}
-				}
-				
-				async function logout () {
-					try {
-						const response = await fetch('/api/users/logout', {
-							method: 'POST',
-							credentials: 'same-origin'
-						});
-						
-						if (response.ok) {
-							window.location.href = '/login';
-						} else {
-							alert('Error logging out.');
-						}
-					} catch (err) {
-						console.error('Error:', err);
-						alert('Error logging out.');
-					}
-				}
-				
-				// Close the dropdown if clicked outside
-				window.onclick = function (event) {
-					const dropdown = document.getElementById("dropdownMenu");
-					const sidebar = document.querySelector('.sidebar');
-					if (!event.target.closest('.user-profile')) {
-						dropdown.classList.add("hidden");
-						sidebar.style.overflow = 'auto';
-					}
-				};
-			</script>
+			
 		</nav>
 		<!-- END SIDEBAR MENU TOP TRAY CONTENT-->
 		
@@ -266,14 +226,14 @@
 							<p class="text-sm text-gray-500">Image should be less than 100KB</p>
 						</div>
 						<div class="flex items-center justify-center">
-							<div class="w-20 h-20 rounded-full bg-blue-600 text-white flex items-center justify-center text-xl font-semibold mr-3 relative overflow-hidden">
+							<div class="w-20 h-20 rounded-full bg-[<%= color %>] text-white flex items-center justify-center text-xl font-semibold mr-3 relative overflow-hidden">
 								<% if (user.profilePhoto) { %>
 								
 								<img id="profilePreview" src="/<%= user.profilePhoto %>" class="w-full h-full object-cover block" />
 								
 								<% } else { %>
 																
-								<span id="userInitial" class="block"><%= user.name.charAt(0) %></span>
+								<span id="userInitial" class="block text-3xl"><%= user.name.charAt(0) %></span>
 								<% } %>
 								<img id="dpPreview" src="" class="w-full h-full absolute object-cover hidden" />
 							</div>
@@ -299,7 +259,7 @@
 					<!-- Role Field (Disabled) -->
 					<div class="flex justify-between items-center">
 						<label class=" text-gray-600">Role</label>
-						<input type="text" name="role" value="<%= user.role || "Admin" %> " class="w-3/5 p-3 border rounded-lg bg-gray-50" disabled>
+						<input type="text" name="role" value="<%= user.roleName || "Owner" %> " class="w-3/5 p-3 border rounded-lg bg-gray-50" disabled>
 					</div>
 					
 					<!-- Language Dropdown -->

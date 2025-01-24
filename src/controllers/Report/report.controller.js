@@ -812,18 +812,7 @@ const getRepliesReportsById = async (req, res, next) => {
 												"$$campaignId",
 											],
 										},
-										{
-											$and: [
-												{
-													$ne: [
-														"$replyContent",
-														null,
-													],
-												}, // Not null
-												{ $ne: ["$replyContent", ""] }, // Not empty string
-												{ $type: "$replyContent" }, // Ensure field exists
-											],
-										},
+										{ $eq: ["$status", "REPLIED"] },
 									],
 								},
 							},

@@ -29,7 +29,7 @@ const templateSchema = new Schema(
 			type: String,
 			required: true,
 		},
-		fb_id: String,
+		template_id: String,
 		createdAt: {
 			type: Number,
 			default: () => Date.now(),

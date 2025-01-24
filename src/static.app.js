@@ -41,6 +41,8 @@ app.use(
 	express.static(path.join(__dirname, "views/Reports/js")),
 );
 
+app.use("/", express.static(path.join(__dirname, "views/commonJS")));
+
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 export default app;

@@ -441,19 +441,19 @@ export const createCampaign = async (req, res, next) => {
 	try {
 		let { templateId, contactListId, variables, schedule, name } = req.body;
 
+		if (!templateId || !contactListId) {
+			return res.status(400).json({
+				message: "Template ID and Contact List ID are required",
+			});
+		}
+
 		if (!isString(templateId, contactListId, variables, schedule, name))
 			return next();
 
 		variables =
 			typeof variables === "string" ? JSON.parse(variables) : variables;
 		schedule =
-			typeof schedule === "string" ? JSON.parse(schedule) : schedule;
-
-		if (!templateId || !contactListId) {
-			return res.status(400).json({
-				message: "Template ID and Contact List ID are required",
-			});
-		}
+			typeof schedule === "string" ? JSON.parse(schedule) : schedule;		
 
 		// Create new campaign object
 		const newCampaign = new Campaign({

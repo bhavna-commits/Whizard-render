@@ -48,8 +48,13 @@ export const createTemplate = async (req, res, next) => {
 
 		// Submit template to Facebook
 		const data = await submitTemplateToFacebook(savedTemplate, id);
+
+		if (data && data.id) {
+			// Save the Facebook template ID (fb_id)
+			savedTemplate.template_id = data.id;
+		}
 		console.log("template creation : ", JSON.stringify(data));
-		// Log activity
+
 		await ActivityLogs.create({
 			useradmin: req.session?.user?.id || req.session?.addedUser?.owner,
 			unique_id: generateUniqueId(),
@@ -402,7 +407,6 @@ export const getCampaignTemplates = async (req, res) => {
 };
 
 export const getCreateTemplate = async (req, res) => {
-	
 	const permissions = req.session?.addedUser?.permissions;
 	if (permissions) {
 		const access = await Permissions.findOne({ unique_id: permissions });

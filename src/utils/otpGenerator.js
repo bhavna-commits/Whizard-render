@@ -9,19 +9,26 @@ export const setOTPExpiry = () => {
 };
 
 export function validatePassword(password) {
-	const minLength = /.{8,}/;
-	const lowercase = /[a-z]/;
-	const uppercase = /[A-Z]/;
-	const number = /[0-9]/;
-	const specialChar = /[\W_]/;
+	const passwordRegex =
+		/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+	
+	return passwordRegex.test(password);
+}
 
-	return (
-		minLength.test(password) &&
-		lowercase.test(password) &&
-		uppercase.test(password) &&
-		number.test(password) &&
-		specialChar.test(password)
-	);
+export function isValidEmail(email) {
+	// Basic email regex validation
+	const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+	// List of common personal email domains
+	const personalEmailPattern =
+		/@(gmail\.com|yahoo\.com|hotmail\.com|aol\.com|outlook\.com|icloud\.com|live\.com|msn\.com|mail\.com|zoho\.com|yandex\.com|protonmail\.com|gmx\.com|me\.com|fastmail\.com|pm\.me|mailinator\.com|tutanota\.com|10minutemail\.com|guerrillamail\.com|temp-mail\.org|getnada\.com|maildrop\.cc|trashmail\.com|fakeinbox\.com|dispostable\.com|sharklasers\.com|mailnesia\.com|yopmail\.com|throwawaymail\.com|mohmal\.com|emailondeck\.com|temporarymail\.com|tempmail\.net|luxusmail\.com|anonbox\.net|burnermail\.io|mytemp\.email)$/i;
+
+	// Check if the email is valid and NOT a personal email
+	if (emailRegex.test(email)) {
+		return !personalEmailPattern.test(email); // True if it's NOT a personal email
+	} else {
+		return false;
+	}
 }
 
 export const generateUniqueId = () => {

@@ -77,8 +77,8 @@ export const profile = async (req, res) => {
 				color: req.session.user.color,
 			});
 		} else {
-			id = req.session?.addedUser?.owner;
-			user = await AddedUser.findOne({ useradmin: id });
+			id = req.session?.addedUser?.id;
+			user = await AddedUser.findOne({ unique_id: id });
 			if (!user) {
 				return res.status(404).json({ message: "User not found" });
 			}

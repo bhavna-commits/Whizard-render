@@ -52,6 +52,8 @@ export async function sendMessages(campaign, id, unique_id) {
 				personalizedMessage,
 			);
 
+			const messageTemplate = generatePreviewMessage(personalizedMessage);
+
 			if (response.status === "FAILED") {
 				console.error(
 					`Failed to send message to ${contact.wa_id}: ${response.response}`,
@@ -73,6 +75,7 @@ export async function sendMessages(campaign, id, unique_id) {
 				recipientPhone: contact.wa_id,
 				status: response.status,
 				messageId: response.response.messages[0].id,
+				messageTemplate,
 			});
 			await report.save();
 		}
@@ -256,3 +259,58 @@ cron.schedule("* * * * *", async () => {
 		console.error("Error checking scheduled campaigns:", error);
 	}
 });
+
+function generatePreviewMessage(template, messageComponents) {
+	try {
+		let previewMessage = "";
+
+		// Process Header component
+		const headerComponent = messageComponents.find(
+			(c) => c.type === "header",
+		);
+		if (headerComponent) {
+			let headerText = template.components.find(
+				(c) => c.type === "HEADER",
+			).text;
+			headerComponent.parameters.forEach((param) => {
+				if (param.type === "text") {
+					headerText = headerText.replace(
+						"{{" + param.text + "}}",
+						param.text,
+					);
+				}
+			});
+			previewMessage += `${headerText}<br>`;
+		}
+
+		// Process Body component
+		const bodyComponent = messageComponents.find((c) => c.type === "body");
+		if (bodyComponent) {
+			let bodyText = template.components.find(
+				(c) => c.type === "BODY",
+			).text;
+			bodyComponent.parameters.forEach((param) => {
+				if (param.type === "text") {
+					bodyText = bodyText.replace(
+						"{{" + param.text + "}}",
+						param.text,
+					);
+				}
+			});
+			previewMessage += `${bodyText}<br>`;
+		}
+
+		// Process Footer component (optional)
+		const footerComponent = template.components.find(
+			(c) => c.type === "FOOTER",
+		);
+		if (footerComponent) {
+			previewMessage += `${footerComponent.text}<br>`;
+		}
+
+		return previewMessage.trim();
+	} catch (error) {
+		console.error("Error generating preview message:", error.message);
+		throw new Error(`Error generating preview message: ${error.message}`);
+	}
+}

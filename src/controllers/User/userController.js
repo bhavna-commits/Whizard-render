@@ -5,7 +5,9 @@ import bcrypt from "bcrypt";
 import {
 	generate6DigitOTP,
 	generateUniqueId,
+	isValidEmail,
 	setOTPExpiry,
+	validatePassword,
 } from "../../utils/otpGenerator.js";
 import dotenv from "dotenv";
 import { isString } from "../../middleWares/sanitiseInput.js";
@@ -26,6 +28,18 @@ export const generateOTP = async (req, res, next) => {
 		if (!isString(name, email, password, phoneNumber, countryCode))
 			return next();
 
+		if (!isValidEmail(email))
+			return res.status(401).json({
+				success: false,
+				message:
+					"Email is not in the valid format or is not a corporate email",
+			});
+		
+		if (!validatePassword(password)) return res.status(401).json({
+			success: false,
+			message:
+				"Password is not in the valid format.",
+		});
 		const user = await User.findOne({ email });
 		const phone = `${countryCode}${phoneNumber}`;
 		const mobileExists = await User.findOne({ phone });
@@ -64,6 +78,7 @@ export const generateOTP = async (req, res, next) => {
 			email: email,
 		});
 	} catch (error) {
+		console.log(error);
 		res.status(500).json({
 			success: false,
 			message: "Error while registering, please check the details",
@@ -132,6 +147,19 @@ export const login = async (req, res, next) => {
 		});
 
 	if (!isString(email, password)) return next();
+
+	if (!isValidEmail(email))
+		return res.status(401).json({
+			success: false,
+			message:
+				"Email is not in the valid format or is not a corporate email",
+		});
+
+	if (!validatePassword(password))
+		return res.status(401).json({
+			success: false,
+			message: "Password is not in the valid format.",
+		});
 
 	try {
 		const user = await User.findOneAndUpdate(
@@ -369,14 +397,13 @@ export const changePassword = async (req, res, next) => {
 
 export const about = async (req, res, next) => {
 	try {
-	
 		if (!req.session.tempUser) {
 			return res.status(400).json({
 				success: false,
 				message: "Session expired. Please try again.",
 			});
 		}
-	
+
 		const {
 			name: companyName,
 			description,
@@ -387,7 +414,7 @@ export const about = async (req, res, next) => {
 			jobRole,
 			website,
 		} = req.body;
-		
+
 		if (
 			!companyName ||
 			!description ||

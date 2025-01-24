@@ -178,54 +178,13 @@
 					<%= initials %>
 				</div>
 				<% } %>
-				<div id="dropdownMenu" class="account-menu hidden">
-					<a href="/settings/profile">Profile</a>
-					<button onclick="logout()">Logout</button>
+				<div id="downMenu" class="account-menu hidden">
+					<a href="/settings/profile" class="flex items-center"><img src="profileLogo.svg" class="pr-2" />View profile</a>
+					<button onclick="logout()" class="flex items-center"><img src="logOut.svg" class="pr-2" />Log out</button>
 				</div>
+				<script src="/menu.js"></script>
 			</div>
 			
-			<script>
-				function toggleDropdown () {
-					const dropdownMenu = document.getElementById('dropdownMenu');
-					dropdownMenu.classList.toggle('hidden');
-					
-					const sidebar = document.querySelector('.sidebar');
-					
-					if (dropdownMenu.classList.contains('hidden')) {
-						sidebar.style.overflow = 'auto';
-					} else {
-						sidebar.style.overflow = 'visible';
-					}
-				}
-				
-				async function logout () {
-					try {
-						const response = await fetch('/api/users/logout', {
-							method: 'POST',
-							credentials: 'same-origin'
-						});
-						
-						if (response.ok) {
-							window.location.href = '/login';
-						} else {
-							alert('Error logging out.');
-						}
-					} catch (err) {
-						console.error('Error:', err);
-						alert('Error logging out.');
-					}
-				}
-				
-				// Close the dropdown if clicked outside
-				window.onclick = function (event) {
-					const dropdown = document.getElementById("dropdownMenu");
-					const sidebar = document.querySelector('.sidebar');
-					if (!event.target.closest('.user-profile')) {
-						dropdown.classList.add("hidden");
-						sidebar.style.overflow = 'auto';
-					}
-				};
-			</script>
 		</nav>
 		
 		<!-- Main Content -->
