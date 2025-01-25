@@ -152,17 +152,17 @@ export const getCampaignReports = async (req, res, next) => {
 	if (!isString(filter)) return next();
 
 	if (filter == "sent") {
-		await getSentReportsById(req, res);
+		await getSentReportsById(req, res, next);
 	} else if (filter == "delivered") {
-		await getDeliveredReportsById(req, res);
+		await getDeliveredReportsById(req, res, next);
 	} else if (filter == "read") {
-		await getReadReportsById(req, res);
+		await getReadReportsById(req, res, next);
 	} else if (filter == "replies") {
-		await getRepliesReportsById(req, res);
+		await getRepliesReportsById(req, res, next);
 	} else if (filter == "failed") {
-		await getFailedReportsById(req, res);
+		await getFailedReportsById(req, res, next);
 	} else {
-		await getCampaignOverview(req, res);
+		await getCampaignOverview(req, res, next);
 	}
 };
 
@@ -338,8 +338,9 @@ export const getCampaignListFilter = async (req, res, next) => {
 const getCampaignOverview = async (req, res, next) => {
 	try {
 		const { id } = req.params;
-		const page = parseInt(req.query.page) || 1;
 
+		const page = parseInt(req.query.page) || 1;
+		
 		if (!isNumber(page)) return next();
 		if (!isString(id)) return next();
 
@@ -349,7 +350,7 @@ const getCampaignOverview = async (req, res, next) => {
 
 		// Fetch campaigns created by the user
 		const campaigns = await overview(id, userId, page, limit, skip);
-
+		console.log(campaigns);
 		const paginatedResults = campaigns[0]?.paginatedResults || [];
 		const totalCount = campaigns[0]?.totalCount[0]?.total || 0;
 		const totalPages = Math.ceil(totalCount / limit);
@@ -377,23 +378,23 @@ const getCampaignOverview = async (req, res, next) => {
 			if (access?.reports?.conversationReports?.viewReports) {
 				res.render("Reports/campaignOverview", {
 					access,
-					campaigns: paginatedResults[0].reports,
+					campaigns: paginatedResults[0]?.reports,
 					id,
 					page,
 					totalPages,
-					totalMessages: paginatedResults[0].totalMessages || 0,
-					messagesSent: paginatedResults[0].messagesSent || 0,
+					totalMessages: paginatedResults[0]?.totalMessages || 0,
+					messagesSent: paginatedResults[0]?.messagesSent || 0,
 					messagesDelivered:
-						paginatedResults[0].messagesDelivered || 0,
-					messagesRead: paginatedResults[0].messagesRead || 0,
-					messagesReplied: paginatedResults[0].messagesReplied || 0,
-					messagesFailed: paginatedResults[0].messagesFailed || 0,
+						paginatedResults[0]?.messagesDelivered || 0,
+					messagesRead: paginatedResults[0]?.messagesRead || 0,
+					messagesReplied: paginatedResults[0]?.messagesReplied || 0,
+					messagesFailed: paginatedResults[0]?.messagesFailed || 0,
 					percentSent:
-						paginatedResults[0].percentSent?.toFixed(2) || 0,
+						paginatedResults[0]?.percentSent?.toFixed(2) || 0,
 					percentDelivered:
-						paginatedResults[0].percentDelivered?.toFixed(2) || 0,
+						paginatedResults[0]?.percentDelivered?.toFixed(2) || 0,
 					percentRead:
-						paginatedResults[0].percentRead?.toFixed(2) || 0,
+						paginatedResults[0]?.percentRead?.toFixed(2) || 0,
 					photo: req.session?.addedUser?.photo,
 					name: req.session?.addedUser?.name,
 					color: req.session?.addedUser?.color,
@@ -408,20 +409,20 @@ const getCampaignOverview = async (req, res, next) => {
 			// console.log(access.access);
 			res.render("Reports/campaignOverview", {
 				access: access.access,
-				campaigns: paginatedResults[0].reports,
+				campaigns: paginatedResults[0]?.reports,
 				id,
 				page,
 				totalPages,
-				totalMessages: paginatedResults[0].totalMessages || 0,
-				messagesSent: paginatedResults[0].messagesSent || 0,
-				messagesDelivered: paginatedResults[0].messagesDelivered || 0,
-				messagesRead: paginatedResults[0].messagesRead || 0,
-				messagesReplied: paginatedResults[0].messagesReplied || 0,
-				messagesFailed: paginatedResults[0].messagesFailed || 0,
-				percentSent: paginatedResults[0].percentSent?.toFixed(2) || 0,
+				totalMessages: paginatedResults[0]?.totalMessages || 0,
+				messagesSent: paginatedResults[0]?.messagesSent || 0,
+				messagesDelivered: paginatedResults[0]?.messagesDelivered || 0,
+				messagesRead: paginatedResults[0]?.messagesRead || 0,
+				messagesReplied: paginatedResults[0]?.messagesReplied || 0,
+				messagesFailed: paginatedResults[0]?.messagesFailed || 0,
+				percentSent: paginatedResults[0]?.percentSent?.toFixed(2) || 0,
 				percentDelivered:
-					paginatedResults[0].percentDelivered?.toFixed(2) || 0,
-				percentRead: paginatedResults[0].percentRead?.toFixed(2) || 0,
+					paginatedResults[0]?.percentDelivered?.toFixed(2) || 0,
+				percentRead: paginatedResults[0]?.percentRead?.toFixed(2) || 0,
 				photo: req.session?.user?.photo,
 				name: req.session?.user?.name,
 				color: req.session?.user?.color,

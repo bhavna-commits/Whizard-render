@@ -30,12 +30,46 @@ async function logout() {
 	}
 }
 
-// Close the dropdown if clicked outside
 window.onclick = function (event) {
+	// Handling the dropdown menu
 	const dropdown = document.getElementById("downMenu");
+	const reportMenu = document.getElementById("reportMenu");
 	const sidebar = document.querySelector(".sidebar");
+
+	// Close dropdown if clicked outside
 	if (!event.target.closest(".user-profile")) {
 		dropdown.classList.add("hidden");
+	}
+
+	// Close report menu if clicked outside
+	if (
+		!event.target.closest(".report-menu") &&
+		!event.target.closest("#reportMenu")
+	) {
+		reportMenu.classList.add("hidden");
+	}
+
+	// Adjust sidebar overflow
+	if (
+		dropdown.classList.contains("hidden") &&
+		reportMenu.classList.contains("hidden")
+	) {
 		sidebar.style.overflow = "auto";
+	} else {
+		sidebar.style.overflow = "visible";
 	}
 };
+
+function getReportsMenu() {
+	const reportMenu = document.getElementById("reportMenu");
+	console.log(reportMenu);
+	reportMenu.classList.toggle("hidden");
+
+	const sidebar = document.querySelector(".sidebar");
+
+	if (reportMenu.classList.contains("hidden")) {
+		sidebar.style.overflow = "auto";
+	} else {
+		sidebar.style.overflow = "visible";
+	}
+}

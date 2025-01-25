@@ -7,52 +7,60 @@
 
 .stat-box {
 	background-color: #f3f4f6;
-	border-radius: 8px;
-	padding: 20px;
+	border-radius: .8rem;
+	padding: 1rem;
 	text-align: center;
-	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+	/* box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); */
 	flex: 1;
 	display: flex;
 	flex-direction: column;
-	align-items: center;
-	justify-content: center;
+	/* align-items: center;
+	justify-content: center; */
 }
 
 .stat-box h3 {
-	font-size: 16px;
+	font-size: 1.2rem;
 	color: #666;
-	margin-bottom: 10px;
+	margin-bottom: 1rem;
+	text-align: left;
 }
 
 .stat-box p {
-	font-size: 24px;
+	font-size: 2rem;
 	color: #333;
 	font-weight: bold;
 	margin: 0;
+	text-align: right;
 }
 
 .stat-box:nth-child(1) {
-	background-color: #e9eef5; /* Light blue for Total */
+	background-color: #e9eef5; 
+	border: .14rem solid #006aff;
 }
 
 .stat-box:nth-child(2) {
-	background-color: #fffec9; /* Light purple for Sent */
+	background-color: rgb(246, 215, 246);
+	border: .14rem solid rgb(255, 0, 255);/* Light purple for Sent */
 }
 
 .stat-box:nth-child(3) {
-	background-color: #ffe9e9; /* Light pink for Delivered */
+	background-color: rgba(255, 235, 255, 1); 
+	border: .14rem solid rgba(255, 124, 156, 1);/* Light pink for Delivered */
 }
 
 .stat-box:nth-child(4) {
-	background-color: #e9fbff; /* Light orange for Read */
+	background-color: rgba(255, 255, 255, 1);
+	border: .14rem solid rgba(255, 136, 1, 1); /* Light orange for Read */
 }
 
 .stat-box:nth-child(5) {
-	background-color: #bfffbf; /* Light cyan for Replies */
+	background-color: rgba(210, 249, 254, 1);
+	border: .14rem solid rgba(3, 126, 142, 1); /* Light cyan for Replies */
 }
 
 .stat-box:nth-child(6) {
-	background-color: #ffb9b9; /* Light cyan for Failed */
+	background-color: #ffb9b9;
+	border: .14rem solid rgba(224, 36, 36, 1); /* Light cyan for Failed */
 }
 
 /* Ensure the percentage text stays in the same line */

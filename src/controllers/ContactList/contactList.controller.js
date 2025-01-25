@@ -7,7 +7,7 @@ import {
 	isString,
 	isBoolean,
 	isObject,
-	isValidArrayOrObject
+	isValidArrayOrObject,
 } from "../../middleWares/sanitiseInput.js";
 // import Template from "../../models/templates.model.js";
 import Permissions from "../../models/permissions.model.js";
@@ -51,7 +51,7 @@ export const previewContactList = async (req, res, next) => {
 					"Invalid file format. Please upload a valid JSON file.",
 			});
 		}
-		if (!isValidArrayOrObject(parsedData)) return next();
+		// if (!isValidArrayOrObject(parsedData)) return next();
 		// Check if the parsed data contains contacts
 		if (!parsedData.length) {
 			return res.status(400).json({
@@ -146,20 +146,10 @@ export const previewContactList = async (req, res, next) => {
 			});
 		}
 
-		// Store the parsed data in the session for further processing
-		if (req.session?.user) {
-			req.session.user = {
-				...req.session.user,
-				contactListCSV: parsedData,
-				listName,
-			};
-		} else {
-			req.session.addedUser = {
-				...req.session.addedUser,
-				contactListCSV: parsedData,
-				listName,
-			};
-		}
+		req.session.csvData = {
+			parsedData,
+			listName,
+		};
 
 		// Return success response with the generated table
 		return res.status(200).json({
@@ -178,20 +168,7 @@ export const previewContactList = async (req, res, next) => {
 
 export const createList = async (req, res, next) => {
 	try {
-		if (
-			!req.session?.user ||
-			!req.session?.user?.contactListCSV ||
-			!req.session?.user?.listName
-		) {
-			return res.status(400).json({
-				success: false,
-				message: "Session data missing or incomplete.",
-			});
-		} else if (
-			!req.session?.addedUser ||
-			!req.session?.addedUser?.contactListCSV ||
-			!req.session?.addedUser?.listName
-		) {
+		if (!req.session?.csvData) {
 			return res.status(400).json({
 				success: false,
 				message: "Session data missing or incomplete.",
@@ -199,11 +176,8 @@ export const createList = async (req, res, next) => {
 		}
 
 		const userId = req.session?.user?.id || req.session?.addedUser?.owner;
-		const parsedData =
-			req.session?.user?.contactListCSV ||
-			req.session?.addedUser?.contactListCSV;
-		const listName =
-			req.session?.user?.listName || req.session?.addedUser?.listName;
+		const parsedData = req.session?.csvData?.parsedData;
+		const listName = req.session?.csvData?.listName;
 
 		const user = await User.findOne({ unique_id: userId });
 		if (!user) {
@@ -230,7 +204,7 @@ export const createList = async (req, res, next) => {
 				return new Contacts({
 					useradmin: userId,
 					Name,
-					wa_idK: `${number}_${keyId}`,
+					wa_idK: `${user.phone}_${keyId}`,
 					keyId,
 					wa_id: Number,
 					contactId: contactList.contactId,
@@ -413,7 +387,7 @@ export const getCustomField = async (req, res, next) => {
 			const access = await Permissions.findOne({
 				unique_id: permissions,
 			});
-			if (access.contactList.customFields.type) {
+			if (access.contactList.customField) {
 				res.render("Contact-List/custom-field", {
 					access,
 					customFields: paginatedResults || [],
@@ -452,14 +426,7 @@ export const createCustomField = async (req, res, next) => {
 		const { fieldName, fieldType } = req.body;
 		if (!isString(fieldName)) return next();
 
-		const userDir = path.join(
-			__dirname,
-			"..",
-			"..",
-			"..",
-			"CSV",
-			userId,
-		);
+		const userDir = path.join(__dirname, "..", "..", "..", "CSV", userId);
 		const csvFilePath = path.join(userDir, "sample.csv");
 
 		// Ensure the user's folder exists

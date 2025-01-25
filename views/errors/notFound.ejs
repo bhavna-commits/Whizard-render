@@ -9,19 +9,21 @@
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 	<link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet" />
 	<script src="https://cdn.tailwindcss.com"></script>
+	<style>
+		html,
+		body {
+			height: 100%;
+			font-family: Figtree, sans-serif;
+		}
+	</style>
 </head>
 
-<body>
-	<div class="container">
-		<div class="">
-			<div class="">
-				<img src="/styles/404.png" alt="404 decoration" >			
-			</div>
-			<div class="frame-292">
-				<p class="message">This page doesn’t exist, but let’s get you back on track!</p>
-				<a href="/" class="button">Fall back to Dashboard!</a>
-			</div>
-		</div>
+<body class=" flex justify-center items-center flex-col">
+	<div class="container flex justify-center items-center flex-col space-y-5 text-center w-fit">
+		<img src="/styles/404.png" alt="404 decoration" class="w-fit" />		
+		<p class="text-2xl w-[75%]">This page doesn&apos;t exist, but let&apos;s get you back on track!</p>
+		<button onclick="location.href = '/'" class="bg-black p-3 rounded px-4 text-white">Fall back to Dashboard!</button>
+		
 	</div>
 </body>
 

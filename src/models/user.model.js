@@ -50,11 +50,7 @@ const userSchema = new mongoose.Schema(
 				addContactListCSV: { type: Boolean, default: true },
 				deleteList: { type: Boolean, default: true },
 				sendBroadcast: { type: Boolean, default: true },
-				customFields: {
-					type: { type: Boolean, default: true },
-					view: { type: Boolean, default: true },
-					add: { type: Boolean, default: true },
-				},
+				customField: { type: Boolean, default: true },
 			},
 			templates: {
 				type: { type: Boolean, default: true },

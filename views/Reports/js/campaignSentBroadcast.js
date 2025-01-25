@@ -137,3 +137,20 @@ uploadCSV.addEventListener("click", function () {
 	downloadLink.click();
 	document.body.removeChild(downloadLink);
 });
+
+function toggleReadMore() {
+	const messageText = document.getElementById("messageText");
+	const readMoreBtn = document.getElementById("readMoreBtn");
+
+	// Toggle the class to show or hide the full text
+	messageText.classList.toggle("whitespace-normal");
+	messageText.classList.toggle("whitespace-nowrap");
+	messageText.classList.toggle("overflow-hidden");
+
+	// Change the button text to "Read less" or "Read more"
+	if (messageText.classList.contains("whitespace-normal")) {
+		readMoreBtn.innerText = "Read less";
+	} else {
+		readMoreBtn.innerText = "Read more";
+	}
+}

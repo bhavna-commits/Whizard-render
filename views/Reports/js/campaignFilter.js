@@ -10,38 +10,60 @@ function closeFilterModal() {
 	document.getElementById("overlay").classList.add("hidden"); // Hide overlay
 }
 
-// Initialize flatpickr for the date range picker
-flatpickr("#timeFrame", {
-	mode: "range",
+flatpickr("#timeStart", {
 	dateFormat: "Y-m-d",
 	maxDate: "today",
+	onChange: function () {
+		checkDateAndApplyFilters();
+	},
 });
 
-// Function to apply the filters
+flatpickr("#timeEnd", {
+	dateFormat: "Y-m-d",
+	maxDate: "today",
+	onChange: function () {
+		checkDateAndApplyFilters();
+	},
+});
+
+// Function to check if both start and end dates are selected, then apply filters
+function checkDateAndApplyFilters() {
+	const timeStart = document.getElementById("timeStart");
+	const timeEnd = document.getElementById("timeEnd");
+	if (timeStart.value) timeStart.textContent = timeStart.value;
+	if (timeEnd.value) timeEnd.textContent = timeEnd.value;
+	// Only apply filters if both timeStart and timeEnd are filled
+	if (timeStart.value && timeEnd.value) {
+		applyFilters();
+	}
+}
+
+// Function to apply filters
 async function applyFilters() {
 	await fetchData();
 }
 
-document.getElementById("searchInput").addEventListener("input", async () => {
-	await fetchData();
-});
-
+// Fetch the data based on the selected filters
 async function fetchData() {
-	const timeFrame = document.getElementById("timeFrame").value;
+	const timeStart = document.getElementById("timeStart").value;
+	const timeEnd = document.getElementById("timeEnd").value;
 	const statusFilter = document.getElementById("statusFilter").value;
 	const search = document.getElementById("searchInput").value;
-	// Show the loading spinner
+
+	// Combine the time range
+	const timeFrame = `${timeStart} to ${timeEnd}`;
+
 	const spinner = document.getElementById("loadingSpinner");
 	spinner.classList.remove("hidden");
 
 	try {
-		// Fetch the filtered data
+		// Fetch filtered data from the server
 		const res = await fetch(
-			`/api/reports/campaign-list/filter?timeFrame=${timeFrame}&status=${statusFilter}&search=${search}`,
+			`/reports/campaign-list/filter?timeFrame=${timeFrame}&status=${statusFilter}&search=${search}`,
 		);
 		const data = await res.text();
 
-		// Replace the campaign table with the new filtered results
+		// Update the campaign table with new filtered results
 		const campaignTable = document.getElementById("campaignTable");
 		campaignTable.innerHTML = data;
 
@@ -55,3 +77,8 @@ async function fetchData() {
 		spinner.classList.add("hidden");
 	}
 }
+
+// Trigger data fetch on search input change
+document.getElementById("searchInput").addEventListener("input", async () => {
+	await fetchData();
+});

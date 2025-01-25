@@ -9,17 +9,21 @@
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 	<link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet" />
 	<script src="https://cdn.tailwindcss.com"></script>
+	<style>
+		html,
+		body {
+			height: 100%;
+			font-family: Figtree, sans-serif;
+		}
+	</style>
 </head>
 
-<body>
-	<div class="container">
-		<img src="/styles/405.png" />
-		<div class="">
-			
-			<p>Oops! You don’t have permission to access this page.</p>
-			<p>If you think this is a mistake, please contact support!</p>
-			<button onclick="window.location.href='/'">Go Back to Dashboard</button>
-		</div>
+<body class=" flex justify-center items-center flex-col">
+	<div class="container flex justify-center items-center flex-col space-y-5 text-center w-fit">
+		<img src="/styles/405.png" alt="404 decoration" class="w-fit" />
+		<p class="text-2xl w-[75%]">Oops! You don’t have permission to access this page.</p>
+		<p class="text-2xl w-[75%]">If you think this is a mistake, please contact support!</p>
+		<button onclick="window.location.href='/'" class="bg-black p-3 rounded px-4 text-white">Go Back to Dashboard</button>
 	</div>
 </body>
 

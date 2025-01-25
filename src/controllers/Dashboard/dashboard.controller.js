@@ -40,7 +40,24 @@ export const getDashboard = async (req, res) => {
 					_id: null,
 					totalMessages: { $sum: 1 },
 					messagesSent: {
-						$sum: { $cond: [{ $eq: ["$status", "SENT"] }, 1, 0] },
+						$sum: {
+							$cond: [
+								{
+									$in: [
+										"$status",
+										[
+											"SENT",
+											"DELIVERED",
+											"READ",
+											"REPLIED",
+											"FAILED",
+										],
+									],
+								},
+								1,
+								0,
+							],
+						},
 					},
 					messagesDelivered: {
 						$sum: {
@@ -66,6 +83,7 @@ export const getDashboard = async (req, res) => {
 				},
 			},
 		]);
+
 
 		// Default values if no reports found
 		const campaignStats =
@@ -267,9 +285,9 @@ export const getFilters = async (req, res) => {
 			{ $sort: { createdAt: -1 } },
 		]);
 		const allData = [];
-		
+
 		// console.log(sentReports);
-		
+
 		sentReports.forEach((campaign) => {
 			campaign.reports.forEach((report) => {
 				const perUser = {};

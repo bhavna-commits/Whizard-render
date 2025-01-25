@@ -123,33 +123,65 @@ router.post("/webhook", async (req, res) => {
 								recipient_id: recipientPhone,
 							} = statusEvent;
 
+							const campaign = await Campaign.findOne({
+								useradmin: user.unique_id,
+								deleted: false,
+							})
+								.sort({ createdAt: -1 })
+								.limit(1);
+
 							let report = await Reports.findOne({ messageId });
 
-							report.status = status.toUpperCase();
-							report.updatedAt = timestamp;
-							report.recipientPhone = recipientPhone;
+							if (report) {
+								report.status = status.toUpperCase();
+								report.updatedAt = timestamp;
+								report.recipientPhone = recipientPhone;
 
-							await report.save();
+								await report.save();
+							} else {
+								report = new Reports({
+									messageId,
+									recipientPhone,
+									WABA_ID: user.WABA_ID || "",
+									FB_PHONE_ID: user.FB_PHONE_ID || "",
+									useradmin: user.unique_id || "",
+									messageId,
+									status: "REPLIED",
+									updatedAt: timestamp,
+									recipientPhone,
+									campaignId: campaign
+										? campaign.unique_id
+										: "",
+									unique_id: generateUniqueId(),
+								});
+							}
 						}
 					}
 
-					// Check for template rejection
-					if (messagingEvent.event == "REJECTED") {
+					// Check for template rejection (Updated according to the new JSON structure)
+					if (messagingEvent.event === "REJECTED") {
 						const {
 							message_template_id: templateId,
+							message_template_name: templateName,
+							message_template_language: templateLanguage,
 							reason: rejectedReason,
 						} = messagingEvent;
 
-							// Update the template status and rejection reason in the database
-							let template = await Template.findOne({
-								fb_id: templateId,
-							});
-							if (template) {
-								template.status = "Rejected";
-								template.rejected_reason = rejectedReason;
-								await template.save();
-							}
-						
+						// Update the template status and rejection reason in the database
+						let template = await Template.findOne({
+							fb_id: templateId,
+						});
+
+						if (template) {
+							template.status = "Rejected";
+							template.rejected_reason = `Template '${templateName}' (Language: ${templateLanguage}) was rejected. Reason: ${rejectedReason}.`;
+
+							await template.save();
+						} else {
+							console.log(
+								`Template with ID ${templateId} not found.`,
+							);
+						}
 					}
 
 					// Handle incoming messages/replies
@@ -175,9 +207,23 @@ router.post("/webhook", async (req, res) => {
 								campaignId: campaign.unique_id,
 								recipientPhone,
 							});
+							console.log("1", text.body);
+							if (report) {
+								if (type === "text") {
+									console.log("2", text.body);
+									report.replyContent = String(text.body);
+									report.status = "REPLIED";
+								} else if (type === "image" && image) {
+									const { id: imageId, mime_type: mimeType } =
+										image;
 
-							if (!report) {
-								report = new Reports({
+									// Handle image if needed, e.g. save to disk or cloud
+								}
+
+								await report.save(); // Save the report
+							} else {
+								console.log("3", text.body);
+								await Reports.create({
 									messageId,
 									recipientPhone,
 									WABA_ID: user.WABA_ID || "",
@@ -193,17 +239,6 @@ router.post("/webhook", async (req, res) => {
 									unique_id: generateUniqueId(),
 								});
 							}
-
-							if (type === "text") {
-								report.replyContent = text.body;
-							} else if (type === "image" && image) {
-								const { id: imageId, mime_type: mimeType } =
-									image;
-
-								// Handle image if needed, e.g. save to disk or cloud
-							}
-
-							await report.save(); // Save the report
 						}
 					}
 				}

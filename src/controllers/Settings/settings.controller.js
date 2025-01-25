@@ -706,11 +706,7 @@ export const createPermissions = async (req, res, next) => {
 				addContactListCSV: permissions.contactlist.addContactListCSV,
 				deleteList: permissions.contactlist.deleteList,
 				sendBroadcast: permissions.contactlist.sendBroadcast,
-				customField: {
-					type: permissions.contactlist.customField.type,
-					view: permissions.contactlist.customField.view,
-					add: permissions.contactlist.customField.add,
-				},
+				customField: permissions.contactlist.customField,
 			},
 			templates: {
 				type: permissions.templates.type,

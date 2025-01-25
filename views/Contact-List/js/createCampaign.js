@@ -232,7 +232,9 @@ class TemplateManager {
 					e.preventDefault();
 					// Get the form and action type from the clicked button
 					const submitterButton = e.submitter; // This gets the clicked button
-					const actionType = submitterButton.value; // This gets the value of the clicked button
+					console.log(submitterButton)
+					const actionType = submitterButton.value;
+					console.log(actionType);// This gets the value of the clicked button
 					// Handle form submission based on the action type
 					this.handleFormSubmit(e, actionType, submitterButton);
 				});
@@ -329,6 +331,7 @@ class TemplateManager {
 		console.log("Attributes selected:", variables);
 	}
 
+	
 	convertDateFormat(dateString) {
 		return dateString.replace(/(\d{2})\/(\d{2})\/(\d{4})/g, "$2/$1/$3");
 	}
@@ -336,7 +339,7 @@ class TemplateManager {
 	async handleFormSubmit(event, actionType, button) {
 		event.preventDefault();
 		// Get the target button
-		const loader = button.querySelector(".loader");
+		const loader = button.querySelector(".loader-submit");
 		const buttonText = button.querySelector(".button-text");
 
 		// Disable the button and show the spinner

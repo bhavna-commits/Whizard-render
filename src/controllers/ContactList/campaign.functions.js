@@ -52,7 +52,10 @@ export async function sendMessages(campaign, id, unique_id) {
 				personalizedMessage,
 			);
 
-			const messageTemplate = generatePreviewMessage(personalizedMessage);
+			const messageTemplate = generatePreviewMessage(
+				template,
+				campaign.variables,
+			);
 
 			if (response.status === "FAILED") {
 				console.error(
@@ -90,7 +93,6 @@ export async function sendMessages(campaign, id, unique_id) {
 
 function replaceDynamicVariables(template, variables, contact) {
 	const messageComponents = [];
-
 	try {
 		// Process dynamic variables in Header
 		const headerComponent = template.components.find(
@@ -260,52 +262,34 @@ cron.schedule("* * * * *", async () => {
 	}
 });
 
-function generatePreviewMessage(template, messageComponents) {
+function generatePreviewMessage(template, variables) {
 	try {
 		let previewMessage = "";
+		console.log(variables);
 
-		// Process Header component
-		const headerComponent = messageComponents.find(
-			(c) => c.type === "header",
-		);
-		if (headerComponent) {
-			let headerText = template.components.find(
-				(c) => c.type === "HEADER",
-			).text;
-			headerComponent.parameters.forEach((param) => {
-				if (param.type === "text") {
-					headerText = headerText.replace(
-						"{{" + param.text + "}}",
-						param.text,
-					);
-				}
-			});
-			previewMessage += `${headerText}<br>`;
-		}
+		let headerText = template.components.find(
+			(c) => c.type === "HEADER",
+		).text;
+
+		previewMessage += `${headerText}\n`;
 
 		// Process Body component
-		const bodyComponent = messageComponents.find((c) => c.type === "body");
-		if (bodyComponent) {
-			let bodyText = template.components.find(
-				(c) => c.type === "BODY",
-			).text;
-			bodyComponent.parameters.forEach((param) => {
-				if (param.type === "text") {
-					bodyText = bodyText.replace(
-						"{{" + param.text + "}}",
-						param.text,
-					);
-				}
-			});
-			previewMessage += `${bodyText}<br>`;
-		}
+
+		let bodyText = template.components.find((c) => c.type === "BODY").text;
+
+		Object.entries(variables).forEach(([key, value]) => {
+			console.log(key, value);
+			bodyText = bodyText.replace("{{" + key + "}}", value);
+		});
+
+		previewMessage += `${bodyText}\n`;
 
 		// Process Footer component (optional)
 		const footerComponent = template.components.find(
 			(c) => c.type === "FOOTER",
 		);
 		if (footerComponent) {
-			previewMessage += `${footerComponent.text}<br>`;
+			previewMessage += `${footerComponent.text}\n`;
 		}
 
 		return previewMessage.trim();

@@ -29,15 +29,15 @@
 					</td>
 					<td class="border-t border-b border-gray-200">
 						<% if (list.status === 'Rejected') { %>
-						<span class="text-orange-500 underline-offset-2 underline font-semibold" title="Rejected Reason: <%= list.rejected_reason %>">
+						<span class="text-orange-500  font-semibold" title="Rejected Reason: <%= list.rejected_reason %>">
 							<%= list.status %>
 						</span>
 						<% } else if (list.status === 'Pending') { %>
-						<span class="text-orange-500 underline-offset-2 underline font-semibold">
+						<span class="text-orange-500  font-semibold">
 							<%= list.status %>
 						</span>
 						<% } else { %>
-						<span class="text-green-500 underline-offset-2 underline font-semibold">
+						<span class="text-green-500  font-semibold">
 							<%= list.status %>
 						</span>
 						<% } %>

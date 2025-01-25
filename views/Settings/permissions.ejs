@@ -143,13 +143,20 @@
 				<!-- Reports: Conditionally rendered based on permissions -->
 				<li>
 					<% if (access?.reports?.type) { %>
-					<a href="/reports/campaign-list">
-						<span class="icon "><svg width="18" height="20" viewBox="0 0 18 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-								<path d="M16.8085 4.21938L13.0585 0.469375C12.9888 0.399749 12.906 0.344539 12.815 0.306898C12.7239 0.269257 12.6264 0.249923 12.5278 0.25H5.02783C4.63001 0.25 4.24848 0.408035 3.96717 0.68934C3.68587 0.970645 3.52783 1.35218 3.52783 1.75V3.25H2.02783C1.63001 3.25 1.24848 3.40804 0.967172 3.68934C0.685867 3.97064 0.527832 4.35218 0.527832 4.75V18.25C0.527832 18.6478 0.685867 19.0294 0.967172 19.3107C1.24848 19.592 1.63001 19.75 2.02783 19.75H12.5278C12.9257 19.75 13.3072 19.592 13.5885 19.3107C13.8698 19.0294 14.0278 18.6478 14.0278 18.25V16.75H15.5278C15.9257 16.75 16.3072 16.592 16.5885 16.3107C16.8698 16.0294 17.0278 15.6478 17.0278 15.25V4.75C17.0279 4.65148 17.0086 4.55391 16.9709 4.46286C16.9333 4.37182 16.8781 4.28908 16.8085 4.21938ZM12.5278 18.25H2.02783V4.75H9.21752L12.5278 8.06031V15.985C12.5278 15.9906 12.5278 15.9953 12.5278 16C12.5278 16.0047 12.5278 16.0094 12.5278 16.015V18.25ZM15.5278 15.25H14.0278V7.75C14.0279 7.65148 14.0086 7.55391 13.9709 7.46286C13.9333 7.37182 13.8781 7.28908 13.8085 7.21937L10.0585 3.46938C9.98875 3.39975 9.90602 3.34454 9.81497 3.3069C9.72392 3.26926 9.62635 3.24992 9.52783 3.25H5.02783V1.75H12.2175L15.5278 5.06031V15.25ZM10.2778 12.25C10.2778 12.4489 10.1988 12.6397 10.0582 12.7803C9.91751 12.921 9.72674 13 9.52783 13H5.02783C4.82892 13 4.63815 12.921 4.4975 12.7803C4.35685 12.6397 4.27783 12.4489 4.27783 12.25C4.27783 12.0511 4.35685 11.8603 4.4975 11.7197C4.63815 11.579 4.82892 11.5 5.02783 11.5H9.52783C9.72674 11.5 9.91751 11.579 10.0582 11.7197C10.1988 11.8603 10.2778 12.0511 10.2778 12.25ZM10.2778 15.25C10.2778 15.4489 10.1988 15.6397 10.0582 15.7803C9.91751 15.921 9.72674 16 9.52783 16H5.02783C4.82892 16 4.63815 15.921 4.4975 15.7803C4.35685 15.6397 4.27783 15.4489 4.27783 15.25C4.27783 15.0511 4.35685 14.8603 4.4975 14.7197C4.63815 14.579 4.82892 14.5 5.02783 14.5H9.52783C9.72674 14.5 9.91751 14.579 10.0582 14.7197C10.1988 14.8603 10.2778 15.0511 10.2778 15.25Z" />
-							</svg>
-						</span>
-						Reports
-					</a>
+					<div class="report-menu relative">
+						<a href="javascript:void(0);" onclick="getReportsMenu()">
+							<span class="icon"><svg width="18" height="20" viewBox="0 0 18 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+									<path d="M16.8085 4.21938L13.0585 0.469375C12.9888 0.399749 12.906 0.344539 12.815 0.306898C12.7239 0.269257 12.6264 0.249923 12.5278 0.25H5.02783C4.63001 0.25 4.24848 0.408035 3.96717 0.68934C3.68587 0.970645 3.52783 1.35218 3.52783 1.75V3.25H2.02783C1.63001 3.25 1.24848 3.40804 0.967172 3.68934C0.685867 3.97064 0.527832 4.35218 0.527832 4.75V18.25C0.527832 18.6478 0.685867 19.0294 0.967172 19.3107C1.24848 19.592 1.63001 19.75 2.02783 19.75H12.5278C12.9257 19.75 13.3072 19.592 13.5885 19.3107C13.8698 19.0294 14.0278 18.6478 14.0278 18.25V16.75H15.5278C15.9257 16.75 16.3072 16.592 16.5885 16.3107C16.8698 16.0294 17.0278 15.6478 17.0278 15.25V4.75C17.0279 4.65148 17.0086 4.55391 16.9709 4.46286C16.9333 4.37182 16.8781 4.28908 16.8085 4.21938ZM12.5278 18.25H2.02783V4.75H9.21752L12.5278 8.06031V15.985C12.5278 15.9906 12.5278 15.9953 12.5278 16C12.5278 16.0047 12.5278 16.0094 12.5278 16.015V18.25ZM15.5278 15.25H14.0278V7.75C14.0279 7.65148 14.0086 7.55391 13.9709 7.46286C13.9333 7.37182 13.8781 7.28908 13.8085 7.21937L10.0585 3.46938C9.98875 3.39975 9.90602 3.34454 9.81497 3.3069C9.72392 3.26926 9.62635 3.24992 9.52783 3.25H5.02783V1.75H12.2175L15.5278 5.06031V15.25ZM10.2778 12.25C10.2778 12.4489 10.1988 12.6397 10.0582 12.7803C9.91751 12.921 9.72674 13 9.52783 13H5.02783C4.82892 13 4.63815 12.921 4.4975 12.7803C4.35685 12.6397 4.27783 12.4489 4.27783 12.25C4.27783 12.0511 4.35685 11.8603 4.4975 11.7197C4.63815 11.579 4.82892 11.5 5.02783 11.5H9.52783C9.72674 11.5 9.91751 11.579 10.0582 11.7197C10.1988 11.8603 10.2778 12.0511 10.2778 12.25ZM10.2778 15.25C10.2778 15.4489 10.1988 15.6397 10.0582 15.7803C9.91751 15.921 9.72674 16 9.52783 16H5.02783C4.82892 16 4.63815 15.921 4.4975 15.7803C4.35685 15.6397 4.27783 15.4489 4.27783 15.25C4.27783 15.0511 4.35685 14.8603 4.4975 14.7197C4.63815 14.579 4.82892 14.5 5.02783 14.5H9.52783C9.72674 14.5 9.91751 14.579 10.0582 14.7197C10.1988 14.8603 10.2778 15.0511 10.2778 15.25Z" />
+								</svg>
+							</span>
+							Reports
+							
+						</a>
+						<div id="reportMenu" class="report-card hidden">
+							<a href="/reports/campaign-list" class="flex flex-row items-center"><img src="conversationReport.svg" class="pr-2" />Campaign Report</a>
+							<a href="/reports/cost-report" class="flex flex-row items-center"><img src="costReport.svg" class="pr-2" />Cost Report</a>
+						</div>
+					</div>
 					<% } else { %>
 					<a href="javascript:void(0);" class="cursor-not-allowed">
 						<span class="icon"><svg width="18" height="20" viewBox="0 0 18 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
@@ -274,7 +281,7 @@
 									<h2 class="text-lg font-semibold">Contact List</h2>
 									<div class="flex items-center space-x-2">
 										<label class="relative inline-flex pt-2 items-center cursor-pointer">
-											<input type="checkbox" name="permissions[contactList]" class="sr-only peer section-toggle">
+											<input type="checkbox" name="permissions[contactlist]" class="sr-only peer section-toggle">
 											<div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 
 												peer-focus:ring-blue-300 rounded-full peer 
 												peer-checked:after:translate-x-full peer-checked:after:border-white 
@@ -287,28 +294,33 @@
 									</div>
 								</div>
 								<div class="options-container grid grid-cols-1 md:grid-cols-5 w-[60%]">
+									
 									<label class="flex items-center space-x-2">
-										<input type="checkbox" name="permissions[contactList][]" value="addContactIndividual" class="rounded option-checkbox text-blue-600 checkbox" />
+										<input type="checkbox" name="permissions[contactlist][]" value="customField" class="rounded option-checkbox  checkbox text-blue-600">
+										<span class="option-label text-gray-500">Custom Field</span>
+									</label>
+									<label class="flex items-center space-x-2">
+										<input type="checkbox" name="permissions[contactlist][]" value="addContactIndividual" class="rounded option-checkbox text-blue-600 checkbox" />
 										<span class="option-label text-gray-500">Add Contact</span>
 									</label>
 									<label class="flex items-center space-x-2">
-										<input type="checkbox" name="permissions[contactList][]" value="editContactIndividual" class="rounded option-checkbox text-blue-600 checkbox" />
+										<input type="checkbox" name="permissions[contactlist][]" value="editContactIndividual" class="rounded option-checkbox text-blue-600 checkbox" />
 										<span class="option-label text-gray-500">Edit Contact</span>
 									</label>
 									<label class="flex items-center space-x-2">
-										<input type="checkbox" name="permissions[contactList][]" value="deleteContactIndividual" class="rounded option-checkbox text-blue-600 checkbox" />
+										<input type="checkbox" name="permissions[contactlist][]" value="deleteContactIndividual" class="rounded option-checkbox text-blue-600 checkbox" />
 										<span class="option-label text-gray-500">Delete Contact</span>
 									</label>
 									<label class="flex items-center space-x-2">
-										<input type="checkbox" name="permissions[contactList][]" value="addContactListCSV" class="rounded option-checkbox text-blue-600 checkbox" />
+										<input type="checkbox" name="permissions[contactlist][]" value="addContactListCSV" class="rounded option-checkbox text-blue-600 checkbox" />
 										<span class="option-label text-gray-500">Upload Contact List</span>
 									</label>
 									<label class="flex items-center space-x-2">
-										<input type="checkbox" name="permissions[contactList][]" value="deleteList" class="rounded option-checkbox text-blue-600 checkbox" />
+										<input type="checkbox" name="permissions[contactlist][]" value="deleteList" class="rounded option-checkbox text-blue-600 checkbox" />
 										<span class="option-label text-gray-500">Delete List</span>
 									</label>
 									<label class="flex items-center space-x-2">
-										<input type="checkbox" name="permissions[contactList][]" value="sendBroadcast" class="rounded option-checkbox text-blue-600 checkbox" />
+										<input type="checkbox" name="permissions[contactlist][]" value="sendBroadcast" class="rounded option-checkbox text-blue-600 checkbox" />
 										<span class="option-label text-gray-500">Send Broadcast</span>
 									</label>
 								</div>
@@ -414,7 +426,7 @@
 								</div>
 								
 								<div class="options-container grid grid-cols-1 md:grid-cols-5 gap-4 mb-4 w-[60%]">
-									<div class="permission-group" id="manage-tags-section">
+									<!-- <div class="permission-group" id="manage-tags-section">
 										<label class="flex items-center space-x-2">
 											<input type="checkbox" name="permissions[settings][]" value="manageTags" class="rounded option-checkbox checkbox text-blue-600 toggle-option" id="manage-tags-toggle">
 											<span class="option-label text-gray-500">Manage Tags</span>
@@ -433,7 +445,7 @@
 												<span class="text-sm nested-label text-gray-500">View Tags</span>
 											</label>
 										</div>
-									</div>
+									</div> -->
 									
 									<label class="flex space-x-2">
 										<input type="checkbox" name="permissions[settings][]" value="userManagement" class="rounded option-checkbox checkbox text-blue-600" id="user-management">

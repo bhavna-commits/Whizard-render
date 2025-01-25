@@ -17,11 +17,7 @@ const permissionState = {
 		deleteContactIndividual: false,
 		deleteList: false,
 		sendBroadcast: false,
-		customField: {
-			type: false,
-			view: false,
-			add: false,
-		},
+		customField: false,
 	},
 	templates: {
 		type: false,
@@ -154,11 +150,9 @@ function updatePermissionState(checkbox, value) {
 	} else {
 		// Handle regular checkboxes based on section
 		switch (sectionName) {
-			// case "contactlist":
-			// 	if (permissionState.contactList.hasOwnProperty(checkboxValue)) {
-			// 		permissionState.contactList[checkboxValue] = value;
-			// 	}
-			// 	break;
+			case "contactlist":
+				permissionState.contactlist[checkboxValue] = value;
+				break;
 			case "reports":
 				if (checkboxValue === "conversationReports") {
 					permissionState.reports.conversationReports.type = value;
@@ -181,6 +175,7 @@ function updatePermissionState(checkbox, value) {
 				) {
 					permissionState[sectionName][checkboxValue] = value;
 				}
+				break;
 		}
 	}
 }

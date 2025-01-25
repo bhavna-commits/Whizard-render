@@ -1,4 +1,4 @@
-import fs from "fs";
+import fs, { access } from "fs";
 import path from "path";
 import Papa from "papaparse";
 import ContactList from "../../models/contactList.model.js";
@@ -20,6 +20,7 @@ import {
 	isBoolean,
 	isObject,
 } from "../../middleWares/sanitiseInput.js";
+import { json } from "stream/consumers";
 
 export const __filename = fileURLToPath(import.meta.url);
 export const __dirname = path.dirname(__filename);
@@ -453,7 +454,7 @@ export const createCampaign = async (req, res, next) => {
 		variables =
 			typeof variables === "string" ? JSON.parse(variables) : variables;
 		schedule =
-			typeof schedule === "string" ? JSON.parse(schedule) : schedule;		
+			typeof schedule === "string" ? JSON.parse(schedule) : schedule;
 
 		// Create new campaign object
 		const newCampaign = new Campaign({
@@ -574,25 +575,44 @@ export const getFilteredContacts = async (req, res, next) => {
 			contactId: id,
 			subscribe: 1,
 		};
-
 		// Loop through each filter
 		filters.forEach((filter) => {
 			if (filter.field === "subscribe_date" && filter.value) {
 				matchStage.$and = matchStage.$and || [];
-				// Handle the date range filter for subscribe_date
-				const [startDate, endDate] = filter.value.split(" to ");
-				// console.log(startDate, endDate);
-				const convertedStartDate = new Date(startDate).getTime();
-				const convertedEndDate = new Date(endDate).getTime();
-				// console.log(convertedStartDate, convertedEndDate);
-				// Apply filter for subscribe_date (ensure only one date range per filter)
+				const [startDate, endDate] = filter.value?.split(" to ");
+
+				// Convert start date to timestamp
+				const convertedStartDate = new Date(
+					Date.UTC(
+						parseInt(startDate.split("-")[0]), // year
+						parseInt(startDate.split("-")[1]) - 1, // month (0-indexed in JS Date)
+						parseInt(startDate.split("-")[2]), // day
+					),
+				).getTime();
+
+				// Check if endDate is defined
+				let convertedEndDate = Infinity; // Default to Infinity if no endDate is provided
+				if (endDate) {
+					convertedEndDate = new Date(
+						Date.UTC(
+							parseInt(endDate.split("-")[0]), // year
+							parseInt(endDate.split("-")[1]) - 1, // month (0-indexed in JS Date)
+							parseInt(endDate.split("-")[2]), // day
+						),
+					).getTime();
+				}
+
+				console.log("Converted Start Date:", convertedStartDate);
+				console.log("Converted End Date:", convertedEndDate);
+
+				// Apply filter for subscribe_date (handle case where endDate may not be provided)
 				matchStage.$and.push({
 					[filter.field]: {
 						$gte: convertedStartDate,
 						$lte: convertedEndDate,
 					},
 				});
-			} else {
+			} else if (filter.field === "Name" || filter.field === "Number") {
 				if (filter.condition === "has") {
 					matchStage.$or = matchStage.$or || [];
 					matchStage.$or.push({
@@ -612,9 +632,29 @@ export const getFilteredContacts = async (req, res, next) => {
 						},
 					});
 				}
+			} else {
+				if (filter.condition === "has") {
+					matchStage.$or = matchStage.$or || [];
+					matchStage.$or.push({
+						[`masterExtra.${filter.field}`]: {
+							$regex: filter.value,
+							$options: "imsx",
+						},
+					});
+				} else {
+					matchStage.$or = matchStage.$or || [];
+					matchStage.$or.push({
+						[`masterExtra.${filter.field}`]: {
+							$not: {
+								$regex: filter.value,
+								$options: "imsx",
+							},
+						},
+					});
+				}
 			}
 		});
-
+		console.log(JSON.stringify(matchStage));
 		// Aggregation pipeline to apply filters and paginate
 		const aggregation = [
 			{ $match: matchStage },
@@ -627,6 +667,7 @@ export const getFilteredContacts = async (req, res, next) => {
 		];
 
 		const result = await Contacts.aggregate(aggregation);
+		console.log(result);
 		const contactLists = result[0].paginatedResults;
 		const totalContacts =
 			result[0].totalContacts.length > 0
@@ -634,16 +675,38 @@ export const getFilteredContacts = async (req, res, next) => {
 				: 0;
 
 		const totalPages = Math.ceil(totalContacts / limit);
-		// console.log(contactLists);
+		console.log(contactLists);
 
-		// Send the filtered results as a response
-		res.render("Contact-List/partials/OverViewTable", {
-			contacts: contactLists,
-			page,
-			totalPages,
-			tags: [],
-			id,
-		});
+		const permissions = req.session?.addedUser?.permissions;
+		if (permissions) {
+			const access = await Permissions.findOne({
+				unique_id: permissions,
+			});
+			if (access.contactList) {
+				res.render("Contact-List/partials/OverViewTable", {
+					access,
+					contacts: contactLists,
+					page,
+					totalPages,
+					tags: [],
+					id,
+				});
+			} else {
+				res.render("errors/notAllowed");
+			}
+		} else {
+			const access = await User.findOne({
+				unique_id: req.session?.user?.id,
+			});
+			res.render("Contact-List/partials/OverViewTable", {
+				access: access.access,
+				contacts: contactLists,
+				page,
+				totalPages,
+				tags: [],
+				id,
+			});
+		}
 	} catch (error) {
 		console.error(error);
 		res.render("errors/serverError");

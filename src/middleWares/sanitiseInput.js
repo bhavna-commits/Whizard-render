@@ -64,9 +64,9 @@ export function isString(...inputs) {
 			continue;
 		}
 
-		if (input !== validator.trim(input)) {
-			return false;
-		}
+		// if (input !== validator.trim(input)) {
+		// 	return false;
+		// }
 
 		// Check if input contains any characters that would need to be escaped
 		// if (input !== validator.escape(input)) {
@@ -86,9 +86,9 @@ export function isString(...inputs) {
 export function isObject(...inputs) {
 	// Helper function to validate individual strings
 	function validateString(input) {
-		if (input !== validator.trim(input)) {
-			return false;
-		}
+		// if (input !== validator.trim(input)) {
+		// 	return false;
+		// }
 
 		// Check if input contains any characters that would need to be escaped
 		// if (input !== validator.escape(input)) {
@@ -142,9 +142,9 @@ export function isValidArrayOrObject(...inputs) {
 	// Helper function to validate individual strings
 	function validateString(input) {
 		// Trim leading/trailing spaces
-		if (input !== validator.trim(input)) {
-			return false;
-		}
+		// if (input !== validator.trim(input)) {
+		// 	return false;
+		// }
 
 		// Prevent potential XSS injections
 		if (input !== xss(input)) {

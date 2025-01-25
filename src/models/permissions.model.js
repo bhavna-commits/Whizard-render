@@ -18,6 +18,7 @@ const permissionSchema = new Schema(
 		},
 		contactList: {
 			type: { type: Boolean, default: false },
+			customField: { type: Boolean, default: false },
 			addContactIndividual: { type: Boolean, default: false },
 			editContactIndividual: { type: Boolean, default: false },
 			deleteContactIndividual: { type: Boolean, default: false },
@@ -45,12 +46,6 @@ const permissionSchema = new Schema(
 			type: { type: Boolean, default: false },
 			userManagement: { type: Boolean, default: false },
 			activityLogs: { type: Boolean, default: false },
-			manageTags: {
-				type: { type: Boolean, default: false },
-				delete: { type: Boolean, default: false },
-				add: { type: Boolean, default: false },
-				view: { type: Boolean, default: false },
-			},
 		},
 		createdAt: { type: Number, default: () => Date.now() },
 		updatedAt: { type: Number, default: () => Date.now() },
