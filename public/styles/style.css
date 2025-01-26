@@ -495,12 +495,6 @@ input[type="number"] {
 	margin-top: 3rem;
 }
 
-.form-control {
-	border-radius: 0.6rem;
-	box-shadow: 0px 0.3rem 0.5rem 0 #1018280d;
-	border: 0.1rem solid #404040;
-}
-
 .btn-primary {
 	background-color: #000;
 	border: none;

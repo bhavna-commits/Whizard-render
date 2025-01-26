@@ -46,8 +46,8 @@ class AttributeManager {
 				const variableKey = Object.keys(variableObj)[0]; // Get the variable key, e.g., '1'
 				return `
                 <div class=" mt-3">
-                    <label class="w-full">Variable: {${variableKey}}</label>
-                    <select class="attribute-select w-full" data-variable="${variableKey}">
+                    <label class="w-full text-gray-400 border-gray-400">Attribute ${variableKey}</label>
+                    <select class="attribute-select w-full text-gray-400" data-variable="${variableKey}">
 						<option disabled selected>Select a value</option>
                         ${options
 							.map(
@@ -110,7 +110,7 @@ class Preview {
 		let bodyContent = "";
 		let footerContent = "";
 		let buttonContent = "";
-		console.log(components);
+
 		// Filter components for header, body, footer, and buttons
 		components.forEach((component) => {
 			if (component.type === "HEADER") {
@@ -155,33 +155,26 @@ class Preview {
 				footerContent = component.text;
 				// console.log("fotter")
 			} else if (component.type === "BUTTONS") {
-				component.buttons.forEach((button) => {
-					const buttonText = button.text || "Click Here";
+				const buttonText = component.text;
+				const buttons = component.buttons;
 
-					// Check for URL type button
-					if (
-						button.type === "URL" &&
-						button.url &&
-						button.url.startsWith("http")
-					) {
+				buttons.forEach((button) => {
+					if (button.type == "PHONE_NUMBER") {
+						let buttonLabel = button.text;
+						const buttonUrl = button.url;
 						buttonContent += `
-                <button class="border-t w-full mt-2 pt-1 text-center me-2 text-base" onclick="window.open('${button.url}', '_blank')" style="color: #6A67FF;">
-                    <i class="fa fa-external-link mx-2"></i><span class="text-lg">${buttonText}</span>
-                </button>
-            `;
-					}
-
-					// Check for Phone number type button
-					else if (
-						button.type === "PHONE_NUMBER" &&
-						button.phone_number
-					) {
+                    <button class="border-t w-full mt-2 pt-1 text-center me-2 text-base" onclick="window.open('${buttonUrl}', '_blank')" style="color: #6A67FF;">
+                        <i class="fa fa-external-link mx-2"></i><span class="text-lg">${buttonLabel}</span>
+                    </button>
+                `;
+					} else {
+						let buttonLabel = button.text;
 						const phoneNumber = button.phone_number;
 						buttonContent += `
-                <button class="border-t w-full mt-2 pt-1 text-center me-2 text-base" onclick="window.location.href='tel:${phoneNumber}'" style="color: #6A67FF;">
-                    <i class="fa fa-phone mx-2"></i><span class="text-lg">${buttonText}</span>
-                </button>
-            `;
+                    <button class="border-t w-full mt-2 pt-1 text-center me-2 text-base" onclick="window.location.href='tel:${phoneNumber}'" style="color: #6A67FF;">
+                        <i class="fa fa-phone mx-2"></i><span class="text-lg">${buttonLabel}</span>
+                    </button>
+                `;
 					}
 				});
 			}
@@ -190,7 +183,7 @@ class Preview {
 		this.container.innerHTML = `
         ${
 			headerContent
-				? `<div class="header-container">${headerContent}</div>`
+				? `<div class="font-semibold text-lg">${headerContent}</div>`
 				: ""
 		}
         <p class="text-lg py-2">${bodyContent.replace(/\n/g, "<br>")}</p>
@@ -262,7 +255,9 @@ class TemplateManager {
 			const templates = await fetchTemplates();
 			this.templateSelect
 				.empty()
-				.append('<option value="">Select a template...</option>');
+				.append(
+					"<option disabled selected>Select a template...</option>",
+				);
 
 			templates.data.forEach((template) => {
 				this.templateSelect.append(
@@ -365,6 +360,8 @@ class TemplateManager {
 			contactList: contactLists,
 		};
 
+		console.log(formData);
+
 		// Check if scheduling or sending immediately
 		if (actionType === "schedule") {
 			const selectedDate = document.getElementById("datePicker").value;
@@ -466,11 +463,12 @@ $(document).ready(() => {
 		isScheduled = !isScheduled;
 
 		// Toggle the knob position
+		// Toggle the knob position
 		if (isScheduled) {
 			toggleKnob.style.transform = "translateX(100%)"; // Moves the knob to the right
 			toggleSwitch.children[0].classList.replace(
-				"bg-gray-300",
-				"bg-red-300",
+				"bg-gray-500",
+				"bg-black",
 			); // Smooth background change
 
 			// Show the schedule section smoothly
@@ -483,8 +481,8 @@ $(document).ready(() => {
 		} else {
 			toggleKnob.style.transform = "translateX(0)"; // Moves the knob back to the left
 			toggleSwitch.children[0].classList.replace(
-				"bg-red-300",
-				"bg-gray-300",
+				"bg-black",
+				"bg-gray-500",
 			); // Smooth background change
 
 			// Hide the schedule section smoothly

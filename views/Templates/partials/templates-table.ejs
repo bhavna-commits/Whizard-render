@@ -3,25 +3,21 @@
 	<div class="overflow-x-auto">
 		<table class="text-center min-w-full border-separate border-spacing-y-4">
 			<tbody class="">
-				<tr class=" text-gray-500 tracking-wider">
-					<td class="">Sno.</td>
-					<td class="w-fit">Template Name</td>
-					<td class="">Category</td>
-					<td class="">Language</td>
-					<td class="">Status</td>
-					<td class="">Actions</td>
+				<tr class=" text-gray-400 ">
+					<td class="text-gray-400">Sno.</td>
+					<td class=" w-fit text-left">Template Name</td>
+					<td class=" ">Category</td>
+					<td class=" ">Language</td>
+					<td class=" ">Status</td>
+					<td class=" ">Actions</td>
 				</tr>
 				
 				<% list.forEach((list, i) => { %>
 				<tr class="hover:bg-gray-100">
 					<td class="border-l border-t border-b rounded-lg py-4 border-gray-200 text-sm text-gray-500"><%= ++i %></td>
 					<td class="border-t border-b border-gray-200  w-48 text-left ">
-						<a href="#" class="text-blue-600 hover:underline ">
-							<div class="pl-4">
-								<p class="text-gray-700 font-semibold"><%= list.name %></p>
-								<p class="text-gray-500 text-sm" id="createdAt-<%= list._id %>" data-timestamp="<%= list.updatedAt %>"></p>
-							</div>
-						</a>
+						<p class="text-gray-700 font-semibold"><%= list.name %></p>
+						<p class="text-gray-400 text-sm" id="createdAt-<%= list._id %>" data-timestamp="<%= list.updatedAt %>"></p>
 					</td>
 					<td class=" text-gray-500 border-t border-b border-gray-200"><%= list.category %></td>
 					<td class="border-t border-b border-gray-200">
@@ -47,23 +43,23 @@
 						<% if (access?.templates?.duplicateTemplate) { %>
 						<!-- Duplicate Button -->
 						<button type="button" class="text-gray-500 hover:text-gray-700 px-3 border-r" onclick="duplicateTemplate('<%= list._id %>')">
-							<i class="fa-regular fa-copy"></i>
+							<img src="duplicate.svg" alt="duplicate">
 						</button>
 						<% } else { %>
 						<!-- Duplicate Button -->
 						<button type="button" class="text-gray-500 hover:cursor-not-allowed px-3 border-r" title="You don't have permissions to access this" disabled>
-							<i class="fa-regular fa-copy"></i>
+							<img src="duplicate.svg" alt="duplicate">
 						</button>
 						<% } %>
 						<% if (access?.templates?.deleteTemplate) { %>
 						<!-- Delete Button -->
 						<button type="button" class="text-gray-500 hover:text-red-700 px-2" onclick="confirmDelete('<%= list._id %>')">
-							<i class="fa-regular fa-trash-can"></i>
+							<img src="bin.svg" alt="bin">
 						</button>
 						<% } else { %>
 						<!-- Delete Button -->
 						<button type="button" class="text-gray-500 hover:cursor-not-allowed px-2" title="You don't have permissions to access this" disabled>
-							<i class="fa-regular fa-trash-can"></i>
+							<img src="bin.svg" alt="bin">
 						</button>
 						<% } %>
 					</td>

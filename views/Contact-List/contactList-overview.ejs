@@ -284,16 +284,13 @@
 				</div>
 				
 				<!-- Contact list table -->
-				<div class="flex w-full justify-center items-center ">
-					<div id="contactList" class="w-[95%]"><%- include('partials/OverViewTable') %></div>
+				<div class="flex w-full  justify-center items-start">
+					<div id="contactList" class="w-[98%] overflow-x-auto"><%- include('partials/OverViewTable') %></div>
 				</div>
 			</div>
 			
 			<!-- Pop-Up Modal to Edit List -->
-			<%- include('partials/editContact') %>
-			
-			
-			
+			<%- include('partials/editContact') %>			
 		</div>
 	</div>
 	<script src="/contact-list/js/editContact.js"></script>

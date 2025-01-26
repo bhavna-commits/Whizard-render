@@ -45,9 +45,9 @@ class AttributeManager {
 			?.map((variableObj, index) => {
 				const variableKey = Object.keys(variableObj)[0]; // Get the variable key, e.g., '1'
 				return `
-                <div class=" mt-3">
-                    <label class="w-full">Variable: {${variableKey}}</label>
-                    <select class="attribute-select w-full" data-variable="${variableKey}">
+                <div class=" mb-4">
+                    <label class="w-full text-gray-400 border-gray-400">Attribute ${variableKey}</label>
+                    <select class="attribute-select w-full text-gray-400" data-variable="${variableKey}">
 						<option disabled selected>Select a value</option>
                         ${options
 							.map(
@@ -154,32 +154,36 @@ class Preview {
 			} else if (component.type === "FOOTER") {
 				footerContent = component.text;
 				// console.log("fotter")
-			} else if (component.type === "BUTTON") {
+			} else if (component.type === "BUTTONS") {
 				const buttonText = component.text;
-				const buttonUrl = component.example.header_handle[0];
+				const buttons = component.buttons;
 
-				let buttonLabel = buttonText || "Click Here";
-				if (buttonUrl && buttonUrl.startsWith("http")) {
-					buttonContent += `
+				buttons.forEach((button) => {
+					if (button.type == "PHONE_NUMBER") {
+						let buttonLabel = button.text;
+						const buttonUrl = button.url;
+						buttonContent += `
                     <button class="border-t w-full mt-2 pt-1 text-center me-2 text-base" onclick="window.open('${buttonUrl}', '_blank')" style="color: #6A67FF;">
                         <i class="fa fa-external-link mx-2"></i><span class="text-lg">${buttonLabel}</span>
                     </button>
                 `;
-				} else if (buttonUrl && buttonUrl.startsWith("tel:")) {
-					const phoneNumber = buttonUrl.replace("tel:", "");
-					buttonContent += `
+					} else {
+						let buttonLabel = button.text;
+						const phoneNumber = button.phone_number;
+						buttonContent += `
                     <button class="border-t w-full mt-2 pt-1 text-center me-2 text-base" onclick="window.location.href='tel:${phoneNumber}'" style="color: #6A67FF;">
                         <i class="fa fa-phone mx-2"></i><span class="text-lg">${buttonLabel}</span>
                     </button>
                 `;
-				}
+					}
+				});
 			}
 		});
 		// console.log("button", buttonContent);
 		this.container.innerHTML = `
         ${
 			headerContent
-				? `<div class="header-container">${headerContent}</div>`
+				? `<div class="font-semibold text-lg">${headerContent}</div>`
 				: ""
 		}
         <p class="text-lg py-2">${bodyContent.replace(/\n/g, "<br>")}</p>
@@ -219,12 +223,12 @@ class TemplateManager {
 			await Promise.all([this.loadTemplates(), this.loadContactLists()]);
 
 			// Initialize Select2 and bind events
-			this.templateSelect
-				.select2()
-				.on("change", (e) => this.handleTemplateChange(e));
-			this.recipientSelect
-				.select2()
-				.on("change", (e) => this.handleContactListChange(e));
+			this.templateSelect.select2().on("change", (e) =>
+				this.handleTemplateChange(e),
+			);
+			this.recipientSelect.select2().on("change", (e) =>
+				this.handleContactListChange(e),
+			);
 
 			document
 				.getElementById("campaign-form")
@@ -232,9 +236,9 @@ class TemplateManager {
 					e.preventDefault();
 					// Get the form and action type from the clicked button
 					const submitterButton = e.submitter; // This gets the clicked button
-					console.log(submitterButton)
+					console.log(submitterButton);
 					const actionType = submitterButton.value;
-					console.log(actionType);// This gets the value of the clicked button
+					console.log(actionType); // This gets the value of the clicked button
 					// Handle form submission based on the action type
 					this.handleFormSubmit(e, actionType, submitterButton);
 				});
@@ -331,7 +335,6 @@ class TemplateManager {
 		console.log("Attributes selected:", variables);
 	}
 
-	
 	convertDateFormat(dateString) {
 		return dateString.replace(/(\d{2})\/(\d{2})\/(\d{4})/g, "$2/$1/$3");
 	}
@@ -455,8 +458,8 @@ $(document).ready(() => {
 		if (isScheduled) {
 			toggleKnob.style.transform = "translateX(100%)"; // Moves the knob to the right
 			toggleSwitch.children[0].classList.replace(
-				"bg-gray-300",
-				"bg-red-300",
+				"bg-gray-500",
+				"bg-black",
 			); // Smooth background change
 
 			// Show the schedule section smoothly
@@ -469,8 +472,8 @@ $(document).ready(() => {
 		} else {
 			toggleKnob.style.transform = "translateX(0)"; // Moves the knob back to the left
 			toggleSwitch.children[0].classList.replace(
-				"bg-red-300",
-				"bg-gray-300",
+				"bg-black",
+				"bg-gray-500",
 			); // Smooth background change
 
 			// Hide the schedule section smoothly

@@ -14,6 +14,7 @@ export const saveTemplateToDatabase = async (
 	dynamicVariables,
 	selectedLanguageCode,
 	id,
+	url,
 ) => {
 	try {
 		const components = createComponents(templateData, dynamicVariables);
@@ -29,7 +30,7 @@ export const saveTemplateToDatabase = async (
 		});
 
 		if (req.file) {
-			const filePath = path.join("uploads", id, req.file?.filename);
+			const filePath = path.join(url, "uploads", id, req.file?.filename);
 			const headerComponent = newTemplate.components.find(
 				(component) => component.type === "HEADER",
 			);
@@ -37,9 +38,7 @@ export const saveTemplateToDatabase = async (
 			if (headerComponent) {
 				// Assuming that the file is an image, video, or document
 				if (headerComponent.format === "IMAGE") {
-					headerComponent.example.header_handle = [
-						"https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.mbaskool.com%2Fmarketing-mix%2Fproducts%2F17539-maybelline.html&psig=AOvVaw3TNjajoA6KOvQsRqezGyAi&ust=1737634380133000&source=images&cd=vfe&opi=89978449&ved=0CBQQjRxqFwoTCJDz79WmiYsDFQAAAAAdAAAAABAJ",
-					];
+					headerComponent.example.header_handle = [filePath];
 				} else if (headerComponent.format === "VIDEO") {
 					headerComponent.example.header_handle = [filePath];
 				} else if (headerComponent.format === "DOCUMENT") {
@@ -47,7 +46,6 @@ export const saveTemplateToDatabase = async (
 				}
 			}
 		}
-
 		return newTemplate;
 	} catch (error) {
 		console.error("Error saving template to database:", error);

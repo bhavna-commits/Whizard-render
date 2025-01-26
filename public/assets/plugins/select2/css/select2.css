@@ -9,18 +9,20 @@
 	box-sizing: border-box;
 	cursor: pointer;
 	display: block;
-	height: 28px;
+	height: 36px;
 	user-select: none;
 	-webkit-user-select: none;
 }
 .select2-container .select2-selection--single .select2-selection__rendered {
 	display: block;
-	padding-left: 8px;
-	padding-right: 20px;
+	padding-top: 4px;
+	padding-left: 8px; /* You can keep the previous padding for the left */
+	padding-right: 20px; /* You can keep the previous padding for the right */
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
 }
+
 .select2-container .select2-selection--single .select2-selection__clear {
 	position: relative;
 }
@@ -41,7 +43,7 @@
 .select2-container .select2-selection--multiple .select2-selection__rendered {
 	display: inline-block;
 	overflow: hidden;
-	padding-left: 8px;
+	padding-left: 1rem;
 	text-overflow: ellipsis;
 	white-space: nowrap;
 }
@@ -64,7 +66,7 @@
 .select2-dropdown {
 	background-color: white;
 	/* border: 1px solid #aaa; */
-	border-radius: 4px;
+	border-radius: 6px;
 	box-shadow: 2px 4px 16px rgb(205, 205, 205);
 	box-sizing: border-box;
 	display: block;
@@ -160,13 +162,13 @@
 
 .select2-container--default .select2-selection--single {
 	background-color: #fff;
-	border: 1px solid #aaa;
-	border-radius: 4px;
+	border: 1px solid #dcdddd;
+	border-radius: 6px;
 }
 .select2-container--default
 	.select2-selection--single
 	.select2-selection__rendered {
-	color: #444;
+	color: #9ca3af;
 	line-height: 28px;
 }
 .select2-container--default
@@ -186,7 +188,7 @@
 	.select2-selection__arrow {
 	height: 26px;
 	position: absolute;
-	top: 1px;
+	top: 4px;
 	right: 1px;
 	width: 20px;
 }
@@ -194,7 +196,7 @@
 	.select2-selection--single
 	.select2-selection__arrow
 	b {
-	border-color: #888 transparent transparent transparent;
+	border-color: #c6c6c6 transparent transparent transparent;
 	border-style: solid;
 	border-width: 5px 4px 0 4px;
 	height: 0;
@@ -234,14 +236,14 @@
 	.select2-selection--single
 	.select2-selection__arrow
 	b {
-	border-color: transparent transparent #888 transparent;
+	border-color: transparent transparent #c6c6c6 transparent;
 	border-width: 0 4px 5px 4px;
 }
 
 .select2-container--default .select2-selection--multiple {
 	background-color: white;
 	border: 1px solid #aaa;
-	border-radius: 4px;
+	border-radius: 6px;
 	cursor: text;
 }
 .select2-container--default
@@ -280,7 +282,7 @@
 	.select2-selection__choice {
 	background-color: #e4e4e4;
 	border: 1px solid #aaa;
-	border-radius: 4px;
+	border-radius: 6px;
 	cursor: default;
 	float: left;
 	margin-right: 5px;
@@ -363,7 +365,7 @@
 
 .select2-container--default .select2-search--dropdown .select2-search__field {
 	border: 1px solid #d1d1d1;
-	border-radius: 4px;
+	border-radius: 6px;
 	outline: none;
 }
 
@@ -462,7 +464,7 @@
 .select2-container--classic .select2-selection--single {
 	background-color: #f7f7f7;
 	/* border: 1px solid #aaa; */
-	border-radius: 4px;
+	border-radius: 6px;
 	outline: 0;
 	background-image: -webkit-linear-gradient(top, white 50%, #eeeeee 100%);
 	background-image: -o-linear-gradient(top, white 50%, #eeeeee 100%);
@@ -476,7 +478,7 @@
 .select2-container--classic
 	.select2-selection--single
 	.select2-selection__rendered {
-	color: #444;
+	color: #b2b2b2;
 	line-height: 28px;
 }
 .select2-container--classic
@@ -490,7 +492,7 @@
 .select2-container--classic
 	.select2-selection--single
 	.select2-selection__placeholder {
-	color: #999;
+	color: #cdcdcd;
 }
 .select2-container--classic
 	.select2-selection--single
@@ -589,7 +591,7 @@
 .select2-container--classic .select2-selection--multiple {
 	background-color: white;
 	border: 1px solid #aaa;
-	border-radius: 4px;
+	border-radius: 6px;
 	cursor: text;
 	outline: 0;
 }
@@ -613,7 +615,7 @@
 	.select2-selection__choice {
 	background-color: #e4e4e4;
 	border: 1px solid #aaa;
-	border-radius: 4px;
+	border-radius: 6px;
 	cursor: default;
 	float: left;
 	margin-right: 5px;
@@ -719,7 +721,7 @@
 .select2-container--classic .select2-results__group {
 	cursor: default;
 	display: block;
-	padding: 6px;
+	padding: 1rem;
 }
 
 .select2-container--classic.select2-container--open .select2-dropdown {

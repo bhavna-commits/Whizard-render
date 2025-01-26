@@ -340,7 +340,7 @@ const getCampaignOverview = async (req, res, next) => {
 		const { id } = req.params;
 
 		const page = parseInt(req.query.page) || 1;
-		
+
 		if (!isNumber(page)) return next();
 		if (!isString(id)) return next();
 
@@ -465,7 +465,6 @@ const getSentReportsById = async (req, res, next) => {
 												"$$campaignId",
 											],
 										},
-										{ $eq: ["$status", "SENT"] },
 									],
 								},
 							},
@@ -1091,8 +1090,6 @@ export const createCampaign = async (req, res, next) => {
 			name,
 			contactList,
 		} = req.body;
-
-		// console.log(JSON.parse(contactList));
 
 		if (!templateId || !contactListId || !name) {
 			return res.status(400).json({

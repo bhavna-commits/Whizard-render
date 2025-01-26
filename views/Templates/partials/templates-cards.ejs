@@ -33,17 +33,17 @@
 					
 					<!-- BUTTON COMPONENTS -->
 					<% template.components.forEach(component => { %>
-					<% if (component.type === 'BUTTON' && component.example?.button_handle) { %>
-					<% component.example.button_handle.forEach(button => { %>
-					<% if (button.startsWith('tel:')) { %>
-					<button class="w-full border-b border-gray-300 py-2" id="callBtn" draggable="true" onclick="window.location.href='tel:<%= button.slice(4) %>'" style="color: #6A67FF;">
-						<i class="fa fa-phone mx-2"></i><%= component.text %>
+					<% if (component.type === 'BUTTONS') { %>
+					<% component.buttons.forEach(button => { %>
+					<% if (button.type == "PHONE_NUMBER") { %>
+					<button class="w-full border-b border-gray-300 py-2" id="callBtn" draggable="true" onclick="window.location.href='tel:<%= button.phone_number %>'" style="color: #6A67FF;">
+						<i class="fa fa-phone mx-2"></i><%= button.text %>
 					</button>
 					<% } else { %>
-					<button class="w-full border-b border-gray-300 py-2" id="websiteBtn" draggable="true" onclick="window.open('<%= button %>', '_blank')" style="color: #6A67FF;">
-						<i class="fa fa-external-link mx-2"></i><%= component.text %>
+					<button class="w-full border-b border-gray-300 py-2" id="websiteBtn" draggable="true" onclick="window.open('<%= button.url %>', '_blank')" style="color: #6A67FF;">
+						<i class="fa fa-external-link mx-2"></i><%= button.text %>
 					</button>
-					<% } %>
+					<% } %>	
 					<% }); %>
 					<% } %>
 					<% }); %>
@@ -57,3 +57,6 @@
 	</div>
 	<% }); %>
 </div>
+<script>
+	console.log('<%- JSON.stringify(list[0].components) %>');
+</script>

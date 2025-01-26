@@ -550,3 +550,50 @@ function getDragAfterElement(y) {
 		},
 	).element;
 }
+
+document.getElementById("phoneNumber").addEventListener("input", function (e) {
+	const phoneInput = e.target;
+	let value = phoneInput.value;
+
+	// Remove any non-numeric characters
+	value = value.replace(/\D/g, "");
+
+	// Update the input field with only numbers
+	phoneInput.value = value;
+
+	// Check if the phone number is less than 12 digits
+	if (value.length < 12 && value.length > 0) {
+		showMessage(
+			'Phone number must be at least 12 digits long, including the country code (without the "+").',
+		);
+	} else {
+		hideMessage();
+	}
+});
+
+// Function to show warning message
+function showMessage(message) {
+	let messageBox = document.getElementById("phoneWarning");
+
+	if (!messageBox) {
+		messageBox = document.createElement("div");
+		messageBox.id = "phoneWarning";
+		messageBox.classList.add(
+			"text-sm",
+			"text-right",
+			"py-2",
+			"text-red-500",
+		);
+		document.getElementById("callForm").appendChild(messageBox);
+	}
+
+	messageBox.textContent = message;
+}
+
+// Function to hide warning message
+function hideMessage() {
+	const messageBox = document.getElementById("phoneWarning");
+	if (messageBox) {
+		messageBox.textContent = "";
+	}
+}

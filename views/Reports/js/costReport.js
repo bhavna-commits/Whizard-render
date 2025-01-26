@@ -13,7 +13,7 @@ let fpInstance;
 function initializeDatePicker() {
 	fpInstance = flatpickr("#dateRange", {
 		mode: "range",
-		dateFormat: "d M Y",
+		dateFormat: "Y-m-d",
 		defaultDate: getQuarterDates(),
 		maxDate: "today",
 		onChange: async function (selectedDates) {

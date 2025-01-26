@@ -5,6 +5,10 @@ import ContactList from "../../models/contactList.model.js";
 import Permissions from "../../models/permissions.model.js";
 import dotenv from "dotenv";
 import Contacts from "../../models/contacts.model.js";
+import {
+	convertUTCToLocal,
+	oneDayInMilliSeconds,
+} from "../../utils/utilFunctions.js";
 
 dotenv.config();
 
@@ -15,18 +19,16 @@ export const getDashboard = async (req, res) => {
 
 		const user = await User.findOne({ unique_id: id });
 		// Convert startDate and endDate to timestamps
-		const startTimestamp = startDate
-			? new Date(startDate).getTime() / 1000
-			: null;
+		const startTimestamp = startDate ? convertUTCToLocal(startDate) : null;
 		const endTimestamp = endDate
-			? new Date(endDate).getTime() / 1000
+			? convertUTCToLocal(endDate) + oneDayInMilliSeconds
 			: null;
-
+		console.log(startTimestamp, endTimestamp);
 		// Build the filter for the query
 		const filter = { useradmin: id, deleted: false };
 
 		if (startTimestamp && endTimestamp) {
-			filter.timestamp = { $gte: startTimestamp, $lte: endTimestamp };
+			filter.createdAt = { $gte: startTimestamp, $lte: endTimestamp };
 		}
 		// if (status && status !== "All") {
 		// 	filter.status = status;
@@ -83,7 +85,6 @@ export const getDashboard = async (req, res) => {
 				},
 			},
 		]);
-
 
 		// Default values if no reports found
 		const campaignStats =
@@ -224,13 +225,11 @@ export const getFilters = async (req, res) => {
 		const query = req.query.value;
 		const { startDate, endDate } = req.query;
 
-		const startTimestamp = startDate
-			? new Date(startDate).getTime() / 1000
-			: null;
+		const startTimestamp = startDate ? convertUTCToLocal(startDate) : null;
 		const endTimestamp = endDate
-			? new Date(endDate).getTime() / 1000
+			? convertUTCToLocal(endDate) + oneDayInMilliSeconds
 			: null;
-
+		// console.log(startTimestamp, endTimestamp);
 		// Build the filter for the query
 		const filter = {
 			useradmin: id,
@@ -238,7 +237,7 @@ export const getFilters = async (req, res) => {
 		};
 
 		if (startTimestamp && endTimestamp) {
-			filter.timestamp = { $gte: startTimestamp, $lte: endTimestamp };
+			filter.createdAt = { $gte: startTimestamp, $lte: endTimestamp };
 		}
 
 		const sentReports = await Campaign.aggregate([
@@ -260,7 +259,9 @@ export const getFilters = async (req, res) => {
 												"$$campaignId",
 											],
 										},
-										{ $eq: ["$status", query] },
+										...(query !== "SENT"
+											? [{ $eq: ["$status", query] }]
+											: []),
 									],
 								},
 							},

@@ -199,7 +199,7 @@
 					<!-- START BREADCRUMB -->
 					
 					<div class="flex items-center">
-						<a href="/reports/campaign-list" class="text-gray-500 hover:text-gray-700 hover:no-underline text-xl font-medium">Reports</a>
+						<a href="/reports/campaign-list" class=" hover:text-gray-700 hover:no-underline text-xl font-medium">Reports</a>
 						<svg class="w-4 h-4 mx-2 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
 							<path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L11.586 10 7.293 5.707a1 1 0 011.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
 						</svg>
@@ -237,7 +237,7 @@
 				</div>
 				
 			</div>
-			<div class="container">
+			<div class="w-[97%]">
 				<!-- Overview Stats -->
 				<div class="stats">
 					<div class="stat-box">
@@ -246,15 +246,15 @@
 					</div>
 					<div class="stat-box">
 						<h3>Sent</h3>
-						<p><%= messagesSent %> <span class="text-base font-normal">(<%= percentSent %>%) of target</span></p>
+						<p><%= messagesSent %> <span><%= percentSent %>% of target</span></p>
 					</div>
 					<div class="stat-box">
 						<h3>Delivered</h3>
-						<p><%= messagesDelivered %> <span class="text-base font-normal">(<%= percentDelivered %>%) of target</span></p>
+						<p><%= messagesDelivered %> <span><%= percentDelivered %>% of target</span></p>
 					</div>
 					<div class="stat-box">
 						<h3>Read</h3>
-						<p><%= messagesRead %> <span class="text-base font-normal">(<%= percentRead %>%) of target</span></p>
+						<p><%= messagesRead %> <span><%= percentRead %>% of target</span></p>
 					</div>
 					<div class="stat-box">
 						<h3>Replies Received</h3>
@@ -273,21 +273,21 @@
 				</div>
 				
 				<% if (campaigns.length > 0) { %>
-				<div class="message-list">
+				<div class="message-list mt-4">
 					<table class="text-center min-w-full border-separate border-spacing-y-4">
 						<thead>
-							<tr class="text-gray-500">
-								<th class="py-4">Send Date</th>
-								<th class="py-4">Status</th>
-								<th>Name</th>
-								<th class="py-4">Contact</th>
-								<th class="py-4">Message Sent</th>
+							<tr class="text-gray-400">
+								<td class="">Send Date</td>
+								<td class="">Status</td>
+								<td>Name</td>
+								<td class="">Contact</td>
+								<td class="">Message Sent</td>
 							</tr>
 						</thead>
 						<tbody>
 							<% campaigns.forEach(report => { %>
-							<tr class="hover:bg-gray-100 cursor-pointer border">
-								<td class="border-l border-t border-b rounded-lg py-4 border-gray-200 text-sm text-gray-500">
+							<tr class="hover:bg-gray-100 cursor-pointer border text-gray-700">
+								<td class="border-l border-t border-b rounded-lg py-4 border-gray-200 text-sm ">
 									<%= new Date(report.timestamp * 1000 || report.updatedAt * 1000).toLocaleDateString() %>
 								</td>
 								<td class="border-t border-b border-gray-200">
@@ -310,84 +310,32 @@
 										<%= report.status.charAt(0).toUpperCase() + report.status.slice(1).toLowerCase() %></div>
 								</td>
 								
-								<td class="border-t border-b border-gray-200 text-gray-500">
+								<td class="border-t border-b border-gray-200 ">
 									<%= report.contactName %>
 								</td>
-								<td class="border-t border-b border-gray-200 text-gray-500">
+								<td class="border-t border-b border-gray-200 ">
 									<% 
                 						const phoneNumber = report.recipientPhone;
                 						const maskedPhone = phoneNumber.slice(0, -2).replace(/\d/g, 'X') + phoneNumber.slice(-2);
                 					%>
 									<%= maskedPhone %>
 								</td>
-								<td class="border-r border-t border-b rounded-lg border-gray-200 text-black max-w-xs">
-									<span id="messageText" class="block overflow-hidden text-ellipsis whitespace-nowrap">
-										<%= report.messageTemplate || 'No Message Text Available' %>
-									</span>
-									<% if (report.messageTemplate && report.messageTemplate.length > 100) { %>
-									<button id="readMoreBtn" class="text-gray-700 hover:text-gray-900 italic mt-2" onclick="toggleReadMore()">Read more</button>
-									<% } %>
+								<td class="border-r border-t border-b rounded-lg border-gray-200 max-w-xs">
+									<p class="inline">
+										<span id="messageText" class="block overflow-hidden text-ellipsis whitespace-nowrap">
+											<%= report.messageTemplate || 'No Message Text Available' %>
+										</span>
+										<% if (report.messageTemplate && report.messageTemplate.length > 100) { %>
+										<button id="readMoreBtn" class="text-gray-900 hover:text-gray-900 italic" onclick="toggleReadMore(event)">Read more</button>
+										<% } %>
+									</p>
 								</td>
+
 							</tr>
 							<% }) %>
 						</tbody>
 					</table>
 					<!-- Pagination -->
-					<!-- Pagination -->
-					<% if (!(page === 1 && campaigns.length < 6)) { %>
-					<div class="flex items-center justify-center py-4 space-x-4">
-						<nav class="flex items-center">
-							<ul class="flex space-x-1">
-								<!-- Previous Button -->
-								<li>
-									<a href="/reports/campaign-list?page=<%= page > 1 ? page - 1 : 1 %>" class="px-3 py-2 rounded-md text-sm font-medium text-gray-500 bg-white border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed" <%= page === 1 ? 'aria-disabled="true"' : '' %>>‹</a>
-								</li>
-								
-								<!-- First Page Button -->
-								<li>
-									<a href="/reports/campaign-list?page=1" class="px-3 py-2 rounded-md text-sm font-medium <%= page === 1 ? 'text-white bg-blue-600 border-blue-600' : 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50' %>">1</a>
-								</li>
-								
-								<% if (page > 3) { %>
-								<!-- Show "..." if current page is greater than 3 -->
-								<li><span class="px-3 py-2 text-sm text-gray-500">...</span></li>
-								<% } %>
-								
-								<!-- Dynamic Page Numbers based on current page -->
-								<% for (let i = Math.max(2, page - 1); i <= Math.min(totalPages - 1, page + 1); i++) { %>
-								<li>
-									<a href="/reports/campaign-list?page=<%= i %>" class="px-3 py-2 rounded-md text-sm font-medium <%= i === page ? 'text-white bg-blue-600 border-blue-600' : 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50' %>"><%= i %></a>
-								</li>
-								<% } %>
-								
-								<% if (page < totalPages - 2) { %>
-								<!-- Show "..." if there are more pages -->
-								<li><span class="px-3 py-2 text-sm text-gray-500">...</span></li>
-								<% } %>
-								
-								<!-- Last Page Button -->
-								<% if (totalPages > 1) { %>
-								<li>
-									<a href="/reports/campaign-list?page=<%= totalPages %>" class="px-3 py-2 rounded-md text-sm font-medium <%= page === totalPages ? 'text-white bg-blue-600 border-blue-600' : 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50' %>"><%= totalPages %></a>
-								</li>
-								<% } %>
-								
-								<!-- Next Button -->
-								<li>
-									<a href="/reports/campaign-list?page=<%= page < totalPages ? page + 1 : totalPages %>" class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50">›</a>
-								</li>
-							</ul>
-						</nav>
-						
-						<!-- "Go to page" input -->
-						<div class="flex items-center space-x-2">
-							<span class="text-sm text-gray-700">Go to page</span>
-							<input type="number" min="1" max="<%= totalPages %>" class="w-16 px-2 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" value="<%= page %>" id="pageInput" />
-							<button type="button" class="px-3 py-1 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" onclick="goToPage()">Go</button>
-						</div>
-					</div>
-					<% } %>
-					
 					
 				</div>
 				<% } else { %>
@@ -416,9 +364,12 @@
 		});
 	</script>
 	<script>
-		function toggleReadMore () {
-			const messageText = document.getElementById('messageText');
-			const readMoreBtn = document.getElementById('readMoreBtn');
+		function toggleReadMore (event) {
+			// Get the clicked button
+			const readMoreBtn = event.target;
+			
+			// Find the closest parent 'td' element and search for the messageText span within that 'td'
+			const messageText = readMoreBtn.closest('td').querySelector('#messageText');
 			
 			// Toggle the class to show or hide the full text
 			messageText.classList.toggle('whitespace-normal');
@@ -433,6 +384,7 @@
 			}
 		}
 		
+		
 		const ctxStatus = document.getElementById('statusChart').getContext('2d');
 		const statusChart = new Chart(ctxStatus, {
 			type: 'bar',
@@ -441,7 +393,7 @@
 				datasets: [{
 					label: 'Messages',
 					data: [<%= messagesFailed %>, <%= messagesSent %>, <%= messagesDelivered %>, <%= messagesRead %>, <%= messagesReplied %>],
-					backgroundColor: ['rgba(224, 36, 36, 1)', 'rgb(255, 0, 255)', 'rgba(255, 124, 156, 1)', 'rgba(255, 136, 1, 1)', 'rgba(3, 126, 142, 1)'],
+					backgroundColor: ['rgba(224, 36, 36, 1)', 'rgba(137, 77, 212, 1)', 'rgba(255, 124, 156, 1)', 'rgba(255, 136, 1, 1)', 'rgba(3, 126, 142, 1)'],
 				}]
 			},
 			options: {

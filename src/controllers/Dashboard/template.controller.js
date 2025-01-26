@@ -11,7 +11,7 @@ import ActivityLogs from "../../models/activityLogs.model.js";
 import Permissions from "../../models/permissions.model.js";
 import User from "../../models/user.model.js";
 import { generateUniqueId } from "../../utils/otpGenerator.js";
-import { languagesCode } from "../../utils/dropDown.js";
+import { languages, languagesCode } from "../../utils/dropDown.js";
 import {
 	isNumber,
 	isObject,
@@ -23,10 +23,10 @@ dotenv.config();
 export const createTemplate = async (req, res, next) => {
 	try {
 		const templateData = JSON.parse(req.body.templateData);
-		const { dynamicVariables, name, selectedLanguageCode } = templateData;
+		const { dynamicVariables, name, selectedLanguageCode, url } = templateData;
 		const id = req.session?.user?.id || req.session?.addedUser?.owner;
 
-		// if (!isObject(templateData)) return next();
+		if (!isObject(templateData)) return next();
 
 		// Check if a template with the same name exists for the user
 		const exists = await Template.findOne({ useradmin: id, name });
@@ -44,6 +44,7 @@ export const createTemplate = async (req, res, next) => {
 			dynamicVariables,
 			selectedLanguageCode,
 			id,
+			url,
 		);
 
 		// Submit template to Facebook
@@ -82,41 +83,38 @@ export const getList = async (req, res, next) => {
 	try {
 		const id = req.session?.user?.id || req.session?.addedUser?.owner;
 		const page = parseInt(req.query.page) || 1;
-		const { category, search } = req.query;
+		const { category, search, language } = req.query; // Language is added
 		const limit = 6;
 		const skip = (page - 1) * limit;
 
-		// if (!isString(category, search)) return next();
-		// if (!isNumber(page)) return next();
+		if (!isString(category, search, language)) return next();
 
 		const match = {
 			useradmin: id,
 			deleted: { $ne: true },
 		};
 
+		// Handle category filter
 		if (category && category != "Category") {
 			match["category"] = category;
-		} else if (category == "Category") {
-			delete match["category"];
 		}
 
+		// Handle search filter
 		const searchQuery = search?.trim();
-
 		if (searchQuery) {
 			match["name"] = {
 				$regex: new RegExp(searchQuery, "ims"),
 			};
 		}
 
+		// Handle language filter (added condition for language)
+		if (language && language !== "Language") {
+			match["language.code"] = language;
+		}
+
 		const result = await Template.aggregate([
-			{
-				$match: match,
-			},
-			{
-				$sort: {
-					createdAt: -1,
-				},
-			},
+			{ $match: match },
+			{ $sort: { createdAt: -1 } },
 			{
 				$facet: {
 					paginatedResults: [{ $skip: skip }, { $limit: limit }],
@@ -127,7 +125,6 @@ export const getList = async (req, res, next) => {
 
 		const templates = result[0]?.paginatedResults || [];
 		const totalCount = result[0]?.totalCount[0]?.total || 0;
-
 		const totalPages = Math.ceil(totalCount / limit);
 
 		const permissions = req.session?.addedUser?.permissions;
@@ -135,9 +132,7 @@ export const getList = async (req, res, next) => {
 			const access = await Permissions.findOne({
 				unique_id: permissions,
 			});
-			// console.log(access);
 			if (access?.templates?.type) {
-				// console.log(templates);
 				res.render("Templates/manage_template", {
 					access,
 					list: templates,
@@ -147,13 +142,13 @@ export const getList = async (req, res, next) => {
 					photo: req.session?.addedUser?.photo,
 					name: req.session?.addedUser?.name,
 					whatsAppStatus: req.session?.addedUser?.whatsAppStatus,
+					languagesCode,
 				});
 			} else {
 				res.render("errors/notAllowed");
 			}
 		} else {
 			const access = await User.findOne({ unique_id: id });
-			// console.log(access.access);
 			res.render("Templates/manage_template", {
 				access: access.access,
 				list: templates,
@@ -163,6 +158,7 @@ export const getList = async (req, res, next) => {
 				photo: req.session.user?.photo,
 				name: req.session.user.name,
 				whatsAppStatus: req.session?.user?.whatsAppStatus,
+				languagesCode,
 			});
 		}
 	} catch (error) {

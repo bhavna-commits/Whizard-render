@@ -5,7 +5,7 @@ import fs from "fs";
 // Set up storage for general files
 const storage = multer.diskStorage({
 	destination: (req, file, cb) => {
-		const userFolder = path.join("uploads", req.session.user.id);
+		const userFolder = path.join("uploads", req.session?.user?.id || req.session?.addedUser?.owner);
 
 		// Check if the folder exists, if not, create it
 		if (!fs.existsSync(userFolder)) {
@@ -24,7 +24,7 @@ const profileStorage = multer.diskStorage({
 	destination: (req, file, cb) => {
 		const profileFolder = path.join(
 			"uploads",
-			req.session.user.id,
+			req.session?.user?.id || req.session?.addedUser?.owner,
 			"profile",
 		);
 

@@ -828,16 +828,38 @@ export const searchContactLists = async (req, res, next) => {
 		// Calculate total pages
 		const totalPages = Math.ceil(totalCount / limit);
 
-		// console.log("Found contacts:", contactLists); // Check the returned results
-
-		res.render("Contact-List/partials/contactListTable", {
-			contacts: contactLists,
-			totalPages,
-			page,
-			photo: req.session.user?.photo,
-			name: req.session.user.name,
-			color: req.session.user.color,
-		});
+		const permissions = req.session?.addedUser?.permissions;
+		if (permissions) {
+			const access = await Permissions.findOne({
+				unique_id: permissions,
+			});
+			if (access.contactList.type) {
+				res.render("Contact-List/partials/contactListTable", {
+					access,
+					contacts: contactLists,
+					totalPages,
+					page,
+					photo: req.session.user?.photo,
+					name: req.session.user.name,
+					color: req.session.user.color,
+					whatsAppStatus: req.session?.addedUser?.whatsAppStatus,
+				});
+			} else {
+				res.render("errors/notAllowed");
+			}
+		} else {
+			const access = await User.findOne({ unique_id: userId });
+			res.render("Contact-List/partials/contactListTable", {
+				access: access.access,
+				contacts: contactLists,
+				totalPages,
+				page,
+				photo: req.session.user?.photo,
+				name: req.session.user.name,
+				color: req.session.user.color,
+				whatsAppStatus: access.WhatsAppConnectStatus,
+			});
+		}
 	} catch (error) {
 		console.error("Error fetching contact lists:", error);
 		res.render("errors/serverError");

@@ -47,14 +47,14 @@ export async function sendMessages(campaign, id, unique_id) {
 			// console.log(JSON.stringify(personalizedMessage));
 			// Send message using WhatsApp (assuming wa_id is the phone number)
 			const response = await sendMessageThroughWhatsApp(
-				template.name,
+				template,
 				contact.wa_id,
 				personalizedMessage,
 			);
 
 			const messageTemplate = generatePreviewMessage(
 				template,
-				campaign.variables,
+				personalizedMessage,
 			);
 
 			if (response.status === "FAILED") {
@@ -65,7 +65,7 @@ export async function sendMessages(campaign, id, unique_id) {
 					`Failed to send message to ${contact.wa_id}: ${response.response}`,
 				);
 			}
-			console.log(JSON.stringify(response));
+			// console.log(JSON.stringify(response));
 			const user = await User.findOne({ unique_id: id });
 			// Create a report for each sent message
 			const report = new Report({
@@ -100,22 +100,46 @@ function replaceDynamicVariables(template, variables, contact) {
 		);
 		if (headerComponent && template.dynamicVariables.header.length > 0) {
 			let headerParameters = [];
+
+			// Handle text components
 			if (headerComponent.format === "TEXT") {
 				template.dynamicVariables.header.forEach((headVar) => {
 					let key = Object.keys(headVar)[0];
-					console.log(variables.get(key));
 					if (variables.get(key) === "Name") {
 						headerParameters.push({
 							type: "text",
 							text: contact.Name || "",
 						});
 					} else if (variables.get(key)) {
-						console.log("here");
 						headerParameters.push({
 							type: "text",
 							text: contact.masterExtra[variables.get(key)] || "",
 						});
 					}
+				});
+			}
+
+			// Handle media components based on their format (Image, Video, Document)
+			if (headerComponent.format === "IMAGE") {
+				headerParameters.push({
+					type: "image",
+					image: {
+						link: headerComponent.example.header_handle[0] || "",
+					},
+				});
+			} else if (headerComponent.format === "VIDEO") {
+				headerParameters.push({
+					type: "video",
+					video: {
+						link: headerComponent.example.header_handle[0] || "",
+					},
+				});
+			} else if (headerComponent.format === "DOCUMENT") {
+				headerParameters.push({
+					type: "document",
+					document: {
+						link: headerComponent.example.header_handle[0] || "",
+					},
 				});
 			}
 
@@ -136,7 +160,7 @@ function replaceDynamicVariables(template, variables, contact) {
 
 			template.dynamicVariables.body.forEach((bodyVar) => {
 				let key = Object.keys(bodyVar)[0];
-				console.log(variables.get(key));
+				// console.log(variables.get(key));
 
 				if (variables.get(key) == "Name") {
 					bodyParameters.push({
@@ -164,7 +188,7 @@ function replaceDynamicVariables(template, variables, contact) {
 	}
 }
 
-async function sendMessageThroughWhatsApp(name, phone, messageComponents) {
+async function sendMessageThroughWhatsApp(template, phone, messageComponents) {
 	try {
 		// Construct the message payload
 		const requestData = {
@@ -173,17 +197,17 @@ async function sendMessageThroughWhatsApp(name, phone, messageComponents) {
 			to: phone,
 			type: "template",
 			template: {
-				name: name,
-				language: { code: "en_US" },
+				name: template.name,
+				language: { code: template.language.code },
 				components: messageComponents,
 			},
 		};
 
 		// Log the request data
-		console.log(
-			"Submitting the following JSON to WhatsApp API:",
-			JSON.stringify(requestData, null, 2),
-		);
+		// console.log(
+		// 	"Submitting the following JSON to WhatsApp API:",
+		// 	JSON.stringify(requestData, null, 2),
+		// );
 
 		// Send the request
 		const response = await axios.post(
@@ -262,10 +286,10 @@ cron.schedule("* * * * *", async () => {
 	}
 });
 
-function generatePreviewMessage(template, variables) {
+function generatePreviewMessage(template, message) {
 	try {
 		let previewMessage = "";
-		console.log(variables);
+		console.log(JSON.stringify(message));
 
 		let headerText = template.components.find(
 			(c) => c.type === "HEADER",
@@ -276,10 +300,10 @@ function generatePreviewMessage(template, variables) {
 		// Process Body component
 
 		let bodyText = template.components.find((c) => c.type === "BODY").text;
+		let bodyVariable = message[0]?.parameters;
 
-		Object.entries(variables).forEach(([key, value]) => {
-			console.log(key, value);
-			bodyText = bodyText.replace("{{" + key + "}}", value);
+		bodyVariable?.forEach((value, index) => {
+			bodyText = bodyText.replace("{{" + (index + 1) + "}}", value.text);
 		});
 
 		previewMessage += `${bodyText}\n`;
@@ -291,7 +315,7 @@ function generatePreviewMessage(template, variables) {
 		if (footerComponent) {
 			previewMessage += `${footerComponent.text}\n`;
 		}
-
+		console.log(JSON.stringify(previewMessage));
 		return previewMessage.trim();
 	} catch (error) {
 		console.error("Error generating preview message:", error.message);

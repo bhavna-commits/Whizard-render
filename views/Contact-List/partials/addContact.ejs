@@ -44,18 +44,6 @@
 				
 			</div>
 			
-			
-			<!-- <% if (tags.length > 0) { %>
-			<div class="form-group">
-				<label for="contactTags">Tags</label>
-				<select id="contactTags" name="tags" class="date-input" required>
-					<% tags?.forEach(function(tag) { %>
-					<option value="<%= tag %>" <%= contact?.tags === tag ? 'selected' : '' %>><%= tag %></option>
-					<% }); %>
-				</select>
-			</div>
-			<% } %> -->
-			
 			<% if (contacts[0]?.masterExtra) { %>
 			<% Object.keys(contacts[0].masterExtra).forEach(function(key) { %>
 			<div class="form-group">
@@ -159,19 +147,32 @@
 						console.log(data.contact);
 						location.reload();
 					} else {
-						saveButton.innerHTML = originalButtonText; // Reset button text
+						saveButton.innerHTML = originalButtonText;
 						saveButton.disabled = false;
+						
+						// Remove any existing error message
+						const existingErrorMessage = saveButton.parentNode.querySelector(".text-danger");
+						if (existingErrorMessage) {
+							existingErrorMessage.remove();
+						}
+						
 						const errorMessage = document.createElement("div");
 						errorMessage.className = "text-danger mt-2";
-						errorMessage.innerText =
-							"Error adding contact: " + data.message;
+						errorMessage.innerText = "Error updating contact: " + data.message;
 						saveButton.parentNode.appendChild(errorMessage);
+						
 					}
 				})
 				.catch((err) => {
-					console.error("Error:", err);
-					saveButton.innerHTML = originalButtonText; // Reset button text
+					saveButton.innerHTML = originalButtonText;
 					saveButton.disabled = false;
+					
+					// Remove any existing error message
+					const existingErrorMessage = saveButton.parentNode.querySelector(".text-danger");
+					if (existingErrorMessage) {
+						existingErrorMessage.remove();
+					}
+					
 					const errorMessage = document.createElement("div");
 					errorMessage.className = "text-danger mt-2";
 					errorMessage.innerText = "An error occurred. Please try again.";

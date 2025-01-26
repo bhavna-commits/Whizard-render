@@ -138,9 +138,12 @@ uploadCSV.addEventListener("click", function () {
 	document.body.removeChild(downloadLink);
 });
 
-function toggleReadMore() {
-	const messageText = document.getElementById("messageText");
-	const readMoreBtn = document.getElementById("readMoreBtn");
+function toggleReadMore(event) {
+	// Get the clicked button
+	const readMoreBtn = event.target;
+
+	// Find the closest parent 'td' element and search for the messageText span within that 'td'
+	const messageText = readMoreBtn.closest("td").querySelector("#messageText");
 
 	// Toggle the class to show or hide the full text
 	messageText.classList.toggle("whitespace-normal");

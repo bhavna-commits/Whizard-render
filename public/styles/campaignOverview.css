@@ -1,7 +1,7 @@
 .stats {
 	display: flex;
 	justify-content: space-between;
-	gap: 10px;
+	/* gap: 1%; */
 	margin: 20px 0;
 }
 
@@ -11,7 +11,8 @@
 	padding: 1rem;
 	text-align: center;
 	/* box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); */
-	flex: 1;
+	min-width: 15%;
+	/* flex: 1; */
 	display: flex;
 	flex-direction: column;
 	/* align-items: center;
@@ -19,53 +20,54 @@
 }
 
 .stat-box h3 {
-	font-size: 1.2rem;
+	font-size: 1.3rem;
 	color: #666;
 	margin-bottom: 1rem;
 	text-align: left;
 }
 
 .stat-box p {
-	font-size: 2rem;
+
+	font-size: 2.1rem;
 	color: #333;
 	font-weight: bold;
 	margin: 0;
 	text-align: right;
 }
 
+.stat-box p span {
+	font-size: 1.1rem;
+	color: rgba(101, 101, 101, 1);
+	/* margin-left:; */
+	font-weight: 500;
+}
+
 .stat-box:nth-child(1) {
 	background-color: #e9eef5; 
-	border: .14rem solid #006aff;
+	border: .12rem solid #006aff;
 }
 
 .stat-box:nth-child(2) {
-	background-color: rgb(246, 215, 246);
-	border: .14rem solid rgb(255, 0, 255);/* Light purple for Sent */
+	background-color: rgba(244, 239, 251, 1);
+	border: .12rem solid rgba(137, 77, 212, 1);/* Light purple for Sent */
 }
 
 .stat-box:nth-child(3) {
 	background-color: rgba(255, 235, 255, 1); 
-	border: .14rem solid rgba(255, 124, 156, 1);/* Light pink for Delivered */
+	border: .12rem solid rgba(255, 124, 156, 1);/* Light pink for Delivered */
 }
 
 .stat-box:nth-child(4) {
 	background-color: rgba(255, 255, 255, 1);
-	border: .14rem solid rgba(255, 136, 1, 1); /* Light orange for Read */
+	border: .12rem solid rgba(255, 136, 1, 1); /* Light orange for Read */
 }
 
 .stat-box:nth-child(5) {
 	background-color: rgba(210, 249, 254, 1);
-	border: .14rem solid rgba(3, 126, 142, 1); /* Light cyan for Replies */
+	border: .12rem solid rgba(3, 126, 142, 1); /* Light cyan for Replies */
 }
 
 .stat-box:nth-child(6) {
 	background-color: #ffb9b9;
-	border: .14rem solid rgba(224, 36, 36, 1); /* Light cyan for Failed */
-}
-
-/* Ensure the percentage text stays in the same line */
-.stat-box p span {
-	font-size: 14px;
-	color: #999;
-	margin-left: 5px;
+	border: .12rem solid rgba(224, 36, 36, 1); /* Light cyan for Failed */
 }

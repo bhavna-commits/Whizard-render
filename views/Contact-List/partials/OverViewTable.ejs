@@ -1,190 +1,166 @@
- <div class="py-5">
- 	<% if (contacts && contacts.length > 0) { %>
- 	<div class="table-responsive ">
- 		<table class="text-center min-w-full bg-white border-separate border-spacing-y-4">
- 			<tbody>
- 				<!-- Table Header -->
- 				<tr class="text-gray-500">
- 					<td class="px-5">Sno.</td>
- 					<td class="px-5">Name</td>
- 					<td class="px-5">Number</td>
- 					<td class="px-5">Created at</td>
- 					<% if (contacts[0]?.masterExtra) { %>
- 					<% Object.keys(contacts[0].masterExtra).forEach(function(key) { %>
- 					<td class="px-5 text-gray-500"><%= key %></td>
- 					<% }); %>
- 					<% } %>
- 					<td class="sticky right-0 bg-white px-5">Actions</td>
- 				</tr>
- 				
- 				<!-- Table Rows -->
- 				<% contacts.forEach((contact, index) => { %>
- 				<tr class="hover:bg-gray-100 cursor-pointer border">
- 					<td class=" border-l border-t border-b rounded-l-lg py-4 border-gray-200 text-sm text-gray-500">
- 						<%= index + 1 %>
- 					</td>
- 					<td class="border-t border-b border-gray-200">
- 						<p class="text-gray-700 pt-3 font-semibold"><%= contact?.Name %></p>
- 					</td>
- 					<td class="text-gray-500 border-t border-b border-gray-200">
- 						XXXXX-XXX<%= contact?.wa_id?.slice(-2) %>
- 					</td>
- 					<td class="text-gray-500 border-t border-b border-gray-200">
- 						<%= new Date(contact.subscribe_date).toLocaleString('en-GB', {
-              year: 'numeric',
-              month: 'short',
-              day: '2-digit'
-            }) %>
- 					</td>
- 					<% if (contact.masterExtra) { %>
- 					<% Object.entries(contact.masterExtra).forEach(function([key, value]) { %>
- 					<td class="text-gray-500 border-t border-b border-gray-200">
- 						<%= value %>
- 					</td>
- 					<% }); %>
- 					<% } %>
- 					
- 					<td class="sticky right-0 bg-white border-r border-t border-b rounded-r-lg border-gray-200">
- 						<% if (access?.contactList?.editContactIndividual) { %>
- 						<button onclick="openEditModal('<%= JSON.stringify(contact) %>')" aria-label="Edit contact" class="text-gray-600 hover:text-blue-600 px-3 border-r">
- 							<img src="editPen.svg" alt="edit">
- 						</button>
- 						<% } else { %>
- 						<button title="You don't have permissions to access this" class="text-gray-400 hover:cursor-not-allowed px-3 border-r">
- 							<img src="editPen.svg" alt="edit">
- 						</button>
- 						<% } %>
- 						<% if (access?.contactList?.deleteContactIndividual) { %>
- 						<button onclick="openDeleteModal('<%= contact._id %>','<%= contact.Name %>' )" class="text-gray-600 hover:text-red-600 px-2">
- 							<img src="bin.svg" alt="bin">
- 						</button>
- 						<% } else { %>
- 						<button title="You don't have permissions to access this" class="text-gray-400 hover:cursor-not-allowed px-2">
- 							<img src="bin.svg" alt="bin">
- 						</button>
- 						<% } %>
- 					</td>
- 				</tr>
- 				<% }); %>
- 			</tbody>
- 		</table>
- 		
- 	</div>
- 	<!-- Pagination -->
- 	<% if (!(page === 1 && contacts.length < 6)) { %>
- 	<%- include('../../commonJS/pagination') %>
- 	<% } %>
- 	
- 	
- 	<script>
- 		function goToPage () {
- 			const pageInput = document.getElementById('pageInput');
- 			const page = parseInt(pageInput.value);
- 			const totalPages = <%= totalPages %>;
- 			const id = '<%= id %>';
- 			
- 			if (page > totalPages) {
- 				alert("Page doesn't exist. Try a lower number.");
- 				pageInput.value = <%= page %>; // Reset input to the current page
- 			} else if (page < 1) {
- 				alert("Page number should be at least 1.");
- 				pageInput.value = <%= page %>;
- 			} else {
- 				window.location.href = `/contact-list/overview/${id}?page=${page}`;
- 			}
- 		}
- 	</script>
- 	
- 	<% } else { %>
- 	<!-- Empty state -->
- 	<div class="flex flex-col items-center justify-center min-h-[400px]  rounded-lg mt-4">
- 		<div class="text-center">
- 			<img src="https://img.freepik.com/free-vector/hands-holding-tablet-with-forefinger-clicking-start-button-new-application-launch-flat-illustration_74855-20595.jpg?ga=GA1.1.131490893.1732525963&semt=ais_hybrid" alt="No contacts" class="w-48 h-48 mx-auto mb-4">
- 			
- 			<h3 class="text-xl font-semibold text-gray-900 mb-2">No contacts yet</h3>
- 			<p class="text-gray-600 mb-6">Start adding contacts by clicking on "Add Contact"</p>
- 			<button onclick="openAddContact()" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black">
- 				<i class="fa-solid fa-user-plus pr-2"></i>
- 				Add Contact
- 			</button>
- 		</div>
- 	</div>
- 	<% } %>
- </div>
- 
- <script>
- 	// Delete confirmation logic
- 	
- 	
- 	function openAddContact () {
- 		document.getElementById("addContactSidebar").classList.add("open");
- 		document.getElementById("overlay").classList.add("active");
- 	}
- 	
- 	function closeAddContact () {
- 		document.getElementById("addContactSidebar").classList.remove("open");
- 		document.getElementById("overlay").classList.remove("active");
- 	}
- 	
- 	function openEditModal (contactData) {
- 		const contact = JSON.parse(contactData);
- 		document.getElementById("edit-contact-id").value = contact.keyId;
- 		document.getElementById("edit-contact-name").value = contact.Name;
- 		// document.getElementById("phone").value = contact.wa_id;
- 		document.getElementById("edit-contact-tags").value = contact.tags;
- 		
- 		const dynamicFieldsContainer = document.getElementById(
- 			"dynamicFieldsContainer",
- 		);
- 		dynamicFieldsContainer.innerHTML = ""; // Clear previous fields
- 		
- 		Object.keys(contact.masterExtra).forEach((key) => {
- 			if (!document.getElementById(`edit-contact-${key}`)) {
- 				const formGroup = document.createElement("div");
- 				formGroup.classList.add("form-group");
- 				
- 				const label = document.createElement("label");
- 				label.setAttribute("for", `edit-contact-${key}`);
- 				label.textContent = key.charAt(0).toUpperCase() + key.slice(1);
- 				
- 				const input = document.createElement("input");
- 				input.setAttribute("type", "text");
- 				input.setAttribute("id", `edit-contact-${key}`);
- 				input.setAttribute("name", `masterExtra.${key}`);
- 				input.setAttribute("class", "date-input");
- 				
- 				// Set required attribute using either method:
- 				input.setAttribute("required", ""); // or input.required = true;
- 				
- 				input.value = contact.masterExtra[key];
- 				
- 				formGroup.appendChild(label);
- 				formGroup.appendChild(input);
- 				dynamicFieldsContainer.appendChild(formGroup);
- 			}
- 			
- 		});
- 		
- 		document.getElementById("editContactSidebar").classList.add("open");
- 		document.getElementById("editContactOverlay").classList.add("active");
- 	}
- 	// Close edit contact modal
- 	function closeEditContact () {
- 		document.getElementById("editContactSidebar").classList.remove("open");
- 		document.getElementById("editContactOverlay").classList.remove("active");
- 	}
- 	
- 	function openDeleteModal (id) {
- 		const deleteModal = new bootstrap.Modal(
- 			document.getElementById("deleteModal"),
- 		);
- 		deleteModal.show();
- 	}
- 	
- 	function closeDeleteContact (id) {
- 		const deleteModal = new bootstrap.Modal(
- 			document.getElementById("deleteModal"),
- 		);
- 		deleteModal.hide();
- 	}
- </script>
+<% if (contacts && contacts.length > 0) { %>
+<div class="table-responsive ">
+	<table class="text-center min-w-full bg-white border-separate border-spacing-y-4">
+		<tbody>
+			<!-- Table Header -->
+			<tr class="text-gray-400">
+				<td class="px-2 py-3">Sno.</td>
+				<td class="w-[10%]">Name</td>
+				<td class="w-[10%]">Number</td>
+				<td class="w-[10%]">Created at</td>
+				<% if (contacts[0]?.masterExtra) { %>
+				<% Object.keys(contacts[0].masterExtra).forEach(function(key) { %>
+				<td class="w-[10%] text-gray-400 "><%= key %></td>
+				<% }); %>
+				<% } %>
+				<td class="sticky right-0 bg-white px-5">Actions</td>
+			</tr>
+			
+			<!-- Table Rows -->
+			<% contacts.forEach((contact, index) => { %>
+			<tr class="hover:bg-gray-100 cursor-pointer border">
+				<td class=" border-l border-t border-b rounded-l-lg py-[1.5rem] border-gray-200 text-sm text-gray-400">
+					<%= index + 1 %>
+				</td>
+				<td class="border-t border-b border-gray-200">
+					<p class="text-gray-500 pt-3"><%= contact?.Name %></p>
+				</td>
+				<td class="text-gray-500 border-t border-b border-gray-200">
+					XXXXX-XXX<%= contact?.wa_id?.slice(-2) %>
+				</td>
+				<td class="text-gray-500 border-t border-b border-gray-200">
+					<%= new Date(contact.subscribe_date).toLocaleString('en-GB', {
+							year: 'numeric',
+							month: 'short',
+							day: '2-digit'
+						}) %>
+				</td>
+				<% if (contact.masterExtra) { %>
+				<% Object.entries(contact.masterExtra).forEach(function([key, value]) { %>
+				<td class="text-gray-500 border-t border-b border-gray-200">
+					<%= value %>
+				</td>
+				<% }); %>
+				<% } %>
+				
+				<td class="sticky right-0 bg-white border-r border-t border-b rounded-r-lg border-gray-200">
+					<% if (access?.contactList?.editContactIndividual) { %>
+					<button onclick="openEditModal('<%= JSON.stringify(contact) %>')" aria-label="Edit contact" class="text-gray-600 hover:text-blue-600 px-3 border-r">
+						<img src="editPen.svg" alt="edit">
+					</button>
+					<% } else { %>
+					<button title="You don't have permissions to access this" class="text-gray-400 hover:cursor-not-allowed px-3 border-r">
+						<img src="editPen.svg" alt="edit">
+					</button>
+					<% } %>
+					<% if (access?.contactList?.deleteContactIndividual) { %>
+					<button onclick="openDeleteModal('<%= contact._id %>','<%= contact.Name %>' )" class="text-gray-600 hover:text-red-600 px-2">
+						<img src="bin contact list.svg" alt="bin">
+					</button>
+					<% } else { %>
+					<button title="You don't have permissions to access this" class="text-gray-400 hover:cursor-not-allowed px-2">
+						<img src="bin contact list.svg" alt="bin">
+					</button>
+					<% } %>
+				</td>
+			</tr>
+			<% }); %>
+		</tbody>
+	</table>
+	
+</div>
+<!-- Pagination -->
+<% if (!(page === 1 && contacts.length < 6)) { %>
+<%- include('../../commonJS/pagination') %>
+<% } %>
+
+<% } else { %>
+<!-- Empty state -->
+<div class="flex flex-col items-center justify-center min-h-[400px]  rounded-lg mt-4">
+	<div class="text-center">
+		<img src="https://img.freepik.com/free-vector/hands-holding-tablet-with-forefinger-clicking-start-button-new-application-launch-flat-illustration_74855-20595.jpg?ga=GA1.1.131490893.1732525963&semt=ais_hybrid" alt="No contacts" class="w-48 h-48 mx-auto mb-4">
+		
+		<h3 class="text-xl font-semibold text-gray-900 mb-2">No contacts yet</h3>
+		<p class="text-gray-600 mb-6">Start adding contacts by clicking on "Add Contact"</p>
+		<button onclick="openAddContact()" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black">
+			<i class="fa-solid fa-user-plus pr-2"></i>
+			Add Contact
+		</button>
+	</div>
+</div>
+<% } %>
+
+<script>
+	// Delete confirmation logic
+	
+	
+	function openAddContact () {
+		document.getElementById("addContactSidebar").classList.add("open");
+		document.getElementById("overlay").classList.add("active");
+	}
+	
+	function closeAddContact () {
+		document.getElementById("addContactSidebar").classList.remove("open");
+		document.getElementById("overlay").classList.remove("active");
+	}
+	
+	function openEditModal (contactData) {
+		const contact = JSON.parse(contactData);
+		document.getElementById("edit-contact-id").value = contact.keyId;
+		document.getElementById("edit-contact-name").value = contact.Name;
+		
+		const dynamicFieldsContainer = document.getElementById(
+			"dynamicFieldsContainer",
+		);
+		dynamicFieldsContainer.innerHTML = ""; // Clear previous fields
+		
+		Object.keys(contact.masterExtra).forEach((key) => {
+			if (!document.getElementById(`edit-contact-${key}`)) {
+				const formGroup = document.createElement("div");
+				formGroup.classList.add("form-group");
+				
+				const label = document.createElement("label");
+				label.setAttribute("for", `edit-contact-${key}`);
+				label.textContent = key.charAt(0).toUpperCase() + key.slice(1);
+				
+				const input = document.createElement("input");
+				input.setAttribute("type", "text");
+				input.setAttribute("id", `edit-contact-${key}`);
+				input.setAttribute("name", `masterExtra.${key}`);
+				input.setAttribute("class", "date-input");
+				
+				// Set required attribute using either method:
+				input.setAttribute("required", ""); // or input.required = true;
+				
+				input.value = contact.masterExtra[key];
+				
+				formGroup.appendChild(label);
+				formGroup.appendChild(input);
+				dynamicFieldsContainer.appendChild(formGroup);
+			}
+			
+		});
+		
+		document.getElementById("editContactSidebar").classList.add("open");
+		document.getElementById("editContactOverlay").classList.add("active");
+	}
+	// Close edit contact modal
+	function closeEditContact () {
+		document.getElementById("editContactSidebar").classList.remove("open");
+		document.getElementById("editContactOverlay").classList.remove("active");
+	}
+	
+	function openDeleteModal (id) {
+		const deleteModal = new bootstrap.Modal(
+			document.getElementById("deleteModal"),
+		);
+		deleteModal.show();
+	}
+	
+	function closeDeleteContact (id) {
+		const deleteModal = new bootstrap.Modal(
+			document.getElementById("deleteModal"),
+		);
+		deleteModal.hide();
+	}
+</script>

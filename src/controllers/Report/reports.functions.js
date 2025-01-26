@@ -69,15 +69,7 @@ export const overview = async (id, userId, page, limit, skip) =>
 		{
 			$addFields: {
 				totalMessages: { $size: "$reports" },
-				messagesSent: {
-					$size: {
-						$filter: {
-							input: "$reports",
-							as: "report",
-							cond: { $eq: ["$$report.status", "SENT"] },
-						},
-					},
-				},
+				messagesSent: { $size: "$reports" },
 				messagesDelivered: {
 					$size: {
 						$filter: {

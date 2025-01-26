@@ -297,7 +297,7 @@
 										<%= report.messageTemplate || 'No Message Text Available' %>
 									</span>
 									<% if (report.messageTemplate && report.messageTemplate.length > 100) { %>
-									<button id="readMoreBtn" class="text-gray-700 hover:text-gray-900 italic mt-2" onclick="toggleReadMore()">Read more</button>
+									<button id="readMoreBtn" class="text-gray-700 hover:text-gray-900 italic mt-2" onclick="toggleReadMore(event)">Read more</button>
 									<% } %>
 								</td>
 								

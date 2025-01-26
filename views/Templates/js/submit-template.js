@@ -84,12 +84,15 @@ async function submit() {
 			}
 		}
 
+		const url = location.hostname;
+
 		formData.append(
 			"templateData",
 			JSON.stringify({
 				...templateData,
 				dynamicVariables,
 				selectedLanguageCode,
+				url,
 			}),
 		);
 
