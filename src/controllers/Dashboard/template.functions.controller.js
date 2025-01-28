@@ -30,7 +30,8 @@ export const saveTemplateToDatabase = async (
 		});
 
 		if (req.file) {
-			const filePath = path.join(url, "uploads", id, req.file?.filename);
+			const filePath = `${url}/uploads/${id}/${req.file?.filename}`;
+
 			const headerComponent = newTemplate.components.find(
 				(component) => component.type === "HEADER",
 			);

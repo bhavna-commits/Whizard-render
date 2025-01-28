@@ -23,10 +23,11 @@ dotenv.config();
 export const createTemplate = async (req, res, next) => {
 	try {
 		const templateData = JSON.parse(req.body.templateData);
-		const { dynamicVariables, name, selectedLanguageCode, url } = templateData;
+		const { dynamicVariables, name, selectedLanguageCode, url } =
+			templateData;
 		const id = req.session?.user?.id || req.session?.addedUser?.owner;
 
-		if (!isObject(templateData)) return next();
+		// if (!isObject(templateData)) return next();
 
 		// Check if a template with the same name exists for the user
 		const exists = await Template.findOne({ useradmin: id, name });

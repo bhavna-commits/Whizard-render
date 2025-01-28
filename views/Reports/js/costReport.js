@@ -17,12 +17,19 @@ function initializeDatePicker() {
 		defaultDate: getQuarterDates(),
 		maxDate: "today",
 		onChange: async function (selectedDates) {
-			if (selectedDates.length === 2) {
-				const [startDate, endDate] = selectedDates;
-				const data = await fetchAnalytics(startDate, endDate);
-				if (data) {
-					updateUI(data);
-				}
+			let startDate = selectedDates[0];
+			let endDate = selectedDates[1];
+
+			// If no dates are selected, use default quarter dates
+			if (!startDate || !endDate) {
+				const [defaultStartDate, defaultEndDate] = getQuarterDates();
+				startDate = defaultStartDate;
+				endDate = defaultEndDate;
+			}
+			// console.log(startDate, endDate);
+			const data = await fetchAnalytics(startDate, endDate);
+			if (data) {
+				updateUI(data);
 			}
 		},
 	});
@@ -38,9 +45,11 @@ async function fetchAnalytics(startDate, endDate) {
 			return null;
 		}
 
+		// Convert to Unix timestamps
 		const startUnix = Math.floor(startDate.getTime() / 1000);
 		const endUnix = Math.floor(endDate.getTime() / 1000);
 
+		// Fetch data
 		const response = await axios.get("/reports/get-cost-report", {
 			params: {
 				start: startUnix,
@@ -48,17 +57,20 @@ async function fetchAnalytics(startDate, endDate) {
 			},
 		});
 
-		return processAnalyticsData(response.data);
+		// Process the fetched data
+		return processAnalyticsData(response.data, startDate, endDate);
 	} catch (error) {
 		console.error("Error fetching analytics:", error);
 		return null;
 	}
 }
 
-const timeseriesMap = new Map();
-let timeseriesData;
+let dataForCSV = [];
 
-function processAnalyticsData(rawData) {
+function processAnalyticsData(rawData, startDate, endDate) {
+	const timeseriesMap = new Map();
+	let timeseriesData;
+
 	const summaryData = {
 		total: {
 			count: 0,
@@ -78,73 +90,80 @@ function processAnalyticsData(rawData) {
 		},
 	};
 
-	if (!Array.isArray(rawData)) {
-		console.error("Invalid data format received:", rawData);
-		return {
-			summaryData,
-			timeseriesData: [],
-		};
+	// Generate every date between startDate and endDate
+	let currentDate = new Date(startDate);
+	const finalEndDate = new Date(endDate);
+
+	while (currentDate <= finalEndDate) {
+		const dateKey = currentDate.toLocaleDateString("en", {
+			month: "short",
+			day: "numeric",
+		});
+		// console.log(dateKey);
+
+		timeseriesMap.set(dateKey, {
+			date: dateKey,
+			marketing: {
+				count: 0,
+				cost: 0,
+			},
+			utility: {
+				count: 0,
+				cost: 0,
+			},
+			authentication: {
+				count: 0,
+				cost: 0,
+			},
+		});
+
+		// Move to the next day
+		currentDate.setDate(currentDate.getDate() + 1);
 	}
 
-	
+	// Process rawData to update timeseriesMap with real data
 	rawData.forEach((point) => {
 		if (!point || typeof point.start !== "number") {
 			return;
 		}
 
-		// Create date in IST by adding 5 hours and 30 minutes to UTC
+		// Create date in UTC
 		const utcDate = new Date(point.start * 1000);
-		const istOffset = 5.5 * 60 * 60 * 1000; // 5.5 hours in milliseconds
-		const istDate = new Date(utcDate.getTime() + istOffset);
 
-		// Store full date object for proper sorting later
-		const dateKey = istDate.toLocaleDateString("en", {
+		// Add one whole day (24 hours) to UTC
+		const oneDayInMilliseconds = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+		const newDate = new Date(utcDate.getTime() + oneDayInMilliseconds);
+
+		// Create a dateKey for the map
+		const dateKey = newDate.toLocaleDateString("en", {
 			month: "short",
 			day: "numeric",
 		});
 
-		if (!timeseriesMap.has(dateKey)) {
-			timeseriesMap.set(dateKey, {
-				date: dateKey,
-				// Store the full date object for sorting
-				fullDate: istDate,
-				marketing: {
-					count: 0,
-					cost: 0,
-				},
-				utility: {
-					count: 0,
-					cost: 0,
-				},
-				authentication: {
-					count: 0,
-					cost: 0,
-				},
-			});
-		}
-
-		const category = (point.conversation_category || "").toLowerCase();
-		if (summaryData[category]) {
-			const entry = timeseriesMap.get(dateKey);
-			entry[category].count = point.conversation || 0;
-			entry[category].cost = point.cost || 0;
-			summaryData[category].count += point.conversation || 0;
-			summaryData[category].cost += point.cost || 0;
-			summaryData.total.count += point.conversation || 0;
-			summaryData.total.cost += point.cost || 0;
+		// Only update data for the date within the selected range
+		if (timeseriesMap.has(dateKey)) {
+			const category = (point.conversation_category || "").toLowerCase();
+			if (summaryData[category]) {
+				const entry = timeseriesMap.get(dateKey);
+				entry[category].count = point.conversation || 0;
+				entry[category].cost = point.cost || 0;
+				summaryData[category].count += point.conversation || 0;
+				summaryData[category].cost += point.cost || 0;
+				summaryData.total.count += point.conversation || 0;
+				summaryData.total.cost += point.cost || 0;
+			}
 		}
 	});
 
-	// Sort using the full date object instead of strings
-	timeseriesData = Array.from(timeseriesMap.values())
-		.sort((a, b) => a.fullDate - b.fullDate)
-		.map((entry) => {
-			// Remove the fullDate property from the final output if not needed
-			const { fullDate, ...rest } = entry;
-			return rest;
-		});
+	// Convert the map to an array and return sorted timeseriesData
+	timeseriesData = Array.from(timeseriesMap.values()).sort((a, b) => {
+		const dateA = new Date(a.date);
+		const dateB = new Date(b.date);
+		return dateA - dateB;
+	});
 
-	// console.log(timeseriesData);
+    dataForCSV = [ ...timeseriesData ];
+    
 	return {
 		summaryData,
 		timeseriesData,
@@ -200,7 +219,7 @@ function createCSV() {
 	];
 
 	// Convert data to CSV rows
-	const csvRows = timeseriesData.map((row) => [
+	const csvRows = dataForCSV.map((row) => [
 		row.date,
 		row.marketing.count,
 		row.marketing.cost,

@@ -251,7 +251,7 @@
 								</tbody>
 							</table>
 							
-							<% if (!(page === 1 && customFields.length < 6)) { %>
+							<% if (totalPages > 1) { %>
 								<%- include('../commonJS/pagination') %>
 							<% } %>
 							

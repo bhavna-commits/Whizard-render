@@ -75,6 +75,7 @@ document
 					document.getElementById(
 						"message",
 					).innerHTML = '';
+					location.reload();
 				}, 2000);
 			} else {
 				document.getElementById(

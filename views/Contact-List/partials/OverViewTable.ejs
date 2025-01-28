@@ -70,7 +70,7 @@
 	
 </div>
 <!-- Pagination -->
-<% if (!(page === 1 && contacts.length < 6)) { %>
+<% if (totalPages > 1) { %>
 <%- include('../../commonJS/pagination') %>
 <% } %>
 

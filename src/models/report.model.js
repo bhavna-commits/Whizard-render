@@ -17,6 +17,10 @@ const CampaignReportSchema = new mongoose.Schema(
 			enum: ["SENT", "DELIVERED", "READ", "FAILED", "REPLIED"],
 			required: true,
 		},
+		failed: {
+			code: String,
+			text: String,
+		},
 		createdAt: {
 			type: Number,
 			default: () => Date.now(),
@@ -28,7 +32,7 @@ const CampaignReportSchema = new mongoose.Schema(
 		deleted: { type: Boolean, default: false },
 		messageId: { type: String, required: true },
 		messageTemplate: { type: Schema.Types.Mixed },
-		replyContent: { type: String, default: "" }
+		replyContent: { type: String, default: "" },
 	},
 	{
 		timestamps: false,

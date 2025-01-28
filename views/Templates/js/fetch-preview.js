@@ -33,35 +33,17 @@ let originalTemplateData = {};
 
 function initializePreview(templateData) {
 	originalTemplateData = {
-		header: templateData.header.content || "",
 		body: templateData.body || "",
-		footer: templateData.footer || "",
-		headerType: templateData.header.type || "none",
 	};
 
-	let headerValidation = { isValid: true, error: null, numbers: [] };
-	if (templateData.header.type == "text") {
-		headerValidation = validateCurlyBraces(templateData.header.content);
-	}
 	const bodyValidation = validateCurlyBraces(templateData.body);
-	const footerValidation = validateCurlyBraces(templateData.footer);
 
-	if (
-		!headerValidation.isValid ||
-		!bodyValidation.isValid ||
-		!footerValidation.isValid
-	) {
+	if (!bodyValidation.isValid) {
 		alert(bodyValidation.error);
 		return false;
 	}
 
-	return [
-		...new Set([
-			...headerValidation.numbers,
-			...bodyValidation.numbers,
-			...footerValidation.numbers,
-		]),
-	].sort();
+	return [...new Set([...bodyValidation.numbers])].sort();
 }
 
 function handleInputChange(event) {

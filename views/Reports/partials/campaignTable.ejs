@@ -72,7 +72,7 @@
 		</table>
 	</div>
 	<!-- Pagination -->
-	<% if (!(page === 1 && campaigns.length < 6)) { %>
+	<% if (totalPages > 1) { %>
 		<%- include('../../commonJS/pagination') %>
 	<% } %>
 

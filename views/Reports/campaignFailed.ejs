@@ -257,7 +257,7 @@
 				<div class="message-list">
 					<table class="text-center min-w-full border-separate border-spacing-y-4">
 						<thead>
-							<tr class="text-gray-500">
+							<tr class="text-gray-400">
 								<td class="py-4"><input type="checkbox" class="checkbox" /></td>
 								<td>Name</td>
 								<td class="py-4">Contact</td>
@@ -269,36 +269,38 @@
 						</thead>
 						<tbody>
 							<% campaigns.forEach(report => { %>
-							<tr class="hover:bg-gray-100 cursor-pointer border">
-								<td class="border-l border-t border-b rounded-lg py-4 border-gray-200 text-sm text-black">
+							<tr class="hover:bg-gray-100 cursor-pointer border text-gray-700">
+								<td class="border-l border-t border-b rounded-lg py-4 border-gray-200 text-sm">
 									<input type="checkbox" class="checkbox" />
 								</td>
-								<td class="border-t border-b border-gray-200 text-black">
+								<td class="border-t border-b border-gray-200">
 									<%= report.contactName %>
 								</td>
-								<td class="border-t border-b border-gray-200 text-black" aria-label="<%= report.recipientPhone %>">
+								<td class="border-t border-b border-gray-200" aria-label="<%= report.recipientPhone %>">
 									<% 
                 						const phoneNumber = report.recipientPhone;
                 						const maskedPhone = phoneNumber.slice(0, -2).replace(/\d/g, 'X') + phoneNumber.slice(-2);
                 					%>
 									<%= maskedPhone %>
 								</td>
-								<td class="border-t border-b border-gray-200 text-black">
+								<td class="border-t border-b border-gray-200">
 									<%= new Date(report.timestamp * 1000 || report.updatedAt * 1000).toLocaleDateString() %>
 								</td>
-								<td class="border-t border-b border-gray-200 text-black">
+								<td class="border-t border-b border-gray-200">
 									<%= new Date(report.timestamp * 1000 || report.createdAt).toLocaleDateString() %>
 								</td>
-								<td class="border-t border-b border-gray-200 text-black">
+								<td class="border-t border-b border-gray-200">
 									<%= report.status.charAt(0).toUpperCase() + report.status.slice(1).toLowerCase() %>
 								</td>
-								<td class="border-r border-t border-b rounded-lg border-gray-200 text-black max-w-xs">
-									<span id="messageText" class="block overflow-hidden text-ellipsis whitespace-nowrap">
-										<%= report.messageTemplate || 'No Message Text Available' %>
-									</span>
-									<% if (report.messageTemplate && report.messageTemplate.length > 100) { %>
-									<button id="readMoreBtn" class="text-gray-700 hover:text-gray-900 italic mt-2" onclick="toggleReadMore(event)">Read more</button>
-									<% } %>
+								<td class="border-r border-t border-b rounded-lg border-gray-200 max-w-xs px-5">
+									<p class="inline">
+										<span id="messageText" class="block overflow-hidden text-ellipsis whitespace-nowrap">
+											<%= report.messageTemplate || 'No Message Text Available' %>
+										</span>
+										<% if (report.messageTemplate && report.messageTemplate.length > 100) { %>
+										<button id="readMoreBtn" class="text-gray-900 hover:text-gray-900 italic" onclick="toggleReadMore(event)">Read more</button>
+										<% } %>
+									</p>
 								</td>
 							</tr>
 							<% }) %>

@@ -296,9 +296,7 @@
 		// Global chart instances
 		let conversationChart = null;
 		let costChart = null;
-		
-		
-		
+	
 		function updateConversationChart (data) {
 			// Destroy existing chart if it exists
 			if (conversationChart) {
@@ -311,7 +309,7 @@
 			}
 			
 			const ctx = document.getElementById("analyticsChart").getContext("2d");
-			
+			// console.log(data.timeseriesData.map(point => point.date));
 			const chartData = {
 				labels: data.timeseriesData.map(point => point.date),
 				datasets: [{
@@ -436,6 +434,7 @@
 						y: {
 							beginAtZero: true,
 							ticks: {
+                                stepSize: 2,
 								callback: function (value) {
 									return '₹' + value.toFixed(2);
 								}
@@ -473,10 +472,6 @@
 			}
 		});
 	</script>
-	
-	
-	
-	
 	<script>
 		window.addEventListener('load', function () {
 			// Fade out the loader smoothly by changing the opacity

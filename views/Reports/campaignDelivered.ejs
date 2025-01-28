@@ -257,7 +257,7 @@
 				<div class="message-list">
 					<table class="text-center min-w-full border-separate border-spacing-y-4">
 						<thead>
-							<tr class="text-gray-500">
+							<tr class="text-gray-400">
 								<td class="py-4"><input type="checkbox" class="checkbox" /></td>
 								<td>Name</td>
 								<td class="py-4">Contact</td>
@@ -269,36 +269,38 @@
 						</thead>
 						<tbody>
 							<% campaigns.forEach(report => { %>
-							<tr class="hover:bg-gray-100 cursor-pointer border">
-								<td class="border-l border-t border-b rounded-lg py-4 border-gray-200 text-sm text-black">
+							<tr class="hover:bg-gray-100 cursor-pointer border text-gray-700">
+								<td class="border-l border-t border-b rounded-lg py-4 border-gray-200 text-sm">
 									<input type="checkbox" class="checkbox" />
 								</td>
-								<td class="border-t border-b border-gray-200 text-black">
+								<td class="border-t border-b border-gray-200">
 									<%= report.contactName %>
 								</td>
-								<td class="border-t border-b border-gray-200 text-black" aria-label="<%= report.recipientPhone %>">
+								<td class="border-t border-b border-gray-200" aria-label="<%= report.recipientPhone %>">
 									<% 
                 						const phoneNumber = report.recipientPhone;
                 						const maskedPhone = phoneNumber.slice(0, -2).replace(/\d/g, 'X') + phoneNumber.slice(-2);
                 					%>
 									<%= maskedPhone %>
 								</td>
-								<td class="border-t border-b border-gray-200 text-black">
+								<td class="border-t border-b border-gray-200">
 									<%= new Date(report.timestamp * 1000 || report.updatedAt * 1000).toLocaleDateString() %>
 								</td>
-								<td class="border-t border-b border-gray-200 text-black">
+								<td class="border-t border-b border-gray-200">
 									<%= new Date(report.timestamp * 1000 || report.createdAt).toLocaleDateString() %>
 								</td>
-								<td class="border-t border-b border-gray-200 text-black">
+								<td class="border-t border-b border-gray-200">
 									<%= report.status.charAt(0).toUpperCase() + report.status.slice(1).toLowerCase() %>
 								</td>
-								<td class="border-r border-t border-b rounded-lg border-gray-200 text-black max-w-xs">
-									<span id="messageText" class="block overflow-hidden text-ellipsis whitespace-nowrap">
-										<%= report.messageTemplate || 'No Message Text Available' %>
-									</span>
-									<% if (report.messageTemplate && report.messageTemplate.length > 100) { %>
-									<button id="readMoreBtn" class="text-gray-700 hover:text-gray-900 italic mt-2" onclick="toggleReadMore(event)">Read more</button>
-									<% } %>
+								<td class="border-r border-t border-b rounded-lg border-gray-200 max-w-xs px-5">
+									<p class="inline">
+										<span id="messageText" class="block overflow-hidden text-ellipsis whitespace-nowrap">
+											<%= report.messageTemplate || 'No Message Text Available' %>
+										</span>
+										<% if (report.messageTemplate && report.messageTemplate.length > 100) { %>
+										<button id="readMoreBtn" class="text-gray-900 hover:text-gray-900 italic" onclick="toggleReadMore(event)">Read more</button>
+										<% } %>
+									</p>
 								</td>
 							</tr>
 							<% }) %>
@@ -307,57 +309,6 @@
 							const contact = <%- JSON.stringify(contact) %>;
 						</script>
 					</table>
-					<!-- Pagination -->
-					<!-- <div class="flex items-center justify-center py-4 space-x-4">
-						<nav class="flex items-center">
-							<ul class="flex space-x-1">
-								
-								<li>
-									<a href="/reports/campaign-list/<%# campaigns[0]?.unique_id %>?page=<%# page > 1 ? page - 1 : 1 %>" class="px-3 py-2 rounded-md text-sm font-medium text-gray-500 bg-white border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed" <%# page === 1 ? 'aria-disabled="true"' : '' %>>‹</a>
-								</li>
-							
-								<li>
-									<a href="/reports/campaign-list/<%# campaigns[0]?.unique_id %>?page=1" class="px-3 py-2 rounded-md text-sm font-medium <%# page === 1 ? 'text-white bg-red-400 border-red-400' : 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50' %>">1</a>
-								</li>
-								
-								<%# if (page > 3) { %>
-								
-								<li><span class="px-3 py-2 text-sm text-gray-500">...</span></li>
-								<%# } %>
-							
-								<%# for (let i = Math.max(2, page - 1); i <= Math.min(totalPages - 1, page + 1); i++) { %>
-								<li>
-									<a href="/reports/campaign-list/<%# campaigns[0]?.unique_id %>?page=<%# i %>" class="px-3 py-2 rounded-md text-sm font-medium <%# i === page ? 'text-white bg-red-400 border-red-400' : 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50' %>"><%# i %></a>
-								</li>
-								<%# } %>
-								
-								<%# if (page < totalPages - 2) { %>
-								
-								<li><span class="px-3 py-2 text-sm text-gray-500">...</span></li>
-								<%# } %>
-								
-								
-								<%# if (totalPages > 1) { %>
-								<li>
-									<a href="/reports/campaign-list/<%# campaigns[0]?.unique_id %>?page=<%# totalPages %>" class="px-3 py-2 rounded-md text-sm font-medium <%# page === totalPages ? 'text-white bg-red-400 border-red-400' : 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50' %>"><%# totalPages %></a>
-								</li>
-								<%# } %>
-								
-							
-								<li>
-									<a href="/reports/campaign-list/<%# campaigns[0]?.unique_id %>?page=<%# page < totalPages ? page + 1 : totalPages %>" class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50">›</a>
-								</li>
-							</ul>
-						</nav>
-						
-						
-						<div class="flex items-center space-x-2">
-							<span class="text-sm text-gray-700">Go to page</span>
-							<input type="number" min="1" max="<%# totalPages %>" class="w-16 px-2 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" value="<%# page %>" id="pageInput" />
-							<button type="button" class="px-3 py-1 text-sm font-medium text-white bg-red-400 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" onclick="goToPage()">Go</button>
-						</div>
-					</div> -->
-					
 				</div>
 				<% } else { %>
 				<div class="flex flex-col items-center justify-center min-h-[400px]  rounded-lg mt-4">

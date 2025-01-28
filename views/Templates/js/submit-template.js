@@ -84,7 +84,7 @@ async function submit() {
 			}
 		}
 
-		const url = location.hostname;
+		const url = `https://${location.hostname}`;
 
 		formData.append(
 			"templateData",

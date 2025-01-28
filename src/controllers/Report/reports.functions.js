@@ -1,7 +1,10 @@
 import dotenv from "dotenv";
 import cron from "node-cron";
-import ActivityLogs from "../../models/activityLogs.model.js";
-import axios from "axios";
+import {
+	replaceDynamicVariables,
+	sendMessageThroughWhatsApp,
+	generatePreviewMessage,
+} from "../ContactList/campaign.functions.js";
 import { agenda } from "../../config/db.js";
 import Template from "../../models/templates.model.js";
 import Contacts from "../../models/contacts.model.js";
@@ -69,7 +72,15 @@ export const overview = async (id, userId, page, limit, skip) =>
 		{
 			$addFields: {
 				totalMessages: { $size: "$reports" },
-				messagesSent: { $size: "$reports" },
+				messagesSent: {
+					$size: {
+						$filter: {
+							input: "$reports",
+							as: "report",
+							cond: { $ne: ["$$report.status", "FAILED"] },
+						},
+					},
+				},
 				messagesDelivered: {
 					$size: {
 						$filter: {
@@ -204,8 +215,13 @@ export async function sendMessages(campaign, id, unique_id, contactList) {
 			// console.log(JSON.stringify(personalizedMessage));
 			// Send message using WhatsApp (assuming wa_id is the phone number)
 			const response = await sendMessageThroughWhatsApp(
-				template.name,
+				template,
 				contact.wa_id,
+				personalizedMessage,
+			);
+
+			const messageTemplate = generatePreviewMessage(
+				template,
 				personalizedMessage,
 			);
 
@@ -217,7 +233,7 @@ export async function sendMessages(campaign, id, unique_id, contactList) {
 					`Failed to send message to ${contact.wa_id}: ${response.response}`,
 				);
 			}
-			console.log(JSON.stringify(response));
+			// console.log(JSON.stringify(response));
 			const user = await User.findOne({ unique_id: id });
 			// Create a report for each sent message
 			const report = new Report({
@@ -230,8 +246,8 @@ export async function sendMessages(campaign, id, unique_id, contactList) {
 				recipientPhone: contact.wa_id,
 				status: response.status,
 				messageId: response.response.messages[0].id,
+				messageTemplate,
 			});
-
 			await report.save();
 		}
 
@@ -240,126 +256,6 @@ export async function sendMessages(campaign, id, unique_id, contactList) {
 	} catch (error) {
 		console.error("Error sending messages:", error.message);
 		throw new Error(`${error.message}`);
-	}
-}
-
-function replaceDynamicVariables(template, variables, contact) {
-	const messageComponents = [];
-
-	try {
-		// Process dynamic variables in Header
-		const headerComponent = template.components.find(
-			(c) => c.type === "HEADER",
-		);
-		if (headerComponent && template.dynamicVariables.header.length > 0) {
-			let headerParameters = [];
-			if (headerComponent.format === "TEXT") {
-				template.dynamicVariables.header.forEach((headVar) => {
-					let key = Object.keys(headVar)[0];
-					console.log(variables.get(key));
-					if (variables.get(key) === "Name") {
-						headerParameters.push({
-							type: "text",
-							text: contact.Name || "",
-						});
-					} else if (variables.get(key)) {
-						console.log("here");
-						headerParameters.push({
-							type: "text",
-							text: contact.masterExtra[variables.get(key)] || "",
-						});
-					}
-				});
-			}
-
-			if (headerParameters.length > 0) {
-				messageComponents.push({
-					type: "header",
-					parameters: headerParameters,
-				});
-			}
-		}
-
-		// Process dynamic variables in Body
-		const bodyComponent = template.components.find(
-			(c) => c.type === "BODY",
-		);
-		if (bodyComponent && template.dynamicVariables.body.length > 0) {
-			let bodyParameters = [];
-
-			template.dynamicVariables.body.forEach((bodyVar) => {
-				let key = Object.keys(bodyVar)[0];
-				console.log(variables.get(key));
-
-				if (variables.get(key) == "Name") {
-					bodyParameters.push({
-						type: "text",
-						text: contact.Name || "",
-					});
-				} else if (variables.get(key)) {
-					bodyParameters.push({
-						type: "text",
-						text: contact.masterExtra[variables.get(key)] || "",
-					});
-				}
-			});
-
-			messageComponents.push({
-				type: "body",
-				parameters: bodyParameters,
-			});
-		}
-
-		return messageComponents;
-	} catch (error) {
-		console.error("Error replacing dynamic variables:", error.message);
-		throw new Error(`Error replacing dynamic variables: ${error.message}`);
-	}
-}
-
-async function sendMessageThroughWhatsApp(name, phone, messageComponents) {
-	try {
-		// Construct the message payload
-		const requestData = {
-			messaging_product: "whatsapp",
-			recipient_type: "individual",
-			to: phone,
-			type: "template",
-			template: {
-				name: name,
-				language: { code: "en_US" },
-				components: messageComponents,
-			},
-		};
-
-		// Log the request data
-		console.log(
-			"Submitting the following JSON to WhatsApp API:",
-			JSON.stringify(requestData, null, 2),
-		);
-
-		// Send the request
-		const response = await axios.post(
-			`https://graph.facebook.com/${process.env.FB_GRAPH_VERSION}/${process.env.FB_PHONE_ID}/messages`,
-			requestData,
-			{
-				headers: {
-					Authorization: `Bearer ${process.env.FB_ACCESS_TOKEN}`,
-					"Content-Type": "application/json",
-				},
-			},
-		);
-
-		return { status: "SENT", response: response.data };
-	} catch (error) {
-		console.error(
-			"Error sending WhatsApp message:",
-			error.response?.data?.error?.message || error.message,
-		);
-		return {
-			status: "FAILED",
-			response: error.response?.data?.error?.message || error.message,
-		};
 	}
 }
 

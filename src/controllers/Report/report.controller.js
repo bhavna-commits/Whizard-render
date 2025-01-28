@@ -49,7 +49,7 @@ export const getCampaignList = async (req, res, next) => {
 							$filter: {
 								input: "$reports",
 								as: "report",
-								cond: { $eq: ["$$report.status", "SENT"] },
+								cond: { $ne: ["$$report.status", "FAILED"] },
 							},
 						},
 					},
@@ -464,6 +464,9 @@ const getSentReportsById = async (req, res, next) => {
 												"$campaignId",
 												"$$campaignId",
 											],
+										},
+										{
+											$ne: ["$status", "FAILED"],
 										},
 									],
 								},
@@ -1305,7 +1308,7 @@ export const renderGetCostReport = async (req, res) => {
 	try {
 		const permissions = req.session?.addedUser?.permissions;
 		if (permissions) {
-			const access = Permissions.findOne({ unique_id: permissions });
+			const access = await Permissions.findOne({ unique_id: permissions });
 			if (
 				access.contactList.sendBroadcast &&
 				req.session?.addedUser?.whatsAppStatus

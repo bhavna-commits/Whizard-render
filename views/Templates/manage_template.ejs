@@ -441,6 +441,7 @@
 		</div>
 		
 		<script>
+			// Open Modal
 			function openModal () {
 				const modal = document.getElementById('filter-modal');
 				modal.style.display = 'block';
@@ -459,20 +460,18 @@
 			}
 			
 			// Toggle Dropdown
-			function toggleDropdown () {
+			function toggleDropdown1 () {
 				const dropdown = document.getElementById('category-options');
 				dropdown.classList.toggle('hidden');
 			}
 			
-			
-			
 			// Select Category and Update Button Text
 			function selectCategory (category) {
 				document.getElementById('categoryDropdown').innerText = category;
-				toggleDropdown(); // Close the dropdown after selection
+				toggleDropdown1(); // Close the dropdown after selection
 			}
 			
-			// Apply Filters Function (for future filter logic)
+			// Apply Filters Function
 			async function applyFilters () {
 				const templateName = document.getElementById('templateSearch').value;
 				const category = document.getElementById('categoryDropdown').innerText;
@@ -485,14 +484,15 @@
 				closeModal();
 			}
 			
-			// Hide modal if clicked outside of it
-			window.onclick = function (event) {
+			// Close Modal with the Escape Key (optional)
+			document.addEventListener('keydown', function (event) {
 				const modal = document.getElementById('filter-modal');
-				if (event.target == modal) {
+				if (event.key === 'Escape' && modal.style.display === 'block') {
 					closeModal();
 				}
-			}
+			});
 			
+			// Handling File Input
 			const fileInput = document.getElementById("file-input");
 			const fileList = document.getElementById("file-list");
 			
@@ -544,6 +544,7 @@
 				}
 			});
 			
+			// Example: Refresh Facebook Templates
 			async function getStatus () {
 				const icon = document.querySelector(".fa-sync");
 				try {
@@ -561,6 +562,7 @@
 				}
 			}
 		</script>
+
 	</div>
 	</div>
 	<!-- END PAGE CONTAINER -->

@@ -121,6 +121,7 @@ router.post("/webhook", async (req, res) => {
 								status,
 								timestamp,
 								recipient_id: recipientPhone,
+								errors,
 							} = statusEvent;
 
 							const campaign = await Campaign.findOne({
@@ -137,44 +138,57 @@ router.post("/webhook", async (req, res) => {
 								report.updatedAt = timestamp;
 								report.recipientPhone = recipientPhone;
 
+								// Check if the status is "failed"
+								if (
+									status === "failed" &&
+									errors &&
+									errors.length > 0
+								) {
+									const { code, title } = errors[0];
+									report.failed = {
+										code: code || "UNKNOWN_ERROR",
+										text:
+											title ||
+											"No error message provided",
+									};
+								}
+
 								await report.save();
-							} else {
-								report = new Reports({
-									messageId,
-									recipientPhone,
-									WABA_ID: user.WABA_ID || "",
-									FB_PHONE_ID: user.FB_PHONE_ID || "",
-									useradmin: user.unique_id || "",
-									messageId,
-									status: "REPLIED",
-									updatedAt: timestamp,
-									recipientPhone,
-									campaignId: campaign
-										? campaign.unique_id
-										: "",
-									unique_id: generateUniqueId(),
-								});
 							}
 						}
 					}
 
-					// Check for template rejection (Updated according to the new JSON structure)
-					if (messagingEvent.event === "REJECTED") {
-						const {
-							message_template_id: templateId,
-							message_template_name: templateName,
-							message_template_language: templateLanguage,
-							reason: rejectedReason,
-						} = messagingEvent;
+					// Check for template rejection (Updated for both old and new JSON structure)
+					if (
+						messagingEvent.event === "REJECTED" ||
+						messagingEvent.status === "REJECTED"
+					) {
+						let templateId,
+							templateName,
+							templateLanguage,
+							rejectedReason;
+
+						if (messagingEvent.event === "REJECTED") {
+							// New structure with the rejection reason inside 'changes'
+							templateId = messagingEvent.message_template_id;
+							templateName = messagingEvent.message_template_name;
+							templateLanguage =
+								messagingEvent.message_template_language;
+							rejectedReason = messagingEvent.reason;
+						} else if (messagingEvent.status === "REJECTED") {
+							// Old structure without detailed reason
+							templateId = entryItem.id;
+							rejectedReason = "Unknown reason";
+						}
 
 						// Update the template status and rejection reason in the database
 						let template = await Template.findOne({
-							fb_id: templateId,
+							template_id: String(templateId),
 						});
-
+						console.log(template);
 						if (template) {
 							template.status = "Rejected";
-							template.rejected_reason = `Template '${templateName}' (Language: ${templateLanguage}) was rejected. Reason: ${rejectedReason}.`;
+							template.rejected_reason = rejectedReason;
 
 							await template.save();
 						} else {

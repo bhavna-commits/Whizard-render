@@ -120,8 +120,20 @@ function addFilter() {
 		});
 }
 
+// Initialize flatpickr on a button with id #dateIntervalButton
 flatpickr("#dateInterval", {
-	mode: "range",
-	dateFormat: "Y-m-d",
-	maxDate: "today",
+	mode: "range", // Range selection
+	dateFormat: "Y-m-d", // Date format
+	maxDate: "today", // Set max date to today
+	onChange: function (selectedDates, dateStr) {
+		// When the date is selected, update the button text
+		const dateButton = document.getElementById("dateInterval");
+
+		if (selectedDates.length === 2) {
+			// Check if a range (two dates) is selected
+			dateButton.textContent = dateStr; // Update button text with the selected range
+		} else if (selectedDates.length === 1) {
+			dateButton.textContent = `Start: ${dateStr}`; // For single date in range mode
+		}
+	},
 });

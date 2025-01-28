@@ -12,8 +12,47 @@ document.addEventListener("DOMContentLoaded", function () {
 
 	let selectedCountry = null;
 
-	// Previous country selector code remains the same...
+	// Load the respective states based on the selected country on page load
+	const loadStatesForSelectedCountry = () => {
+		const countryName = countrySearchInput.value; // Get the selected country name
+		selectedCountry = countries.find(
+			(country) => country.name === countryName,
+		);
 
+		// If a country is selected and has states, load the states into the dropdown
+		if (
+			selectedCountry &&
+			selectedCountry.states &&
+			selectedCountry.states.length > 0
+		) {
+			stateInput.classList.add("hidden");
+			stateDropdown.classList.remove("hidden");
+
+			// Enable the state dropdown
+			stateDropdown.disabled = false;
+
+			// Clear previous state options
+			stateDropdown.innerHTML = '<option value="">Select State</option>';
+
+			// Add state options
+			selectedCountry.states.forEach((state) => {
+				const option = document.createElement("option");
+				option.value = state.name;
+				option.textContent = state.name;
+				stateDropdown.appendChild(option);
+			});
+		} else {
+			// If no states are available, show the manual input field
+			stateDropdown.classList.add("hidden");
+			stateInput.classList.remove("hidden");
+			stateInput.disabled = false;
+		}
+	};
+
+	// Call the function to load states on page load
+	loadStatesForSelectedCountry();
+
+	// Handle form submission (existing logic)
 	form.addEventListener("submit", async function (e) {
 		e.preventDefault();
 
@@ -59,7 +98,7 @@ document.addEventListener("DOMContentLoaded", function () {
 				throw new Error(errorMsg);
 			}
 
-			// If the result is successful, redirect to the homepage or next page
+			// If the result is successful, display the success message
 			if (result.success) {
 				errorMessage.classList.remove("hidden");
 				errorMessage.classList.add("text-green-500");
@@ -84,12 +123,8 @@ document.addEventListener("DOMContentLoaded", function () {
 		}
 	});
 
-	// Initially disable state input and dropdown
-	stateInput.disabled = true;
-	stateDropdown.disabled = true;
-
+	// Country selection logic
 	countrySelectorButton.addEventListener("click", function () {
-		// console.log("lciked");
 		countryDropdown.classList.toggle("hidden");
 	});
 
@@ -103,42 +138,8 @@ document.addEventListener("DOMContentLoaded", function () {
 			countrySearchInput.value = countryName;
 			countryDropdown.classList.add("hidden");
 
-			// Find the selected country data from the countries array
-			selectedCountry = countries.find(
-				(country) => country.name === countryName,
-			);
-
-			console.log(selectedCountry);
-			// Handle state input based on whether the country has states
-			if (
-				selectedCountry &&
-				selectedCountry.states &&
-				selectedCountry.states.length > 0
-			) {
-				// If the country has states, show the state dropdown and populate it
-				stateInput.classList.add("hidden");
-				stateDropdown.classList.remove("hidden");
-				stateInput.disabled = true;
-				stateDropdown.disabled = false;
-
-				// Clear the previous dropdown options
-				stateDropdown.innerHTML =
-					'<option value="">Select State</option>';
-
-				// Add state options to the dropdown
-				selectedCountry.states.forEach((state) => {
-					const option = document.createElement("option");
-					option.value = state.name;
-					option.textContent = state.name;
-					stateDropdown.appendChild(option);
-				});
-			} else {
-				// If no states are available, hide the dropdown and show the manual input
-				stateDropdown.classList.add("hidden");
-				stateInput.classList.remove("hidden");
-				stateDropdown.disabled = true;
-				stateInput.disabled = false;
-			}
+			// Load respective states based on the selected country
+			loadStatesForSelectedCountry();
 		});
 	});
 
@@ -158,6 +159,7 @@ document.addEventListener("DOMContentLoaded", function () {
 		});
 	});
 
+	// Description word count logic (existing)
 	const descriptionInput = document.getElementById("description");
 	const wordCountDisplay = document.getElementById("wordCount");
 	const maxWords = 100;
@@ -165,11 +167,7 @@ document.addEventListener("DOMContentLoaded", function () {
 	descriptionInput.addEventListener("input", () => {
 		const inputText = descriptionInput.value.trim();
 		const words = inputText.split("");
-		// console.log(words);
 		const wordCount = words.length;
-		// console.log(wordCount);
-		// Update the word count display
 		wordCountDisplay.textContent = `${wordCount}/${maxWords} words`;
-		// console.log(descriptionInput.value);
 	});
 });

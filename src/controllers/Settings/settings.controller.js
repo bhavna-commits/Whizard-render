@@ -72,9 +72,9 @@ export const profile = async (req, res) => {
 				access: user.access,
 				user,
 				languages,
-				photo: req.session.user?.photo,
-				name: req.session.user.name,
-				color: req.session.user.color,
+				photo: req.session?.user?.photo,
+				name: req.session?.user?.name,
+				color: req.session?.user?.color,
 			});
 		} else {
 			id = req.session?.addedUser?.id;
@@ -110,7 +110,7 @@ export const updateProfile = async (req, res) => {
 		if (req.file?.filename) {
 			profilePicPath = path.join(
 				"uploads",
-				req.session.user.id,
+				req.session?.user?.id || req.session?.addedUser?.owner,
 				"profile",
 				req.file.filename,
 			);
@@ -121,26 +121,49 @@ export const updateProfile = async (req, res) => {
 			language: data.language,
 		};
 
-		if (profilePicPath) {
-			updateFields.profilePhoto = profilePicPath;
+		let updatedUser;
+
+		// Check if updating a 'User' or an 'AddedUser'
+		if (req.session?.user?.id) {
+			if (profilePicPath) {
+				updateFields.profilePhoto = profilePicPath;
+			}
+
+			updatedUser = await User.findOneAndUpdate(
+				{
+					unique_id: req.session?.user?.id,
+				},
+				updateFields,
+				{ new: true },
+			);
+
+			// Update session with new photo
+			req.session.user.photo = updatedUser.profilePhoto;
+		} else {
+			if (profilePicPath) {
+				updateFields.photo = profilePicPath;
+			}
+			// delete updateFields.language;
+			updatedUser = await AddedUser.findOneAndUpdate(
+				{
+					unique_id: req.session?.addedUser?.id,
+				},
+				updateFields,
+				{ new: true },
+			);
+
+			// Update session with new photo
+			req.session.addedUser.photo = updatedUser.photo;
 		}
 
-		const updatedUser = await User.findOneAndUpdate(
-			{ unique_id: req.session.user.id },
-			updateFields,
-			{ new: true },
-		);
-		req.session.user.photo = updatedUser.profilePhoto;
-		// console.log(updatedUser);
+		// Log activity for both User and AddedUser
 		try {
 			await ActivityLogs.create({
-				useradmin: req.session.user.id,
+				useradmin: req.session?.user?.id || req.session?.addedUser?.id,
 				unique_id: generateUniqueId(),
-				name: req.session.user.name
-					? req.session.user.name
-					: req.session.addedUser.name,
+				name: req.session.user?.name || req.session.addedUser?.name,
 				actions: "Update",
-				details: `Updated its profile`,
+				details: `Updated profile information`,
 			});
 		} catch (err) {
 			res.status(500).json({
@@ -149,11 +172,10 @@ export const updateProfile = async (req, res) => {
 			});
 		}
 
-		await updatedUser.save();
 		// Send success response
 		res.status(200).json({
 			success: true,
-			message: "Profile picture uploaded successfully",
+			message: "Profile updated successfully",
 		});
 	} catch (err) {
 		// Handle errors and send error response

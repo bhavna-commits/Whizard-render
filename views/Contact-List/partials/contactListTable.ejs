@@ -64,7 +64,7 @@
 		</table>
 	</div>
 	<!-- Pagination -->
-	<% if (contacts.length == 6 || page > 1) { %>
+	<% if (totalPages > 1) { %>
 		<%- include('../../commonJS/pagination') %>
 	<% } %>	
 	

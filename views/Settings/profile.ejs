@@ -234,9 +234,9 @@
 						</div>
 						<div class="flex items-center justify-center">
 							<div class="w-20 h-20 rounded-full bg-[<%= color %>] text-white flex items-center justify-center text-xl font-semibold mr-3 relative overflow-hidden">
-								<% if (user.profilePhoto) { %>
+								<% if (photo) { %>
 								
-								<img id="profilePreview" src="/<%= user.profilePhoto %>" class="w-full h-full object-cover block" />
+								<img id="profilePreview" src="/<%= photo %>" class="w-full h-full object-cover block" />
 								
 								<% } else { %>
 																

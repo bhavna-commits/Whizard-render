@@ -91,7 +91,7 @@ export async function sendMessages(campaign, id, unique_id) {
 	}
 }
 
-function replaceDynamicVariables(template, variables, contact) {
+export function replaceDynamicVariables(template, variables, contact) {
 	const messageComponents = [];
 	try {
 		// Process dynamic variables in Header
@@ -188,7 +188,7 @@ function replaceDynamicVariables(template, variables, contact) {
 	}
 }
 
-async function sendMessageThroughWhatsApp(template, phone, messageComponents) {
+export async function sendMessageThroughWhatsApp(template, phone, messageComponents) {
 	try {
 		// Construct the message payload
 		const requestData = {
@@ -286,7 +286,7 @@ cron.schedule("* * * * *", async () => {
 	}
 });
 
-function generatePreviewMessage(template, message) {
+export function generatePreviewMessage(template, message) {
 	try {
 		let previewMessage = "";
 		console.log(JSON.stringify(message));
