@@ -36,15 +36,15 @@
 					<td class="border-t border-b border-gray-200 ">
 						<p class="inline-flex justify-center items-center h-fit w-fit px-2 py-1 rounded 
 						<% if (campaign.status === "SCHEDULED" || campaign.status === "IN_QUEUE") { %>
-						bg-yellow-100 text-yellow-500
+							bg-yellow-100 text-yellow-500
 						<% } else { %>
-						bg-green-100 text-green-500
+							bg-green-100 text-green-500
 						<% } %>">
-							<% if (campaign.status === "SCHEDULED" || campaign.status === "IN_QUEUE") { %>
+						<% if (campaign.status === "SCHEDULED" || campaign.status === "IN_QUEUE") { %>
 							Scheduled
-							<% } else { %>
+						<% } else { %>
 							Broadcast
-							<% } %>
+						<% } %>
 						</p>
 					</td>
 					<td class="text-gray-500 border-t border-b border-gray-200">
@@ -59,13 +59,12 @@
 					<td class="text-gray-500 border-t border-b border-gray-200">
 						<%= campaign.read %>
 					</td>
-					<td class="text-gray-500 border-t border-b border-gray-200">
+					<td class="text-gray-500 border-t border-b border-gray-200" title="<%=   %>">
 						<%= campaign.failed %>
 					</td>
 					<td class="text-gray-500 border-r border-t border-b rounded-lg border-gray-200">
 						<%= campaign.replied %>
-					</td>
-					
+					</td>					
 				</tr>
 				<% }); %>
 			</tbody>

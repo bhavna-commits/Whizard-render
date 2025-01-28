@@ -22,8 +22,8 @@ import {
 	__filename,
 	csvFilePath,
 	updateCSVOnFieldDelete,
+	generateTableAndCheckFields,
 } from "./contacts.controller.js";
-import { generateTableAndCheckFields } from "./contacts.controller.js";
 
 dotenv.config();
 
@@ -39,7 +39,6 @@ export const previewContactList = async (req, res, next) => {
 			});
 		}
 
-		if (!isString(fileData, listName)) return next();
 		// Parse file data
 		let parsedData;
 		try {
@@ -51,7 +50,7 @@ export const previewContactList = async (req, res, next) => {
 					"Invalid file format. Please upload a valid JSON file.",
 			});
 		}
-		// if (!isValidArrayOrObject(parsedData)) return next();
+
 		// Check if the parsed data contains contacts
 		if (!parsedData.length) {
 			return res.status(400).json({
@@ -60,7 +59,7 @@ export const previewContactList = async (req, res, next) => {
 			});
 		}
 
-		// Validate columns
+		// Validate data
 		const requiredColumns = ["Name", "Number"];
 		const customFields = await CustomField.find({
 			customid: req.session?.user?.id || req.session?.addedUser?.owner,
@@ -78,71 +77,24 @@ export const previewContactList = async (req, res, next) => {
 			});
 		}
 
-		// Prepare expected columns based on required and custom fields
-		const customFieldNames = customFields.map((field) => field.clname);
-		const expectedColumns = [...requiredColumns, ...customFieldNames];
-
-		// Get the actual columns from the file data
-		const actualColumns = Object.keys(parsedData[0]);
-
-		// Check for missing and invalid columns
-		const missingColumns = requiredColumns.filter(
-			(col) => !actualColumns.includes(col),
-		);
-		const invalidColumns = actualColumns.filter(
-			(col) =>
-				!expectedColumns.includes(col) &&
-				col !== "Name" &&
-				col !== "Number",
-		);
-
-		// Check for duplicate numbers and add to invalid columns
-		const numbers = parsedData?.map((contact) => contact.Number?.trim());
-
-		// Only numbers allowed
-		const invalidNumbers = numbers?.filter(
-			(number) => !/^\d{10,}$/.test(number),
-		);
-
-		// If any invalid numbers found, treat them as invalid columns
-		if (invalidNumbers?.length > 0) {
-			invalidColumns?.push(
-				`Invalid numbers: ${invalidNumbers?.join(
-					", ",
-				)} (must be digits only, with a minimum of 10 digits)`,
-			);
-		}
-
-		// Check for duplicate numbers
-		const duplicateNumbers = numbers?.filter(
-			(number, index) => numbers?.indexOf(number) !== index,
-		);
-
-		// If duplicates found, treat them as invalid columns
-		if (duplicateNumbers?.length > 0) {
-			invalidColumns?.push(
-				`Duplicate numbers: ${duplicateNumbers?.join(", ")}`,
-			);
-		}
-
-		// Generate table HTML and check for empty fields
-		const { tableHtml, emptyFields } = generateTableAndCheckFields(
+		// Get validation results
+		const validationResult = generateTableAndCheckFields(
 			parsedData,
-			actualColumns,
+			requiredColumns,
+			customFields,
 		);
 
-		// Return error response if there are issues with the columns or empty fields
+		// Return error response if there are issues
 		if (
-			missingColumns?.length > 0 ||
-			invalidColumns?.length > 0 ||
-			emptyFields?.length > 0
+			validationResult.missingColumns?.length > 0 ||
+			validationResult.invalidColumns?.length > 0 ||
+			validationResult.emptyFields?.length > 0 ||
+			validationResult.invalidNumbers?.length > 0 ||
+			validationResult.duplicateNumbers?.length > 0
 		) {
 			return res.status(400).json({
 				success: false,
-				missingColumns,
-				invalidColumns,
-				emptyFields,
-				tableHtml,
+				...validationResult,
 			});
 		}
 
@@ -151,11 +103,10 @@ export const previewContactList = async (req, res, next) => {
 			listName,
 		};
 
-		// Return success response with the generated table
 		return res.status(200).json({
 			success: true,
 			message: "Data preview successful.",
-			tableHtml,
+			tableHtml: validationResult.tableHtml,
 		});
 	} catch (error) {
 		console.error(error);

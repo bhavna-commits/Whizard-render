@@ -513,48 +513,133 @@ export const createCampaign = async (req, res, next) => {
 	}
 };
 
-export const generateTableAndCheckFields = (parsedData, actualColumns) => {
-	const emptyFields = parsedData
-		.map((row, rowIndex) => {
-			return Object.keys(row).map((key) => {
-				if (!row[key] || row[key].trim() === "") {
-					return {
-						row: rowIndex + 1,
-						column: key,
-						value: row[key],
-					};
+export const generateTableAndCheckFields = (
+	parsedData,
+	requiredColumns,
+	customFields,
+) => {
+	const actualColumns = Object.keys(parsedData[0]);
+	const customFieldNames = customFields?.map((field) => field.clname) || [];
+	const expectedColumns = [...requiredColumns, ...customFieldNames];
+
+	// Initialize error trackers
+	const errors = {
+		missingColumns: requiredColumns.filter(
+			(col) => !actualColumns.includes(col),
+		),
+		invalidColumns: actualColumns.filter(
+			(col) =>
+				!expectedColumns.includes(col) &&
+				col !== "Name" &&
+				col !== "Number",
+		),
+		emptyFields: [],
+		invalidNumbers: [],
+		duplicateNumbers: [],
+	};
+
+	// Track numbers for validation
+	const numbers = new Map();
+	const numberIndexes = new Map();
+
+	// Process data rows
+	parsedData.forEach((row, rowIndex) => {
+		// Check empty fields
+		actualColumns.forEach((col) => {
+			if (!row[col]?.trim()) {
+				errors.emptyFields.push({
+					row: rowIndex + 1,
+					column: col,
+					value: row[col],
+				});
+			}
+		});
+
+		// Number validation
+		const number = row.Number?.trim();
+		if (number) {
+			// Validate number format
+			if (!/^\d{10,}$/.test(number)) {
+				errors.invalidNumbers.push({
+					row: rowIndex + 1,
+					column: "Number",
+					value: number,
+				});
+			}
+
+			// Track duplicates
+			if (numbers.has(number)) {
+				errors.duplicateNumbers.push({
+					row: rowIndex + 1,
+					column: "Number",
+					value: number,
+				});
+				// Mark original occurrence as duplicate
+				const firstRow = numberIndexes.get(number);
+				if (firstRow) {
+					errors.duplicateNumbers.push({
+						row: firstRow,
+						column: "Number",
+						value: number,
+					});
 				}
-				return null;
-			});
-		})
-		.flat()
-		.filter((item) => item !== null);
+			} else {
+				numbers.set(number, true);
+				numberIndexes.set(number, rowIndex + 1);
+			}
+		}
+	});
 
+	// Generate HTML table with error highlighting
 	let tableHtml = "<table class='min-w-full table-auto'><thead><tr>";
-
 	tableHtml += "<th class='px-4 py-2 border'>#</th>";
 
-	actualColumns.forEach((header, index) => {
-		tableHtml += `<th class='px-4 py-2 border'>${header} (${
-			index + 1
-		})</th>`;
+	// Generate headers with error highlighting
+	actualColumns.forEach((header) => {
+		const isMissing = errors.missingColumns.includes(header);
+		const isInvalid = errors.invalidColumns.includes(header);
+		const errorClass =
+			isMissing || isInvalid ? "border-red-500 bg-red-50" : "";
+		tableHtml += `<th class='px-4 py-2 border ${errorClass}'>${header}</th>`;
 	});
 	tableHtml += "</tr></thead><tbody>";
 
+	// Generate rows with error highlighting
 	parsedData.forEach((row, rowIndex) => {
 		tableHtml += "<tr>";
 		tableHtml += `<td class='px-4 py-2 border'>${rowIndex + 1}</td>`;
-		actualColumns.forEach((header) => {
-			tableHtml += `<td class='px-4 py-2 border'>${
-				row[header] || ""
-			}</td>`;
+
+		actualColumns.forEach((col) => {
+			const cellValue = row[col] || "";
+			const isError = [
+				errors.emptyFields.some(
+					(e) => e.row === rowIndex + 1 && e.column === col,
+				),
+				errors.invalidNumbers.some(
+					(e) => e.row === rowIndex + 1 && e.column === col,
+				),
+				errors.duplicateNumbers.some(
+					(e) => e.row === rowIndex + 1 && e.column === col,
+				),
+			].some(Boolean);
+
+			const errorClass = isError ? "border-red-500 bg-red-50" : "";
+			tableHtml += `<td class='px-4 py-2 border ${errorClass}'>${cellValue}</td>`;
 		});
+
 		tableHtml += "</tr>";
 	});
 
 	tableHtml += "</tbody></table>";
 
-	return { tableHtml, emptyFields };
+	return {
+		tableHtml,
+		...errors,
+		invalidNumbers: errors.invalidNumbers.map((n) => n.value),
+		duplicateNumbers: [
+			...new Set(errors.duplicateNumbers.map((n) => n.value)),
+		],
+	};
 };
 
 export const getFilteredContacts = async (req, res, next) => {

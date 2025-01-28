@@ -130,7 +130,6 @@ contactListForm.addEventListener("submit", async function (e) {
 		}
 
 		const listName = document.getElementById("listName").value;
-		
 
 		try {
 			const response = await fetch(
@@ -146,7 +145,7 @@ contactListForm.addEventListener("submit", async function (e) {
 					}),
 				},
 			);
-			
+
 			errorMessage.innerHTML = "";
 			const data = await response.json();
 
@@ -204,35 +203,124 @@ submitButton.addEventListener("click", async () => {
 
 // Error handling and displaying
 function displayErrors(result) {
-	errorMessage.innerHTML = "";
-	previewSection.classList.remove("hidden");
-	mainDiv.classList.remove("max-w-3xl");
-	mainDiv.classList.remove("mt-[5%]");
-	mainDiv.classList.add("mt-[2%]");
-	previewSection.innerHTML = result.tableHtml;
-	fileUploadSection.classList.add("hidden");
+    errorMessage.innerHTML = "";
+    previewSection.classList.remove("hidden");
+    mainDiv.classList.remove("max-w-3xl", "mt-[5%]");
+    mainDiv.classList.add("mt-[2%]");
+    previewSection.innerHTML = result.tableHtml;
+    fileUploadSection.classList.add("hidden");
 
-	if (result.missingColumns.length > 0) {
-		errorMessage.innerHTML += `<p class="py-2"><p class="font-bold py-1">Missing columns: </p><span>${result.missingColumns.join(
-			", ",
-		)}</span>`;
-	}
+    // Create error container with better layout
+    const errorContainer = document.createElement('div');
+    errorContainer.className = 'space-y-4 mb-6';
 
-	if (result.invalidColumns.length > 0) {
-		errorMessage.innerHTML += `<p class="py-2"><p class="font-bold py-1">Invalid columns: </p><span>${result.invalidColumns.join(
-			", ",
-		)}</span></p>`;
-		errorMessage.innerHTML += `
-		<button onclick="document.location='contact-list/custom-field'" type="button" class="border-2 mt-2 bg-red-100  py-2 px-2 rounded-lg transition-colors ease-in-out text-black duration-300 hover:bg-red-300 h-fit w-fit text-base font-medium">
-			Manage custom fields
-		</button>`;
-	}
+    // Helper function to create error sections
+    const createErrorSection = (title, content, count, type) => {
+        return `
+        <div class="bg-red-50 p-4 rounded-lg border border-red-200 error-section cursor-pointer" onclick="toggleErrorDetails('${type}')">
+            <div class="flex items-center justify-between" >
+                <h3 class="font-semibold text-red-700">
+                    ${title} (${count})
+                </h3>
+                <svg id="icon-${type}" class="w-5 h-5 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                </svg>
+            </div>
+            <div id="details-${type}" class="mt-2 text-sm text-red-600 hidden details-content">
+                ${content}
+            </div>
+        </div>`;
+    };
 
-	if (result.emptyFields.length > 0) {
-		errorMessage.innerHTML += `<p class="py-2"><p class="font-bold py-1">Empty fields found in rows: </p><span>${result.emptyFields
-			.map((field) => `Row ${field.row}, Column ${field.column}`)
-			.join(", ")}</span></p>`;
-	}
+    // Build error sections
+    let errorSections = '';
+
+    // Missing Columns
+    if (result.missingColumns.length > 0) {
+        errorSections += createErrorSection(
+            'Missing Required Columns',
+            `<p>These columns are required but missing from your file:</p>
+            <ul class="list-disc pl-5 mt-1">
+                ${result.missingColumns.map(c => `<li>${c}</li>`).join('')}
+            </ul>`,
+            result.missingColumns.length,
+            'missing-columns'
+        );
+    }
+
+    // Invalid Columns
+    if (result.invalidColumns.length > 0) {
+        errorSections += createErrorSection(
+            'Invalid Columns Found',
+            `<p>These columns are not recognized:</p>
+            <ul class="list-disc pl-5 mt-1">
+                ${result.invalidColumns.map(c => `<li>${c}</li>`).join('')}
+            </ul>
+            <button onclick="document.location='contact-list/custom-field'" type="button" 
+                class="mt-3 bg-red-100 border-2 py-2 px-4 rounded-lg hover:bg-red-200 transition-colors">
+                Manage Custom Fields
+            </button>`,
+            result.invalidColumns.length,
+            'invalid-columns'
+        );
+    }
+
+    // Empty Fields
+    if (result.emptyFields.length > 0) {
+        const example = result.emptyFields[0];
+        errorSections += createErrorSection(
+            'Empty Fields Detected',
+            `<p>Found ${result.emptyFields.length} empty fields. Example:</p>
+            <p class="mt-1">Row ${example.row}, Column "${example.column}"</p>
+            <p class="mt-2 text-red-700">Please fill all required fields marked in red.</p>`,
+            result.emptyFields.length,
+            'empty-fields'
+        );
+    }
+
+    // Invalid Numbers
+    if (result.invalidNumbers.length > 0) {
+        const example = result.invalidNumbers[0];
+        errorSections += createErrorSection(
+            'Invalid Phone Numbers',
+            `<p>Found ${result.invalidNumbers.length} invalid numbers. Example:</p>
+            <p class="mt-1">Row ${example.row}: "${example.value}"</p>
+            <p class="mt-2 text-red-700">Phone numbers must contain only digits (minimum 10 digits).</p>`,
+            result.invalidNumbers.length,
+            'invalid-numbers'
+        );
+    }
+
+    // Duplicate Numbers
+    if (result.duplicateNumbers.length > 0) {
+        const example = result.duplicateNumbers[0];
+        errorSections += createErrorSection(
+            'Duplicate Phone Numbers',
+            `<p>Found ${result.duplicateNumbers.length} duplicates. Example:</p>
+            <p class="mt-1">Number "${example.value}" appears multiple times</p>
+            <p class="mt-2 text-red-700">Each phone number must be unique.</p>`,
+            result.duplicateNumbers.length,
+            'duplicate-numbers'
+        );
+    }
+
+    errorContainer.innerHTML = `
+        <h2 class="text-xl font-bold mb-4 text-red-600">Found ${Object.values(result).reduce((acc, val) => acc + (Array.isArray(val) ? val.length : 0), 0)} Issues</h2>
+        ${errorSections}
+        <p class="text-sm text-gray-600 mt-4">
+            Click on any error type above to see details. Fix these issues and re-upload your file.
+        </p>`;
+
+    errorMessage.appendChild(errorContainer);
+}
+
+// Toggle error details visibility
+function toggleErrorDetails(type) {
+    const details = document.getElementById(`details-${type}`);
+    const icon = document.getElementById(`icon-${type}`);
+    
+    details.classList.toggle('hidden');
+    icon.classList.toggle('rotate-180');
 }
 
 // Re-upload logic
@@ -266,7 +354,7 @@ function getSampleCSV() {
 
 document.getElementById("searchInput").addEventListener("input", async () => {
 	try {
-		console.log("here")
+		console.log("here");
 		const res = await fetch(`/contact-list/search?query=${this.value}`);
 		const data = await res.json();
 		const table = document.getElementById("contactListTable");

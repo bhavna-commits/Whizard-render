@@ -1,13 +1,13 @@
-<div id="campaignModal" class="fixed inset-0 z-50 opacity-0 pointer-events-none overflow-auto transition-opacity duration-300 ease-in-out ">
-	<div class="absolute inset-0 bg-gray-500 bg-opacity-50"></div>
-	<div id="campaignModalDiv" class="relative bg-white w-[90%] max-w-3xl overflow-auto mx-auto mt-[5%] rounded-lg shadow-lg p-6 transform transition-transform duration-300 ease-in-out scale-95">
+<div id="campaignModal" class="fixed inset-0 z-50 opacity-0 pointer-events-none transition-opacity duration-300 ease-in-out flex items-start justify-center">
+	<div class="fixed inset-0 bg-gray-500/75 backdrop-blur-sm"></div>
+	<div id="campaignModalDiv" class="relative bg-white w-[90%] max-w-3xl overflow-auto mx-auto mt-[5%] rounded-lg shadow-lg p-6 transform transition-transform duration-300 ease-in-out scale-95 max-h-[90vh]">
 		<div class="flex justify-between items-center mb-6">
 			<div></div>
 			<h2 class="text-2xl text-gray-900">Create Contact List</h2>
 			<span class="text-2xl text-gray-600 cursor-pointer hover:text-gray-800 close">&times;</span>
 		</div>
 		
-		<form id="contactListForm" class="space-y-7">
+		<form id="contactListForm" class="space-y-7 ">
 			<div id="fileUploadSection" class="space-y-4">
 				<div class="">
 					<label for="listName" class="block text-gray-400">Contact list name</label>
@@ -30,10 +30,12 @@
 			
 			<div id="previewSection" class="hidden overflow-scroll max-h-72">
 			</div>
-			<div class="text-red-500 text-sm" id="errorMessage"></div>
-			<button type="button" id="createList" class=" p-2 w-[30%] bg-black text-white rounded-md font-medium hover:bg-gray-800 transition-colors duration-200 hidden">
-				Submit
-			</button>
+			<div class="" id="errorMessage"></div>
+			<div class="flex justify-end">
+				<button type="button" id="createList" class=" p-2 w-[20%] bg-black text-white rounded-md font-medium hover:bg-gray-800 transition-colors duration-200 hidden">
+					Submit
+				</button>
+			</div>
 		</form>
 	</div>
 </div>
