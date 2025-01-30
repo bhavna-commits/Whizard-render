@@ -104,7 +104,7 @@ export const updateProfile = async (req, res) => {
 	try {
 		const data = req.body;
 
-		console.log(JSON.stringify(data));
+		// console.log(JSON.stringify(data));
 
 		let profilePicPath;
 		if (req.file?.filename) {

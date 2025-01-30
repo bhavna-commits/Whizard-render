@@ -8,7 +8,7 @@
 					<td class="w-44 text-left">Campaign Name</td>
 					<td class="w-52">Type</td>
 					<td>Total</td>
-					<td >Sent</td>
+					<td>Sent</td>
 					<td class="w-[10%]">Delivered</td>
 					<td>Read</td>
 					<td>Failed</td>
@@ -27,24 +27,26 @@
 					<td class="border-t border-b border-gray-200 text-left">
 						<p class="font-semibold "><%= campaign.name %></p>
 						<p class="text-xs text-gray-500"><%= new Date(campaign.createdAt).toLocaleString('en-GB', {
-                            year: 'numeric',
+                            day: '2-digit',
                             month: 'short',
-                            day: '2-digit'
-                        }) %></p>
-						
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            hour12: true
+                        }).replace(',', ' at ') %></p>						
 					</td>
 					<td class="border-t border-b border-gray-200 ">
 						<p class="inline-flex justify-center items-center h-fit w-fit px-2 py-1 rounded 
 						<% if (campaign.status === "SCHEDULED" || campaign.status === "IN_QUEUE") { %>
-							bg-yellow-100 text-yellow-500
+							bg-[#FFF0E5] text-[#FF6A00]
 						<% } else { %>
-							bg-green-100 text-green-500
+							bg-[#EBE5FF] text-[#5526FF]
 						<% } %>">
-						<% if (campaign.status === "SCHEDULED" || campaign.status === "IN_QUEUE") { %>
+							<% if (campaign.status === "SCHEDULED" || campaign.status === "IN_QUEUE") { %>
 							Scheduled
-						<% } else { %>
+							<% } else { %>
 							Broadcast
-						<% } %>
+							<% } %>
 						</p>
 					</td>
 					<td class="text-gray-500 border-t border-b border-gray-200">
@@ -64,7 +66,7 @@
 					</td>
 					<td class="text-gray-500 border-r border-t border-b rounded-lg border-gray-200">
 						<%= campaign.replied %>
-					</td>					
+					</td>
 				</tr>
 				<% }); %>
 			</tbody>
@@ -72,9 +74,9 @@
 	</div>
 	<!-- Pagination -->
 	<% if (totalPages > 1) { %>
-		<%- include('../../commonJS/pagination') %>
+	<%- include('../../commonJS/pagination') %>
 	<% } %>
-
+	
 	<script>
 		function goToPage () {
 			const pageInput = document.getElementById('pageInput');

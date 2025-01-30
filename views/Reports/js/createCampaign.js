@@ -501,7 +501,7 @@ $(document).ready(() => {
 	// Initialize Flatpickr for date and time pickers
 	flatpickr("#datePicker", {
 		dateFormat: "d/m/Y",
-		defaultDate: "01/01/2025",
+		defaultDate: "today",
 		allowInput: true,
 	});
 

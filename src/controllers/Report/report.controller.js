@@ -5,14 +5,14 @@ import ContactList from "../../models/contactList.model.js";
 import Permissions from "../../models/permissions.model.js";
 import ActivityLogs from "../../models/activityLogs.model.js";
 import User from "../../models/user.model.js";
-import { overview } from "./reports.functions.js";
-import { sendMessages } from "./reports.functions.js";
+import { overview, sendMessagesReports } from "./reports.functions.js";
 import {
 	isNumber,
 	isString,
 	isBoolean,
 } from "../../middleWares/sanitiseInput.js";
 import { generateUniqueId } from "../../utils/otpGenerator.js";
+import { sendCampaignScheduledEmail } from "../../services/OTP/reportsEmail.js";
 
 dotenv.config();
 
@@ -350,7 +350,7 @@ const getCampaignOverview = async (req, res, next) => {
 
 		// Fetch campaigns created by the user
 		const campaigns = await overview(id, userId, page, limit, skip);
-		console.log(campaigns);
+		// console.log(campaigns);
 		const paginatedResults = campaigns[0]?.paginatedResults || [];
 		const totalCount = campaigns[0]?.totalCount[0]?.total || 0;
 		const totalPages = Math.ceil(totalCount / limit);
@@ -1136,12 +1136,20 @@ export const createCampaign = async (req, res, next) => {
 		// console.log(contactList);
 
 		if (!schedule) {
-			await sendMessages(
+			await sendMessagesReports(
 				newCampaign,
 				req.session?.user?.id || req.session?.addedUser?.owner,
 				generateUniqueId(),
 				contactList,
 			);
+
+			const time = Date.now();
+			// + 15 * 60 * 1000;
+			const reportTime = new Date(time);
+			agenda.schedule(reportTime, "send campaign report email", {
+				campaignId: newCampaign.unique_id,
+				userId: newCampaign.useradmin,
+			});
 
 			await ActivityLogs.create({
 				useradmin:
@@ -1157,6 +1165,16 @@ export const createCampaign = async (req, res, next) => {
 			newCampaign.scheduledAt = Number(schedule) * 1000;
 			newCampaign.status = "SCHEDULED";
 
+			const user = await User.findOne({
+				unique_id:
+					req.session?.user?.id || req.session?.addedUser?.owner,
+			});
+			await sendCampaignScheduledEmail(
+				user.email,
+				name,
+				newCampaign.scheduledAt,
+			);
+
 			await ActivityLogs.create({
 				useradmin:
 					req.session?.user?.id || req.session?.addedUser?.owner,
@@ -1167,6 +1185,27 @@ export const createCampaign = async (req, res, next) => {
 				actions: "Send",
 				details: `Scheduled new campaign named: ${name}`,
 			});
+		}
+
+		try {
+			const userId =
+				req.session?.user?.id || req.session?.addedUser?.owner;
+			const user = await User.findOne({ unique_id: userId });
+
+			if (user?.email) {
+				await sendCampaignScheduledEmail(
+					user.email,
+					name,
+					newCampaign.scheduledAt,
+				);
+			} else {
+				console.warn("No email found for user:", userId);
+			}
+		} catch (emailError) {
+			console.error(
+				"Failed to send scheduled confirmation email:",
+				emailError,
+			);
 		}
 
 		// Save the campaign
@@ -1308,7 +1347,9 @@ export const renderGetCostReport = async (req, res) => {
 	try {
 		const permissions = req.session?.addedUser?.permissions;
 		if (permissions) {
-			const access = await Permissions.findOne({ unique_id: permissions });
+			const access = await Permissions.findOne({
+				unique_id: permissions,
+			});
 			if (
 				access.contactList.sendBroadcast &&
 				req.session?.addedUser?.whatsAppStatus

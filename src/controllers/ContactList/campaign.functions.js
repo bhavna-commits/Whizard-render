@@ -98,26 +98,26 @@ export function replaceDynamicVariables(template, variables, contact) {
 		const headerComponent = template.components.find(
 			(c) => c.type === "HEADER",
 		);
-		if (headerComponent && template.dynamicVariables.header.length > 0) {
+		if (headerComponent) {
 			let headerParameters = [];
 
-			// Handle text components
-			if (headerComponent.format === "TEXT") {
-				template.dynamicVariables.header.forEach((headVar) => {
-					let key = Object.keys(headVar)[0];
-					if (variables.get(key) === "Name") {
-						headerParameters.push({
-							type: "text",
-							text: contact.Name || "",
-						});
-					} else if (variables.get(key)) {
-						headerParameters.push({
-							type: "text",
-							text: contact.masterExtra[variables.get(key)] || "",
-						});
-					}
-				});
-			}
+			// // Handle text components
+			// if (headerComponent.format === "TEXT") {
+			// 	template.dynamicVariables.header.forEach((headVar) => {
+			// 		let key = Object.keys(headVar)[0];
+			// 		if (variables.get(key) === "Name") {
+			// 			headerParameters.push({
+			// 				type: "text",
+			// 				text: contact.Name || "",
+			// 			});
+			// 		} else if (variables.get(key)) {
+			// 			headerParameters.push({
+			// 				type: "text",
+			// 				text: contact.masterExtra[variables.get(key)] || "",
+			// 			});
+			// 		}
+			// 	});
+			// }
 
 			// Handle media components based on their format (Image, Video, Document)
 			if (headerComponent.format === "IMAGE") {
@@ -188,7 +188,11 @@ export function replaceDynamicVariables(template, variables, contact) {
 	}
 }
 
-export async function sendMessageThroughWhatsApp(template, phone, messageComponents) {
+export async function sendMessageThroughWhatsApp(
+	template,
+	phone,
+	messageComponents,
+) {
 	try {
 		// Construct the message payload
 		const requestData = {
@@ -202,12 +206,6 @@ export async function sendMessageThroughWhatsApp(template, phone, messageCompone
 				components: messageComponents,
 			},
 		};
-
-		// Log the request data
-		// console.log(
-		// 	"Submitting the following JSON to WhatsApp API:",
-		// 	JSON.stringify(requestData, null, 2),
-		// );
 
 		// Send the request
 		const response = await axios.post(
@@ -233,58 +231,6 @@ export async function sendMessageThroughWhatsApp(template, phone, messageCompone
 		};
 	}
 }
-
-agenda.define("process campaign", async (job) => {
-	const { campaignId } = job.attrs.data;
-
-	try {
-		// Fetch the campaign details
-		const campaign = await Campaign.findById(campaignId);
-
-		if (campaign && campaign.status === "IN_QUEUE") {
-			await sendMessages(
-				campaign,
-				campaign.useradmin,
-				generateUniqueId(),
-			);
-			await Campaign.findByIdAndUpdate(campaignId, { status: "SENT" });
-			console.log(`Campaign ${campaignId} has been successfully sent.`);
-		}
-	} catch (error) {
-		console.error(`Error processing campaign ${campaignId}:`, error);
-	}
-});
-
-const scheduleCampaign = async (campaign) => {
-	const { scheduledAt, _id } = campaign;
-	// console.log(new Date(scheduledAt));
-	// Schedule the job to run at the specified time (use Date object or timestamp)
-	agenda.schedule(new Date(scheduledAt), "process campaign", {
-		campaignId: _id,
-	});
-
-	// Mark the campaign as IN_QUEUE so it won’t be processed multiple times
-	await Campaign.findByIdAndUpdate(_id, { status: "IN_QUEUE" });
-	console.log(`Campaign ${_id} scheduled successfully.`);
-};
-
-cron.schedule("* * * * *", async () => {
-	try {
-		const now = Date.now();
-		// console.log(now);
-		// Find all campaigns that are scheduled to be sent
-		const scheduledCampaigns = await Campaign.find({
-			scheduledAt: { $lte: now },
-			status: "SCHEDULED",
-		});
-
-		for (let campaign of scheduledCampaigns) {
-			await scheduleCampaign(campaign);
-		}
-	} catch (error) {
-		console.error("Error checking scheduled campaigns:", error);
-	}
-});
 
 export function generatePreviewMessage(template, message) {
 	try {

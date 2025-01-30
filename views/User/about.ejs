@@ -2,206 +2,214 @@
 <html lang="en">
 
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sign Up</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no" />
-  <link rel="apple-touch-icon" href="pages/ico/60.png" />
-  <link rel="apple-touch-icon" sizes="76x76" href="pages/ico/76.png" />
-  <link rel="apple-touch-icon" sizes="120x120" href="pages/ico/120.png" />
-  <link rel="apple-touch-icon" sizes="152x152" href="pages/ico/152.png" />
-  <link rel="icon" type="image/x-icon" href="favicon.ico" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-touch-fullscreen" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <meta content="Meet pages - The simplest and fastest way to build web UI for your dashboard or app." name="description" />
-  <meta content="Ace" name="author" />
-  <link href="assets/plugins/pace/pace-theme-flash.css" rel="stylesheet" type="text/css" />
-  <link href="assets/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
-  <link href="assets/plugins/jquery-scrollbar/jquery.scrollbar.css" rel="stylesheet" type="text/css" media="screen" />
-  <link href="assets/plugins/select2/css/select2.min.css" rel="stylesheet" type="text/css" media="screen" />
-  <!-- <link class="main-stylesheet" href="pages/css/themes/corporate.css" rel="stylesheet" type="text/css" /> -->
-  <!-- Please remove the file below for production: Contains demo classes -->
-  <link class="main-stylesheet" href="assets/css/style.css" rel="stylesheet" type="text/css" />
-  <link rel="stylesheet" href="/styles/style.css" />
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
-  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" />
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="/styles/countrySelector.css" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
-  <script src="https://kit.fontawesome.com/44e4e59292.js" crossorigin="anonymous"></script>
-  <style>
-    .loading-spinner {
-      border: 3px solid rgba(0, 0, 0, 0.1);
-      border-left-color: #fff;
-      border-radius: 100%;
-      width: 16px;  
-      height: 16px;
-      animation: spin 1s linear infinite;
-    }
-
-    @keyframes spin {
-      0% {
-        transform: rotate(0deg);
-      }
-
-      100% {
-        transform: rotate(360deg);
-      }
-    }
-  </style>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Sign Up</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no" />
+	<link rel="apple-touch-icon" href="pages/ico/60.png" />
+	<link rel="apple-touch-icon" sizes="76x76" href="pages/ico/76.png" />
+	<link rel="apple-touch-icon" sizes="120x120" href="pages/ico/120.png" />
+	<link rel="apple-touch-icon" sizes="152x152" href="pages/ico/152.png" />
+	<link rel="icon" type="image/x-icon" href="favicon.ico" />
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+	<meta name="apple-touch-fullscreen" content="yes" />
+	<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+	<meta content="Meet pages - The simplest and fastest way to build web UI for your dashboard or app." name="description" />
+	<meta content="Ace" name="author" />
+	<link href="assets/plugins/pace/pace-theme-flash.css" rel="stylesheet" type="text/css" />
+	<link href="assets/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+	<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+	<link href="assets/plugins/jquery-scrollbar/jquery.scrollbar.css" rel="stylesheet" type="text/css" media="screen" />
+	<link href="assets/plugins/select2/css/select2.min.css" rel="stylesheet" type="text/css" media="screen" />
+	<!-- <link class="main-stylesheet" href="pages/css/themes/corporate.css" rel="stylesheet" type="text/css" /> -->
+	<!-- Please remove the file below for production: Contains demo classes -->
+	<link class="main-stylesheet" href="assets/css/style.css" rel="stylesheet" type="text/css" />
+	<link rel="stylesheet" href="/styles/style.css" />
+	<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+	<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" />
+	<script src="https://cdn.tailwindcss.com"></script>
+	<link rel="stylesheet" href="/styles/countrySelector.css" />
+	<link rel="preconnect" href="https://fonts.googleapis.com" />
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+	<link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+	<script src="https://kit.fontawesome.com/44e4e59292.js" crossorigin="anonymous"></script>
+	<style>
+		.loading-spinner {
+			border: 3px solid rgba(0, 0, 0, 0.1);
+			border-left-color: #fff;
+			border-radius: 100%;
+			width: 16px;
+			height: 16px;
+			animation: spin 1s linear infinite;
+		}
+		
+		@keyframes spin {
+			0% {
+				transform: rotate(0deg);
+			}
+			
+			100% {
+				transform: rotate(360deg);
+			}
+		}
+	</style>
 </head>
 
 <body>
-  <div id="loader" class="loader">
-  	<div class="w-full h-full flex justify-center items-center">
-  		<img src="/assets/img/Wizard_logo.png" alt="Whizard Logo" class="animate-pulse loading-image" />
-  	</div>
-  </div>
-  <div class="flex">
-    <!-- Left Section -->
-    <div class="flex-grow left-section">
-      <div class="mb-5">
-        <img src="/assets/img/Wizard_logo.png" alt="Whizard Logo" style="max-width: 150px" class="w-25" />
-      </div>
-      <h1 class="gradient-text">
-        Smart WhatsApp solutions for effortless business
-      </h1>
-      <p class="p-text">
-        Whizard helps businesses enhance WhatsApp communication by
-        simplifying template creation, reporting, and integration seamlessly
-        with other platforms.
-      </p>
-      <div class="img-preview">
-        <img src="/assets/img/template.png" class="w-75" alt="Template Preview" />
-      </div>
-    </div>
-
-    <!-- Right Section - Sign Up Form -->
-    <div class="flex-shrink right-section">
-      <div class="d-flex justify-content-center align-items-center vh-100 border-0">
-        <div class="w-75 max-w-md">
-          <h2 class="text-4xl text-center mb-2">Tell us About yourself</h2>
-          <h2 class="text-gray-500 text-center mb-4">
-            Help us customize your experience
-          </h2>
-          <form id="signUpForm">
-            <div class="mb-3">
-              <label for="name" class="form-label text-gray-500">Company Name</label>
-              <input type="text" class="form-control" id="name" name="name" placeholder="Enter your Company's Name" required />
-            </div>
-            <div class="">
-              <label for="description" class="form-label text-gray-500">Description</label>
-              <textarea class="form-control" id="description" name="description" placeholder="Tell us a bit about your company..." rows="2" maxlength="100" required></textarea>
-              <div class="form-text text-gray-500 mt-2 text-sm text-right" id="wordCount">
-                0/100 words
-              </div>
-            </div>
-            <div class="mb-3 flex flex-col w-full">
-              <label for="country" class="form-label text-gray-500">Country</label>
-              <div class="country-selector focus:outline-none" id="countrySelector">
-                <button type="button" class="country-selector-button" id="countrySelectorButton">
-                  <span id="selectedFlag"></span> &nbsp;
-                  <input type="text" name="countryCode" id="countrySearch" placeholder="Search country..." class="p-0" />
-                  <div class="rotate-180">
-                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="18px" fill="black" class="text-black z-20">
-                      <path d="M480-528 296-344l-56-56 240-240 240 240-56 56-184-184Z" />
-                    </svg>
-                  </div>
-                </button>
-                <div class="country-dropdown hidden" id="countryDropdown">
-                  <div class="countries-list">
-                    <% countries.forEach(function(country) { %>
-                    <button type="button" class="country-option focus:outline-none">
-                      <span class="country-flag"><%= country.flag %></span>
-                      <span class="country-name"><%= country.name %></span>
-                    </button>
-                    <% }); %>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="mb-3 flex flex-col w-full">
-              <label for="state" class="form-label text-gray-500">State</label>
-              <!-- State Input (initially disabled and hidden) -->
-              <input type="text" id="stateInput" class="hidden form-control" placeholder="Enter your state" />
-              <!-- State Dropdown (initially disabled) -->
-              <select id="stateDropdown" class="form-control">
-                <option value="">Select State</option>
-              </select>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
-              <div>
-                <label for="companySize" class="form-label text-gray-500">Company Size</label>
-                <select id="companySize" name="companySize" class="form-control text-sm" required>
-                  <option value="">Select company size</option>
-                  <% size.forEach(function(s) { %>
-                  <option value="<%= s %>"><%= s %></option>
-                  <% }); %>
-                </select>
-              </div>
-
-              <div>
-                <label for="industry" class="form-label text-gray-500">Industry/Category</label>
-                <select id="industry" name="industry" class="form-control text-sm" required>
-                  <option value="">Select industry type</option>
-                  <% industryCategory.forEach(function(industry) { %>
-                  <option value="<%= industry %>"><%= industry %></option>
-                  <% }); %>
-                </select>
-              </div>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
-              <div>
-                <label for="jobRole" class="form-label text-gray-500">Job Role</label>
-                <select id="jobRole" name="jobRole" class="form-control text-sm" required>
-                  <option value="">Select your role</option>
-                  <% roles.forEach(function(role) { %>
-                  <option value="<%= role %>"><%= role %></option>
-                  <% }); %>
-                </select>
-              </div>
-
-              <div>
-                <label for="website" class="form-label text-gray-500">Website URL</label>
-                <input type="url" id="website" name="website" class="form-control" placeholder="https://example.com" />
-              </div>
-            </div>
-
-            <button type="submit" class="btn btn-primary w-100 mt-4" id="submitBtn">
-              Complete Sign Up
-            </button>
-            <div id="errorMessage" class="hidden"></div>
-          </form>
-        </div>
-      </div>
-    </div>
-  </div>
-  <script>
-    // Embed the server-side `countries` data into the client-side script
-    const countries = <%- JSON.stringify(countries) %>;
-  </script>
-
-  <script src="/user/js/about.js"></script>
-  <script>
-  	window.addEventListener('load', function () {
-  		// Fade out the loader smoothly by changing the opacity
-  		var loader = document.getElementById('loader');
-  		loader.style.transition = 'opacity 0.3s ease'; // Smooth fade out
-  		loader.style.opacity = '0';
-  		
-  		// Completely remove the loader after the fade-out effect is finished
-  		setTimeout(function () {
-  			loader.style.display = 'none'; // Ensure loader is no longer in the DOM flow
-  		}, 300); // Match the duration of the fade-out (0.5 seconds in this case)
-  	});
-  </script>
+	<div id="loader" class="loader">
+		<div class="w-full h-full flex justify-center items-center">
+			<img src="/assets/img/Wizard_logo.png" alt="Whizard Logo" class="animate-pulse loading-image" />
+		</div>
+	</div>
+	<div class="flex">
+		<!-- Left Section -->
+		<div class="flex-grow left-section">
+			<div class="mb-3">
+				<img src="/assets/img/Wizard_logo.png" alt="Whizard Logo" style="max-width: 150px" class="w-25" />
+			</div>
+			<h1 class="gradient-text">
+				Smart WhatsApp solutions for effortless business
+			</h1>
+			<p class="p-text">
+				Whizard helps businesses enhance WhatsApp communication by
+				simplifying template creation, reporting, and integration seamlessly
+				with other platforms.
+			</p>
+			<div class="img-preview">
+				<div class="carousel">
+					<img src="/assets/img/template.png" class="w-75 active" alt="Template Preview">
+					<img src="/assets/img/template2.jpg" class="w-75" alt="Template Preview" />
+					<img src="/assets/img/template3.jpg" class="w-75" alt="Template Preview" />
+					<img src="/assets/img/template4.jpg" class="w-75" alt="Template Preview" />
+					<img src="/assets/img/template5.jpg" class="w-75" alt="Template Preview" />
+					<img src="/assets/img/template6.jpg" class="w-75" alt="Template Preview" />
+				</div>
+				<div class="carousel-dots"></div>
+			</div>
+		</div>
+		
+		<!-- Right Section - Sign Up Form -->
+		<div class="flex-shrink right-section">
+			<div class="d-flex justify-content-center align-items-center vh-100 border-0">
+				<div class="w-[75%]">
+					<h2 class="text-4xl text-center mb-2">Tell us About yourself</h2>
+					<h2 class="text-gray-500 text-center mb-4">
+						Help us customize your experience
+					</h2>
+					<form id="signUpForm">
+						<div class="mb-3">
+							<label for="name" class="form-label text-gray-500">Company Name</label>
+							<input type="text" class="form-control" id="name" name="name" placeholder="Enter your Company's Name" required />
+						</div>
+						<div class="">
+							<label for="description" class="form-label text-gray-500">Description</label>
+							<textarea class="form-control" id="description" name="description" placeholder="Tell us a bit about your company..." rows="2" maxlength="100" required></textarea>
+							<div class="form-text text-gray-500 mt-2 text-sm text-right" id="wordCount">
+								0/100 words
+							</div>
+						</div>
+						<div class="mb-3 flex flex-col w-full">
+							<label for="country" class="form-label text-gray-500">Country</label>
+							<div class="country-selector focus:outline-none" id="countrySelector">
+								<button type="button" class="country-selector-button" id="countrySelectorButton">
+									<span id="selectedFlag"></span> &nbsp;
+									<input type="text" name="countryCode" id="countrySearch" placeholder="Search country..." class="p-0" />
+									<div class="rotate-180">
+										<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="18px" fill="black" class="text-black z-20">
+											<path d="M480-528 296-344l-56-56 240-240 240 240-56 56-184-184Z" />
+										</svg>
+									</div>
+								</button>
+								<div class="country-dropdown hidden" id="countryDropdown">
+									<div class="countries-list">
+										<% countries.forEach(function(country) { %>
+										<button type="button" class="country-option focus:outline-none">
+											<span class="country-flag"><%= country.flag %></span>
+											<span class="country-name"><%= country.name %></span>
+										</button>
+										<% }); %>
+									</div>
+								</div>
+							</div>
+						</div>
+						
+						<div class="mb-3 flex flex-col w-full">
+							<label for="state" class="form-label text-gray-500">State</label>
+							<!-- State Input (initially disabled and hidden) -->
+							<input type="text" id="stateInput" class="hidden form-control" placeholder="Enter your state" />
+							<!-- State Dropdown (initially disabled) -->
+							<select id="stateDropdown" class="form-control">
+								<option value="">Select State</option>
+							</select>
+						</div>
+						
+						<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
+							<div>
+								<label for="companySize" class="form-label text-gray-500">Company Size</label>
+								<select id="companySize" name="companySize" class="form-control text-sm" required>
+									<option value="">Select company size</option>
+									<% size.forEach(function(s) { %>
+									<option value="<%= s %>"><%= s %></option>
+									<% }); %>
+								</select>
+							</div>
+							
+							<div>
+								<label for="industry" class="form-label text-gray-500">Industry/Category</label>
+								<select id="industry" name="industry" class="form-control text-sm" required>
+									<option value="">Select industry type</option>
+									<% industryCategory.forEach(function(industry) { %>
+									<option value="<%= industry %>"><%= industry %></option>
+									<% }); %>
+								</select>
+							</div>
+						</div>
+						
+						<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
+							<div>
+								<label for="jobRole" class="form-label text-gray-500">Job Role</label>
+								<select id="jobRole" name="jobRole" class="form-control text-sm" required>
+									<option value="">Select your role</option>
+									<% roles.forEach(function(role) { %>
+									<option value="<%= role %>"><%= role %></option>
+									<% }); %>
+								</select>
+							</div>
+							
+							<div>
+								<label for="website" class="form-label text-gray-500">Website URL</label>
+								<input type="url" id="website" name="website" class="form-control" placeholder="https://example.com" />
+							</div>
+						</div>
+						
+						<button type="submit" class="bg-black w-100 mt-4 rounded-[.6rem] text-white p-2" id="submitBtn">
+							Complete Sign Up
+						</button>
+						<div id="errorMessage" class="hidden"></div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+	<script>
+		// Embed the server-side `countries` data into the client-side script
+		const countries = <%- JSON.stringify(countries) %>;
+	</script>
+	<script src="carousel.js"></script>
+	<script src="/user/js/about.js"></script>
+	<script>
+		window.addEventListener('load', function () {
+			// Fade out the loader smoothly by changing the opacity
+			var loader = document.getElementById('loader');
+			loader.style.transition = 'opacity 0.3s ease'; // Smooth fade out
+			loader.style.opacity = '0';
+			
+			// Completely remove the loader after the fade-out effect is finished
+			setTimeout(function () {
+				loader.style.display = 'none'; // Ensure loader is no longer in the DOM flow
+			}, 300); // Match the duration of the fade-out (0.5 seconds in this case)
+		});
+	</script>
 </body>
 
 </html>

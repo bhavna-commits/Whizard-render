@@ -19,14 +19,14 @@
 }
 
 /* Media query for lower DPI screens (between 96dpi and 110dpi) */
-@media (min-resolution: 96dpi) and (max-resolution: 110dpi) {
+@media (min-resolution: 96dpi) and (max-resolution: 120dpi) {
 	* {
-		font-size: 12px; /* Starting at 10px for lower resolution */
+		font-size: 14px; /* Starting at 10px for lower resolution */
 	}
 }
 
 /* Media query for medium DPI screens (between 110dpi and 130dpi) */
-@media (min-resolution: 110dpi) and (max-resolution: 130dpi) {
+@media (min-resolution: 120dpi) and (max-resolution: 130dpi) {
 	* {
 		font-size: 14px; /* Slightly larger, 11px for medium range */
 	}
@@ -35,14 +35,14 @@
 /* Media query for higher DPI screens (between 130dpi and 150dpi) */
 @media (min-resolution: 130dpi) and (max-resolution: 150dpi) {
 	* {
-		font-size: 14px; /* Highest value for this range, 12px */
+		font-size: 16px; /* Highest value for this range, 12px */
 	}
 }
 
 /* Media query for higher resolution screens (more than 150dpi) */
 @media (min-resolution: 150dpi) {
 	* {
-		font-size: 12px; /* 1rem = 16px */
+		font-size: 16px; /* 1rem = 16px */
 	}
 }
 
@@ -56,7 +56,7 @@
 /* Responsive design using viewport width for layout */
 @media screen and (max-width: 768px) {
 	* {
-		font-size: 12px; /* 0.875rem = 14px */
+		font-size: 1px; /* 0.875rem = 14px */
 	}
 }
 
@@ -185,8 +185,8 @@ input[type="number"] {
 .report-card {
 	position: absolute;
 	width: 12.5rem;
-	bottom: 0%;
-	left: 100%;
+	bottom: -30%;
+	left: 120%;
 	background-color: white;
 	/* border: 1px solid #ccc; */
 	border-radius: 0.6rem;
@@ -455,12 +455,13 @@ input[type="number"] {
 
 .left-section {
 	background-color: #f9f9f9;
-	padding: 3rem;
+	padding: 2rem;
 	text-align: left;
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
 	max-width: 55%;
+	max-height: 100vh;
 }
 
 .right-section {
@@ -525,14 +526,79 @@ input[type="number"] {
 
 .img-preview {
 	width: 100%;
-	margin-top: 2rem;
-	text-align: center;
+	/* margin-top: 2rem; */
+	/* text-align: left; */
+	position: relative;
 }
 
-.img-preview img {
-	max-width: 100%;
-	height: auto;
+.carousel {
+	position: relative;
+	width: 100%;
+	height: 450px; /* Adjust based on your image height */
+	overflow: hidden;
+	/* border: #00db23 solid 2px; */
 }
+
+.carousel img {
+	position: absolute;
+	object-fit: contain;
+	min-width: 100%;
+	height: 90%;
+	opacity: 0;
+	transform: translateX(5%);
+	transition: all 0.8s ease-in-out;
+	left: 0;
+	right: 0;
+	margin: 0 auto;
+	/* border: #000 2px solid; */
+}
+
+.carousel img.active {
+	opacity: 1;
+	transform: translateX(0);
+	z-index: 2;
+}
+
+.carousel img.next {
+	transform: translateX(0);
+	z-index: 1;
+}
+
+.carousel img.prev {
+	transform: translateX(-0);
+	z-index: 1;
+}
+
+.carousel-dots {
+	position: absolute;
+	bottom: 20px;
+	width: 100%;
+	display: flex;
+	justify-content: center;
+	gap: 8px;
+	z-index: 3;
+}
+
+.carousel-dot {
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background: transparent;
+	border: 2px solid #d3d3d3;
+	cursor: pointer;
+	transition: all 0.3s ease;
+}
+
+.carousel-dot.active {
+	background: #a8a8a8;
+	transform: scale(1.2);
+}
+
+.carousel-dot:hover {
+	transform: scale(1.2);
+	opacity: 1;
+}
+
 .gradient-text {
 	font-size: 3rem;
 	font-weight: 400 !important;

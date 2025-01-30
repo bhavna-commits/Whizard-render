@@ -73,3 +73,4 @@ function getReportsMenu() {
 		sidebar.style.overflow = "visible";
 	}
 }
+

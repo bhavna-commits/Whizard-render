@@ -21,6 +21,7 @@ import {
 	isObject,
 } from "../../middleWares/sanitiseInput.js";
 import { json } from "stream/consumers";
+import { sendCampaignScheduledEmail } from "../../services/OTP/reportsEmail.js";
 
 export const __filename = fileURLToPath(import.meta.url);
 export const __dirname = path.dirname(__filename);
@@ -473,6 +474,14 @@ export const createCampaign = async (req, res, next) => {
 				generateUniqueId(),
 			);
 
+			const time = Date.now();
+			// + 15 * 60 * 1000;
+			const reportTime = new Date(time);
+			agenda.schedule(reportTime, "send campaign report email", {
+				campaignId: newCampaign.unique_id,
+				userId: newCampaign.useradmin,
+			});
+
 			await ActivityLogs.create({
 				useradmin:
 					req.session?.user?.id || req.session?.addedUser?.owner,
@@ -486,6 +495,16 @@ export const createCampaign = async (req, res, next) => {
 		} else {
 			newCampaign.scheduledAt = Number(schedule) * 1000;
 			newCampaign.status = "SCHEDULED";
+
+			const user = await User.findOne({
+				unique_id:
+					req.session?.user?.id || req.session?.addedUser?.owner,
+			});
+			await sendCampaignScheduledEmail(
+				user.email,
+				name,
+				newCampaign.scheduledAt,
+			);
 
 			await ActivityLogs.create({
 				useradmin:

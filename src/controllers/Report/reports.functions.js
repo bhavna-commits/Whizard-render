@@ -5,6 +5,10 @@ import {
 	sendMessageThroughWhatsApp,
 	generatePreviewMessage,
 } from "../ContactList/campaign.functions.js";
+import {
+	sendCampaignReportEmail,
+	sendCampaignScheduledEmail,
+} from "../../services/OTP/reportsEmail.js";
 import { agenda } from "../../config/db.js";
 import Template from "../../models/templates.model.js";
 import Contacts from "../../models/contacts.model.js";
@@ -12,6 +16,7 @@ import Campaign from "../../models/campaign.model.js";
 import Report from "../../models/report.model.js";
 import User from "../../models/user.model.js";
 import { generateUniqueId } from "../../utils/otpGenerator.js";
+import { sendMessages } from "../ContactList/campaign.functions.js";
 
 dotenv.config();
 
@@ -185,7 +190,12 @@ export const overview = async (id, userId, page, limit, skip) =>
 		},
 	]);
 
-export async function sendMessages(campaign, id, unique_id, contactList) {
+export async function sendMessagesReports(
+	campaign,
+	id,
+	unique_id,
+	contactList,
+) {
 	try {
 		// Find the template by unique_id
 		const template = await Template.findOne({
@@ -198,12 +208,12 @@ export async function sendMessages(campaign, id, unique_id, contactList) {
 			);
 		}
 
-		if (contactList.length === 0) {
+		if (contactList?.length === 0) {
 			throw new Error(
 				`No contacts found for contact list ID ${campaign.contactListId}`,
 			);
 		}
-
+		console.log(contactList);
 		// Loop through each contact in the contact list
 		for (let contact of contactList) {
 			// Replace dynamic variables in the template with contact-specific data
@@ -212,8 +222,7 @@ export async function sendMessages(campaign, id, unique_id, contactList) {
 				campaign.variables,
 				contact,
 			);
-			// console.log(JSON.stringify(personalizedMessage));
-			// Send message using WhatsApp (assuming wa_id is the phone number)
+
 			const response = await sendMessageThroughWhatsApp(
 				template,
 				contact.wa_id,
@@ -259,41 +268,87 @@ export async function sendMessages(campaign, id, unique_id, contactList) {
 	}
 }
 
+const scheduleCampaign = async (campaign) => {
+	try {
+		const { scheduledAt, _id, contactListId, contactList } = campaign;
+		if (contactList) {
+			agenda.schedule(new Date(scheduledAt), "process reports campaign", {
+				campaignId: _id,
+				contactList,
+				scheduledAt,
+			});
+		} else {
+			agenda.schedule(new Date(scheduledAt), "process campaign", {
+				campaignId: _id,
+				contactListId,
+				scheduledAt,
+			});
+		}
+		// Mark the campaign as IN_QUEUE so it won’t be processed multiple times
+		await Campaign.findByIdAndUpdate(_id, { status: "IN_QUEUE" });
+		console.log(`Campaign ${_id} scheduled successfully.`);
+	} catch (err) {
+		console.error("Error schedling campagin", err);
+	}
+};
+
 agenda.define("process campaign", async (job) => {
-	const { campaignId, contactList } = job.attrs.data;
+	const { campaignId } = job.attrs.data;
 
 	try {
-		// Fetch the campaign details
 		const campaign = await Campaign.findById(campaignId);
-
-		if (campaign && campaign.status === "IN_QUEUE") {
+		if (campaign?.status === "IN_QUEUE") {
 			await sendMessages(
 				campaign,
 				campaign.useradmin,
 				generateUniqueId(),
-				contactList,
 			);
 			await Campaign.findByIdAndUpdate(campaignId, { status: "SENT" });
-			console.log(`Campaign ${campaignId} has been successfully sent.`);
+
+			const time = Date.now();
+			// + 15 * 60 * 1000;
+			const reportTime = new Date(time);
+			agenda.schedule(reportTime, "send campaign report email", {
+				campaignId,
+				userId: campaign.useradmin,
+			});
 		}
 	} catch (error) {
 		console.error(`Error processing campaign ${campaignId}:`, error);
 	}
 });
 
-const scheduleCampaign = async (campaign) => {
-	const { scheduledAt, _id, contactList } = campaign;
-	// console.log(new Date(scheduledAt));
-	// Schedule the job to run at the specified time (use Date object or timestamp)
-	agenda.schedule(new Date(scheduledAt), "process campaign", {
-		campaignId: _id,
-		contactList,
-	});
+agenda.define("process reports campaign", async (job) => {
+	const { campaignId, contactList } = job.attrs.data;
 
-	// Mark the campaign as IN_QUEUE so it won’t be processed multiple times
-	await Campaign.findByIdAndUpdate(_id, { status: "IN_QUEUE" });
-	console.log(`Campaign ${_id} scheduled successfully.`);
-};
+	try {
+		const campaign = await Campaign.findById(campaignId);
+		if (campaign?.status === "IN_QUEUE") {
+			await sendMessagesReports(
+				campaign,
+				campaign.useradmin,
+				generateUniqueId(),
+				contactList,
+			);
+			await Campaign.findByIdAndUpdate(campaignId, { status: "SENT" });
+
+			const time = Date.now();
+			// + 15 * 60 * 1000;
+			const reportTime = new Date(time);
+			agenda.schedule(reportTime, "send campaign report email", {
+				campaignId,
+				userId: campaign.useradmin,
+			});
+		}
+	} catch (error) {
+		console.error(`Error processing campaign ${campaignId}:`, error);
+	}
+});
+
+agenda.define("send campaign report email", async (job) => {
+	const { campaignId, userId } = job.attrs.data;
+	await sendCampaignReportEmail(campaignId, userId);
+});
 
 cron.schedule("* * * * *", async () => {
 	try {
