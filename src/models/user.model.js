@@ -5,6 +5,7 @@ const userSchema = new mongoose.Schema(
 		WABA_ID: { type: String, required: false },
 		FB_PHONE_ID: { type: String, required: false },
 		FB_ACCESS_TOKEN: { type: String, required: false },
+		FB_ACCESS_TOKEN_EXPIRY: { type: String, required: false },
 		profilePhoto: { type: String, required: false },
 		name: { type: String, required: true },
 		email: { type: String, required: true, unique: true },
@@ -21,7 +22,6 @@ const userSchema = new mongoose.Schema(
 		jobRole: { type: String, required: true },
 		website: { type: String, required: true },
 		blocked: { type: Boolean, default: false },
-		FB_ACCESS_TOKEN_EXPIRY: { type: String, required: false },
 		WhatsAppConnectStatus: {
 			type: String,
 			enum: ["Pending", "Live"],

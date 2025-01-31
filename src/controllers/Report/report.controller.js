@@ -12,6 +12,7 @@ import {
 	isBoolean,
 } from "../../middleWares/sanitiseInput.js";
 import { generateUniqueId } from "../../utils/otpGenerator.js";
+import { agenda } from "../../config/db.js";
 import { sendCampaignScheduledEmail } from "../../services/OTP/reportsEmail.js";
 
 dotenv.config();

@@ -44,7 +44,7 @@ export const home = async (req, res) => {
 		} else {
 			const id = req.session?.user?.id;
 			const access = await User.findOne({ unique_id: id });
-			console.log(access.access);
+			// console.log(access.access);
 			res.render("Settings/home", {
 				access: access.access,
 				photo: req.session?.user?.photo,
@@ -304,7 +304,7 @@ export const accountDetails = async (req, res) => {
 		} else {
 			const id = req.session?.user?.id;
 			const access = await User.findOne({ unique_id: id });
-			console.log(access.access);
+			// console.log(access.access);
 			res.render("Settings/accountDetails", {
 				access: access.access,
 				user,
@@ -425,7 +425,7 @@ export const getActivityLogs = async (req, res) => {
 		} else {
 			const id = req.session?.user?.id;
 			const access = await User.findOne({ unique_id: id });
-			console.log(access.access);
+			// console.log(access.access);
 			res.render("Settings/activityLogs", {
 				access: access.access,
 				logs,
@@ -551,7 +551,7 @@ export const getUserManagement = async (req, res) => {
 			}
 		} else {
 			const access = await User.findOne({ unique_id: id });
-			console.log(access.access);
+			// console.log(access.access);
 			res.render("Settings/userManagement", {
 				access: access.access,
 				users,

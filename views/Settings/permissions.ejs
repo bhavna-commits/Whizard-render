@@ -34,7 +34,12 @@
 	<!-- Loader HTML -->
 	<div id="loader" class="loader">
 		<div class="w-full h-full flex justify-center items-center">
-			<img src="/assets/img/Wizard_logo.png" alt="Whizard Logo" class="animate-pulse loading-image" />
+			<div class="flex flex-col items-center max-w-[10rem]">
+				<img src="/assets/img/Wizard_logo.png" alt="Whizard Logo" class="animate-pulse object-contain loading-image mb-2" />
+				<div class="w-full h-1 bg-gray-300 rounded-full overflow-hidden">
+					<div id="progress-bar" class="h-full bg-black transition-all duration-300 ease-out" style="width: 0%"></div>
+				</div>
+			</div>
 		</div>
 	</div>
 	
@@ -182,7 +187,7 @@
 					<a href="/settings/profile" class="flex items-center"><img src="profileLogo.svg" class="pr-2" />View profile</a>
 					<button onclick="logout()" class="flex items-center"><img src="logOut.svg" class="pr-2" />Log out</button>
 				</div>
-				<script src="/menu.js"></script>
+
 			</div>
 		</nav>
 		<!-- END SIDEBAR MENU TOP TRAY CONTENT-->
@@ -206,7 +211,26 @@
 					</div>
 					<div class="flex items-center">
 						<a href="/settings/user-management/permissions" class="text-red-500 hover:text-gray-700 text-xl font-medium ">Permissions</a>
+						<div class="relative inline-block pl-2">
+							<i class="info-icon text-red-700 hover:text-red-900">
+								<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+									<circle cx="12" cy="12" r="10"></circle>
+									<line x1="12" y1="16" x2="12" y2="12"></line>
+									<line x1="12" y1="8" x2="12.01" y2="8"></line>
+								</svg>
+								
+							</i>
+							<div class="tooltip invisible opacity-0 w-64 bg-gray-900 text-white text-sm rounded-lg absolute z-10 p-4 -translate-x-1/2 left-1/2 mt-2 transition-opacity duration-300">
+								<!-- Arrow -->
+								<div class="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-gray-900 transform rotate-45"></div>
+								<!-- Content -->
+								<div class="relative">
+									Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+								</div>
+							</div>
+						</div>
 					</div>
+
 				</nav>
 			</div>
 			<div class="mainDiv">
@@ -228,15 +252,15 @@
 							<!-- Dashboard Section -->
 							<div class="border-t pt-4 flex items-center justify-between ">
 								<h2 class="text-lg font-medium mb-4">Dashboard</h2>
-								<div class="grid grid-cols-1 md:grid-cols-5   w-[60%]">
+								<div class="grid grid-cols-1 md:grid-cols-4   w-[60%]">
 									<label class="flex items-center space-x-2 min-w-fit">
 										<input type="checkbox" name="conntectNow" value="connectNow" class="rounded checkbox text-blue-600">
 										<span>Connect Now</span>
 									</label>
-									<label class="flex items-center space-x-2 min-w-fit">
+									<!-- <label class="flex items-center space-x-2 min-w-fit">
 										<input type="checkbox" name="viewUsers" value="viewUsers" class="rounded checkbox text-blue-600">
 										<span>View Users</span>
-									</label>
+									</label> -->
 									<label class="flex items-center space-x-2 min-w-fit">
 										<input type="checkbox" name="quickActions" value="quickActions" class="rounded checkbox text-blue-600">
 										<span>Quick Actions</span>
@@ -267,7 +291,7 @@
 										
 									</div>
 								</div>
-								<div class="options-container grid grid-cols-1 md:grid-cols-5 w-[60%]">
+								<div class="options-container grid grid-cols-1 md:grid-cols-4 w-[60%]">
 									<label class="flex items-center space-x-2 min-w-fit">
 										<input type="checkbox" name="permissions[dashboard][]" value="connectNow" class="rounded checkbox option-checkbox text-black" disabled />
 										<span class="option-label text-gray-500">Redirected to VP chat</span>
@@ -293,12 +317,13 @@
 										</label>
 									</div>
 								</div>
-								<div class="options-container grid grid-cols-1 md:grid-cols-5 w-[60%]">
-									
-									<label class="flex items-center space-x-2">
-										<input type="checkbox" name="permissions[contactlist][]" value="customField" class="rounded option-checkbox  checkbox text-blue-600">
-										<span class="option-label text-gray-500">Custom Field</span>
-									</label>
+								<div class="options-container grid grid-cols-1 md:grid-cols-4 space-y-4 w-[60%]">
+									<div class="flex items-end">
+										<label class="flex items-center space-x-2">
+											<input type="checkbox" name="permissions[contactlist][]" value="customField" class="rounded option-checkbox  text-blue-600 checkbox">
+											<span class="option-label text-gray-500">Custom Field</span>
+										</label>
+									</div>
 									<label class="flex items-center space-x-2">
 										<input type="checkbox" name="permissions[contactlist][]" value="addContactIndividual" class="rounded option-checkbox text-blue-600 checkbox" />
 										<span class="option-label text-gray-500">Add Contact</span>
@@ -343,7 +368,7 @@
 										</label>
 									</div>
 								</div>
-								<div class="options-container grid grid-cols-1 md:grid-cols-5 w-[60%]">
+								<div class="options-container grid grid-cols-1 md:grid-cols-4 w-[60%]">
 									<label class="flex items-center space-x-2">
 										<input type="checkbox" name="permissions[templates][]" value="editTemplate" class="rounded checkbox option-checkbox  text-blue-600">
 										<span class="option-label text-gray-500">Edit Template</span>
@@ -367,24 +392,25 @@
 										<label class="relative inline-flex pt-2 items-center cursor-pointer">
 											<input type="checkbox" name="permissions[reports][enabled]" class="sr-only peer section-toggle">
 											<div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 
-                  peer-focus:ring-blue-300 rounded-full peer 
-                  peer-checked:after:translate-x-full peer-checked:after:border-white 
-                  after:content-[''] after:absolute after:top-[.625rem] after:left-[.12rem]
-                  after:bg-white after:border-gray-300 after:border after:rounded-full 
-                  after:h-5 after:w-5 after:transition-all peer-checked:bg-black"></div>
+												peer-focus:ring-blue-300 rounded-full peer 
+												peer-checked:after:translate-x-full peer-checked:after:border-white 
+												after:content-[''] after:absolute after:top-[.625rem] after:left-[.12rem]
+												after:bg-white after:border-gray-300 after:border after:rounded-full 
+												after:h-5 after:w-5 after:transition-all peer-checked:bg-black">
+											</div>
 											<span class="ml-3 text-sm font-medium toggle-label text-gray-500">No</span>
 										</label>
 									</div>
 								</div>
 								
-								<div class="options-container grid grid-cols-1 md:grid-cols-5 gap-4 mb-4 w-[60%]">
+								<div class="options-container grid grid-cols-1 md:grid-cols-4 mb-4 w-[60%]">
 									<div>
-										<label class="flex items-center space-x-2">
+										<label class="flex items-center space-x-2 mb-3">
 											<input type="checkbox" name="permissions[reports][]" value="conversationReports" class="rounded option-checkbox  checkbox text-blue-600 toggle-option conversation-toggle">
 											<span class="option-label text-gray-500">Conversation Reports</span>
 										</label>
 										
-										<div class="grid-flow-col gap-4 pl-3 nested-options">
+										<div class="grid-flow-col gap-4 pl-3 nested-options space-y-3">
 											<label class="flex items-center space-x-2">
 												<input type="checkbox" name="permissions[reports][]" value="viewReports" class="rounded nested-checkbox  checkboxSmall text-blue-600 text-sm toggle-option">
 												<span class="text-sm nested-label text-gray-500">View Reports</span>
@@ -399,11 +425,12 @@
 											</label>
 										</div>
 									</div>
-									
-									<label class="flex space-x-2">
-										<input type="checkbox" name="permissions[reports][]" value="costReports" class="rounded option-checkbox checkbox text-blue-600 toggle-option">
-										<span class="option-label text-gray-500">Cost Reports</span>
-									</label>
+									<div class="">
+										<label class="flex items-center space-x-2">
+											<input type="checkbox" name="permissions[reports][]" value="costReports" class="rounded option-checkbox checkbox text-blue-600 toggle-option">
+											<span class="option-label text-gray-500">Cost Reports</span>
+										</label>
+									</div>
 								</div>
 							</div>
 							
@@ -415,17 +442,18 @@
 										<label class="relative inline-flex items-center cursor-pointer">
 											<input type="checkbox" name="permissions[settings][enabled]" class="sr-only peer section-toggle" id="settings-toggle">
 											<div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 
-                peer-focus:ring-blue-300 rounded-full peer 
-                peer-checked:after:translate-x-full peer-checked:after:border-white 
-                after:content-[''] after:absolute after:top-[2px] after:left-[2px] 
-                after:bg-white after:border-gray-300 after:border after:rounded-full 
-                after:h-5 after:w-5 after:transition-all peer-checked:bg-black"></div>
+												peer-focus:ring-blue-300 rounded-full peer 
+												peer-checked:after:translate-x-full peer-checked:after:border-white 
+												after:content-[''] after:absolute after:top-[2px] after:left-[2px] 
+												after:bg-white after:border-gray-300 after:border after:rounded-full 
+												after:h-5 after:w-5 after:transition-all peer-checked:bg-black">
+											</div>
 											<span class="ml-3 text-sm font-medium toggle-label text-gray-500">No</span>
 										</label>
 									</div>
 								</div>
 								
-								<div class="options-container grid grid-cols-1 md:grid-cols-5 gap-4 mb-4 w-[60%]">
+								<div class="options-container grid grid-cols-1 md:grid-cols-4 mb-4 w-[60%]">
 									<!-- <div class="permission-group" id="manage-tags-section">
 										<label class="flex items-center space-x-2">
 											<input type="checkbox" name="permissions[settings][]" value="manageTags" class="rounded option-checkbox checkbox text-blue-600 toggle-option" id="manage-tags-toggle">
@@ -447,11 +475,11 @@
 										</div>
 									</div> -->
 									
-									<label class="flex space-x-2">
+									<label class="flex items-center space-x-2">
 										<input type="checkbox" name="permissions[settings][]" value="userManagement" class="rounded option-checkbox checkbox text-blue-600" id="user-management">
 										<span class="option-label text-gray-500">User Management</span>
 									</label>
-									<label class="flex space-x-2">
+									<label class="flex items-center space-x-2">
 										<input type="checkbox" name="permissions[settings][]" value="activityLogs" class="rounded option-checkbox checkbox text-blue-600" id="activity-logs">
 										<span class="option-label text-gray-500">Activity Logs</span>
 									</label>
@@ -474,6 +502,7 @@
 		</div>
 	</div>
 	<script src="/settings/js/permissions.js"></script>
+	<script src="/menu.js"></script>
 	<script>
 		window.addEventListener('load', function () {
 			// Fade out the loader smoothly by changing the opacity

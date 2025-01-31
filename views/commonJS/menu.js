@@ -74,3 +74,72 @@ function getReportsMenu() {
 	}
 }
 
+document.querySelectorAll(".info-icon").forEach((icon) => {
+	const tooltip = document.querySelector(".tooltip");
+	icon.addEventListener("mouseenter", () => {
+		tooltip.classList.remove("invisible", "opacity-0");
+		tooltip.classList.add("visible", "opacity-100");
+		// console.log(tooltip.classList);
+	});
+
+	icon.addEventListener("mouseleave", () => {
+		tooltip.classList.add("invisible", "opacity-0");
+		tooltip.classList.remove("visible", "opacity-100");
+		// console.log(tooltip.classList);
+	});
+});
+
+const progressBar = document.getElementById("progress-bar");
+const loader = document.getElementById("loader");
+let progress = 0;
+
+// Track different loading phases
+const updateProgress = (newProgress) => {
+	progress = Math.max(progress, Math.min(newProgress, 100));
+	progressBar.style.width = `${progress}%`;
+};
+
+// Initial DOM loading
+document.addEventListener("readystatechange", () => {
+	if (document.readyState === "interactive") {
+		updateProgress(30);
+	}
+});
+
+// Track images loading
+document.addEventListener("DOMContentLoaded", () => {
+	const images = document.images;
+	const totalImages = images.length;
+	let loadedImages = 0;
+
+	if (totalImages === 0) {
+		updateProgress(70);
+		return;
+	}
+
+	const imageProgressHandler = () => {
+		loadedImages++;
+		updateProgress(30 + (loadedImages / totalImages) * 40);
+	};
+
+	Array.from(images).forEach((img) => {
+		if (img.complete) imageProgressHandler();
+		else img.addEventListener("load", imageProgressHandler);
+	});
+});
+
+// Final window load
+window.addEventListener("load", () => {
+	updateProgress(100);
+	setTimeout(() => {
+		loader.classList.add("hidden");
+	}, 500);
+});
+
+// Fallback in case load events fail
+setTimeout(() => {
+	if (progress < 100) {
+		updateProgress(100);
+		loader.classList.add("hidden");
+	}
+}, 5000);

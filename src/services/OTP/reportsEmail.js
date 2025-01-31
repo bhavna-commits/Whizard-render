@@ -2,7 +2,7 @@ import ejs from "ejs";
 import path from "path";
 import { overview } from "../../controllers/Report/reports.functions.js";
 import User from "../../models/user.model.js";
-import dotenv from 'dotenv';
+import dotenv from "dotenv";
 import nodemailer from "nodemailer";
 
 dotenv.config();
@@ -21,7 +21,6 @@ const __dirname = path.resolve();
 
 export const sendCampaignReportEmail = async (campaignId, userId) => {
 	try {
-		
 		console.log(campaignId, userId);
 		const user = await User.findOne({ unique_id: userId });
 		if (!user?.email) throw new Error("User email not found");
@@ -38,16 +37,20 @@ export const sendCampaignReportEmail = async (campaignId, userId) => {
 		);
 		const paginatedResults = campaignsData[0]?.paginatedResults || [];
 
-		// Process reports data
 		paginatedResults.forEach((campaign) => {
 			campaign.reports.forEach((report) => {
-				// Add contactName
 				const contact = campaign.contacts.find(
-					(c) => `91${c.wa_id}` === report.recipientPhone,
+					(contact) => `91${contact.wa_id}` === report.recipientPhone,
 				);
-				report.contactName = contact?.Name || "Unknown";
+				if (contact) {
+					report.contactName = contact.Name;
+				} else {
+					const contact = campaign.contacts.find(
+						(contact) => contact.wa_id === report.recipientPhone,
+					);
+					report.contactName = contact.Name;
+				}
 
-				// Add status colors
 				const status = report.status.toLowerCase();
 				switch (status) {
 					case "failed":

@@ -132,6 +132,9 @@ contactListForm.addEventListener("submit", async function (e) {
 		const listName = document.getElementById("listName").value;
 
 		try {
+			previewButton.innerHTML = `<div class="flex justify-center items-center">
+  											<div class="w-16 h-16 border-4 border-t-transparent border-white rounded-full animate-spin"></div>
+										</div>`;
 			const response = await fetch(
 				"/api/contact-list/previewContactList",
 				{
@@ -167,6 +170,8 @@ contactListForm.addEventListener("submit", async function (e) {
 			}
 		} catch (error) {
 			console.error("Error processing file: ", error);
+		} finally {
+			previewButton.innerHTML = "Preview";
 		}
 	};
 
@@ -179,6 +184,9 @@ contactListForm.addEventListener("submit", async function (e) {
 
 submitButton.addEventListener("click", async () => {
 	try {
+		submitButton.innerHTML = `<div class="flex justify-center items-center">
+  											<div class="w-16 h-16 border-4 border-t-transparent border-white rounded-full animate-spin"></div>
+										</div>`;
 		errorMessage.innerHTML = "";
 		const response = await fetch("/api/contact-list/create-list", {
 			method: "POST",
@@ -198,25 +206,27 @@ submitButton.addEventListener("click", async () => {
 		}
 	} catch (error) {
 		console.error("Error creating list:", error);
+	} finally {
+		submitButton.innerHTML = "Submit";
 	}
 });
 
 // Error handling and displaying
 function displayErrors(result) {
-    errorMessage.innerHTML = "";
-    previewSection.classList.remove("hidden");
-    mainDiv.classList.remove("max-w-3xl", "mt-[5%]");
-    mainDiv.classList.add("mt-[2%]");
-    previewSection.innerHTML = result.tableHtml;
-    fileUploadSection.classList.add("hidden");
+	errorMessage.innerHTML = "";
+	previewSection.classList.remove("hidden");
+	mainDiv.classList.remove("max-w-3xl", "mt-[5%]");
+	mainDiv.classList.add("mt-[2%]");
+	previewSection.innerHTML = result.tableHtml;
+	fileUploadSection.classList.add("hidden");
 
-    // Create error container with better layout
-    const errorContainer = document.createElement('div');
-    errorContainer.className = 'space-y-4 mb-6';
+	// Create error container with better layout
+	const errorContainer = document.createElement("div");
+	errorContainer.className = "space-y-4 mb-6";
 
-    // Helper function to create error sections
-    const createErrorSection = (title, content, count, type) => {
-        return `
+	// Helper function to create error sections
+	const createErrorSection = (title, content, count, type) => {
+		return `
         <div class="bg-red-50 p-4 rounded-lg border border-red-200 error-section cursor-pointer" onclick="toggleErrorDetails('${type}')">
             <div class="flex items-center justify-between" >
                 <h3 class="font-semibold text-red-700">
@@ -230,97 +240,102 @@ function displayErrors(result) {
                 ${content}
             </div>
         </div>`;
-    };
+	};
 
-    // Build error sections
-    let errorSections = '';
+	// Build error sections
+	let errorSections = "";
 
-    // Missing Columns
-    if (result.missingColumns.length > 0) {
-        errorSections += createErrorSection(
-            'Missing Required Columns',
-            `<p>These columns are required but missing from your file:</p>
+	// Missing Columns
+	if (result.missingColumns.length > 0) {
+		errorSections += createErrorSection(
+			"Missing Required Columns",
+			`<p>These columns are required but missing from your file:</p>
             <ul class="list-disc pl-5 mt-1">
-                ${result.missingColumns.map(c => `<li>${c}</li>`).join('')}
+                ${result.missingColumns.map((c) => `<li>${c}</li>`).join("")}
             </ul>`,
-            result.missingColumns.length,
-            'missing-columns'
-        );
-    }
+			result.missingColumns.length,
+			"missing-columns",
+		);
+	}
 
-    // Invalid Columns
-    if (result.invalidColumns.length > 0) {
-        errorSections += createErrorSection(
-            'Invalid Columns Found',
-            `<p>These columns are not recognized:</p>
+	// Invalid Columns
+	if (result.invalidColumns.length > 0) {
+		errorSections += createErrorSection(
+			"Invalid Columns Found",
+			`<p>These columns are not recognized:</p>
             <ul class="list-disc pl-5 mt-1">
-                ${result.invalidColumns.map(c => `<li>${c}</li>`).join('')}
+                ${result.invalidColumns.map((c) => `<li>${c}</li>`).join("")}
             </ul>
             <button onclick="document.location='contact-list/custom-field'" type="button" 
                 class="mt-3 bg-red-100 border-2 py-2 px-4 rounded-lg hover:bg-red-200 transition-colors">
                 Manage Custom Fields
             </button>`,
-            result.invalidColumns.length,
-            'invalid-columns'
-        );
-    }
+			result.invalidColumns.length,
+			"invalid-columns",
+		);
+	}
 
-    // Empty Fields
-    if (result.emptyFields.length > 0) {
-        const example = result.emptyFields[0];
-        errorSections += createErrorSection(
-            'Empty Fields Detected',
-            `<p>Found ${result.emptyFields.length} empty fields. Example:</p>
+	// Empty Fields
+	if (result.emptyFields.length > 0) {
+		const example = result.emptyFields[0];
+		errorSections += createErrorSection(
+			"Empty Fields Detected",
+			`<p>Found ${result.emptyFields.length} empty fields. Example:</p>
             <p class="mt-1">Row ${example.row}, Column "${example.column}"</p>
             <p class="mt-2 text-red-700">Please fill all required fields marked in red.</p>`,
-            result.emptyFields.length,
-            'empty-fields'
-        );
-    }
+			result.emptyFields.length,
+			"empty-fields",
+		);
+	}
 
-    // Invalid Numbers
-    if (result.invalidNumbers.length > 0) {
-        const example = result.invalidNumbers[0];
-        errorSections += createErrorSection(
-            'Invalid Phone Numbers',
-            `<p>Found ${result.invalidNumbers.length} invalid numbers. Example:</p>
+	// Invalid Numbers
+	if (result.invalidNumbers.length > 0) {
+		const example = result.invalidNumbers[0];
+		errorSections += createErrorSection(
+			"Invalid Phone Numbers",
+			`<p>Found ${result.invalidNumbers.length} invalid numbers. Example:</p>
             <p class="mt-1">Row ${example.row}: "${example.value}"</p>
             <p class="mt-2 text-red-700">Phone numbers must contain only digits (minimum 10 digits).</p>`,
-            result.invalidNumbers.length,
-            'invalid-numbers'
-        );
-    }
+			result.invalidNumbers.length,
+			"invalid-numbers",
+		);
+	}
 
-    // Duplicate Numbers
-    if (result.duplicateNumbers.length > 0) {
-        const example = result.duplicateNumbers[0];
-        errorSections += createErrorSection(
-            'Duplicate Phone Numbers',
-            `<p>Found ${result.duplicateNumbers.length} duplicates. Example:</p>
+	// Duplicate Numbers
+	if (result.duplicateNumbers.length > 0) {
+		const example = result.duplicateNumbers[0];
+		errorSections += createErrorSection(
+			"Duplicate Phone Numbers",
+			`<p>Found ${result.duplicateNumbers.length} duplicates. Example:</p>
             <p class="mt-1">Number "${example.value}" appears multiple times</p>
             <p class="mt-2 text-red-700">Each phone number must be unique.</p>`,
-            result.duplicateNumbers.length,
-            'duplicate-numbers'
-        );
-    }
+			result.duplicateNumbers.length,
+			"duplicate-numbers",
+		);
+	}
 
-    errorContainer.innerHTML = `
-        <h2 class="text-xl font-bold mb-4 text-red-600">Found ${Object.values(result).reduce((acc, val) => acc + (Array.isArray(val) ? val.length : 0), 0)} Issues</h2>
+	errorContainer.innerHTML = `
+        <h2 class="text-xl font-bold mb-4 text-red-600">Found ${Object.values(
+			result,
+		).reduce(
+			(acc, val) => acc + (Array.isArray(val) ? val.length : 0),
+			0,
+		)} Issues</h2>
         ${errorSections}
         <p class="text-sm text-gray-600 mt-4">
             Click on any error type above to see details. Fix these issues and re-upload your file.
         </p>`;
 
-    errorMessage.appendChild(errorContainer);
+	errorMessage.appendChild(errorContainer);
 }
 
 // Toggle error details visibility
 function toggleErrorDetails(type) {
-    const details = document.getElementById(`details-${type}`);
-    const icon = document.getElementById(`icon-${type}`);
-    
-    details.classList.toggle('hidden');
-    icon.classList.toggle('rotate-180');
+	const details = document.getElementById(`details-${type}`);
+	const icon = document.getElementById(`icon-${type}`);
+
+	details.classList.toggle("hidden");
+	icon.classList.toggle("rotate-180");
 }
 
 // Re-upload logic

@@ -1,5 +1,4 @@
 // SDK initialization
-
 window.fbAsyncInit = function () {
 	FB.init({
 		appId: app_id,
@@ -19,7 +18,36 @@ window.fbAsyncInit = function () {
 	fjs.parentNode.insertBefore(js, fjs);
 })(document, "script", "facebook-jssdk");
 
-// Session logging message event listener
+let waba_id = null;
+let phone_number_id = null;
+let fbAccessToken = null; 
+
+// Function to send data when all variables are available
+function sendDataToBackend() {
+	console.log(waba_id, phone_number_id, fbAccessToken);
+	if (waba_id && phone_number_id && fbAccessToken) {
+		fetch("/api/facebook/auth_code", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({
+				access_token: fbAccessToken,
+				waba_id,
+				phone_number_id,
+			}),
+		})
+			.then((response) => response.json())
+			.then((data) => {
+				console.log("Data saved successfully:", data);
+			})
+			.catch((error) => {
+				console.error("Error saving data:", error);
+			});
+	}
+}
+
+// Message event listener
 window.addEventListener("message", (event) => {
 	if (
 		event.origin !== "https://www.facebook.com" &&
@@ -30,39 +58,25 @@ window.addEventListener("message", (event) => {
 		const data = JSON.parse(event.data);
 		if (data.type === "WA_EMBEDDED_SIGNUP") {
 			console.log("message event: ", data);
+			waba_id = data.data.waba_id;
+			phone_number_id = data.data.phone_number_id;
+			sendDataToBackend();
 		}
-	} catch {
+	} catch (error) {
 		console.log("message event catch: ", event.data);
 	}
 });
 
-// Response callback
+// Login callback
 const fbLoginCallback = (response) => {
 	if (response.authResponse) {
-		const code = response.authResponse.code;
-		console.log("response: ", code);
-		fetch("/api/facebook/auth_code", {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify({
-				code,
-			}),
-		})
-			.then((response) => response.json())
-			.then((data) => {
-				console.log("Access Token received:", data.access_token);
-			})
-			.catch((error) => {
-				console.error("Error:", error);
-			});
-	} else {
-		console.log("response: ", response);
+		fbAccessToken = response.authResponse.code; // Assign to global variable
+		console.log("Access Token received:", fbAccessToken);
+		sendDataToBackend(); // Check if we can send after receiving token
 	}
 };
 
-// Launch method and callback registration
+// Launch method
 const launchWhatsAppSignup = () => {
 	FB.login(fbLoginCallback, {
 		config_id: config_id,

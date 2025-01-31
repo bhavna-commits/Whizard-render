@@ -81,7 +81,12 @@
 	<!-- Loader HTML -->
 	<div id="loader" class="loader">
 		<div class="w-full h-full flex justify-center items-center">
-			<img src="/assets/img/Wizard_logo.png" alt="Whizard Logo" class="animate-pulse loading-image" />
+			<div class="flex flex-col items-center max-w-[10rem]">
+				<img src="/assets/img/Wizard_logo.png" alt="Whizard Logo" class="animate-pulse object-contain loading-image mb-2" />
+				<div class="w-full h-1 bg-gray-300 rounded-full overflow-hidden">
+					<div id="progress-bar" class="h-full bg-black transition-all duration-300 ease-out" style="width: 0%"></div>
+				</div>
+			</div>
 		</div>
 	</div>
 	
@@ -229,7 +234,7 @@
 					<a href="/settings/profile" class="flex items-center"><img src="profileLogo.svg" class="pr-2" />View profile</a>
 					<button onclick="logout()" class="flex items-center"><img src="logOut.svg" class="pr-2" />Log out</button>
 				</div>
-				<script src="/menu.js"></script>
+
 			</div>
 		</nav>
 		
@@ -578,6 +583,7 @@
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/js/all.min.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 	</div>
+	<script src="/menu.js"></script>
 	<script src=" assets/plugins/pace/pace.min.js" type="text/javascript"></script>
 	<script src="assets/plugins/liga.js" type="text/javascript"></script>
 	<script src="assets/plugins/jquery/jquery-3.2.1.min.js" type="text/javascript"></script>

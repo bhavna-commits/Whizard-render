@@ -56,11 +56,16 @@
 </head>
 
 <body>
-	<div id="loader" class="loader">
-		<div class="w-full h-full flex justify-center items-center">
-			<img src="/assets/img/Wizard_logo.png" alt="Whizard Logo" class="animate-pulse loading-image" />
+		<div id="loader" class="loader">
+			<div class="w-full h-full flex justify-center items-center">
+				<div class="flex flex-col items-center max-w-[10rem]">
+					<img src="/assets/img/Wizard_logo.png" alt="Whizard Logo" class="animate-pulse object-contain loading-image mb-2" />
+					<div class="w-full h-1 bg-gray-300 rounded-full overflow-hidden">
+						<div id="progress-bar" class="h-full bg-black transition-all duration-300 ease-out" style="width: 0%"></div>
+					</div>
+				</div>
+			</div>
 		</div>
-	</div>
 	<div class="flex">
 		<!-- Left Section -->
 		<div class="flex-grow left-section">

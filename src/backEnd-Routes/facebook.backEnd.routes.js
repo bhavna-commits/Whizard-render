@@ -1,51 +1,70 @@
 import express from "express";
 import dotenv from "dotenv";
-import fs from "fs";
+import cron from "node-cron";
 import Template from "../models/templates.model.js";
 import Campaign from "../models/campaign.model.js";
 import User from "../models/user.model.js";
 import Reports from "../models/report.model.js";
 import axios from "axios";
 import { generateUniqueId } from "../utils/otpGenerator.js";
-// import { dummyPayload } from "../utils/dummy.js";
 
 dotenv.config();
 
 const router = express.Router();
 
-router.get("/auth_code", async (req, res) => {
-	// const { code } = req.body;
+router.post("/auth_code", async (req, res) => {
+	const { access_token, waba_id, phone_number_id } = req.body;
+
+	console.log(
+		"access token :",
+		access_token,
+		"waba id :",
+		waba_id,
+		"phone id :",
+		phone_number_id,
+	);
 
 	try {
-		const url = `https://graph.facebook.com/${process.env.FB_GRAPH_VERSION}/oauth/access_token?client_id=${process.env.FB_APP_ID}&client_secret=${process.env.FB_APP_SECRET}&redirect_uri=https://localhost:5000&code=HFnK$H{U5^7ik[fDlEgJ*!HwNc0S];`;
-
 		// Step 1: Exchange authorization code for access token
-		const response = await axios.post(url);
+
+		const url = `https://graph.facebook.com/${process.env.FB_GRAPH_VERSION}/oauth/access_token`;
+		const params = {
+			client_id: process.env.FB_APP_ID,
+			client_secret: process.env.FB_APP_SECRET,
+			redirect_uri: "https://192.168.1.8:5000/",
+			code: access_token, 
+		};
+
+		const response = await axios.get(url, { params });
+		console.log("Access Token:", response.data.access_token);
 
 		if (response.status === 200) {
-			const { access_token, expires_in } = response.data;
+			const { access_token: newAccessToken, expires_in } = response.data;
 
-			// Step 2: Store access token and calculate expiration time (current time + expires_in)
-			const expirationTime = Date.now() + expires_in * 1000; // expires_in is in seconds
+			// Step 2: Store access token and calculate expiration time
+			const expirationTime = Date.now() + expires_in * 1000;
 			await User.findOneAndUpdate(
 				req.session?.user?.id || req.session?.addedUser?.owner,
 				{
-					FB_ACCESS_TOKEN: access_token,
+					FB_ACCESS_TOKEN: newAccessToken,
 					FB_ACCESS_TOKEN_EXPIRY: expirationTime,
+					WABA_ID: waba_id,
+					PHONE_NUMBER_ID: phone_number_id,
 				},
 			);
 
 			// Step 3: Automatically exchange short-lived token for a long-lived token
-			const longLivedToken = await exchangeForLongLivedToken(
-				access_token,
+			const longLivedToken = await getPermanentAccessToken(
+				waba_id,
+				phone_number_id,
+				newAccessToken,
 			);
 			if (longLivedToken) {
-				// Store the long-lived token and update its expiration time
-				const longLivedExpirationTime =
-					Date.now() + 60 * 24 * 60 * 60 * 1000; // 60 days in milliseconds
+				// const longLivedExpirationTime =
+				// 	Date.now() + 60 * 24 * 60 * 60 * 1000; // 60 days in milliseconds
 				await User.findByIdAndUpdate(req.session.user.id, {
 					FB_ACCESS_TOKEN: longLivedToken,
-					FB_ACCESS_TOKEN_EXPIRY: longLivedExpirationTime,
+					// FB_ACCESS_TOKEN_EXPIRY: longLivedExpirationTime,
 				});
 
 				res.json({ access_token: longLivedToken });
@@ -70,34 +89,6 @@ router.get("/auth_code", async (req, res) => {
 		});
 	}
 });
-
-// Function to exchange the short-lived token for a long-lived one
-const exchangeForLongLivedToken = async (shortLivedToken) => {
-	try {
-		const url = `https://graph.facebook.com/${process.env.FB_GRAPH_VERSION}/oauth/access_token`;
-		const response = await axios.get(url, {
-			params: {
-				grant_type: "fb_exchange_token",
-				client_id: process.env.FB_APP_ID,
-				client_secret: process.env.FB_APP_SECRET,
-				fb_exchange_token: shortLivedToken,
-			},
-		});
-
-		if (response.status === 200) {
-			return response.data.access_token;
-		} else {
-			console.error(
-				"Failed to exchange for long-lived token:",
-				response.data,
-			);
-			return null;
-		}
-	} catch (error) {
-		console.error("Error refreshing token:", error);
-		return null;
-	}
-};
 
 router.post("/webhook", async (req, res) => {
 	try {
@@ -263,6 +254,92 @@ router.post("/webhook", async (req, res) => {
 	} catch (err) {
 		console.error("Error processing webhook:", err);
 		res.status(500).send("Server Error");
+	}
+});
+
+// Function to refresh the long-lived token
+// const refreshLongLivedToken = async (userId, oldToken) => {
+// 	try {
+// 		const response = await axios.get(
+// 			`https://graph.facebook.com/${process.env.FB_GRAPH_VERSION}/oauth/access_token?grant_type=fb_exchange_token&client_id=${process.env.FB_APP_ID}&client_secret=${process.env.FB_APP_SECRET}&fb_exchange_token=${oldToken}`,
+// 		);
+
+// 		if (response.data.access_token) {
+// 			const newAccessToken = response.data.access_token;
+// 			const expirationTime = Date.now() + 50 * 24 * 60 * 60 * 1000; // 50 days in milliseconds
+
+// 			// Save the new token and expiration time to the database
+// 			await User.findByIdAndUpdate(userId, {
+// 				FB_ACCESS_TOKEN: newAccessToken,
+// 				FB_ACCESS_TOKEN_EXPIRY: expirationTime,
+// 			});
+
+// 			console.log(`Token refreshed for user ${userId}`);
+// 		} else {
+// 			console.error("Failed to get a new access token:", response.data);
+// 		}
+// 	} catch (error) {
+// 		console.error("Error refreshing long-lived token:", error);
+// 	}
+// };
+async function getPermanentAccessToken(
+	wabaId,
+	phoneNumberId,
+	systemUserAccessToken,
+) {
+	try {
+		const url = `https://graph.facebook.com/${process.env.FB_GRAPH_VERSION}/${wabaId}/phone_numbers?access_token=${systemUserAccessToken}`;
+
+		const response = await axios.get(url);
+
+		if (response.status === 200) {
+			const phoneNumbers = response.data.data;
+			const phoneNumber = phoneNumbers.find(
+				(number) => number.id === phoneNumberId,
+			);
+
+			if (phoneNumber) {
+				// Use the phone number's access token
+				const phoneNumberAccessToken = phoneNumber.access_token;
+				console.log("Permanent Access Token:", phoneNumberAccessToken);
+				return phoneNumberAccessToken;
+			} else {
+				console.error("Phone number not found.");
+			}
+		} else {
+			console.error("Error fetching phone numbers:", response.data);
+		}
+	} catch (error) {
+		console.error("Error:", error);
+	}
+}
+
+// Cron job to check token expiration every day at midnight
+cron.schedule("0 10 * * *", async () => {
+	console.log("Checking token expiration...");
+
+	try {
+		// Find all users whose token is about to expire in the next 10 days (i.e., 50 days have passed)
+		const currentTime = Date.now();
+		const tenDaysInMs = 10 * 24 * 60 * 60 * 1000;
+
+		const users = await User.find({
+			FB_ACCESS_TOKEN_EXPIRY: { $lt: currentTime + tenDaysInMs }, // Tokens expiring in less than 10 days
+		});
+
+		if (users.length > 0) {
+			console.log(
+				`${users.length} users' tokens are about to expire. Refreshing...`,
+			);
+
+			for (const user of users) {
+				await refreshLongLivedToken(user._id, user.FB_ACCESS_TOKEN);
+			}
+		} else {
+			console.log("No tokens need to be refreshed today.");
+		}
+	} catch (error) {
+		console.error("Error checking token expiration:", error);
 	}
 });
 

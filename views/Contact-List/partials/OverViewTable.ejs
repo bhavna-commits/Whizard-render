@@ -5,15 +5,15 @@
 			<!-- Table Header -->
 			<tr class="text-gray-400">
 				<td class="px-2 py-3">Sno.</td>
-				<td class="w-[10%]">Name</td>
-				<td class="w-[10%]">Number</td>
-				<td class="w-[10%]">Created at</td>
+				<td class="min-w-[10%] ">Name</td>
+				<td class="min-w-[10%]">Number</td>
+				<td class="min-w-[10%]">Created at</td>
 				<% if (contacts[0]?.masterExtra) { %>
 				<% Object.keys(contacts[0].masterExtra).forEach(function(key) { %>
-				<td class="w-[10%] text-gray-400 "><%= key %></td>
+				<td class="min-w-[10%] text-gray-400 "><%= key %></td>
 				<% }); %>
 				<% } %>
-				<td class="sticky right-0 bg-white px-5">Actions</td>
+				<td class=" sticky right-0 bg-white">Actions</td>
 			</tr>
 			
 			<!-- Table Rows -->

@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 import cron from "node-cron";
 import ActivityLogs from "../../models/activityLogs.model.js";
 import axios from "axios";
-import { agenda } from "../../config/db.js";
+
 import Template from "../../models/templates.model.js";
 import Contacts from "../../models/contacts.model.js";
 import Campaign from "../../models/campaign.model.js";

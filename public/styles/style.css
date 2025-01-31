@@ -56,7 +56,7 @@
 /* Responsive design using viewport width for layout */
 @media screen and (max-width: 768px) {
 	* {
-		font-size: 1px; /* 0.875rem = 14px */
+		font-size: 12px; /* 0.875rem = 14px */
 	}
 }
 

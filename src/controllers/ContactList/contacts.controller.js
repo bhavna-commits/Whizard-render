@@ -12,6 +12,7 @@ import {
 	generateUniqueId,
 	convertDateFormat,
 } from "../../utils/otpGenerator.js";
+import { agenda } from "../../config/db.js";
 import { sendMessages } from "./campaign.functions.js";
 import { countries } from "../../utils/dropDown.js";
 import {
