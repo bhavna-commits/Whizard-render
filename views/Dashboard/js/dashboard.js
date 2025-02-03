@@ -20,7 +20,7 @@ window.fbAsyncInit = function () {
 
 let waba_id = null;
 let phone_number_id = null;
-let fbAccessToken = null; 
+let fbAccessToken = null;
 
 // Function to send data when all variables are available
 function sendDataToBackend() {
@@ -39,7 +39,11 @@ function sendDataToBackend() {
 		})
 			.then((response) => response.json())
 			.then((data) => {
-				console.log("Data saved successfully:", data);
+				if (data.success) {
+					location.reload();
+				} else {
+					alert(data.error);
+				}
 			})
 			.catch((error) => {
 				console.error("Error saving data:", error);

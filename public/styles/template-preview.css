@@ -15,8 +15,8 @@
 .iphone-screen {
 	position: absolute;
 	/* top: 1rem; */
-	left: 2rem;
-	width: 80%;
+	left: 3.5rem;
+	width: 64%;
 	/* height: 95%; */
 	/* overflow: hidden; */
 	background-image: url(./BG.jpg);
@@ -44,8 +44,8 @@
 
 @media screen and (min-width: 769px) {
 	.iphone-screen {
-		left: 3.2rem;
-		width: 68%; /* Width for larger screens */
+		left: 3.6rem;
+		width: 64%; /* Width for larger screens */
 	}
 }
 

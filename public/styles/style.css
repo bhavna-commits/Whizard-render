@@ -374,14 +374,7 @@ input[type="number"] {
 	);
 }
 
-.icon-gradient {
-	background: radial-gradient(
-		circle at bottom,
-		rgb(255, 255, 255) 0%,
-		rgba(224, 255, 229, 0.293) 100%,
-		transparent 0%
-	);
-}
+
 
 .icon-gradient-platform {
 	background: radial-gradient(

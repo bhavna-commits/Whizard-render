@@ -4,9 +4,11 @@ import axios from "axios";
 import Template from "../../models/templates.model.js";
 import User from "../../models/user.model.js";
 import { generateUniqueId } from "../../utils/otpGenerator.js";
-const { FB_GRAPH_VERSION } = process.env;
+import { getFbAccessToken } from "../../backEnd-Routes/facebook.backEnd.routes.js";
 
 dotenv.config();
+
+const { FB_GRAPH_VERSION } = process.env;
 
 export const saveTemplateToDatabase = async (
 	req,
@@ -56,6 +58,9 @@ export const saveTemplateToDatabase = async (
 
 export async function submitTemplateToFacebook(savedTemplate, id) {
 	try {
+		let waba_id = await User.findOne({ unique_id: id });
+		waba_id = waba_id.WABA_ID;
+
 		const plainTemplate = savedTemplate.toObject(); // Convert to plain object
 
 		// Now you can clean up and submit to Facebook
@@ -84,12 +89,12 @@ export async function submitTemplateToFacebook(savedTemplate, id) {
 		const user = await User.findOne({ unique_id: id });
 
 		const response = await axios.post(
-			`https://graph.facebook.com/${process.env.FB_GRAPH_VERSION}/${process.env.WABA_ID}/message_templates`,
+			`https://graph.facebook.com/${process.env.FB_GRAPH_VERSION}/${waba_id}/message_templates`,
 			requestData,
 			{
 				headers: {
 					"Content-Type": "application/json",
-					Authorization: `Bearer ${process.env.FB_ACCESS_TOKEN}`,
+					Authorization: `Bearer ${getFbAccessToken()}`,
 				},
 			},
 		);
@@ -132,7 +137,7 @@ export const fetchFacebookTemplates = async (id) => {
 		const response = await fetch(url, {
 			method: "GET",
 			headers: {
-				Authorization: `Bearer ${process.env.FB_ACCESS_TOKEN}`,
+				Authorization: `Bearer ${getFbAccessToken()}`,
 			},
 		});
 

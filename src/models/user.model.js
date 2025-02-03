@@ -5,7 +5,7 @@ const userSchema = new mongoose.Schema(
 		WABA_ID: { type: String, required: false },
 		FB_PHONE_ID: { type: String, required: false },
 		FB_ACCESS_TOKEN: { type: String, required: false },
-		FB_ACCESS_TOKEN_EXPIRY: { type: String, required: false },
+		FB_ACCESS_TOKEN_EXPIRY: { type: Number, required: false },
 		profilePhoto: { type: String, required: false },
 		name: { type: String, required: true },
 		email: { type: String, required: true, unique: true },

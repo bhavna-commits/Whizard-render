@@ -1,23 +1,28 @@
 <% if (templateData) { %>
 <!-- Modal Container -->
-<!-- Modal Container -->
-<div id="customModal" class="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center hidden z-50">
-	<div class="bg-white rounded-lg shadow-lg w-9/12 max-w-7xl h-[77%] overflow-auto">
+<div id="customModal" class="fixed inset-0 bg-gray-800 bg-opacity-50 backdrop-blur-sm flex justify-center items-center hidden z-50">
+	<div class="bg-white rounded-lg shadow-lg min-w-[50rem] h-[70%] overflow-auto px-6 py-4">
 		<!-- Modal Header -->
-		<div class="flex justify-between items-center p-4 border-b">
+		<div class="flex justify-between items-center h-[10%]">
 			<h5 id="templateModalLabel" class="text-xl font-semibold">Template Name</h5>
 			<button class="text-gray-500 hover:text-gray-700 text-3xl" id="modalCloseBtn">&times;</button>
 		</div>
 		
 		<!-- Modal Body -->
-		<div class="p-6 flex space-x-6">
+		<div class=" flex space-x-6 w-full h-[90%]">
 			<!-- Left Side: Dynamic Attributes Form -->
-			<form id="previewForm" class="w-[40%] space-y-4">
-				<!-- Dynamic attributes will be inserted here -->
-			</form>
+			<div class="w-1/2 space-y-4 h-full">
+				<form id="previewForm" class="h-[80%] overflow-auto">
+					<!-- Dynamic attributes will be inserted here -->
+				</form><!-- Modal Footer -->
+				<div class="flex justify-end p-4">
+					<button class="px-4 py-2 w-full bg-[#FF6A00] text-white rounded-md" id="submitTemplate" onclick="submit()">Submit</button>
+				</div>
+			</div>
+			
 			
 			<!-- Right Side: iPhone Preview -->
-			<div class="w-[60%] flex justify-center items-center border-l">
+			<div class="w-1/2 flex justify-center items-center">
 				<div class="iphone-container w-full max-w-xs">
 					<div class="iphone-screen">
 						<div class="card bg-gray-100 relative">
@@ -34,10 +39,7 @@
 			</div>
 		</div>
 		
-		<!-- Modal Footer -->
-		<div class="flex justify-end p-4 border-t">
-			<button class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700" id="submitTemplate" onclick="submit()">Submit</button>
-		</div>
+		
 	</div>
 </div>
 <% } %>

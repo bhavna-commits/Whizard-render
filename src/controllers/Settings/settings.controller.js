@@ -401,10 +401,14 @@ export const updateAccountDetails = async (req, res, next) => {
 
 export const getActivityLogs = async (req, res) => {
 	try {
-		const id = req.session?.user?.id || req.session?.addedUser?.owner;
-		const logs = await ActivityLogs.find({
-			useradmin: id,
-		}).sort({ createdAt: -1 });
+		let filter = {};
+		const now = new Date();
+		let startDate = new Date(now.setDate(now.getDate() - 7));
+		filter.useradmin =
+			req.session?.user?.id || req.session?.addedUser?.owner;
+		filter.createdAt = { $gte: startDate };
+
+		const logs = await ActivityLogs.find(filter).sort({ createdAt: -1 });
 
 		const permissions = req.session?.addedUser?.permissions;
 		if (permissions) {

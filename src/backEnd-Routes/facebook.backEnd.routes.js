@@ -12,17 +12,20 @@ dotenv.config();
 
 const router = express.Router();
 
+let fbAccessToken = process.env.FB_ACCESS_TOKEN;
+let fbAccessTokenExpirationTime = Date.now();
+
 router.post("/auth_code", async (req, res) => {
 	const { access_token: code, waba_id, phone_number_id } = req.body;
 
-	console.log(
-		"access token :",
-		code,
-		"waba id :",
-		waba_id,
-		"phone id :",
-		phone_number_id,
-	);
+	// console.log(
+	// 	"FB_GRAPH_VERSION token :",
+	// 	FB_GRAPH_VERSION,
+	// 	"waba FB_APP_ID :",
+	// 	FB_APP_ID,
+	// 	"FB_APP_SECRET id :",
+	// 	FB_APP_SECRET,
+	// );
 
 	try {
 		// // Step 1: Exchange authorization code for access toke
@@ -47,47 +50,35 @@ router.post("/auth_code", async (req, res) => {
 		if (response.status === 200) {
 			const { access_token: newAccessToken, expires_in } = response.data;
 
-			// Step 2: Store access token and calculate expiration time
-			const expirationTime = Date.now() + expires_in * 1000;
+			await refreshLongLivedToken(newAccessToken);
+
 			await User.findOneAndUpdate(
 				{
 					unique_id:
 						req.session?.user?.id || req.session?.addedUser?.owner,
 				},
 				{
-					FB_ACCESS_TOKEN: newAccessToken,
-					FB_ACCESS_TOKEN_EXPIRY: expirationTime,
 					WABA_ID: waba_id,
 					PHONE_NUMBER_ID: phone_number_id,
+					WhatsAppConnectStatus: "Live",
 				},
 			);
 
+			if (req.session?.user) {
+				req.session.user.whatsAppStatus = "Live";
+			} else {
+				req.session.addedUser.whatsAppStatus = "Live";
+			}
 			// Step 3: Automatically exchange short-lived token for a long-lived token
-			// const longLivedToken = await getPermanentAccessToken(
-			// 	waba_id,
-			// 	phone_number_id,
-			// 	newAccessToken,
-			// );
-			// if (longLivedToken) {
-			// 	// const longLivedExpirationTime =
-			// 	// 	Date.now() + 60 * 24 * 60 * 60 * 1000; // 60 days in milliseconds
-			// 	await User.findByIdAndUpdate(req.session.user.id, {
-			// 		FB_ACCESS_TOKEN: longLivedToken,
-			// 		// FB_ACCESS_TOKEN_EXPIRY: longLivedExpirationTime,
-			// 	});
 
-			// 	res.json({ access_token: longLivedToken });
-			// } else {
-			// 	res.status(500).json({
-			// 		error: "Failed to exchange for a long-lived token",
-			// 	});
-			// }
+			res.status(201).json({ success: true, access_token: longLivedToken });
 		} else {
 			console.log(response.data.error);
 		}
 	} catch (error) {
-		console.error("Error making axios request:", error);
+		console.error("Error making axios request:", error.response.data.error);
 		res.status(500).json({
+			success: false,
 			error: "Failed to exchange authorization code",
 		});
 	}
@@ -260,91 +251,59 @@ router.post("/webhook", async (req, res) => {
 	}
 });
 
-// Function to refresh the long-lived token
-const refreshLongLivedToken = async (userId, oldToken) => {
+const refreshLongLivedToken = async (oldToken) => {
 	try {
+		console.log(oldToken);
 		const response = await axios.get(
 			`https://graph.facebook.com/${process.env.FB_GRAPH_VERSION}/oauth/access_token?grant_type=fb_exchange_token&client_id=${process.env.FB_APP_ID}&client_secret=${process.env.FB_APP_SECRET}&fb_exchange_token=${oldToken}`,
 		);
 
 		if (response.data.access_token) {
-			const newAccessToken = response.data.access_token;
-			const expirationTime = Date.now() + 50 * 24 * 60 * 60 * 1000; // 50 days in milliseconds
+			fbAccessToken = response.data.access_token;
+			// Facebook returns expires_in in seconds; convert it to an absolute timestamp in milliseconds.
+			const expiresInSeconds = response.data.expires_in;
+			fbAccessTokenExpirationTime = Date.now() + expiresInSeconds * 1000;
 
-			// Save the new token and expiration time to the database
-			await User.findByIdAndUpdate(userId, {
-				FB_ACCESS_TOKEN: newAccessToken,
-				FB_ACCESS_TOKEN_EXPIRY: expirationTime,
-			});
-
-			console.log(`Token refreshed for user ${userId}`);
+			console.log(`Token refreshed`);
 		} else {
-			console.error("Failed to get a new access token:", response.data);
+			console.error(
+				"Failed to get a new access token:",
+				response.data.error.message,
+			);
+			throw new Error(response.data.error.message);
 		}
 	} catch (error) {
-		console.error("Error refreshing long-lived token:", error);
+		// Error handling: if axios provides a response, output its error message
+		if (
+			error.response &&
+			error.response.data &&
+			error.response.data.error
+		) {
+			console.error(
+				"Error refreshing long-lived token:",
+				error.response.data.error.message,
+			);
+		} else {
+			console.error("Error refreshing long-lived token:", error.message);
+		}
 	}
 };
 
-async function getPermanentAccessToken(
-	wabaId,
-	phoneNumberId,
-	systemUserAccessToken,
-) {
+// Run this every minute using node-cron
+cron.schedule("* * * * *", async () => {
+	// console.log("Checking token expiration...");
+	// await refreshLongLivedToken(fbAccessToken);
 	try {
-		const url = `https://graph.facebook.com/${process.env.FB_GRAPH_VERSION}/${wabaId}/phone_numbers?access_token=${systemUserAccessToken}`;
-
-		const response = await axios.get(url);
-
-		if (response.status === 200) {
-			const phoneNumbers = response.data.data;
-			const phoneNumber = phoneNumbers.find(
-				(number) => number.id === phoneNumberId,
-			);
-
-			if (phoneNumber) {
-				// Use the phone number's access token
-				const phoneNumberAccessToken = phoneNumber.access_token;
-				console.log("Permanent Access Token:", phoneNumberAccessToken);
-				return phoneNumberAccessToken;
-			} else {
-				console.error("Phone number not found.");
-			}
-		} else {
-			console.error("Error fetching phone numbers:", response.data);
-		}
-	} catch (error) {
-		console.error("Error:", error);
-	}
-}
-
-// Cron job to check token expiration every day at midnight
-cron.schedule("0 10 * * *", async () => {
-	console.log("Checking token expiration...");
-
-	try {
-		// Find all users whose token is about to expire in the next 10 days (i.e., 50 days have passed)
 		const currentTime = Date.now();
-		const tenDaysInMs = 10 * 24 * 60 * 60 * 1000;
 
-		const users = await User.find({
-			FB_ACCESS_TOKEN_EXPIRY: { $lt: currentTime + tenDaysInMs }, // Tokens expiring in less than 10 days
-		});
-
-		if (users.length > 0) {
-			console.log(
-				`${users.length} users' tokens are about to expire. Refreshing...`,
-			);
-
-			for (const user of users) {
-				await refreshLongLivedToken(user._id, user.FB_ACCESS_TOKEN);
-			}
-		} else {
-			console.log("No tokens need to be refreshed today.");
+		if (fbAccessTokenExpirationTime < currentTime) {
+			await refreshLongLivedToken(fbAccessToken);
 		}
 	} catch (error) {
 		console.error("Error checking token expiration:", error);
 	}
 });
+
+export const getFbAccessToken = () => fbAccessToken;
 
 export default router;

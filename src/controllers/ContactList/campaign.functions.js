@@ -2,18 +2,20 @@ import dotenv from "dotenv";
 import cron from "node-cron";
 import ActivityLogs from "../../models/activityLogs.model.js";
 import axios from "axios";
-
 import Template from "../../models/templates.model.js";
 import Contacts from "../../models/contacts.model.js";
 import Campaign from "../../models/campaign.model.js";
 import Report from "../../models/report.model.js";
 import User from "../../models/user.model.js";
 import { generateUniqueId } from "../../utils/otpGenerator.js";
+import { getFbAccessToken } from "../../backEnd-Routes/facebook.backEnd.routes.js";
 
 dotenv.config();
 
 export async function sendMessages(campaign, id, unique_id) {
 	try {
+		let phone_number_id = await User.findOne({ unique_id: id });
+		phone_number_id = phone_number_id.FB_PHONE_ID;
 		// Find the template by unique_id
 		const template = await Template.findOne({
 			unique_id: campaign.templateId,
@@ -47,6 +49,7 @@ export async function sendMessages(campaign, id, unique_id) {
 			// console.log(JSON.stringify(personalizedMessage));
 			// Send message using WhatsApp (assuming wa_id is the phone number)
 			const response = await sendMessageThroughWhatsApp(
+				phone_number_id,
 				template,
 				contact.wa_id,
 				personalizedMessage,
@@ -189,6 +192,7 @@ export function replaceDynamicVariables(template, variables, contact) {
 }
 
 export async function sendMessageThroughWhatsApp(
+	phone_number_id,
 	template,
 	phone,
 	messageComponents,
@@ -209,11 +213,11 @@ export async function sendMessageThroughWhatsApp(
 
 		// Send the request
 		const response = await axios.post(
-			`https://graph.facebook.com/${process.env.FB_GRAPH_VERSION}/${process.env.FB_PHONE_ID}/messages`,
+			`https://graph.facebook.com/${process.env.FB_GRAPH_VERSION}/${phone_number_id}/messages`,
 			requestData,
 			{
 				headers: {
-					Authorization: `Bearer ${process.env.FB_ACCESS_TOKEN}`,
+					Authorization: `Bearer ${getFbAccessToken()}`,
 					"Content-Type": "application/json",
 				},
 			},

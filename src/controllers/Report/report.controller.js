@@ -14,6 +14,7 @@ import {
 import { generateUniqueId } from "../../utils/otpGenerator.js";
 import { agenda } from "../../config/db.js";
 import { sendCampaignScheduledEmail } from "../../services/OTP/reportsEmail.js";
+import { getFbAccessToken } from "../../backEnd-Routes/facebook.backEnd.routes.js";
 
 dotenv.config();
 
@@ -1231,11 +1232,10 @@ export const getCostReport = async (req, res) => {
 		const userId = req.session?.user?.id || req.session?.addedUser?.owner;
 		const user = await User.findOne({ unique_id: userId });
 
-		const WABA_ID = process.env.WABA_ID;
-		const accessToken = process.env.FB_ACCESS_TOKEN;
+		const WABA_ID = user.WABA_ID;
 		const graph = process.env.FB_GRAPH_VERSION;
 
-		if (!user || !WABA_ID || !accessToken || !graph) {
+		if (!user || !WABA_ID || !graph) {
 			return res.status(400).json({
 				error: "User does not have required credentials",
 			});
@@ -1256,12 +1256,12 @@ export const getCostReport = async (req, res) => {
 			`.granularity(DAILY)` +
 			`.conversation_categories(${JSON.stringify(categories)})` +
 			`.dimensions(["CONVERSATION_CATEGORY"])` +
-			`&access_token=${accessToken}`;
+			`&access_token=${getFbAccessToken()}`;
 
 		const response = await fetch(apiURL, {
 			method: "GET",
 			headers: {
-				Authorization: `Bearer ${accessToken}`,
+				Authorization: `Bearer ${getFbAccessToken()}`,
 			},
 		});
 

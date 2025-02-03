@@ -77,23 +77,7 @@
 	<%- include('../../commonJS/pagination') %>
 	<% } %>
 	
-	<script>
-		function goToPage () {
-			const pageInput = document.getElementById('pageInput');
-			const page = parseInt(pageInput.value);
-			const totalPages = <%= totalPages %>;
-			
-			if (page > totalPages) {
-				alert("Page doesn't exist. Try a lower number.");
-				pageInput.value = <%= page %>; // Reset input to the current page
-			} else if (page < 1) {
-				alert("Page number should be at least 1.");
-				pageInput.value = <%= page %>;
-			} else {
-				window.location.href = `/reports/campaign-list?page=${page}`;
-			}
-		}
-	</script>
+
 	<% } else { %>
 	<!-- Empty state -->
 	<div class="flex flex-col items-center justify-center min-h-[400px]  rounded-lg mt-4">

@@ -262,7 +262,7 @@
 								
 								<% } else { %>
 								
-								<span id="userInitial" class="block text-3xl"><%= user.name.charAt(0) %></span>
+								<span id="userInitial" class="block text-3xl"><%= user.name.charAt(0) + user.name.charAt(name.length - 1) %></span>
 								<% } %>
 								<img id="dpPreview" src="" class="w-full h-full absolute object-cover hidden" />
 							</div>

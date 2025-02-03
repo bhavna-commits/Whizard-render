@@ -387,9 +387,11 @@ class TemplateManager {
 				resetButton(button, loader, buttonText);
 				return;
 			}
+			formData.append("test", null);
 		} else if (actionType === "sendNow") {
 			// If "Send Now" is clicked, make sure schedule is null
-			formData.schedule = null;
+			formData.append("schedule", null);
+			formData.append("test", null);
 		}
 
 		// Add selected attributes to form data
@@ -417,6 +419,37 @@ class TemplateManager {
 
 		if (Object.keys(selectedAttributes).length > 0) {
 			formData.variables = selectedAttributes;
+		}
+		
+		if (actionType === "test") {
+			formData.append("schedule", null);
+			formData.append(
+				"test",
+				document.getElementById("testNumber").value,
+			);
+			// Submit the form
+			try {
+				const response = await fetch(
+					"/api/contact-list/create-campaign",
+					{
+						method: "POST",
+						body: formData,
+					},
+				);
+
+				const result = await response.json();
+				if (response.ok) {
+					alert("Test campaign sent successfully!");
+				} else {
+					alert(result.message);
+				}
+			} catch (error) {
+				console.error("Error sending test campaign:", error);
+				alert("An error occurred while sending the test campaign.");
+			} finally {
+				resetButton(button, loader, buttonText);
+			}
+			return;
 		}
 
 		try {

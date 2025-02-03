@@ -34,12 +34,12 @@ export const generateOTP = async (req, res, next) => {
 				message:
 					"Email is not in the valid format or is not a corporate email",
 			});
-		
-		if (!validatePassword(password)) return res.status(401).json({
-			success: false,
-			message:
-				"Password is not in the valid format.",
-		});
+
+		if (!validatePassword(password))
+			return res.status(401).json({
+				success: false,
+				message: "Password is not in the valid format.",
+			});
 		const user = await User.findOne({ email });
 		const phone = `${countryCode}${phoneNumber}`;
 		const mobileExists = await User.findOne({ phone });
@@ -162,15 +162,7 @@ export const login = async (req, res, next) => {
 		});
 
 	try {
-		const user = await User.findOneAndUpdate(
-			{ email },
-			{
-				WABA_ID: process.env.WABA_ID,
-				FB_PHONE_ID: process.env.FB_PHONE_ID,
-				FB_ACCESS_TOKEN: process.env.FB_ACCESS_TOKEN,
-			},
-			{ new: true, runValidators: true },
-		);
+		const user = await User.findOne({ email });
 
 		if (!user) {
 			const addedUser = await AddedUser.findOne({ email });
