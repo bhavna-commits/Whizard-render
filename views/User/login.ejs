@@ -85,7 +85,7 @@
 			<div class="mb-5">
 				<img src="./assets/img/Wizard_logo.png" alt="Whizard Logo" style="max-width: 150px;" class="w-25">
 			</div>
-			<h1 class="gradient-text">Smart WhatsApp solutions for effortless business</h1>
+			<h1 class="gradient-text">Smart WhatsApp Solutions for Effortless Business</h1>
 			<p class="p-text">Whizard helps businesses enhance WhatsApp communication by simplifying template creation, reporting, and integration seamlessly with other platforms.</p>
 			<div class="img-preview">
 				<div class="carousel">
@@ -94,7 +94,7 @@
 					<img src="/assets/img/template3.jpg" class="w-75" alt="Template Preview" />
 					<img src="/assets/img/template4.jpg" class="w-75" alt="Template Preview" />
 					<img src="/assets/img/template5.jpg" class="w-75" alt="Template Preview" />
-					<img src="/assets/img/template6.jpg" class="w-75" alt="Template Preview" />					
+					<img src="/assets/img/template6.jpg" class="w-75" alt="Template Preview" />
 				</div>
 				<div class="carousel-dots"></div>
 			</div>
@@ -141,7 +141,8 @@
 					<a href="resetPassword" class="forgot-password">Forgot password?</a>
 				</div>
 				
-				<button type="submit" class="bg-black w-full text-white rounded-[.6rem] p-2 ">Sign In</button>
+				<button type="submit" class="bg-black w-full text-white rounded-[.6rem] p-2"> <span class="inline-block loading-spinner m-auto hidden"></span>
+					<span id="submitText">Sign In</span></button>
 				<p class="text-center py-2  text-gray-500">Don't have an account yet ? <a href="/register" class="text-black hover:underline-offset-2 hover:text-black ">Register here</a></p>
 			</form>
 			<div class="text-center" id="errorMessage">Error: Invalid login details.</div>
@@ -178,6 +179,12 @@
 			const password = document.getElementById('password').value;
 			const rememberMe = document.getElementById('remember-me').checked;
 			
+			const loader = document.querySelector(".loading-spinner");
+			const submitBtn = document.querySelector("button[type=submit]");
+			const submitText = document.getElementById("submitText");
+			submitBtn.disabled = true;
+			submitText.textContent = '';
+			loader.classList.remove("hidden");
 			// Clear any previous messages
 			document.getElementById('errorMessage').style.display = 'none';
 			document.getElementById('successMessage').style.display = 'none';
@@ -198,6 +205,10 @@
 				
 				const data = await response.json();
 				
+				submitBtn.disabled = false;
+				submitText.textContent = 'Sign In';
+				loader.classList.add("hidden");
+				
 				if (response.ok) {
 					// Show success message
 					document.getElementById('successMessage').style.display = 'block';
@@ -212,16 +223,20 @@
 					// Redirect to the dashboard
 					setTimeout(() => {
 						window.location.href = '/';
-					}, 1500); // Redirect after 1.5 seconds
+					}, 500);
 				} else {
 					// Show error message
 					document.getElementById('errorMessage').textContent = data.message;
 					document.getElementById('errorMessage').style.display = 'block';
+					
 				}
 			} catch (error) {
 				// Handle errors
 				document.getElementById('errorMessage').textContent = 'An error occurred. Please try again.';
 				document.getElementById('errorMessage').style.display = 'block';
+				submitBtn.disabled = false;
+				submitText.textContent = 'Sign In';
+				loader.classList.add("hidden");
 			}
 		});
 		

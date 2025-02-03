@@ -7,7 +7,7 @@ document
 		}
 	});
 
-document.querySelectorAll(".custom-dropdown-toggle").forEach((button) => {
+document.querySelectorAll(".custom-drop-toggle").forEach((button) => {
 	button.addEventListener("click", function () {
 		const dropdownMenu = this.nextElementSibling;
 		dropdownMenu.classList.toggle("show");

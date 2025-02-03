@@ -13,7 +13,7 @@ import {
 	convertDateFormat,
 } from "../../utils/otpGenerator.js";
 import { agenda } from "../../config/db.js";
-import { sendMessages } from "./campaign.functions.js";
+import { sendMessages, sendTestMessage } from "./campaign.functions.js";
 import { countries } from "../../utils/dropDown.js";
 import {
 	isNumber,
@@ -442,7 +442,8 @@ export const createContact = async (req, res, next) => {
 
 export const createCampaign = async (req, res, next) => {
 	try {
-		let { templateId, contactListId, variables, schedule, name } = req.body;
+		let { templateId, contactListId, variables, schedule, name, test } =
+			req.body;
 
 		if (!templateId || !contactListId) {
 			return res.status(400).json({
@@ -450,13 +451,55 @@ export const createCampaign = async (req, res, next) => {
 			});
 		}
 
-		if (!isString(templateId, contactListId, variables, schedule, name))
+		if (
+			!isString(
+				templateId,
+				contactListId,
+				variables,
+				schedule,
+				name,
+				test,
+			)
+		)
 			return next();
 
 		variables =
 			typeof variables === "string" ? JSON.parse(variables) : variables;
 		schedule =
 			typeof schedule === "string" ? JSON.parse(schedule) : schedule;
+		test = typeof schedule === "string" ? JSON.parse(test) : test;
+
+		if (test && schedule) {
+			try {
+				await sendTestMessage(
+					test,
+					templateId,
+					variables,
+					contactListId,
+				);
+				await ActivityLogs.create({
+					useradmin:
+						req.session?.user?.id || req.session?.addedUser?.owner,
+					unique_id: generateUniqueId(),
+					name: req.session?.user?.name
+						? req.session?.user?.name
+						: req.session?.addedUser?.name,
+					actions: "Send",
+					details: `Sent a test campaign named: ${name}`,
+				});
+				return res.status(201).json({
+					success: true,
+					message: "Test message sent succesfully",
+				});
+
+			} catch (error) {
+				console.log("error sending test message :", error);
+				return res.status(500).json({
+					success: false,
+					message: "Error sending text message",
+				});
+			}
+		}
 
 		// Create new campaign object
 		const newCampaign = new Campaign({

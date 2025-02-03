@@ -1,6 +1,6 @@
 function toggleDropdown() {
-    const dropdownMenu = document.getElementById("downMenu");
-    console.log(dropdownMenu);
+	const dropdownMenu = document.getElementById("downMenu");
+	console.log(dropdownMenu);
 	dropdownMenu.classList.toggle("hidden");
 
 	const sidebar = document.querySelector(".sidebar");
@@ -30,11 +30,11 @@ async function logout() {
 	}
 }
 
-window.onclick = function (event) {
+window.addEventListener("click", function (event) {
 	// Handling the dropdown menu
 	const dropdown = document.getElementById("downMenu");
 	const reportMenu = document.getElementById("reportMenu");
-	const sidebar = document.querySelector(".sidebar");
+	const sidebar = document.querySelector(".sidebar ul");
 
 	// Close dropdown if clicked outside
 	if (!event.target.closest(".user-profile")) {
@@ -58,14 +58,14 @@ window.onclick = function (event) {
 	} else {
 		sidebar.style.overflow = "visible";
 	}
-};
+})	;
 
 function getReportsMenu() {
 	const reportMenu = document.getElementById("reportMenu");
 	console.log(reportMenu);
 	reportMenu.classList.toggle("hidden");
 
-	const sidebar = document.querySelector(".sidebar");
+	const sidebar = document.querySelector(".sidebar ul");
 
 	if (reportMenu.classList.contains("hidden")) {
 		sidebar.style.overflow = "auto";
@@ -121,7 +121,7 @@ document.addEventListener("DOMContentLoaded", () => {
 		loadedImages++;
 		updateProgress(30 + (loadedImages / totalImages) * 40);
 	};
-
+	
 	Array.from(images).forEach((img) => {
 		if (img.complete) imageProgressHandler();
 		else img.addEventListener("load", imageProgressHandler);
@@ -130,7 +130,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // Final window load
 window.addEventListener("load", () => {
-	updateProgress(100);
+	updateProgress(100);	
 	setTimeout(() => {
 		loader.classList.add("hidden");
 	}, 500);

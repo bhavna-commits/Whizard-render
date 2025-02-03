@@ -302,7 +302,7 @@
 									<%= maskedPhone %>
 								</td>
 								<td class="border-t border-b border-gray-200">
-									<%= new Date(report.timestamp * 1000 || report.updatedAt * 1000).toLocaleDateString() %>
+									<%= new Date(report.timestamp * 1000 || report.updatedAt).toLocaleDateString() %>
 								</td>
 								<td class="border-t border-b border-gray-200">
 									<%= new Date(report.timestamp * 1000 || report.createdAt).toLocaleDateString() %>

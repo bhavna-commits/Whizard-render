@@ -11,7 +11,7 @@
 					<td class="">Actions</td>
 				</tr>
 				<% contacts.forEach((contact, index) => { %>
-				<tr class="hover:bg-gray-100 cursor-pointer border" onclick="window.location.href='/contact-list/overview/<%= contact.contactId %>'">
+				<tr class="hover:bg-gray-100 cursor-pointer border" onclick="window.location.href='/contact-list/overview/<%= contact.contactId %>?listId=<%= contact.contactId %>&listName=<%= contact.contalistName %>'">
 					<td class="border-l border-t border-b rounded-lg py-4 border-gray-200 text-sm text-gray-500">
 						<%= index + 1 %>
 					</td>
@@ -31,25 +31,25 @@
 					<td class="border-r border-t border-b rounded-lg border-gray-200">
 						<!-- Edit Button -->
 						<% if (access?.contactList?.sendBroadcast && whatsAppStatus == "Live") { %>
-						<button aria-label="Edit contact" class="text-gray-600 hover:text-blue-600 px-3 border-r" onclick="event.stopPropagation(); location.href='/contact-list/createCampaign'">
-							<img src="broadcast.svg" />
+						<button aria-label="Edit contact" title="Send Broadcast" class="text-gray-600 hover:text-blue-600 px-3 border-r" onclick="event.stopPropagation(); location.href='/contact-list/createCampaign/?listId=<%= contact.contactId %>&listName=<%= contact.contalistName %>'">
+							<img src="broadcast.svg" alt="broadcast" />
 						</button>
 						<% } else if (whatsAppStatus == "Pending")  { %>
 						<button class="text-gray-600 hover:cursor-not-allowed px-3 border-r" title="Connect with whatsApp Business API to send message" disabled>
-							<img src="broadcast.svg" />
+							<img src="broadcast.svg" alt="broadcast" />
 						</button>
 						<% } else if (access?.contactList?.sendBroadcast) { %>
-						<button aria-label="Edit contact" class="text-gray-600 hover:text-blue-600 px-3 border-r" onclick="event.stopPropagation(); location.href='/contact-list/createCampaign'">
-							<img src="broadcast.svg" />
+						<button aria-label="Edit contact" title="Connect with whatsApp Business API to send message" class="text-gray-600 hover:text-blue-600 px-3 border-r" onclick="event.stopPropagation(); location.href='/contact-list/createCampaign/?listId=<%= contact.contactId %>&listName=<%= contact.contalistName %>'">
+							<img src="broadcast.svg" alt="broadcast" />
 						</button>
 						<% } else { %>
 						<button class="text-gray-600 hover:cursor-not-allowed px-3 border-r" title="You don't have permissions to access this" disabled>
-							<img src="broadcast.svg" />
+							<img src="broadcast.svg" alt="broadcast" />
 						</button>
 						<% } %>
 						<% if (access?.contactList?.deleteList) { %>
 						<!-- Delete Button -->
-						<button aria-label="Delete contact" class="text-gray-600 hover:text-red-600 px-2" onclick="event.stopPropagation(); openDeleteModal('<%= contact.contactId %>', '<%= contact.contalistName %>');">
+						<button aria-label="Delete contact" title="Delete List" class="text-gray-600 hover:text-red-600 px-2" onclick="event.stopPropagation(); openDeleteModal('<%= contact.contactId %>', '<%= contact.contalistName %>');">
 							<img src="bin contact list.svg" alt="">
 						</button>
 						<% } else { %>
@@ -65,8 +65,8 @@
 	</div>
 	<!-- Pagination -->
 	<% if (totalPages > 1) { %>
-		<%- include('../../commonJS/pagination') %>
-	<% } %>	
+	<%- include('../../commonJS/pagination') %>
+	<% } %>
 	
 	<% } else { %>
 	<!-- Empty state -->

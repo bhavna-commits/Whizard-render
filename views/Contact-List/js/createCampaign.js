@@ -223,12 +223,13 @@ class TemplateManager {
 			await Promise.all([this.loadTemplates(), this.loadContactLists()]);
 
 			// Initialize Select2 and bind events
-			this.templateSelect.select2().on("change", (e) =>
-				this.handleTemplateChange(e),
-			);
-			this.recipientSelect.select2().on("change", (e) =>
-				this.handleContactListChange(e),
-			);
+			this.templateSelect
+				.select2()
+				.on("change", (e) => this.handleTemplateChange(e));
+
+			this.recipientSelect
+				.select2()
+				.on("change", (e) => this.handleContactListChange(e));
 
 			document
 				.getElementById("campaign-form")
@@ -276,10 +277,23 @@ class TemplateManager {
 				.empty()
 				.append('<option value="">Select recipients...</option>');
 
+			const selectedList = new URLSearchParams(location.search);
+			console.log(selectedList.get("listId"));
+			const listId = selectedList.get("listId");
+			const listName = selectedList.get("listName");
+			if (listId) {
+				this.recipientSelect
+					.empty()
+					.append(`<option value="${listId}">${listName}</option>`);
+				this.alreadyContactList(listId);
+			}
+
 			contactLists.forEach((list) => {
-				this.recipientSelect.append(
-					new Option(list.contalistName, list.contactId),
-				);
+				if (list.contactId != listId) {
+					this.recipientSelect.append(
+						new Option(list.contalistName, list.contactId),
+					);
+				}
 			});
 		} catch (error) {
 			console.error("Error loading contact lists:", error);
@@ -331,6 +345,29 @@ class TemplateManager {
 		}
 	}
 
+	async alreadyContactList(contactListId) {
+		console.log("Contact list changed:", contactListId);
+
+		if (!contactListId) {
+			this.currentContacts = [];
+			this.attributeManager.update(this.currentTemplate, []);
+			return;
+		}
+
+		try {
+			this.currentContacts = await fetchContactListContacts(
+				contactListId,
+			);
+			// console.log(this.currentContacts);
+			this.attributeManager.update(
+				this.currentTemplate,
+				this.currentContacts,
+			);
+		} catch (error) {
+			console.error("Error loading contacts:", error);
+		}
+	}
+
 	handleAttributeSelection(variables) {
 		console.log("Attributes selected:", variables);
 	}
@@ -342,6 +379,7 @@ class TemplateManager {
 	async handleFormSubmit(event, actionType, button) {
 		event.preventDefault();
 		// Get the target button
+
 		const loader = button.querySelector(".loader-submit");
 		const buttonText = button.querySelector(".button-text");
 
@@ -356,8 +394,8 @@ class TemplateManager {
 		formData.append("contactListId", this.recipientSelect.val());
 		formData.append("name", document.getElementById("campaign-name").value);
 
-		// Check if scheduling or sending immediately
 		if (actionType === "schedule") {
+			// Check if scheduling or sending immediately
 			const selectedDate = document.getElementById("datePicker").value;
 			const selectedTime = document.getElementById("timePicker").value;
 
@@ -370,7 +408,8 @@ class TemplateManager {
 				console.log(dateTime);
 				if (!isNaN(dateTime.getTime())) {
 					const unixTimestamp = Math.floor(dateTime.getTime() / 1000);
-					formData.append("schedule", unixTimestamp); // Append the schedule timestamp
+					formData.append("schedule", unixTimestamp);
+					formData.append("test", null); // Append the schedule timestamp
 				} else {
 					alert("Invalid date or time. Please check your selection.");
 					resetButton(button, loader, buttonText);
@@ -381,9 +420,11 @@ class TemplateManager {
 				resetButton(button, loader, buttonText);
 				return;
 			}
+			formData.append("test", null);
 		} else if (actionType === "sendNow") {
 			// If "Send Now" is clicked, make sure schedule is null
 			formData.append("schedule", null);
+			formData.append("test", null);
 		}
 
 		// Add selected attributes to form data
@@ -410,6 +451,37 @@ class TemplateManager {
 
 		if (Object.keys(selectedAttributes).length > 0) {
 			formData.append("variables", JSON.stringify(selectedAttributes));
+		}
+
+		if (actionType === "test") {
+			formData.append("schedule", null);
+			formData.append(
+				"test",
+				document.getElementById("testNumber").value,
+			);
+			// Submit the form
+			try {
+				const response = await fetch(
+					"/api/contact-list/create-campaign",
+					{
+						method: "POST",
+						body: formData,
+					},
+				);
+
+				const result = await response.json();
+				if (response.ok) {
+					alert("Test campaign sent successfully!");
+				} else {
+					alert(result.message);
+				}
+			} catch (error) {
+				console.error("Error sending test campaign:", error);
+				alert("An error occurred while sending the test campaign.");
+			} finally {
+				resetButton(button, loader, buttonText);
+			}
+			return;
 		}
 
 		// Submit the form
@@ -449,6 +521,59 @@ $(document).ready(() => {
 	console.log(date);
 
 	let isScheduled = false;
+
+	let testError = document.getElementById("testError");
+	const testButton = document.querySelector("button[value='test']");
+
+	document
+		.getElementById("testNumber")
+		.addEventListener("input", function (e) {
+			const phoneInput = e.target;
+			let value = phoneInput.value;
+
+			// Remove any non-numeric characters
+			value = value.replace(/\D/g, "");
+
+			// Update the input field with only numbers
+			phoneInput.value = value;
+
+			if (value.length == 0) {
+				testError.classList.add("hidden");
+			}
+			if (value.length < 12 && value.length > 0) {
+				testError.classList.remove("hidden");
+				testButton.disabled = true;
+				testButton.classList.add(
+					"text-gray-400",
+					"border",
+					"hover:cursor-not-allowed",
+					"bg-white",
+				);
+				testButton.classList.remove("text-white", "bg-black");
+			} else if (value.length < 11) {
+				console.log("ds");
+				testButton.disabled = true;
+				testButton.classList.add(
+					"text-gray-400",
+					"border",
+					"hover:cursor-not-allowed",
+					"bg-white",
+				);
+				testButton.classList.remove("text-white", "bg-black");
+			} else if (value.length > 11) {
+				testButton.disabled = false;
+				testButton.classList.remove(
+					"text-[#959595]",
+					"border",
+					"hover:cursor-not-allowed",
+					"bg-white",
+				);
+				testButton.classList.add("text-white", "bg-black");
+				testError.classList.add("hidden");
+			} else {
+				testError.classList.add("hidden");
+			}
+		});
 
 	// Toggle function
 	function toggleSwitchState() {
@@ -509,4 +634,3 @@ function resetButton(button, loader, buttonText) {
 	loader.classList.add("hidden");
 	buttonText.classList.remove("hidden");
 }
-function schedule() {}

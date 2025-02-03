@@ -268,3 +268,61 @@ export function generatePreviewMessage(template, message) {
 		throw new Error(`Error generating preview message: ${error.message}`);
 	}
 }
+
+export async function sendTestMessage(
+	test,
+	templateId,
+	variables,
+	contactListId,
+) {
+	try {
+		// Find the template by unique_id
+		const template = await Template.findOne({
+			unique_id: templateId,
+		});
+
+		if (!template) {
+			throw new Error(`Template with ID ${templateId} not found`);
+		}
+
+		// Find contacts by contactListId
+		const contactList = await Contacts.find({
+			contactId: contactListId,
+		});
+
+		if (contactList.length === 0) {
+			throw new Error(
+				`No contacts found for contact list ID ${contactListId}`,
+			);
+		}
+
+		// Loop through each contact in the contact list
+		const contact = contactList[0];
+		// Replace dynamic variables in the template with contact-specific data
+		const personalizedMessage = replaceDynamicVariables(
+			template,
+			variables,
+			contact,
+		);
+		// console.log(JSON.stringify(personalizedMessage));
+		// Send message using WhatsApp (assuming wa_id is the phone number)
+		const response = await sendMessageThroughWhatsApp(
+			template,
+			contact.wa_id,
+			personalizedMessage,
+		);
+
+		if (response.status === "FAILED") {
+			console.error(
+				`Failed to send message to ${contact.wa_id}: ${response.response}`,
+			);
+			throw new Error(
+				`Failed to send message to ${contact.wa_id}: ${response.response}`,
+			);
+		}
+
+	} catch (error) {
+		console.error("Error sending messages:", error.message);
+		throw new Error(`${error.message}`);
+	}
+}

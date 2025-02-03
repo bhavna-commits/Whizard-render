@@ -17,27 +17,29 @@
 			<h2 style="color: #333; text-align: center; margin-bottom: 20px;">Campaign Report Overview</h2>
 			<table style="width: 100%; border-spacing: 10px;">
 				<tr>
-					<td style="background: #e9f1fb; padding: 15px; border-radius: 8px; text-align: center; border: 1px solid #00f;">
+					<td style="width: 33.33%; background: #e9f1fb; padding: 15px; border-radius: 8px; text-align: center; border: 1px solid #00f; ">
 						<h3 style="margin: 0 0 5px 0; color: #666;">Total</h3>
 						<p style="margin: 0; font-size: 24px; font-weight: bold; color: #333;"><%= totalMessages %></p>
 					</td>
-					<td style="background: #f7f1fc; padding: 15px; border-radius: 8px; text-align: center; border: 1px solid #8b00ff;">
+					<td style="width: 33.33%; background: #f7f1fc; padding: 15px; border-radius: 8px; text-align: center; border: 1px solid #8b00ff;">
 						<h3 style="margin: 0 0 5px 0; color: #666;">Sent</h3>
 						<p style="margin: 0; font-size: 24px; font-weight: bold; color: #333;"><%= messagesSent %> <span style="font-size: 14px; color: #666;">(<%= percentSent %> of target)</span></p>
 					</td>
-					<td style="background: #fce9f9; padding: 15px; border-radius: 8px; text-align: center; border: 1px solid #ff00ff;">
+					<td style="width: 33.33%; background: #fce9f9; padding: 15px; border-radius: 8px; text-align: center; border: 1px solid #ff00ff;">
 						<h3 style="margin: 0 0 5px 0; color: #666;">Delivered</h3>
 						<p style="margin: 0; font-size: 24px; font-weight: bold; color: #333;"><%= messagesDelivered %> <span style="font-size: 14px; color: #666;">(<%= percentDelivered %> of target)</span></p>
 					</td>
-					<td style="background: #fff4e5; padding: 15px; border-radius: 8px; text-align: center; border: 1px solid #ff8800;">
+				</tr>
+				<tr>
+					<td style="width: 33.33%; background: #fff4e5; padding: 15px; border-radius: 8px; text-align: center; border: 1px solid #ff8800;">
 						<h3 style="margin: 0 0 5px 0; color: #666;">Read</h3>
 						<p style="margin: 0; font-size: 24px; font-weight: bold; color: #333;"><%= messagesRead %> <span style="font-size: 14px; color: #666;">(<%= percentRead %> of target)</span></p>
 					</td>
-					<td style="background: #e0f8f9; padding: 15px; border-radius: 8px; text-align: center; border: 1px solid #00bfc2;">
+					<td style="width: 33.33%; background: #e0f8f9; padding: 15px; border-radius: 8px; text-align: center; border: 1px solid #00bfc2;">
 						<h3 style="margin: 0 0 5px 0; color: #666;">Replies</h3>
 						<p style="margin: 0; font-size: 24px; font-weight: bold; color: #333;"><%= messagesReplied %></p>
 					</td>
-					<td style="background: #ffe0e0; padding: 15px; border-radius: 8px; text-align: center; border: 1px solid #e02424;">
+					<td style="width: 33.33%; background: #ffe0e0; padding: 15px; border-radius: 8px; text-align: center; border: 1px solid #e02424;">
 						<h3 style="margin: 0 0 5px 0; color: #666;">Failed</h3>
 						<p style="margin: 0; font-size: 24px; font-weight: bold; color: #333;"><%= messagesFailed %></p>
 					</td>

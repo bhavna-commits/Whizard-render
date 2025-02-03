@@ -13,11 +13,11 @@ dotenv.config();
 const router = express.Router();
 
 router.post("/auth_code", async (req, res) => {
-	const { access_token, waba_id, phone_number_id } = req.body;
+	const { access_token: code, waba_id, phone_number_id } = req.body;
 
 	console.log(
 		"access token :",
-		access_token,
+		code,
 		"waba id :",
 		waba_id,
 		"phone id :",
@@ -25,26 +25,35 @@ router.post("/auth_code", async (req, res) => {
 	);
 
 	try {
-		// Step 1: Exchange authorization code for access token
+		// // Step 1: Exchange authorization code for access toke
+		let response;
+		try {
+			response = await axios.get(
+				`https://graph.facebook.com/${process.env.FB_GRAPH_VERSION}/oauth/access_token`,
+				{
+					params: {
+						client_id: process.env.FB_APP_ID,
+						client_secret: process.env.FB_APP_SECRET,
+						redirect_uri: "https://chat.lifestylehead.com/",
+						code,
+					},
+				},
+			);
 
-		const url = `https://graph.facebook.com/${process.env.FB_GRAPH_VERSION}/oauth/access_token`;
-		const params = {
-			client_id: process.env.FB_APP_ID,
-			client_secret: process.env.FB_APP_SECRET,
-			redirect_uri: "https://192.168.1.8:5000/",
-			code: access_token, 
-		};
-
-		const response = await axios.get(url, { params });
-		console.log("Access Token:", response.data.access_token);
-
+			console.log("Access Token:", response.data.access_token);
+		} catch (error) {
+			console.error("Error details:", error.response.data.error.message);
+		}
 		if (response.status === 200) {
 			const { access_token: newAccessToken, expires_in } = response.data;
 
 			// Step 2: Store access token and calculate expiration time
 			const expirationTime = Date.now() + expires_in * 1000;
 			await User.findOneAndUpdate(
-				req.session?.user?.id || req.session?.addedUser?.owner,
+				{
+					unique_id:
+						req.session?.user?.id || req.session?.addedUser?.owner,
+				},
 				{
 					FB_ACCESS_TOKEN: newAccessToken,
 					FB_ACCESS_TOKEN_EXPIRY: expirationTime,
@@ -54,33 +63,27 @@ router.post("/auth_code", async (req, res) => {
 			);
 
 			// Step 3: Automatically exchange short-lived token for a long-lived token
-			const longLivedToken = await getPermanentAccessToken(
-				waba_id,
-				phone_number_id,
-				newAccessToken,
-			);
-			if (longLivedToken) {
-				// const longLivedExpirationTime =
-				// 	Date.now() + 60 * 24 * 60 * 60 * 1000; // 60 days in milliseconds
-				await User.findByIdAndUpdate(req.session.user.id, {
-					FB_ACCESS_TOKEN: longLivedToken,
-					// FB_ACCESS_TOKEN_EXPIRY: longLivedExpirationTime,
-				});
+			// const longLivedToken = await getPermanentAccessToken(
+			// 	waba_id,
+			// 	phone_number_id,
+			// 	newAccessToken,
+			// );
+			// if (longLivedToken) {
+			// 	// const longLivedExpirationTime =
+			// 	// 	Date.now() + 60 * 24 * 60 * 60 * 1000; // 60 days in milliseconds
+			// 	await User.findByIdAndUpdate(req.session.user.id, {
+			// 		FB_ACCESS_TOKEN: longLivedToken,
+			// 		// FB_ACCESS_TOKEN_EXPIRY: longLivedExpirationTime,
+			// 	});
 
-				res.json({ access_token: longLivedToken });
-			} else {
-				res.status(500).json({
-					error: "Failed to exchange for a long-lived token",
-				});
-			}
+			// 	res.json({ access_token: longLivedToken });
+			// } else {
+			// 	res.status(500).json({
+			// 		error: "Failed to exchange for a long-lived token",
+			// 	});
+			// }
 		} else {
-			console.error(
-				"Error exchanging code for access token:",
-				response.data,
-			);
-			res.status(500).json({
-				error: "Failed to exchange authorization code",
-			});
+			console.log(response.data.error);
 		}
 	} catch (error) {
 		console.error("Error making axios request:", error);
@@ -126,7 +129,7 @@ router.post("/webhook", async (req, res) => {
 
 							if (report) {
 								report.status = status.toUpperCase();
-								report.updatedAt = timestamp;
+								report.updatedAt = timestamp * 1000;
 								report.recipientPhone = recipientPhone;
 
 								// Check if the status is "failed"
@@ -258,30 +261,31 @@ router.post("/webhook", async (req, res) => {
 });
 
 // Function to refresh the long-lived token
-// const refreshLongLivedToken = async (userId, oldToken) => {
-// 	try {
-// 		const response = await axios.get(
-// 			`https://graph.facebook.com/${process.env.FB_GRAPH_VERSION}/oauth/access_token?grant_type=fb_exchange_token&client_id=${process.env.FB_APP_ID}&client_secret=${process.env.FB_APP_SECRET}&fb_exchange_token=${oldToken}`,
-// 		);
+const refreshLongLivedToken = async (userId, oldToken) => {
+	try {
+		const response = await axios.get(
+			`https://graph.facebook.com/${process.env.FB_GRAPH_VERSION}/oauth/access_token?grant_type=fb_exchange_token&client_id=${process.env.FB_APP_ID}&client_secret=${process.env.FB_APP_SECRET}&fb_exchange_token=${oldToken}`,
+		);
 
-// 		if (response.data.access_token) {
-// 			const newAccessToken = response.data.access_token;
-// 			const expirationTime = Date.now() + 50 * 24 * 60 * 60 * 1000; // 50 days in milliseconds
+		if (response.data.access_token) {
+			const newAccessToken = response.data.access_token;
+			const expirationTime = Date.now() + 50 * 24 * 60 * 60 * 1000; // 50 days in milliseconds
 
-// 			// Save the new token and expiration time to the database
-// 			await User.findByIdAndUpdate(userId, {
-// 				FB_ACCESS_TOKEN: newAccessToken,
-// 				FB_ACCESS_TOKEN_EXPIRY: expirationTime,
-// 			});
+			// Save the new token and expiration time to the database
+			await User.findByIdAndUpdate(userId, {
+				FB_ACCESS_TOKEN: newAccessToken,
+				FB_ACCESS_TOKEN_EXPIRY: expirationTime,
+			});
 
-// 			console.log(`Token refreshed for user ${userId}`);
-// 		} else {
-// 			console.error("Failed to get a new access token:", response.data);
-// 		}
-// 	} catch (error) {
-// 		console.error("Error refreshing long-lived token:", error);
-// 	}
-// };
+			console.log(`Token refreshed for user ${userId}`);
+		} else {
+			console.error("Failed to get a new access token:", response.data);
+		}
+	} catch (error) {
+		console.error("Error refreshing long-lived token:", error);
+	}
+};
+
 async function getPermanentAccessToken(
 	wabaId,
 	phoneNumberId,

@@ -162,8 +162,8 @@ function processAnalyticsData(rawData, startDate, endDate) {
 		return dateA - dateB;
 	});
 
-    dataForCSV = [ ...timeseriesData ];
-    
+	dataForCSV = [...timeseriesData];
+
 	return {
 		summaryData,
 		timeseriesData,
@@ -233,7 +233,7 @@ function createCSV() {
 	csvRows.unshift(headers);
 
 	// Convert to CSV string
-	const csvString = csvRows
+	const csv = csvRows
 		.map((row) =>
 			row
 				.map((cell) => {
@@ -248,24 +248,20 @@ function createCSV() {
 		)
 		.join("\n");
 
-	// Create a Blob with the CSV data
-	const blob = new Blob([csvString], { type: "text/csv;charset=utf-8;" });
+	// Create CSV Blob
+	const csvFile = new Blob([csv.join("\n")], { type: "text/csv" });
 
-	// Create a download link
-	const link = document.createElement("a");
-
-	// Create the download URL
-	const url = window.URL.createObjectURL(blob);
-	link.setAttribute("href", url);
-
-	// Set the filename
+	// Create a link element and trigger the download
+	const downloadLink = document.createElement("a");
 	const today = new Date();
-	const filename = `timeseries_data_${today.toISOString().split("T")[0]}.csv`;
-	link.setAttribute("download", filename);
+	downloadLink.download = `timeseries_data_${
+		today.toISOString().split("T")[0]
+	}.csv`;
 
-	// Append to body, click, and remove
-	document.body.appendChild(link);
-	link.click();
-	document.body.removeChild(link);
-	window.URL.revokeObjectURL(url);
+	downloadLink.href = window.URL.createObjectURL(csvFile);
+	downloadLink.style.display = "none";
+
+	document.body.appendChild(downloadLink);
+	downloadLink.click();
+	document.body.removeChild(downloadLink);
 }

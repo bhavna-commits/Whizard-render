@@ -22,6 +22,7 @@ const __dirname = path.resolve();
 export const sendCampaignReportEmail = async (campaignId, userId) => {
 	try {
 		console.log(campaignId, userId);
+		let campaignName;
 		const user = await User.findOne({ unique_id: userId });
 		if (!user?.email) throw new Error("User email not found");
 
@@ -38,6 +39,7 @@ export const sendCampaignReportEmail = async (campaignId, userId) => {
 		const paginatedResults = campaignsData[0]?.paginatedResults || [];
 
 		paginatedResults.forEach((campaign) => {
+			campaignName = campaign.name;
 			campaign.reports.forEach((report) => {
 				const contact = campaign.contacts.find(
 					(contact) => `91${contact.wa_id}` === report.recipientPhone,
@@ -108,7 +110,7 @@ export const sendCampaignReportEmail = async (campaignId, userId) => {
 		const mailOptions = {
 			from: process.env.EMAIL_USER,
 			to: user.email,
-			subject: `Campaign Report - ${campaignId}`,
+			subject: `Campaign Report - ${campaignName} (${campaignId})`,
 			html,
 			attachments: [
 				{

@@ -114,8 +114,15 @@ uploadCSV.addEventListener("click", function () {
 				// Skip the first checkbox column
 				if (index === 2) {
 					// Contact column: get the real phone number from the aria-label
-					const phoneNumber = cell.getAttribute("aria-label");
+					const phoneNumber = cell.textContent.trim();;
 					cells.push(phoneNumber);
+				} else if (index === 6) {
+					// Message Template column: get the full message text
+					const messageText = cell
+						.querySelector("#messageText")
+						.textContent.replaceAll("\n", "")
+						.trim();
+					cells.push(messageText);
 				} else {
 					cells.push(cell.textContent.trim());
 				}

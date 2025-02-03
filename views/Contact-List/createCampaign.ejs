@@ -230,23 +230,24 @@
 								<path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L11.586 10 7.293 5.707a1 1 0 011.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
 							</svg>
 						</div>
-						
-						<a href="/contact-list/createCampaign" class="text-red-600 text-lg font-medium hover:no-underline">Create Campaign</a>
-						<div class="relative inline-block pl-2">
-							<i class="info-icon text-red-700 hover:text-red-900">
-								<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-									<circle cx="12" cy="12" r="10"></circle>
-									<line x1="12" y1="16" x2="12" y2="12"></line>
-									<line x1="12" y1="8" x2="12.01" y2="8"></line>
-								</svg>
-								
-							</i>
-							<div class="tooltip invisible opacity-0 w-64 bg-gray-900 text-white text-sm rounded-lg absolute z-10 p-4 -translate-x-1/2 left-1/2 mt-2 transition-opacity duration-300">
-								<!-- Arrow -->
-								<div class="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-gray-900 transform rotate-45"></div>
-								<!-- Content -->
-								<div class="relative">
-									Create and customize campaigns with dynamic attributes. Preview the template before sending and schedule campaigns for later as needed.
+						<div class="flex items-center">
+							<a href="/contact-list/createCampaign" class="text-red-600 text-lg font-medium hover:no-underline">Create Campaign</a>
+							<div class="relative inline-block pl-2">
+								<i class="info-icon text-red-700 hover:text-red-900">
+									<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+										<circle cx="12" cy="12" r="10"></circle>
+										<line x1="12" y1="16" x2="12" y2="12"></line>
+										<line x1="12" y1="8" x2="12.01" y2="8"></line>
+									</svg>
+									
+								</i>
+								<div class="tooltip invisible opacity-0 w-64 bg-gray-900 text-white text-sm rounded-lg absolute z-10 p-4 -translate-x-1/2 left-1/2 mt-2 transition-opacity duration-300">
+									<!-- Arrow -->
+									<div class="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-gray-900 transform rotate-45"></div>
+									<!-- Content -->
+									<div class="relative">
+										Create and customize campaigns with dynamic attributes. Preview the template before sending and schedule campaigns for later as needed.
+									</div>
 								</div>
 							</div>
 						</div>
@@ -262,28 +263,46 @@
 								<h4 class="page-title font-semibold text-xl">Create Campaign</h4>
 							</div>
 							<form id="campaign-form">
-								<div class="gap-10 flex flex-col">
+								<div class="space-y-6 flex flex-col">
 									<div class="">
 										<label class=" text-gray-400">Campaign name</label>
-										<input type="text" id="campaign-name" class="form-control p-3 placeholder:text-gray-400  rounded-lg border " placeholder="Enter campaign name" required />
+										<input type="text" id="campaign-name" class="form-control p-2 placeholder:text-[#959595]  rounded-lg border " placeholder="Enter campaign name" required />
 									</div>
 									
 									<div class=" flex flex-col items-start relative">
 										<label class="pr-3 text-gray-400">Select template</label>
-										<select id="template-select" class=" w-full text-gray-400 bg-white border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
-											<option class="text-gray-500" value="">
+										<select id="template-select" class=" w-full text-[#959595] bg-white border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+											<option class="text-[#959595]" value="">
 												Select a template...
 											</option>
 										</select>
 									</div>
 									
+									
+									
 									<div class=" flex flex-col items-start relative">
 										<label class="pr-3 text-gray-400">Select recipient list</label>
-										<select id="recipient-select" class="w-full p-2 text-gray-400 bg-white border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
-											<option class="text-gray-500" disabled>
+										<select id="recipient-select" class="w-full p-2 text-[#959595] bg-white border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+											<option class="text-[#959595]" disabled>
 												Recipient List
 											</option>
 										</select>
+									</div>
+									<div class="flex flex-col items-start relative">
+										<label for="testNumber" class="pr-3 text-gray-400">Test your campaign</label>
+										<div class="flex w-full">
+											<input id="testNumber" type="tel" minlength="12" maxlength="15" placeholder="Enter Test WhatsApp Number" class="form-control text-[#959595] placeholder:text-[#959595] bg-white border border-gray-300 rounded-md  focus:ring-indigo-500 focus:border-indigo-500 p-2" />
+											
+											<button type="submit" value="test" class=" border hover:cursor-not-allowed bg-white ml-2
+											 px-2 py-1 rounded-md hover:bg-gray-800 transition-colors text-gray-500">
+												<span class="inline-block loader-submit hidden"></span>
+												<span class="button-text">Test</span>
+											</button>
+											
+										</div>
+										
+										<small id="testError" class="text-red-500 hidden p-2">The number must include country code WITHOUT +</small>
+										
 									</div>
 								</div>
 								<div class="w-full pt-5">
@@ -319,6 +338,7 @@
 											</div>
 										</div>
 									</div>
+									
 									
 									<!-- Schedule Button -->
 									<button type="submit" name="actionType" value="schedule" id="scheduleButton" class="w-[40%] bg-black text-white py-2 rounded-md hover:bg-gray-800 transition-colors hidden">

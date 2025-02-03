@@ -284,7 +284,8 @@
 								<td class="py-4">Contact</td>
 								<td class="py-4">Delivered At</td>
 								<td class="py-4">Send At</td>
-								<td class="py-4">Status</td>
+								<td class="py-4">Error Code</td>
+								<td class="py-4">Error</td>
 								<td class="py-4">Message Sent</td>
 							</tr>
 						</thead>
@@ -305,13 +306,16 @@
 									<%= maskedPhone %>
 								</td>
 								<td class="border-t border-b border-gray-200">
-									<%= new Date(report.timestamp * 1000 || report.updatedAt * 1000).toLocaleDateString() %>
+									<%= new Date(report.timestamp * 1000 || report.updatedAt).toLocaleDateString() %>
 								</td>
 								<td class="border-t border-b border-gray-200">
 									<%= new Date(report.timestamp * 1000 || report.createdAt).toLocaleDateString() %>
 								</td>
 								<td class="border-t border-b border-gray-200">
-									<%= report.status.charAt(0).toUpperCase() + report.status.slice(1).toLowerCase() %>
+									<%= report.failed?.code %>
+								</td>
+								<td class="border-t border-b border-gray-200">
+									<%= report.failed?.text %>
 								</td>
 								<td class="border-r border-t border-b rounded-lg border-gray-200 max-w-xs px-5">
 									<p class="inline">

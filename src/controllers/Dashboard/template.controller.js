@@ -30,7 +30,7 @@ export const createTemplate = async (req, res, next) => {
 		// if (!isObject(templateData)) return next();
 
 		// Check if a template with the same name exists for the user
-		const exists = await Template.findOne({ useradmin: id, name });
+		const exists = await Template.findOne({ useradmin: id, name, deleted: false });
 		if (exists) {
 			return res.status(500).json({
 				success: false,

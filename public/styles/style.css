@@ -4,66 +4,11 @@
 	margin: 0;
 	padding: 0;
 	font-family: "Figtree", sans-serif;
-	font-size: 12px; /* 0.875rem = 14px */
+	font-size: 15px;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 	-webkit-text-size-adjust: none;
 	-ms-text-size-adjust: none;
-}
-
-/* Media query for devices with lower resolution (96 dpi or lower) */
-@media (max-resolution: 96dpi) {
-	* {
-		font-size: 11px; /* 0.75rem = 12px */
-	}
-}
-
-/* Media query for lower DPI screens (between 96dpi and 110dpi) */
-@media (min-resolution: 96dpi) and (max-resolution: 120dpi) {
-	* {
-		font-size: 14px; /* Starting at 10px for lower resolution */
-	}
-}
-
-/* Media query for medium DPI screens (between 110dpi and 130dpi) */
-@media (min-resolution: 120dpi) and (max-resolution: 130dpi) {
-	* {
-		font-size: 14px; /* Slightly larger, 11px for medium range */
-	}
-}
-
-/* Media query for higher DPI screens (between 130dpi and 150dpi) */
-@media (min-resolution: 130dpi) and (max-resolution: 150dpi) {
-	* {
-		font-size: 16px; /* Highest value for this range, 12px */
-	}
-}
-
-/* Media query for higher resolution screens (more than 150dpi) */
-@media (min-resolution: 150dpi) {
-	* {
-		font-size: 16px; /* 1rem = 16px */
-	}
-}
-
-/* Media query for very high-resolution devices (more than 300dpi) */
-@media (min-resolution: 300dpi) {
-	* {
-		font-size: 14px; /* 1.125rem = 18px */
-	}
-}
-
-/* Responsive design using viewport width for layout */
-@media screen and (max-width: 768px) {
-	* {
-		font-size: 12px; /* 0.875rem = 14px */
-	}
-}
-
-@media screen and (max-width: 480px) {
-	* {
-		font-size: 11px; /* 0.8125rem = 13px */
-	}
 }
 
 html {
@@ -72,8 +17,8 @@ html {
 }
 
 body {
-	height: 100vh;
-	width: 100vw;
+	height: 100%;
+	width: auto;
 }
 
 *::-webkit-scrollbar {
@@ -240,20 +185,26 @@ input[type="number"] {
 	flex-direction: column;
 	align-items: center;
 	justify-content: space-between;
-	height: 100%;
+	height: 100vh;
 	box-shadow: 0.2rem 0 0.5rem rgba(0, 0, 0, 0.1);
 	position: relative;
 	background-color: white;
-	width: 8rem;
+	width: 8%;
 	/* padding-top: 0.75rem; */
-	overflow: auto;
+	/* overflow: auto; */
 	/* overflow-y: visible; */
 	scrollbar-width: none;
-	min-width: 8rem;
+	min-width: 7rem;
 	::-webkit-scrollbar {
 		display: none;
 	}
 }
+
+/* @media screen and (max-width: 768px) {
+    .sidebar {
+        flex-direction: row;
+    }
+} */
 
 .logo {
 	position: relative;
@@ -306,6 +257,7 @@ input[type="number"] {
 	padding: 0;
 	/* You can use gap for consistent spacing between elements */
 	gap: 1.2rem; /* Default spacing */
+	overflow: auto;
 }
 
 .sidebar ul li:nth-child(6) {
@@ -911,3 +863,4 @@ input[type="number"] {
 	color: #191919;
 	padding-bottom: 1rem;
 }
+

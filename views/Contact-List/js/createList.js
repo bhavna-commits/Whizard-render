@@ -39,8 +39,8 @@ function hideModal() {
 	// Reset preview and buttons
 	previewSection.innerHTML = ""; // Clear the preview section
 	errorMessage.innerHTML = ""; // Clear the error messages
-	// previewButton.classList.add("hidden"); // Hide preview button
-	// submitButton.classList.add("hidden"); // Hide submit button
+	previewButton.classList.remove("hidden"); // Hide preview button
+	submitButton.classList.add("hidden"); // Hide submit button
 
 	// Reset main div size if needed
 	if (!mainDiv.classList.contains("max-w-3xl")) {
@@ -133,7 +133,7 @@ contactListForm.addEventListener("submit", async function (e) {
 
 		try {
 			previewButton.innerHTML = `<div class="flex justify-center items-center">
-  											<div class="w-16 h-16 border-4 border-t-transparent border-white rounded-full animate-spin"></div>
+  											<div class="w-4 h-4 border-2 border-t-transparent border-white rounded-full animate-spin"></div>
 										</div>`;
 			const response = await fetch(
 				"/api/contact-list/previewContactList",
@@ -185,7 +185,7 @@ contactListForm.addEventListener("submit", async function (e) {
 submitButton.addEventListener("click", async () => {
 	try {
 		submitButton.innerHTML = `<div class="flex justify-center items-center">
-  											<div class="w-16 h-16 border-4 border-t-transparent border-white rounded-full animate-spin"></div>
+  											<div class="w-4 h-4 border-2 border-t-transparent border-white rounded-full animate-spin"></div>
 										</div>`;
 		errorMessage.innerHTML = "";
 		const response = await fetch("/api/contact-list/create-list", {
@@ -262,13 +262,13 @@ function displayErrors(result) {
 	if (result.invalidColumns.length > 0) {
 		errorSections += createErrorSection(
 			"Invalid Columns Found",
-			`<p>These columns are not recognized:</p>
+			`<p>These columns are not recognized, please add the columns in customs fields first by clicking on the button below, before adding to the csv</p>
             <ul class="list-disc pl-5 mt-1">
                 ${result.invalidColumns.map((c) => `<li>${c}</li>`).join("")}
             </ul>
             <button onclick="document.location='contact-list/custom-field'" type="button" 
                 class="mt-3 bg-red-100 border-2 py-2 px-4 rounded-lg hover:bg-red-200 transition-colors">
-                Manage Custom Fields
+                Create Custom Fields
             </button>`,
 			result.invalidColumns.length,
 			"invalid-columns",
