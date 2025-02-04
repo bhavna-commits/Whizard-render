@@ -291,11 +291,12 @@ function displayErrors(result) {
 	// Invalid Numbers
 	if (result.invalidNumbers.length > 0) {
 		const example = result.invalidNumbers[0];
+		// console.log(result.invalidNumbers);
 		errorSections += createErrorSection(
 			"Invalid Phone Numbers",
-			`<p>Found ${result.invalidNumbers.length} invalid numbers. Example:</p>
-            <p class="mt-1">Row ${example.row}: "${example.value}"</p>
-            <p class="mt-2 text-red-700">Phone numbers must contain only digits (minimum 10 digits).</p>`,
+			`<p>Found ${result.invalidNumbers.length} invalid numbers.</p>
+            <p class="mt-1">Example: Row ${example.row}: "${example.value}"</p>
+            <p class="mt-2 text-red-700">Phone numbers must contain only : digits, minimum 12 digits, country code without "+"(If any of these things are missing or incorrect please correct it and re-upload the file)</p>`,
 			result.invalidNumbers.length,
 			"invalid-numbers",
 		);

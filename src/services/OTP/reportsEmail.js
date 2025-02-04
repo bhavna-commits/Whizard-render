@@ -41,17 +41,17 @@ export const sendCampaignReportEmail = async (campaignId, userId) => {
 		paginatedResults.forEach((campaign) => {
 			campaignName = campaign.name;
 			campaign.reports.forEach((report) => {
-				const contact = campaign.contacts.find(
-					(contact) => `91${contact.wa_id}` === report.recipientPhone,
-				);
-				if (contact) {
-					report.contactName = contact.Name;
-				} else {
-					const contact = campaign.contacts.find(
-						(contact) => contact.wa_id === report.recipientPhone,
-					);
-					report.contactName = contact.Name;
-				}
+				// const contact = campaign.contacts.find(
+				// 	(contact) => `91${contact.wa_id}` === report.recipientPhone,
+				// );
+				// if (contact) {
+				// 	report.contactName = contact.Name;
+				// } else {
+				// 	const contact = campaign.contacts.find(
+				// 		(contact) => contact.wa_id === report.recipientPhone,
+				// 	);
+				// 	report.contactName = contact.Name;
+				// }
 
 				const status = report.status.toLowerCase();
 				switch (status) {

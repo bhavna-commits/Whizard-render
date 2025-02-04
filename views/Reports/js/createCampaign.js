@@ -362,6 +362,15 @@ class TemplateManager {
 
 		console.log(formData);
 
+		const testFormData = new FormData(this.campaignForm);
+		testFormData.append("templateId", this.templateSelect.val());
+		testFormData.append("contactListId", contactListId);
+		testFormData.append(
+			"name",
+			document.getElementById("campaign-name").value,
+		);
+		testFormData.append("contactList", contactLists);
+
 		// Check if scheduling or sending immediately
 		if (actionType === "schedule") {
 			const selectedDate = document.getElementById("datePicker").value;
@@ -387,11 +396,12 @@ class TemplateManager {
 				resetButton(button, loader, buttonText);
 				return;
 			}
-			formData.append("test", null);
+			testFormData.append("test", null);
 		} else if (actionType === "sendNow") {
 			// If "Send Now" is clicked, make sure schedule is null
-			formData.append("schedule", null);
-			formData.append("test", null);
+			formData.schedule = null;
+			testFormData.append("schedule", null);
+			testFormData.append("test", null);
 		}
 
 		// Add selected attributes to form data
@@ -419,11 +429,15 @@ class TemplateManager {
 
 		if (Object.keys(selectedAttributes).length > 0) {
 			formData.variables = selectedAttributes;
+			testFormData.append(
+				"variables",
+				JSON.stringify(selectedAttributes),
+			);
 		}
-		
+
 		if (actionType === "test") {
-			formData.append("schedule", null);
-			formData.append(
+			testFormData.append("schedule", null);
+			testFormData.append(
 				"test",
 				document.getElementById("testNumber").value,
 			);
@@ -433,7 +447,7 @@ class TemplateManager {
 					"/api/contact-list/create-campaign",
 					{
 						method: "POST",
-						body: formData,
+						body: testFormData,
 					},
 				);
 
@@ -453,6 +467,7 @@ class TemplateManager {
 		}
 
 		try {
+			// formData.set("test", null);
 			const response = await fetch("/api/reports/broadcast", {
 				method: "POST",
 				headers: {
@@ -491,6 +506,58 @@ $(document).ready(() => {
 
 	let isScheduled = false;
 
+	let testError = document.getElementById("testError");
+	const testButton = document.querySelector("button[value='test']");
+
+	document
+		.getElementById("testNumber")
+		.addEventListener("input", function (e) {
+			const phoneInput = e.target;
+			let value = phoneInput.value;
+
+			// Remove any non-numeric characters
+			value = value.replace(/\D/g, "");
+
+			// Update the input field with only numbers
+			phoneInput.value = value;
+
+			if (value.length == 0) {
+				testError.classList.add("hidden");
+			}
+			if (value.length < 12 && value.length > 0) {
+				testError.classList.remove("hidden");
+				testButton.disabled = true;
+				testButton.classList.add(
+					"text-gray-400",
+					"border",
+					"hover:cursor-not-allowed",
+					"bg-white",
+				);
+				testButton.classList.remove("text-white", "bg-black");
+			} else if (value.length < 11) {
+				console.log("ds");
+				testButton.disabled = true;
+				testButton.classList.add(
+					"text-gray-400",
+					"border",
+					"hover:cursor-not-allowed",
+					"bg-white",
+				);
+				testButton.classList.remove("text-white", "bg-black");
+			} else if (value.length > 11) {
+				testButton.disabled = false;
+				testButton.classList.remove(
+					"text-[#959595]",
+					"border",
+					"hover:cursor-not-allowed",
+					"bg-white",
+				);
+				testButton.classList.add("text-white", "bg-black");
+				testError.classList.add("hidden");
+			} else {
+				testError.classList.add("hidden");
+			}
+		});
 	// Toggle function
 	function toggleSwitchState() {
 		isScheduled = !isScheduled;

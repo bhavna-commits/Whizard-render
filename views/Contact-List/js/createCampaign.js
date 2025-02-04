@@ -450,6 +450,7 @@ class TemplateManager {
 		}
 
 		if (Object.keys(selectedAttributes).length > 0) {
+			console.log(selectedAttributes);
 			formData.append("variables", JSON.stringify(selectedAttributes));
 		}
 
@@ -486,6 +487,7 @@ class TemplateManager {
 
 		// Submit the form
 		try {
+			formData.set("test", null);
 			const response = await fetch("/api/contact-list/create-campaign", {
 				method: "POST",
 				body: formData,

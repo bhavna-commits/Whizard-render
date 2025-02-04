@@ -7,12 +7,9 @@ const selectAllCheckbox = document.querySelector(
 );
 const checkboxes = document.querySelectorAll('tbody input[type="checkbox"]');
 const broadcastButton = document.getElementById("broadcast");
-const uploadCSV = document.getElementById("exportCSV");
 
 // Initially disable the broadcast button
 broadcastButton.disabled = true;
-broadcastButton.classList.add("bg-blue-200");
-broadcastButton.classList.toggle("hover:bg-blue-600");
 
 // Helper function to check if any checkbox is selected
 function isAnyCheckboxSelected() {
@@ -22,15 +19,21 @@ function isAnyCheckboxSelected() {
 // Function to enable/disable broadcast button
 function toggleBroadcastButton() {
 	if (isAnyCheckboxSelected()) {
+		// Enable the button and update styles
 		broadcastButton.disabled = false;
-		broadcastButton.classList.toggle("hover:cursor-not-allowed");
-		broadcastButton.classList.toggle("hover:bg-blue-600");
-		broadcastButton.classList.remove("bg-blue-200");
+		broadcastButton.classList.remove("hover:cursor-not-allowed");
+		broadcastButton.classList.remove("hover:bg-gray-200");
+		broadcastButton.classList.remove("bg-gray-300");
+		broadcastButton.classList.add("bg-black");
+		// broadcastButton.classList.add("hover:bg-gray-600");
 	} else {
+		// Disable the button and update styles
 		broadcastButton.disabled = true;
-		broadcastButton.classList.add("bg-blue-200");
-		broadcastButton.classList.toggle("hover:bg-blue-600");
-		broadcastButton.classList.toggle("hover:cursor-not-allowed");
+		broadcastButton.classList.add("hover:cursor-not-allowed");
+		broadcastButton.classList.add("hover:bg-gray-200");
+		broadcastButton.classList.add("bg-gray-300");
+		broadcastButton.classList.remove("bg-black");
+		// broadcastButton.classList.remove("hover:bg-gray-600");
 	}
 }
 
@@ -92,6 +95,8 @@ broadcastButton.addEventListener("click", function () {
 		});
 });
 
+const uploadCSV = document.getElementById("exportCSV");
+
 uploadCSV.addEventListener("click", function () {
 	const table = document.querySelector("table");
 
@@ -114,7 +119,7 @@ uploadCSV.addEventListener("click", function () {
 				// Skip the first checkbox column
 				if (index === 2) {
 					// Contact column: get the real phone number from the aria-label
-					const phoneNumber = cell.textContent.trim();;
+					const phoneNumber = cell.textContent.trim();
 					cells.push(phoneNumber);
 				} else if (index === 6) {
 					// Message Template column: get the full message text

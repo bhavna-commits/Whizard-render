@@ -1104,23 +1104,12 @@ export const createCampaign = async (req, res, next) => {
 			});
 		}
 
-		if (!isString(templateId, contactListId, schedule, name)) return next();
+		if (!isString(name)) return next();
 
 		variables =
 			typeof variables === "string" ? JSON.parse(variables) : variables;
 		schedule =
 			typeof schedule === "string" ? JSON.parse(schedule) : schedule;
-
-		// Create new campaign object
-		const newCampaign = new Campaign({
-			useradmin: req.session?.user?.id || req.session?.addedUser?.owner,
-			unique_id: generateUniqueId(),
-			templateId,
-			contactListId,
-			variables,
-			name,
-			contactList,
-		});
 
 		// Find contacts by contactListId
 		const contactLists = await Contacts.find({
@@ -1133,11 +1122,25 @@ export const createCampaign = async (req, res, next) => {
 			console.log(c.wa_id);
 			return contactList.some((cl) => {
 				console.log(cl.recipientPhone);
-				return "91" + c.wa_id === cl.recipientPhone;
+				return (
+					c.wa_id === cl.recipientPhone || // Match directly with wa_id
+					"91" + c.wa_id === cl.recipientPhone // Match with "91" prefix
+				);
 			});
 		});
 
-		// console.log(contactList);
+		console.log(contactList);
+
+		// Create new campaign object
+		const newCampaign = new Campaign({
+			useradmin: req.session?.user?.id || req.session?.addedUser?.owner,
+			unique_id: generateUniqueId(),
+			templateId,
+			contactListId,
+			variables,
+			name,
+			contactList,
+		});
 
 		if (!schedule) {
 			await sendMessagesReports(
@@ -1147,8 +1150,7 @@ export const createCampaign = async (req, res, next) => {
 				contactList,
 			);
 
-			const time = Date.now();
-			// + 15 * 60 * 1000;
+			const time = Date.now() + 15 * 60 * 1000;
 			const reportTime = new Date(time);
 			agenda.schedule(reportTime, "send campaign report email", {
 				campaignId: newCampaign.unique_id,
@@ -1191,26 +1193,26 @@ export const createCampaign = async (req, res, next) => {
 			});
 		}
 
-		try {
-			const userId =
-				req.session?.user?.id || req.session?.addedUser?.owner;
-			const user = await User.findOne({ unique_id: userId });
+		// try {
+		// 	const userId =
+		// 		req.session?.user?.id || req.session?.addedUser?.owner;
+		// 	const user = await User.findOne({ unique_id: userId });
 
-			if (user?.email) {
-				await sendCampaignScheduledEmail(
-					user.email,
-					name,
-					newCampaign.scheduledAt,
-				);
-			} else {
-				console.warn("No email found for user:", userId);
-			}
-		} catch (emailError) {
-			console.error(
-				"Failed to send scheduled confirmation email:",
-				emailError,
-			);
-		}
+		// 	if (user?.email) {
+		// 		await sendCampaignScheduledEmail(
+		// 			user.email,
+		// 			name,
+		// 			newCampaign.scheduledAt,
+		// 		);
+		// 	} else {
+		// 		console.warn("No email found for user:", userId);
+		// 	}
+		// } catch (emailError) {
+		// 	console.error(
+		// 		"Failed to send scheduled confirmation email:",
+		// 		emailError,
+		// 	);
+		// }
 
 		// Save the campaign
 		await newCampaign.save();

@@ -399,6 +399,17 @@ export const createContact = async (req, res, next) => {
 			});
 		}
 
+		const numberExists = await Contacts.findOne({
+			contactId,
+			wa_id,
+		});
+
+		if (numberExists) {
+			return res.status(400).json({
+				success: false,
+				message: "Cannot add same number twice in a list",
+			});
+		}
 		// console.log(`${countryCode.slice(1)}${wa_id}`);
 
 		const keyId = generateUniqueId();
@@ -451,28 +462,23 @@ export const createCampaign = async (req, res, next) => {
 			});
 		}
 
-		if (
-			!isString(
-				templateId,
-				contactListId,
-				variables,
-				schedule,
-				name,
-				test,
-			)
-		)
+		if (!isString(templateId, contactListId, variables, name))
 			return next();
 
+		// console.log(variables);
 		variables =
 			typeof variables === "string" ? JSON.parse(variables) : variables;
 		schedule =
 			typeof schedule === "string" ? JSON.parse(schedule) : schedule;
-		test = typeof schedule === "string" ? JSON.parse(test) : test;
+		test = typeof test === "string" ? JSON.parse(test) : test;
 
-		if (test && schedule) {
+		// console.log(test);
+
+		if (test) {
+			console.log("her");
 			try {
 				await sendTestMessage(
-					test,
+					req.session?.user?.id || req.session?.addedUser?.owner,
 					templateId,
 					variables,
 					contactListId,
@@ -491,7 +497,6 @@ export const createCampaign = async (req, res, next) => {
 					success: true,
 					message: "Test message sent succesfully",
 				});
-
 			} catch (error) {
 				console.log("error sending test message :", error);
 				return res.status(500).json({
@@ -518,8 +523,7 @@ export const createCampaign = async (req, res, next) => {
 				generateUniqueId(),
 			);
 
-			const time = Date.now();
-			// + 15 * 60 * 1000;
+			const time = Date.now() + 15 * 60 * 1000;
 			const reportTime = new Date(time);
 			agenda.schedule(reportTime, "send campaign report email", {
 				campaignId: newCampaign.unique_id,
@@ -549,6 +553,13 @@ export const createCampaign = async (req, res, next) => {
 				name,
 				newCampaign.scheduledAt,
 			);
+
+			const time = Date.now() + 15 * 60 * 1000;
+			const reportTime = new Date(time);
+			agenda.schedule(reportTime, "send campaign report email", {
+				campaignId: newCampaign.unique_id,
+				userId: newCampaign.useradmin,
+			});
 
 			await ActivityLogs.create({
 				useradmin:
@@ -622,7 +633,7 @@ export const generateTableAndCheckFields = (
 		const number = row.Number?.trim();
 		if (number) {
 			// Validate number format
-			if (!/^\d{10,}$/.test(number)) {
+			if (!/^\d{12,}$/.test(number)) {
 				errors.invalidNumbers.push({
 					row: rowIndex + 1,
 					column: "Number",
@@ -698,10 +709,8 @@ export const generateTableAndCheckFields = (
 	return {
 		tableHtml,
 		...errors,
-		invalidNumbers: errors.invalidNumbers.map((n) => n.value),
-		duplicateNumbers: [
-			...new Set(errors.duplicateNumbers.map((n) => n.value)),
-		],
+		invalidNumbers: errors.invalidNumbers,
+		duplicateNumbers: [...new Set(errors.duplicateNumbers)],
 	};
 };
 

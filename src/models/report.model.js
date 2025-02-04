@@ -11,6 +11,7 @@ const CampaignReportSchema = new mongoose.Schema(
 			ref: "Campaign",
 			required: true,
 		},
+		contactName: { type: String, required: true },
 		recipientPhone: { type: String, required: true },
 		status: {
 			type: String,

@@ -46,6 +46,7 @@ export async function sendMessages(campaign, id, unique_id) {
 				campaign.variables,
 				contact,
 			);
+
 			// console.log(JSON.stringify(personalizedMessage));
 			// Send message using WhatsApp (assuming wa_id is the phone number)
 			const response = await sendMessageThroughWhatsApp(
@@ -78,6 +79,7 @@ export async function sendMessages(campaign, id, unique_id) {
 				unique_id,
 				campaignName: campaign.name,
 				campaignId: campaign.unique_id,
+				contactName: contact.Name,
 				recipientPhone: contact.wa_id,
 				status: response.status,
 				messageId: response.response.messages[0].id,
@@ -95,33 +97,17 @@ export async function sendMessages(campaign, id, unique_id) {
 }
 
 export function replaceDynamicVariables(template, variables, contact) {
-	const messageComponents = [];
 	try {
+		console.log("variables :", variables);
+		const messageComponents = [];
+		// variables = new Map(Object.entries(variables));
 		// Process dynamic variables in Header
+		// console.log(variables);
 		const headerComponent = template.components.find(
 			(c) => c.type === "HEADER",
 		);
 		if (headerComponent) {
 			let headerParameters = [];
-
-			// // Handle text components
-			// if (headerComponent.format === "TEXT") {
-			// 	template.dynamicVariables.header.forEach((headVar) => {
-			// 		let key = Object.keys(headVar)[0];
-			// 		if (variables.get(key) === "Name") {
-			// 			headerParameters.push({
-			// 				type: "text",
-			// 				text: contact.Name || "",
-			// 			});
-			// 		} else if (variables.get(key)) {
-			// 			headerParameters.push({
-			// 				type: "text",
-			// 				text: contact.masterExtra[variables.get(key)] || "",
-			// 			});
-			// 		}
-			// 	});
-			// }
-
 			// Handle media components based on their format (Image, Video, Document)
 			if (headerComponent.format === "IMAGE") {
 				headerParameters.push({
@@ -274,7 +260,7 @@ export function generatePreviewMessage(template, message) {
 }
 
 export async function sendTestMessage(
-	test,
+	id,
 	templateId,
 	variables,
 	contactListId,
@@ -308,9 +294,12 @@ export async function sendTestMessage(
 			variables,
 			contact,
 		);
-		// console.log(JSON.stringify(personalizedMessage));
-		// Send message using WhatsApp (assuming wa_id is the phone number)
+
+		let phone_number_id = await User.findOne({ unique_id: id });
+		phone_number_id = phone_number_id.FB_PHONE_ID;
+
 		const response = await sendMessageThroughWhatsApp(
+			phone_number_id,
 			template,
 			contact.wa_id,
 			personalizedMessage,
@@ -324,7 +313,6 @@ export async function sendTestMessage(
 				`Failed to send message to ${contact.wa_id}: ${response.response}`,
 			);
 		}
-
 	} catch (error) {
 		console.error("Error sending messages:", error.message);
 		throw new Error(`${error.message}`);

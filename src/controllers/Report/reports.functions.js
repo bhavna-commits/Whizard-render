@@ -215,16 +215,17 @@ export async function sendMessagesReports(
 				`No contacts found for contact list ID ${campaign.contactListId}`,
 			);
 		}
-		console.log(contactList);
+		// console.log(contactList);
 		// Loop through each contact in the contact list
 		for (let contact of contactList) {
 			// Replace dynamic variables in the template with contact-specific data
+			// console.log(contact);
 			const personalizedMessage = replaceDynamicVariables(
 				template,
 				campaign.variables,
 				contact,
 			);
-
+			console.log(personalizedMessage);
 			const response = await sendMessageThroughWhatsApp(
 				phone_number_id,
 				template,
@@ -255,6 +256,7 @@ export async function sendMessagesReports(
 				unique_id,
 				campaignName: campaign.name,
 				campaignId: campaign.unique_id,
+				contactName: contact.Name,
 				recipientPhone: contact.wa_id,
 				status: response.status,
 				messageId: response.response.messages[0].id,
@@ -308,8 +310,7 @@ agenda.define("process campaign", async (job) => {
 			);
 			await Campaign.findByIdAndUpdate(campaignId, { status: "SENT" });
 
-			const time = Date.now();
-			// + 15 * 60 * 1000;
+			const time = Date.now() + 15 * 60 * 1000;
 			const reportTime = new Date(time);
 			agenda.schedule(reportTime, "send campaign report email", {
 				campaignId,
@@ -335,8 +336,7 @@ agenda.define("process reports campaign", async (job) => {
 			);
 			await Campaign.findByIdAndUpdate(campaignId, { status: "SENT" });
 
-			const time = Date.now();
-			// + 15 * 60 * 1000;
+			const time = Date.now() + 15 * 60 * 1000;
 			const reportTime = new Date(time);
 			agenda.schedule(reportTime, "send campaign report email", {
 				campaignId,

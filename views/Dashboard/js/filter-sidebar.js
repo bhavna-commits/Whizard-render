@@ -12,15 +12,26 @@ flatpickr("#filterDate", {
 	dateFormat: "Y-m-d",
 	maxDate: "today",
 	onChange: function (selectedDates, dateStr, instance) {
-		console.log("Selected range:", dateStr);
+		// Only proceed when both start and end dates are selected
+		if (selectedDates.length === 2) {
+			let [startDate, endDate] = dateStr.split("to");
 
-		let [startDate, endDate] = dateStr.split("to");
-		const url = new URL(window.location.href);
-		startDate = startDate.trim();
-		endDate = endDate.trim();
-		if (startDate && endDate) {
+			const url = new URL(window.location.href);
+			
+			startDate = startDate?.trim();
+			endDate = endDate?.trim();
+			if (endDate) {
+				url.searchParams.set("endDate", endDate);
+			} else {
+				url.searchParams.set("endDate", startDate);
+			}
+
+			// Update the URL with the selected dates
+			
 			url.searchParams.set("startDate", startDate);
-			url.searchParams.set("endDate", endDate);
+			
+
+			// Redirect to updated URL after both dates are selected
 			window.location.href = url.toString();
 		}
 	},

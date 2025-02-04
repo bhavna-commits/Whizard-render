@@ -4,6 +4,7 @@ import cron from "node-cron";
 import Template from "../models/templates.model.js";
 import Campaign from "../models/campaign.model.js";
 import User from "../models/user.model.js";
+import Token from "../models/token.model.js";
 import Reports from "../models/report.model.js";
 import axios from "axios";
 import { generateUniqueId } from "../utils/otpGenerator.js";
@@ -12,7 +13,13 @@ dotenv.config();
 
 const router = express.Router();
 
-let fbAccessToken = process.env.FB_ACCESS_TOKEN;
+let fbAccessToken;
+(async () => {
+	const tokenDoc = await Token.findOne();
+	// console.log(tokenDoc);
+	fbAccessToken = tokenDoc?.accessToken;
+})();
+
 let fbAccessTokenExpirationTime = Date.now();
 
 router.post("/auth_code", async (req, res) => {
@@ -71,7 +78,10 @@ router.post("/auth_code", async (req, res) => {
 			}
 			// Step 3: Automatically exchange short-lived token for a long-lived token
 
-			res.status(201).json({ success: true, access_token: longLivedToken });
+			res.status(201).json({
+				success: true,
+				access_token: longLivedToken,
+			});
 		} else {
 			console.log(response.data.error);
 		}
@@ -259,11 +269,12 @@ const refreshLongLivedToken = async (oldToken) => {
 		);
 
 		if (response.data.access_token) {
-			fbAccessToken = response.data.access_token;
-			// Facebook returns expires_in in seconds; convert it to an absolute timestamp in milliseconds.
+			const tokenDoc = await Token.findOne();
+			tokenDoc.accessToken = response.data.access_token;
+			fbAccessToken = tokenDoc?.accessToken;
 			const expiresInSeconds = response.data.expires_in;
 			fbAccessTokenExpirationTime = Date.now() + expiresInSeconds * 1000;
-
+			await tokenDoc.save();
 			console.log(`Token refreshed`);
 		} else {
 			console.error(
