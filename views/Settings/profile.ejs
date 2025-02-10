@@ -195,7 +195,6 @@
 					<a href="/settings/profile" class="flex items-center"><img src="profileLogo.svg" class="pr-2" />View profile</a>
 					<button onclick="logout()" class="flex items-center"><img src="logOut.svg" class="pr-2" />Log out</button>
 				</div>
-				<script src="/menu.js"></script>
 			</div>
 			
 		</nav>
@@ -232,7 +231,7 @@
 								<div class="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-gray-900 transform rotate-45"></div>
 								<!-- Content -->
 								<div class="relative">
-									Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+									Your profile
 								</div>
 							</div>
 						</div>
@@ -292,7 +291,7 @@
 					<!-- Role Field (Disabled) -->
 					<div class="flex justify-between items-center ">
 						<label class=" text-[#191919]">Role</label>
-						<input type="text" name="role" value="<%= user.roleName || "Owner" %> " class="w-3/5 p-3 text-[#B8B8B8] border rounded-xl bg-white hover:cursor-not-allowed" disabled>
+						<input type="text" name="role" value="<%= user.roleName || "Owner" %> " class="w-3/5 p-3 text-[#B8B8B8] border rounded-xl bg-white hover:cursor-not-allowed" disabled />
 					</div>
 					
 					<!-- Language Dropdown -->
@@ -328,7 +327,7 @@
 		</div>
 	</div>
 	
-	
+	<script src="/settings/js/profile.js"></script>
 	<script src="/menu.js"></script>
 	<%- include("partials/changePassword") %>
 	<script>
@@ -344,7 +343,7 @@
 			}, 300); // Match the duration of the fade-out (0.5 seconds in this case)
 		});
 	</script>
-	<script src="/settings/js/profile.js"></script>
+	
 </body>
 
 </html>

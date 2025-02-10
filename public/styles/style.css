@@ -11,15 +11,33 @@
 	-ms-text-size-adjust: none;
 }
 
-@media screen and (max-width: 1024px) {
+/* @media screen and (max-width: 1536px) {
+	* {
+		font-size: 15px;
+	}
+} */
+
+@media (max-width: 1440px) {
 	* {
 		font-size: 14px;
 	}
 }
 
-@media screen and (max-width: 1024px) {
+@media (max-width: 1230px) {
 	* {
 		font-size: 13px;
+	}
+}
+
+@media (max-width: 1024px) {
+	* {
+		font-size: 12px;
+	}
+}
+
+@media (max-width: 768px) {
+	* {
+		font-size: 12px;
 	}
 }
 
@@ -742,13 +760,14 @@ input[type="number"] {
 		width: 100%;
 		align-items: center;
 		justify-content: center;
+		box-shadow: 0.2rem 0 0.5rem rgba(120, 120, 120, 0.1);
 	}
 
 	.sidebar .logo {
 		width: 20%;
 		height: 100%;
 		/* border: 1px solid black; */
-		box-shadow: 1px -0.5rem 1rem 0px rgb(224, 224, 224);
+		box-shadow: 1px -0.5rem 1rem 0px rgba(224, 224, 224, 0.4);
 	}
 
 	.sidebar .logo::after {
@@ -779,7 +798,7 @@ input[type="number"] {
 	.user-profile {
 		width: 20%;
 		height: 100%;
-		box-shadow: -0.1rem -.5rem 1rem 0px rgb(221, 221, 221);
+		box-shadow: -0.1rem -.5rem 1rem 0px rgba(221, 221, 221, 0.418);
 	}
 	.sidebar ul li {
 		display: flex;

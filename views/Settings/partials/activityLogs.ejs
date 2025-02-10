@@ -1,52 +1,68 @@
-<% let currentDate = ''; %>
-<% if (logs.length === 0) { %>
+<%
+// Helper function to get formatted date
+const formatDate = (date) => {
+  return new Date(date).toLocaleDateString("en-GB", { 
+    day: 'numeric', 
+    month: 'short', 
+    year: 'numeric' 
+  });
+};
+
+// Group logs by date
+const groupedLogs = logs.reduce((groups, log) => {
+  const date = formatDate(log.createdAt);
+  if (!groups[date]) {
+    groups[date] = [];
+  }
+  groups[date].push(log);
+  return groups;
+}, {});
+
+// Get today's date in the same format
+const today = formatDate(new Date());
+%>
+
+<% if (Object.keys(groupedLogs).length == 0) { %>
 <p class="text-center text-gray-500">No logs found.</p>
 <% } else { %>
-<% logs.forEach((log, index) => { 
-		    const logDate = new Date(log.createdAt).toLocaleDateString("en-GB", { 
-        day: 'numeric', month: 'short', year: 'numeric' 
-}); %>
-
-<% if (logDate !== currentDate) { %>
-
-<div class="timeline-date font-bold text-lg mt-6 mb-4">
-	<%= logDate %> <%= logDate === new Date().toLocaleDateString("en-GB", {day: 'numeric', month: 'short', year: 'numeric'}) ? "Today" : "" %>
+<% Object.entries(groupedLogs).forEach(([date, dateLogs]) => { %>
+<div class="timeline-date font-bold text-lg mt-10 mb-6">
+	<%= date %> <%= date == today ? "Today" : "" %>
 </div>
-<% currentDate = logDate; %>
-<% } %>
 
-
+<% dateLogs.forEach((log, index) => { %>
 <div class="timeline-item flex items-center relative">
-	
 	<div class="flex flex-col">
 		<div class="flex items-center">
-			<div class="icon bg-gray-200 text-gray-700 rounded-full flex justify-center items-center w-10 h-10 font-semibold">
+			<div class="icon bg-[<%= log.color %>] border text-gray-700 rounded-full flex justify-center items-center w-10 h-10 font-semibold">
+				<% if (log.photo) { %>
+				<img id="profilePreview" src="/<%= log.photo %>" class="w-full h-full rounded-full object-cover block" />
+				<% } else { %>
 				<%= log.name.split(" ").map(n => n[0]).join("") %>
+				<% } %>
 			</div>
 			
-			<% if (index < logs.length - 1 && new Date(logs[index + 1].createdAt).toLocaleDateString("en-GB") === logDate) { %>
-			<div class="absolute left-5 top-10 bottom-0 w-1 bg-gray-300"></div>
-			<% } %>
-						
 			<div class="content ml-4">
-				<div class="flex justify-between w-full space-x-7 ">					
+				<div class="flex justify-between w-full space-x-7">
 					<div>
-						<p class=" font-bold"><%= log.name %></p>
-						<p class="text-sm text-gray-500"><%= new Date(log.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) %></p>
-					</div>					
-					<span class="<%= log.actions.toLowerCase() %> bg-<%= log.actions.toLowerCase() === 'sent' ? 'orange-100' : log.actions.toLowerCase() === 'updated' ? 'pink-100' : 'blue-100' %> text-<%= log.actions.toLowerCase() === 'sent' ? 'orange-500' : log.actions.toLowerCase() === 'updated' ? 'pink-500' : 'blue-500' %> align-middle h-fit p-1 rounded text-sm">
+						<p class="font-bold"><%= log.name %></p>
+						<p class="text-sm text-gray-500">
+							<%= new Date(log.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) %>
+						</p>
+					</div>
+					<span class="<%= log.actions.toLowerCase() %> bg-<%= log.actions.toLowerCase() == 'sent' ? 'orange-100' : log.actions.toLowerCase() == 'updated' ? 'pink-100' : 'blue-100' %> text-<%= log.actions.toLowerCase() == 'sent' ? 'orange-500' : log.actions.toLowerCase() == 'updated' ? 'pink-500' : 'blue-500' %> align-middle h-fit p-1 rounded text-sm">
 						<%= log.actions %>
 					</span>
-					<div class=" text-gray-600 text-right"><%= log.details %></div>					
-				</div>				
+					<div class="text-gray-600 text-right"><%= log.details %></div>
+				</div>
 			</div>
 		</div>
-		
-		<div class="border-r pl-[16px] h-10 w-0"></div>
 	</div>
-	
 </div>
+<% if (index < dateLogs.length - 1) { %>
+<div class="border-r pl-[1.23rem] h-10 w-0"></div>
+<% } %>
 
 <% }); %>
-
+<% }); %>
 <% } %>

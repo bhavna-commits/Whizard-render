@@ -492,6 +492,12 @@ export const createCampaign = async (req, res, next) => {
 					name: req.session?.user?.name
 						? req.session?.user?.name
 						: req.session?.addedUser?.name,
+					photo: req.session?.user?.photo
+						? req.session?.user?.photo
+						: req.session?.addedUser?.photo,
+					color: req.session?.user?.color
+						? req.session?.user?.color
+						: req.session?.addedUser?.color,
 					actions: "Send",
 					details: `Sent a test campaign named: ${name}`,
 				});

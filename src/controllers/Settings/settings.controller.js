@@ -408,7 +408,46 @@ export const getActivityLogs = async (req, res) => {
 			req.session?.user?.id || req.session?.addedUser?.owner;
 		filter.createdAt = { $gte: startDate };
 
+		const [users, addedUsers] = await Promise.all([
+			User.find({ unique_id: filter.useradmin }), // Retrieve all users
+			AddedUser.find({ useradmin: filter.useradmin, deleted: false }), // Retrieve all addedUsers that are not deleted
+		]);
+
+		// Step 2: Create a map (or dictionary) of users and addedUsers by their names for quick lookup
+		const userMap = new Map();
+		users.forEach((user) => {
+			userMap.set(user.name, {
+				photo: user.profilePhoto,
+				color: user.color,
+			});
+		});
+
+		const addedUserMap = new Map();
+		addedUsers.forEach((addedUser) => {
+			addedUserMap.set(addedUser.name, {
+				photo: addedUser.photo,
+				color: addedUser.color,
+			});
+		});
+
+		// Step 3: Fetch logs based on the filter
 		const logs = await ActivityLogs.find(filter).sort({ createdAt: -1 });
+
+		// Step 4: Iterate over logs and assign the photo and color based on matching names
+		logs.forEach((log) => {
+			const userData = userMap.get(log.name); // Check if name matches with a user
+			const addedUserData = addedUserMap.get(log.name); // Check if name matches with an addedUser
+
+			if (userData) {
+				// If it's a user, add the photo and color from the user
+				log.photo = userData.photo;
+				log.color = userData.color;
+			} else if (addedUserData) {
+				// If it's an addedUser, add the photo and color from the addedUser
+				log.photo = addedUserData.photo;
+				log.color = addedUserData.color;
+			}
+		});
 
 		const permissions = req.session?.addedUser?.permissions;
 		if (permissions) {
@@ -458,6 +497,7 @@ export const activityLogsFiltered = async (req, res, next) => {
 			filter.actions = action;
 		}
 
+
 		// Filter by date range
 		const now = new Date();
 		if (dateRange) {
@@ -499,7 +539,47 @@ export const activityLogsFiltered = async (req, res, next) => {
 			}
 		}
 
+		const [users, addedUsers] = await Promise.all([
+			User.find({ unique_id: filter.useradmin }), // Retrieve all users
+			AddedUser.find({ useradmin: filter.useradmin, deleted: false }), // Retrieve all addedUsers that are not deleted
+		]);
+
+		// Step 2: Create a map (or dictionary) of users and addedUsers by their names for quick lookup
+		const userMap = new Map();
+		users.forEach((user) => {
+			userMap.set(user.name, {
+				photo: user.profilePhoto,
+				color: user.color,
+			});
+		});
+
+		const addedUserMap = new Map();
+		addedUsers.forEach((addedUser) => {
+			addedUserMap.set(addedUser.name, {
+				photo: addedUser.photo,
+				color: addedUser.color,
+			});
+		});
+
+		// Step 3: Fetch logs based on the filter
 		const logs = await ActivityLogs.find(filter).sort({ createdAt: -1 });
+
+		// Step 4: Iterate over logs and assign the photo and color based on matching names
+		logs.forEach((log) => {
+			const userData = userMap.get(log.name); // Check if name matches with a user
+			const addedUserData = addedUserMap.get(log.name); // Check if name matches with an addedUser
+
+			if (userData) {
+				// If it's a user, add the photo and color from the user
+				log.photo = userData.photo;
+				log.color = userData.color;
+			} else if (addedUserData) {
+				// If it's an addedUser, add the photo and color from the addedUser
+				log.photo = addedUserData.photo;
+				log.color = addedUserData.color;
+			}
+		});
+		
 		if (req.session?.user) {
 			const acesss = await User.findOne({
 				unique_id: req.session?.user?.id,
@@ -587,8 +667,23 @@ export const sendUserInvitation = async (req, res, next) => {
 			return next(); // Ensure that execution stops here if validation fails
 		}
 
+		let exists = await User.findOne({ name, unique_id: adminId });
+		if (exists) {
+			return res.status(409).json({ message: "Name already in use" }); // Use return to stop further execution
+		}
+
+		// Check if the name already exists in the AddedUser collection
+		exists = await AddedUser.findOne({
+			name,
+			deleted: false,
+			useradmin: adminId,
+		});
+		if (exists) {
+			return res.status(409).json({ message: "Name already in use" }); // Use return to stop further execution
+		}
+
 		// Check if the user already exists in the User collection
-		let exists = await User.findOne({ email });
+		exists = await User.findOne({ email });
 		if (exists) {
 			return res.status(409).json({ message: "Email already in use" }); // Use return to stop further execution
 		}

@@ -2,9 +2,11 @@ import mongoose from "mongoose";
 
 const activityLogsSchema = new mongoose.Schema(
 	{
-		useradmin: {type: String, required: true},
-		unique_id: { type: String, required: true},
+		useradmin: { type: String, required: true },
+		unique_id: { type: String, required: true },
 		name: { type: String, required: true },
+		// photo: { type: String, required: true },
+		// color: { type: String, required: true },
 		actions: {
 			type: String,
 			enum: ["All action", "Update", "Create", "Delete", "Send"],
