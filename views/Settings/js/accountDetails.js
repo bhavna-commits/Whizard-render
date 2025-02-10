@@ -32,7 +32,7 @@ document.addEventListener("DOMContentLoaded", function () {
 			stateDropdown.disabled = false;
 
 			// Clear previous state options
-			stateDropdown.innerHTML = '<option value="">Select State</option>';
+			// stateDropdown.innerHTML = '<option value="">Select State</option>';
 
 			// Add state options
 			selectedCountry.states.forEach((state) => {

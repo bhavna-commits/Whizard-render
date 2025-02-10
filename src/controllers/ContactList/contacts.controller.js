@@ -475,13 +475,15 @@ export const createCampaign = async (req, res, next) => {
 		// console.log(test);
 
 		if (test) {
-			console.log("her");
+			console.log("var :", typeof variables);
 			try {
+				
 				await sendTestMessage(
 					req.session?.user?.id || req.session?.addedUser?.owner,
 					templateId,
 					variables,
 					contactListId,
+					test
 				);
 				await ActivityLogs.create({
 					useradmin:

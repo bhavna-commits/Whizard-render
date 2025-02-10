@@ -264,6 +264,7 @@ export async function sendTestMessage(
 	templateId,
 	variables,
 	contactListId,
+	test
 ) {
 	try {
 		// Find the template by unique_id
@@ -288,6 +289,11 @@ export async function sendTestMessage(
 
 		// Loop through each contact in the contact list
 		const contact = contactList[0];
+
+		if (typeof variables === "object" && !Array.isArray(variables)) {
+			variables = new Map(Object.entries(variables));
+		}
+
 		// Replace dynamic variables in the template with contact-specific data
 		const personalizedMessage = replaceDynamicVariables(
 			template,
@@ -301,16 +307,16 @@ export async function sendTestMessage(
 		const response = await sendMessageThroughWhatsApp(
 			phone_number_id,
 			template,
-			contact.wa_id,
+			test,
 			personalizedMessage,
 		);
 
 		if (response.status === "FAILED") {
 			console.error(
-				`Failed to send message to ${contact.wa_id}: ${response.response}`,
+				`Failed to send message to ${test}: ${response.response}`,
 			);
 			throw new Error(
-				`Failed to send message to ${contact.wa_id}: ${response.response}`,
+				`Failed to send message to ${test}: ${response.response}`,
 			);
 		}
 	} catch (error) {

@@ -64,7 +64,7 @@ window.addEventListener("message", (event) => {
 			console.log("message event: ", data);
 			waba_id = data.data.waba_id;
 			phone_number_id = data.data.phone_number_id;
-			sendDataToBackend();
+			// sendDataToBackend();
 		}
 	} catch (error) {
 		console.log("message event catch: ", event.data);

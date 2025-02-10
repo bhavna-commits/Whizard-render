@@ -25,68 +25,68 @@ let fbAccessTokenExpirationTime = Date.now();
 router.post("/auth_code", async (req, res) => {
 	const { access_token: code, waba_id, phone_number_id } = req.body;
 
-	// console.log(
-	// 	"FB_GRAPH_VERSION token :",
-	// 	FB_GRAPH_VERSION,
-	// 	"waba FB_APP_ID :",
-	// 	FB_APP_ID,
-	// 	"FB_APP_SECRET id :",
-	// 	FB_APP_SECRET,
-	// );
+	console.log(code, waba_id, phone_number_id);
 
 	try {
 		// // Step 1: Exchange authorization code for access toke
 		let response;
 		try {
-			response = await axios.get(
-				`https://graph.facebook.com/${process.env.FB_GRAPH_VERSION}/oauth/access_token`,
-				{
-					params: {
-						client_id: process.env.FB_APP_ID,
-						client_secret: process.env.FB_APP_SECRET,
-						redirect_uri: "https://chat.lifestylehead.com/",
-						code,
-					},
-				},
-			);
-
-			console.log("Access Token:", response.data.access_token);
-		} catch (error) {
-			console.error("Error details:", error.response.data.error.message);
-		}
-		if (response.status === 200) {
-			const { access_token: newAccessToken, expires_in } = response.data;
-
-			await refreshLongLivedToken(newAccessToken);
-
-			await User.findOneAndUpdate(
-				{
-					unique_id:
-						req.session?.user?.id || req.session?.addedUser?.owner,
-				},
-				{
-					WABA_ID: waba_id,
-					PHONE_NUMBER_ID: phone_number_id,
-					WhatsAppConnectStatus: "Live",
-				},
-			);
-
-			if (req.session?.user) {
-				req.session.user.whatsAppStatus = "Live";
-			} else {
-				req.session.addedUser.whatsAppStatus = "Live";
-			}
-			// Step 3: Automatically exchange short-lived token for a long-lived token
-
-			res.status(201).json({
-				success: true,
-				access_token: longLivedToken,
+			const url = `https://graph.facebook.com/v22.0/oauth/access_token`;
+			response = await fetch(url, {
+				method: "POST",
+				body: JSON.stringify({
+					client_id: process.env.FB_APP_ID,
+					client_secret: process.env.FB_APP_SECRET,
+					grant_type: "authorization_code",
+					code,
+					redirect_uri:
+						"",
+				}),
+				headers: { "Content-Type": "application/json" },
 			});
-		} else {
-			console.log(response.data.error);
+			response = await response.json();
+			if (response?.error) {
+				 console.log(
+					"Error while exchanging code for excess token:",
+					response?.error?.message,
+				);
+				return;
+			}
+		} catch (error) {
+			console.error("Error details:", error);
 		}
+		console.log("response :", response);
+		const { access_token: newAccessToken, expires_in } = response;
+		// console.log("access token : ", newAccessToken);
+		await refreshLongLivedToken(newAccessToken);
+
+		await User.findOneAndUpdate(
+			{
+				unique_id:
+					req.session?.user?.id || req.session?.addedUser?.owner,
+			},
+			{
+				WABA_ID: waba_id,
+				FB_PHONE_ID: phone_number_id,
+				WhatsAppConnectStatus: "Live",
+			},
+		);
+
+		if (req.session?.user) {
+			req.session.user.whatsAppStatus = "Live";
+		} else {
+			req.session.addedUser.whatsAppStatus = "Live";
+		}
+		// Step 3: Automatically exchange short-lived token for a long-lived token
+
+		res.status(201).json({
+			success: true,
+		});
+		// } else {
+		// 	console.log(response?.data?.error);
+		// }
 	} catch (error) {
-		console.error("Error making axios request:", error.response.data.error);
+		console.error("Error making axios request:", error);
 		res.status(500).json({
 			success: false,
 			error: "Failed to exchange authorization code",

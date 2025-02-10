@@ -519,16 +519,66 @@
 			}
 			
 			// Apply Filters Function
-			async function applyFilters () {
-				const templateName = document.getElementById('templateSearch').value;
-				const category = document.getElementById('categoryDropdown').innerText;
+			const searchInput = document.querySelector('input[type="text"]');
+			const languageSelect = document.querySelector('select[name="language"]');
+			const categorySelect = document.querySelector('select[name="category"]');
+			const applyFilterBtn = document.getElementById('applyFilterBtn');
+			const clearFilterBtn = document.getElementById('clearFilterBtn');
+			let queryParams = new URLSearchParams(window.location.search);
+			
+			// Only set textContent if the query parameter exists
+			if (queryParams.has('category')) {
+				categorySelect.value = queryParams.get('category');
+			}
+			
+			if (queryParams.has('language')) {
+				languageSelect.value = queryParams.get('language');
+			}
+			
+			if (queryParams.has('search')) {
+				searchInput.value = queryParams.get('search');
+			}
+			
+			// Function to apply the filter
+			function applyFilter () {
+				// Get the values from inputs and dropdowns
+				const searchValue = searchInput ? searchInput.value.trim() : '';
+				const selectedLanguage = languageSelect ? languageSelect.options[languageSelect.selectedIndex]?.value : '';
+				const selectedCategory = categorySelect ? categorySelect.options[categorySelect.selectedIndex]?.value : '';
 				
-				// You can add your logic here to apply filters
-				console.log('Template Name:', templateName);
-				console.log('Category:', category);
-				location.href = `/template?search=${templateName}&category=${category}`;
-				// Close modal after applying filters
-				closeModal();
+				// Update query params in the URL
+				if (searchValue) {queryParams.set('search', searchValue)} else {queryParams.set('search', '')};
+				if (selectedLanguage && selectedLanguage !== "Language") queryParams.set('language', selectedLanguage);
+				if (selectedCategory && selectedCategory !== "Category") queryParams.set('category', selectedCategory);
+				
+				// Implement your filtering logic here (e.g., fetching filtered data from the server)
+				console.log("Applied filters: ", searchValue, selectedLanguage, selectedCategory);
+				// Apply the new URL with query params
+				location.href = `${window.location.pathname}?${queryParams.toString()}`;
+			}
+			
+			// Function to clear the filter
+			function clearFilter () {
+				// Clear the inputs and dropdowns
+				if (searchInput) searchInput.value = '';
+				if (languageSelect) languageSelect.selectedIndex = 0;
+				if (categorySelect) categorySelect.selectedIndex = 0;
+				
+				// Remove query params from the URL
+				location.href = 'template';
+				
+				// Optionally, reload the page or fetch unfiltered data
+				console.log("Cleared filters");
+			}
+			
+			// Apply Filter button click event
+			if (applyFilterBtn) {
+				applyFilterBtn.addEventListener('click', applyFilter);
+			}
+			
+			// Clear Filter button click event
+			if (clearFilterBtn) {
+				clearFilterBtn.addEventListener('click', clearFilter);
 			}
 			
 			// Close Modal with the Escape Key (optional)
@@ -635,69 +685,7 @@
 	<script src="assets/js/scripts.js" type="text/javascript"></script>
 	<script src="assets/js/card.js" type="text/javascript"></script>
 	<script src="assets/js/scripts.js" type="text/javascript"></script>
-	<script>
-		const searchInput = document.querySelector('input[type="text"]');
-		const languageSelect = document.querySelector('select[name="language"]');
-		const categorySelect = document.querySelector('select[name="category"]');
-		const applyFilterBtn = document.getElementById('applyFilterBtn');
-		const clearFilterBtn = document.getElementById('clearFilterBtn');
-		let queryParams = new URLSearchParams(window.location.search);
-		
-		// Only set textContent if the query parameter exists
-		if (queryParams.has('category')) {
-			categorySelect.value = queryParams.get('category');
-		}
-		
-		if (queryParams.has('language')) {
-			languageSelect.value = queryParams.get('language');
-		}
-		
-		if (queryParams.has('search')) {
-			searchInput.value = queryParams.get('search');
-		}
-		
-		// Function to apply the filter
-		function applyFilter () {
-			// Get the values from inputs and dropdowns
-			const searchValue = searchInput ? searchInput.value.trim() : '';
-			const selectedLanguage = languageSelect ? languageSelect.options[languageSelect.selectedIndex]?.value : '';
-			const selectedCategory = categorySelect ? categorySelect.options[categorySelect.selectedIndex]?.value : '';
-			
-			// Update query params in the URL
-			if (searchValue) queryParams.set('search', searchValue);
-			if (selectedLanguage && selectedLanguage !== "Language") queryParams.set('language', selectedLanguage);
-			if (selectedCategory && selectedCategory !== "Category") queryParams.set('category', selectedCategory);
-			
-			// Implement your filtering logic here (e.g., fetching filtered data from the server)
-			console.log("Applied filters: ", searchValue, selectedLanguage, selectedCategory);
-			// Apply the new URL with query params
-			location.href = `${window.location.pathname}?${queryParams.toString()}`;
-		}
-		
-		// Function to clear the filter
-		function clearFilter () {
-			// Clear the inputs and dropdowns
-			if (searchInput) searchInput.value = '';
-			if (languageSelect) languageSelect.selectedIndex = 0;
-			if (categorySelect) categorySelect.selectedIndex = 0;
-			
-			// Remove query params from the URL
-			location.href = 'template';
-			
-			// Optionally, reload the page or fetch unfiltered data
-			console.log("Cleared filters");
-		}
-		
-		// Apply Filter button click event
-		if (applyFilterBtn) {
-			applyFilterBtn.addEventListener('click', applyFilter);
-		}
-		
-		// Clear Filter button click event
-		if (clearFilterBtn) {
-			clearFilterBtn.addEventListener('click', clearFilter);
-		}
-	</script>
+	
 	<script src="/menu.js"></script>
 	<script>
 		window.addEventListener('load', function () {

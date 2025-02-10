@@ -173,12 +173,6 @@ export const login = async (req, res, next) => {
 						.json({ message: "Account is blocked." });
 				}
 
-				const now = Date.now();
-				if (addedUser.lockUntil && addedUser.lockUntil > now) {
-					return res.status(429).json({
-						message: `Account locked. Please try again later.`,
-					});
-				}
 				console.log("here : login");
 				const isMatch = bcrypt.compare(password, addedUser.password);
 				console.log("here: passed");
@@ -190,8 +184,6 @@ export const login = async (req, res, next) => {
 						.json({ message: "Invalid credentials" });
 				}
 
-				addedUser.loginAttempts = 0; // Reset login attempts on successful login
-				addedUser.lockUntil = null; // Clear any lock period
 				await addedUser.save();
 
 				const data = await User.findOne({
@@ -239,8 +231,6 @@ export const login = async (req, res, next) => {
 				return res.status(400).json({ message: "Invalid credentials" });
 			}
 
-			user.loginAttempts = 0; // Reset login attempts on successful login
-			user.lockUntil = null; // Clear any lock period
 			await user.save();
 
 			req.session.user = {

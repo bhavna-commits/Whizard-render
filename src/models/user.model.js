@@ -88,6 +88,14 @@ const userSchema = new mongoose.Schema(
 			type: Number,
 			default: () => Date.now(),
 		},
+		loginAttempts: {
+			type: Number,
+			default: 0,
+		},
+		lockUntil: {
+			type: Number,
+			default: 0,
+		},
 	},
 	{ timestamps: false, strict: false },
 );
