@@ -332,3 +332,84 @@ export const getFilters = async (req, res) => {
 		res.json({ success: false, message: err });
 	}
 };
+
+export const addNumber = async (req, res) => {
+	try {
+		const { phoneNumber } = req.body;
+		const userId = req.user.id;
+
+		// Add to database
+		await User.findOneAndUpdate(
+			{ unique_id: userId },
+			{
+				$push: {
+					phoneNumbers: {
+						phone_number_id: phoneNumber,
+						friendly_name: `Number ${new Date().toLocaleDateString()}`,
+					},
+				},
+			},
+			{ new: true, upsert: true },
+		);
+
+		res.redirect("/manage-numbers");
+	} catch (error) {
+		res.render("add-number", {
+			error: "Failed to register number. Please try again.",
+		});
+	}
+};
+
+export const verifyNumber = async (req, res) => {
+	try {
+		const { code, phoneNumberId } = req.body;
+		const userId = req.user.id;
+
+		// Update verification status
+		await User.findOneAndUpdate(
+			{
+				unique_id: userId,
+				"phoneNumbers.phone_number_id": phoneNumberId,
+			},
+			{
+				$set: {
+					"phoneNumbers.$.verified": true,
+				},
+			},
+		);
+
+		res.redirect("/manage-numbers");
+	} catch (error) {
+		res.render("verify-number", {
+			error: "Verification failed. Please try again.",
+		});
+	}
+};
+
+export const selectPhoneNumber = async (req, res) => {
+	try {
+		const { phoneNumberId } = req.body;
+		const userId = req.user.id;
+
+		// Reset all selected flags
+		await User.updateOne(
+			{ unique_id: userId },
+			{ $set: { "phoneNumbers.$[].selected": false } },
+		);
+
+		// Set new selected number
+		await User.updateOne(
+			{
+				unique_id: userId,
+				"phoneNumbers.phone_number_id": phoneNumberId,
+			},
+			{ $set: { "phoneNumbers.$.selected": true } },
+		);
+
+		res.redirect("/manage-numbers");
+	} catch (error) {
+		res.render("manage-numbers", {
+			error: "Failed to select phone number",
+		});
+	}
+};

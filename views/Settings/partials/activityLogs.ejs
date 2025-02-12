@@ -20,25 +20,28 @@ const groupedLogs = logs.reduce((groups, log) => {
 
 // Get today's date in the same format
 const today = formatDate(new Date());
+const oneDayInMillis = 24 * 60 * 60 * 1000;
+const yesterdayDate = new Date(new Date().getTime() - oneDayInMillis);
+const yesterday = formatDate(yesterdayDate);
 %>
 
 <% if (Object.keys(groupedLogs).length == 0) { %>
 <p class="text-center text-gray-500">No logs found.</p>
 <% } else { %>
-<% Object.entries(groupedLogs).forEach(([date, dateLogs]) => { %>
+<% Object.entries(groupedLogs).forEach(([date, dateLogs], groupIndex, allGroups) => { %>
 <div class="timeline-date font-bold text-lg mt-10 mb-6">
-	<%= date %> <%= date == today ? "Today" : "" %>
+	<%= date %> <%= date == today ? "(Today)" : "" %> <%= date == yesterday ? "(Yesterday)" : "" %>
 </div>
 
 <% dateLogs.forEach((log, index) => { %>
 <div class="timeline-item flex items-center relative">
 	<div class="flex flex-col">
 		<div class="flex items-center">
-			<div class="icon bg-[<%= log.color %>] border text-gray-700 rounded-full flex justify-center items-center w-10 h-10 font-semibold">
+			<div class="bg-[<%= log.color || '#43a2ea' %>] border text-white rounded-full flex justify-center items-center w-10 h-10 font-semibold">
 				<% if (log.photo) { %>
 				<img id="profilePreview" src="/<%= log.photo %>" class="w-full h-full rounded-full object-cover block" />
 				<% } else { %>
-				<%= log.name.split(" ").map(n => n[0]).join("") %>
+				<%= log.name.split(" ").map(n => n[0]).join("").toUpperCase() %>
 				<% } %>
 			</div>
 			
@@ -50,7 +53,16 @@ const today = formatDate(new Date());
 							<%= new Date(log.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) %>
 						</p>
 					</div>
-					<span class="<%= log.actions.toLowerCase() %> bg-<%= log.actions.toLowerCase() == 'sent' ? 'orange-100' : log.actions.toLowerCase() == 'updated' ? 'pink-100' : 'blue-100' %> text-<%= log.actions.toLowerCase() == 'sent' ? 'orange-500' : log.actions.toLowerCase() == 'updated' ? 'pink-500' : 'blue-500' %> align-middle h-fit p-1 rounded text-sm">
+					<span class="<%= log.actions.toLowerCase() %> 
+						bg-<%= log.actions.toLowerCase() === 'send' ? 'orange-100' : 
+							log.actions.toLowerCase() === 'create' ? 'green-100' : 
+							log.actions.toLowerCase() === 'update' ? 'pink-100' : 
+							'red-100' %> 
+						text-<%= log.actions.toLowerCase() === 'send' ? 'orange-500' : 
+								log.actions.toLowerCase() === 'create' ? 'green-500' : 
+								log.actions.toLowerCase() === 'update' ? 'pink-500' : 
+								'red-500' %> 
+						align-middle h-fit p-1 rounded text-sm">
 						<%= log.actions %>
 					</span>
 					<div class="text-gray-600 text-right"><%= log.details %></div>
@@ -59,10 +71,16 @@ const today = formatDate(new Date());
 		</div>
 	</div>
 </div>
+
 <% if (index < dateLogs.length - 1) { %>
 <div class="border-r pl-[1.23rem] h-10 w-0"></div>
 <% } %>
 
 <% }); %>
+
+<% if (groupIndex != allGroups.length - 1) { %>
+<div class="border-b h-0 w-full py-3 text-center"></div>
+<% } %>
+
 <% }); %>
 <% } %>

@@ -43,23 +43,23 @@
 						<% if (access?.templates?.duplicateTemplate) { %>
 						<!-- Duplicate Button -->
 						<button type="button" class="text-gray-500 hover:text-gray-700 px-3 border-r" onclick="duplicateTemplate('<%= list._id %>')">
-							<img src="duplicate.svg" alt="duplicate">
+							<img src="svg/duplicate.svg" alt="duplicate">
 						</button>
 						<% } else { %>
 						<!-- Duplicate Button -->
 						<button type="button" class="text-gray-500 hover:cursor-not-allowed px-3 border-r" title="You don't have permissions to access this" disabled>
-							<img src="duplicate.svg" alt="duplicate">
+							<img src="svg/duplicate.svg" alt="duplicate">
 						</button>
 						<% } %>
 						<% if (access?.templates?.deleteTemplate) { %>
 						<!-- Delete Button -->
 						<button type="button" class="text-gray-500 hover:text-red-700 px-2" onclick="confirmDelete('<%= list._id %>')">
-							<img src="bin.svg" alt="bin">
+							<img src="svg/bin.svg" alt="bin">
 						</button>
 						<% } else { %>
 						<!-- Delete Button -->
 						<button type="button" class="text-gray-500 hover:cursor-not-allowed px-2" title="You don't have permissions to access this" disabled>
-							<img src="bin.svg" alt="bin">
+							<img src="svg/bin.svg" alt="bin">
 						</button>
 						<% } %>
 					</td>

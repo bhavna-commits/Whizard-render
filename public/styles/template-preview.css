@@ -15,8 +15,8 @@
 .iphone-screen {
 	position: absolute;
 	/* top: 1rem; */
-	left: 3.5rem;
-	width: 64%;
+	left: 3.7rem;
+	width: 63%;
 	/* height: 95%; */
 	/* overflow: hidden; */
 	background-image: url(./BG.jpg);
@@ -42,10 +42,31 @@
 	margin-top: 1rem;
 }
 
-@media screen and (min-width: 769px) {
+@media (max-width: 1440px) {
 	.iphone-screen {
-		left: 3.6rem;
-		width: 64%; /* Width for larger screens */
+		left: 3.3rem;
+		width: 67%;
+	}
+}
+
+@media (max-width: 1230px) {
+	.iphone-screen {
+		left: 2.8rem;
+		width: 72%;
+	}
+}
+
+@media (max-width: 1024px) {
+	.iphone-screen {
+		left: 2.2rem;
+		width: 78%;
+	}
+}
+
+@media (max-width: 768px) {
+	.iphone-screen {
+		left: 2.3rem;
+		width: 77.5%;
 	}
 }
 

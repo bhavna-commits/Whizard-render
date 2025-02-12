@@ -1,0 +1,67 @@
+<div class="hidden" id="addNumberModal">
+	<div class="max-w-md mx-auto bg-white p-6 rounded-lg shadow-md">
+		<h2 class="text-xl font-semibold mb-6">Register New Number</h2>
+		<div id="addNewNumberError" class="mb-4 p-3 bg-red-100 text-red-700 rounded"></div>
+		<form onsubmit="addPhoneNumber()">
+			<div class="mb-4">
+				<label class="block text-gray-700 mb-2">Phone Number</label>
+				<input type="tel" name="phoneNumber" class="w-full p-2 border rounded" placeholder="+1234567890" required>
+			</div>
+			<button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+				Register Number
+			</button>
+		</form>
+	</div>
+	<div class="max-w-md mx-auto bg-white p-6 rounded-lg shadow-md">
+		<h2 class="text-xl font-semibold mb-6">Verify Number</h2>
+		
+		<form onsubmit="verifyPhoneNumber()">
+			<input type="hidden" name="phoneNumber" value="<%= phoneNumber %>">
+			<div class="mb-4">
+				<label class="block text-gray-700 mb-2">Verification Code</label>
+				<input type="text" name="code" class="w-full p-2 border rounded" placeholder="Enter OTP" required>
+			</div>
+			<button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+				Verify Number
+			</button>
+		</form>
+	</div>
+</div>
+<div class="max-w-2xl mx-auto bg-white p-6 rounded-lg shadow-md">
+	<h2 class="text-xl font-semibold mb-6">Manage Phone Numbers</h2>
+	
+	<div id="verifyNewNumberError" class="mb-4 p-3 bg-red-100 text-red-700 rounded"></div>
+	
+	<div id="verifyNewNumberSuccess" class="mb-4 p-3 bg-green-100 text-green-700 rounded"></div>
+	
+	<div class="mb-6">
+		<button type="button" onclick="openAddNumber()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+			Add New Number
+		</button>
+	</div>
+	
+	<div class="space-y-4">
+		<% user.FB_PHONE_NUMBERS.forEach((number, index) => { %>
+		<div class="border p-4 rounded-lg <%= number.selected ? 'border-blue-500 bg-blue-50' : '' %>">
+			<div class="flex justify-between items-center">
+				<div>
+					<h3 class="font-medium"><%= number.friendly_name || number.phone_number_id %></h3>
+					<p class="text-sm text-gray-600">
+						<%= number.verified ? '✅ Verified' : '❌ Unverified' %>
+					</p>
+				</div>
+				<% if (!number.selected) { %>
+				<form onsubmit="selectNumber()">
+					<input type="hidden" name="phoneNumberId" value="<%= number.phone_number_id %>">
+					<button type="submit" class="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700">
+						Select
+					</button>
+				</form>
+				<% } else { %>
+				<span class="text-green-600 font-medium">Selected</span>
+				<% } %>
+			</div>
+		</div>
+		<% }); %>
+	</div>
+</div>

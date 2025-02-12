@@ -14,8 +14,14 @@ dotenv.config();
 
 export async function sendMessages(campaign, id, unique_id) {
 	try {
-		let phone_number_id = await User.findOne({ unique_id: id });
-		phone_number_id = phone_number_id.FB_PHONE_ID;
+		const user = await User.findOne({ unique_id: req.user.id });
+		const selectedNumber = user.FB_PHONE_NUMBERS.find(
+			(num) => num.selected,
+		);
+
+		if (!selectedNumber) {
+			throw new Error("No phone number selected");
+		}
 		// Find the template by unique_id
 		const template = await Template.findOne({
 			unique_id: campaign.templateId,
@@ -50,7 +56,7 @@ export async function sendMessages(campaign, id, unique_id) {
 			// console.log(JSON.stringify(personalizedMessage));
 			// Send message using WhatsApp (assuming wa_id is the phone number)
 			const response = await sendMessageThroughWhatsApp(
-				phone_number_id,
+				selectedNumber.phone_number_id,
 				template,
 				contact.wa_id,
 				personalizedMessage,
@@ -264,7 +270,7 @@ export async function sendTestMessage(
 	templateId,
 	variables,
 	contactListId,
-	test
+	test,
 ) {
 	try {
 		// Find the template by unique_id

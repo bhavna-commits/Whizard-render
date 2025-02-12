@@ -1,0 +1,193 @@
+<script>
+	// Helper function to get the formatted first segment of the URL path
+	const getFirstSegment = () => {
+		const currentPath = window.location.pathname;
+		
+		// Split the path by "/" and filter out empty parts
+		const pathSegments = currentPath.split("/").filter(Boolean);
+		
+		// Return the first segment or 'dashboard' if path is root '/'
+		return pathSegments[0] || 'dashboard';
+	};
+	
+	window.onload = function () {
+		const firstSegment = getFirstSegment();
+		
+		// Define the mapping for each route and corresponding SVG icons
+		const routeMap = {
+			dashboard: {
+				linkClass: '.dashboard-link',
+				iconNormal: 'svg/dashboard.svg',
+				iconClicked: 'svg/dashboardClicked.svg'
+			},
+			settings: {
+				linkClass: '.settings-link',
+				iconNormal: 'svg/settings.svg',
+				iconClicked: 'svg/settingsClicked.svg'
+			},
+			'contact-list': {
+				linkClass: '.contact-list-link',
+				iconNormal: 'svg/contact-list.svg',
+				iconClicked: 'svg/contact-listClicked.svg'
+			},
+			template: {
+				linkClass: '.template-link',
+				iconNormal: 'svg/template.svg',
+				iconClicked: 'svg/templateClicked.svg'
+			},
+			reports: {
+				linkClass: '.reports-link',
+				iconNormal: 'svg/reports.svg',
+				iconClicked: 'svg/reportsClicked.svg'
+			},
+			chats: {
+				linkClass: '.chats-link',
+				iconNormal: 'svg/chats.svg',
+				iconClicked: 'svg/chatsClicked.svg'
+			}
+		};
+		
+		// Iterate through the routes and update their respective SVGs
+		Object.keys(routeMap).forEach((key) => {
+			const route = routeMap[key];
+			const link = document.querySelector(`${route.linkClass} .icon img`);
+			
+			// If the current route matches the first segment, use the "clicked" icon
+			if (firstSegment === key && link) {
+				link.src = route.iconClicked;
+				link.alt = `${key} clicked`;
+				link.closest('.icon').classList.add('active'); // Add 'active' class
+			} else if (link) {
+				// Otherwise, use the normal icon
+				link.src = route.iconNormal;
+				link.alt = key;
+			}
+		});
+	};
+</script>
+
+<nav class="sidebar">
+	<div class="logo">
+		<img onclick="location.href = '/'" class="cursor-pointer" src="/assets/img/Wizard_logo.png" alt="Whizard Logo" />
+	</div>
+	<ul class="">
+		<!-- Dashboard: Always enabled -->
+		<li>
+			<a href="/" class="dashboard-link">
+				<span class="icon"><img src="svg/dashboard.svg" />
+				</span>
+				Dashboard
+			</a>
+		</li>
+		
+		<!-- Chats: Conditionally rendered based on permissions -->
+		<li>
+			<% if (access?.chats?.type) { %>
+			<a href="/chats" class="chats-link">
+				<span class="icon"><img src="svg/chats.svg" />
+					
+				</span>
+				Chats
+			</a>
+			<% } else { %>
+			<a href="javascript:void(0);" class="cursor-not-allowed">
+				<span class="icon"><img src="svg/chats.svg" />
+				</span>
+				Chats
+			</a>
+			<% } %>
+		</li>
+		
+		<!-- Contact List: Conditionally rendered based on permissions -->
+		<li>
+			<% if (access.contactList?.type) { %>
+			<a href="/contact-list" class="contact-list-link">
+				<span class="icon"><img src="svg/contact-list.svg" />
+				</span>
+				Contact List
+			</a>
+			<% } else { %>
+			<a href="javascript:void(0);" class="cursor-not-allowed">
+				<span class="icon"><img src="svg/contact-list.svg" />
+				</span>
+				Contact List
+			</a>
+			<% } %>
+		</li>
+		
+		<!-- Template: Conditionally rendered based on permissions -->
+		<li>
+			<% if (access?.templates?.type) { %>
+			<a href="/template" class="template-link">
+				<span class="icon"><img src="svg/template.svg" />
+				</span>
+				Template
+			</a>
+			<% } else { %>
+			<a href="javascript:void(0);" class="cursor-not-allowed">
+				<span class="icon"><img src="svg/template.svg" />
+				</span>
+				Template
+			</a>
+			<% } %>
+		</li>
+		
+		<!-- Settings: Conditionally rendered based on permissions -->
+		<li>
+			<% if (access?.settings?.type) { %>
+			<a href="/settings" class="settings-link">
+				<span class="icon"><img src="svg/settings.svg" />
+				</span>
+				Settings
+			</a>
+			<% } else { %>
+			<a href="javascript:void(0);" class="cursor-not-allowed">
+				<span class="icon"><img src="svg/settings.svg" />
+				</span>
+				Settings
+			</a>
+			<% } %>
+		</li>
+		
+		<!-- Reports: Conditionally rendered based on permissions -->
+		<li>
+			<% if (access?.reports?.type) { %>
+			<div class="report-menu relative">
+				<a href="javascript:void(0);" class="reports-link" onclick="getReportsMenu()">
+					<span class="icon"><img src="svg/reports.svg" />
+					</span>
+					Reports
+					
+				</a>
+				<div id="reportMenu" class="report-card hidden">
+					<a href="/reports/campaign-list" class="flex flex-row items-center"><img src="svg/conversationReport.svg" class="pr-2" />Campaign Report</a>
+					<a href="/reports/cost-report" class="flex flex-row items-center"><img src="svg/costReport.svg" class="pr-2" />Cost Report</a>
+				</div>
+			</div>
+			<% } else { %>
+			<a href="javascript:void(0);" class="cursor-not-allowed">
+				<span class="icon"><img src="svg/reports.svg" />
+				</span>
+				Reports
+			</a>
+			<% } %>
+		</li>
+	</ul>
+	<div class=" user-profile text-white flex justify-center items-center text-center">
+		<% if (photo) { %>
+		<img src="/<%= photo %>" alt="User Profile" class="user-profile-img" onclick="toggleDropdown()" />
+		<% } else { %>
+		<!-- Extract and display the initials -->
+		<div class="user-profile-name bg-[<%= color %>]" onclick="toggleDropdown()">
+			<% let initials = name.split(' ').map(n => n[0].toUpperCase()).join(''); %>
+			<%= initials %>
+		</div>
+		<% } %>
+		<div id="downMenu" class="account-menu hidden">
+			<a href="/settings/profile" class="flex items-center"><img src="svg/profileLogo.svg" class="pr-2" />View profile</a>
+			<button onclick="logout()" class="flex items-center"><img src="svg/logOut.svg" class="pr-2" />Log out</button>
+		</div>
+		
+	</div>
+	
+</nav>

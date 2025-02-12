@@ -21,6 +21,7 @@ import sendAddUserMail from "../../services/OTP/addingUserService.js";
 import dotenv from "dotenv";
 import { getRandomColor } from "../User/userFunctions.js";
 import { access } from "fs";
+import { start } from "repl";
 
 dotenv.config();
 
@@ -404,6 +405,7 @@ export const getActivityLogs = async (req, res) => {
 		let filter = {};
 		const now = new Date();
 		let startDate = new Date(now.setDate(now.getDate() - 7));
+		// console.log(startDate);
 		filter.useradmin =
 			req.session?.user?.id || req.session?.addedUser?.owner;
 		filter.createdAt = { $gte: startDate };
@@ -561,10 +563,8 @@ export const activityLogsFiltered = async (req, res, next) => {
 			});
 		});
 
-		// Step 3: Fetch logs based on the filter
 		const logs = await ActivityLogs.find(filter).sort({ createdAt: -1 });
 
-		// Step 4: Iterate over logs and assign the photo and color based on matching names
 		logs.forEach((log) => {
 			const userData = userMap.get(log.name); // Check if name matches with a user
 			const addedUserData = addedUserMap.get(log.name); // Check if name matches with an addedUser
@@ -579,7 +579,7 @@ export const activityLogsFiltered = async (req, res, next) => {
 				log.color = addedUserData.color;
 			}
 		});
-		
+
 		if (req.session?.user) {
 			const acesss = await User.findOne({
 				unique_id: req.session?.user?.id,

@@ -3,7 +3,15 @@ import mongoose from "mongoose";
 const userSchema = new mongoose.Schema(
 	{
 		WABA_ID: { type: String, required: false },
-		FB_PHONE_ID: { type: String, required: false },
+		FB_PHONE_NUMBERS: [
+			{
+				phone_number_id: String,
+				verified: { type: Boolean, default: false },
+				selected: { type: Boolean, default: false },
+				friendly_name: String,
+				created_at: { type: Date, default: Date.now },
+			},
+		],
 		FB_ACCESS_TOKEN: { type: String, required: false },
 		FB_ACCESS_TOKEN_EXPIRY: { type: Number, required: false },
 		profilePhoto: { type: String, required: false },

@@ -1,3 +1,9 @@
+
+.mainDiv {
+	/* padding-top: 0.75rem; */
+	width: 98%;
+}
+
 .graphalert {
 	position: absolute;
 	top: 50%;

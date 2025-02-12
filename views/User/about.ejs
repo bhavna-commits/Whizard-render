@@ -56,20 +56,11 @@
 </head>
 
 <body>
-		<div id="loader" class="loader">
-			<div class="w-full h-full flex justify-center items-center">
-				<div class="flex flex-col items-center max-w-[10rem]">
-					<img src="/assets/img/Wizard_logo.png" alt="Whizard Logo" class="animate-pulse object-contain loading-image mb-2" />
-					<div class="w-full h-1 bg-gray-300 rounded-full overflow-hidden">
-						<div id="progress-bar" class="h-full bg-black transition-all duration-300 ease-out" style="width: 0%"></div>
-					</div>
-				</div>
-			</div>
-		</div>
+	<%- include("../commonJS/loader") %>
 	<div class="flex">
 		<!-- Left Section -->
 		
-    <%- include("common/leftSide")  %>
+		<%- include("common/leftSide")  %>
 		
 		<!-- Right Section - Sign Up Form -->
 		<div class="flex-shrink right-section">
@@ -180,19 +171,7 @@
 	</script>
 	<script src="carousel.js"></script>
 	<script src="/user/js/about.js"></script>
-	<script>
-		window.addEventListener('load', function () {
-			// Fade out the loader smoothly by changing the opacity
-			var loader = document.getElementById('loader');
-			loader.style.transition = 'opacity 0.3s ease'; // Smooth fade out
-			loader.style.opacity = '0';
-			
-			// Completely remove the loader after the fade-out effect is finished
-			setTimeout(function () {
-				loader.style.display = 'none'; // Ensure loader is no longer in the DOM flow
-			}, 300); // Match the duration of the fade-out (0.5 seconds in this case)
-		});
-	</script>
+	
 </body>
 
 </html>
