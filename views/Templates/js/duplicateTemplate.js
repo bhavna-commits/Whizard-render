@@ -1,4 +1,5 @@
 // Access the BODY component from the `data` object
+selectLanguage(data.language.language, data.language.code);
 const bodyText = data.components.find((c) => c.type == "BODY")?.text || "";
 document.getElementById("bodyInput").innerHTML = bodyText.replace(
 	/\n/g,

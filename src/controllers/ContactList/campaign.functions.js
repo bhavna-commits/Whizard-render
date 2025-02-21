@@ -8,20 +8,13 @@ import Campaign from "../../models/campaign.model.js";
 import Report from "../../models/report.model.js";
 import User from "../../models/user.model.js";
 import { generateUniqueId } from "../../utils/otpGenerator.js";
-import { getFbAccessToken } from "../../backEnd-Routes/facebook.backEnd.routes.js";
 
 dotenv.config();
 
 export async function sendMessages(campaign, id, unique_id) {
 	try {
-		const user = await User.findOne({ unique_id: req.user.id });
-		const selectedNumber = user.FB_PHONE_NUMBERS.find(
-			(num) => num.selected,
-		);
+		const user = await User.findOne({ unique_id: id });
 
-		if (!selectedNumber) {
-			throw new Error("No phone number selected");
-		}
 		// Find the template by unique_id
 		const template = await Template.findOne({
 			unique_id: campaign.templateId,
@@ -53,10 +46,10 @@ export async function sendMessages(campaign, id, unique_id) {
 				contact,
 			);
 
-			// console.log(JSON.stringify(personalizedMessage));
+			
 			// Send message using WhatsApp (assuming wa_id is the phone number)
 			const response = await sendMessageThroughWhatsApp(
-				selectedNumber.phone_number_id,
+				user,
 				template,
 				contact.wa_id,
 				personalizedMessage,
@@ -75,8 +68,6 @@ export async function sendMessages(campaign, id, unique_id) {
 					`Failed to send message to ${contact.wa_id}: ${response.response}`,
 				);
 			}
-			// console.log(JSON.stringify(response));
-			const user = await User.findOne({ unique_id: id });
 			// Create a report for each sent message
 			const report = new Report({
 				WABA_ID: user.WABA_ID,
@@ -184,7 +175,7 @@ export function replaceDynamicVariables(template, variables, contact) {
 }
 
 export async function sendMessageThroughWhatsApp(
-	phone_number_id,
+	user,
 	template,
 	phone,
 	messageComponents,
@@ -203,17 +194,48 @@ export async function sendMessageThroughWhatsApp(
 			},
 		};
 
-		// Send the request
-		const response = await axios.post(
-			`https://graph.facebook.com/${process.env.FB_GRAPH_VERSION}/${phone_number_id}/messages`,
-			requestData,
-			{
+		// Log the constructed requestData payload for debugging
+		// console.log(
+		// 	"Request Data Payload:",
+		// 	JSON.stringify(requestData, null, 2),
+		// );
+
+		// Find the selected phone number from the user's array
+		const selectedNumber = user.FB_PHONE_NUMBERS.find(
+			(n) => n.selected === true,
+		);
+		if (!selectedNumber) {
+			throw new Error("No phone number selected.");
+		}
+
+		// Log the selected phone number details
+		// console.log("Selected Phone Number:", selectedNumber);
+
+		// Construct the API URL
+		const url = `https://graph.facebook.com/${process.env.FB_GRAPH_VERSION}/${selectedNumber.phone_number_id}/messages`;
+		console.log("Request URL:", url);
+
+		// Declare response variable in the outer scope
+		let response;
+
+		// Send the request using axios
+		try {
+			response = await axios.post(url, requestData, {
 				headers: {
-					Authorization: `Bearer ${getFbAccessToken()}`,
+					Authorization: `Bearer ${user.FB_ACCESS_TOKEN}`,
 					"Content-Type": "application/json",
 				},
-			},
-		);
+			});
+
+			// Log the response from the WhatsApp API
+			console.log("Response from WhatsApp API:", response.data);
+		} catch (error) {
+			console.error(
+				"Error sending message:",
+				error.response ? error.response.data : error.message,
+			);
+			throw error;
+		}
 
 		return { status: "SENT", response: response.data };
 	} catch (error) {
@@ -223,7 +245,10 @@ export async function sendMessageThroughWhatsApp(
 		);
 		return {
 			status: "FAILED",
-			response: error.response?.data?.error?.message || error.message,
+			response:
+				error.response?.data?.error?.error_user_msg ||
+				error.response?.data?.error?.error_user_title ||
+				error.response?.data?.error?.message,
 		};
 	}
 }
@@ -307,11 +332,10 @@ export async function sendTestMessage(
 			contact,
 		);
 
-		let phone_number_id = await User.findOne({ unique_id: id });
-		phone_number_id = phone_number_id.FB_PHONE_ID;
+		let user = await User.findOne({ unique_id: id });
 
 		const response = await sendMessageThroughWhatsApp(
-			phone_number_id,
+			user,
 			template,
 			test,
 			personalizedMessage,

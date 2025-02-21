@@ -4,7 +4,7 @@ import axios from "axios";
 import Template from "../../models/templates.model.js";
 import User from "../../models/user.model.js";
 import { generateUniqueId } from "../../utils/otpGenerator.js";
-import { getFbAccessToken } from "../../backEnd-Routes/facebook.backEnd.routes.js";
+// import { getFbAccessToken } from "../../backEnd-Routes/facebook.backEnd.routes.js";
 
 dotenv.config();
 
@@ -94,7 +94,7 @@ export async function submitTemplateToFacebook(savedTemplate, id) {
 			{
 				headers: {
 					"Content-Type": "application/json",
-					Authorization: `Bearer ${getFbAccessToken()}`,
+					Authorization: `Bearer ${user.FB_ACCESS_TOKEN}`,
 				},
 			},
 		);
@@ -104,15 +104,10 @@ export async function submitTemplateToFacebook(savedTemplate, id) {
 	} catch (error) {
 		// Handle different error types
 		if (error.response) {
-			// Server responded with a status code outside the 2xx range
-			console.error(
-				"Facebook API error:",
-				error.response.data.error?.message,
-				"Request data:",
-				error.config.data, // Log the request that was sent
-			);
 			throw new Error(
-				error.response.data.error?.message ||
+				error.response.data.error?.error_user_msg ||
+					error.response.data.error?.error_user_title ||
+					error.response.data.error?.message ||
 					"Unknown error from Facebook",
 			);
 		} else if (error.request) {
@@ -137,7 +132,7 @@ export const fetchFacebookTemplates = async (id) => {
 		const response = await fetch(url, {
 			method: "GET",
 			headers: {
-				Authorization: `Bearer ${getFbAccessToken()}`,
+				Authorization: `Bearer ${user.FB_ACCESS_TOKEN}`,
 			},
 		});
 

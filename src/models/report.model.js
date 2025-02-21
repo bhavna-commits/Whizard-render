@@ -41,11 +41,35 @@ const CampaignReportSchema = new mongoose.Schema(
 	},
 );
 
-CampaignReportSchema.pre("save", function (next) {
-	if (this.isNew) {
-		this.updatedAt = () => Date.now();
-	}
-	next();
-});
++(
+	// Single field indexes
+	(+CampaignReportSchema.index({ useradmin: 1 }))
+);
++CampaignReportSchema.index({ campaignId: 1 });
++CampaignReportSchema.index({ status: 1 });
++CampaignReportSchema.index({ recipientPhone: 1 });
++CampaignReportSchema.index({ createdAt: 1 }); // For time-based queries
++(+(
+	// Unique index for messageId to prevent duplicates
+	(+CampaignReportSchema.index({ messageId: 1 }, { unique: true }))
+));
++(+(
+	// Compound indexes
+	(+CampaignReportSchema.index({ useradmin: 1, campaignId: 1 }))
+)); // Common filter combination
++CampaignReportSchema.index({ status: 1, createdAt: 1 }); // Time-sorted status queries
++(+(
+	// Optional index for deleted flag if using soft-delete frequently
+	(+(
+		// CampaignReportSchema.index({ deleted: 1 });
+
+		CampaignReportSchema.pre("save", function (next) {
+			if (this.isNew) {
+				this.updatedAt = () => Date.now();
+			}
+			next();
+		})
+	))
+));
 
 export default mongoose.model("CampaignReport", CampaignReportSchema);

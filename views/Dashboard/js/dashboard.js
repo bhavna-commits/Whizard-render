@@ -23,9 +23,26 @@ let phone_number_id = null;
 let fbAccessToken = null;
 
 // Function to send data when all variables are available
+function showLoader() {
+	const loader = document.getElementById("afterSignUpLoader");
+	if (loader) {
+		loader.classList.remove("hidden");
+	}
+}
+
+function hideLoader() {
+	const loader = document.getElementById("afterSignUpLoader");
+	if (loader) {
+		loader.classList.add("hidden");
+	}
+}
+
 function sendDataToBackend() {
 	console.log(waba_id, phone_number_id, fbAccessToken);
 	if (waba_id && phone_number_id && fbAccessToken) {
+		// Show the loader before starting the API call
+		showLoader();
+
 		fetch("/api/facebook/auth_code", {
 			method: "POST",
 			headers: {
@@ -39,17 +56,22 @@ function sendDataToBackend() {
 		})
 			.then((response) => response.json())
 			.then((data) => {
+				// Hide the loader once the response is received
+				hideLoader();
 				if (data.success) {
-					location.reload();
+					openSet2FAPin(phone_number_id);
 				} else {
 					alert(data.error);
 				}
 			})
 			.catch((error) => {
+				hideLoader();
 				console.error("Error saving data:", error);
+				alert(error);
 			});
 	}
 }
+
 
 // Message event listener
 window.addEventListener("message", (event) => {

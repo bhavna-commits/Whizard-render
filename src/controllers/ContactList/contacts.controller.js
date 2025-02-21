@@ -475,7 +475,7 @@ export const createCampaign = async (req, res, next) => {
 		// console.log(test);
 
 		if (test) {
-			console.log("var :", typeof variables);
+			// console.log("var :", typeof variables);
 			try {
 				
 				await sendTestMessage(

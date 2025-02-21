@@ -47,7 +47,7 @@ async function fetchAnalytics(startDate, endDate) {
 
 		// Convert to Unix timestamps
 		const startUnix = Math.floor(startDate.getTime() / 1000);
-		const endUnix = Math.floor(endDate.getTime() / 1000);
+		const endUnix = Math.floor(endDate.getTime() / 1000) + 86400;
 		
 		const response = await axios.get("/reports/get-cost-report", {
 			params: {

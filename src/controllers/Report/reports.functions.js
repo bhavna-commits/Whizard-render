@@ -197,8 +197,8 @@ export async function sendMessagesReports(
 	contactList,
 ) {
 	try {
-		let phone_number_id = await User.findOne({ unique_id: id });
-		phone_number_id = phone_number_id.FB_PHONE_ID;
+		let user = await User.findOne({ unique_id: id });
+		
 		// Find the template by unique_id
 		const template = await Template.findOne({
 			unique_id: campaign.templateId,
@@ -227,7 +227,7 @@ export async function sendMessagesReports(
 			);
 			console.log(personalizedMessage);
 			const response = await sendMessageThroughWhatsApp(
-				phone_number_id,
+				user,
 				template,
 				contact.wa_id,
 				personalizedMessage,

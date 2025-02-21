@@ -9,6 +9,7 @@ import settingsbackEndRoute from "./backEnd-Routes/settings.backEnd.routes.js";
 import faceBookBackEndRoute from "./backEnd-Routes/facebook.backEnd.routes.js";
 import reportsFrontEndRoute from "./frontEnd-Routes/reports.frontEnd.routes.js";
 import reportsBackEndRoute from "./backEnd-Routes/reports.backEnd.routes.js";
+import dashboardBackEndRoutes from "./backEnd-Routes/dashboard.backEnd.routes.js"
 
 import { checkSession } from "./middleWares/checkSession.js";
 import app from "./static.app.js";
@@ -25,6 +26,7 @@ app.use("/api/templates", checkSession, templatesRoutes);
 app.use("/api/contact-list", checkSession, contactListRoute);
 app.use("/api/settings", checkSession, settingsbackEndRoute);
 app.use("/api/reports", checkSession, reportsBackEndRoute);
+app.use("/api/dashboard", checkSession, dashboardBackEndRoutes);
 
 app.use((req, res) => {
 	res.status(404).render("errors/notFound");

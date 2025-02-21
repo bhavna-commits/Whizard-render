@@ -80,123 +80,244 @@
 				
 			</div>
 			
-			
-			<div class="container mx-auto bg-white p-6 rounded-lg">
-				
-				<% if (users.length > 0) { %>
-				<table class=" w-full text-left border-collapse">
-					<thead class="font-thin">
-						<tr class="text-gray-500 font-normal">
-							<td class="p-4 text-center">Sno.</td>
-							<td class="p-4 text-center">User Name</td>
-							<td class="p-4 text-center">Email</td>
-							<td class="p-4 text-center">Role</td>
-							<td class="p-4 text-center">Status</td>
-							<td class="p-4 text-center">Actions</td>
-						</tr>
-					</thead>
-					<tbody>
-						<% users.forEach((user, index) => { %>
-						<tr class="text-gray-900">
-							<td class="p-4 text-center"><%= index + 1 %></td>
-							<td class="p-4 text-center"><%= user.name %></td>
-							<td class="p-4 text-center"><%= user.email %></td>
-							<td class="p-4 text-center"><%= user.roleName %></td>
-							<td class="p-4 text-center">
-								<% if (user.status === 'Active') { %>
-								<span class="text-orange-500 bg-orange-100 p-2 rounded"><%= user.status %></span>
-								<% } else { %>
-								<span class="text-gray-500 bg-gray-100 p-2 rounded"><%= user.status %></span>
-								<% } %>
-							</td>
-							<td class="p-4 text-center">
-								<div class="relative">
-									<button type="button" class="text-gray-500 font-bold hover:text-gray-900 focus:outline-none" onclick="toggleDropdownTable('<%= user.email.replace(/\./g, '-') %>')">
-										. . .
-									</button>
-									<div id="dropdown-<%= user.email.replace(/\./g, '-') %>" class="hidden absolute bg-white border rounded-lg shadow-lg w-40 right-0 z-10">
-										
-										<button type="button" class="block w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-100" onclick="updateRole('<%= user.email %>', '<%= user.name %>' , 'dropdown-<%= user.email.replace(/\./g, '-') %>')">Update Role</button>
-										<button type="button" class="block w-full px-4 py-2 text-left text-red-500 hover:bg-gray-100" onclick="deleteUser('<%= user.unique_id %>', '<%= user.name %>')">Delete User</button>
-									</div>
-								</div>
-							</td>
-						</tr>
-						<% }) %>
-					</tbody>
-				</table>
-				<% } else { %>
-				<!-- Empty state -->
-				<div class="flex flex-col items-center justify-center min-h-[400px]  rounded-lg mt-4">
-					<div class="text-center">
-						<img src="https://img.freepik.com/free-vector/hands-holding-tablet-with-forefinger-clicking-start-button-new-application-launch-flat-illustration_74855-20595.jpg?ga=GA1.1.131490893.1732525963&semt=ais_hybrid" alt="No contacts" class="w-48 h-48 mx-auto mb-4">
-						
-						<h3 class="text-xl font-semibold text-gray-900 mb-2">No members yet</h3>
-						<p class="text-gray-600 mb-6">Start adding users by clicking on "Add New User"</p>
-						<button type="button" id="AddNewUser" onclick="openModal()" class="inline-flex items-center px-3 py-[10px] border border-transparent text-sm font-medium rounded-md text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black">
-							<i class="fa-solid fa-plus pr-2"></i>
-							<span>Add New User</span>
-						</button>
-					</div>
-				</div>
-				<% } %>
+			<div class="flex space-x-4 w-full p-6">
+				<!-- "Users" button - active by default -->
+				<button id="usersBtn" class="nav py-1 p-2 bg-black text-white border-black rounded focus:outline-none" onclick="toggleTabs('usersBtn', 'usersTab')">
+					Users
+				</button>
+				<div class="h-4 mt-2 w-0 border border-[#B8B8B8]"></div>
+				<!-- "Roles" button -->
+				<button id="rolesBtn" class="nav py-1 p-2 rounded focus:outline-none" onclick="toggleTabs('rolesBtn', 'rolesTab')">
+					Roles
+				</button>
 			</div>
-			
-			<script>
-				function toggleDropdownTable (index) {
-					const dropdownTable = document.getElementById('dropdown-' + index);
-					dropdownTable.classList.toggle('hidden');
-				}
-				
-				function deleteUser (userId, name) {
-					const confirmation = confirm(`Are you sure you want to delete user ${name}?`);
+			<div class="overflow-y-auto h-full w-full">
+				<div id="usersTab" class="tab container mx-auto ">
 					
-					if (confirmation) {
-						fetch('/api/settings/updateUserManagement', {
-								method: 'POST',
-								headers: {
-									'Content-Type': 'application/json',
-								},
-								body: JSON.stringify({
-									action: 'deleteUser',
-									userId
-								}),
-							})
-							.then(response => response.json())
-							.then(data => {
-								if (data.success) {
-									alert(`User ${name} deleted successfully`);
-									location.reload(); // Reload the page to reflect the changes
-								} else {
-									alert('Failed to delete user');
-								}
-							})
-							.catch(error => {
-								console.error('Error:', error);
-								alert('An error occurred while deleting user');
-							});
-					}
-				}
+					<% if (users.length > 0) { %>
+					<table class=" w-full text-left border-collapse">
+						<thead class="font-thin">
+							<tr class="text-gray-500 font-normal">
+								<td class="p-4 text-center">Sno.</td>
+								<td class="p-4 text-center">User Name</td>
+								<td class="p-4 text-center">Email</td>
+								<td class="p-4 text-center">Role</td>
+								<td class="p-4 text-center">Status</td>
+								<td class="p-4 text-center">Actions</td>
+							</tr>
+						</thead>
+						<tbody>
+							<% users.forEach((user, index) => { %>
+							<tr class="text-gray-900">
+								<td class="p-4 text-center"><%= index + 1 %></td>
+								<td class="p-4 text-center"><%= user.name %></td>
+								<td class="p-4 text-center"><%= user.email %></td>
+								<td class="p-4 text-center hover:cursor-pointer" onclick="location.href= '/settings/user-management/permissions?id=<%= user.roleId %>'" title="click here to edit role"><%= user.roleName %></td>
+								<td class="p-4 text-center">
+									<% if (user.status === 'Active') { %>
+									<span class="text-orange-500 bg-orange-100 p-2 rounded"><%= user.status %></span>
+									<% } else { %>
+									<span class="text-gray-500 bg-gray-100 p-2 rounded"><%= user.status %></span>
+									<% } %>
+								</td>
+								<td class="p-4 text-center">
+									<div class="relative">
+										<button type="button" class="text-gray-500 font-bold hover:text-gray-900 focus:outline-none" onclick="toggleDropdownTable('<%= user.email.replace(/\./g, '-') %>')">
+											. . .
+										</button>
+										<div id="dropdown-<%= user.email.replace(/\./g, '-') %>" class="hidden absolute bg-white border rounded-lg shadow-lg w-40 right-0 z-10">
+											
+											<button type="button" class="block w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-100" onclick="updateRole('<%= user.email %>', '<%= user.name %>' , 'dropdown-<%= user.email.replace(/\./g, '-') %>')">Update Role</button>
+											<button type="button" class="block w-full px-4 py-2 text-left text-red-500 hover:bg-gray-100" onclick="deleteUser('<%= user.unique_id %>', '<%= user.name %>')">Delete User</button>
+										</div>
+									</div>
+								</td>
+							</tr>
+							<% }) %>
+						</tbody>
+					</table>
+					<% } else { %>
+					<!-- Empty state -->
+					<div class="flex flex-col items-center justify-center min-h-[400px]  rounded-lg mt-4">
+						<div class="text-center">
+							<img src="https://img.freepik.com/free-vector/hands-holding-tablet-with-forefinger-clicking-start-button-new-application-launch-flat-illustration_74855-20595.jpg?ga=GA1.1.131490893.1732525963&semt=ais_hybrid" alt="No contacts" class="w-48 h-48 mx-auto mb-4">
+							
+							<h3 class="text-xl font-semibold text-gray-900 mb-2">No members yet</h3>
+							<p class="text-gray-600 mb-6">Start adding users by clicking on "Add New User"</p>
+							<button type="button" id="AddNewUser" onclick="openModal()" class="inline-flex items-center px-3 py-[10px] border border-transparent text-sm font-medium rounded-md text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black">
+								<i class="fa-solid fa-plus pr-2"></i>
+								<span>Add New User</span>
+							</button>
+						</div>
+					</div>
+					<% } %>
+				</div>
 				
-				// Close dropdown on clicking outside (using document.addEventListener)
-				document.addEventListener('click', function (event) {
-					const target = event.target;
-					
-					// If the clicked element is not a dropdown button
-					if (!target.matches('button')) {
-						// Hide all dropdowns
-						document.querySelectorAll("[id^='dropdown']").forEach(dropdown => {
-							if (!dropdown.classList.contains('hidden')) {
-								dropdown.classList.add('hidden');
-							}
-						});
-					}
-				});
-			</script>
-			
+				<div id="rolesTab" class="tab hidden container mx-auto flex justify-center items-center">
+					<% if (permissions.length > 0) { %>
+					<table class="w-[100%] border-separate border-spacing-y-4">
+						<!-- Table Head -->
+						<thead class=" text-gray-600 text-xs">
+							<tr>
+								<th class="px-4 py-3  font-medium">Sno.</th>
+								<th class="px-4 py-3  font-medium">Name</th>
+								<th class="px-4 py-3  font-medium">Created By</th>
+								<th class="px-4 py-3  font-medium">Actions</th>
+								<th class=""></th>
+							</tr>
+						</thead>
+						<!-- Table Body -->
+						<tbody class="text-gray-700 text-sm">
+							<% permissions?.forEach((permission, index) => { %>
+							<tr class="">
+								<td class="px-4 py-3 text-center  border-gray-200 rounded-lg"><%= index + 1 %></td>
+								<td class="px-4 py-3 text-center  border-gray-200 rounded-lg"><%= permission.name %></td>
+								<td class="px-4 py-3 text-center  border-gray-200"><%= permission.createdBy %></td>
+								<td class="px-4 py-3 text-right relative  border-gray-200 rounded-lg">
+									<div class="flex items-center justify-center">
+										<button class="px-4 py-2 " onclick="location.href= '/settings/user-management/permissions?id=<%= permission.unique_id %>'" title="Update Permission"><img src="svg/editPen.svg" alt="Edit" class="" /></button>
+										<div class="h-4  w-0 border border-[#B8B8B8]"></div>
+										<button class="  px-4 py-2 " onclick="deletePermission('<%= permission.unique_id	 %>', '<%= permission.name	 %>')" title="Delete Permission"><img src="svg/bin contact list.svg" alt="Delete" class="" /></button>
+									</div>
+									<!-- <button class="p-2  hover:bg-gray-50 rounded focus:outline-none" onclick="openOptions('<%= index %>')">
+										<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" viewBox="0 0 20 20" fill="currentColor">
+											<path d="M10 3a1.5 1.5 0 110 3 1.5 1.5 0 010-3zm0 5a1.5 1.5 0 110 3 1.5 1.5 0 010-3zm0 5a1.5 1.5 0 110 3 1.5 1.5 0 010-3z" />
+										</svg>
+									</button>
+									
+									<div id="<%= index %>" class="openOptions hidden absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded shadow-md z-10">
+										<ul class="py-1 text-sm text-gray-700">
+											<li>
+												<button class="w-full text-left px-4 py-2 hover:bg-gray-100" onclick="location.href= '/settings/user-management/permissions?id=<%= permission.unique_id	 %>'">Update Permission</button>
+											</li>
+											<li>
+												<button class="w-full text-left px-4 py-2 hover:bg-gray-100" onclick="deletePermission('<%= permission.unique_id	 %>', '<%= permission.name	 %>')">Delete Role</button>
+											</li>
+										</ul>
+									</div> -->
+								</td>
+							</tr>
+							<% }); %>
+						</tbody>
+					</table>
+					<% } %>
+				</div>
+			</div>
 			
 		</div>
 	</div>
+	<script>
+		// Toggle dropdown menu
+		function openOptions (menuId) {
+			const dropdown = document.getElementById(menuId);
+			dropdown.classList.toggle('hidden');
+		}
+		
+		function toggleTabs (btn, tab) {
+			
+			document.querySelectorAll(".tab").forEach(element => {
+				element.classList.add("hidden");
+			});
+			
+			document.querySelectorAll('.nav').forEach(element => {
+				element.classList.remove('bg-black', 'text-white');
+				// element.classList.add('bg-transparent', 'text-gray-500');
+			});
+			
+			document.getElementById(btn).classList.add('bg-black', 'text-white');
+			// document.getElementById(btn).classList.remove('border-transparent', 'text-gray-500');
+			document.getElementById(tab).classList.remove("hidden");
+		}
+		
+		function toggleDropdownTable (index) {
+			const dropdownTable = document.getElementById('dropdown-' + index);
+			dropdownTable.classList.toggle('hidden');
+		}
+		
+		function deleteUser (userId, name) {
+			const confirmation = confirm(`Are you sure you want to delete user ${name}?`);
+			
+			if (confirmation) {
+				fetch('/api/settings/updateUserManagement', {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json',
+						},
+						body: JSON.stringify({
+							action: 'deleteUser',
+							userId
+						}),
+					})
+					.then(response => response.json())
+					.then(data => {
+						if (data.success) {
+							alert(`User ${name} deleted successfully`);
+							location.reload(); // Reload the page to reflect the changes
+						} else {
+							alert('Failed to delete user');
+						}
+					})
+					.catch(error => {
+						console.error('Error:', error);
+						alert('An error occurred while deleting user');
+					});
+			}
+		}
+		
+		function deletePermission (userId, name) {
+			const confirmation = confirm(`Are you sure you want to delete role ${name}?`);
+			
+			if (confirmation) {
+				fetch(`/api/settings/deleteRole?id=${userId}&name=${name}`, {
+						method: 'DELETE',
+						headers: {
+							'Content-Type': 'application/json',
+						},
+					})
+					.then(response => response.json())
+					.then(data => {
+						if (data.success) {
+							alert(`Role ${name} deleted successfully`);
+							location.reload(); // Reload the page to reflect changes
+						} else {
+							alert('Failed to delete role');
+						}
+					})
+					.catch(error => {
+						console.error('Error:', error);
+						alert('An error occurred while deleting the role');
+					});
+			}
+		}
+		
+		// Close dropdown on clicking outside (using document.addEventListener)
+		document.addEventListener('click', function (event) {
+			const target = event.target;
+			
+			// If the clicked element is not a dropdown button
+			if (!target.matches('button')) {
+				// Hide all dropdowns
+				document.querySelectorAll("[id^='dropdown']").forEach(dropdown => {
+					if (!dropdown.classList.contains('hidden')) {
+						dropdown.classList.add('hidden');
+					}
+				});
+			}
+		});
+		
+		document.addEventListener('click', function (event) {
+			const dropdowns = document.querySelectorAll('.openOptions');
+			
+			dropdowns.forEach(dropdown => {
+				const isClickInside = dropdown.contains(event.target);
+				
+				// If the click is outside of the dropdown or its toggle button, hide the dropdown
+				if (!isClickInside && !event.target.closest('button')) {
+					dropdown.classList.add('hidden');
+				}
+			});
+		});
+	</script>
 	<%- include("partials/addUser")  %>
 	<%- include("partials/updateRole")  %>
 	<script src="/menu.js"></script>

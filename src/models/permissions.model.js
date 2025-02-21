@@ -7,14 +7,17 @@ const permissionSchema = new Schema(
 		useradmin: { type: String, ref: "User", required: true },
 		name: { type: String, required: true },
 		unique_id: { type: String, required: true },
+		deleted: { type: Boolean, default: false },
 		dashboard: {
 			connectNow: { type: Boolean, default: false },
 			viewUsers: { type: Boolean, default: false },
 			quickActions: { type: Boolean, default: false },
+			addPhoneNumber: { type: Boolean, default: false },
 		},
 		chats: {
 			type: { type: Boolean, default: false },
-			redirectToVpchat: { type: Boolean, default: false },
+			view: { type: Boolean, default: false },
+			chat: { type: Boolean, default: false },
 		},
 		contactList: {
 			type: { type: Boolean, default: false },
@@ -38,7 +41,6 @@ const permissionSchema = new Schema(
 				type: { type: Boolean, default: false },
 				viewReports: { type: Boolean, default: false },
 				retargetingUsers: { type: Boolean, default: false },
-				redirectToVpchat: { type: Boolean, default: false },
 			},
 			costReports: { type: Boolean, default: false },
 		},
@@ -49,6 +51,7 @@ const permissionSchema = new Schema(
 		},
 		createdAt: { type: Number, default: () => Date.now() },
 		updatedAt: { type: Number, default: () => Date.now() },
+		createdBy: { type: String, required: true },
 	},
 	{
 		timestamps: false,

@@ -7,6 +7,8 @@ import {
 	sendUserInvitation,
 	createPermissions,
 	updateUserManagement,
+	editPermissions,
+	deleteRole,
 } from "../controllers/Settings/settings.controller.js";
 import { trackSanitationFailures } from "../middleWares/sanitiseInput.js";
 
@@ -21,14 +23,23 @@ router.post(
 	trackSanitationFailures,
 );
 router.post(
-	"/user-management/permissions/update",
+	"/user-management/permissions/create",
 	createPermissions,
 	trackSanitationFailures,
 );
+
+router.post(
+	"/user-management/permissions/edit",
+	editPermissions,
+	trackSanitationFailures,
+);
+
 router.post(
 	"/updateUserManagement",
 	updateUserManagement,
 	trackSanitationFailures,
 );
+
+router.delete("/deleteRole", deleteRole);
 
 export default router;

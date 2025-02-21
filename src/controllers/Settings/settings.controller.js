@@ -21,7 +21,6 @@ import sendAddUserMail from "../../services/OTP/addingUserService.js";
 import dotenv from "dotenv";
 import { getRandomColor } from "../User/userFunctions.js";
 import { access } from "fs";
-import { start } from "repl";
 
 dotenv.config();
 
@@ -499,7 +498,6 @@ export const activityLogsFiltered = async (req, res, next) => {
 			filter.actions = action;
 		}
 
-
 		// Filter by date range
 		const now = new Date();
 		if (dateRange) {
@@ -614,6 +612,7 @@ export const getUserManagement = async (req, res) => {
 		let users = await AddedUser.find({ useradmin: id, deleted: false });
 		const permissions = await Permissions.find({
 			useradmin: id,
+			deleted: false,
 		});
 		users = users ? users : [];
 
@@ -752,11 +751,15 @@ export const getPermissions = async (req, res) => {
 	try {
 		const id = req.session?.addedUser?.owner || req.session?.user?.id;
 		const permission = req.session?.addedUser?.permissions;
+		const editPermission = await Permissions.findOne({
+			unique_id: req.query?.id,
+		});
 		if (permission) {
 			const access = await Permissions.findOne({ unique_id: permission });
 			if (access.settings.userManagement) {
 				res.render("Settings/permissions", {
 					access,
+					editPermission,
 					photo: req.session?.addedUser?.photo,
 					name: req.session?.addedUser?.name,
 					color: req.session?.addedUser?.color,
@@ -769,6 +772,7 @@ export const getPermissions = async (req, res) => {
 			// console.log(access.access);
 			res.render("Settings/permissions", {
 				access: access.access,
+				editPermission,
 				photo: req.session?.user?.photo,
 				name: req.session?.user.name,
 				color: req.session?.user.color,
@@ -807,14 +811,17 @@ export const createPermissions = async (req, res, next) => {
 			useradmin,
 			name,
 			unique_id,
+			createdBy: req.session?.user?.name || req.session?.addedUser?.name,
 			dashboard: {
 				connectNow: permissions.dashboard.connectNow,
 				viewUsers: permissions.dashboard.viewUsers,
 				quickActions: permissions.dashboard.quickActions,
+				addNumber: permissions.dashboard.addNumber,
 			},
 			chats: {
 				type: permissions.chats.type,
-				redirectToVpchat: permissions.chats.redirectToVpchat,
+				chat: permissions.chats.chat,
+				view: permissions.chats.view,
 			},
 			contactList: {
 				type: permissions.contactlist.type,
@@ -870,7 +877,7 @@ export const createPermissions = async (req, res, next) => {
 				? req.session?.user?.name
 				: req.session?.addedUser?.name,
 			actions: "Create",
-			details: `Created a new role`,
+			details: `Created a new role named ${newRole.name}`,
 		});
 		// Save the role
 		await newRole.save();
@@ -880,6 +887,109 @@ export const createPermissions = async (req, res, next) => {
 			.json({ message: "Role created successfully!", role: newRole });
 	} catch (error) {
 		console.error("Error creating role:", error);
+		return res.status(500).json({ message: error });
+	}
+};
+
+export const editPermissions = async (req, res, next) => {
+	try {
+		// Get the unique id from the query parameters
+		const unique_id = req.query?.id;
+		const useradmin =
+			req.session?.user?.id || req.session?.addedUser?.owner;
+
+		const { permissions } = req.body;
+		if (!permissions) {
+			return res.status(401).json({
+				success: false,
+				message: "Invalid input: please fill the required fields",
+			});
+		}
+
+		// if (!isString(name)) next();
+		// console.log(permissions);
+		// Find the role to update
+		const role = await Permissions.findOne({ unique_id, useradmin });
+		if (!role) {
+			return res.status(404).json({ message: "Role not found" });
+		}
+
+		// Update role values using the permissions from the request body
+		role.dashboard = {
+			connectNow: permissions.dashboard.connectNow,
+			viewUsers: permissions.dashboard.viewUsers,
+			quickActions: permissions.dashboard.quickActions,
+			addPhoneNumber: permissions.dashboard.addPhoneNumber,
+		};
+		// console.log(role.dashboard);
+		role.chats = {
+			type: permissions.chats.type,
+			view: permissions.chats.view,
+			chat: permissions.chats.chat,
+		};
+		// console.log(role.chats);
+		role.contactList = {
+			type: permissions.contactlist.type,
+			addContactIndividual: permissions.contactlist.addContactIndividual,
+			editContactIndividual:
+				permissions.contactlist.editContactIndividual,
+			deleteContactIndividual:
+				permissions.contactlist.deleteContactIndividual,
+			addContactListCSV: permissions.contactlist.addContactListCSV,
+			deleteList: permissions.contactlist.deleteList,
+			sendBroadcast: permissions.contactlist.sendBroadcast,
+			customField: permissions.contactlist.customField,
+		};
+		// console.log(role.contactList);
+		role.templates = {
+			type: permissions.templates.type,
+			editTemplate: permissions.templates.editTemplate,
+			createTemplate: permissions.templates.createTemplate,
+			deleteTemplate: permissions.templates.deleteTemplate,
+		};
+		// console.log(role.templates);
+		role.reports = {
+			type: permissions.reports.type,
+			conversationReports: {
+				type: permissions.reports.conversationReports.type,
+				viewReports:
+					permissions.reports.conversationReports.viewReports,
+				retargetingUsers:
+					permissions.reports.conversationReports.retargetingUsers,
+				redirectToVpchat:
+					permissions.reports.conversationReports.redirectToVpchat,
+			},
+			costReports: permissions.reports.costReports,
+		};
+		// console.log(role.reports);
+		role.settings = {
+			type: permissions.settings.type,
+			userManagement: permissions.settings.userManagement,
+			activityLogs: permissions.settings.activityLogs,
+			manageTags: {
+				type: permissions.settings.manageTags.type,
+				delete: permissions.settings.manageTags.delete,
+				add: permissions.settings.manageTags.add,
+				view: permissions.settings.manageTags.view,
+			},
+		};
+		// console.log(role.settings);
+		await role.save();
+
+		// Log the update action in ActivityLogs
+		await ActivityLogs.create({
+			useradmin,
+			unique_id: generateUniqueId(),
+			name: req.session?.user?.name || req.session?.addedUser?.name,
+			actions: "Update",
+			details: `Edited permissions role with name ${role.name}`,
+		});
+
+		return res
+			.status(200)
+			.json({ message: "Role updated successfully!", role });
+	} catch (error) {
+		console.error("Error editing role:", error);
 		return res.status(500).json({ message: error });
 	}
 };
@@ -932,19 +1042,19 @@ export const createAddedUserPassword = async (req, res, next) => {
 };
 
 export const updateUserManagement = async (req, res) => {
+	const userId = req.session?.user?.id || req.session?.addedUser?.owner;
 	const action = req.body?.action;
-	const userId = req.body?.userId;
 	const status = req.body?.status;
 	const newRoleId = req.body?.newRoleId;
 	const newRoleName = req.body?.newRoleName;
 	const email = req.body?.email;
-
+	// console.log(action, newRoleId, newRoleName, email);
 	try {
 		let user;
 		switch (action) {
 			case "updateStatus":
 				user = await AddedUser.findOneAndUpdate(
-					{ unique_id: userId },
+					{ unique_id: userId, deleted: false },
 					{ status },
 					{ new: true },
 				);
@@ -959,10 +1069,11 @@ export const updateUserManagement = async (req, res) => {
 
 			case "updateRole":
 				user = await AddedUser.findOneAndUpdate(
-					{ email },
+					{ email, deleted: false },
 					{ roleName: newRoleName, roleId: newRoleId },
 					{ new: true },
 				);
+				// console.log(user);
 				if (!user) {
 					return res
 						.status(404)
@@ -974,7 +1085,7 @@ export const updateUserManagement = async (req, res) => {
 
 			case "deleteUser":
 				user = await AddedUser.findOneAndUpdate(
-					{ unique_id: userId },
+					{ unique_id: userId, deleted: false },
 					{ deleted: true },
 					{ new: true },
 				);
@@ -997,5 +1108,32 @@ export const updateUserManagement = async (req, res) => {
 		return res
 			.status(500)
 			.json({ success: false, message: "Server error", error });
+	}
+};
+
+export const deleteRole = async (req, res) => {
+	try {
+		const useradmin =
+			req.session?.user?.id || req.session?.addedUser?.owner;
+		const { id, name } = req.query; // Now extract from req.params
+
+		// Example deletion logic:
+		await Permissions.findOneAndUpdate(
+			{ unique_id: id },
+			{ deleted: true },
+		);
+
+		await ActivityLogs.create({
+			useradmin,
+			unique_id: generateUniqueId(),
+			name: req.session?.user?.name || req.session?.addedUser?.name,
+			actions: "Delete",
+			details: `Deleted role with name ${name}`,
+		});
+
+		return res.json({ success: true });
+	} catch (error) {
+		console.error(error);
+		return res.json({ success: false, message: "Failed to delete role" });
 	}
 };

@@ -266,7 +266,7 @@ function displayErrors(result) {
             <ul class="list-disc pl-5 mt-1">
                 ${result.invalidColumns.map((c) => `<li>${c}</li>`).join("")}
             </ul>
-            <button onclick="document.location='contact-list/custom-field'" type="button" 
+            <button onclick="document.location='/contact-list/custom-field'" type="button" 
                 class="mt-3 bg-red-100 border-2 py-2 px-4 rounded-lg hover:bg-red-200 transition-colors">
                 Create Custom Fields
             </button>`,

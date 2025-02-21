@@ -1,0 +1,12 @@
+<% phoneNumbers.forEach((number) => { %>
+<li class="p-2 hover:bg-gray-100 flex items-center justify-between rounded cursor-pointer" data-value="<%= number.phone_number_id %>" data-verified="<%= number.verified %>">
+	<div class="flex items-center">
+		<span><%= number.friendly_name || number.phone_number_id %></span>
+		<% if (number.verified) { %>
+		<img src="svg/verifiedNumber.svg" class="w-5 h-5 mb-1 ml-2" alt="Verified" title="Verified Number" />
+		<% } %>
+	</div>
+</li>
+<% }); %>
+
+

@@ -352,6 +352,7 @@ function removePreviewButton(buttonId) {
 	if (button) {
 		button.remove();
 	}
+	document.getElementById("previewButton").innerHTML = '';
 }
 
 const previewContainer = document.getElementById("previewContainer");

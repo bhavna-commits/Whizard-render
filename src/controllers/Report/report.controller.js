@@ -14,7 +14,7 @@ import {
 import { generateUniqueId } from "../../utils/otpGenerator.js";
 import { agenda } from "../../config/db.js";
 import { sendCampaignScheduledEmail } from "../../services/OTP/reportsEmail.js";
-import { getFbAccessToken } from "../../backEnd-Routes/facebook.backEnd.routes.js";
+// import { user.FB_ACCESS_TOKEN } from "../../backEnd-Routes/facebook.backEnd.routes.js";
 
 dotenv.config();
 
@@ -1258,12 +1258,12 @@ export const getCostReport = async (req, res) => {
 			`.granularity(DAILY)` +
 			`.conversation_categories(${JSON.stringify(categories)})` +
 			`.dimensions(["CONVERSATION_CATEGORY"])` +
-			`&access_token=${getFbAccessToken()}`;
+			`&access_token=${user.FB_ACCESS_TOKEN}`;
 
 		const response = await fetch(apiURL, {
 			method: "GET",
 			headers: {
-				Authorization: `Bearer ${getFbAccessToken()}`,
+				Authorization: `Bearer ${user.FB_ACCESS_TOKEN}`,
 			},
 		});
 
@@ -1323,7 +1323,7 @@ export const getCostReport = async (req, res) => {
 				}
 			}
 		}
-		console.log(data_points);
+		// console.log(data_points);
 		// Check permissions and render response
 		const permissions = req.session?.addedUser?.permissions;
 		if (permissions) {

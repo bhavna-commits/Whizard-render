@@ -1,6 +1,7 @@
 import { getRandomColor, sendEmailVerification } from "./userFunctions.js";
 import User from "../../models/user.model.js";
 import AddedUser from "../../models/addedUser.model.js";
+import Permissions from "../../models/permissions.model.js";
 import bcrypt from "bcrypt";
 import {
 	generate6DigitOTP,
@@ -9,6 +10,7 @@ import {
 	setOTPExpiry,
 	validatePassword,
 } from "../../utils/otpGenerator.js";
+import { DEFAULT_PERMISSIONS } from "../../utils/defaultPermissions.js";
 import dotenv from "dotenv";
 import { isString } from "../../middleWares/sanitiseInput.js";
 import { incrementLoginAttempts } from "../../middleWares/rateLimiter.js";
@@ -148,12 +150,12 @@ export const login = async (req, res, next) => {
 
 	if (!isString(email, password)) return next();
 
-	if (!isValidEmail(email))
-		return res.status(401).json({
-			success: false,
-			message:
-				"Email is not in the valid format or is not a corporate email",
-		});
+	// if (!isValidEmail(email))
+	// 	return res.status(401).json({
+	// 		success: false,
+	// 		message:
+	// 			"Email is not in the valid format or is not a corporate email",
+	// 	});
 
 	if (!validatePassword(password))
 		return res.status(401).json({
@@ -173,9 +175,9 @@ export const login = async (req, res, next) => {
 						.json({ message: "Account is blocked." });
 				}
 
-				console.log("here : login");
+				// console.log("here : login");
 				const isMatch = bcrypt.compare(password, addedUser.password);
-				console.log("here: passed");
+				// console.log("here: passed");
 
 				if (!isMatch) {
 					await incrementLoginAttempts(addedUser);
@@ -232,6 +234,8 @@ export const login = async (req, res, next) => {
 			}
 
 			await user.save();
+
+			// await createDefaultPermissionsForUser(user.unique_id);
 
 			req.session.user = {
 				id: user.unique_id,
@@ -473,6 +477,8 @@ export const about = async (req, res, next) => {
 
 		await newUser.save();
 
+		await createDefaultPermissionsForUser(newUser.unique_id);
+
 		res.status(201).json({
 			success: true,
 			message: "User created and logged in successfully.",
@@ -506,3 +512,28 @@ export const logout = async (req, res) => {
 		return res.status(200).json({ success: true });
 	});
 };
+
+async function createDefaultPermissionsForUser(userId) {
+	// Define the three default roles
+	const roles = ["member", "admin", "owner"];
+
+	// Create an array of documents to insert
+	const permissionsDocs = roles.map((roleType) => {
+		const defaultPerm = DEFAULT_PERMISSIONS[roleType];
+		return {
+			useradmin: userId,
+			name: roleType.charAt(0).toUpperCase() + roleType.slice(1),
+			unique_id: generateUniqueId(),
+			dashboard: defaultPerm.dashboard,
+			chats: defaultPerm.chats,
+			contactList: defaultPerm.contactList,
+			templates: defaultPerm.templates,
+			reports: defaultPerm.reports,
+			settings: defaultPerm.settings,
+			createdBy: "Default",
+		};
+	});
+
+	// Insert all documents at once
+	await Permissions.insertMany(permissionsDocs);
+}
