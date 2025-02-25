@@ -250,17 +250,17 @@ export async function sendMessageThroughWhatsApp(
 export function generatePreviewMessage(template, message) {
 	try {
 		let previewMessage = "";
-		console.log(JSON.stringify(message));
+		// console.log(JSON.stringify(message));
 
 		let headerText = template.components.find(
 			(c) => c.type === "HEADER",
-		).text;
+		)?.text;
 
 		previewMessage += `${headerText}\n`;
 
 		// Process Body component
 
-		let bodyText = template.components.find((c) => c.type === "BODY").text;
+		let bodyText = template.components.find((c) => c.type === "BODY")?.text;
 		let bodyVariable = message[0]?.parameters;
 
 		bodyVariable?.forEach((value, index) => {
@@ -276,7 +276,7 @@ export function generatePreviewMessage(template, message) {
 		if (footerComponent) {
 			previewMessage += `${footerComponent.text}\n`;
 		}
-		console.log(JSON.stringify(previewMessage));
+		// console.log(JSON.stringify(previewMessage));
 		return previewMessage.trim();
 	} catch (error) {
 		console.error("Error generating preview message:", error.message);

@@ -273,23 +273,23 @@ export async function sendMessagesReports(
 
 const scheduleCampaign = async (campaign) => {
 	try {
-		const { scheduledAt, _id, contactListId, contactList } = campaign;
+		const { scheduledAt, unique_id, contactListId, contactList } = campaign;
 		if (contactList) {
 			agenda.schedule(new Date(scheduledAt), "process reports campaign", {
-				campaignId: _id,
+				campaignId: unique_id,
 				contactList,
 				scheduledAt,
 			});
 		} else {
 			agenda.schedule(new Date(scheduledAt), "process campaign", {
-				campaignId: _id,
+				campaignId: unique_id,
 				contactListId,
 				scheduledAt,
 			});
 		}
 		// Mark the campaign as IN_QUEUE so it won’t be processed multiple times
-		await Campaign.findByIdAndUpdate(_id, { status: "IN_QUEUE" });
-		console.log(`Campaign ${_id} scheduled successfully.`);
+		await Campaign.findOneAndUpdate({ unique_id }, { status: "IN_QUEUE" });
+		console.log(`Campaign ${unique_id} scheduled successfully.`);
 	} catch (err) {
 		console.error("Error schedling campagin", err);
 	}
@@ -299,12 +299,12 @@ agenda.define("process campaign", async (job) => {
 	const { campaignId } = job.attrs.data;
 
 	try {
-		const campaign = await Campaign.findById(campaignId);
+		const campaign = await Campaign.findOne({ unique_id: campaignId });
 
 		let user = await User.findOne({ unique_id: campaign.useradmin });
 
 		const phone_number = user.FB_PHONE_NUMBERS.find(
-			(n) => n.selected === true,
+			(n) => n.selected == true,
 		).phone_number_id;
 
 		if (!phone_number) {
@@ -318,7 +318,11 @@ agenda.define("process campaign", async (job) => {
 				generateUniqueId(),
 				phone_number,
 			);
-			await Campaign.findByIdAndUpdate(campaignId, { status: "SENT" });
+
+			await Campaign.findOneAndUpdate(
+				{ unique_id: campaignId },
+				{ status: "SENT" },
+			);
 
 			const time = Date.now() + 15 * 60 * 1000;
 			const reportTime = new Date(time);
@@ -336,12 +340,12 @@ agenda.define("process reports campaign", async (job) => {
 	const { campaignId, contactList } = job.attrs.data;
 
 	try {
-		const campaign = await Campaign.findById(campaignId);
+		const campaign = await Campaign.findOne({ unique_id: campaignId });
 
 		let user = await User.findOne({ unique_id: campaign.useradmin });
 
 		const phone_number = user.FB_PHONE_NUMBERS.find(
-			(n) => n.selected === true,
+			(n) => n.selected == true,
 		).phone_number_id;
 
 		if (!phone_number) {
@@ -357,7 +361,10 @@ agenda.define("process reports campaign", async (job) => {
 				phone_number,
 			);
 
-			await Campaign.findByIdAndUpdate(campaignId, { status: "SENT" });
+			await Campaign.findOneAndUpdate(
+				{ unique_id: campaignId },
+				{ status: "SENT" },
+			);
 
 			const time = Date.now() + 15 * 60 * 1000;
 			const reportTime = new Date(time);

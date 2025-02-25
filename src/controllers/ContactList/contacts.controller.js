@@ -570,12 +570,12 @@ export const createCampaign = async (req, res, next) => {
 				newCampaign.scheduledAt,
 			);
 
-			const time = Date.now() + 15 * 60 * 1000;
-			const reportTime = new Date(time);
-			agenda.schedule(reportTime, "send campaign report email", {
-				campaignId: newCampaign.unique_id,
-				userId: newCampaign.useradmin,
-			});
+			// const time = Date.now();
+			// const reportTime = new Date(time);
+			// agenda.schedule(reportTime, "send campaign report email", {
+			// 	campaignId: newCampaign.unique_id,
+			// 	userId: newCampaign.useradmin,
+			// });
 
 			await ActivityLogs.create({
 				useradmin: id,
