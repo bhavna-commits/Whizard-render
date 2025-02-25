@@ -22,9 +22,10 @@ const CampaignSchema = new mongoose.Schema(
 			enum: ["SENT", "PENDING", "SCHEDULED", "IN_QUEUE"],
 			default: "PENDING",
 		},
-		createdAt: { type: Number, default: () => Date.now() },
+		createdAt: { type: Date, default: () => Date.now() },
 		deleted: { type: Boolean, default: false },
 		contactList: { type: mongoose.Schema.Types.Mixed, default: null },
+		phoneNumberId: { type: String, required: true },
 	},
 	{ strict: false, timestamps: false },
 );

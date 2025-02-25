@@ -11,10 +11,8 @@ import { generateUniqueId } from "../../utils/otpGenerator.js";
 
 dotenv.config();
 
-export async function sendMessages(campaign, id, unique_id) {
+export async function sendMessages(campaign, user, unique_id, phone_number) {
 	try {
-		const user = await User.findOne({ unique_id: id });
-
 		// Find the template by unique_id
 		const template = await Template.findOne({
 			unique_id: campaign.templateId,
@@ -46,13 +44,13 @@ export async function sendMessages(campaign, id, unique_id) {
 				contact,
 			);
 
-			
 			// Send message using WhatsApp (assuming wa_id is the phone number)
 			const response = await sendMessageThroughWhatsApp(
 				user,
 				template,
 				contact.wa_id,
 				personalizedMessage,
+				phone_number,
 			);
 
 			const messageTemplate = generatePreviewMessage(
@@ -71,8 +69,8 @@ export async function sendMessages(campaign, id, unique_id) {
 			// Create a report for each sent message
 			const report = new Report({
 				WABA_ID: user.WABA_ID,
-				FB_PHONE_ID: user.FB_PHONE_ID,
-				useradmin: id,
+				FB_PHONE_ID: phone_number,
+				useradmin: user.unique_id,
 				unique_id,
 				campaignName: campaign.name,
 				campaignId: campaign.unique_id,
@@ -95,7 +93,7 @@ export async function sendMessages(campaign, id, unique_id) {
 
 export function replaceDynamicVariables(template, variables, contact) {
 	try {
-		console.log("variables :", variables);
+		// console.log("variables :", variables);
 		const messageComponents = [];
 		// variables = new Map(Object.entries(variables));
 		// Process dynamic variables in Header
@@ -179,7 +177,9 @@ export async function sendMessageThroughWhatsApp(
 	template,
 	phone,
 	messageComponents,
+	phone_number,
 ) {
+	// console.log(template);
 	try {
 		// Construct the message payload
 		const requestData = {
@@ -201,18 +201,12 @@ export async function sendMessageThroughWhatsApp(
 		// );
 
 		// Find the selected phone number from the user's array
-		const selectedNumber = user.FB_PHONE_NUMBERS.find(
-			(n) => n.selected === true,
-		);
-		if (!selectedNumber) {
-			throw new Error("No phone number selected.");
-		}
 
 		// Log the selected phone number details
 		// console.log("Selected Phone Number:", selectedNumber);
 
 		// Construct the API URL
-		const url = `https://graph.facebook.com/${process.env.FB_GRAPH_VERSION}/${selectedNumber.phone_number_id}/messages`;
+		const url = `https://graph.facebook.com/${process.env.FB_GRAPH_VERSION}/${phone_number}/messages`;
 		console.log("Request URL:", url);
 
 		// Declare response variable in the outer scope
@@ -291,11 +285,12 @@ export function generatePreviewMessage(template, message) {
 }
 
 export async function sendTestMessage(
-	id,
+	user,
 	templateId,
 	variables,
 	contactListId,
 	test,
+	phone_number,
 ) {
 	try {
 		// Find the template by unique_id
@@ -332,13 +327,12 @@ export async function sendTestMessage(
 			contact,
 		);
 
-		let user = await User.findOne({ unique_id: id });
-
 		const response = await sendMessageThroughWhatsApp(
 			user,
 			template,
 			test,
 			personalizedMessage,
+			phone_number,
 		);
 
 		if (response.status === "FAILED") {

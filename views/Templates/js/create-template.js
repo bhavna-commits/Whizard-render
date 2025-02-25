@@ -54,7 +54,7 @@ document
 
 			const mediaType = document.getElementById("mediaType").value;
 			const fileInput = document.getElementById("file-upload").files[0];
-			console.log(fileInput);
+			// console.log(fileInput);
 			if (mediaType === "image" && fileInput) {
 				const img = document.createElement("img");
 				img.src = URL.createObjectURL(fileInput);
@@ -178,25 +178,75 @@ const allowedFileTypes = {
 	location: ["application/gpx+xml", "application/vnd.google-earth.kml+xml"],
 };
 
-// Listen for file selection
 fileUpload.addEventListener("change", (e) => {
 	e.stopPropagation();
 	const file = e.target.files[0];
 
 	if (file) {
 		const fileType = file.type;
-		const isValidFile = validateFileType(fileType);
+		const mediaType = document.getElementById("mediaType").value;
+		const isValidType = validateFileType(fileType, mediaType);
+		const isValidSize = validateFileSize(file.size, mediaType);
 
-		if (isValidFile) {
+		if (isValidType && isValidSize) {
 			uploadText.textContent = file.name;
 			removeFileIcon.classList.remove("hidden");
 		} else {
-			alert("Invalid file type. Please upload the allowed file types.");
+			let errorMessage = "";
+			if (!isValidType) {
+				errorMessage =
+					"Invalid file type. Please upload the allowed file types.";
+			} else {
+				// Size error message
+				const sizeLimits = {
+					audio: "16MB",
+					document: "100MB",
+					image: "5MB",
+					sticker: "100KB",
+					video: "16MB",
+				};
+				const maxSize = sizeLimits[mediaType] || "the allowed size";
+				errorMessage = `File size exceeds the limit for ${mediaType}. Maximum allowed size is ${maxSize}.`;
+			}
+
+			alert(errorMessage);
 			fileUpload.value = "";
 			uploadText.textContent = defaultText;
 		}
 	}
 });
+
+function validateFileType(fileType, mediaType) {
+	// Assuming allowedFileTypes is defined elsewhere
+	if (mediaType == "image") {
+		return allowedFileTypes.image.includes(fileType);
+	} else if (mediaType == "video") {
+		return allowedFileTypes.video.includes(fileType);
+	} else if (mediaType == "document") {
+		return allowedFileTypes.document.includes(fileType);
+	} else if (mediaType == "location") {
+		return allowedFileTypes.location.includes(fileType);
+	} else if (mediaType == "sticker") {
+		// Added sticker type if needed
+		return allowedFileTypes.sticker.includes(fileType);
+	}
+	return false;
+}
+
+function validateFileSize(fileSize, mediaType) {
+	const sizeLimits = {
+		audio: 16 * 1024 * 1024, // 16MB
+		document: 100 * 1024 * 1024, // 100MB
+		image: 5 * 1024 * 1024, // 5MB
+		sticker: 100 * 1024, // 100KB
+		video: 16 * 1024 * 1024, // 16MB
+	};
+
+	// Return true if mediaType has no size limit (e.g., location)
+	if (!(mediaType in sizeLimits)) return true;
+
+	return fileSize <= sizeLimits[mediaType];
+}
 
 removeFileIcon.addEventListener("click", (e) => {
 	e.stopPropagation();
@@ -204,21 +254,6 @@ removeFileIcon.addEventListener("click", (e) => {
 	uploadText.textContent = defaultText;
 	removeFileIcon.classList.add("hidden");
 });
-
-function validateFileType(fileType) {
-	const mediaType = document.getElementById("mediaType").value;
-
-	if (mediaType === "image") {
-		return allowedFileTypes.image.includes(fileType);
-	} else if (mediaType === "video") {
-		return allowedFileTypes.video.includes(fileType);
-	} else if (mediaType === "document") {
-		return allowedFileTypes.document.includes(fileType);
-	} else if (mediaType === "location") {
-		return allowedFileTypes.location.includes(fileType);
-	}
-	return false;
-}
 
 document.getElementById("mediaType").addEventListener("change", (e) => {
 	const value = e.target.value;
@@ -245,7 +280,7 @@ document.getElementById("footerInput").addEventListener("input", function () {
 	document.getElementById("previewFoot").classList.add("text-left");
 
 	document.querySelector(".footer-count").textContent =
-		footerInput.length + "/64";
+		footerInput.length + "/60";
 });
 
 document
@@ -352,7 +387,7 @@ function removePreviewButton(buttonId) {
 	if (button) {
 		button.remove();
 	}
-	document.getElementById("previewButton").innerHTML = '';
+	document.getElementById("previewButton").innerHTML = "";
 }
 
 const previewContainer = document.getElementById("previewContainer");

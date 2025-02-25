@@ -122,11 +122,11 @@
 			<div class="flex justify-between items-center w-[98%] pt-4">
 				<div class="flex items-center justify-start">
 					<h6 class="pr-2 text-black">List of templates</h6>
-					<div class="relative flex items-center bg-gray-200 w-[4.6rem] h-8 rounded-full p-1">
+					<div class="relative flex items-center bg-gray-200 w-[4.5rem] h-8 rounded-full p-1">
 						<!-- Toggle Button -->
-						<div id="toggle" class="absolute w-8 h-6  bg-white rounded-full transform transition-transform duration-300"></div>
+						<div id="toggle" class="absolute w-8 h-6 bg-white rounded-full transform transition-transform duration-300"></div>
 						
-						<img id="option1" class="fas fa-list text-red-600 text-gray-400 cursor-pointer z-10 ml-2" src="svg/template list.svg" alt="list">
+						<img id="option1" class="fas fa-list text-red-600 cursor-pointer z-10 ml-2" src="svg/template list.svg" alt="list">
 						<!-- <i id="option1" class="fas fa-list text-red-600 text-gray-400 cursor-pointer z-10 ml-2"></i> -->
 						<img id="option2" class="fas fa-th text-gray-400 cursor-pointer z-10 ml-[1.3rem] mr-2" src="svg/template cards.svg" alt="cards">
 						<!-- Grid Icon -->
@@ -224,12 +224,13 @@
 			// Event listener for List Icon
 			option1.addEventListener('click', () => {
 				if (!isListView) {
-					toggle.classList.remove('translate-x-6'); // Move to the left
+					toggle.classList.remove('translate-x-4'); // Move to the left
 					toggle.classList.add('translate-x-0');
 					option1.classList.add('text-red-600');
 					option2.classList.remove('text-red-600');
+					option1.classList.remove('text-gray-400');
 					isListView = true;
-					
+						
 					// Show list view, hide grid view
 					listView.classList.remove('hidden');
 					listView.classList.add('block');
@@ -242,9 +243,10 @@
 			option2.addEventListener('click', () => {
 				if (isListView) {
 					toggle.classList.remove('translate-x-0'); // Move to the right
-					toggle.classList.add('translate-x-[2.1rem]');
+					toggle.classList.add('translate-x-[2.0rem]');
 					option2.classList.add('text-red-600');
 					option1.classList.remove('text-red-600');
+					option2.classList.remove('text-gray-400');
 					isListView = false;
 					
 					// Show grid view, hide list view

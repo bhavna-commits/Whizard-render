@@ -21,7 +21,7 @@ import {
 	isBoolean,
 	isObject,
 } from "../../middleWares/sanitiseInput.js";
-import { json } from "stream/consumers";
+
 import { sendCampaignScheduledEmail } from "../../services/OTP/reportsEmail.js";
 
 export const __filename = fileURLToPath(import.meta.url);
@@ -472,22 +472,33 @@ export const createCampaign = async (req, res, next) => {
 			typeof schedule === "string" ? JSON.parse(schedule) : schedule;
 		test = typeof test === "string" ? JSON.parse(test) : test;
 
+		let id = req.session?.user?.id || req.session?.addedUser?.owner;
+
+		let user = await User.findOne({ unique_id: id });
+
+		const phone_number = user.FB_PHONE_NUMBERS.find(
+			(n) => n.selected == true,
+		).phone_number_id;
+
+		if (!phone_number) {
+			throw new Error("No phone number selected.");
+		}
+
 		// console.log(test);
 
 		if (test) {
 			// console.log("var :", typeof variables);
 			try {
-				
 				await sendTestMessage(
-					req.session?.user?.id || req.session?.addedUser?.owner,
+					user,
 					templateId,
 					variables,
 					contactListId,
-					test
+					test,
+					phone_number,
 				);
 				await ActivityLogs.create({
-					useradmin:
-						req.session?.user?.id || req.session?.addedUser?.owner,
+					useradmin: id,
 					unique_id: generateUniqueId(),
 					name: req.session?.user?.name
 						? req.session?.user?.name
@@ -516,19 +527,21 @@ export const createCampaign = async (req, res, next) => {
 
 		// Create new campaign object
 		const newCampaign = new Campaign({
-			useradmin: req.session?.user?.id || req.session?.addedUser?.owner,
+			useradmin: id,
 			unique_id: generateUniqueId(),
 			templateId,
 			contactListId,
 			variables,
 			name,
+			phoneNumberId: phone_number,
 		});
 
 		if (!schedule) {
 			await sendMessages(
 				newCampaign,
-				req.session?.user?.id || req.session?.addedUser?.owner,
+				user,
 				generateUniqueId(),
+				phone_number,
 			);
 
 			const time = Date.now() + 15 * 60 * 1000;
@@ -539,8 +552,7 @@ export const createCampaign = async (req, res, next) => {
 			});
 
 			await ActivityLogs.create({
-				useradmin:
-					req.session?.user?.id || req.session?.addedUser?.owner,
+				useradmin: id,
 				unique_id: generateUniqueId(),
 				name: req.session?.user?.name
 					? req.session?.user?.name
@@ -552,10 +564,6 @@ export const createCampaign = async (req, res, next) => {
 			newCampaign.scheduledAt = Number(schedule) * 1000;
 			newCampaign.status = "SCHEDULED";
 
-			const user = await User.findOne({
-				unique_id:
-					req.session?.user?.id || req.session?.addedUser?.owner,
-			});
 			await sendCampaignScheduledEmail(
 				user.email,
 				name,
@@ -570,8 +578,7 @@ export const createCampaign = async (req, res, next) => {
 			});
 
 			await ActivityLogs.create({
-				useradmin:
-					req.session?.user?.id || req.session?.addedUser?.owner,
+				useradmin: id,
 				unique_id: generateUniqueId(),
 				name: req.session?.user?.name
 					? req.session?.user?.name

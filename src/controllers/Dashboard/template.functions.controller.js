@@ -58,8 +58,7 @@ export const saveTemplateToDatabase = async (
 
 export async function submitTemplateToFacebook(savedTemplate, id) {
 	try {
-		let waba_id = await User.findOne({ unique_id: id });
-		waba_id = waba_id.WABA_ID;
+		let user = await User.findOne({ unique_id: id });
 
 		const plainTemplate = savedTemplate.toObject(); // Convert to plain object
 
@@ -77,6 +76,7 @@ export async function submitTemplateToFacebook(savedTemplate, id) {
 			return cleanComponent;
 		});
 
+		// console.log(JSON.stringify(plainTemplate.components));
 		// Continue with the request data preparation
 		const requestData = {
 			name: plainTemplate.name,
@@ -86,10 +86,10 @@ export async function submitTemplateToFacebook(savedTemplate, id) {
 			components: plainTemplate.components,
 		};
 
-		const user = await User.findOne({ unique_id: id });
+		
 
 		const response = await axios.post(
-			`https://graph.facebook.com/${process.env.FB_GRAPH_VERSION}/${waba_id}/message_templates`,
+			`https://graph.facebook.com/${process.env.FB_GRAPH_VERSION}/${user.WABA_ID}/message_templates`,
 			requestData,
 			{
 				headers: {
@@ -99,9 +99,11 @@ export async function submitTemplateToFacebook(savedTemplate, id) {
 			},
 		);
 
+		
 		// If the response is successful, return the response data
 		return response.data;
 	} catch (error) {
+		// console.log(error.response.data.error);
 		// Handle different error types
 		if (error.response) {
 			throw new Error(

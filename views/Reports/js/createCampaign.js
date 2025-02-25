@@ -527,32 +527,32 @@ $(document).ready(() => {
 			if (value.length < 12 && value.length > 0) {
 				testError.classList.remove("hidden");
 				testButton.disabled = true;
-				testButton.classList.add(
-					"text-gray-400",
-					"border",
-					"hover:cursor-not-allowed",
-					"bg-white",
-				);
-				testButton.classList.remove("text-white", "bg-black");
+				// testButton.classList.add(
+				// 	"text-gray-400",
+				// 	"border",
+				// 	"hover:cursor-not-allowed",
+				// 	"bg-white",
+				// );
+				// testButton.classList.remove("text-white", "bg-black");
 			} else if (value.length < 11) {
-				console.log("ds");
+				// console.log("ds");
 				testButton.disabled = true;
-				testButton.classList.add(
-					"text-gray-400",
-					"border",
-					"hover:cursor-not-allowed",
-					"bg-white",
-				);
-				testButton.classList.remove("text-white", "bg-black");
+				// testButton.classList.add(
+				// 	"text-gray-400",
+				// 	"border",
+				// 	"hover:cursor-not-allowed",
+				// 	"bg-white",
+				// );
+				// testButton.classList.remove("text-white", "bg-black");
 			} else if (value.length > 11) {
 				testButton.disabled = false;
-				testButton.classList.remove(
-					"text-[#959595]",
-					"border",
-					"hover:cursor-not-allowed",
-					"bg-white",
-				);
-				testButton.classList.add("text-white", "bg-black");
+				// testButton.classList.remove(
+				// 	"text-[#959595]",
+				// 	"border",
+				// 	"hover:cursor-not-allowed",
+				// 	"bg-white",
+				// );
+				// testButton.classList.add("text-white", "bg-black");
 				testError.classList.add("hidden");
 			} else {
 				testError.classList.add("hidden");

@@ -192,13 +192,12 @@ export const overview = async (id, userId, page, limit, skip) =>
 
 export async function sendMessagesReports(
 	campaign,
-	id,
+	user,
 	unique_id,
 	contactList,
+	phone_number,
 ) {
 	try {
-		let user = await User.findOne({ unique_id: id });
-		
 		// Find the template by unique_id
 		const template = await Template.findOne({
 			unique_id: campaign.templateId,
@@ -225,12 +224,13 @@ export async function sendMessagesReports(
 				campaign.variables,
 				contact,
 			);
-			console.log(personalizedMessage);
+			// console.log(personalizedMessage);
 			const response = await sendMessageThroughWhatsApp(
 				user,
 				template,
 				contact.wa_id,
 				personalizedMessage,
+				phone_number,
 			);
 
 			const messageTemplate = generatePreviewMessage(
@@ -246,13 +246,11 @@ export async function sendMessagesReports(
 					`Failed to send message to ${contact.wa_id}: ${response.response}`,
 				);
 			}
-			// console.log(JSON.stringify(response));
-			const user = await User.findOne({ unique_id: id });
 			// Create a report for each sent message
 			const report = new Report({
 				WABA_ID: user.WABA_ID,
-				FB_PHONE_ID: user.FB_PHONE_ID,
-				useradmin: id,
+				FB_PHONE_ID: phone_number,
+				useradmin: user.unique_id,
 				unique_id,
 				campaignName: campaign.name,
 				campaignId: campaign.unique_id,
@@ -302,11 +300,23 @@ agenda.define("process campaign", async (job) => {
 
 	try {
 		const campaign = await Campaign.findById(campaignId);
+
+		let user = await User.findOne({ unique_id: campaign.useradmin });
+
+		const phone_number = user.FB_PHONE_NUMBERS.find(
+			(n) => n.selected === true,
+		).phone_number_id;
+
+		if (!phone_number) {
+			throw new Error("No phone number selected.");
+		}
+
 		if (campaign?.status === "IN_QUEUE") {
 			await sendMessages(
 				campaign,
-				campaign.useradmin,
+				user,
 				generateUniqueId(),
+				phone_number,
 			);
 			await Campaign.findByIdAndUpdate(campaignId, { status: "SENT" });
 
@@ -327,13 +337,26 @@ agenda.define("process reports campaign", async (job) => {
 
 	try {
 		const campaign = await Campaign.findById(campaignId);
+
+		let user = await User.findOne({ unique_id: campaign.useradmin });
+
+		const phone_number = user.FB_PHONE_NUMBERS.find(
+			(n) => n.selected === true,
+		).phone_number_id;
+
+		if (!phone_number) {
+			throw new Error("No phone number selected.");
+		}
+
 		if (campaign?.status === "IN_QUEUE") {
 			await sendMessagesReports(
 				campaign,
-				campaign.useradmin,
+				user,
 				generateUniqueId(),
 				contactList,
+				phone_number,
 			);
+
 			await Campaign.findByIdAndUpdate(campaignId, { status: "SENT" });
 
 			const time = Date.now() + 15 * 60 * 1000;

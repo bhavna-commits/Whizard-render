@@ -4,30 +4,30 @@ import { sendVerificationEmail } from "../../services/OTP/emailOTPService.js";
 
 // Generate email verification token
 export const generateEmailToken = () => {
-  const token = crypto.randomBytes(20).toString("hex");
-  const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
-  return { token, hashedToken };
+	const token = crypto.randomBytes(20).toString("hex");
+	const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+	return { token, hashedToken };
 };
 
 // Send verification email
 export const sendEmailVerification = async (email, token) => {
-  try {
-    await sendVerificationEmail(email, token);
-  } catch (error) {
-    throw new Error("Failed to send verification email");
-  }
+	try {
+		await sendVerificationEmail(email, token);
+	} catch (error) {
+		throw new Error("Failed to send verification email");
+	}
 };
 
 // Verify the email token
 export const verifyEmailToken = (incomingToken, storedToken, tokenExpiry) => {
-  const hashedIncomingToken = crypto
-    .createHash("sha256")
-    .update(incomingToken)
-    .digest("hex");
-  if (hashedIncomingToken !== storedToken || Date.now() > tokenExpiry) {
-    return false;
-  }
-  return true;
+	const hashedIncomingToken = crypto
+		.createHash("sha256")
+		.update(incomingToken)
+		.digest("hex");
+	if (hashedIncomingToken !== storedToken || Date.now() > tokenExpiry) {
+		return false;
+	}
+	return true;
 };
 
 const friendlyColors = [
@@ -45,4 +45,3 @@ const friendlyColors = [
 export const getRandomColor = () => {
 	return friendlyColors[Math.floor(Math.random() * friendlyColors.length)];
 };
-

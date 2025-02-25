@@ -1111,6 +1111,18 @@ export const createCampaign = async (req, res, next) => {
 		schedule =
 			typeof schedule === "string" ? JSON.parse(schedule) : schedule;
 
+		let id = req.session?.user?.id || req.session?.addedUser?.owner;
+
+		let user = await User.findOne({ unique_id: id });
+
+		const phone_number = user.FB_PHONE_NUMBERS.find(
+			(n) => n.selected == true,
+		).phone_number_id;
+
+		if (!phone_number) {
+			throw new Error("No phone number selected.");
+		}
+
 		// Find contacts by contactListId
 		const contactLists = await Contacts.find({
 			contactId: contactListId,
@@ -1119,7 +1131,7 @@ export const createCampaign = async (req, res, next) => {
 		// console.log(contactLists);
 
 		contactList = contactLists.filter((c) => {
-			console.log(c.wa_id);
+			// console.log(c.wa_id);
 			return contactList.some((cl) => {
 				console.log(cl.recipientPhone);
 				return (
@@ -1129,25 +1141,27 @@ export const createCampaign = async (req, res, next) => {
 			});
 		});
 
-		console.log(contactList);
+		// console.log(phone_number);
 
 		// Create new campaign object
 		const newCampaign = new Campaign({
-			useradmin: req.session?.user?.id || req.session?.addedUser?.owner,
+			useradmin: id,
 			unique_id: generateUniqueId(),
 			templateId,
 			contactListId,
 			variables,
 			name,
 			contactList,
+			phoneNumberId: phone_number,
 		});
 
 		if (!schedule) {
 			await sendMessagesReports(
 				newCampaign,
-				req.session?.user?.id || req.session?.addedUser?.owner,
+				user,
 				generateUniqueId(),
 				contactList,
+				phone_number,
 			);
 
 			const time = Date.now() + 15 * 60 * 1000;
@@ -1158,8 +1172,7 @@ export const createCampaign = async (req, res, next) => {
 			});
 
 			await ActivityLogs.create({
-				useradmin:
-					req.session?.user?.id || req.session?.addedUser?.owner,
+				useradmin: id,
 				unique_id: generateUniqueId(),
 				name: req.session?.user?.name
 					? req.session?.user?.name
@@ -1171,10 +1184,6 @@ export const createCampaign = async (req, res, next) => {
 			newCampaign.scheduledAt = Number(schedule) * 1000;
 			newCampaign.status = "SCHEDULED";
 
-			const user = await User.findOne({
-				unique_id:
-					req.session?.user?.id || req.session?.addedUser?.owner,
-			});
 			await sendCampaignScheduledEmail(
 				user.email,
 				name,
@@ -1182,8 +1191,7 @@ export const createCampaign = async (req, res, next) => {
 			);
 
 			await ActivityLogs.create({
-				useradmin:
-					req.session?.user?.id || req.session?.addedUser?.owner,
+				useradmin: id,
 				unique_id: generateUniqueId(),
 				name: req.session?.user?.name
 					? req.session?.user?.name
@@ -1195,7 +1203,7 @@ export const createCampaign = async (req, res, next) => {
 
 		// try {
 		// 	const userId =
-		// 		req.session?.user?.id || req.session?.addedUser?.owner;
+		// 		id;
 		// 	const user = await User.findOne({ unique_id: userId });
 
 		// 	if (user?.email) {

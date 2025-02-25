@@ -11,6 +11,7 @@ import {
 } from "../../utils/utilFunctions.js";
 // import { getFbAccessToken } from "../../backEnd-Routes/facebook.backEnd.routes.js";
 import { isString } from "../../middleWares/sanitiseInput.js";
+import { countries } from "../../utils/dropDown.js";
 
 dotenv.config();
 
@@ -28,6 +29,7 @@ export const getDashboard = async (req, res) => {
 
 		const permissions = req.session?.addedUser?.permissions;
 		const renderData = {
+			countries,
 			user,
 			config: process.env.CONFIG_ID,
 			app: process.env.FB_APP_ID,
@@ -271,23 +273,8 @@ export const addNumber = async (req, res, next) => {
 		);
 
 		const fbData = await fbResponse.json();
-		console.log(fbData.error);
+		// console.log(fbData);
 		handleFacebookError(fbResponse, fbData);
-
-		await User.findOneAndUpdate(
-			{ unique_id: userId },
-			{
-				$push: {
-					phoneNumbers: {
-						phone_number_id: fbData.id,
-						number: `+${sanitizedCC}${nationalNumber}`,
-						friendly_name,
-						verified: false,
-					},
-				},
-			},
-			{ new: true, upsert: true },
-		);
 
 		// Call the sendOTP function to send an SMS verification code after adding the number
 		await sendOTP(fbData.id, user, "SMS", "en_US");
@@ -295,9 +282,10 @@ export const addNumber = async (req, res, next) => {
 		res.json({
 			success: true,
 			message: "Number added and OTP sent successfully",
+			phoneNumberId: fbData.id,
 		});
 	} catch (error) {
-		console.log("Error adding Number" ,error);
+		console.log("Error adding Number", error);
 		res.status(500).json({
 			success: false,
 			message: error,
@@ -308,7 +296,7 @@ export const addNumber = async (req, res, next) => {
 export const set2FAPin = async (req, res, next) => {
 	try {
 		// Extract required fields from the request body
-		const { phoneNumberId,pin } = req.body;
+		const { phoneNumberId, pin } = req.body;
 		if (!phoneNumberId || !pin) {
 			return res.status(400).json({
 				success: false,
@@ -344,7 +332,7 @@ export const set2FAPin = async (req, res, next) => {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
-				"Authorization": `Bearer ${accessToken}`,
+				Authorization: `Bearer ${accessToken}`,
 			},
 			body: JSON.stringify(payload),
 		});
@@ -408,7 +396,21 @@ export const verifyNumber = async (req, res, next) => {
 		const { code, phoneNumberId } = req.body;
 		const userId = req.session?.user?.id || req.session?.addedUser?.owner;
 
-		if (!isString(code, phoneNumberId)) return next();
+		// console.log(code, phoneNumberId);
+		// Validate that code and phoneNumberId are non-empty strings
+		if (
+			typeof code !== "string" ||
+			typeof phoneNumberId !== "string" ||
+			code.trim() === "" ||
+			phoneNumberId.trim() === ""
+		) {
+			return res.status(400).json({
+				success: false,
+				message:
+					"Both 'code' and 'phoneNumberId' must be non-empty strings.",
+			});
+		}
+
 		// Fetch user to get WABA_ID (WhatsApp Business Account ID)
 		const user = await User.findOne({ unique_id: userId });
 		if (!user || !user.WABA_ID) {
@@ -420,7 +422,7 @@ export const verifyNumber = async (req, res, next) => {
 
 		// Send the request to Facebook to verify the phone number
 		const fbResponse = await fetch(
-			`https://graph.facebook.com/${process.env.FB_GRAPH_VERSION}/${phoneNumberId}/verify`,
+			`https://graph.facebook.com/${process.env.FB_GRAPH_VERSION}/${phoneNumberId}/verify_code`,
 			{
 				method: "POST",
 				headers: {
@@ -454,7 +456,8 @@ export const verifyNumber = async (req, res, next) => {
 		console.error("Error verifying number:", error);
 		res.status(500).json({
 			success: false,
-			message: error || "Failed to verify number. Please try again.",
+			message:
+				error || "Failed to verify number. Please try again.",
 		});
 	}
 };
@@ -595,7 +598,6 @@ const getPhoneNumbers = async (user) => {
 		);
 
 		const data = await response.json();
-		// console.log(data);
 		if (!response.ok) {
 			throw (
 				data?.error?.error_user_msg ||
@@ -604,7 +606,7 @@ const getPhoneNumbers = async (user) => {
 				"Error while fetching number"
 			);
 		}
-		// console.log(data);
+
 		// Check if there are phone numbers returned
 		if (data.data && data.data.length > 0) {
 			// Prepare phone numbers to match your schema
@@ -618,6 +620,17 @@ const getPhoneNumbers = async (user) => {
 					number.verified_name ||
 					`Number ${new Date().toLocaleDateString()}`,
 			}));
+
+			// Get the list of phone number IDs from the Facebook API response
+			const fbPhoneNumberIds = phoneNumbers.map(
+				(number) => number.phone_number_id,
+			);
+
+			// Filter out phone numbers from the database that no longer exist in the Facebook API response
+			user.FB_PHONE_NUMBERS = user.FB_PHONE_NUMBERS.filter(
+				(existingNumber) =>
+					fbPhoneNumberIds.includes(existingNumber.phone_number_id),
+			);
 
 			// Synchronize the fetched numbers with the user's existing numbers
 			user.FB_PHONE_NUMBERS = user.FB_PHONE_NUMBERS.map(
@@ -653,7 +666,12 @@ const getPhoneNumbers = async (user) => {
 
 			// Save the updated user document
 			await user.save();
+		} else {
+			// If no phone numbers are returned from Facebook, clear all phone numbers in the database
+			user.FB_PHONE_NUMBERS = [];
+			await user.save();
 		}
+
 		return user;
 	} catch (error) {
 		console.error("Error getting phone numbers:", error);
@@ -810,6 +828,7 @@ const fetchDashboardData = async (userId, query) => {
 
 const handleFacebookError = (response, data) => {
 	if (!response.ok) {
+		// console.log(data.error);
 		throw `${
 			data.error.error_user_msg ||
 			data.error.error_user_title ||

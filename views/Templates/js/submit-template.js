@@ -267,10 +267,9 @@ function collectTemplateData() {
 
 	// Validate footer input
 	const footerInput = document.getElementById("footerInput");
-	if (!footerInput || !footerInput.value.trim()) {
-		return showError("Footer content cannot be empty.");
+	if (footerInput.value.trim()) {
+		templateData.footer = footerInput.value.trim();
 	}
-	templateData.footer = footerInput.value.trim();
 
 	// Validate buttons
 	const buttonElements = document.getElementById("buttonOptions").children;
