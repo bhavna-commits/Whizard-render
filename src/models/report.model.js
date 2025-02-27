@@ -4,19 +4,21 @@ const CampaignReportSchema = new mongoose.Schema(
 	{
 		WABA_ID: { type: String, required: true },
 		FB_PHONE_ID: { type: String, required: true },
-		useradmin: { type: String, required: true },
+		useradmin: { type: String, required: true, index: true },
 		unique_id: { type: String, required: true },
 		campaignId: {
 			type: String,
 			ref: "Campaign",
 			required: true,
+			index: true,
 		},
 		contactName: { type: String, required: true },
-		recipientPhone: { type: String, required: true },
+		recipientPhone: { type: String, required: true, index: true },
 		status: {
 			type: String,
 			enum: ["SENT", "DELIVERED", "READ", "FAILED", "REPLIED"],
 			required: true,
+			index: true,
 		},
 		failed: {
 			code: String,
@@ -25,13 +27,14 @@ const CampaignReportSchema = new mongoose.Schema(
 		createdAt: {
 			type: Number,
 			default: () => Date.now(),
+			index: true,
 		},
 		updatedAt: {
 			type: Number,
 			default: () => Date.now(),
 		},
-		deleted: { type: Boolean, default: false },
-		messageId: { type: String, required: true },
+		deleted: { type: Boolean, default: false, index: true },
+		messageId: { type: String, required: true, unique: true },
 		messageTemplate: { type: Schema.Types.Mixed },
 		replyContent: { type: String, default: "" },
 	},
@@ -41,35 +44,16 @@ const CampaignReportSchema = new mongoose.Schema(
 	},
 );
 
-+(
-	// Single field indexes
-	(+CampaignReportSchema.index({ useradmin: 1 }))
-);
-+CampaignReportSchema.index({ campaignId: 1 });
-+CampaignReportSchema.index({ status: 1 });
-+CampaignReportSchema.index({ recipientPhone: 1 });
-+CampaignReportSchema.index({ createdAt: 1 }); // For time-based queries
-+(+(
-	// Unique index for messageId to prevent duplicates
-	(+CampaignReportSchema.index({ messageId: 1 }, { unique: true }))
-));
-+(+(
-	// Compound indexes
-	(+CampaignReportSchema.index({ useradmin: 1, campaignId: 1 }))
-)); // Common filter combination
-+CampaignReportSchema.index({ status: 1, createdAt: 1 }); // Time-sorted status queries
-+(+(
-	// Optional index for deleted flag if using soft-delete frequently
-	(+(
-		// CampaignReportSchema.index({ deleted: 1 });
+// Compound indexes
+CampaignReportSchema.index({ useradmin: 1, campaignId: 1 });
+CampaignReportSchema.index({ status: 1, createdAt: 1 }); // Time-sorted status queries
 
-		CampaignReportSchema.pre("save", function (next) {
-			if (this.isNew) {
-				this.updatedAt = () => Date.now();
-			}
-			next();
-		})
-	))
-));
+// Middleware to update timestamps
+CampaignReportSchema.pre("save", function (next) {
+	if (this.isNew) {
+		this.updatedAt = Date.now();
+	}
+	next();
+});
 
 export default mongoose.model("CampaignReport", CampaignReportSchema);

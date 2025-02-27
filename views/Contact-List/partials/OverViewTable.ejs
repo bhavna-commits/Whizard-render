@@ -20,7 +20,7 @@
 			<% contacts.forEach((contact, index) => { %>
 			<tr class="hover:bg-gray-100 cursor-pointer border">
 				<td class=" border-l border-t border-b rounded-l-lg py-[1.5rem] border-gray-200 text-sm text-gray-400">
-					<%= index + 1 %>
+					<%= (page - 1) * 6 + (index + 1) %>
 				</td>
 				<td class="border-t border-b border-gray-200">
 					<p class="text-gray-500 pt-3"><%= contact?.Name %></p>

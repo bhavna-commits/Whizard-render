@@ -26,13 +26,64 @@ export const getCampaignList = async (req, res, next) => {
 		const skip = (page - 1) * limit;
 
 		if (!isNumber(page)) next();
+
+		const { status, timeFrame, phoneNumberId } = req.query;
+
+		if (!isString(status, timeFrame)) next();
+
+		let matchQuery = {
+			useradmin: userId,
+			deleted: { $ne: true }, // Adjust based on your campaign schema
+		};
+
+		if (status === "scheduled") {
+			matchQuery["status"] = { $in: ["SCHEDULED", "IN_QUEUE"] };
+		} else if (status === "all") {
+			delete matchQuery["status"];
+		} else {
+			matchQuery["status"] = { $nin: ["SCHEDULED", "IN_QUEUE"] };
+		}
+
+		if (timeFrame) {
+			const [startDateStr, endDateStr] = timeFrame.split(" to ");
+			if (startDateStr && endDateStr) {
+				const startDate = new Date(startDateStr);
+				const endDate = new Date(endDateStr);
+
+				startDate.setHours(0, 0, 0, 0);
+				endDate.setHours(23, 59, 59, 999);
+				endDate.setTime(endDate.getTime() + 1000 * 60 * 60 * 24);
+
+				// console.log(startDate.getTime());
+				// console.log(endDate.getTime());
+
+				matchQuery["createdAt"] = {
+					$gte: startDate.getTime(),
+					$lte: endDate.getTime(), 
+				};
+			}
+		}
+
+		let phoneNumbers = await User.findOne({ unique_id: userId });
+
+		phoneNumbers = phoneNumbers.FB_PHONE_NUMBERS;
+
+		let selectedNumber = phoneNumbers.find((num) => num.selected == true);
+
+		if (selectedNumber) {
+			matchQuery.phoneNumberId = selectedNumber.phone_number_id;
+		}
+
+		if (phoneNumberId && phoneNumberId != "All") {
+			matchQuery.phoneNumberId = phoneNumberId;
+		} else if (phoneNumberId == "All") {
+			delete matchQuery.phoneNumberId;
+		}
+
 		// Fetch campaigns created by the user
 		const campaigns = await Campaign.aggregate([
 			{
-				$match: {
-					useradmin: userId,
-					deleted: { $ne: true },
-				},
+				$match: matchQuery,
 			},
 			{
 				$lookup: {
@@ -127,6 +178,7 @@ export const getCampaignList = async (req, res, next) => {
 					name: req.session?.addedUser?.name,
 					color: req.session?.addedUser?.color,
 					whatsAppStatus: req.session?.addedUser?.whatsAppStatus,
+					phoneNumbers,
 				});
 			} else {
 				res.render("errors/notAllowed");
@@ -142,6 +194,7 @@ export const getCampaignList = async (req, res, next) => {
 				name: req.session?.user?.name,
 				color: req.session?.user?.color,
 				whatsAppStatus: req.session?.user?.whatsAppStatus,
+				phoneNumbers,
 			});
 		}
 	} catch (err) {
@@ -150,50 +203,20 @@ export const getCampaignList = async (req, res, next) => {
 	}
 };
 
-export const getCampaignReports = async (req, res, next) => {
-	const { filter } = req.query;
-
-	if (!isString(filter)) return next();
-
-	if (filter == "sent") {
-		await getSentReportsById(req, res, next);
-	} else if (filter == "delivered") {
-		await getDeliveredReportsById(req, res, next);
-	} else if (filter == "read") {
-		await getReadReportsById(req, res, next);
-	} else if (filter == "replies") {
-		await getRepliesReportsById(req, res, next);
-	} else if (filter == "failed") {
-		await getFailedReportsById(req, res, next);
-	} else {
-		await getCampaignOverview(req, res, next);
-	}
-};
-
 export const getCampaignListFilter = async (req, res, next) => {
 	try {
 		const userId = req.session?.user?.id || req.session?.addedUser?.owner;
 		const page = parseInt(req.query.page) || 1;
+		const search = req.query?.search;
 		const limit = 6;
 		const skip = (page - 1) * limit;
 
-		const { status, timeFrame, search } = req.query;
-
-		if (!isString(status, timeFrame, search)) next();
-		if (!isNumber(page)) next();
+		if (!isString(search)) next();
 
 		let matchQuery = {
 			useradmin: userId,
 			deleted: { $ne: true }, // Adjust based on your campaign schema
 		};
-
-		if (status === "scheduled") {
-			matchQuery["status"] = { $in: ["SCHEDULED", "IN_QUEUE"] };
-		} else if (status === "all") {
-			delete matchQuery["status"];
-		} else {
-			matchQuery["status"] = { $nin: ["SCHEDULED", "IN_QUEUE"] };
-		}
 
 		const trimmedQuery = search.trim();
 		const escapeRegex = (text) =>
@@ -202,22 +225,6 @@ export const getCampaignListFilter = async (req, res, next) => {
 
 		if (search) {
 			matchQuery["name"] = { $regex: escapedQuery, $options: "imsx" };
-		}
-
-		if (timeFrame) {
-			const [startDateStr, endDateStr] = timeFrame.split(" to ");
-			if (startDateStr && endDateStr) {
-				const startDate = new Date(startDateStr);
-				const endDate = new Date(endDateStr);
-
-				startDate.setHours(0, 0, 0, 0);
-				endDate.setHours(23, 59, 59, 999);
-
-				matchQuery["createdAt"] = {
-					$gte: startDate.getTime(),
-					$lte: endDate.getTime(),
-				};
-			}
 		}
 
 		// Fetch filtered campaigns first
@@ -336,6 +343,26 @@ export const getCampaignListFilter = async (req, res, next) => {
 	} catch (err) {
 		console.error(err);
 		res.render("errors/serverError");
+	}
+};
+
+export const getCampaignReports = async (req, res, next) => {
+	const { filter } = req.query;
+
+	if (!isString(filter)) return next();
+
+	if (filter == "sent") {
+		await getSentReportsById(req, res, next);
+	} else if (filter == "delivered") {
+		await getDeliveredReportsById(req, res, next);
+	} else if (filter == "read") {
+		await getReadReportsById(req, res, next);
+	} else if (filter == "replies") {
+		await getRepliesReportsById(req, res, next);
+	} else if (filter == "failed") {
+		await getFailedReportsById(req, res, next);
+	} else {
+		await getCampaignOverview(req, res, next);
 	}
 };
 

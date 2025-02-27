@@ -13,7 +13,7 @@
 				<% contacts.forEach((contact, index) => { %>
 				<tr class="hover:bg-gray-100 cursor-pointer border" onclick="window.location.href='/contact-list/overview/<%= contact.contactId %>?listId=<%= contact.contactId %>&listName=<%= contact.contalistName %>'">
 					<td class="border-l border-t border-b rounded-lg py-4 border-gray-200 text-sm text-gray-500">
-						<%= index + 1 %>
+						<%= (page - 1) * 6 + (index + 1) %>
 					</td>
 					<td class="border-t border-b border-gray-200 text-left">
 						<%= contact.contalistName %>

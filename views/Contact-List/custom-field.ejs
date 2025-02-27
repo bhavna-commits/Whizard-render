@@ -103,7 +103,7 @@
 								<tbody class="bg-white divide-y divide-gray-200">
 									<% customFields.forEach((field, index) => { %>
 									<tr class="border-gray-100 border text-gray-700 text-center">
-										<td class="border-l border-t border-b rounded-lg py-4 border-gray-200 text-gray-400 whitespace-nowrap"><%= index + 1 %></td>
+										<td class="border-l border-t border-b rounded-lg py-4 border-gray-200 text-gray-400 whitespace-nowrap"><%= (page - 1) * 6 + (index + 1) %></td>
 										<td class="text-left border-t border-b rounded-lg border-gray-200 whitespace-nowrap"><%= field.clname %></td>
 										<td class="text-left border-t border-b rounded-lg border-gray-200 text-gray-500 whitespace-nowrap"><%= field.cltype %></td>
 										<td class="text-left border-r border-t border-b rounded-lg border-gray-200 whitespace-nowrap">

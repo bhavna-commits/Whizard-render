@@ -7,6 +7,7 @@ const templateSchema = new Schema(
 		name: {
 			type: String,
 			required: true,
+			index: true, // Index for quicker name lookups
 		},
 		language: {
 			code: {
@@ -18,21 +19,25 @@ const templateSchema = new Schema(
 		category: {
 			type: String,
 			required: true,
+			index: true, // Index for category-based searches
 		},
-		components: [],
+		components: [], // Leaving this as an open array
 		status: {
 			type: String,
 			enum: ["Approved", "Rejected", "Pending"],
 			default: "Pending",
+			index: true, // Index for filtering by status
 		},
 		unique_id: {
 			type: String,
 			required: true,
+			index: true, // Index for unique identifier
 		},
 		template_id: String,
 		createdAt: {
 			type: Number,
 			default: () => Date.now(),
+			index: true, // Index for time-based queries
 		},
 		updatedAt: {
 			type: Number,
@@ -41,6 +46,7 @@ const templateSchema = new Schema(
 		useradmin: {
 			type: String,
 			required: true,
+			index: true, // Index for user-based queries
 		},
 		dynamicVariables: {
 			type: Object,
@@ -50,11 +56,13 @@ const templateSchema = new Schema(
 		deleted: {
 			type: Boolean,
 			default: false,
+			index: true, // Index for deleted flag to support soft delete functionality
 		},
 	},
 	{ timestamps: false, strict: false },
 );
 
+// Middleware to update the updatedAt field before saving
 templateSchema.pre("save", function (next) {
 	this.updatedAt = Date.now();
 	next();

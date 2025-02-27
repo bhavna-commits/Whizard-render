@@ -2,19 +2,26 @@ import { Schema, model } from "mongoose";
 
 const customFieldsSchema = new Schema(
 	{
-		unique_id: { type: String, required: true },
-		customid: { type: String, required: true },
-		clname: { type: String, required: true },
-		cltype: { type: String, enum: ["input", "dropdown"], required: true },
+		unique_id: { type: String, required: true, index: true },
+		customid: { type: String, required: true, index: true },
+		clname: { type: String, required: true, index: true },
+		cltype: {
+			type: String,
+			enum: ["input", "dropdown"],
+			required: true,
+			index: true,
+		},
 		usertimestmp: {
 			type: Number,
 			default: () => Date.now(),
+			index: true,
 		},
 		updatetimestmp: {
 			type: Number,
 			default: () => Date.now(),
+			index: true,
 		},
-		status: { type: Number, required: true, default: 1 },
+		status: { type: Number, required: true, default: 1, index: true },
 	},
 	{ timestamps: false, strict: false },
 );

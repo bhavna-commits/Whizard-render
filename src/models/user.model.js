@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema(
 	{
-		WABA_ID: { type: String, required: false },
+		WABA_ID: { type: String, required: false, index: true }, // Index for WABA_ID for faster lookup
 		FB_PHONE_NUMBERS: [
 			{
 				phone_number_id: String,
@@ -15,13 +15,13 @@ const userSchema = new mongoose.Schema(
 		FB_ACCESS_TOKEN: { type: String, required: false },
 		FB_ACCESS_TOKEN_EXPIRY: { type: Number, required: false },
 		profilePhoto: { type: String, required: false },
-		name: { type: String, required: true },
-		email: { type: String, required: true, unique: true },
+		name: { type: String, required: true, index: true }, // Index for quicker name lookup
+		email: { type: String, required: true, unique: true }, // Unique index for email
 		password: { type: String, required: true },
-		phone: { type: String, required: true },
+		phone: { type: String, required: true, index: true }, // Index for phone number
 		addedUsers: [{ type: String, ref: "AddedUser" }],
 		color: { type: String, required: true },
-		companyName: { type: String, required: true },
+		companyName: { type: String, required: true, index: true }, // Index for companyName
 		companyDescription: { type: String, required: true },
 		country: { type: String, required: true },
 		state: { type: String, required: true },
@@ -29,16 +29,18 @@ const userSchema = new mongoose.Schema(
 		industry: { type: String, required: true },
 		jobRole: { type: String, required: true },
 		website: { type: String, required: true },
-		blocked: { type: Boolean, default: false },
+		blocked: { type: Boolean, default: false, index: true }, // Index for blocked users
 		WhatsAppConnectStatus: {
 			type: String,
 			enum: ["Pending", "Live"],
 			default: "Pending",
 			required: true,
+			index: true, // Index for WhatsAppConnectStatus
 		},
 		unique_id: {
 			type: String,
 			required: true,
+			index: true, // Index for unique identifier
 		},
 		access: {
 			dashboard: {
@@ -93,6 +95,7 @@ const userSchema = new mongoose.Schema(
 		createdAt: {
 			type: Number,
 			default: () => Date.now(),
+			index: true, // Index for time-based queries
 		},
 		updatedAt: {
 			type: Number,
@@ -110,6 +113,9 @@ const userSchema = new mongoose.Schema(
 	{ timestamps: false, strict: false },
 );
 
-const User = mongoose.model("User", userSchema);
+userSchema.pre("save", function (next) {
+	this.updatedAt = Date.now();
+	next();
+});
 
-export default User;
+export default mongoose.model("User", userSchema);

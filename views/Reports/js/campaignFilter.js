@@ -32,6 +32,7 @@ function checkDateAndApplyFilters() {
 	const timeEnd = document.getElementById("timeEnd");
 	if (timeStart.value) timeStart.textContent = timeStart.value;
 	if (timeEnd.value) timeEnd.textContent = timeEnd.value;
+	console.log(timeEnd.value);
 	// Only apply filters if both timeStart and timeEnd are filled
 	if (timeStart.value && timeEnd.value) {
 		applyFilters();
@@ -40,15 +41,11 @@ function checkDateAndApplyFilters() {
 
 // Function to apply filters
 async function applyFilters() {
-	await fetchData();
-}
-
-// Fetch the data based on the selected filters
-async function fetchData() {
 	const timeStart = document.getElementById("timeStart").value;
 	const timeEnd = document.getElementById("timeEnd").value;
 	const statusFilter = document.getElementById("statusFilter").value;
 	const search = document.getElementById("searchInput").value;
+	const phoneNumberId = document.getElementById("phoneNumbers").value;
 
 	// Combine the time range
 	const timeFrame = `${timeStart} to ${timeEnd}`;
@@ -56,10 +53,20 @@ async function fetchData() {
 	const spinner = document.getElementById("loadingSpinner");
 	spinner.classList.remove("hidden");
 
+	location.href = `/reports/campaign-list?timeFrame=${encodeURIComponent(
+		timeFrame,
+	)}&status=${statusFilter}&search=${search}&phoneNumberId=${phoneNumberId}`;
+}
+
+async function getSearch() {
+	const search = document.getElementById("searchInput").value;
+	const spinner = document.getElementById("loadingSpinner");
+	spinner.classList.remove("hidden");
+
 	try {
 		// Fetch filtered data from the server
 		const res = await fetch(
-			`/reports/campaign-list/filter?timeFrame=${timeFrame}&status=${statusFilter}&search=${search}`,
+			`/reports/campaign-list/filter?search=${search}`,
 		);
 		const data = await res.text();
 
@@ -80,5 +87,37 @@ async function fetchData() {
 
 // Trigger data fetch on search input change
 document.getElementById("searchInput").addEventListener("input", async () => {
-	await fetchData();
+	await getSearch();
 });
+
+// Retrieve the query parameters from the URL
+const searchParamsFilter = new URLSearchParams(window.location.search);
+
+// Get the timeFrame parameter
+const timeFrame = searchParamsFilter.get("timeFrame");
+const search = searchParamsFilter.get("search");
+const statusFilter = searchParamsFilter.get("status");
+const phoneNumberId = searchParamsFilter.get("phoneNumberId");
+
+if (timeFrame) {
+	const [start, end] = timeFrame.split(" to ");
+	if (start && end) {
+		// Set the values in the input fields
+		document.getElementById("timeStart").value = start;
+		document.getElementById("timeEnd").value = end;
+		document.getElementById("timeStart").textContent = start;
+		document.getElementById("timeEnd").textContent = end;
+	}
+}
+
+if (search) {
+	document.getElementById("searchInput").value = search;
+}
+
+if (statusFilter) {
+	document.getElementById("statusFilter").value = statusFilter;
+}
+
+if (phoneNumberId) {
+	document.getElementById("phoneNumbers").value = phoneNumberId;
+}

@@ -2,6 +2,28 @@
 	// Get current URL without any page query parameter
 	const url = new URL(window.location.href);
 	// url.searchParams.delete('page'); // Removing the page param to append it later dynamically
+
+	// Navigate to the desired page number
+	function goToPage (page) {
+		const totalPages = <%= totalPages %>;
+		if (page > totalPages) {
+			alert("Page doesn't exist. Try a lower number.");
+			pageInput.value = <%= page %>; // Reset input to the current page
+		} else if (page < 1) {
+			alert("Page number should be at least 1.");
+			pageInput.value = <%= page %>;
+		} else {
+			url.searchParams.set('page', page);
+			window.location.href = url.toString();
+		}
+	}
+	
+	// Handling Go button for input field
+	function goToInputPage () {
+		const pageInput = document.getElementById('pageInput');
+		const page = parseInt(pageInput.value);
+		goToPage(page);
+	}
 </script>
 
 <div class="flex items-center justify-center py-4 space-x-4">
@@ -57,27 +79,3 @@
 		<button type="button" class="px-3 py-1 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2" onclick="goToInputPage()">Go</button>
 	</div>
 </div>
-
-<script>
-	// Navigate to the desired page number
-	function goToPage (page) {
-		const totalPages = <%= totalPages %>;
-		if (page > totalPages) {
-			alert("Page doesn't exist. Try a lower number.");
-			pageInput.value = <%= page %>; // Reset input to the current page
-		} else if (page < 1) {
-			alert("Page number should be at least 1.");
-			pageInput.value = <%= page %>;
-		} else {
-			url.searchParams.set('page', page);
-			window.location.href = url.toString();
-		}
-	}
-	
-	// Handling Go button for input field
-	function goToInputPage () {
-		const pageInput = document.getElementById('pageInput');
-		const page = parseInt(pageInput.value);
-		goToPage(page);
-	}
-</script>

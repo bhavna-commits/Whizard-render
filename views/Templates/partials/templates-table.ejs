@@ -14,7 +14,7 @@
 				
 				<% list.forEach((list, i) => { %>
 				<tr class="hover:bg-gray-100">
-					<td class="border-l border-t border-b rounded-lg py-4 border-gray-200 text-sm text-gray-500"><%= ++i %></td>
+					<td class="border-l border-t border-b rounded-lg py-4 border-gray-200 text-sm text-gray-500"><%= (page - 1) * 6 + (i + 1) %></td>
 					<td class="border-t border-b border-gray-200  w-48 text-left ">
 						<p class="text-gray-700 font-semibold"><%= list.name %></p>
 						<p class="text-gray-400 text-sm" id="createdAt-<%= list._id %>" data-timestamp="<%= list.updatedAt %>"></p>
