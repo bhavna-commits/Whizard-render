@@ -64,18 +64,100 @@
 			}
 		});
 	};
+	
+	// Toggle sidebar menu on mobile
+	function toggleSidebar () {
+		const sidebarMenu = document.getElementById('sidebarMenu');
+		const overlay = document.getElementById('sidebarOverlay');
+		const hamburgerIcon = document.getElementById('hamburgerIcon');
+		const closeIcon = document.getElementById('closeIcon');
+		
+		// Toggle sidebar visibility
+		sidebarMenu.classList.toggle('show');
+		sidebarMenu.classList.toggle('hidden-mobile');
+		
+		// Toggle overlay
+		overlay.classList.toggle('hidden');
+		
+		// Toggle hamburger/close icon
+		hamburgerIcon.classList.toggle('hidden');
+		closeIcon.classList.toggle('hidden');
+		
+		// Prevent scrolling on body when sidebar is open
+		document.body.style.overflow = sidebarMenu.classList.contains('show') ? 'hidden' : 'auto';
+	}
+	
+	// Toggle user dropdown
+	function toggleDropdown () {
+		const downMenu = document.getElementById('downMenu');
+		downMenu.classList.toggle('hidden');
+	}
+	
+	// Toggle reports dropdown
+	function getReportsMenu () {
+		const reportMenu = document.getElementById('reportMenu');
+		reportMenu.classList.toggle('hidden');
+	}
+	
+	// Close dropdowns when clicking outside
+	document.addEventListener('click', function (event) {
+		// Close user dropdown when clicking outside
+		const userProfile = document.querySelector('.user-profile');
+		const downMenu = document.getElementById('downMenu');
+		if (!userProfile.contains(event.target) && !downMenu.classList.contains('hidden')) {
+			downMenu.classList.add('hidden');
+		}
+		
+		// Close reports dropdown when clicking outside
+		const reportMenu = document.getElementById('reportMenu');
+		const reportLink = document.querySelector('.reports-link');
+		if (reportMenu && !reportMenu.contains(event.target) && !reportLink.contains(event.target) && !reportMenu.classList.contains('hidden')) {
+			reportMenu.classList.add('hidden');
+		}
+	});
+	
+	// Initialize responsive behavior on page load
+	
+	// Handle initial state based on screen size
+	const checkScreenSize = () => {
+		const sidebarMenu = document.getElementById('sidebarMenu');
+		if (window.innerWidth > 768) {
+			sidebarMenu.classList.remove('hidden-mobile');
+			sidebarMenu.classList.remove('show');
+			document.getElementById('sidebarOverlay').classList.add('hidden');
+			document.body.style.overflow = 'auto';
+		} else {
+			if (!sidebarMenu.classList.contains('show')) {
+				sidebarMenu.classList.add('hidden-mobile');
+			}
+		}
+	};
+	
+	checkScreenSize();
+	
+	// Update on window resize
+	window.addEventListener('resize', checkScreenSize);
 </script>
 
 <nav class="sidebar">
+	<!-- Mobile Hamburger Button (visible only on mobile) -->
+	<div class="hamburger-button md:hidden">
+		<button onclick="toggleSidebar()" id="hamburger">
+			<img src="svg/hamburger.svg" alt="Menu" id="hamburgerIcon" />
+			<img src="svg/close.svg" alt="Close" id="closeIcon" class="hidden" />
+		</button>
+	</div>
+	
 	<div class="logo">
 		<img onclick="location.href = '/'" class="cursor-pointer" src="/assets/img/Wizard_logo.png" alt="Whizard Logo" />
 	</div>
-	<ul class="">
+	
+	<!-- Main sidebar content that will be hidden/shown on mobile -->
+	<ul id="sidebarMenu" class="md:flex hidden-mobile">
 		<!-- Dashboard: Always enabled -->
 		<li>
 			<a href="/" class="dashboard-link">
-				<span class="icon"><img src="svg/dashboard.svg" />
-				</span>
+				<span class="icon"><img src="svg/dashboard.svg" /></span>
 				Dashboard
 			</a>
 		</li>
@@ -84,15 +166,12 @@
 		<li>
 			<% if (access?.chats?.type) { %>
 			<a href="/chats" class="chats-link">
-				<span class="icon"><img src="svg/chats.svg" />
-					
-				</span>
+				<span class="icon"><img src="svg/chats.svg" /></span>
 				Chats
 			</a>
 			<% } else { %>
 			<a href="javascript:void(0);" class="cursor-not-allowed">
-				<span class="icon"><img src="svg/chats.svg" />
-				</span>
+				<span class="icon"><img src="svg/chats.svg" /></span>
 				Chats
 			</a>
 			<% } %>
@@ -102,14 +181,12 @@
 		<li>
 			<% if (access.contactList?.type) { %>
 			<a href="/contact-list" class="contact-list-link">
-				<span class="icon"><img src="svg/contact-list.svg" />
-				</span>
+				<span class="icon"><img src="svg/contact-list.svg" /></span>
 				Contact List
 			</a>
 			<% } else { %>
 			<a href="javascript:void(0);" class="cursor-not-allowed">
-				<span class="icon"><img src="svg/contact-list.svg" />
-				</span>
+				<span class="icon"><img src="svg/contact-list.svg" /></span>
 				Contact List
 			</a>
 			<% } %>
@@ -119,14 +196,12 @@
 		<li>
 			<% if (access?.templates?.type) { %>
 			<a href="/template" class="template-link">
-				<span class="icon"><img src="svg/template.svg" />
-				</span>
+				<span class="icon"><img src="svg/template.svg" /></span>
 				Template
 			</a>
 			<% } else { %>
 			<a href="javascript:void(0);" class="cursor-not-allowed">
-				<span class="icon"><img src="svg/template.svg" />
-				</span>
+				<span class="icon"><img src="svg/template.svg" /></span>
 				Template
 			</a>
 			<% } %>
@@ -136,14 +211,12 @@
 		<li>
 			<% if (access?.settings?.type) { %>
 			<a href="/settings" class="settings-link">
-				<span class="icon"><img src="svg/settings.svg" />
-				</span>
+				<span class="icon"><img src="svg/settings.svg" /></span>
 				Settings
 			</a>
 			<% } else { %>
 			<a href="javascript:void(0);" class="cursor-not-allowed">
-				<span class="icon"><img src="svg/settings.svg" />
-				</span>
+				<span class="icon"><img src="svg/settings.svg" /></span>
 				Settings
 			</a>
 			<% } %>
@@ -154,10 +227,8 @@
 			<% if (access?.reports?.type) { %>
 			<div class="report-menu relative">
 				<a href="javascript:void(0);" class="reports-link" onclick="getReportsMenu()">
-					<span class="icon"><img src="svg/reports.svg" />
-					</span>
+					<span class="icon"><img src="svg/reports.svg" /></span>
 					Reports
-					
 				</a>
 				<div id="reportMenu" class="report-card hidden">
 					<a href="/reports/campaign-list" class="flex flex-row items-center"><img src="svg/conversationReport.svg" class="pr-2" />Campaign Report</a>
@@ -166,14 +237,14 @@
 			</div>
 			<% } else { %>
 			<a href="javascript:void(0);" class="cursor-not-allowed">
-				<span class="icon"><img src="svg/reports.svg" />
-				</span>
+				<span class="icon"><img src="svg/reports.svg" /></span>
 				Reports
 			</a>
 			<% } %>
 		</li>
 	</ul>
-	<div class=" user-profile text-white flex justify-center items-center text-center">
+	
+	<div class="user-profile text-white flex justify-center items-center text-center">
 		<% if (photo) { %>
 		<img src="/<%= photo %>" alt="User Profile" class="user-profile-img" onclick="toggleDropdown()" />
 		<% } else { %>
@@ -187,7 +258,8 @@
 			<a href="/settings/profile" class="flex items-center"><img src="svg/profileLogo.svg" class="pr-2" />View profile</a>
 			<button onclick="logout()" class="flex items-center"><img src="svg/logOut.svg" class="pr-2" />Log out</button>
 		</div>
-		
 	</div>
-	
 </nav>
+
+<!-- Overlay for when mobile menu is open -->
+<!-- <div id="sidebarOverlay" class="sidebar-overlay hidden" onclick="toggleSidebar()"></div> -->

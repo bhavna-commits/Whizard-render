@@ -75,31 +75,35 @@
 					
 				</div>
 			</div>
+
+			<div class="flex items-center h-fit px-2 pt-3 w-[98%]">
+				<!-- Button for Overview -->
+				<button onclick="location.href = `/reports/campaign-list/<%= id %>`" type="button" class="py-1 px-2 bg-black text-white rounded">Overview</button>
+				<div class="border h-4 m-2"></div>
+				
+				<!-- Button for Sent Messages -->
+				<button onclick="location.href = `/reports/campaign-list/<%= id %>?filter=sent`" type="button" class="p-2">Sent</button>
+				<div class="border h-4 m-2"></div>
+				
+				<!-- Button for Delivered Messages -->
+				<button onclick="location.href = `/reports/campaign-list/<%= id %>?filter=delivered`" type="button" class="p-2">Delivered</button>
+				<div class="border h-4 m-2"></div>
+				
+				<!-- Button for Read Messages -->
+				<button onclick="location.href = `/reports/campaign-list/<%= id %>?filter=read`" type="button" class="p-2">Read</button>
+				<div class="border h-4 m-2"></div>
+				
+				<!-- Button for Replies Received -->
+				<button onclick="location.href = `/reports/campaign-list/<%= id %>?filter=replies`" type="button" class="p-2">Replies received</button>
+				<div class="border h-4 m-2"></div>
+				
+				<!-- Button for Failed Messages -->
+				<button onclick="location.href = `/reports/campaign-list/<%= id %>?filter=failed`" type="button" class="p-2">Failed</button>
+			</div>
+
+
 			<div class="mainDiv">
-				<div class="flex items-center h-fit px-2 pt-3">
-					<!-- Button for Overview -->
-					<button onclick="location.href = `/reports/campaign-list/<%= id %>`" type="button" class="py-1 px-2 bg-black text-white rounded">Overview</button>
-					<div class="border h-4 m-2"></div>
-					
-					<!-- Button for Sent Messages -->
-					<button onclick="location.href = `/reports/campaign-list/<%= id %>?filter=sent`" type="button" class="p-2">Sent</button>
-					<div class="border h-4 m-2"></div>
-					
-					<!-- Button for Delivered Messages -->
-					<button onclick="location.href = `/reports/campaign-list/<%= id %>?filter=delivered`" type="button" class="p-2">Delivered</button>
-					<div class="border h-4 m-2"></div>
-					
-					<!-- Button for Read Messages -->
-					<button onclick="location.href = `/reports/campaign-list/<%= id %>?filter=read`" type="button" class="p-2">Read</button>
-					<div class="border h-4 m-2"></div>
-					
-					<!-- Button for Replies Received -->
-					<button onclick="location.href = `/reports/campaign-list/<%= id %>?filter=replies`" type="button" class="p-2">Replies received</button>
-					<div class="border h-4 m-2"></div>
-					
-					<!-- Button for Failed Messages -->
-					<button onclick="location.href = `/reports/campaign-list/<%= id %>?filter=failed`" type="button" class="p-2">Failed</button>
-				</div>
+				
 				
 				
 				<div class="w-[97%]">

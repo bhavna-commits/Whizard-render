@@ -4,6 +4,7 @@ import app from "./app.js";
 
 app.use(express.static("public"));
 app.use("/api/templates/duplicate/:id", express.static("public"));
+app.use("/Chats/chats", express.static("public"));
 app.use("/contact-list", express.static("public"));
 app.use("/contact-list/overview", express.static("public"));
 app.use("/Contact-List/createCampaign", express.static("public"));
@@ -23,6 +24,7 @@ app.use(
 	express.static(path.join(__dirname, "views/Dashboard/js")),
 );
 app.use("/user/js", express.static(path.join(__dirname, "views/User/js")));
+app.use("/chats/js", express.static(path.join(__dirname, "views/Chats/js")));
 app.use(
 	"/template/js",
 	express.static(path.join(__dirname, "views/Templates/js")),

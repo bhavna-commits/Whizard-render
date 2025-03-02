@@ -210,29 +210,6 @@ input[type="number"] {
 	background: rgba(250, 250, 250, 1);
 }
 
-.sidebar {
-	/* padding-left: 1rem;
-	padding-right: 1rem; */
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	justify-content: space-between;
-	height: 100vh;
-	/* box-shadow: 0.2rem 0 0.5rem rgba(228, 228, 228, 0.36); */
-	border-right: #F9F9FA .5rem solid;
-	position: relative;
-	background-color: white;
-	width: 10%;
-	/* padding-top: 0.75rem; */
-	/* overflow: auto; */
-	/* overflow-y: visible; */
-	scrollbar-width: none;
-	min-width: 7rem;
-	::-webkit-scrollbar {
-		display: none;
-	}
-}
-
 .logo {
 	position: relative;
 	padding: 1rem 0 1rem 0;
@@ -273,35 +250,48 @@ input[type="number"] {
 	);
 }
 
+.sidebar {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: space-between;
+	height: 100vh;
+	border-right: #f9f9fa 0.5rem solid;
+	position: relative;
+	background-color: white;
+	width: 10%;
+	scrollbar-width: none;
+	min-width: 7rem;
+}
+
+.sidebar::-webkit-scrollbar {
+	display: none;
+}
+
 .sidebar ul {
 	list-style: none;
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	/* justify-content: space-evenly; */
 	flex-grow: 1;
 	margin: 0;
 	padding: 0;
-	/* You can use gap for consistent spacing between elements */
-	gap: 1.2rem; /* Default spacing */
+	gap: 1.2rem;
 	overflow: auto;
 }
 
 .sidebar ul li:nth-child(6) {
 	margin-bottom: 2rem;
-	/* border: #000 solid 2px; */
 }
 
 .sidebar ul li:nth-child(1) {
 	margin-top: 1.5rem;
-	/* border: #000 solid 2px; */
 }
 
 .sidebar ul li a {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	/* padding: 14px 5px; */
 	color: #959595;
 	text-decoration: none;
 	transition: background 0.3s;
@@ -313,47 +303,68 @@ input[type="number"] {
 	color: #e02424;
 }
 
-/* Default styles for the list item */
 .sidebar ul li a {
 	display: flex;
 	align-items: center;
 	text-decoration: none;
-	/* padding: 0.3rem; */
 	transition: all 0.3s ease-in-out;
 }
 
-/* The icon container (span) and the icon (i) */
 .sidebar ul li a .icon {
 	display: inline-block;
 	border-radius: 1rem;
 	padding: 1rem;
-	transition: all 0.3s ease-in-out; /* Change background color of the span */
+	transition: all 0.3s ease-in-out;
 }
 
-/* Apply the hover effect to the entire list item */
 .sidebar ul li a:hover .icon {
-	background-color: #fdd0d0; /* Background color change only on the span */
+	background-color: #fdd0d0;
 }
 
 .sidebar ul li a span img {
-	transition: transform 0.3s ease-in; 
+	transition: transform 0.3s ease-in;
 }
 
 .sidebar ul li a:hover span img {
-	transform: scale(1.5); /* Icon grows on hover */
-	/* transition: transform 0.3s ease-in;  */
+	transform: scale(1.5);
 }
 
-/* Optionally, you can add a little padding around the icon when hovered to give it more space */
-/* .sidebar ul li a:hover {
-  padding: 1rem 1.5rem;
-} */
-
 .sidebar ul li a .icon:active {
-	/* padding: 1rem; */
-	text-align: center;
-	/* margin-right: 10px; */
 	color: #f20000 !important;
+}
+
+/* Hamburger button */
+.hamburger-button {
+	display: none;
+	position: absolute;
+	left: 1rem;
+	top: 50%;
+	transform: translateY(-50%);
+	z-index: 30;
+}
+
+.hamburger-button button {
+	background: none;
+	border: none;
+	cursor: pointer;
+	padding: 0.5rem;
+}
+
+.hamburger-button img {
+	width: 1.5rem;
+	height: 1.5rem;
+}
+
+/* Overlay for mobile sidebar */
+.sidebar-overlay {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background-color: rgba(0, 0, 0, 0.5);
+	z-index: 20;
+	transition: opacity 0.3s ease;
 }
 
 .hidden {
@@ -643,28 +654,6 @@ input[type="number"] {
 	height: 3.5rem;
 }
 
-/* Card styling */
-.card-dashboard {
-	/* background: #fff; */
-	padding: 1rem;
-	border-radius: 1rem;
-	box-shadow: 0px 0.1rem 0.2rem 0px #1018280d;
-	margin-bottom: 2rem;
-	position: relative;
-}
-
-.card-dashboard h5 {
-	font-weight: normal;
-	color: #3f3f3f;
-	font-size: larger;
-}
-
-.card-dashboard h4 {
-	font-weight: bold;
-	font-size: 2.5rem;
-	color: #333;
-}
-
 /* Background colors for icons */
 .icon-wrapper {
 	background: radial-gradient(
@@ -758,75 +747,97 @@ input[type="number"] {
 		flex-grow: 1;
 	}
 
+	.user-profile {
+		width: 20%;
+		height: 100%;
+		box-shadow: -0.1rem -0.5rem 1rem 0px rgba(221, 221, 221, 0.418);
+	}
+
+	.hamburger-button {
+		display: block;
+	}
+
 	.sidebar {
 		flex-direction: row;
-		height: 10vh;
+		height: 7vh;
 		width: 100%;
 		align-items: center;
 		justify-content: center;
-		box-shadow: 0.2rem 0 0.5rem rgba(120, 120, 120, 0.1);
+		box-shadow: 0 2px 5px rgba(120, 120, 120, 0.1);
+		z-index: 10;
 	}
 
 	.sidebar .logo {
-		width: 20%;
+		width: auto;
 		height: 100%;
-		/* border: 1px solid black; */
-		box-shadow: 1px -0.5rem 1rem 0px rgba(224, 224, 224, 0.4);
-	}
-
-	.sidebar .logo::after {
-		width: 0;
-		height: 0;
-	}
-
-	.sidebar .logo::before {
-		width: 0;
-		height: 0;
+		display: flex;
+		justify-content: center;
+		align-items: center;
 	}
 
 	.sidebar .logo img {
 		padding: 0.5rem;
+		height: 80%;
 	}
 
-	.sidebar ul {
-		flex-grow: 1;
+	/* Mobile menu slide out */
+	.sidebar ul#sidebarMenu {
+		position: fixed;
+		top: 5vh;
+		left: -80%;
 		width: 80%;
-		flex-direction: row;
-		height: 100%;
-		justify-content: center;
-		align-items: center;
-		/* border: 2px solid blueviolet; */
-		/* width: 100vw; */
+		height: 90vh;
+		background-color: white;
+		flex-direction: column;
+		transition: left 0.3s ease;
+		box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+		z-index: 100;
+		padding: 1rem 0;
 	}
 
-	.user-profile {
-		width: 20%;
-		height: 100%;
-		box-shadow: -0.1rem -.5rem 1rem 0px rgba(221, 221, 221, 0.418);
+	.sidebar ul#sidebarMenu.show {
+		left: 0;
 	}
-	.sidebar ul li {
-		display: flex;
-		/* flex-direction: row; */
-		width: fit-content;
+
+	.hidden-mobile {
+		display: none;
+	}
+
+	/* Profile section */
+	.user-profile {
+		width: auto;
 		height: 100%;
-		justify-content: center;
+		position: absolute;
+		right: 1rem;
+		display: flex;
 		align-items: center;
-		/* border: 2px solid blueviolet; */
+		justify-content: center;
+	}
+
+	.sidebar ul li {
+		width: 100%;
+		display: flex;
+		justify-content: flex-start;
+		padding-left: 2rem;
+	}
+
+	.sidebar ul li a {
+		flex-direction: row;
+		width: 100%;
+		justify-content: flex-start;
+		padding: 0.8rem 1rem;
+	}
+
+	.sidebar ul li a .icon {
+		margin-right: 1rem;
 	}
 
 	.sidebar ul li:nth-child(6) {
 		margin-bottom: 0;
-		/* border: #000 solid 2px; */
 	}
 
 	.sidebar ul li:nth-child(1) {
 		margin-top: 0;
-		/* border: #000 solid 2px; */
-	}
-
-	.sidebar ul li a span svg {
-		width: 20 !important;
-		height: 20 !important;
 	}
 
 	.left-section {

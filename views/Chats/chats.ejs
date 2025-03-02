@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="icon" type="image/x-icon" href="favicon.ico" />
+	<title>Chats - Whizard</title>
+	<link rel="stylesheet" href="styles/style.css" />
+	<link rel="preconnect" href="https://fonts.googleapis.com" />
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+	<link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet" />
+	<script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body>
+	<div class="layout-container" style="transform: translateZ(0);  will-change: transform;  overflow: hidden !important;">
+		<%- include("../commonJS/sidebar")  %>
+		<div class="main-content">
+			<iframe src="https://chat.viralpitch.co/#/main" class="w-full h-full bg-transparent border-none" frameborder="0" allow="geolocation; microphone; camera; fullscreen; clipboard-read; clipboard-write" sandbox="allow-forms allow-modals allow-orientation-lock allow-pointer-lock allow-popups allow-popups-to-escape-sandbox allow-presentation allow-same-origin allow-scripts allow-top-navigation allow-top-navigation-by-user-activation" title="Chat Interface" aria-label="Embedded Chat Application" loading="eager" scrolling="no" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen allowpaymentrequest="false" style="transform: translateZ(0); backface-visibility: hidden; perspective: 1000;"></iframe>
+		</div>
+	</div>
+	<script>
+		let iframe = document.querySelector('iframe');
+		
+		document.addEventListener('visibilitychange', () => {
+			if (!document.hidden) {
+				iframe.style.display = 'none';
+				const tempSrc = iframe.src;
+				iframe.src = '';
+				setTimeout(() => {
+					iframe.src = tempSrc;
+					iframe.style.display = 'block';
+				}, 100);
+			}
+		});
+		
+		iframe.onerror = function () {
+			console.error('Chat failed to load');
+			// Show reload button or alternative UI
+		};
+	</script>
+</body>
+
+</html>

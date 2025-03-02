@@ -25,6 +25,7 @@
 </head>
 <!-- Loader HTML -->
 <%- include("../commonJS/loader") %>
+
 <body>
 	
 	
@@ -126,9 +127,9 @@
 						<!-- Toggle Button -->
 						<div id="toggle" class="absolute w-8 h-6 bg-white rounded-full transform transition-transform duration-300"></div>
 						
-						<img id="option1" class="fas fa-list text-red-600 cursor-pointer z-10 ml-2" src="svg/template list.svg" alt="list">
+						<img id="option1" class="fas fa-list text-red-600 cursor-pointer z-10 ml-2" src="svg/template-list-red.svg" alt="list">
 						<!-- <i id="option1" class="fas fa-list text-red-600 text-gray-400 cursor-pointer z-10 ml-2"></i> -->
-						<img id="option2" class="fas fa-th text-gray-400 cursor-pointer z-10 ml-[1.3rem] mr-2" src="svg/template cards.svg" alt="cards">
+						<img id="option2" class="fas fa-th text-gray-400 cursor-pointer z-10 ml-[1.3rem] mr-2" src="svg/template-cards-gray.svg" alt="cards">
 						<!-- Grid Icon -->
 						<!-- <i id="option2" class="fas fa-th text-gray-400 cursor-pointer z-10 ml-[1.3rem] mr-2"></i> -->
 					</div>
@@ -226,11 +227,13 @@
 				if (!isListView) {
 					toggle.classList.remove('translate-x-4'); // Move to the left
 					toggle.classList.add('translate-x-0');
-					option1.classList.add('text-red-600');
-					option2.classList.remove('text-red-600');
-					option1.classList.remove('text-gray-400');
+					
+					// Change icons
+					option1.src = 'svg/template-list-red.svg'; // Make list icon red
+					option2.src = 'svg/template-cards-gray.svg'; // Make grid icon gray
+					
 					isListView = true;
-						
+					
 					// Show list view, hide grid view
 					listView.classList.remove('hidden');
 					listView.classList.add('block');
@@ -244,9 +247,11 @@
 				if (isListView) {
 					toggle.classList.remove('translate-x-0'); // Move to the right
 					toggle.classList.add('translate-x-[2.0rem]');
-					option2.classList.add('text-red-600');
-					option1.classList.remove('text-red-600');
-					option2.classList.remove('text-gray-400');
+					
+					// Change icons
+					option2.src = 'svg/template-cards-red.svg'; // Make grid icon red
+					option1.src = 'svg/template-list-gray.svg'; // Make list icon gray
+					
 					isListView = false;
 					
 					// Show grid view, hide list view
@@ -256,6 +261,7 @@
 					listView.classList.remove('block');
 				}
 			});
+			
 			const timestampElements = document.querySelectorAll("[data-timestamp]");
 			
 			timestampElements.forEach((element) => {
@@ -395,7 +401,11 @@
 				const selectedCategory = categorySelect ? categorySelect.options[categorySelect.selectedIndex]?.value : '';
 				
 				// Update query params in the URL
-				if (searchValue) {queryParams.set('search', searchValue)} else {queryParams.set('search', '')};
+				if (searchValue) {
+					queryParams.set('search', searchValue)
+				} else {
+					queryParams.set('search', '')
+				};
 				if (selectedLanguage && selectedLanguage !== "Language") queryParams.set('language', selectedLanguage);
 				if (selectedCategory && selectedCategory !== "Category") queryParams.set('category', selectedCategory);
 				
