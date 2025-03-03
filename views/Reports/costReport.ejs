@@ -143,14 +143,27 @@
 						</div>
 					</div>
 					
-					<!-- Graph -->
-					<div class="bg-white rounded-lg border p-4">
+					<!-- Modified Graph HTML with loading states -->
+					<div class="bg-white rounded-lg border p-4 relative">
 						<div class="text-gray-500 text-xl">Conversations</div>
-						<canvas id="analyticsChart" height="200" width="1200"></canvas>
+						<div class="relative">
+							<!-- Loading overlay -->
+							<div id="analyticsLoading" class="hidden absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-10">
+								<div class="animate-spin inline-block w-8 h-8 border-4 border-black border-t-transparent rounded-full"></div>
+							</div>
+							<canvas id="analyticsChart" height="200" width="1200"></canvas>
+						</div>
 					</div>
-					<div class="bg-white rounded-lg border mt-6 p-4">
+					
+					<div class="bg-white rounded-lg border mt-6 p-4 relative">
 						<div class="text-gray-500 text-xl">Approximate Charges</div>
-						<canvas id="chargesChart" height="200" width="1200"></canvas>
+						<div class="relative">
+							<!-- Loading overlay -->
+							<div id="chargesLoading" class="hidden absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-10">
+								<div class="animate-spin inline-block w-8 h-8 border-4 border-black border-t-transparent rounded-full"></div>
+							</div>
+							<canvas id="chargesChart" height="200" width="1200"></canvas>
+						</div>
 					</div>
 				</div>
 			</div>

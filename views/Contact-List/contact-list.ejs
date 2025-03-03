@@ -41,6 +41,7 @@
 	
 </head>
 <%- include("../commonJS/loader") %>
+
 <body>
 	<!-- Loader HTML -->
 	
@@ -138,7 +139,7 @@
 				
 				<!-- Contact list table -->
 				<div class="flex justify-center w-full pt-2">
-					<div id="contactListTable" class="w-[95%] ">
+					<div id="contactListTable" class="w-[95%]">
 						<%- include('partials/contactListTable') %>
 					</div>
 				</div>
@@ -151,32 +152,6 @@
 		</div>
 	</div>
 	<!-- END PAGE CONTAINER -->
-	<script>
-		// Get the search input element
-		const searchInput = document.getElementById("searchInput");
-		
-		// Event listener to trigger search when the input changes
-		searchInput.addEventListener("input", async function () {
-			const query = searchInput.value; // Get the input value
-			
-			try {
-				// Fetch the search results from the backend
-				const response = await fetch(`/api/contact-list/search?query=${encodeURIComponent(query)}`);
-				
-				if (response.ok) {
-					// Get the updated contact list from the server
-					const data = await response.text(); // Assuming the response is HTML
-					
-					// Replace the contact list table with the updated data
-					document.getElementById("contactListTable").innerHTML = data;
-				} else {
-					console.error("Error fetching search results");
-				}
-			} catch (error) {
-				console.error("Error making the request", error);
-			}
-		});
-	</script>
 	<!-- BEGIN VENDOR JS -->
 	<script src="assets/plugins/pace/pace.min.js" type="text/javascript"></script>
 	<!--  A polyfill for browsers that don't support ligatures: remove liga.js if not needed-->

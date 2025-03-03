@@ -7,7 +7,7 @@ const downloadBtn = document.getElementById("downloadTemplate");
 const previewSection = document.getElementById("previewSection");
 const fileUploadSection = document.getElementById("fileUploadSection");
 const errorMessage = document.getElementById("errorMessage");
-const reUpload = document.getElementById("reUpload");
+// const reUpload = document.getElementById("reUpload");
 const mainDiv = document.getElementById("campaignModalDiv");
 const previewButton = document.getElementById("previewButton");
 const submitButton = document.getElementById("createList");
@@ -340,10 +340,10 @@ function toggleErrorDetails(type) {
 }
 
 // Re-upload logic
-reUpload.addEventListener("click", function () {
-	fileUploadSection.classList.remove("hidden");
-	previewSection.classList.add("hidden");
-});
+// reUpload.addEventListener("click", function () {
+// 	fileUploadSection.classList.remove("hidden");
+// 	previewSection.classList.add("hidden");
+// });
 
 // Handle template download
 function getSampleCSV() {
@@ -368,15 +368,52 @@ function getSampleCSV() {
 		});
 }
 
-document.getElementById("searchInput").addEventListener("input", async () => {
-	try {
-		console.log("here");
-		const res = await fetch(`/contact-list/search?query=${this.value}`);
-		const data = await res.json();
-		const table = document.getElementById("contactListTable");
-		table.innerHTML = "";
-		table.innerHTML += data;
-	} catch (error) {
-		alert(error);
-	}
+const searchInput = document.getElementById("searchInput");
+const contactListTable = document.getElementById("contactListTable");
+
+let debounceTimer;
+
+searchInput.addEventListener("input", function () {
+	const query = searchInput.value;
+
+	// Clear existing timer
+	clearTimeout(debounceTimer);
+
+	// Show loading spinner immediately
+	contactListTable.innerHTML = `
+        <div class="flex justify-center items-center h-96">
+            <div class="animate-spin inline-block w-8 h-8 border-4 border-black border-t-transparent rounded-full"></div>
+        </div>
+    `;
+
+	// Set new timer
+	debounceTimer = setTimeout(async () => {
+		try {
+			const response = await fetch(
+				`/api/contact-list/search?query=${encodeURIComponent(query)}`,
+			);
+
+			if (response.ok) {
+				const data = await response.text();
+				contactListTable.innerHTML = data;
+			} else {
+				contactListTable.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="text-center text-red-500 py-4 h-full w-full">
+                            Error loading results
+                        </td>
+                    </tr>
+                `;
+			}
+		} catch (error) {
+			console.error("Error making the request", error);
+			contactListTable.innerHTML = `
+                <tr>
+                    <td colspan="5" class="text-center text-red-500 py-4 h-full w-full">
+                        Network error - failed to fetch results
+                    </td>
+                </tr>
+            `;
+		}
+	}, 300); // 300ms delay after typing stops
 });

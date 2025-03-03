@@ -58,36 +58,53 @@ async function applyFilters() {
 	)}&status=${statusFilter}&search=${search}&phoneNumberId=${phoneNumberId}`;
 }
 
+let debounceTimer; // Declare debounce timer variable
+
 async function getSearch() {
 	const search = document.getElementById("searchInput").value;
-	const spinner = document.getElementById("loadingSpinner");
-	spinner.classList.remove("hidden");
+	const campaignTable = document.getElementById("campaignTable");
 
 	try {
-		// Fetch filtered data from the server
 		const res = await fetch(
 			`/reports/campaign-list/filter?search=${search}`,
 		);
-		const data = await res.text();
 
-		// Update the campaign table with new filtered results
-		const campaignTable = document.getElementById("campaignTable");
+		if (!res.ok) throw new Error("Failed to fetch data");
+
+		const data = await res.text();
 		campaignTable.innerHTML = data;
 
-		// Close the sidebar and overlay after applying filters
 		closeFilterModal();
 	} catch (error) {
 		console.error("Error fetching campaign data:", error);
-		alert("Failed to fetch campaign data.");
-	} finally {
-		// Hide the loading spinner
-		spinner.classList.add("hidden");
+		campaignTable.innerHTML = `
+            <tr>
+                <td colspan="6" class="text-center text-red-500 py-4">
+                    Error loading campaigns: ${error.message}
+                </td>
+            </tr>
+        `;
 	}
 }
 
-// Trigger data fetch on search input change
-document.getElementById("searchInput").addEventListener("input", async () => {
-	await getSearch();
+// Modified event listener with debouncing
+document.getElementById("searchInput").addEventListener("input", () => {
+	const campaignTable = document.getElementById("campaignTable");
+
+	// Show loading spinner immediately
+	campaignTable.innerHTML = `
+        <div class="flex justify-center items-center h-96">
+            <div class="animate-spin inline-block w-8 h-8 border-4 border-black border-t-transparent rounded-full"></div>
+        </div>
+    `;
+
+	// Clear existing timer
+	clearTimeout(debounceTimer);
+
+	// Set new timer
+	debounceTimer = setTimeout(async () => {
+		await getSearch();
+	}, 300); // 300ms debounce delay
 });
 
 // Retrieve the query parameters from the URL

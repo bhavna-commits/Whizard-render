@@ -42,7 +42,7 @@ const dataSection = document.getElementById("dataSection");
 const userName = document.getElementById("userName");
 const userDate = document.getElementById("userDate");
 const overlay = document.getElementById("overlay");
-const closeBtn = document.getElementById("closeBtn");
+// const closeBtn = document.getElementById("closeBtn");
 const loading = document.getElementById("loading");
 
 // Close sidebar

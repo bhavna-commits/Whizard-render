@@ -36,24 +36,25 @@ function initializeDatePicker() {
 }
 
 async function fetchAnalytics(startDate, endDate) {
+	const analyticsLoading = document.getElementById("analyticsLoading");
+	const chargesLoading = document.getElementById("chargesLoading");
+
 	try {
+		// Show loaders
+		analyticsLoading.classList.remove("hidden");
+		chargesLoading.classList.remove("hidden");
+
 		if (!startDate || !endDate) {
-			console.error("Invalid dates:", {
-				startDate,
-				endDate,
-			});
+			console.error("Invalid dates:", { startDate, endDate });
 			return null;
 		}
 
 		// Convert to Unix timestamps
 		const startUnix = Math.floor(startDate.getTime() / 1000);
 		const endUnix = Math.floor(endDate.getTime() / 1000) + 86400;
-		
+
 		const response = await axios.get("/reports/get-cost-report", {
-			params: {
-				start: startUnix,
-				end: endUnix,
-			},
+			params: { start: startUnix, end: endUnix },
 		});
 
 		// Process the fetched data
@@ -61,6 +62,10 @@ async function fetchAnalytics(startDate, endDate) {
 	} catch (error) {
 		console.error("Error fetching analytics:", error);
 		return null;
+	} finally {
+		// Hide loaders regardless of success/failure
+		analyticsLoading.classList.add("hidden");
+		chargesLoading.classList.add("hidden");
 	}
 }
 
