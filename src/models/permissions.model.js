@@ -32,6 +32,7 @@ const permissionSchema = new Schema(
 		templates: {
 			type: { type: Boolean, default: false },
 			duplicateTemplate: { type: Boolean, default: false },
+			editTemplate: { type: Boolean, default: false },
 			createTemplate: { type: Boolean, default: false },
 			deleteTemplate: { type: Boolean, default: false },
 		},

@@ -22,7 +22,7 @@ async function submit() {
 
 	try {
 		const templateData = collectTemplateData();
-		console.log(templateData);
+		// console.log(templateData);
 		if (!templateData) return;
 
 		let headerValidation = { isValid: true, error: null, numbers: [] };
@@ -99,15 +99,36 @@ async function submit() {
 		if (templateData.header.content instanceof File) {
 			formData.append("headerFile", templateData.header.content);
 		}
-		console.log("FormData:", Array.from(formData.entries()));
-		const response = await fetch("/api/templates/createTemplate", {
-			method: "POST",
-			body: formData,
-		});
+
+		let response;
+
+		const editURL = location.href.split("/")[4];
+
+		if (editURL == "edit") {
+			const url = location.href.split("/");
+			const templateId = url[url.length - 2];
+
+			// Log formData contents
+			// for (let [key, value] of formData.entries()) {
+			// 	console.log(`${key}: ${value}`);
+			// }
+
+			response = await fetch(
+				`/api/templates/editTemplate/${templateId}`,
+				{
+					method: "POST",
+					body: formData, // Send FormData directly
+				},
+			);
+		} else {
+			response = await fetch("/api/templates/createTemplate", {
+				method: "POST",
+				body: formData, // Send FormData directly
+			});
+		}
 
 		// Parse response data to populate modal content
 		const res = await response.json();
-		console.log(res);
 
 		if (res.success) {
 			location.href = "/template";
@@ -354,6 +375,31 @@ function collectTemplateData() {
 	const headerType = headerTypeDropdown.value;
 	templateData.header = { type: headerType, content: null };
 
+	// Assuming you get mediaFileData and mediaFileName from the backend
+	if (mediaFileData && mediaFileName) {
+		// Decode the base64 string back into binary data
+		const byteString = atob(mediaFileData);
+
+		// Create an array of bytes
+		const byteArray = new Uint8Array(byteString.length);
+		for (let i = 0; i < byteString.length; i++) {
+			byteArray[i] = byteString.charCodeAt(i);
+		}
+
+		// Create a new Blob object of the appropriate type (assuming image/jpeg here, adjust based on your actual file type)
+		const file = new File([byteArray], mediaFileName, {
+			type: "image/jpeg", // Adjust the MIME type if necessary based on the file type
+		});
+
+		// Create a DataTransfer object to mimic a user input
+		const dataTransfer = new DataTransfer();
+		dataTransfer.items.add(file);
+
+		// Set the file input's files property to our newly created File object
+		const fileInput = document.getElementById("file-upload");
+		fileInput.files = dataTransfer.files;	
+	}
+
 	// Skip header validation if the type is "none"
 	if (headerType === "none") {
 		templateData.header.content = null;
@@ -371,7 +417,7 @@ function collectTemplateData() {
 		}
 
 		templateData.header.content = fileInput.files[0];
-		console.log(templateData.header.content);
+		// console.log(templateData.header.content);
 	} else {
 		return showError("Invalid header type selected.");
 	}

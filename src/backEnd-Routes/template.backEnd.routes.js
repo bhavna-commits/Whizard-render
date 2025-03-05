@@ -5,6 +5,7 @@ import {
 	deleteTemplate,
 	duplicateTemplate,
 	getCampaignSingleTemplates,
+	editTemplate,
 } from "../controllers/Dashboard/template.controller.js";
 import { multerMiddle } from "../config/multerMiddleware.js";
 import { trackSanitationFailures } from "../middleWares/sanitiseInput.js";
@@ -18,10 +19,15 @@ router.post(
 	trackSanitationFailures,
 );
 
-router.get("/duplicate/:id", duplicateTemplate, trackSanitationFailures);
-
 router.delete("/delete/:id", deleteTemplate, trackSanitationFailures);
 
 router.get("/:id", getCampaignSingleTemplates, trackSanitationFailures);
+
+router.post(
+	"/editTemplate/:id",
+	multerMiddle,
+	editTemplate,
+	trackSanitationFailures,
+);
 
 export default router;

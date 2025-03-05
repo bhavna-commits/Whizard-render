@@ -1,3 +1,11 @@
+const url = location.href.split("/")[4];
+
+if (url == "edit") {
+	document.querySelector(
+		"input[placeholder='Give new template a name']",
+	).value = data.name;
+}
+
 // Access the BODY component from the `data` object
 selectLanguage(data.language.language, data.language.code);
 const bodyText = data.components.find((c) => c.type == "BODY")?.text || "";
@@ -13,25 +21,71 @@ document.getElementById("footerInput").innerHTML = footerText.replace(
 	"<br>",
 );
 
-const headerText = data.components.find((c) => c.type == "HEADER")?.text || "";
+const headerComponent = data.components.find((c) => c.type == "HEADER");
+const headerText = headerComponent?.text || "";
+
+// If it's a text header
 if (headerText) {
 	document.getElementById("noneInputContainer").classList.add("hidden");
 	document.getElementById("headerInputContainer").classList.toggle("hidden");
 	document.getElementById("mediaTypeDropdown").value = "text";
 	document.getElementById("headerInput").value = headerText;
-} else {
-	// If no headerText, default the dropdown to "none"
-	document.getElementById("mediaTypeDropdown").value = "none";
-}
 
-document.getElementById("previewHeader").innerHTML = headerText.replace(
-	/\n/g,
-	"<br>",
-);
-document.getElementById("previewHead").innerHTML = headerText.replace(
-	/\n/g,
-	"<br>",
-);
+	// Update the preview for the header text
+	document.getElementById("previewHeader").innerHTML = headerText.replace(
+		/\n/g,
+		"<br>",
+	);
+	document.getElementById("previewHead").innerHTML = headerText.replace(
+		/\n/g,
+		"<br>",
+	);
+}
+// If it's an image in the header component
+else if (
+	headerComponent?.format === "IMAGE" &&
+	headerComponent?.example?.header_handle?.[0]
+) {
+	document.getElementById("mediaTypeDropdown").value = "media";
+
+	const imageUrl = headerComponent.example.header_handle[0]
+		.split("/")
+		.slice(3)
+		.join("/");
+
+	// Update the preview for the image
+	document.getElementById(
+		"previewHeader",
+	).innerHTML = `<img src="/${imageUrl}" alt="Header Media" class="custom-card-img">`;
+	document.getElementById(
+		"previewHead",
+	).innerHTML = `<img src="/${imageUrl}" alt="Header Media" class="custom-card-img">`;
+}
+// If it's a document in the header component
+else if (
+	headerComponent?.format === "DOCUMENT" &&
+	headerComponent?.example?.header_handle?.[0]
+) {
+	document.getElementById("mediaTypeDropdown").value = "media";
+	const documentUrl = headerComponent.example.header_handle[0]
+		.split("/")
+		.slice(3)
+		.join("/");
+
+	// Update the preview for the document
+	document.getElementById(
+		"previewHeader",
+	).innerHTML = `<a href="${documentUrl}" target="_blank" class="custom-card-document">View Document</a>`;
+	document.getElementById(
+		"previewHead",
+	).innerHTML = `<a href="${documentUrl}" target="_blank" class="custom-card-document">View Document</a>`;
+}
+// If no headerText or media, default the dropdown to "none"
+else {
+	document.getElementById("mediaTypeDropdown").value = "none";
+	document.getElementById("previewHeader").innerHTML = "";
+	document.getElementById("previewHead").innerHTML = "";
+}
 
 document.getElementById("previewBody").innerHTML = bodyText.replace(
 	/\n/g,

@@ -68,6 +68,7 @@ const userSchema = new mongoose.Schema(
 			templates: {
 				type: { type: Boolean, default: true },
 				duplicateTemplate: { type: Boolean, default: true },
+				editTemplate: { type: Boolean, default: true },
 				createTemplate: { type: Boolean, default: true },
 				deleteTemplate: { type: Boolean, default: true },
 			},

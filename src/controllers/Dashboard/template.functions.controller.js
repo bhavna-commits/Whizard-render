@@ -20,7 +20,8 @@ export const saveTemplateToDatabase = async (
 ) => {
 	try {
 		const components = createComponents(templateData, dynamicVariables);
-		// console.log(components);
+
+		// Create the new template object
 		const newTemplate = new Template({
 			name: templateData.templateName,
 			category: templateData.category,
@@ -31,6 +32,7 @@ export const saveTemplateToDatabase = async (
 			language: selectedLanguageCode,
 		});
 
+		// Check if there is a file uploaded and update the corresponding header component with the file URL
 		if (req.file) {
 			const filePath = `${url}/uploads/${id}/${req.file?.filename}`;
 
@@ -39,17 +41,19 @@ export const saveTemplateToDatabase = async (
 			);
 
 			if (headerComponent) {
-				// Assuming that the file is an image, video, or document
+				// Depending on the header format, update the header_url with the file path
 				if (headerComponent.format === "IMAGE") {
-					headerComponent.example.header_handle = [filePath];
+					headerComponent.example.header_url = [filePath];
 				} else if (headerComponent.format === "VIDEO") {
-					headerComponent.example.header_handle = [filePath];
+					headerComponent.example.header_url = [filePath];
 				} else if (headerComponent.format === "DOCUMENT") {
-					headerComponent.example.header_handle = [filePath];
+					headerComponent.example.header_url = [filePath];
 				}
 			}
 		}
-		return newTemplate;
+
+		// Return the saved template object after successful saving
+		return savedTemplate;
 	} catch (error) {
 		console.error("Error saving template to database:", error);
 		throw new Error(`Error saving template to database: ${error.message}`);
@@ -86,8 +90,6 @@ export async function submitTemplateToFacebook(savedTemplate, id) {
 			components: plainTemplate.components,
 		};
 
-		
-
 		const response = await axios.post(
 			`https://graph.facebook.com/${process.env.FB_GRAPH_VERSION}/${user.WABA_ID}/message_templates`,
 			requestData,
@@ -99,7 +101,6 @@ export async function submitTemplateToFacebook(savedTemplate, id) {
 			},
 		);
 
-		
 		// If the response is successful, return the response data
 		return response.data;
 	} catch (error) {
@@ -118,6 +119,66 @@ export async function submitTemplateToFacebook(savedTemplate, id) {
 			throw new Error("No response received from Facebook");
 		} else {
 			// Something else went wrong
+			console.error("Error with the request:", error.message);
+			throw new Error("Error with the request: " + error.message);
+		}
+	}
+}
+
+export async function updateTemplateOnFacebook(originalTemplate, id) {
+	try {
+		// Retrieve the user to get credentials and related info
+		let user = await User.findOne({ unique_id: id });
+
+		// Clean up the components array similar to what you do in submitTemplateToFacebook
+		const cleanedComponents = originalTemplate.components.map(
+			(component) => {
+				const {
+					_id,
+					$__parent,
+					$__,
+					$errors,
+					$isNew,
+					[Symbol("mongoose#documentArrayParent")]: symbol,
+					...cleanComponent
+				} = component;
+				return cleanComponent;
+			},
+		);
+
+		// Prepare the request data
+		const requestData = {
+			category: originalTemplate.category.toUpperCase(), // Facebook requires uppercase
+			components: cleanedComponents,
+		};
+		// console.log(JSON.stringify(requestData));
+		// POST request to the WhatsApp template API endpoint
+		const response = await axios.post(
+			`https://graph.facebook.com/${process.env.FB_GRAPH_VERSION}/${originalTemplate.template_id}`,
+			requestData,
+			{
+				headers: {
+					"Content-Type": "application/json",
+					Authorization: `Bearer ${user.FB_ACCESS_TOKEN}`,
+				},
+			},
+		);
+
+		// Return the response data if successful
+		return response.data;
+	} catch (error) {
+		console.log(error.response.data.error);
+		if (error.response) {
+			throw new Error(
+				error.response.data.error?.error_user_msg ||
+					error.response.data.error?.error_user_title ||
+					error.response.data.error?.message ||
+					"Unknown error from Facebook",
+			);
+		} else if (error.request) {
+			console.error("No response received from Facebook:", error.request);
+			throw new Error("No response received from Facebook");
+		} else {
 			console.error("Error with the request:", error.message);
 			throw new Error("Error with the request: " + error.message);
 		}
@@ -158,8 +219,9 @@ export const fetchFacebookTemplates = async (id) => {
 	}
 };
 
-function createComponents(templateData, dynamicVariables) {
+export function createComponents(templateData, dynamicVariables) {
 	const components = [];
+	// console.log(templateData.header.content);
 	// Add HEADER component based on type
 	if (templateData.header.type === "text") {
 		if (dynamicVariables.header && dynamicVariables.header.length > 0) {

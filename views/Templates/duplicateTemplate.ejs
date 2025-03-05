@@ -101,7 +101,7 @@
 					<div class="form-group  space-y-1">
 						<label class="font-semibold">Category</label>
 						<div class="relative">
-							<button id="categoryButton" aria-haspopup="true" aria-expanded="false" class="w-full text-sm bg-transparent border border-gray-300 rounded px-4 py-2 text-left cursor-pointer text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500" type="button">
+							<button id="categoryButton" aria-haspopup="true" aria-expanded="false" class="w-full text-sm bg-transparent border border-gray-300 form-control px-2 py-2 text-left cursor-pointer text-gray-400 focus:outline-none focus:ring-2  focus:ring-indigo-200 " type="button">
 								Choose category
 							</button>
 							<div id="categoryDropdown" class="hidden absolute bg-white border border-gray-200 rounded mt-2 py-2 shadow-lg w-full z-50">
@@ -456,6 +456,8 @@
 	
 	<script>
 		const data = <%- JSON.stringify(templateData) %>;
+		const mediaFileData = <%- JSON.stringify(mediaFileData) %>;
+		const mediaFileName = <%- JSON.stringify(mediaFileName) %>;
 		// console.log(JSON.stringify(data));
 	</script>
 	<script src="/template/js/duplicateTemplate.js"></script>

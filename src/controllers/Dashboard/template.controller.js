@@ -1,11 +1,14 @@
-import path from "path";
+import axios from "axios";
 import fs from "fs";
+import path from "path";
 import Template from "../../models/templates.model.js";
 import dotenv from "dotenv";
 import {
 	saveTemplateToDatabase,
 	submitTemplateToFacebook,
 	fetchFacebookTemplates,
+	updateTemplateOnFacebook,
+	createComponents,
 } from "./template.functions.controller.js";
 import ActivityLogs from "../../models/activityLogs.model.js";
 import Permissions from "../../models/permissions.model.js";
@@ -20,6 +23,8 @@ import {
 
 dotenv.config();
 
+const __dirname = path.resolve();
+
 export const createTemplate = async (req, res, next) => {
 	try {
 		const templateData = JSON.parse(req.body.templateData);
@@ -30,7 +35,11 @@ export const createTemplate = async (req, res, next) => {
 		// if (!isObject(templateData)) return next();
 
 		// Check if a template with the same name exists for the user
-		const exists = await Template.findOne({ useradmin: id, name, deleted: false });
+		const exists = await Template.findOne({
+			useradmin: id,
+			name,
+			deleted: false,
+		});
 		if (exists) {
 			return res.status(500).json({
 				success: false,
@@ -58,7 +67,7 @@ export const createTemplate = async (req, res, next) => {
 		console.log("template creation : ", JSON.stringify(data));
 
 		await ActivityLogs.create({
-			useradmin: req.session?.user?.id || req.session?.addedUser?.owner,
+			useradmin: id,
 			unique_id: generateUniqueId(),
 			name: req.session?.user?.name || req.session?.addedUser?.name,
 			actions: "Create",
@@ -168,7 +177,7 @@ export const getList = async (req, res, next) => {
 	}
 };
 
-export const duplicateTemplate = async (req, res) => {
+export const duplicateTemplate = async (req, res, next) => {
 	try {
 		const templateId = req.params?.id;
 
@@ -187,8 +196,37 @@ export const duplicateTemplate = async (req, res) => {
 				.json({ success: false, error: "Template not found" });
 		}
 
-		console.log(originalTemplate);
-		// console.log(req.session?.user);
+		let mediaFileData = null;
+		const headerComponent = originalTemplate.components.find(
+			(component) =>
+				component.type === "HEADER" &&
+				(component.format === "IMAGE" ||
+					component.format == "DOCUMENT"),
+		);
+
+		let mediaFileName;
+		// Assuming you have the file path stored in your template
+		if (headerComponent && headerComponent.example?.header_handle?.[0]) {
+			const mediaFileUrl = headerComponent.example.header_handle[0];
+			mediaFileName = mediaFileUrl.split("/").pop();
+			// Assuming you store the file path on your server
+			const mediaFilePath = path.join(
+				__dirname,
+				"uploads",
+				req.session?.user?.id || req.session?.addedUser?.owner,
+				mediaFileName,
+			);
+
+			// Check if the file exists
+			if (fs.existsSync(mediaFilePath)) {
+				// Read the file and convert it into a buffer or base64 format
+				mediaFileData = fs.readFileSync(mediaFilePath);
+			} else {
+				throw "Media file not found";
+			}
+		}
+
+		// Permissions check (unchanged)
 		const permissions = req.session?.addedUser?.permissions;
 		if (permissions) {
 			const access = await Permissions.findOne({
@@ -206,6 +244,10 @@ export const duplicateTemplate = async (req, res) => {
 					color: req.session?.addedUser?.color,
 					languagesCode,
 					whatsAppStatus: req.session?.addedUser?.whatsAppStatus,
+					mediaFileData: mediaFileData
+						? mediaFileData.toString("base64")
+						: null, // Send file data as base64
+					mediaFileName,
 				});
 			} else {
 				res.render("errors/notAllowed");
@@ -214,7 +256,6 @@ export const duplicateTemplate = async (req, res) => {
 			const access = await User.findOne({
 				unique_id: req.session?.user?.id,
 			});
-			// console.log(access);
 			res.render("Templates/duplicateTemplate", {
 				access: access.access,
 				templateData: originalTemplate,
@@ -223,6 +264,10 @@ export const duplicateTemplate = async (req, res) => {
 				color: req.session?.user?.color,
 				languagesCode,
 				whatsAppStatus: access.whatsAppStatus,
+				mediaFileData: mediaFileData
+					? mediaFileData.toString("base64")
+					: null, // Send file data as base64
+				mediaFileName,
 			});
 		} else {
 			res.render("errors/notAllowed");
@@ -233,39 +278,183 @@ export const duplicateTemplate = async (req, res) => {
 	}
 };
 
+export const editTemplate = async (req, res, next) => {
+	try {
+		// Retrieve and validate the template id from params
+		const templateId = req.params?.id;
+		if (!templateId)
+			return res.status(404).json({
+				success: false,
+				error: "Template id not found",
+			});
+		if (!isString(templateId)) return next();
+
+		// Find the existing template in DB
+		const originalTemplate = await Template.findById(templateId);
+		if (!originalTemplate) {
+			return res
+				.status(404)
+				.json({ success: false, error: "Template not found" });
+		}
+
+		// Parse the new template data from the request body
+		const templateData = JSON.parse(req.body.templateData);
+		const { dynamicVariables, templateName, selectedLanguageCode, url } =
+			templateData;
+		const id = req.session?.user?.id || req.session?.addedUser?.owner;
+
+		// Check if another template with the same name exists for the user (if name is changed)
+		const exists = await Template.findOne({
+			useradmin: id,
+			templateName,
+			deleted: false,
+			_id: { $ne: templateId },
+		});
+		if (exists) {
+			return res.status(500).json({
+				success: false,
+				message:
+					"This template name already exists, choose a different name",
+			});
+		}
+
+		const components = createComponents(templateData, dynamicVariables);
+		// Update the template fields in DB
+		originalTemplate.dynamicVariables = dynamicVariables;
+		originalTemplate.name = templateName;
+		originalTemplate.selectedLanguageCode = selectedLanguageCode;
+		originalTemplate.url = url;
+		originalTemplate.components = components;
+
+		if (req.file) {
+			const filePath = `${url}/uploads/${id}/${req.file?.filename}`;
+
+			const headerComponent = originalTemplate.components.find(
+				(component) => component.type === "HEADER",
+			);
+
+			if (headerComponent) {
+				// Depending on the header format, update the header_url with the file path
+				if (headerComponent.format === "IMAGE") {
+					headerComponent.example.header_url = [filePath];
+				} else if (headerComponent.format === "VIDEO") {
+					headerComponent.example.header_url = [filePath];
+				} else if (headerComponent.format === "DOCUMENT") {
+					headerComponent.example.header_url = [filePath];
+				}
+			}
+		}
+		// Update the template on Facebook using the stored Facebook template id
+		// (Assuming updateTemplateOnFacebook is defined similar to submitTemplateToFacebook)
+		const updatedData = await updateTemplateOnFacebook(
+			originalTemplate,
+			id,
+		);
+		if (updatedData && updatedData.id) {
+			// Optionally update the facebook template id in case it changes
+			originalTemplate.template_id = updatedData.id;
+		}
+
+		// Save the updated template in DB
+		await originalTemplate.save();
+
+		// Log the update activity
+		await ActivityLogs.create({
+			useradmin: id,
+			unique_id: generateUniqueId(),
+			name: req.session?.user?.name || req.session?.addedUser?.name,
+			actions: "Update",
+			details: `Updated template named: ${originalTemplate.name}`,
+		});
+
+		// Return success response
+		res.status(200).json({
+			success: true,
+			message: "Template updated successfully.",
+		});
+	} catch (error) {
+		console.error("Error updating template:", error);
+		res.status(500).json({
+			success: false,
+			message: `Error updating template: ${error.message}`,
+		});
+	}
+};
+
 export const deleteTemplate = async (req, res, next) => {
 	try {
 		const templateId = req.params?.id;
+		const id = req.session?.user?.id || req.session?.addedUser?.owner;
 		if (!templateId)
 			return res
 				.status(404)
 				.json({ success: false, error: "Template id not found" });
 
+		// Check if templateId is a string
 		if (!isString(templateId)) return next();
 
+		// Find the template in the database
 		const deletedTemplate = await Template.findByIdAndUpdate(
 			{ _id: templateId },
 			{ deleted: true },
 		);
+
 		if (!deletedTemplate) {
 			return res
 				.status(404)
 				.json({ success: false, error: "Template not found" });
 		}
 
-		await ActivityLogs.create({
-			useradmin: req.session?.user?.id || req.session?.addedUser?.owner,
-			unique_id: generateUniqueId(),
-			name: req.session?.user?.name || req.session?.addedUser?.name,
-			actions: "Delete",
-			details: `Deleted Template named: ${deletedTemplate.name}`,
+		// Get the user to retrieve the WABA_ID and access token
+		const user = await User.findOne({
+			unique_id: id,
 		});
 
-		res.status(200).json({
-			success: true,
-			message: "Template deleted successfully",
-		});
+		if (!user || !user.WABA_ID || !user.FB_ACCESS_TOKEN) {
+			return res.status(500).json({
+				success: false,
+				error: "Failed to retrieve user or credentials",
+			});
+		}
+
+		// Send DELETE request to Meta's API to delete the template
+		const response = await axios.delete(
+			`https://graph.facebook.com/${process.env.FB_GRAPH_VERSION}/${user.WABA_ID}/message_templates`,
+			{
+				params: {
+					hsm_id: deletedTemplate.template_id, // Assuming the template ID on Meta is stored as template_id
+					name: deletedTemplate.name,
+				},
+				headers: {
+					Authorization: `Bearer ${user.FB_ACCESS_TOKEN}`,
+				},
+			},
+		);
+
+		// Check the Meta API response for success
+		if (response.data?.success) {
+			// Log the deletion in ActivityLogs
+			await ActivityLogs.create({
+				useradmin:
+					req.session?.user?.id || req.session?.addedUser?.owner,
+				unique_id: generateUniqueId(),
+				name: req.session?.user?.name || req.session?.addedUser?.name,
+				actions: "Delete",
+				details: `Deleted Template named: ${deletedTemplate.name}`,
+			});
+
+			return res.status(200).json({
+				success: true,
+				message: "Template deleted successfully from both DB and Meta",
+			});
+		} else {
+			return res.status(500).json({
+				success: false,
+				error: "Failed to delete the template from Meta",
+			});
+		}
 	} catch (error) {
+		// Handle any errors during the delete process
 		res.status(500).json({ success: false, error: error.message });
 	}
 };

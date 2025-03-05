@@ -11,6 +11,7 @@ import reportsFrontEndRoute from "./frontEnd-Routes/reports.frontEnd.routes.js";
 import reportsBackEndRoute from "./backEnd-Routes/reports.backEnd.routes.js";
 import dashboardBackEndRoutes from "./backEnd-Routes/dashboard.backEnd.routes.js";
 import chatsFrontEndRoutes from "./frontEnd-Routes/chats.frontEnd.routes.js";
+import chatsBackEndRoutes from "./backEnd-Routes/chats.backEnd.routes.js"
 
 import { checkSession } from "./middleWares/checkSession.js";
 import app from "./static.app.js";
@@ -21,6 +22,7 @@ app.use("/api/users", userRoutes);
 
 app.use("/", checkSession, tempalteFrontEndRoutes);
 app.use("/chats", checkSession, chatsFrontEndRoutes);
+app.use("/api/chats", checkSession, chatsBackEndRoutes);
 app.use("/reports", checkSession, reportsFrontEndRoute);
 app.use("/settings", checkSession, settingsFrontRoute);
 app.use("/contact-list", checkSession, contactFrontEndRoutes);

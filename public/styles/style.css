@@ -817,7 +817,7 @@ input[type="number"] {
 	.user-profile {
 		width: auto;
 		height: 100%;
-		position: relative;
+		position: absolute;
 		right: 1rem;
 		display: flex;
 		align-items: center;

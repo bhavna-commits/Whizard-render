@@ -3,7 +3,8 @@ import path from "path";
 import app from "./app.js";
 
 app.use(express.static("public"));
-app.use("/api/templates/duplicate/:id", express.static("public"));
+app.use("/templates/duplicate/:id", express.static("public"));
+app.use("/templates/edit/:id", express.static("public"));
 app.use("/Chats/chats", express.static("public"));
 app.use("/contact-list", express.static("public"));
 app.use("/contact-list/overview", express.static("public"));

@@ -378,7 +378,7 @@
 			const categorySelect = document.querySelector('select[name="category"]');
 			const applyFilterBtn = document.getElementById('applyFilterBtn');
 			const clearFilterBtn = document.getElementById('clearFilterBtn');
-			let queryParams = new URLSearchParams(window.location.search);
+			let queryParams = new URLSearchParams(location.search);
 			
 			// Only set textContent if the query parameter exists
 			if (queryParams.has('category')) {
@@ -447,57 +447,57 @@
 				}
 			});
 			
-			// Handling File Input
-			const fileInput = document.getElementById("file-input");
-			const fileList = document.getElementById("file-list");
+			// // Handling File Input
+			// const fileInput = document.getElementById("file-input");
+			// const fileList = document.getElementById("file-list");
 			
-			fileInput.addEventListener("change", function () {
-				const files = fileInput.files;
+			// fileInput.addEventListener("change", function () {
+			// 	const files = fileInput.files;
 				
-				for (const file of files) {
-					const fileItem = document.createElement("div");
-					fileItem.classList.add("file-item");
+			// 	for (const file of files) {
+			// 		const fileItem = document.createElement("div");
+			// 		fileItem.classList.add("file-item");
 					
-					const fileStatus = document.createElement("div");
-					fileStatus.classList.add("file-status");
+			// 		const fileStatus = document.createElement("div");
+			// 		fileStatus.classList.add("file-status");
 					
-					const fileName = document.createElement("span");
-					fileName.textContent = file.name;
-					fileName.classList.add("status-uploading");
+			// 		const fileName = document.createElement("span");
+			// 		fileName.textContent = file.name;
+			// 		fileName.classList.add("status-uploading");
 					
-					const loader = document.createElement("div");
-					loader.classList.add("circular-loader");
+			// 		const loader = document.createElement("div");
+			// 		loader.classList.add("circular-loader");
 					
-					const statusText = document.createElement("span");
-					statusText.textContent = "Uploading...";
-					statusText.classList.add("status-uploading");
+			// 		const statusText = document.createElement("span");
+			// 		statusText.textContent = "Uploading...";
+			// 		statusText.classList.add("status-uploading");
 					
-					const removeButton = document.createElement("span");
-					removeButton.textContent = "✖";
-					removeButton.classList.add("remove-file");
-					removeButton.onclick = () => fileItem.remove();
+			// 		const removeButton = document.createElement("span");
+			// 		removeButton.textContent = "✖";
+			// 		removeButton.classList.add("remove-file");
+			// 		removeButton.onclick = () => fileItem.remove();
 					
-					fileStatus.appendChild(loader);
-					fileStatus.appendChild(fileName);
-					fileStatus.appendChild(statusText);
-					fileItem.appendChild(fileStatus);
-					fileItem.appendChild(removeButton);
-					fileList.appendChild(fileItem);
+			// 		fileStatus.appendChild(loader);
+			// 		fileStatus.appendChild(fileName);
+			// 		fileStatus.appendChild(statusText);
+			// 		fileItem.appendChild(fileStatus);
+			// 		fileItem.appendChild(removeButton);
+			// 		fileList.appendChild(fileItem);
 					
-					setTimeout(() => {
-						loader.remove();
-						statusText.textContent = "Uploaded";
-						statusText.classList.remove("status-uploading");
-						statusText.classList.add("status-uploaded");
+			// 		setTimeout(() => {
+			// 			loader.remove();
+			// 			statusText.textContent = "Uploaded";
+			// 			statusText.classList.remove("status-uploading");
+			// 			statusText.classList.add("status-uploaded");
 						
-						const uploadedIcon = document.createElement("div");
-						uploadedIcon.classList.add("uploaded-icon");
-						uploadedIcon.textContent = "✔";
+			// 			const uploadedIcon = document.createElement("div");
+			// 			uploadedIcon.classList.add("uploaded-icon");
+			// 			uploadedIcon.textContent = "✔";
 						
-						fileStatus.prepend(uploadedIcon);
-					}, 2000);
-				}
-			});
+			// 			fileStatus.prepend(uploadedIcon);
+			// 		}, 2000);
+			// 	}
+			// });
 			
 			// Example: Refresh Facebook Templates
 			async function getStatus () {

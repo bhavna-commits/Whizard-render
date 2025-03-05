@@ -4,6 +4,7 @@ import {
 	getFaceBookTemplates,
 	getCampaignTemplates,
 	getCreateTemplate,
+	duplicateTemplate,
 } from "../controllers/Dashboard/template.controller.js";
 import { trackSanitationFailures } from "../middleWares/sanitiseInput.js";
 
@@ -24,5 +25,13 @@ router.get(
 	getCampaignTemplates,
 	trackSanitationFailures,
 );
+
+router.get(
+	"/templates/duplicate/:id",
+	duplicateTemplate,
+	trackSanitationFailures,
+);
+
+router.get("/templates/edit/:id", duplicateTemplate, trackSanitationFailures);
 
 export default router;

@@ -40,6 +40,17 @@
 					</td>
 					
 					<td class="border-r border-t border-b rounded-lg border-gray-200">
+						<% if (access?.templates?.editTemplate) { %>
+						<!-- Edit Button -->
+						<button type="button" class="text-gray-500 hover:text-gray-700 px-3 border-r" onclick="editTemplate('<%= list._id %>')">
+							<img src="svg/editPenLight.svg" alt="edit">
+						</button>
+						<% } else { %>
+						<!-- Duplicate Button -->
+						<button type="button" class="text-gray-500 hover:cursor-not-allowed px-3 border-r" title="You don't have permissions to access this" disabled>
+							<img src="svg/editPenLight.svg" alt="duplicate">
+						</button>
+						<% } %>
 						<% if (access?.templates?.duplicateTemplate) { %>
 						<!-- Duplicate Button -->
 						<button type="button" class="text-gray-500 hover:text-gray-700 px-3 border-r" onclick="duplicateTemplate('<%= list._id %>')">
@@ -97,7 +108,11 @@
 		});
 		
 		function duplicateTemplate (templateId) {
-			location.href = `/api/templates/duplicate/${templateId}`;
+			location.href = `/templates/duplicate/${templateId}`;
+		}
+		
+		function editTemplate (templateId) {
+			location.href = `/templates/edit/${templateId}`;
 		}
 		
 		// Function to confirm deletion
