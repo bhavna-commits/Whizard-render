@@ -251,6 +251,18 @@ export function createComponents(templateData, dynamicVariables) {
 			format: "IMAGE",
 			example: {},
 		});
+	} else if (templateData.header.type === "document") {
+		components.push({
+			type: "HEADER",
+			format: "DOCUMENT",
+			example: {},
+		});
+	} else if (templateData.header.type === "video") {
+		components.push({
+			type: "HEADER",
+			format: "VIDEO",
+			example: {},
+		});
 	}
 
 	// Add BODY component with dynamic variables
@@ -284,9 +296,6 @@ export function createComponents(templateData, dynamicVariables) {
 		components.push({
 			type: "FOOTER",
 			text: templateData.footer,
-			// example: {
-			// 	footer_text: [footerExample],
-			// },
 		});
 	} else if (templateData.footer) {
 		components.push({
@@ -320,3 +329,105 @@ export function createComponents(templateData, dynamicVariables) {
 	}
 	return components;
 }
+
+export function createChatsComponents(templateData, dynamicVariables) {
+	const components = [];
+
+	// Iterate through each component in templateData
+	templateData.forEach((comp) => {
+		// Process HEADER
+		if (comp.type === "HEADER") {
+			if (comp.format === "TEXT") {
+				const headerExample =
+					dynamicVariables?.header?.length > 0
+						? dynamicVariables.header.map(
+								(variable) => Object.values(variable)[0],
+						  )
+						: [];
+
+				components.push({
+					type: "HEADER",
+					format: "TEXT",
+					text: comp.text,
+					example: {
+						header_text: headerExample,
+					},
+				});
+			} else if (comp.format === "IMAGE") {
+				components.push({
+					type: "HEADER",
+					format: "IMAGE",
+					link: dynamicVariables?.header?.imageUrl || "",
+					caption: comp.text || "",
+				});
+			} else if (comp.format === "DOCUMENT") {
+				components.push({
+					type: "HEADER",
+					format: "DOCUMENT",
+					link: dynamicVariables?.header?.documentUrl || "",
+					caption: comp.text || "",
+				});
+			} else if (comp.format === "VIDEO") {
+				components.push({
+					type: "HEADER",
+					format: "VIDEO",
+					link: dynamicVariables?.header?.videoUrl || "",
+					caption: comp.text || "",
+				});
+			}
+		}
+
+		// Process BODY
+		if (comp.type === "BODY") {
+			const bodyExample =
+				dynamicVariables?.body?.length > 0
+					? dynamicVariables.body.map(
+							(variable) => Object.values(variable)[0],
+					  )
+					: [];
+
+			components.push({
+				type: "BODY",
+				text: comp.text,
+				example: {
+					body_text: [bodyExample],
+				},
+			});
+		}
+
+		// Process FOOTER
+		if (comp.type === "FOOTER") {
+			components.push({
+				type: "FOOTER",
+				text: comp.text,
+			});
+		}
+
+		// Process BUTTONS
+		if (comp.type === "BUTTONS" && comp.buttons.length > 0) {
+			components.push({
+				type: "BUTTONS",
+				buttons: comp.buttons.map((button) => {
+					if (button.type === "PHONE_NUMBER") {
+						// Call-to-Action button for phone numbers
+						return {
+							type: "PHONE_NUMBER",
+							text: button.text,
+							phone_number: button.phone_number,
+						};
+					} else if (button.type === "URL") {
+						// Call-to-Action button for URLs
+						return {
+							type: "URL",
+							text: button.text,
+							url: button.url,
+						};
+					}
+				}),
+			});
+		}
+	});
+
+	return components;
+}
+

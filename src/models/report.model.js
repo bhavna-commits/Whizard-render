@@ -46,7 +46,7 @@ const CampaignReportSchema = new mongoose.Schema(
 
 // Compound indexes
 CampaignReportSchema.index({ useradmin: 1, campaignId: 1 });
-CampaignReportSchema.index({ status: 1, createdAt: 1 }); // Time-sorted status queries
+CampaignReportSchema.index({ status: 1, createdAt: 1 }); 
 
 // Middleware to update timestamps
 CampaignReportSchema.pre("save", function (next) {

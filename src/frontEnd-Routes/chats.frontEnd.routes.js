@@ -1,9 +1,9 @@
 import express from "express";
-import { getChats } from "../controllers/Chats/chats.controller.js";
+import { getUsers } from "../controllers/Chats/chats.controller.js";
 import { trackSanitationFailures } from "../middleWares/sanitiseInput.js";
 
 const router = express.Router();
 
-router.get("/", getChats, trackSanitationFailures);
+router.get("/", getUsers, trackSanitationFailures);
 
 export default router;

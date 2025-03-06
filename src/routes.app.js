@@ -19,10 +19,11 @@ import app from "./static.app.js";
 app.use("/api/facebook", faceBookBackEndRoute);
 app.use("/", userfrontEndRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/chats", chatsBackEndRoutes);
 
 app.use("/", checkSession, tempalteFrontEndRoutes);
 app.use("/chats", checkSession, chatsFrontEndRoutes);
-app.use("/api/chats", checkSession, chatsBackEndRoutes);
+
 app.use("/reports", checkSession, reportsFrontEndRoute);
 app.use("/settings", checkSession, settingsFrontRoute);
 app.use("/contact-list", checkSession, contactFrontEndRoutes);
