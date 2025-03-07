@@ -5,7 +5,7 @@ import {
 	getCampaignTemplates,
 	getCreateTemplate,
 	duplicateTemplate,
-} from "../controllers/Dashboard/template.controller.js";
+} from "../controllers/Templates/template.controller.js";
 import { trackSanitationFailures } from "../middleWares/sanitiseInput.js";
 
 const router = express.Router();

@@ -11,7 +11,7 @@ import {
 } from "../../utils/utilFunctions.js";
 // import { getFbAccessToken } from "../../backEnd-Routes/facebook.backEnd.routes.js";
 import { isString } from "../../middleWares/sanitiseInput.js";
-import { countries } from "../../utils/dropDown.js";
+import { countries, help } from "../../utils/dropDown.js";
 
 dotenv.config();
 
@@ -29,6 +29,7 @@ export const getDashboard = async (req, res) => {
 
 		const permissions = req.session?.addedUser?.permissions;
 		const renderData = {
+			help,
 			countries,
 			user,
 			config: process.env.CONFIG_ID,

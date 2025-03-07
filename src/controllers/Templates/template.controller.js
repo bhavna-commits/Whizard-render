@@ -204,7 +204,7 @@ export const duplicateTemplate = async (req, res, next) => {
 					component.format == "DOCUMENT"),
 		);
 
-		let mediaFileName;
+		let mediaFileName = null;
 		// Assuming you have the file path stored in your template
 		if (headerComponent && headerComponent.example?.header_handle?.[0]) {
 			const mediaFileUrl = headerComponent.example.header_handle[0];
@@ -336,11 +336,11 @@ export const editTemplate = async (req, res, next) => {
 			if (headerComponent) {
 				// Depending on the header format, update the header_url with the file path
 				if (headerComponent.format === "IMAGE") {
-					headerComponent.example.header_url = [filePath];
+					headerComponent.example.header_handle = [filePath];
 				} else if (headerComponent.format === "VIDEO") {
-					headerComponent.example.header_url = [filePath];
+					headerComponent.example.header_handle = [filePath];
 				} else if (headerComponent.format === "DOCUMENT") {
-					headerComponent.example.header_url = [filePath];
+					headerComponent.example.header_handle = [filePath];
 				}
 			}
 		}

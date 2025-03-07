@@ -799,3 +799,12 @@ export const languagesCode = [
 	{ language: "Vietnamese", code: "vi" },
 	{ language: "Zulu", code: "zu" },
 ];
+
+export const help = [
+	{
+		a: "https://whizardapi.com/lets-apply-for-whatsapp-business-api-with-whizard/",
+		title: "How to apply for Whatsapp Business API?",
+		description:
+			"Discover how to apply for Official WhatsApp Business API for FREE with Whizard.",
+	},
+];

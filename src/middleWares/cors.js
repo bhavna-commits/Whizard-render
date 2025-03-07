@@ -1,7 +1,7 @@
 import cors from "cors";
 
 const corsOptions = {
-	origin: "*", // Allow all origins
+	origin: ["https://whizard-chat.web.app"], // Allow all origins
 	methods: ["GET", "POST", "PUT", "DELETE"], // Allow specific HTTP methods
 	credentials: true, // Enable credentials (cookies, authorization headers, etc.)
 	optionsSuccessStatus: 200, // Status for successful OPTIONS requests

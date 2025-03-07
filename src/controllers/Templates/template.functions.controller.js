@@ -36,18 +36,20 @@ export const saveTemplateToDatabase = async (
 		if (req.file) {
 			const filePath = `${url}/uploads/${id}/${req.file?.filename}`;
 
+			console.log(filePath);
+
 			const headerComponent = newTemplate.components.find(
-				(component) => component.type === "HEADER",
+				(component) => component.type == "HEADER",
 			);
 
 			if (headerComponent) {
 				// Depending on the header format, update the header_url with the file path
-				if (headerComponent.format === "IMAGE") {
-					headerComponent.example.header_url = [filePath];
-				} else if (headerComponent.format === "VIDEO") {
-					headerComponent.example.header_url = [filePath];
-				} else if (headerComponent.format === "DOCUMENT") {
-					headerComponent.example.header_url = [filePath];
+				if (headerComponent.format == "IMAGE") {
+					headerComponent.example.header_handle = [filePath];
+				} else if (headerComponent.format == "VIDEO") {
+					headerComponent.example.header_handle = [filePath];
+				} else if (headerComponent.format == "DOCUMENT") {
+					headerComponent.example.header_handle = [filePath];
 				}
 			}
 		}

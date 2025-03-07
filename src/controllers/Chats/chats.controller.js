@@ -8,14 +8,14 @@ import {
 	getStoredTokens,
 	saveStoredTokens,
 } from "./chats.token.js";
-import { createChatsComponents } from "../Dashboard/template.functions.controller.js";
+import { createChatsComponents } from "../Templates/template.functions.controller.js";
 import { isNumber, isString } from "../../middleWares/sanitiseInput.js";
 import Campaign from "../../models/campaign.model.js";
 import Template from "../../models/templates.model.js";
 
 dotenv.config();
 
-export const getUsers = async (req, res) => {
+export const getSetToken = async (req, res) => {
 	try {
 		const id = req.session?.user?.id || req.session?.addedUser?.owner;
 
@@ -129,7 +129,7 @@ export const getMoreUsers = async (req, res, next) => {
 	}
 };
 
-export const getReturnedToken = async (req, res, next) => {
+export const getUsers = async (req, res, next) => {
 	try {
 		const token = req.body.token;
 
@@ -332,9 +332,9 @@ export const getSingleChat = async (req, res, next) => {
 
 		if (!isString(token, wa_id))
 			// Validate that token and wa_id are strings
-            return next();
-        
-        const tokenData = getToken(token);
+			return next();
+
+		const tokenData = getToken(token);
 
 		if (!tokenData) {
 			return res.status(400).json({ message: "Invalid token" });
@@ -444,5 +444,77 @@ export const getSingleChat = async (req, res, next) => {
 	} catch (error) {
 		console.error("Error in getSingleChat:", error);
 		return res.status(500).json({ success: false, message: error });
+	}
+};
+
+export const searchUsers = async (req, res, next) => {
+	try {
+		const token = req.body?.token;
+		const search = req.body?.search;
+
+		if (!token || !search) {
+			return res.status(400).json({
+				message: "Token not provided or search is empty",
+				success: false,
+			});
+		}
+
+		if (!isString(token, search)) return next();
+
+		const tokenData = getToken(token); // Retrieve token data using the new function
+
+		if (!tokenData) {
+			return res
+				.status(400)
+				.json({ message: "Invalid token", success: false });
+		}
+
+		const { expiresAt, userId } = tokenData;
+		const isValid = !isTokenExpired(expiresAt);
+
+		if (!isValid) {
+			return res
+				.status(400)
+				.json({ message: "Token has expired", success: false });
+		}
+
+		// Modify the query to allow searching by contact name or phone number using the 'search' parameter
+		const reports = await Report.find({
+			useradmin: userId,
+			$or: [
+				{ contactName: { $regex: search, $options: "imsx" } },
+				{ recipientPhone: { $regex: search, $options: "imsx" } },
+			],
+		})
+			.sort({ updatedAt: -1 })
+			.limit(10)
+			.select("contactName recipientPhone status replyContent updatedAt");
+
+		if (!reports || reports.length === 0) {
+			return res.status(400).json({
+				message: "No matching reports found for the search criteria",
+				success: false,
+			});
+		}
+
+		// Format the reports based on the required format
+		const formattedReports = reports.map((report) => {
+			const isReplyRecent =
+				report.replyContent &&
+				Date.now() - report.updatedAt < 24 * 60 * 60 * 1000; // Less than 24 hours
+			return {
+				lastmessage: report.replyContent || "No recent reply",
+				wa_id: report.recipientPhone,
+				status: isReplyRecent ? 1 : 0, // Status is 1 if replyContent is not empty and updatedAt is less than 24 hours
+				name: report.contactName,
+				usertimestmp: report.updatedAt,
+				is_read: report.status === "READ" ? true : false, // is_read is true if the status is "READ"
+			};
+		});
+
+		res.status(200).json({ msg: formattedReports, success: true });
+	} catch (error) {
+		console.error("Error in searchUsers:", error);
+		res.status(400).json({ message: error, success: false });
 	}
 };

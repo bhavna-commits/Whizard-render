@@ -6,7 +6,7 @@ import {
 	duplicateTemplate,
 	getCampaignSingleTemplates,
 	editTemplate,
-} from "../controllers/Dashboard/template.controller.js";
+} from "../controllers/Templates/template.controller.js";
 import { multerMiddle } from "../config/multerMiddleware.js";
 import { trackSanitationFailures } from "../middleWares/sanitiseInput.js";
 
