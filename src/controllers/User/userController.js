@@ -167,12 +167,25 @@ export const login = async (req, res, next) => {
 		const user = await User.findOne({ email });
 
 		if (!user) {
-			const addedUser = await AddedUser.findOne({ email });
+			const addedUser = await AddedUser.findOne({
+				email,
+				deleted: false,
+			});
+			// console.log(addedUser);
 			if (addedUser) {
 				if (addedUser.blocked) {
 					return res
 						.status(403)
 						.json({ message: "Account is blocked." });
+				}
+
+				if (!addedUser.password) {
+					return res
+						.status(403)
+						.json({
+							message:
+								"Account is In-Active. Please setup Password through the invitation link",
+						});
 				}
 
 				// console.log("here : login");
@@ -191,7 +204,7 @@ export const login = async (req, res, next) => {
 				const data = await User.findOne({
 					unique_id: addedUser.useradmin,
 				});
-
+				// console.log(addedUser);
 				req.session.addedUser = {
 					id: addedUser.unique_id,
 					name: addedUser.name,
@@ -286,6 +299,10 @@ export const resendEmailOTP = async (req, res) => {
 		res.status(500).json({ message: "Error resending OTP.", error });
 	}
 };
+
+export const resendWhatsAppOTP = async (req, res) => {
+	
+}
 
 export const resetPassword = async (req, res) => {
 	const { email } = req.body;

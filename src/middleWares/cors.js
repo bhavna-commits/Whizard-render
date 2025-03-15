@@ -1,10 +1,14 @@
 import cors from "cors";
 
 const corsOptions = {
-	origin: ["https://whizard-chat.web.app"], // Allow all origins
-	methods: ["GET", "POST", "PUT", "DELETE"], // Allow specific HTTP methods
-	credentials: true, // Enable credentials (cookies, authorization headers, etc.)
-	optionsSuccessStatus: 200, // Status for successful OPTIONS requests
+	origin: (origin, callback) => {
+		// Allow requests with no origin (like mobile apps or curl requests)
+		if (!origin) return callback(null, true);
+		callback(null, origin);
+	},
+	methods: ["GET", "POST", "PUT", "DELETE"],
+	credentials: true, // Enable credentials if needed
+	optionsSuccessStatus: 200,
 };
 
 const corsMiddleware = cors(corsOptions);

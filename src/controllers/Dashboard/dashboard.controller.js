@@ -59,6 +59,7 @@ export const getDashboard = async (req, res) => {
 			const access = await Permissions.findOne({
 				unique_id: permissions,
 			});
+			console.log(access);
 			if (access) {
 				renderData.access = access;
 				res.render("Dashboard/dashboard", renderData);
@@ -360,7 +361,6 @@ export const set2FAPin = async (req, res, next) => {
 	}
 };
 
-// Function to send the OTP code via SMS after adding the number
 const sendOTP = async (phone_number_id, user, code_method, language) => {
 	try {
 		const otpResponse = await fetch(
@@ -391,7 +391,6 @@ const sendOTP = async (phone_number_id, user, code_method, language) => {
 	}
 };
 
-// Verify Phone Number through Facebook API
 export const verifyNumber = async (req, res, next) => {
 	try {
 		const { code, phoneNumberId } = req.body;
@@ -502,6 +501,8 @@ export const deletePhoneNumber = async (req, res, next) => {
 				message: "Phone number ID is required.",
 			});
 		}
+
+		if (!isString(phoneNumberId)) return next();
 
 		// Fetch the user to get their WABA_ID
 		const user = await User.findOne({ unique_id: userId });

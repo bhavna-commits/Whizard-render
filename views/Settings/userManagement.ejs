@@ -122,12 +122,12 @@
 								</td>
 								<td class="p-4 text-center">
 									<div class="relative">
-										<button type="button" class="text-gray-500 font-bold hover:text-gray-900 focus:outline-none" onclick="toggleDropdownTable('<%= user.email.replace(/\./g, '-') %>')">
+										<button type="button" class="text-gray-500 font-bold hover:text-gray-900 focus:outline-none" onclick="toggleDropdownTable('<%= user.unique_id %>')">
 											. . .
 										</button>
-										<div id="dropdown-<%= user.email.replace(/\./g, '-') %>" class="hidden absolute bg-white border rounded-lg shadow-lg w-40 right-0 z-10">
+										<div id="dropdown-<%= user.unique_id %>" class="hidden absolute bg-white border rounded-lg shadow-lg w-40 right-0 z-10">
 											
-											<button type="button" class="block w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-100" onclick="updateRole('<%= user.email %>', '<%= user.name %>' , 'dropdown-<%= user.email.replace(/\./g, '-') %>')">Update Role</button>
+											<button type="button" class="block w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-100" onclick="updateRole('<%= user.email %>', '<%= user.unique_id %>', '<%= user.name %>' , 'dropdown-<%= user.unique_id %>')">Update Role</button>
 											<button type="button" class="block w-full px-4 py-2 text-left text-red-500 hover:bg-gray-100" onclick="deleteUser('<%= user.unique_id %>', '<%= user.name %>')">Delete User</button>
 										</div>
 									</div>
@@ -144,10 +144,10 @@
 							
 							<h3 class="text-xl font-semibold text-gray-900 mb-2">No members yet</h3>
 							<p class="text-gray-600 mb-6">Start adding users by clicking on "Add New User"</p>
-							<button type="button" id="AddNewUser" onclick="openModal()" class="inline-flex items-center px-3 py-[10px] border border-transparent text-sm font-medium rounded-md text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black">
+							<!-- <button type="button" id="AddNewUser" onclick="openModal()" class="inline-flex items-center px-3 py-[10px] border border-transparent text-sm font-medium rounded-md text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black">
 								<i class="fa-solid fa-plus pr-2"></i>
 								<span>Add New User</span>
-							</button>
+							</button> -->
 						</div>
 					</div>
 					<% } %>
@@ -254,7 +254,7 @@
 							alert(`User ${name} deleted successfully`);
 							location.reload(); // Reload the page to reflect the changes
 						} else {
-							alert('Failed to delete user');
+							alert(data.message);
 						}
 					})
 					.catch(error => {

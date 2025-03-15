@@ -37,6 +37,12 @@ const CampaignReportSchema = new mongoose.Schema(
 		messageId: { type: String, required: true, unique: true },
 		messageTemplate: { type: Schema.Types.Mixed },
 		replyContent: { type: String, default: "" },
+		textSent: { type: String, default: "" },
+		media: {
+			url: { type: String, default: "" },
+			fileName: { type: String, default: "" },
+			caption: { type: String, default: "" },
+		},
 	},
 	{
 		timestamps: false,

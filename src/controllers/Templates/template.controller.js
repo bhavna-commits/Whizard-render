@@ -2,6 +2,9 @@ import axios from "axios";
 import fs from "fs";
 import path from "path";
 import Template from "../../models/templates.model.js";
+import ActivityLogs from "../../models/activityLogs.model.js";
+import Permissions from "../../models/permissions.model.js";
+import User from "../../models/user.model.js";
 import dotenv from "dotenv";
 import {
 	saveTemplateToDatabase,
@@ -9,10 +12,9 @@ import {
 	fetchFacebookTemplates,
 	updateTemplateOnFacebook,
 	createComponents,
+	uploadAndRetrieveMediaURL,
 } from "./template.functions.controller.js";
-import ActivityLogs from "../../models/activityLogs.model.js";
-import Permissions from "../../models/permissions.model.js";
-import User from "../../models/user.model.js";
+import { getMimeType } from "../Chats/chats.extra.functions.js";
 import { generateUniqueId } from "../../utils/otpGenerator.js";
 import { languages, languagesCode } from "../../utils/dropDown.js";
 import {
@@ -40,6 +42,7 @@ export const createTemplate = async (req, res, next) => {
 			name,
 			deleted: false,
 		});
+
 		if (exists) {
 			return res.status(500).json({
 				success: false,
@@ -64,7 +67,6 @@ export const createTemplate = async (req, res, next) => {
 			// Save the Facebook template ID (fb_id)
 			savedTemplate.template_id = data.id;
 		}
-		console.log("template creation : ", JSON.stringify(data));
 
 		await ActivityLogs.create({
 			useradmin: id,
@@ -280,7 +282,6 @@ export const duplicateTemplate = async (req, res, next) => {
 
 export const editTemplate = async (req, res, next) => {
 	try {
-		// Retrieve and validate the template id from params
 		const templateId = req.params?.id;
 		if (!templateId)
 			return res.status(404).json({
@@ -289,7 +290,7 @@ export const editTemplate = async (req, res, next) => {
 			});
 		if (!isString(templateId)) return next();
 
-		// Find the existing template in DB
+		// Retrieve the original template from DB
 		const originalTemplate = await Template.findById(templateId);
 		if (!originalTemplate) {
 			return res
@@ -297,13 +298,13 @@ export const editTemplate = async (req, res, next) => {
 				.json({ success: false, error: "Template not found" });
 		}
 
-		// Parse the new template data from the request body
+		// Parse new template data from request body
 		const templateData = JSON.parse(req.body.templateData);
 		const { dynamicVariables, templateName, selectedLanguageCode, url } =
 			templateData;
 		const id = req.session?.user?.id || req.session?.addedUser?.owner;
 
-		// Check if another template with the same name exists for the user (if name is changed)
+		// Check for duplicate template names
 		const exists = await Template.findOne({
 			useradmin: id,
 			templateName,
@@ -319,46 +320,69 @@ export const editTemplate = async (req, res, next) => {
 		}
 
 		const components = createComponents(templateData, dynamicVariables);
-		// Update the template fields in DB
 		originalTemplate.dynamicVariables = dynamicVariables;
 		originalTemplate.name = templateName;
 		originalTemplate.selectedLanguageCode = selectedLanguageCode;
 		originalTemplate.url = url;
 		originalTemplate.components = components;
 
-		if (req.file) {
-			const filePath = `${url}/uploads/${id}/${req.file?.filename}`;
+		const user = await User.findOne({ unique_id: id });
 
+		if (req.file) {
+			// Extract the actual phone number id from the user's FB_PHONE_NUMBERS array.
+			const phoneNumberObj = user.FB_PHONE_NUMBERS.find(
+				(u) => u.selected === true,
+			);
+			if (!phoneNumberObj)
+				return res
+					.status(400)
+					.json({
+						success: false,
+						message: "No phone number selected",
+					});
+			const phoneNumberId = phoneNumberObj.phone_number_id; 
+
+			// Construct the local file path (ensure the file was saved locally)
+			let filePath = path.join(
+				__dirname,
+				"uploads",
+				id,
+				req.file.filename,
+			);
+			const accessToken = user.FB_ACCESS_TOKEN;
+			const mediaType = getMimeType(req.file.filename); // e.g., "image/jpeg"
+
+			// Upload file to Meta and get media URL
+			const { mediaUrl } = await uploadAndRetrieveMediaURL(
+				accessToken,
+				phoneNumberId,
+				filePath,
+				mediaType,
+				req.file.filename,
+			);
+
+			// Find the HEADER component and update its header_handle with the media URL.
 			const headerComponent = originalTemplate.components.find(
 				(component) => component.type === "HEADER",
 			);
-
 			if (headerComponent) {
-				// Depending on the header format, update the header_url with the file path
-				if (headerComponent.format === "IMAGE") {
-					headerComponent.example.header_handle = [filePath];
-				} else if (headerComponent.format === "VIDEO") {
-					headerComponent.example.header_handle = [filePath];
-				} else if (headerComponent.format === "DOCUMENT") {
-					headerComponent.example.header_handle = [filePath];
-				}
+				headerComponent.example.header_handle = [mediaUrl];
 			}
 		}
-		// Update the template on Facebook using the stored Facebook template id
-		// (Assuming updateTemplateOnFacebook is defined similar to submitTemplateToFacebook)
+
+		// Update the template on Facebook
 		const updatedData = await updateTemplateOnFacebook(
 			originalTemplate,
-			id,
+			user,
 		);
 		if (updatedData && updatedData.id) {
-			// Optionally update the facebook template id in case it changes
 			originalTemplate.template_id = updatedData.id;
 		}
 
 		// Save the updated template in DB
 		await originalTemplate.save();
 
-		// Log the update activity
+		// Log the activity
 		await ActivityLogs.create({
 			useradmin: id,
 			unique_id: generateUniqueId(),
@@ -367,7 +391,6 @@ export const editTemplate = async (req, res, next) => {
 			details: `Updated template named: ${originalTemplate.name}`,
 		});
 
-		// Return success response
 		res.status(200).json({
 			success: true,
 			message: "Template updated successfully.",
@@ -593,6 +616,8 @@ export const getCampaignTemplates = async (req, res) => {
 };
 
 export const getCreateTemplate = async (req, res) => {
+	let mediaFileData = null;
+	let mediaFileName = null;
 	const permissions = req.session?.addedUser?.permissions;
 	if (permissions) {
 		const access = await Permissions.findOne({ unique_id: permissions });
@@ -608,6 +633,8 @@ export const getCreateTemplate = async (req, res) => {
 				color: req.session?.addedUser?.color,
 				whatsAppStatus: req.session?.addedUser?.whatsAppStatus,
 				languagesCode,
+				mediaFileData,
+				mediaFileName,
 			});
 		} else {
 			res.render("errors/notAllowed");
@@ -622,6 +649,8 @@ export const getCreateTemplate = async (req, res) => {
 			color: req.session?.user?.color,
 			whatsAppStatus: req.session?.user?.whatsAppStatus,
 			languagesCode,
+			mediaFileData,
+			mediaFileName,
 		});
 	} else {
 		res.render("errors/notAllowed");

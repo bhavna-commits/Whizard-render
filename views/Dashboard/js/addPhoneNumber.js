@@ -718,7 +718,25 @@ function closeAddNumber() {
 	const modal = document.getElementById("addNumberModal");
 	const modalContent = document.getElementById("modalContent");
 
-	// Reverse the transition
+	// Clear all input values
+	document.querySelectorAll("input").forEach((input) => (input.value = ""));
+
+	// Reset any text content such as error, success, or status messages
+	document
+		.querySelectorAll(
+			"#addNewNumberError, #verifyNewNumberError, #set2FAPinStatus",
+		)
+		.forEach((element) => {
+			element.classList.add("hidden"); // Hide any error/success messages
+			element.innerHTML = ""; // Clear innerHTML content
+		});
+
+	// Hide any loaders
+	document.querySelectorAll(".buttonLoader").forEach((loader) => {
+		loader.classList.add("hidden"); // Hide loaders
+	});
+
+	// Reverse the transition for closing modal
 	modal.classList.remove("opacity-100", "backdrop-blur-sm");
 	modal.classList.add("opacity-0");
 

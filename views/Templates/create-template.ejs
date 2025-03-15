@@ -85,7 +85,7 @@
 	<div class="layout-container">
 		<%- include("../commonJS/sidebar")  %>
 		
-		<div class="flex bg-slate-50 flex-grow w-full overflow-y-scroll max-h-full">
+		<div class="flex bg-slate-50 flex-grow w-full max-h-full overflow-auto">
 			<div class="bg-white px-3 ml-1 py-3 min-w-[22rem] flex-shrink">
 				<div class="title logo w-full">
 					<h4 class="page-title font-bold text-xl text-center">
@@ -213,7 +213,7 @@
 				</form>
 			</div>
 			
-			<div class=" mx-2 px-1 bg-white flex-grow min-w-[30rem]">
+			<div class=" mx-2 px-1 bg-white flex-grow min-w-[30rem] ">
 				<div class="p-2">
 					<div class="d-flex w-full justify-content-between align-items-center logo">
 						<div class="title ">
@@ -436,6 +436,11 @@
 	</div>
 	
 	<%- include("partials/template-preview-modal") %>
+	<script>
+		const mediaFileData = <%- JSON.stringify(mediaFileData) %>;
+		const mediaFileName = <%- JSON.stringify(mediaFileName) %>;
+		// console.log(JSON.stringify(data));
+	</script>
 	<script src="/menu.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/js/all.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>

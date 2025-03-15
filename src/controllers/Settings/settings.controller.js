@@ -1042,15 +1042,16 @@ export const createAddedUserPassword = async (req, res, next) => {
 };
 
 export const updateUserManagement = async (req, res) => {
-	const userId = req.session?.user?.id || req.session?.addedUser?.owner;
+	const userId = req.body?.userId;
 	const action = req.body?.action;
 	const status = req.body?.status;
 	const newRoleId = req.body?.newRoleId;
 	const newRoleName = req.body?.newRoleName;
-	const email = req.body?.email;
 	// console.log(action, newRoleId, newRoleName, email);
 	try {
 		let user;
+		const sessionStore = req.sessionStore;
+		// console.log(sessionStore); // Access the session store
 		switch (action) {
 			case "updateStatus":
 				user = await AddedUser.findOneAndUpdate(
@@ -1069,7 +1070,7 @@ export const updateUserManagement = async (req, res) => {
 
 			case "updateRole":
 				user = await AddedUser.findOneAndUpdate(
-					{ email, deleted: false },
+					{ unique_id: userId, deleted: false },
 					{ roleName: newRoleName, roleId: newRoleId },
 					{ new: true },
 				);
@@ -1084,24 +1085,107 @@ export const updateUserManagement = async (req, res) => {
 					.json({ success: true, message: "Role updated" });
 
 			case "deleteUser":
-				user = await AddedUser.findOneAndUpdate(
-					{ unique_id: userId, deleted: false },
-					{ deleted: true },
-					{ new: true },
-				);
-				if (!user) {
-					return res
-						.status(404)
-						.json({ success: false, message: "User not found" });
-				}
-				return res
-					.status(200)
-					.json({ success: true, message: "User deleted" });
+				try {
+					// Fetch all active sessions from the session store
+					sessionStore.all(async (err, sessions) => {
+						if (err) {
+							console.error("Error fetching sessions: ", err);
+							return res.status(500).json({
+								success: false,
+								message: "Error fetching sessions",
+							});
+						}
 
-			default:
-				return res
-					.status(400)
-					.json({ success: false, message: "Invalid action" });
+						let destroyPromises = [];
+
+						// Loop through each session and destroy the ones with matching addedUser id
+						sessions.forEach((session) => {
+							if (!session || !session.session) {
+								console.warn("Skipping undefined session");
+								return;
+							}
+
+							let sessionData;
+							try {
+								sessionData = JSON.parse(session.session); // Parse session data
+							} catch (error) {
+								console.error(
+									"Error parsing session data: ",
+									error,
+								);
+								return;
+							}
+
+							if (
+								sessionData.addedUser &&
+								sessionData.addedUser.id == userId
+							) {
+								// Push the destroy promise to the array
+								destroyPromises.push(
+									new Promise((resolve, reject) => {
+										sessionStore.destroy(
+											session._id,
+											(err) => {
+												if (err) {
+													console.error(
+														"Error destroying session: ",
+														err,
+													);
+													reject(err);
+												} else {
+													console.log(
+														`Session ${session._id} destroyed.`,
+													);
+													resolve();
+												}
+											},
+										);
+									}),
+								);
+							}
+						});
+
+						// Wait for all destroy operations to complete
+						try {
+							await Promise.all(destroyPromises);
+						} catch (destroyError) {
+							console.error(
+								"Error destroying sessions: ",
+								destroyError,
+							);
+							return res.status(500).json({
+								success: false,
+								message: "Error destroying sessions",
+							});
+						}
+
+						// Mark the user as deleted in the AddedUser collection
+						user = await AddedUser.findOneAndUpdate(
+							{ unique_id: userId, deleted: false },
+							{ deleted: true },
+							{ new: true },
+						);
+
+						if (!user) {
+							return res.status(404).json({
+								success: false,
+								message: "User not found",
+							});
+						}
+
+						return res.status(200).json({
+							success: true,
+							message: "User deleted and session(s) destroyed",
+						});
+					});
+				} catch (error) {
+					console.error(error);
+					return res.status(500).json({
+						success: false,
+						message: "Server error",
+						error,
+					});
+				}
 		}
 	} catch (error) {
 		console.error(error);

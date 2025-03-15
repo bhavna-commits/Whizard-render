@@ -8,7 +8,7 @@
 	</div>
 	
 	<div class="logo">
-		<img onclick="location.href = '/'" class="cursor-pointer" src="/assets/img/Wizard_logo.png" alt="Whizard Logo" />
+		<img onclick="location.href = '/'" class="cursor-pointer" loading="lazy" src="/assets/img/Wizard_logo.png" alt="Whizard Logo" />
 	</div>
 	
 	<!-- Main sidebar content that will be hidden/shown on mobile -->
@@ -16,7 +16,7 @@
 		<!-- Dashboard: Always enabled -->
 		<li>
 			<a href="/" class="dashboard-link">
-				<span class="icon"><img src="svg/dashboard.svg" /></span>
+				<span class="icon"><img loading="lazy" src="svg/dashboard.svg" /></span>
 				Dashboard
 			</a>
 		</li>
@@ -25,12 +25,12 @@
 		<li>
 			<% if (access?.chats?.type) { %>
 			<a href="/chats" class="chats-link">
-				<span class="icon"><img src="svg/chats.svg" /></span>
+				<span class="icon"><img loading="lazy" src="svg/chats.svg" /></span>
 				Chats
 			</a>
 			<% } else { %>
 			<a href="javascript:void(0);" class="cursor-not-allowed">
-				<span class="icon"><img src="svg/chats.svg" /></span>
+				<span class="icon"><img loading="lazy" src="svg/chats.svg" /></span>
 				Chats
 			</a>
 			<% } %>
@@ -40,12 +40,12 @@
 		<li>
 			<% if (access.contactList?.type) { %>
 			<a href="/contact-list" class="contact-list-link">
-				<span class="icon"><img src="svg/contact-list.svg" /></span>
+				<span class="icon"><img loading="lazy" src="svg/contact-list.svg" /></span>
 				Contact List
 			</a>
 			<% } else { %>
 			<a href="javascript:void(0);" class="cursor-not-allowed">
-				<span class="icon"><img src="svg/contact-list.svg" /></span>
+				<span class="icon"><img loading="lazy" src="svg/contact-list.svg" /></span>
 				Contact List
 			</a>
 			<% } %>
@@ -55,12 +55,12 @@
 		<li>
 			<% if (access?.templates?.type) { %>
 			<a href="/template" class="template-link">
-				<span class="icon"><img src="svg/template.svg" /></span>
+				<span class="icon"><img loading="lazy" src="svg/template.svg" /></span>
 				Template
 			</a>
 			<% } else { %>
 			<a href="javascript:void(0);" class="cursor-not-allowed">
-				<span class="icon"><img src="svg/template.svg" /></span>
+				<span class="icon"><img loading="lazy" src="svg/template.svg" /></span>
 				Template
 			</a>
 			<% } %>
@@ -70,12 +70,12 @@
 		<li>
 			<% if (access?.settings?.type) { %>
 			<a href="/settings" class="settings-link">
-				<span class="icon"><img src="svg/settings.svg" /></span>
+				<span class="icon"><img loading="lazy" src="svg/settings.svg" /></span>
 				Settings
 			</a>
 			<% } else { %>
 			<a href="javascript:void(0);" class="cursor-not-allowed">
-				<span class="icon"><img src="svg/settings.svg" /></span>
+				<span class="icon"><img loading="lazy" src="svg/settings.svg" /></span>
 				Settings
 			</a>
 			<% } %>
@@ -86,17 +86,17 @@
 			<% if (access?.reports?.type) { %>
 			<div class="report-menu relative">
 				<a href="javascript:void(0);" class="reports-link" onclick="getReportsMenu()">
-					<span class="icon"><img src="svg/reports.svg" /></span>
+					<span class="icon"><img loading="lazy" src="svg/reports.svg" /></span>
 					Reports
 				</a>
 				<div id="reportMenu" class="report-card hidden">
-					<a href="/reports/campaign-list" class="flex flex-row items-center"><img src="svg/conversationReport.svg" class="pr-2" />Campaign Report</a>
-					<a href="/reports/cost-report" class="flex flex-row items-center"><img src="svg/costReport.svg" class="pr-2" />Cost Report</a>
+					<a href="/reports/campaign-list" class="flex flex-row items-center"><img loading="lazy" src="svg/conversationReport.svg" class="pr-2" />Campaign Report</a>
+					<a href="/reports/cost-report" class="flex flex-row items-center"><img loading="lazy" src="svg/costReport.svg" class="pr-2" />Cost Report</a>
 				</div>
 			</div>
 			<% } else { %>
 			<a href="javascript:void(0);" class="cursor-not-allowed">
-				<span class="icon"><img src="svg/reports.svg" /></span>
+				<span class="icon"><img loading="lazy" src="svg/reports.svg" /></span>
 				Reports
 			</a>
 			<% } %>
@@ -105,7 +105,7 @@
 	
 	<div class="user-profile text-white flex justify-center items-center text-center">
 		<% if (photo) { %>
-		<img src="/<%= photo %>" alt="User Profile" class="user-profile-img" onclick="toggleDropdown()" />
+		<img loading="lazy" src="/<%= photo %>" alt="User Profile" class="user-profile-img" onclick="toggleDropdown()" />
 		<% } else { %>
 		<!-- Extract and display the initials -->
 		<div class="user-profile-name bg-[<%= color %>]" onclick="toggleDropdown()">
@@ -114,8 +114,8 @@
 		</div>
 		<% } %>
 		<div id="downMenu" class="account-menu hidden">
-			<a href="/settings/profile" class="flex items-center"><img src="svg/profileLogo.svg" class="pr-2" />View profile</a>
-			<button onclick="logout()" class="flex items-center"><img src="svg/logOut.svg" class="pr-2" />Log out</button>
+			<a href="/settings/profile" class="flex items-center"><img loading="lazy" src="svg/profileLogo.svg" class="pr-2" />View profile</a>
+			<button onclick="logout()" class="flex items-center"><img loading="lazy" src="svg/logOut.svg" class="pr-2" />Log out</button>
 		</div>
 	</div>
 </nav>

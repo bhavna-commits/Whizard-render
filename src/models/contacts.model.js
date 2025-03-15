@@ -29,7 +29,7 @@ const contactsSchema = new Schema(
 		},
 		masterExtra: { type: Schema.Types.Mixed },
 		contactId: { type: String, index: true },
-		// useradmin: { type: String, required: true },
+		useradmin: { type: String, required: true },
 	},
 	{ timestamps: false, strict: false },
 );

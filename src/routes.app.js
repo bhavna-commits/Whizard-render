@@ -23,7 +23,6 @@ app.use("/api/chats", chatsBackEndRoutes);
 
 app.use("/", checkSession, tempalteFrontEndRoutes);
 app.use("/chats", checkSession, chatsFrontEndRoutes);
-
 app.use("/reports", checkSession, reportsFrontEndRoute);
 app.use("/settings", checkSession, settingsFrontRoute);
 app.use("/contact-list", checkSession, contactFrontEndRoutes);

@@ -1,13 +1,9 @@
 import dotenv from "dotenv";
-import cron from "node-cron";
-import ActivityLogs from "../../models/activityLogs.model.js";
 import axios from "axios";
 import Template from "../../models/templates.model.js";
 import Contacts from "../../models/contacts.model.js";
 import Campaign from "../../models/campaign.model.js";
 import Report from "../../models/report.model.js";
-import User from "../../models/user.model.js";
-import { generateUniqueId } from "../../utils/otpGenerator.js";
 
 dotenv.config();
 
@@ -29,7 +25,7 @@ export async function sendMessages(campaign, user, unique_id, phone_number) {
 			contactId: campaign.contactListId,
 		});
 
-		if (contactList.length === 0) {
+		if (contactList.length == 0) {
 			throw new Error(
 				`No contacts found for contact list ID ${campaign.contactListId}`,
 			);

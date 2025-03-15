@@ -41,7 +41,7 @@
 </div>
 
 <script>
-	function updateRole (email, name, id) {
+	function updateRole (email, userId, name, id) {
 		// const userId = document.querySelectorAll('tr')[index + 1].dataset.id;
 		// console.log(userId);
 		document.getElementById(id).classList.add("hidden");
@@ -75,7 +75,7 @@
 						},
 						body: JSON.stringify({
 							action: 'updateRole',
-							email, // Sending user email
+							userId,
 							newRoleId,
 							newRoleName
 						}),

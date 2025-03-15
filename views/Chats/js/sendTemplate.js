@@ -1,6 +1,7 @@
 // API service for handling data fetching
-async function fetchTemplates() {
-	const response = await fetch("/getCampaignTemplates");
+async function fetchTemplates(userId) {
+	console.log(userId);
+	const response = await fetch(`/api/chats/getCampaignTemplates/${userId}`);
 	return response.json();
 }
 
@@ -10,7 +11,7 @@ async function fetchContactLists() {
 }
 
 async function fetchTemplateById(templateId) {
-	const response = await fetch(`/api/templates/${templateId}`);
+	const response = await fetch(`/api/chats/get-template/${templateId}`);
 	return response.json();
 }
 
@@ -252,7 +253,8 @@ class TemplateManager {
 
 	async loadTemplates() {
 		try {
-			const templates = await fetchTemplates();
+			const templates = await fetchTemplates(userId);
+			console.log(templates);
 			this.templateSelect
 				.empty()
 				.append(
@@ -370,39 +372,6 @@ class TemplateManager {
 			document.getElementById("campaign-name").value,
 		);
 		testFormData.append("contactList", contactLists);
-
-		// Check if scheduling or sending immediately
-		if (actionType === "schedule") {
-			const selectedDate = document.getElementById("datePicker").value;
-			const selectedTime = document.getElementById("timePicker").value;
-
-			// Make sure the user selected a valid date and time for scheduling
-			if (selectedDate && selectedTime) {
-				const convertedDateString =
-					this.convertDateFormat(selectedDate);
-				const dateTimeString = `${convertedDateString} ${selectedTime}`;
-				const dateTime = new Date(dateTimeString);
-				console.log(dateTime);
-				if (!isNaN(dateTime.getTime())) {
-					const unixTimestamp = Math.floor(dateTime.getTime() / 1000);
-					formData.schedule = unixTimestamp;
-				} else {
-					alert("Invalid date or time. Please check your selection.");
-					resetButton(button, loader, buttonText);
-					return;
-				}
-			} else {
-				alert("Please select both date and time for scheduling.");
-				resetButton(button, loader, buttonText);
-				return;
-			}
-			testFormData.append("test", null);
-		} else if (actionType === "sendNow") {
-			// If "Send Now" is clicked, make sure schedule is null
-			formData.schedule = null;
-			testFormData.append("schedule", null);
-			testFormData.append("test", null);
-		}
 
 		// Add selected attributes to form data
 		// Validate attribute selects

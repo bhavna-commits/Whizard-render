@@ -253,7 +253,7 @@ function createCSV() {
 		.join("\n");
 
 	// Create CSV Blob
-	const csvFile = new Blob([csv.join("\n")], { type: "text/csv" });
+	const csvFile = new Blob([csv], { type: "text/csv" });
 
 	// Create a link element and trigger the download
 	const downloadLink = document.createElement("a");

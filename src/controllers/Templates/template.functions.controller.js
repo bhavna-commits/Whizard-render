@@ -1,14 +1,82 @@
 import dotenv from "dotenv";
-import path from "path";
 import axios from "axios";
+import fs from "fs";
+import FormData from "form-data";
 import Template from "../../models/templates.model.js";
 import User from "../../models/user.model.js";
 import { generateUniqueId } from "../../utils/otpGenerator.js";
-// import { getFbAccessToken } from "../../backEnd-Routes/facebook.backEnd.routes.js";
+import { getMimeType } from "../Chats/chats.extra.functions.js";
 
 dotenv.config();
 
 const { FB_GRAPH_VERSION } = process.env;
+
+export const uploadAndRetrieveMediaURL = async (
+	accessToken,
+	phoneNumberId,
+	filePath,
+	mediaType,
+	fileName,
+) => {
+	try {
+		// Step 1: Upload file to Meta
+		const uploadUrl = `https://graph.facebook.com/${process.env.FB_GRAPH_VERSION}/${phoneNumberId}/media`;
+		const formData = new FormData();
+
+		console.log(fs.createReadStream(filePath));
+
+		formData.append("messaging_product", "whatsapp");
+		formData.append("type", mediaType);
+		formData.append("file", fs.createReadStream(filePath), {
+			filename: fileName,
+			contentType: mediaType,
+		});
+
+		const uploadResponse = await fetch(uploadUrl, {
+			method: "POST",
+			headers: {
+				// Use formData.getHeaders() to set proper Content-Type (with boundary)
+				...formData.getHeaders(),
+				Authorization: `Bearer ${accessToken}`,
+			},
+			body: formData,
+		});
+
+		if (!uploadResponse.ok) {
+			const errText = await uploadResponse.text();
+			throw new Error(
+				`Upload failed: ${uploadResponse.status} ${errText}`,
+			);
+		}
+
+		const uploadData = await uploadResponse.json();
+		const mediaId = uploadData.id;
+
+		// Step 2: Retrieve the media URL using the media ID
+		const getMediaUrl = `https://graph.facebook.com/${process.env.FB_GRAPH_VERSION}/${mediaId}/`;
+		const getResponse = await fetch(getMediaUrl, {
+			method: "GET",
+			headers: {
+				Authorization: `Bearer ${accessToken}`,
+			},
+		});
+
+		if (!getResponse.ok) {
+			const errText = await getResponse.text();
+			throw new Error(
+				`Media retrieval failed: ${getResponse.status} ${errText}`,
+			);
+		}
+
+		const getData = await getResponse.json();
+		const mediaUrl = getData.url;
+
+		return mediaUrl;
+	} catch (error) {
+		console.error("Error in uploadAndRetrieveMediaURL:", error.message);
+		throw error.message;
+	}
+};
 
 export const saveTemplateToDatabase = async (
 	req,
@@ -34,9 +102,28 @@ export const saveTemplateToDatabase = async (
 
 		// Check if there is a file uploaded and update the corresponding header component with the file URL
 		if (req.file) {
-			const filePath = `${url}/uploads/${id}/${req.file?.filename}`;
+			let filePath = path.join(
+				__dirname,
+				"uploads",
+				id,
+				req.file?.filename,
+			);
 
-			console.log(filePath);
+			const user = await User.findOne({ unique_id: id });
+
+			const phoneNumberId = user.FB_PHONE_NUMBERS.find(
+				(u) => u.selected == true,
+			);
+			const accessToken = user.FB_ACCESS_TOKEN;
+			const mediaType = getMimeType(req.file?.filename);
+
+			filePath = await uploadAndRetrieveMediaURL(
+				accessToken,
+				phoneNumberId,
+				filePath,
+				mediaType,
+				req.file?.filename,
+			);
 
 			const headerComponent = newTemplate.components.find(
 				(component) => component.type == "HEADER",
@@ -55,7 +142,7 @@ export const saveTemplateToDatabase = async (
 		}
 
 		// Return the saved template object after successful saving
-		return savedTemplate;
+		return newTemplate;
 	} catch (error) {
 		console.error("Error saving template to database:", error);
 		throw new Error(`Error saving template to database: ${error.message}`);
@@ -127,11 +214,8 @@ export async function submitTemplateToFacebook(savedTemplate, id) {
 	}
 }
 
-export async function updateTemplateOnFacebook(originalTemplate, id) {
+export async function updateTemplateOnFacebook(originalTemplate, user) {
 	try {
-		// Retrieve the user to get credentials and related info
-		let user = await User.findOne({ unique_id: id });
-
 		// Clean up the components array similar to what you do in submitTemplateToFacebook
 		const cleanedComponents = originalTemplate.components.map(
 			(component) => {
@@ -331,105 +415,3 @@ export function createComponents(templateData, dynamicVariables) {
 	}
 	return components;
 }
-
-export function createChatsComponents(templateData, dynamicVariables) {
-	const components = [];
-
-	// Iterate through each component in templateData
-	templateData.forEach((comp) => {
-		// Process HEADER
-		if (comp.type === "HEADER") {
-			if (comp.format === "TEXT") {
-				const headerExample =
-					dynamicVariables?.header?.length > 0
-						? dynamicVariables.header.map(
-								(variable) => Object.values(variable)[0],
-						  )
-						: [];
-
-				components.push({
-					type: "HEADER",
-					format: "TEXT",
-					text: comp.text,
-					example: {
-						header_text: headerExample,
-					},
-				});
-			} else if (comp.format === "IMAGE") {
-				components.push({
-					type: "HEADER",
-					format: "IMAGE",
-					link: dynamicVariables?.header?.imageUrl || "",
-					caption: comp.text || "",
-				});
-			} else if (comp.format === "DOCUMENT") {
-				components.push({
-					type: "HEADER",
-					format: "DOCUMENT",
-					link: dynamicVariables?.header?.documentUrl || "",
-					caption: comp.text || "",
-				});
-			} else if (comp.format === "VIDEO") {
-				components.push({
-					type: "HEADER",
-					format: "VIDEO",
-					link: dynamicVariables?.header?.videoUrl || "",
-					caption: comp.text || "",
-				});
-			}
-		}
-
-		// Process BODY
-		if (comp.type === "BODY") {
-			const bodyExample =
-				dynamicVariables?.body?.length > 0
-					? dynamicVariables.body.map(
-							(variable) => Object.values(variable)[0],
-					  )
-					: [];
-
-			components.push({
-				type: "BODY",
-				text: comp.text,
-				example: {
-					body_text: [bodyExample],
-				},
-			});
-		}
-
-		// Process FOOTER
-		if (comp.type === "FOOTER") {
-			components.push({
-				type: "FOOTER",
-				text: comp.text,
-			});
-		}
-
-		// Process BUTTONS
-		if (comp.type === "BUTTONS" && comp.buttons.length > 0) {
-			components.push({
-				type: "BUTTONS",
-				buttons: comp.buttons.map((button) => {
-					if (button.type === "PHONE_NUMBER") {
-						// Call-to-Action button for phone numbers
-						return {
-							type: "PHONE_NUMBER",
-							text: button.text,
-							phone_number: button.phone_number,
-						};
-					} else if (button.type === "URL") {
-						// Call-to-Action button for URLs
-						return {
-							type: "URL",
-							text: button.text,
-							url: button.url,
-						};
-					}
-				}),
-			});
-		}
-	});
-
-	return components;
-}
-

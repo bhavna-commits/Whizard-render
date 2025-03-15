@@ -7,6 +7,8 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(corsMiddleware);
+
+app.options("*", corsMiddleware);
 app.set("view engine", "ejs");
 
 app.locals.makeRange = (start, end) => {
