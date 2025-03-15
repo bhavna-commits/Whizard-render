@@ -620,8 +620,8 @@ export const getSendTemplate = async (req, res, next) => {
 		const contactData = await Contacts.findOne({
 			useradmin: userId,
 			wa_id,
-        });
-        
+		});
+
 		if (!contactData) {
 			return res.status(404).json({ message: "Contact not found" });
 		}
