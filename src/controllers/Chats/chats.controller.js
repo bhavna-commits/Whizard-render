@@ -37,10 +37,6 @@ import {
 
 import { generateUniqueId } from "../../utils/otpGenerator.js";
 import { sendTestMessage } from "../ContactList/campaign.functions.js";
-import ContactList from "../../models/contactList.model.js";
-import AddedUser from "../../models/addedUser.model.js";
-import permissionsModel from "../../models/permissions.model.js";
-import ActivityLogs from "../../models/activityLogs.model.js";
 
 dotenv.config();
 
@@ -49,10 +45,10 @@ const __dirname = path.resolve();
 export const getSetToken = async (req, res) => {
 	try {
 		const id = req.session?.user?.id || req.session?.addedUser?.owner;
-
+		const addedUser = req.session?.addedUser;
 		// Generate token and expiration time
 		const { token, expiresAt } = generateRefreshToken();
-		setToken(token, expiresAt, id); // Store the token using the new function
+		setToken(token, expiresAt, id, addedUser); // Store the token using the new function
 
 		// Handle permissions and render the appropriate view
 		const permissions = req.session?.addedUser?.permissions;
@@ -471,7 +467,7 @@ export const sendMessages = async (req, res, next) => {
 			message: err || "Token error",
 		});
 	}
-	const { userId } = tokenData;
+	const { userId, addedUser } = tokenData;
 
 	try {
 		// Get access token for Meta API
@@ -589,10 +585,20 @@ export const sendMessages = async (req, res, next) => {
 			recipientPhone: to,
 			status: "SENT",
 			messageId: data.messages[0].id,
-			textSent: messageText,
+			messageTemplate: messageText,
 			media: { url, fileName, caption },
 		});
 		await report.save();
+
+		const letName = addedUser?.name ? addedUser?.name : user.name;
+
+		await ActivityLogs.create({
+			useradmin: userId,
+			unique_id: generateUniqueId(),
+			name: letName,
+			actions: "Send",
+			details: `Sent message from chats to: ${name}`,
+		});
 	} catch (err) {
 		console.log("Error sending message: ", err);
 		res.status(500).json({
@@ -604,6 +610,7 @@ export const sendMessages = async (req, res, next) => {
 
 export const getSendTemplate = async (req, res, next) => {
 	try {
+		console.log("hjk")
 		const { token, wa_id } = req.query;
 		if (!token || !wa_id) {
 			return res.status(400).json({ message: "All data not provided" });
@@ -615,6 +622,7 @@ export const getSendTemplate = async (req, res, next) => {
 		try {
 			tokenData = validateToken(token);
 		} catch (err) {
+			console.log("token error :", err);
 			return res.status(401).render("errors/serverError");
 		}
 		const { userId } = tokenData;
@@ -713,7 +721,7 @@ export const sendTemplate = async (req, res, next) => {
 				message: err || "Token error",
 			});
 		}
-		const { userId } = tokenData;
+		const { userId, addedUser } = tokenData;
 
 		let user = await User.findOne({ unique_id: userId });
 
@@ -749,9 +757,19 @@ export const sendTemplate = async (req, res, next) => {
 			recipientPhone: contactList[0]?.recipientPhone,
 			status: "SENT",
 			messageId: data.messages[0].id,
-			textSent: messageTemplate,
+			messageTemplate,
 		});
 		await report.save();
+
+		const name = addedUser?.name ? addedUser?.name : user.name;
+
+		await ActivityLogs.create({
+			useradmin: userId,
+			unique_id: generateUniqueId(),
+			name,
+			actions: "Send",
+			details: `Sent message template named from chats to: ${contactList[0]?.contactName}`,
+		});
 		// if (!schedule) {
 		// 	await sendMessages(
 		// 		newCampaign,

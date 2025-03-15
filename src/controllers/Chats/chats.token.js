@@ -27,9 +27,9 @@ export const saveStoredTokens = (tokens) => {
 	}
 };
 
-export const setToken = (token, expiresAt, userId) => {
+export const setToken = (token, expiresAt, userId, addedUser) => {
 	const tokens = getStoredTokens();
-	tokens[token] = { expiresAt, userId };
+	tokens[token] = { expiresAt, userId, addedUser };
 	saveStoredTokens(tokens);
 };
 
@@ -62,7 +62,7 @@ export const validateToken = (token) => {
         throw "Invalid token";
     }
 
-    const { expiresAt, userId } = tokenData;
+    const { expiresAt } = tokenData;
     const isValid = !isTokenExpired(expiresAt);
     if (!isValid) {
         throw "Token has expired";

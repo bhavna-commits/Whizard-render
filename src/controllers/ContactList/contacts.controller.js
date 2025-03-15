@@ -510,7 +510,7 @@ export const createCampaign = async (req, res, next) => {
 						? req.session?.user?.color
 						: req.session?.addedUser?.color,
 					actions: "Send",
-					details: `Sent a test campaign named: ${name}`,
+					details: `Sent a test message named: ${name}`,
 				});
 				return res.status(201).json({
 					success: true,
