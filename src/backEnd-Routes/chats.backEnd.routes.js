@@ -11,6 +11,7 @@ import {
 	getSendTemplate,
 	getAllTemplates,
 	getSingleTemplate,
+	sendTemplate,
 } from "../controllers/Chats/chats.controller.js";
 import { getCampaignTemplates } from "../controllers/Templates/template.controller.js";
 import { trackSanitationFailures } from "../middleWares/sanitiseInput.js";
@@ -32,6 +33,8 @@ router.post("/get-more-chats", getMoreChats, trackSanitationFailures);
 router.post("/get-more-users", getMoreUsers, trackSanitationFailures);
 
 router.post("/search-users", searchUsers, trackSanitationFailures);
+
+router.post("/send-template", sendTemplate, trackSanitationFailures);
 
 router.get(
 	"/get-template/:id",

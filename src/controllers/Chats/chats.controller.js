@@ -36,6 +36,11 @@ import {
 } from "../../middleWares/sanitiseInput.js";
 
 import { generateUniqueId } from "../../utils/otpGenerator.js";
+import { sendTestMessage } from "../ContactList/campaign.functions.js";
+import ContactList from "../../models/contactList.model.js";
+import AddedUser from "../../models/addedUser.model.js";
+import permissionsModel from "../../models/permissions.model.js";
+import ActivityLogs from "../../models/activityLogs.model.js";
 
 dotenv.config();
 
@@ -610,10 +615,7 @@ export const getSendTemplate = async (req, res, next) => {
 		try {
 			tokenData = validateToken(token);
 		} catch (err) {
-			return res.status(401).json({
-				success: false,
-				message: err.message || "Token error",
-			});
+			return res.status(401).render("errors/serverError");
 		}
 		const { userId } = tokenData;
 
@@ -674,16 +676,142 @@ export const getSingleTemplate = async (req, res, next) => {
 		const updatedTemplates = await Template.findOne({
 			unique_id: id,
 		});
-		// console.log(updatedTemplates);
-		res.json({
-			success: true,
-			data: updatedTemplates,
-		});
+		console.log(updatedTemplates);
+		res.json(updatedTemplates);
 	} catch (error) {
 		// Handle errors, returning a 500 status code with error message
 		res.status(500).json({
 			success: false,
 			error: error.message,
+		});
+	}
+};
+
+export const sendTemplate = async (req, res, next) => {
+	try {
+		let { templateId, contactListId, variables, contactList, token } =
+			req.body;
+
+		if (!templateId || !contactListId) {
+			return res.status(400).json({
+				message: "Template ID and Contact List ID are required",
+			});
+		}
+
+		if (!isString(templateId, contactListId)) return next();
+
+		console.log("contact list :", contactListId);
+		variables =
+			typeof variables === "string" ? JSON.parse(variables) : variables;
+
+		let tokenData;
+		try {
+			tokenData = validateToken(token);
+		} catch (err) {
+			return res.status(401).json({
+				success: false,
+				message: err || "Token error",
+			});
+		}
+		const { userId } = tokenData;
+
+		let user = await User.findOne({ unique_id: userId });
+
+		const phone_number = user.FB_PHONE_NUMBERS.find(
+			(n) => n.selected == true,
+		).phone_number_id;
+
+		if (!phone_number) {
+			throw new Error("No phone number selected.");
+		}
+
+		const { data, messageTemplate } = await sendTestMessage(
+			user,
+			templateId,
+			variables,
+			contactListId,
+			contactList[0]?.recipientPhone,
+			phone_number,
+		);
+
+		let campaign = await Campaign.findOne({
+			contactListId,
+		}).sort({ createdAt: -1 });
+
+		const report = new Report({
+			WABA_ID: user.WABA_ID,
+			FB_PHONE_ID: phone_number,
+			useradmin: user.unique_id,
+			unique_id: generateUniqueId(),
+			campaignName: campaign.name,
+			campaignId: campaign.unique_id,
+			contactName: contactList[0]?.contactName,
+			recipientPhone: contactList[0]?.recipientPhone,
+			status: "SENT",
+			messageId: data.messages[0].id,
+			textSent: messageTemplate,
+		});
+		await report.save();
+		// if (!schedule) {
+		// 	await sendMessages(
+		// 		newCampaign,
+		// 		user,
+		// 		generateUniqueId(),
+		// 		phone_number,
+		// 	);
+
+		// 	const time = Date.now() + 15 * 60 * 1000;
+		// 	const reportTime = new Date(time);
+		// 	agenda.schedule(reportTime, "send campaign report email", {
+		// 		campaignId: newCampaign.unique_id,
+		// 		userId: newCampaign.useradmin,
+		// 	});
+
+		// 	await ActivityLogs.create({
+		// 		useradmin: id,
+		// 		unique_id: generateUniqueId(),
+		// 		name: req.session?.user?.name
+		// 			? req.session?.user?.name
+		// 			: req.session?.addedUser?.name,
+		// 		actions: "Send",
+		// 		details: `Sent campaign named: ${name}`,
+		// 	});
+		// } else {
+		// 	newCampaign.scheduledAt = Number(schedule) * 1000;
+		// 	newCampaign.status = "SCHEDULED";
+
+		// 	await sendCampaignScheduledEmail(
+		// 		user.email,
+		// 		name,
+		// 		newCampaign.scheduledAt,
+		// 	);
+
+		// 	// const time = Date.now();
+		// 	// const reportTime = new Date(time);
+		// 	// agenda.schedule(reportTime, "send campaign report email", {
+		// 	// 	campaignId: newCampaign.unique_id,
+		// 	// 	userId: newCampaign.useradmin,
+		// 	// });
+
+		// 	await ActivityLogs.create({
+		// 		useradmin: id,
+		// 		unique_id: generateUniqueId(),
+		// 		name: req.session?.user?.name
+		// 			? req.session?.user?.name
+		// 			: req.session?.addedUser?.name,
+		// 		actions: "Send",
+		// 		details: `Scheduled new campaign named: ${name}`,
+		// 	});
+		// }
+		// console.log(report);
+		res.status(201).json({
+			message: "Campaign created successfully",
+			// campaign: newCampaign,
+		});
+	} catch (error) {
+		console.error("Error creating campaign:", error.message);
+		res.status(500).json({
+			message: `Error creating campaign: ${error.message}`,
 		});
 	}
 };

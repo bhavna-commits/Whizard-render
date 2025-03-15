@@ -301,7 +301,8 @@ class TemplateManager {
 		}
 
 		try {
-			const { template } = await fetchTemplateById(templateId);
+			// console.log(templateId);
+			const template = await fetchTemplateById(templateId);
 			// console.log(template);
 			this.currentTemplate = template;
 			this.preview.update(template);
@@ -354,24 +355,16 @@ class TemplateManager {
 		loader.classList.remove("hidden");
 		buttonText.classList.add("hidden");
 
+		const params = new URLSearchParams(window.location.search);
+		const token = params.get("token");
+
 		// Create form data
 		const formData = {
 			templateId: this.templateSelect.val(),
 			contactListId: contactListId,
-			name: document.getElementById("campaign-name").value,
 			contactList: contactLists,
+			token,
 		};
-
-		console.log(formData);
-
-		const testFormData = new FormData(this.campaignForm);
-		testFormData.append("templateId", this.templateSelect.val());
-		testFormData.append("contactListId", contactListId);
-		testFormData.append(
-			"name",
-			document.getElementById("campaign-name").value,
-		);
-		testFormData.append("contactList", contactLists);
 
 		// Add selected attributes to form data
 		// Validate attribute selects
@@ -398,46 +391,11 @@ class TemplateManager {
 
 		if (Object.keys(selectedAttributes).length > 0) {
 			formData.variables = selectedAttributes;
-			testFormData.append(
-				"variables",
-				JSON.stringify(selectedAttributes),
-			);
-		}
-
-		if (actionType === "test") {
-			testFormData.append("schedule", null);
-			testFormData.append(
-				"test",
-				document.getElementById("testNumber").value,
-			);
-			// Submit the form
-			try {
-				const response = await fetch(
-					"/api/contact-list/create-campaign",
-					{
-						method: "POST",
-						body: testFormData,
-					},
-				);
-
-				const result = await response.json();
-				if (response.ok) {
-					alert("Test campaign sent successfully!");
-				} else {
-					alert(result.message);
-				}
-			} catch (error) {
-				console.error("Error sending test campaign:", error);
-				alert("An error occurred while sending the test campaign.");
-			} finally {
-				resetButton(button, loader, buttonText);
-			}
-			return;
 		}
 
 		try {
 			// formData.set("test", null);
-			const response = await fetch("/api/reports/broadcast", {
+			const response = await fetch("/api/chats/send-template", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
@@ -447,7 +405,10 @@ class TemplateManager {
 			const result = await response.json();
 			if (response.ok) {
 				alert("Campaign created successfully!");
-				location.href = "/reports/campaign-list";
+				// window.close();
+
+				const newWindow = window.open("", "_self");
+				newWindow.close();
 			} else {
 				alert(`Error: ${result.message}`);
 			}
@@ -589,4 +550,3 @@ function resetButton(button, loader, buttonText) {
 	loader.classList.add("hidden");
 	buttonText.classList.remove("hidden");
 }
-

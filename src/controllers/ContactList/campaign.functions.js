@@ -331,6 +331,11 @@ export async function sendTestMessage(
 			phone_number,
 		);
 
+		const messageTemplate = generatePreviewMessage(
+			template,
+			personalizedMessage,
+		);
+
 		if (response.status === "FAILED") {
 			console.error(
 				`Failed to send message to ${test}: ${response.response}`,
@@ -339,6 +344,8 @@ export async function sendTestMessage(
 				`Failed to send message to ${test}: ${response.response}`,
 			);
 		}
+
+		return { messageTemplate, data: response.response };
 	} catch (error) {
 		console.error("Error sending messages:", error.message);
 		throw new Error(`${error.message}`);

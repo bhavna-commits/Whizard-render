@@ -2,7 +2,13 @@ import axios from "axios";
 import dotenv from "dotenv";
 import FormData from "form-data";
 import fs from "fs";
+import Template from "../../models/templates.model.js";
+import Contacts from "../../models/contacts.model.js";
 import { getMimeType } from "./chats.extra.functions.js";
+import {
+	replaceDynamicVariables,
+	sendMessageThroughWhatsApp,
+} from "../ContactList/campaign.functions.js";
 
 dotenv.config();
 
