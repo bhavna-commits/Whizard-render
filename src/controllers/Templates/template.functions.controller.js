@@ -12,6 +12,8 @@ dotenv.config();
 
 const { FB_GRAPH_VERSION } = process.env;
 
+const __dirname = path.resolve();
+
 export const uploadAndRetrieveMediaURL = async (
 	accessToken,
 	phoneNumberId,
