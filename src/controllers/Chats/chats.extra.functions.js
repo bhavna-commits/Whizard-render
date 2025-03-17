@@ -273,55 +273,29 @@ export const buildCommonChatFields = (reportItem, wa_id, overrides = {}) => {
 	};
 };
 
-export const processTemplateReport = async (reportItem, wa_id) => {
+export const processTemplateReport = async (reportItem, wa_id, text) => {
 	const campaign = await Campaign.findOne({
 		unique_id: reportItem.campaignId,
 	});
-
 	const template = await Template.findOne({ unique_id: campaign.templateId });
 
-	const dynamicVariables = template.dynamicVariables || {};
+	// Create a base chat object using common fields.
+	let chat = buildCommonChatFields(reportItem, wa_id, { text });
 
-	// createChatsComponents returns an array of components.
-	const components = createChatsComponents(
-		template.components,
-		dynamicVariables,
-	);
-
-	// Map each component to a chat object.
-	return components.map((comp) => {
-		let media_message = { link: "", caption: "" };
-		let media_type = "";
+	// Process each component and add its information to the single chat object.
+	template.components.forEach((comp) => {
 		if (comp.type === "HEADER") {
-			if (comp.format === "IMAGE") {
-				media_message = {
+			if ([ "IMAGE", "VIDEO", "DOCUMENT" ].includes(comp.format)) {
+				chat.media_message = {
 					link: comp.example.header_url[0] || "",
 					caption: comp.text || "",
 				};
-				media_type = "image";
-			} else if (comp.format === "VIDEO") {
-				media_message = {
-					link: comp.example.header_url[0] || "",
-					caption: comp.text || "",
-				};
-				media_type = "video";
-			} else if (comp.format === "DOCUMENT") {
-				media_message = {
-					link: comp.example.header_url[0] || "",
-					caption: comp.text || "",
-				};
-				media_type = "document";
+				chat.media_type = comp.format.toLowerCase();
 			}
 		}
-
-		// For a component (for example, BODY type) we set text accordingly.
-		const text = comp.type === "BODY" ? comp.text : "";
-		return buildCommonChatFields(reportItem, wa_id, {
-			media_message,
-			media_type,
-			text,
-		});
 	});
+
+	return chat;
 };
 
 export const processMediaReport = (reportItem, wa_id) => {

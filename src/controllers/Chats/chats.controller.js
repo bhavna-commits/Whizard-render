@@ -357,7 +357,11 @@ export const getSingleChat = async (req, res, next) => {
 
 			if (reportItem.messageTemplate) {
 				// Process template-based messages.
-				chatsForReport = await processTemplateReport(reportItem, wa_id);
+				chatsForReport = await processTemplateReport(
+					reportItem,
+					wa_id,
+					reportItem.messageTemplate,
+				);
 			} else if (reportItem.media && reportItem.media.url) {
 				// Process media-based messages.
 				chatsForReport.push(processMediaReport(reportItem, wa_id));
@@ -365,8 +369,7 @@ export const getSingleChat = async (req, res, next) => {
 				// Process simple text messages.
 				chatsForReport.push(processTextReport(reportItem, wa_id));
 			}
-
-			formattedChats.push(...chatsForReport);
+			formattedChats.push(chatsForReport);
 		}
 
 		return res.status(200).json({ success: true, chats: formattedChats });

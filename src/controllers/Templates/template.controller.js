@@ -210,6 +210,7 @@ export const duplicateTemplate = async (req, res, next) => {
 		// Assuming you have the file path stored in your template
 		if (headerComponent && headerComponent.example?.header_handle?.[0]) {
 			const mediaFileUrl = headerComponent.example.header_handle[0];
+			console.log(mediaFileUrl);
 			mediaFileName = mediaFileUrl.split("/").pop();
 			// Assuming you store the file path on your server
 			const mediaFilePath = path.join(
@@ -340,7 +341,7 @@ export const editTemplate = async (req, res, next) => {
 			// 			success: false,
 			// 			message: "No phone number selected",
 			// 		});
-			// const phoneNumberId = phoneNumberObj.phone_number_id; 
+			// const phoneNumberId = phoneNumberObj.phone_number_id;
 
 			// // Construct the local file path (ensure the file was saved locally)
 			// let filePath = path.join(url, "uploads", id, req.file.filename);
@@ -355,8 +356,22 @@ export const editTemplate = async (req, res, next) => {
 			// 	mediaType,
 			// 	req.file.filename,
 			// );
-			
-			let filePath = `${url}/uploads/${id}/${req.file?.filename}`;
+
+			let filePath = path.join(
+				__dirname,
+				"uploads",
+				id,
+				req.file.filename,
+			);
+
+			// const phoneNumberId = user.FB_PHONE_NUMBERS.find(
+			// 	(u) => u.selected == true,
+			// );
+			const accessToken = user.FB_ACCESS_TOKEN;
+
+			const appId = process.env.FB_APP_ID;
+
+			filePath = await uploadMediaResumable(accessToken, appId, filePath);
 
 			// Find the HEADER component and update its header_handle with the media URL.
 			const headerComponent = originalTemplate.components.find(
