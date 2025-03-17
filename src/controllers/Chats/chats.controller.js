@@ -103,7 +103,7 @@ export const getUsers = async (req, res, next) => {
 		try {
 			tokenData = validateToken(token);
 		} catch (err) {
-			return res.status(401).json({
+			return res.status(400).json({
 				success: false,
 				message: err || "Token error",
 			});
@@ -127,9 +127,9 @@ export const getUsers = async (req, res, next) => {
 			phoneNumber.phone_number_id,
 		);
 
-		if (formattedReports.length === 0) {
-			return res.status(400).json({
-				message: "No reports found for this user",
+		if (formattedReports.length == 0) {
+			return res.status(404).json({
+				message: "No Reports Found",
 				success: false,
 			});
 		}
