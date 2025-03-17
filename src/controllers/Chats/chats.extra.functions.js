@@ -31,7 +31,7 @@ export function getMimeType(fileName) {
 }
 
 export const determineMediaType = (url) => {
-    console.log("img :", url);
+	console.log("img :", url);
 	const extension = url.split(".").pop().toLowerCase();
 	if (["jpg", "jpeg", "png", "gif"].includes(extension)) return "image";
 	if (["mp4", "mov", "avi"].includes(extension)) return "video";
@@ -64,10 +64,11 @@ export const fetchAndFormatReports = async (
 		const isReplyRecent =
 			report.replyContent &&
 			Date.now() - report.updatedAt < 24 * 60 * 60 * 1000; // Less than 24 hours
+		console.log(isReplyRecent);
 		return {
 			lastmessage: report.replyContent || "No recent reply",
 			wa_id: report.recipientPhone,
-			status: isReplyRecent ? 1 : 0,
+			status: isReplyRecent ? 0 : 1,
 			name: report.contactName,
 			usertimestmp: report.updatedAt,
 			campaignId: report.campaignId,
@@ -221,7 +222,7 @@ export const createChatsComponents = (templateData, dynamicVariables) => {
 	});
 
 	return components;
-}
+};
 
 export const buildCommonChatFields = (reportItem, wa_id, overrides = {}) => {
 	return {
