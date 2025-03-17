@@ -96,7 +96,7 @@ export const saveTemplateToDatabase = async (
 		// Check if there is a file uploaded and update the corresponding header component with the file URL
 		if (req.file) {
 			let filePath = `${url}/uploads/${id}/${req.file?.filename}`;
-
+			filePath = encodeURI(filePath)
 			// const user = await User.findOne({ unique_id: id });
 
 			// const phoneNumberId = user.FB_PHONE_NUMBERS.find(
