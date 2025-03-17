@@ -60,14 +60,6 @@ export const createTemplate = async (req, res, next) => {
 			url,
 		);
 
-		// Submit template to Facebook
-		const data = await submitTemplateToFacebook(savedTemplate, id);
-
-		if (data && data.id) {
-			// Save the Facebook template ID (fb_id)
-			savedTemplate.template_id = data.id;
-		}
-
 		await ActivityLogs.create({
 			useradmin: id,
 			unique_id: generateUniqueId(),

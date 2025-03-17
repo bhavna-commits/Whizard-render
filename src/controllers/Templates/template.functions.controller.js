@@ -71,6 +71,24 @@ export const uploadAndRetrieveMediaURL = async (
 	}
 };
 
+export const getMediaUrl = async (fileHandle, accessToken) => {
+	try {
+		const response = await axios.get(
+			`https://graph.facebook.com/${FB_GRAPH_VERSION}/${fileHandle}`,
+			{
+				params: {
+					access_token: accessToken,
+					fields: "source",
+				},
+			},
+		);
+		return response.data.source;
+	} catch (error) {
+		console.error("Error fetching media URL:", error);
+		throw error;
+	}
+};
+
 export const uploadMediaResumable = async (accessToken, appId, filePath) => {
 	try {
 		// Determine file properties.
@@ -168,7 +186,6 @@ export const saveTemplateToDatabase = async (
 				req.file.filename,
 			);
 
-
 			const user = await User.findOne({ unique_id: id });
 
 			// const phoneNumberId = user.FB_PHONE_NUMBERS.find(
@@ -183,9 +200,11 @@ export const saveTemplateToDatabase = async (
 			// 	mediaType,
 			// 	req.file?.filename,
 			// );
-			const appId = process.env.FB_APP_ID; 
+			const appId = process.env.FB_APP_ID;
 
 			filePath = await uploadMediaResumable(accessToken, appId, filePath);
+
+			filePath = await getMediaUrl(filePath, accessToken);
 
 			const headerComponent = newTemplate.components.find(
 				(component) => component.type == "HEADER",
@@ -203,6 +222,17 @@ export const saveTemplateToDatabase = async (
 			}
 		}
 
+		// Submit template to Facebook
+		const data = await submitTemplateToFacebook(newTemplate, id);
+
+		if (data && data.id) {
+			// Save the Facebook template ID (fb_id)
+			newTemplate.template_id = data.id;
+		}
+
+		if (req.file) {
+			const mediaUrl = await getMediaUrl(filePath, accessToken);
+		}
 		// Return the saved template object after successful saving
 		return newTemplate;
 	} catch (error) {
