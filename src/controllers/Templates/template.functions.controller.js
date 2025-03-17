@@ -71,6 +71,69 @@ export const uploadAndRetrieveMediaURL = async (
 	}
 };
 
+export const uploadMediaResumable = async (accessToken, appId, filePath) => {
+	try {
+		// Determine file properties.
+		const fileName = path.basename(filePath);
+		const fileStats = fs.statSync(filePath);
+		const fileLength = fileStats.size;
+		const fileType = getMimeType(fileName);
+
+		// Step 1: Start an upload session.
+		const startSessionUrl = `https://graph.facebook.com/${process.env.FB_GRAPH_VERSION}/${appId}/uploads`;
+		const startSessionParams = {
+			file_name: fileName,
+			file_length: fileLength,
+			file_type: fileType,
+			access_token: accessToken,
+		};
+
+		console.log(
+			"Starting upload session with parameters:",
+			startSessionParams,
+		);
+		const sessionResponse = await axios.post(startSessionUrl, null, {
+			params: startSessionParams,
+		});
+		// Expect a response like: { "id": "upload:<UPLOAD_SESSION_ID>" }
+		const uploadSessionId = sessionResponse.data.id;
+		console.log("Upload session id:", uploadSessionId);
+
+		// Step 2: Start the upload.
+		const uploadUrl = `https://graph.facebook.com/${process.env.FB_GRAPH_VERSION}/${uploadSessionId}`;
+		const headers = {
+			Authorization: `OAuth ${accessToken}`,
+			file_offset: 0,
+		};
+
+		// For small files, read the entire file into a buffer.
+		// For larger files, consider using streams.
+		const fileData = fs.readFileSync(filePath);
+
+		console.log(
+			`Uploading file data (size: ${fileLength} bytes) to ${uploadUrl}`,
+		);
+		const uploadFileResponse = await axios.post(uploadUrl, fileData, {
+			headers,
+		});
+		// Expect a response like: { "h": "<UPLOADED_FILE_HANDLE>" }
+		const fileHandle = uploadFileResponse.data.h;
+		console.log("File handle received:", fileHandle);
+
+		return fileHandle;
+	} catch (error) {
+		if (error.response) {
+			console.error(
+				"Error in uploadMediaResumable:",
+				error.response.data,
+			);
+		} else {
+			console.error("Error in uploadMediaResumable:", error.message);
+		}
+		throw error;
+	}
+};
+
 export const saveTemplateToDatabase = async (
 	req,
 	templateData,
@@ -95,15 +158,15 @@ export const saveTemplateToDatabase = async (
 
 		// Check if there is a file uploaded and update the corresponding header component with the file URL
 		if (req.file) {
-			let filePath = `${url}/uploads/${id}/${req.file?.filename}`;
-			filePath = encodeURI(filePath)
-			// const user = await User.findOne({ unique_id: id });
+			let filePath = `/uploads/${id}/${req.file?.filename}`;
+			filePath = encodeURI(filePath);
+
+			const user = await User.findOne({ unique_id: id });
 
 			// const phoneNumberId = user.FB_PHONE_NUMBERS.find(
 			// 	(u) => u.selected == true,
 			// );
-			// const accessToken = user.FB_ACCESS_TOKEN;
-			// const mediaType = getMimeType(req.file?.filename);
+			const accessToken = user.FB_ACCESS_TOKEN;
 
 			// filePath = await uploadAndRetrieveMediaURL(
 			// 	accessToken,
@@ -112,6 +175,9 @@ export const saveTemplateToDatabase = async (
 			// 	mediaType,
 			// 	req.file?.filename,
 			// );
+			const appId = process.env.FB_APP_ID; 
+
+			filePath = await uploadMediaResumable(accessToken, appId, filePath);
 
 			const headerComponent = newTemplate.components.find(
 				(component) => component.type == "HEADER",
