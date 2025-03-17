@@ -356,11 +356,7 @@ export const editTemplate = async (req, res, next) => {
 			// 	req.file.filename,
 			// );
 			
-			let filePath = `
-				${url}/
-				uploads/
-				${id}/
-				${req.file?.filename}`;
+			let filePath = `${url}/uploads/${id}/${req.file?.filename}`;
 
 			// Find the HEADER component and update its header_handle with the media URL.
 			const headerComponent = originalTemplate.components.find(
