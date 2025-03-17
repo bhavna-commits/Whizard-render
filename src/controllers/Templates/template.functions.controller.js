@@ -96,7 +96,7 @@ export const saveTemplateToDatabase = async (
 		// Check if there is a file uploaded and update the corresponding header component with the file URL
 		if (req.file) {
 			let filePath = path.join(
-				__dirname,
+				url,
 				"uploads",
 				id,
 				req.file?.filename,

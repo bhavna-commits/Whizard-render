@@ -330,43 +330,38 @@ export const editTemplate = async (req, res, next) => {
 
 		if (req.file) {
 			// Extract the actual phone number id from the user's FB_PHONE_NUMBERS array.
-			const phoneNumberObj = user.FB_PHONE_NUMBERS.find(
-				(u) => u.selected === true,
-			);
-			if (!phoneNumberObj)
-				return res
-					.status(400)
-					.json({
-						success: false,
-						message: "No phone number selected",
-					});
-			const phoneNumberId = phoneNumberObj.phone_number_id; 
+			// const phoneNumberObj = user.FB_PHONE_NUMBERS.find(
+			// 	(u) => u.selected === true,
+			// );
+			// if (!phoneNumberObj)
+			// 	return res
+			// 		.status(400)
+			// 		.json({
+			// 			success: false,
+			// 			message: "No phone number selected",
+			// 		});
+			// const phoneNumberId = phoneNumberObj.phone_number_id; 
 
-			// Construct the local file path (ensure the file was saved locally)
-			let filePath = path.join(
-				__dirname,
-				"uploads",
-				id,
-				req.file.filename,
-			);
-			const accessToken = user.FB_ACCESS_TOKEN;
-			const mediaType = getMimeType(req.file.filename); // e.g., "image/jpeg"
+			// // Construct the local file path (ensure the file was saved locally)
+			// let filePath = path.join(url, "uploads", id, req.file.filename);
+			// const accessToken = user.FB_ACCESS_TOKEN;
+			// const mediaType = getMimeType(req.file.filename); // e.g., "image/jpeg"
 
 			// Upload file to Meta and get media URL
-			const { mediaUrl } = await uploadAndRetrieveMediaURL(
-				accessToken,
-				phoneNumberId,
-				filePath,
-				mediaType,
-				req.file.filename,
-			);
+			// const { mediaUrl } = await uploadAndRetrieveMediaURL(
+			// 	accessToken,
+			// 	phoneNumberId,
+			// 	filePath,
+			// 	mediaType,
+			// 	req.file.filename,
+			// );
 
 			// Find the HEADER component and update its header_handle with the media URL.
 			const headerComponent = originalTemplate.components.find(
 				(component) => component.type === "HEADER",
 			);
 			if (headerComponent) {
-				headerComponent.example.header_handle = [mediaUrl];
+				headerComponent.example.header_handle = [url];
 			}
 		}
 
