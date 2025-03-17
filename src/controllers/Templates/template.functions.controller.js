@@ -162,7 +162,7 @@ export async function submitTemplateToFacebook(savedTemplate, id) {
 			return cleanComponent;
 		});
 
-		// console.log(JSON.stringify(plainTemplate.components));
+		console.log(JSON.stringify(plainTemplate.components));
 		// Continue with the request data preparation
 		const requestData = {
 			name: plainTemplate.name,
