@@ -342,7 +342,7 @@ export const getSingleChat = async (req, res, next) => {
 		const reports = await Report.find({
 			recipientPhone: wa_id,
 			useradmin: userId,
-		});
+		}).sort({ createdAt: -1 });
 
 		if (!reports || !reports.length)
 			return res.status(404).json({

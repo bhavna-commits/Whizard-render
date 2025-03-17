@@ -45,26 +45,55 @@ export const fetchAndFormatReports = async (
 	skip = 0,
 	limit = 10,
 ) => {
-	const reports = await Report.find({
-		useradmin: userId,
-		FB_PHONE_ID: phoneNumberId,
-	})
-		.sort({ updatedAt: -1 })
-		.skip(skip)
-		.limit(limit)
-		.select(
-			"contactName recipientPhone status replyContent updatedAt campaignId",
-		);
+	// Aggregation pipeline:
+	const aggregatedReports = await Report.aggregate([
+		{
+			$match: {
+				useradmin: userId,
+				FB_PHONE_ID: phoneNumberId,
+			},
+		},
+		// Sort reports by updatedAt descending so the most recent comes first
+		{
+			$sort: { createdAt: -1 },
+		},
+		// Group by recipientPhone (wa_id), keeping only the first document per group
+		{
+			$group: {
+				_id: "$recipientPhone",
+				doc: { $first: "$$ROOT" },
+			},
+		},
+		// Replace root with the grouped document
+		{
+			$replaceRoot: { newRoot: "$doc" },
+		},
+		// Optionally project only the fields you need
+		{
+			$project: {
+				contactName: 1,
+				recipientPhone: 1,
+				status: 1,
+				replyContent: 1,
+				updatedAt: 1,
+				campaignId: 1,
+			},
+		},
+		// Apply pagination on the unique records
+		{ $skip: skip },
+		{ $limit: limit },
+	]);
 
-	if (!reports || reports.length === 0) {
+	if (!aggregatedReports || aggregatedReports.length === 0) {
 		return [];
 	}
 
-	const formattedReports = reports.map((report) => {
+	// Format the results as needed.
+	const formattedReports = aggregatedReports.map((report) => {
 		const isReplyRecent =
 			report.replyContent &&
-			Date.now() - report.updatedAt < 24 * 60 * 60 * 1000; // Less than 24 hours
-		console.log(isReplyRecent);
+			Date.now() - report.updatedAt < 24 * 60 * 60 * 1000; // less than 24 hours
+
 		return {
 			lastmessage: report.replyContent || "No recent reply",
 			wa_id: report.recipientPhone,
