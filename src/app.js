@@ -8,9 +8,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(corsMiddleware);
 
-app.options("*", corsMiddleware);
 app.set("view engine", "ejs");
-app.set("trust proxy", 1);
+// app.set("trust proxy", 1);
 
 app.locals.makeRange = (start, end) => {
 	return Array.from({ length: end - start + 1 }, (_, i) => start + i);

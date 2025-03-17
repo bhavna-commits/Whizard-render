@@ -8,6 +8,7 @@ import Report from "../../models/report.model.js";
 import Campaign from "../../models/campaign.model.js";
 import Template from "../../models/templates.model.js";
 import Contacts from "../../models/contacts.model.js";
+import ActivityLogs from "../../models/activityLogs.model.js";
 import { uploadMedia, sendMessage, getMediaUrl } from "./chats.functions.js";
 import {
 	setToken,
@@ -610,7 +611,6 @@ export const sendMessages = async (req, res, next) => {
 
 export const getSendTemplate = async (req, res, next) => {
 	try {
-		console.log("hjk")
 		const { token, wa_id } = req.query;
 		if (!token || !wa_id) {
 			return res.status(400).json({ message: "All data not provided" });

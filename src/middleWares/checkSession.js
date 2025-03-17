@@ -10,7 +10,7 @@ export const checkSession = (req, res, next) => {
 			res.redirect("/login");
 		});
 	} else if (req.session?.user || req.session?.addedUser) {
-		console.log(req.session);
+		// console.log(req.session);
 		// Continue if either user or addedUser is present, but not both
 		next();
 	} else {
