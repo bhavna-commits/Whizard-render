@@ -104,7 +104,6 @@ export const getList = async (req, res, next) => {
 		const match = {
 			useradmin: id,
 			deleted: { $ne: true },
-			status: "Approved",
 		};
 
 		// Handle category filter

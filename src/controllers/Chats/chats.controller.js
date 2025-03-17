@@ -658,8 +658,9 @@ export const getAllTemplates = async (req, res, next) => {
 		// Respond with the updated templates from MongoDB
 		const updatedTemplates = await Template.find({
 			useradmin: id,
+			deleted: { $ne: true },
 			status: "Approved",
-		});
+		}).sort({ createdAt: -1 });
 		// console.log(updatedTemplates);
 		res.json({
 			success: true,
