@@ -158,8 +158,16 @@ export const saveTemplateToDatabase = async (
 
 		// Check if there is a file uploaded and update the corresponding header component with the file URL
 		if (req.file) {
-			let filePath = `/uploads/${id}/${req.file?.filename}`;
-			filePath = encodeURI(filePath);
+			// let filePath = `/uploads/${id}/${req.file?.filename}`;
+			// filePath = encodeURI(filePath);
+
+			let filePath = path.join(
+				__dirname,
+				"uploads",
+				id,
+				req.file.filename,
+			);
+
 
 			const user = await User.findOne({ unique_id: id });
 
