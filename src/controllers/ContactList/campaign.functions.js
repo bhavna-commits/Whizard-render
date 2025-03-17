@@ -101,6 +101,7 @@ export function replaceDynamicVariables(template, variables, contact) {
 			let headerParameters = [];
 			// Handle media components based on their format (Image, Video, Document)
 			if (headerComponent.format === "IMAGE") {
+				console.log(headerComponent.example.header_handle[0]);
 				headerParameters.push({
 					type: "image",
 					image: {

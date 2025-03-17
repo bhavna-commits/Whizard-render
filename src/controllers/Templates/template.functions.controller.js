@@ -1,5 +1,6 @@
 import dotenv from "dotenv";
 import axios from "axios";
+import path from "path";
 import fs from "fs";
 import FormData from "form-data";
 import Template from "../../models/templates.model.js";
@@ -19,62 +20,52 @@ export const uploadAndRetrieveMediaURL = async (
 	fileName,
 ) => {
 	try {
-		// Step 1: Upload file to Meta
-		const uploadUrl = `https://graph.facebook.com/${process.env.FB_GRAPH_VERSION}/${phoneNumberId}/media`;
+		const url = `https://graph.facebook.com/${process.env.FB_GRAPH_VERSION}/${phoneNumberId}/media`;
 		const formData = new FormData();
 
-		console.log(fs.createReadStream(filePath));
+		// Get MIME type from file extension (implement getMimeType accordingly)
+		const mimeType = getMimeType(fileName);
 
-		formData.append("messaging_product", "whatsapp");
-		formData.append("type", mediaType);
+		// Append the file as a stream, along with required fields.
 		formData.append("file", fs.createReadStream(filePath), {
 			filename: fileName,
-			contentType: mediaType,
+			contentType: mimeType,
 		});
+		formData.append("messaging_product", "whatsapp");
+		formData.append("type", mediaType);
 
-		const uploadResponse = await fetch(uploadUrl, {
-			method: "POST",
+		// POST the form data to upload the media.
+		const uploadResponse = await axios.post(url, formData, {
 			headers: {
-				// Use formData.getHeaders() to set proper Content-Type (with boundary)
 				...formData.getHeaders(),
 				Authorization: `Bearer ${accessToken}`,
 			},
-			body: formData,
 		});
+		// axios automatically throws an error for non-2xx responses.
+		const mediaId = uploadResponse.data.id;
 
-		if (!uploadResponse.ok) {
-			const errText = await uploadResponse.text();
-			throw new Error(
-				`Upload failed: ${uploadResponse.status} ${errText}`,
-			);
-		}
-
-		const uploadData = await uploadResponse.json();
-		const mediaId = uploadData.id;
-
-		// Step 2: Retrieve the media URL using the media ID
+		// Use axios to GET the media URL using the returned mediaId.
 		const getMediaUrl = `https://graph.facebook.com/${process.env.FB_GRAPH_VERSION}/${mediaId}/`;
-		const getResponse = await fetch(getMediaUrl, {
-			method: "GET",
+		const getResponse = await axios.get(getMediaUrl, {
 			headers: {
 				Authorization: `Bearer ${accessToken}`,
 			},
 		});
+		const mediaUrl = getResponse.data.url;
 
-		if (!getResponse.ok) {
-			const errText = await getResponse.text();
-			throw new Error(
-				`Media retrieval failed: ${getResponse.status} ${errText}`,
-			);
-		}
-
-		const getData = await getResponse.json();
-		const mediaUrl = getData.url;
-
-		return mediaUrl;
+		return { mediaId, mediaUrl };
 	} catch (error) {
-		console.error("Error in uploadAndRetrieveMediaURL:", error.message);
-		throw error.message;
+		// Log detailed error information.
+		if (error.response) {
+			console.error(
+				"Error in uploadAndRetrieveMediaURL:",
+				error.response.data,
+			);
+		} else {
+			console.error("Error in uploadAndRetrieveMediaURL:", error.message);
+		}
+		// Throw the error so that the calling controller can handle it.
+		throw error;
 	}
 };
 
@@ -109,21 +100,21 @@ export const saveTemplateToDatabase = async (
 				req.file?.filename,
 			);
 
-			const user = await User.findOne({ unique_id: id });
+			// const user = await User.findOne({ unique_id: id });
 
-			const phoneNumberId = user.FB_PHONE_NUMBERS.find(
-				(u) => u.selected == true,
-			);
-			const accessToken = user.FB_ACCESS_TOKEN;
-			const mediaType = getMimeType(req.file?.filename);
+			// const phoneNumberId = user.FB_PHONE_NUMBERS.find(
+			// 	(u) => u.selected == true,
+			// );
+			// const accessToken = user.FB_ACCESS_TOKEN;
+			// const mediaType = getMimeType(req.file?.filename);
 
-			filePath = await uploadAndRetrieveMediaURL(
-				accessToken,
-				phoneNumberId,
-				filePath,
-				mediaType,
-				req.file?.filename,
-			);
+			// filePath = await uploadAndRetrieveMediaURL(
+			// 	accessToken,
+			// 	phoneNumberId,
+			// 	filePath,
+			// 	mediaType,
+			// 	req.file?.filename,
+			// );
 
 			const headerComponent = newTemplate.components.find(
 				(component) => component.type == "HEADER",

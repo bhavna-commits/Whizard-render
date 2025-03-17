@@ -27,6 +27,7 @@
 				</td>
 				<td class="text-gray-500 border-t border-b border-gray-200">
 					XXXXX-XXX<%= contact?.wa_id?.slice(-2) %>
+					<% console.log(contact?.wa_id) %>
 				</td>
 				<td class="text-gray-500 border-t border-b border-gray-200">
 					<%= new Date(contact.subscribe_date).toLocaleString('en-GB', {

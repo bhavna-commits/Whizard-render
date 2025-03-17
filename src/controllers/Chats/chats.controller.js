@@ -482,7 +482,7 @@ export const sendMessages = async (req, res, next) => {
 
 		// If media file is included in the bytecode, handle the decoding
 		// Handle media files
-		let tempFilePath = null;
+		let tempFilePath = '';
 		if (mediaMessages && fileByteCode) {
 			const tempDir = path.join(__dirname, "uploads", userId);
 			tempFilePath = path.join(tempDir, fileName);
@@ -557,14 +557,14 @@ export const sendMessages = async (req, res, next) => {
 		// Send the message using Meta API
 		const data = await sendMessage(accessToken, from, payload);
 
-		let url = "";
+		// let url = "";
 
-		if (mediaId) {
-			const res = await getMediaUrl(accessToken, mediaId);
-			if (res.success) {
-				url = res.url;
-			}
-		}
+		// if (mediaId) {
+		// 	const res = await getMediaUrl(accessToken, mediaId);
+		// 	if (res.success) {
+		// 		url = res.url;
+		// 	}
+		// }
 
 		// Respond with success
 		res.status(200).json({
@@ -587,7 +587,7 @@ export const sendMessages = async (req, res, next) => {
 			status: "SENT",
 			messageId: data.messages[0].id,
 			messageTemplate: messageText,
-			media: { url, fileName, caption },
+			media: { url: tempFilePath, fileName, caption },
 		});
 		await report.save();
 
