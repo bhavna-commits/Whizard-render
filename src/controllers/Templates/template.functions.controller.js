@@ -204,7 +204,7 @@ export const saveTemplateToDatabase = async (
 
 			filePath = await uploadMediaResumable(accessToken, appId, filePath);
 
-			filePath = await getMediaUrl(filePath, accessToken);
+			// filePath = await getMediaUrl(filePath, accessToken);
 
 			const headerComponent = newTemplate.components.find(
 				(component) => component.type == "HEADER",
