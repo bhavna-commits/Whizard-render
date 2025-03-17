@@ -683,6 +683,8 @@ export const getSingleTemplate = async (req, res, next) => {
 		// Respond with the updated templates from MongoDB
 		const updatedTemplates = await Template.findOne({
 			unique_id: id,
+			deleted: { $ne: true },
+			status: "Approved",
 		});
 		console.log(updatedTemplates);
 		res.json(updatedTemplates);

@@ -104,6 +104,7 @@ export const getList = async (req, res, next) => {
 		const match = {
 			useradmin: id,
 			deleted: { $ne: true },
+			status: "Approved",
 		};
 
 		// Handle category filter
@@ -600,6 +601,7 @@ export const getCampaignTemplates = async (req, res) => {
 		const updatedTemplates = await Template.find({
 			useradmin: id,
 			status: "Approved",
+			deleted: false,
 		});
 		// console.log(updatedTemplates);
 		res.json({
