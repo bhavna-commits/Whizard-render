@@ -101,25 +101,25 @@ export function replaceDynamicVariables(template, variables, contact) {
 			let headerParameters = [];
 			// Handle media components based on their format (Image, Video, Document)
 			if (headerComponent.format === "IMAGE") {
-				console.log(headerComponent.example.header_handle[0]);
+				console.log(headerComponent.example.header_url);
 				headerParameters.push({
 					type: "image",
 					image: {
-						link: headerComponent.example.header_handle[0] || "",
+						link: headerComponent.example.header_url || "",
 					},
 				});
 			} else if (headerComponent.format === "VIDEO") {
 				headerParameters.push({
 					type: "video",
 					video: {
-						link: headerComponent.example.header_handle[0] || "",
+						link: headerComponent.example.header_url || "",
 					},
 				});
 			} else if (headerComponent.format === "DOCUMENT") {
 				headerParameters.push({
 					type: "document",
 					document: {
-						link: headerComponent.example.header_handle[0] || "",
+						link: headerComponent.example.header_url || "",
 					},
 				});
 			}
