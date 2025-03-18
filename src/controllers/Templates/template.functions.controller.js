@@ -254,10 +254,11 @@ export async function submitTemplateToFacebook(savedTemplate, id) {
 	try {
 		let user = await User.findOne({ unique_id: id });
 
-		const plainTemplate = savedTemplate.toObject(); // Convert to plain object
+		const plainTemplate = savedTemplate.toObject(); // Convert Mongoose document to plain object
 
-		// Now you can clean up and submit to Facebook
+		// Clean up components by removing unwanted properties (like _id, $__parent, etc.) and also remove header_url from example
 		plainTemplate.components = plainTemplate.components.map((component) => {
+			// Destructure and remove unwanted Mongoose properties
 			const {
 				_id,
 				$__parent,
@@ -267,6 +268,12 @@ export async function submitTemplateToFacebook(savedTemplate, id) {
 				[Symbol("mongoose#documentArrayParent")]: symbol,
 				...cleanComponent
 			} = component;
+
+			// Remove header_url from the example if it exists
+			if (cleanComponent.example && cleanComponent.example.header_url) {
+				delete cleanComponent.example.header_url;
+			}
+
 			return cleanComponent;
 		});
 
