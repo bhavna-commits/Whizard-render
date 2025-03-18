@@ -209,7 +209,7 @@ export const saveTemplateToDatabase = async (
 
 			filePath = await uploadMediaResumable(accessToken, appId, filePath);
 
-			// filePath = await getMediaUrl(filePath, accessToken);
+			filePath = await getMediaUrl(filePath, accessToken);
 
 			const headerComponent = newTemplate.components.find(
 				(component) => component.type == "HEADER",
@@ -235,9 +235,9 @@ export const saveTemplateToDatabase = async (
 			newTemplate.template_id = data.id;
 		}
 
-		if (req.file) {
-			const mediaUrl = await getMediaUrl(filePath, accessToken);
-		}
+		// if (req.file) {
+		// 	const mediaUrl = await getMediaUrl(filePath, accessToken);
+		// }
 		// Return the saved template object after successful saving
 		return newTemplate;
 	} catch (error) {
