@@ -349,6 +349,7 @@ class TemplateManager {
 
 		const loader = button.querySelector(".loader-submit");
 		const buttonText = button.querySelector(".button-text");
+		const status = document.getElementById("status");
 
 		// Disable the button and show the loader
 		button.disabled = true;
@@ -404,19 +405,20 @@ class TemplateManager {
 			});
 			const result = await response.json();
 			if (result.success) {
-				alert(result.message);
-				window.flutter_inappwebview.callHandler(
-					"closeWebView",
-					"success",
-				);
-				window.parent.postMessage("close_webview", "*");
-				window.name = "close_webview";
+				status.classList.add("text-green-500");
+				status.classList.remove("hidden");
+				status.textContent = result.message;
+				location.href = "https://whizard-chat.web.app/#/homeR";
 			} else {
-				alert(`Error: ${result.message}`);
+				status.classList.add("text-red-500");
+				status.classList.remove("hidden");
+				status.textContent = result.message;
 			}
 		} catch (error) {
 			console.error("Error submitting campaign:", error);
-			alert("An error occurred while creating the campaign.");
+			status.classList.add("text-red-500");
+			status.classList.remove("hidden");
+			status.textContent = result.message;
 		} finally {
 			resetButton(button, loader, buttonText);
 		}
