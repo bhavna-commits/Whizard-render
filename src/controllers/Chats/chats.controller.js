@@ -577,8 +577,6 @@ export const sendMessages = async (req, res, next) => {
 		// 	}
 		// }
 
-		window.name = "close_webview";
-
 		// Respond with success
 		res.status(200).json({
 			message: "Message sent successfully",

@@ -403,12 +403,12 @@ class TemplateManager {
 				body: JSON.stringify(formData),
 			});
 			const result = await response.json();
-			if (response.ok) {
-				alert("Campaign created successfully!");
-				// window.close();
-
-				const newWindow = window.open("", "_self");
-				newWindow.close();
+			if (result.success) {
+				alert(result.message);
+				window.flutter_inappwebview.callHandler(
+					"closeWebView",
+					"success",
+				);
 			} else {
 				alert(`Error: ${result.message}`);
 			}
