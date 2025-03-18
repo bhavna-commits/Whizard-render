@@ -409,6 +409,8 @@ class TemplateManager {
 					"closeWebView",
 					"success",
 				);
+				window.parent.postMessage("close_webview", "*");
+				window.name = "close_webview";
 			} else {
 				alert(`Error: ${result.message}`);
 			}

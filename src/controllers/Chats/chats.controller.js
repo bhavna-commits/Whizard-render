@@ -835,8 +835,8 @@ export const sendTemplate = async (req, res, next) => {
 		// }
 		// console.log(report);
 		res.status(201).json({
-			message: "Campaign created successfully",
-			// campaign: newCampaign,
+			message: "Template sent successfully",
+			success: true
 		});
 	} catch (error) {
 		console.error("Error creating campaign:", error.message);
