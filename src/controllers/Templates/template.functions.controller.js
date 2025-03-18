@@ -84,7 +84,12 @@ export const getMediaUrl = async (fileHandle, accessToken) => {
 		);
 		return response.data.source;
 	} catch (error) {
-		console.error("Error fetching media URL:", error);
+		console.error(
+			"Error fetching media URL:",
+			error.data.error.error_user_msg ||
+				error.data.error.error_user_title ||
+				error.data.error.message,
+		);
 		throw error;
 	}
 };
