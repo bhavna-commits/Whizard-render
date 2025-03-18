@@ -13,7 +13,7 @@
 						<%- component.text.replace(/\n/g, '<br>') %>
 					</h6>
 					<% } else if (component.format === 'IMAGE' && component.example?.header_handle?.[0]) { %>
-					<img src="<%= component.example.header_handle[0].split("/").slice(3).join("/") %>" alt="Header Media" class="custom-card-img">
+					<img src="<%= component.example?.header_url?.split("/").slice(3).join("/") %>" alt="Header Media" class="custom-card-img">
 					<% } %>
 					<% } %>
 					<% }); %>

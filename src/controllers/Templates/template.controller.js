@@ -605,7 +605,7 @@ export const getCampaignTemplates = async (req, res) => {
 			useradmin: id,
 			status: "Approved",
 			deleted: false,
-		});
+		}).sort({ createdAt: -1 });
 		// console.log(updatedTemplates);
 		res.json({
 			success: true,

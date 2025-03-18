@@ -4,6 +4,7 @@ import {
 	replaceDynamicVariables,
 	sendMessageThroughWhatsApp,
 	generatePreviewMessage,
+	getMediaPreviewFromTemplate,
 } from "../ContactList/campaign.functions.js";
 import {
 	sendCampaignReportEmail,
@@ -246,8 +247,10 @@ export async function sendMessagesReports(
 					`Failed to send message to ${contact.wa_id}: ${response.response}`,
 				);
 			}
-			// Create a report for each sent message
-			const report = new Report({
+
+			const mediaPreview = getMediaPreviewFromTemplate(template);
+
+			let reportData = {
 				WABA_ID: user.WABA_ID,
 				FB_PHONE_ID: phone_number,
 				useradmin: user.unique_id,
@@ -258,8 +261,20 @@ export async function sendMessagesReports(
 				recipientPhone: contact.wa_id,
 				status: response.status,
 				messageId: response.response.messages[0].id,
-				messageTemplate,
-			});
+			};
+
+			if (mediaPreview) {
+				// If media exists, store media details instead of the messageTemplate preview.
+				reportData.media = {
+					url: mediaPreview.url,
+					fileName: mediaPreview.fileName,
+				};
+			} else {
+				// Otherwise, store the text preview.
+				reportData.messageTemplate = messageTemplate;
+			}
+
+			const report = new Report(reportData);
 			await report.save();
 		}
 

@@ -117,7 +117,7 @@ class Preview {
 			if (component.type === "HEADER") {
 				if (component.format === "IMAGE") {
 					// Handle image format
-					let fileUrl = component.example.header_handle[0].replace(
+					let fileUrl = component.example?.header_url?.replace(
 						/\\/g,
 						"/",
 					);
@@ -126,7 +126,7 @@ class Preview {
 					headerContent = `<img src="/${fileUrl}" alt="Header Image" class="custom-card-img">`;
 				} else if (component.format === "VIDEO") {
 					// Handle video format
-					let fileUrl = component.example.header_handle[0].replace(
+					let fileUrl = component.example?.header_url?.replace(
 						/\\/g,
 						"/",
 					);
@@ -142,7 +142,7 @@ class Preview {
                 `;
 				} else if (component.format === "DOCUMENT") {
 					// Handle document format (PDF, DOCX, etc.)
-					let fileUrl = component.example.header_handle[0].replace(
+					let fileUrl = component.example?.header_url?.replace(
 						/\\/g,
 						"/",
 					);
