@@ -83,7 +83,7 @@ export const fetchAndFormatReports = async (
 		{ $skip: skip },
 		{ $limit: limit },
 	]);
-
+	console.log("fg",aggregatedReports);
 	if (!aggregatedReports || aggregatedReports.length === 0) {
 		return [];
 	}

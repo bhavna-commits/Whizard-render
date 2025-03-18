@@ -576,8 +576,6 @@ export const sendMessages = async (req, res, next) => {
 		res.status(200).json({
 			message: "Messages sent successfully",
 			success: true,
-			url,
-			caption,
 		});
 
 		// Save the report
