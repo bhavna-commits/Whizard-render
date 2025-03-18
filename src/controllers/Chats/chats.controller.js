@@ -250,7 +250,10 @@ export const getMoreChats = async (req, res, next) => {
 		});
 
 		// Send the formatted reports as JSON for pagination or infinite scroll
-		res.status(200).json({ chats: formattedReports.reverse(), success: true });
+		res.status(200).json({
+			chats: formattedReports.reverse(),
+			success: true,
+		});
 	} catch (error) {
 		console.error("Error in getMoreReports:", error);
 		res.status(500).json({ message: error, success: false });
@@ -375,7 +378,11 @@ export const getSingleChat = async (req, res, next) => {
 
 		return res
 			.status(200)
-			.json({ success: true, chats: formattedChats.reverse(), permission });
+			.json({
+				success: true,
+				chats: formattedChats.reverse(),
+				permission,
+			});
 	} catch (error) {
 		console.error("Error in getSingleChat:", error);
 		return res
@@ -453,7 +460,7 @@ export const searchUsers = async (req, res, next) => {
 
 export const sendMessages = async (req, res, next) => {
 	const { messages, token, fileByteCode, fileName } = req.body;
-
+	console.log(messages);
 	// Check for required fields
 	if (!token || !messages) {
 		return res.status(400).json({
