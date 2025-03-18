@@ -83,7 +83,7 @@ export const fetchAndFormatReports = async (
 		{ $skip: skip },
 		{ $limit: limit },
 	]);
-	console.log("fg",aggregatedReports);
+	console.log("fg", aggregatedReports);
 	if (!aggregatedReports || aggregatedReports.length === 0) {
 		return [];
 	}
@@ -278,16 +278,16 @@ export const processTemplateReport = async (reportItem, wa_id, text) => {
 		unique_id: reportItem.campaignId,
 	});
 	const template = await Template.findOne({ unique_id: campaign.templateId });
-
+	console.log(template.components);
 	// Create a base chat object using common fields.
 	let chat = buildCommonChatFields(reportItem, wa_id, { text });
 
 	// Process each component and add its information to the single chat object.
 	template.components.forEach((comp) => {
 		if (comp.type === "HEADER") {
-			if ([ "IMAGE", "VIDEO", "DOCUMENT" ].includes(comp.format)) {
+			if (["IMAGE", "VIDEO", "DOCUMENT"].includes(comp.format)) {
 				chat.media_message = {
-					link: comp.example.header_url[0] || "",
+					link: comp.example.header_url || "",
 					caption: comp.text || "",
 				};
 				chat.media_type = comp.format.toLowerCase();
