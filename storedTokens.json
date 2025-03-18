@@ -650,5 +650,10 @@
   "8eb23abd66fd29e378304ecc1e2c89bbcd4d048cb667c4b75bf9f1b93ca65f07": {
     "expiresAt": 1742282206878,
     "userId": "db2426e80f"
+  },
+  "bef802b335be6cbf7c9e75e8ab057f2dde93eeb675f8b2698ba4a5f83d0cafe5": {
+    "expiresAt": 1742283774695,
+    "userId": "db2426e80f",
+    "permission": true
   }
 }

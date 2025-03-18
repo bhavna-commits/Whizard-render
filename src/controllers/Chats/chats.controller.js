@@ -49,7 +49,6 @@ export const getSetToken = async (req, res) => {
 		const addedUser = req.session?.addedUser;
 		// Generate token and expiration time
 		const { token, expiresAt } = generateRefreshToken();
-		setToken(token, expiresAt, id, addedUser); // Store the token using the new function
 
 		// Handle permissions and render the appropriate view
 		const permissions = req.session?.addedUser?.permissions;
@@ -64,7 +63,8 @@ export const getSetToken = async (req, res) => {
 			const access = await Permissions.findOne({
 				unique_id: permissions,
 			});
-			if (access.chats.type) {
+			if (access.chats.view) {
+				setToken(token, expiresAt, id, addedUser, access.chats.chat);
 				renderData.access = access;
 				res.render("Chats/chats", renderData);
 			} else {
@@ -74,6 +74,7 @@ export const getSetToken = async (req, res) => {
 			const access = await User.findOne({
 				unique_id: id,
 			});
+			setToken(token, expiresAt, id, addedUser, access.access.chats.chat);
 			renderData.access = access.access;
 			res.render("Chats/chats", renderData);
 		}
@@ -337,7 +338,7 @@ export const getSingleChat = async (req, res, next) => {
 			});
 		}
 
-		const { userId } = tokenData;
+		const { userId, permission } = tokenData;
 
 		const reports = await Report.find({
 			recipientPhone: wa_id,
@@ -353,7 +354,7 @@ export const getSingleChat = async (req, res, next) => {
 		let formattedChats = [];
 
 		for (const reportItem of reports) {
-			let chatsForReport = [];
+			let chatsForReport = "";
 
 			if (reportItem.messageTemplate) {
 				// Process template-based messages.
@@ -364,9 +365,7 @@ export const getSingleChat = async (req, res, next) => {
 				);
 			} else if (reportItem.media && reportItem.media.url) {
 				// Process media-based messages.
-
 				chatsForReport = processMediaReport(reportItem, wa_id);
-				console.log(chatsForReport);
 			} else if (reportItem.textSent || reportItem.replyContent) {
 				// Process simple text messages.
 				chatsForReport = processTextReport(reportItem, wa_id);
@@ -374,7 +373,9 @@ export const getSingleChat = async (req, res, next) => {
 			formattedChats.push(chatsForReport);
 		}
 
-		return res.status(200).json({ success: true, chats: formattedChats });
+		return res
+			.status(200)
+			.json({ success: true, chats: formattedChats, permission });
 	} catch (error) {
 		console.error("Error in getSingleChat:", error);
 		return res

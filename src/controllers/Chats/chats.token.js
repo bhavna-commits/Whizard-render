@@ -27,9 +27,9 @@ export const saveStoredTokens = (tokens) => {
 	}
 };
 
-export const setToken = (token, expiresAt, userId, addedUser) => {
+export const setToken = (token, expiresAt, userId, addedUser, permission) => {
 	const tokens = getStoredTokens();
-	tokens[token] = { expiresAt, userId, addedUser };
+	tokens[token] = { expiresAt, userId, addedUser, permission };
 	saveStoredTokens(tokens);
 };
 
