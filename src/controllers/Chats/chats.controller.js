@@ -597,7 +597,7 @@ export const sendMessages = async (req, res, next) => {
 			recipientPhone: to,
 			status: "SENT",
 			messageId: data.messages[0].id,
-			messageTemplate: messageText,
+			textSent: messageText,
 			media: { url: tempFilePath, fileName, caption },
 		});
 		await report.save();
