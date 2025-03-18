@@ -136,7 +136,7 @@ export const getUsers = async (req, res, next) => {
 		}
 
 		res.status(200).json({
-			msg: formattedReports,
+			msg: formattedReports.reverse(),
 			success: true,
 			phoneNumber,
 		});
@@ -184,7 +184,7 @@ export const getMoreUsers = async (req, res, next) => {
 		);
 
 		res.status(200).json({
-			msg: formattedReports,
+			msg: formattedReports.reverse(),
 			success: true,
 		});
 	} catch (error) {
@@ -225,7 +225,7 @@ export const getMoreChats = async (req, res, next) => {
 			useradmin: userId,
 			recipientPhone: wa_id,
 		})
-			.sort({ updatedAt: -1 }) // Sort by updatedAt (latest first)
+			.sort({ createdAt: -1 }) // Sort by updatedAt (latest first)
 			.skip(skip) // Skip records for pagination
 			.limit(limit) // Limit to the next batch (10 reports)
 			.select("contactName recipientPhone status replyContent updatedAt"); // Select necessary fields
@@ -250,7 +250,7 @@ export const getMoreChats = async (req, res, next) => {
 		});
 
 		// Send the formatted reports as JSON for pagination or infinite scroll
-		res.status(200).json({ chats: formattedReports, success: true });
+		res.status(200).json({ chats: formattedReports.reverse(), success: true });
 	} catch (error) {
 		console.error("Error in getMoreReports:", error);
 		res.status(500).json({ message: error, success: false });
@@ -375,7 +375,7 @@ export const getSingleChat = async (req, res, next) => {
 
 		return res
 			.status(200)
-			.json({ success: true, chats: formattedChats, permission });
+			.json({ success: true, chats: formattedChats.reverse(), permission });
 	} catch (error) {
 		console.error("Error in getSingleChat:", error);
 		return res
