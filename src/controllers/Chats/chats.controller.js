@@ -578,7 +578,7 @@ export const sendMessages = async (req, res, next) => {
 		// 		url = res.url;
 		// 	}
 		// }
-
+		window.flutter_inappwebview.callHandler("closeWebView", "success");	
 		// Respond with success
 		res.status(200).json({
 			message: "Messages sent successfully",
