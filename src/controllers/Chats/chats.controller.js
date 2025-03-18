@@ -364,10 +364,12 @@ export const getSingleChat = async (req, res, next) => {
 				);
 			} else if (reportItem.media && reportItem.media.url) {
 				// Process media-based messages.
-				chatsForReport.push(processMediaReport(reportItem, wa_id));
+
+				chatsForReport = processMediaReport(reportItem, wa_id);
+				console.log(chatsForReport);
 			} else if (reportItem.textSent || reportItem.replyContent) {
 				// Process simple text messages.
-				chatsForReport.push(processTextReport(reportItem, wa_id));
+				chatsForReport = processTextReport(reportItem, wa_id);
 			}
 			formattedChats.push(chatsForReport);
 		}
@@ -485,7 +487,7 @@ export const sendMessages = async (req, res, next) => {
 
 		// If media file is included in the bytecode, handle the decoding
 		// Handle media files
-		let tempFilePath = '';
+		let tempFilePath = "";
 		if (mediaMessages && fileByteCode) {
 			const tempDir = path.join(__dirname, "uploads", userId);
 			tempFilePath = path.join(tempDir, fileName);
