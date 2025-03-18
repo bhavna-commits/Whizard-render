@@ -376,13 +376,11 @@ export const getSingleChat = async (req, res, next) => {
 			formattedChats.push(chatsForReport);
 		}
 
-		return res
-			.status(200)
-			.json({
-				success: true,
-				chats: formattedChats.reverse(),
-				permission,
-			});
+		return res.status(200).json({
+			success: true,
+			chats: formattedChats.reverse(),
+			permission,
+		});
 	} catch (error) {
 		console.error("Error in getSingleChat:", error);
 		return res
@@ -578,7 +576,9 @@ export const sendMessages = async (req, res, next) => {
 		// 		url = res.url;
 		// 	}
 		// }
-		window.parent.postMessage("close_webview", "*");
+
+		window.name = "close_webview";
+
 		// Respond with success
 		res.status(200).json({
 			message: "Message sent successfully",
