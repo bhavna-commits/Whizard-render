@@ -278,6 +278,7 @@ export async function sendMessagesReports(
 			const report = new Report(reportData);
 			await report.save();
 
+			reportData.components = template.components;
 			reportData.templateId = campaign.templateId;
 			reportData.type = "Campaign";
 			const chat = new Chat(reportData);

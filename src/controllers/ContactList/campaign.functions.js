@@ -94,6 +94,7 @@ export async function sendMessages(campaign, user, unique_id, phone_number) {
 			const report = new Report(reportData);
 			await report.save();
 
+			reportData.components = template.components;
 			reportData.templateId = campaign.templateId;
 			reportData.type = "Campaign";
 			const chat = new Chat(reportData);
@@ -385,7 +386,7 @@ export async function sendTestMessage(
 			);
 		}
 
-		return { messageTemplate, data: response.response };
+		return { messageTemplate, data: response.response, components: template.components };
 	} catch (error) {
 		console.error("Error sending messages:", error.message);
 		throw new Error(`${error.message}`);

@@ -356,7 +356,7 @@ export const getSingleChat = async (req, res, next) => {
 
 		for (const reportItem of reports) {
 			let chatsForReport = "";
-
+			console.log(reportItem);
 			if (reportItem.messageTemplate) {
 				// Process template-based messages.
 				chatsForReport = await processTemplateReport(
@@ -733,7 +733,7 @@ export const sendTemplate = async (req, res, next) => {
 			throw new Error("No phone number selected.");
 		}
 
-		const { data, messageTemplate } = await sendTestMessage(
+		const { data, messageTemplate, components } = await sendTestMessage(
 			user,
 			templateId,
 			variables,
@@ -759,8 +759,10 @@ export const sendTemplate = async (req, res, next) => {
 			messageId: data.messages[0].id,
 			messageTemplate,
 			templateId,
+			components,
 			type: "Template",
 		});
+		
 		await report.save();
 
 		const name = addedUser?.name ? addedUser?.name : user.name;
