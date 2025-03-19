@@ -4,6 +4,7 @@ import Template from "../../models/templates.model.js";
 import Contacts from "../../models/contacts.model.js";
 import Campaign from "../../models/campaign.model.js";
 import Report from "../../models/report.model.js";
+import Chat from "../../models/chats.model.js";
 
 dotenv.config();
 
@@ -92,6 +93,10 @@ export async function sendMessages(campaign, user, unique_id, phone_number) {
 
 			const report = new Report(reportData);
 			await report.save();
+
+			reportData.templateId = campaign.templateId;
+			const chat = new Chat(reportData);
+			await chat.save();			
 		}
 
 		// Update the campaign status to 'SENT' after messages are sent

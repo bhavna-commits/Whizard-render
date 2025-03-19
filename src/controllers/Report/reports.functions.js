@@ -16,6 +16,7 @@ import Contacts from "../../models/contacts.model.js";
 import Campaign from "../../models/campaign.model.js";
 import Report from "../../models/report.model.js";
 import User from "../../models/user.model.js";
+import Chat from "../../models/chats.model.js";
 import { generateUniqueId } from "../../utils/otpGenerator.js";
 import { sendMessages } from "../ContactList/campaign.functions.js";
 
@@ -276,6 +277,10 @@ export async function sendMessagesReports(
 
 			const report = new Report(reportData);
 			await report.save();
+
+			reportData.templateId = campaign.templateId;
+			const chat = new Chat(reportData);
+			await chat.save();
 		}
 
 		// Update the campaign status to 'SENT' after messages are sent

@@ -408,7 +408,9 @@ class TemplateManager {
 				status.classList.add("text-green-500");
 				status.classList.remove("hidden");
 				status.textContent = result.message;
-				location.href = "https://whizard-chat.web.app/#/homeR";
+				setTimeout(() => {
+					location.href = "https://whizard-chat.web.app/#/homeR";
+				}, 1000);
 			} else {
 				status.classList.add("text-red-500");
 				status.classList.remove("hidden");

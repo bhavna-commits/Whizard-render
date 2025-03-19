@@ -4,7 +4,7 @@ import path from "path";
 import { Buffer } from "buffer";
 import dotenv from "dotenv";
 import User from "../../models/user.model.js";
-import Report from "../../models/report.model.js";
+import Report from "../../models/chats.model.js";
 import Campaign from "../../models/campaign.model.js";
 import Template from "../../models/templates.model.js";
 import Contacts from "../../models/contacts.model.js";
@@ -326,7 +326,7 @@ export const getSingleChat = async (req, res, next) => {
 		if (!token || !wa_id)
 			return res.status(400).json({
 				success: false,
-				message: "All values not provided",
+				message: "All values are not provided",
 			});
 
 		if (!isString(token, wa_id)) return next();
@@ -458,7 +458,6 @@ export const searchUsers = async (req, res, next) => {
 
 export const sendMessages = async (req, res, next) => {
 	const { messages, token, fileByteCode, fileName } = req.body;
-	console.log(messages);
 	// Check for required fields
 	if (!token || !messages) {
 		return res.status(400).json({
@@ -567,15 +566,6 @@ export const sendMessages = async (req, res, next) => {
 
 		// Send the message using Meta API
 		const data = await sendMessage(accessToken, from, payload);
-
-		// let url = "";
-
-		// if (mediaId) {
-		// 	const res = await getMediaUrl(accessToken, mediaId);
-		// 	if (res.success) {
-		// 		url = res.url;
-		// 	}
-		// }
 
 		// Respond with success
 		res.status(200).json({
@@ -720,7 +710,6 @@ export const sendTemplate = async (req, res, next) => {
 
 		if (!isString(templateId, contactListId)) return next();
 
-		console.log("contact list :", contactListId);
 		variables =
 			typeof variables === "string" ? JSON.parse(variables) : variables;
 
@@ -780,60 +769,9 @@ export const sendTemplate = async (req, res, next) => {
 			unique_id: generateUniqueId(),
 			name,
 			actions: "Send",
-			details: `Sent message template named from chats to: ${contactList[0]?.contactName}`,
+			details: `Sent message template from chats to: ${contactList[0]?.contactName}`,
 		});
-		// if (!schedule) {
-		// 	await sendMessages(
-		// 		newCampaign,
-		// 		user,
-		// 		generateUniqueId(),
-		// 		phone_number,
-		// 	);
-
-		// 	const time = Date.now() + 15 * 60 * 1000;
-		// 	const reportTime = new Date(time);
-		// 	agenda.schedule(reportTime, "send campaign report email", {
-		// 		campaignId: newCampaign.unique_id,
-		// 		userId: newCampaign.useradmin,
-		// 	});
-
-		// 	await ActivityLogs.create({
-		// 		useradmin: id,
-		// 		unique_id: generateUniqueId(),
-		// 		name: req.session?.user?.name
-		// 			? req.session?.user?.name
-		// 			: req.session?.addedUser?.name,
-		// 		actions: "Send",
-		// 		details: `Sent campaign named: ${name}`,
-		// 	});
-		// } else {
-		// 	newCampaign.scheduledAt = Number(schedule) * 1000;
-		// 	newCampaign.status = "SCHEDULED";
-
-		// 	await sendCampaignScheduledEmail(
-		// 		user.email,
-		// 		name,
-		// 		newCampaign.scheduledAt,
-		// 	);
-
-		// 	// const time = Date.now();
-		// 	// const reportTime = new Date(time);
-		// 	// agenda.schedule(reportTime, "send campaign report email", {
-		// 	// 	campaignId: newCampaign.unique_id,
-		// 	// 	userId: newCampaign.useradmin,
-		// 	// });
-
-		// 	await ActivityLogs.create({
-		// 		useradmin: id,
-		// 		unique_id: generateUniqueId(),
-		// 		name: req.session?.user?.name
-		// 			? req.session?.user?.name
-		// 			: req.session?.addedUser?.name,
-		// 		actions: "Send",
-		// 		details: `Scheduled new campaign named: ${name}`,
-		// 	});
-		// }
-		// console.log(report);
+		
 		res.status(201).json({
 			message: "Template sent successfully",
 			success: true
