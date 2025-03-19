@@ -16,7 +16,6 @@ const ChatsSchema = new mongoose.Schema(
 			type: String,
 			ref: "template",
 			required: false,
-			index: true,
 		},
 		components: [],
 		contactName: { type: String, required: true },

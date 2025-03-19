@@ -274,8 +274,6 @@ export const getRefreshToken = async (req, res, next) => {
 
 		const tokenData = getToken(oldToken);
 
-		// console.log(tokenData);
-
 		if (!tokenData) {
 			return res
 				.status(400)
