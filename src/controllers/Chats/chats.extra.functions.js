@@ -278,7 +278,7 @@ export const processTemplateReport = async (reportItem, wa_id, text) => {
 	const template = await Template.findOne({
 		unique_id: reportItem.templateId,
 	});
-	console.log(template.components);
+
 	// Create a base chat object using common fields.
 	let chat = buildCommonChatFields(reportItem, wa_id, { text });
 

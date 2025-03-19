@@ -98,7 +98,7 @@ export async function sendMessages(campaign, user, unique_id, phone_number) {
 			reportData.templateId = campaign.templateId;
 			reportData.type = "Campaign";
 			const chat = new Chat(reportData);
-			await chat.save();			
+			await chat.save();
 		}
 
 		// Update the campaign status to 'SENT' after messages are sent
@@ -267,21 +267,23 @@ export async function sendMessageThroughWhatsApp(
 }
 
 export function getMediaPreviewFromTemplate(template) {
-  const headerComponent = template.components.find(c => c.type === "HEADER");
-  if (
-    headerComponent &&
-    headerComponent.example &&
-    headerComponent.example.header_url
-  ) {
-    // If header_url is an array, use the first element; otherwise, assume it's a string.
-    const headerUrl = Array.isArray(headerComponent.example.header_url)
-      ? headerComponent.example.header_url[0]
-      : headerComponent.example.header_url;
-    // Extract the file name from the URL (everything after the last '/')
-    const fileName = headerUrl.split('/').pop();
-    return { url: headerUrl, fileName };
-  }
-  return null;
+	const headerComponent = template.components.find(
+		(c) => c.type === "HEADER",
+	);
+	if (
+		headerComponent &&
+		headerComponent.example &&
+		headerComponent.example.header_url
+	) {
+		// If header_url is an array, use the first element; otherwise, assume it's a string.
+		const headerUrl = Array.isArray(headerComponent.example.header_url)
+			? headerComponent.example.header_url[0]
+			: headerComponent.example.header_url;
+		// Extract the file name from the URL (everything after the last '/')
+		const fileName = headerUrl.split("/").pop();
+		return { url: headerUrl, fileName };
+	}
+	return null;
 }
 
 export function generatePreviewMessage(template, message) {
@@ -293,7 +295,9 @@ export function generatePreviewMessage(template, message) {
 			(c) => c.type === "HEADER",
 		)?.text;
 
-		previewMessage += `${headerText}\n`;
+		if (headerText) {
+			previewMessage += `${headerText}\n`;
+		}
 
 		// Process Body component
 
@@ -386,7 +390,11 @@ export async function sendTestMessage(
 			);
 		}
 
-		return { messageTemplate, data: response.response, components: template.components };
+		return {
+			messageTemplate,
+			data: response.response,
+			components: template.components,
+		};
 	} catch (error) {
 		console.error("Error sending messages:", error.message);
 		throw new Error(`${error.message}`);
