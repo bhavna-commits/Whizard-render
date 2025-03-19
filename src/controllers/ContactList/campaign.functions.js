@@ -95,6 +95,7 @@ export async function sendMessages(campaign, user, unique_id, phone_number) {
 			await report.save();
 
 			reportData.templateId = campaign.templateId;
+			reportData.type = "Campaign";
 			const chat = new Chat(reportData);
 			await chat.save();			
 		}

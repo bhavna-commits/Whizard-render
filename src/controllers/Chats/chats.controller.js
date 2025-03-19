@@ -587,6 +587,7 @@ export const sendMessages = async (req, res, next) => {
 			messageId: data.messages[0].id,
 			textSent: messageText,
 			media: { url: tempFilePath, fileName, caption },
+			type: "Chat",
 		});
 		await report.save();
 
@@ -759,6 +760,8 @@ export const sendTemplate = async (req, res, next) => {
 			status: "SENT",
 			messageId: data.messages[0].id,
 			messageTemplate,
+			templateId,
+			type: "Template",
 		});
 		await report.save();
 
@@ -771,10 +774,10 @@ export const sendTemplate = async (req, res, next) => {
 			actions: "Send",
 			details: `Sent message template from chats to: ${contactList[0]?.contactName}`,
 		});
-		
+
 		res.status(201).json({
 			message: "Template sent successfully",
-			success: true
+			success: true,
 		});
 	} catch (error) {
 		console.error("Error creating campaign:", error.message);

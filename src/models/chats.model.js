@@ -15,7 +15,7 @@ const ChatsSchema = new mongoose.Schema(
 		templateId: {
 			type: String,
 			ref: "template",
-			required: true,
+			required: false,
 			index: true,
 		},
 		components: [],
@@ -50,7 +50,11 @@ const ChatsSchema = new mongoose.Schema(
 			fileName: { type: String, default: "" },
 			caption: { type: String, default: "" },
 		},
-		type: { type: String, enum: ["Campaign", "Template", "Chat"], required: true },
+		type: {
+			type: String,
+			enum: ["Campaign", "Template", "Chat"],
+			required: true,
+		},
 	},
 	{
 		timestamps: false,

@@ -279,6 +279,7 @@ export async function sendMessagesReports(
 			await report.save();
 
 			reportData.templateId = campaign.templateId;
+			reportData.type = "Campaign";
 			const chat = new Chat(reportData);
 			await chat.save();
 		}
