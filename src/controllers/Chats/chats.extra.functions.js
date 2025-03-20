@@ -1,4 +1,4 @@
-import Report from "../../models/report.model.js";
+import Report from "../../models/chats.model.js";
 import Campaign from "../../models/campaign.model.js";
 import Template from "../../models/templates.model.js";
 
@@ -95,7 +95,8 @@ export const fetchAndFormatReports = async (
 			Date.now() - report.updatedAt < 24 * 60 * 60 * 1000; // less than 24 hours
 
 		return {
-			lastmessage: report.replyContent || "No recent reply",
+			lastmessage:
+				report.replyContent || report.textSent || "No recent reply",
 			wa_id: report.recipientPhone,
 			status: isReplyRecent ? 0 : 1,
 			name: report.contactName,
@@ -274,7 +275,6 @@ export const buildCommonChatFields = (reportItem, wa_id, overrides = {}) => {
 };
 
 export const processTemplateReport = async (reportItem, wa_id, text) => {
-	
 	const template = await Template.findOne({
 		unique_id: reportItem.templateId,
 	});

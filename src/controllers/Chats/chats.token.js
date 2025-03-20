@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import crypto from "crypto";
 import { isString } from "../../middleWares/sanitiseInput.js";
+import { generateUniqueId } from "../../utils/otpGenerator.js";
 
 const __dirname = path.resolve();
 
