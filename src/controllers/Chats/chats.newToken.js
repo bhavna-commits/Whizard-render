@@ -112,22 +112,23 @@ export function generateToken() {
 export async function getUserIdFromToken(req, res, next) {
 	const token = req.body?.token;
 	if (!token) {
-		throw new Error("Token not provided");
+		throw "Token not provided";
 	}
 	if (typeof token !== "string") {
-		throw new Error("Token must be a string");
+		throw "Token must be a string";
 	}
 	// Decode the token; assuming a timestamp length of 13 digits.
 	const { timestamp, baseHash } = decodeToken(token, 13);
 	// Find the token record by matching the baseHash (stored in DB as accessToken).
-	const tokenRecord = await Token.findOne({ accessToken: baseHash });
+    const tokenRecord = await Token.findOne({ accessToken: baseHash });
+
 	if (!tokenRecord) {
-		throw new Error("Token not found");
+		throw "Token not found";
 	}
 	// Check token expiration: we assume token lifetime is defined in TOKEN_LIFETIME.
 	const decodedTimestamp = Number(timestamp);
 	if (Date.now() > decodedTimestamp + TOKEN_LIFETIME) {
-		throw new Error("Token has expired");
+		throw "Token has expired";
 	}
 	// Generate a new token with a fresh timestamp using the same baseHash.
 	const newTimestampStr = Date.now().toString();
@@ -193,7 +194,6 @@ export async function createTokenRecord(userId, permission, addedUser) {
 	return newTokenRecord;
 }
 
-
 /**
  * Refreshes the token by decoding its embedded timestamp, adding 30 seconds,
  * generating a new token with the updated timestamp, and updating the token record.
@@ -205,7 +205,7 @@ export async function createTokenRecord(userId, permission, addedUser) {
 export async function refreshToken(oldToken) {
 	const tokenRecord = await Token.findOne({ accessToken: oldToken });
 	if (!tokenRecord) {
-		throw new Error("Invalid token");
+		throw "Invalid token";
 	}
 
 	// Decode the original timestamp from the token
@@ -213,7 +213,7 @@ export async function refreshToken(oldToken) {
 	const decodedTimestamp = Number(decodedTimestampStr);
 
 	if (Date.now() > tokenRecord.expiresAt) {
-		throw new Error("Token has expired");
+		throw "Token has expired";
 	}
 
 	// Add 30 seconds to the decoded timestamp
@@ -238,7 +238,7 @@ export async function refreshToken(oldToken) {
  */
 export async function validateToken(token) {
 	if (!token || typeof token !== "string") {
-		throw new Error("Invalid token format");
+		throw "Invalid token format";
 	}
 	const tokenRecord = await Token.findOne({ accessToken: token });
 	if (!tokenRecord) {

@@ -149,7 +149,7 @@ export const getUsers = async (req, res, next) => {
 // getMoreUsers – Using token from req.body.token
 export const getMoreUsers = async (req, res, next) => {
 	try {
-		const { userId, token } = getUserIdFromToken(req, res, next);
+		const { userId, token } = await getUserIdFromToken(req, res, next);
 
 		const phoneNumberId = req.body?.phoneNumberId;
 		const skip = parseInt(req.body?.skip, 10) || 0;
@@ -184,7 +184,7 @@ export const getMoreUsers = async (req, res, next) => {
 // getMoreChats – Using token from req.body.token
 export const getMoreChats = async (req, res, next) => {
 	try {
-		const { userId, token } = getUserIdFromToken(req, res, next);
+		const { userId, token } = await getUserIdFromToken(req, res, next);
 
 		const wa_id = req.body?.wa_id;
 		const skip = parseInt(req.body?.skip, 10) || 0;
@@ -241,7 +241,11 @@ export const getMoreChats = async (req, res, next) => {
 // getRefreshToken – Now using token from req.body.token for refresh
 export const getRefreshToken = async (req, res, next) => {
 	try {
-		const { userId, addedUser, token } = getUserIdFromToken(req, res, next);
+		const { userId, addedUser, token } = await getUserIdFromToken(
+			req,
+			res,
+			next,
+		);
 
 		// Determine permissions (this may use additional info from tokenData or user lookup)
 		// In your system, you may retrieve additional user/permission data as needed.
@@ -275,7 +279,7 @@ export const getRefreshToken = async (req, res, next) => {
 // getSingleChat – Using token from req.body.token
 export const getSingleChat = async (req, res, next) => {
 	try {
-		const { userId, permission, token } = getUserIdFromToken(
+		const { userId, permission, token } = await getUserIdFromToken(
 			req,
 			res,
 			next,
@@ -288,14 +292,14 @@ export const getSingleChat = async (req, res, next) => {
 				message: "All values are not provided",
 			});
 		if (!isString(wa_id)) return next();
-			console.log(userId);
+
 		const reports = await Report.find({
 			recipientPhone: wa_id,
 			useradmin: userId,
 		})
 			.sort({ createdAt: -1 })
 			.limit(10)
-			.select("contactName recipientPhone status replyContent updatedAt");;
+			.select("contactName recipientPhone status replyContent updatedAt");
 
 		if (!reports || !reports.length)
 			return res.status(404).json({
@@ -306,16 +310,21 @@ export const getSingleChat = async (req, res, next) => {
 		let formattedChats = [];
 		for (const reportItem of reports) {
 			let chatsForReport = "";
-			if (reportItem.messageTemplate) {
+			if (
+				reportItem.type == "Template" ||
+				reportItem.type == "Campaign"
+			) {
 				chatsForReport = await processTemplateReport(
 					reportItem,
 					wa_id,
 					reportItem.messageTemplate,
 				);
-			} else if (reportItem.media && reportItem.media.url) {
-				chatsForReport = processMediaReport(reportItem, wa_id);
-			} else if (reportItem.textSent || reportItem.replyContent) {
-				chatsForReport = processTextReport(reportItem, wa_id);
+			} else {
+				if (reportItem.media.url) {
+					chatsForReport = processMediaReport(reportItem, wa_id);
+				} else if (reportItem.textSent || reportItem.replyContent) {
+					chatsForReport = processTextReport(reportItem, wa_id);
+				}
 			}
 			formattedChats.push(chatsForReport);
 		}
@@ -338,7 +347,7 @@ export const getSingleChat = async (req, res, next) => {
 // searchUsers – Using token from req.body.token
 export const searchUsers = async (req, res, next) => {
 	try {
-		const { userId, token } = getUserIdFromToken(req, res, next);
+		const { userId, token } = await getUserIdFromToken(req, res, next);
 
 		const search = req.body?.search;
 		const phoneNumberId = req.body?.phoneNumberId;
@@ -395,7 +404,7 @@ export const searchUsers = async (req, res, next) => {
 export const sendMessages = async (req, res, next) => {
 	try {
 		const { messages, fileByteCode, fileName } = req.body;
-		const { userId, token } = getUserIdFromToken(req, res, next);
+		const { userId, token } = await getUserIdFromToken(req, res, next);
 
 		if (!messages) {
 			return res.status(400).json({
@@ -405,7 +414,11 @@ export const sendMessages = async (req, res, next) => {
 		}
 		if (!isObject(messages)) return next();
 
+		console.log(userId, token);
+
 		const user = await User.findOne({ unique_id: userId });
+
+		console.log(user);
 		const accessToken = user.FB_ACCESS_TOKEN;
 
 		const mediaMessages = ["image", "video", "document"].includes(
@@ -518,7 +531,7 @@ export const sendMessages = async (req, res, next) => {
 // getSendTemplate – Using token from req.query.token
 export const getSendTemplate = async (req, res, next) => {
 	try {
-		const { userId } = getUserIdFromToken(req, res, next);
+		const { userId } = await getUserIdFromToken(req, res, next);
 
 		const { wa_id } = req.query;
 		if (!wa_id) {
@@ -609,7 +622,7 @@ export const sendTemplate = async (req, res, next) => {
 		variables =
 			typeof variables === "string" ? JSON.parse(variables) : variables;
 
-		const { userId } = getUserIdFromToken(req, res, next);
+		const { userId } = await getUserIdFromToken(req, res, next);
 
 		let user = await User.findOne({ unique_id: userId });
 
