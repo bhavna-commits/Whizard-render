@@ -275,7 +275,7 @@ export const getRefreshToken = async (req, res, next) => {
 		});
 	} catch (error) {
 		console.error("Error in getRefreshToken:", error);
-		res.status(500).json({ message: error.message, success: false });
+		res.status(500).json({ message: error.message || error, success: false });
 	}
 };
 
