@@ -19,7 +19,7 @@ import { uploadMedia, sendMessage, getMediaUrl } from "./chats.functions.js";
 // 	generateRefreshToken,
 // 	isTokenExpired,
 // } from "./chats.token.js";
-import { createTokenRecord } from "./chats.newToken.js";
+import { createTokenRecord, getUserIdFromToken } from "./chats.newToken.js";
 import {
 	fetchAndFormatReports,
 	createTextPayload,
