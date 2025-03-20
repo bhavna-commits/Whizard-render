@@ -8,7 +8,7 @@ const tokenSchema = new mongoose.Schema(
 		permission: { type: String, required: true },
 		createdAt: { type: Number, default: () => Date.now() },
 		unique_id: { type: String, required: true },
-		lastToken: { type: String, required: true, default: "" },
+		lastToken: { type: String, default: "" },
 		addedUser: { type: String, required: false },
 	},
 	{
