@@ -30,6 +30,7 @@ import {
 	processMediaReport,
 	processTextReport,
 	generateChatTemplate,
+	buildCommonChatFields,
 } from "./chats.extra.functions.js";
 import {
 	isNumber,
