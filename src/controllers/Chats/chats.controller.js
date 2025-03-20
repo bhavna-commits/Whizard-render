@@ -230,11 +230,10 @@ export const getMoreChats = async (req, res, next) => {
 // getRefreshToken – Now using token from req.body.token for refresh
 export const getRefreshToken = async (req, res, next) => {
 	try {
-		const { userId } = getUserIdFromToken(req, res, next);
+		const { userId, addedUser } = getUserIdFromToken(req, res, next);
 
 		// Determine permissions (this may use additional info from tokenData or user lookup)
 		// In your system, you may retrieve additional user/permission data as needed.
-		const addedUser = tokenData.addedUser;
 		let permissionValue, accessData;
 
 		if (tokenData.addedUser && tokenData.addedUser.permissions) {
