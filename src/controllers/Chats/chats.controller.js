@@ -95,22 +95,16 @@ export const getSetToken = async (req, res) => {
 	}
 };
 
-// Helper function: Extract user ID from session (either req.session.user or req.session.addedUser)
-const getUserIdFromSession = (req) =>
-  req.session?.user?.id || req.session?.addedUser?.owner;
-
 // -------------------------------------------------------------------------
-// getUsers – Only token validation changes
+// getUsers – Now using token validation to get the userId
 export const getUsers = async (req, res, next) => {
 	try {
-		// Use session instead of req.body.token
-		const userId = getUserIdFromSession(req);
-		if (!userId) {
-			return res.status(400).json({ message: "User not authenticated" });
-		}
+		const { userId } = getUserIdFromToken(req, res, next);
 
 		const user = await User.findOne({ unique_id: userId });
-		const phoneNumber = user.FB_PHONE_NUMBERS.find((d) => d.selected == true);
+		const phoneNumber = user.FB_PHONE_NUMBERS.find(
+			(d) => d.selected == true,
+		);
 
 		if (!phoneNumber) {
 			return res.status(400).json({
@@ -143,23 +137,20 @@ export const getUsers = async (req, res, next) => {
 };
 
 // -------------------------------------------------------------------------
-// getMoreUsers – Only token validation changes
+// getMoreUsers – Using token from req.body.token
 export const getMoreUsers = async (req, res, next) => {
 	try {
-		// Use session to get the user ID
-		const userId = getUserIdFromSession(req);
-		if (!userId) {
-			return res.status(400).json({ message: "User not authenticated" });
-		}
+		const { userId } = getUserIdFromToken(req, res, next);
 
 		const phoneNumberId = req.body?.phoneNumberId;
 		const skip = parseInt(req.body?.skip, 10) || 0;
 
 		if (!phoneNumberId) {
-			return res.status(400).json({ message: "Phone number ID not provided" });
+			return res
+				.status(400)
+				.json({ message: "Phone number ID not provided" });
 		}
 
-		// Keep your existing validation for skip & phoneNumberId
 		if (!isString(phoneNumberId)) return next();
 		if (!isNumber(skip)) return next();
 
@@ -180,27 +171,24 @@ export const getMoreUsers = async (req, res, next) => {
 };
 
 // -------------------------------------------------------------------------
-// getMoreChats – Only token validation changes
+// getMoreChats – Using token from req.body.token
 export const getMoreChats = async (req, res, next) => {
 	try {
-		// Get userId from session
-		const userId = getUserIdFromSession(req);
-		if (!userId) {
-			return res.status(400).json({ message: "User not authenticated" });
-		}
+		const { userId } = getUserIdFromToken(req, res, next);
 
 		const wa_id = req.body?.wa_id;
 		const skip = parseInt(req.body?.skip, 10) || 0;
 		const limit = 10;
 
 		if (!wa_id) {
-			return res.status(400).json({ message: "Token not provided or skip not provided" });
+			return res
+				.status(400)
+				.json({ message: "wa_id not provided or skip not provided" });
 		}
 
 		if (!isString(wa_id)) return next();
 		if (!isNumber(skip)) return next();
 
-		// Fetch reports for pagination
 		const reports = await Report.find({
 			useradmin: userId,
 			recipientPhone: wa_id,
@@ -239,22 +227,20 @@ export const getMoreChats = async (req, res, next) => {
 };
 
 // -------------------------------------------------------------------------
-// getRefreshToken – Refactored to use session; the rest remains unchanged.
+// getRefreshToken – Now using token from req.body.token for refresh
 export const getRefreshToken = async (req, res, next) => {
 	try {
-		const userId = getUserIdFromSession(req);
-		if (!userId) {
-			return res
-				.status(400)
-				.json({ message: "User not authenticated", success: false });
-		}
+		const { userId } = getUserIdFromToken(req, res, next);
 
-		// Determine permissions using session data
-		const addedUser = req.session?.addedUser;
+		// Determine permissions (this may use additional info from tokenData or user lookup)
+		// In your system, you may retrieve additional user/permission data as needed.
+		const addedUser = tokenData.addedUser;
 		let permissionValue, accessData;
 
-		if (req.session?.addedUser?.permissions) {
-			accessData = await Permissions.findOne({ unique_id: req.session.addedUser.permissions });
+		if (tokenData.addedUser && tokenData.addedUser.permissions) {
+			accessData = await Permissions.findOne({
+				unique_id: tokenData.addedUser.permissions,
+			});
 			if (!accessData || !accessData.chats?.view) {
 				return res.render("errors/notAllowed");
 			}
@@ -265,7 +251,11 @@ export const getRefreshToken = async (req, res, next) => {
 		}
 
 		// Create a new token record in the database
-		const tokenRecord = await createTokenRecord(userId, permissionValue, addedUser);
+		const tokenRecord = await createTokenRecord(
+			userId,
+			permissionValue,
+			addedUser,
+		);
 
 		res.status(200).json({
 			message: "Token refreshed successfully",
@@ -280,16 +270,10 @@ export const getRefreshToken = async (req, res, next) => {
 };
 
 // -------------------------------------------------------------------------
-// getSingleChat – Only token validation changes
+// getSingleChat – Using token from req.body.token
 export const getSingleChat = async (req, res, next) => {
 	try {
-		const userId = getUserIdFromSession(req);
-		if (!userId) {
-			return res.status(400).json({
-				success: false,
-				message: "User not authenticated",
-			});
-		}
+		const { userId, permission } = getUserIdFromToken(req, res, next);
 
 		const { wa_id } = req.body;
 		if (!wa_id)
@@ -330,7 +314,7 @@ export const getSingleChat = async (req, res, next) => {
 		return res.status(200).json({
 			success: true,
 			chats: formattedChats.reverse(),
-			permission: req.session?.addedUser?.permissions || null,
+			permission,
 		});
 	} catch (error) {
 		console.error("Error in getSingleChat:", error);
@@ -341,22 +325,16 @@ export const getSingleChat = async (req, res, next) => {
 };
 
 // -------------------------------------------------------------------------
-// searchUsers – Only token validation changes
+// searchUsers – Using token from req.body.token
 export const searchUsers = async (req, res, next) => {
 	try {
-		const userId = getUserIdFromSession(req);
-		if (!userId) {
-			return res.status(400).json({
-				message: "User not authenticated",
-				success: false,
-			});
-		}
+		const { userId } = getUserIdFromToken(req, res, next);
 
 		const search = req.body?.search;
 		const phoneNumberId = req.body?.phoneNumberId;
 		if (!search) {
 			return res.status(400).json({
-				message: "Token not provided or search is empty",
+				message: "Search term not provided",
 				success: false,
 			});
 		}
@@ -403,15 +381,16 @@ export const searchUsers = async (req, res, next) => {
 };
 
 // -------------------------------------------------------------------------
-// sendMessages – Only token validation changes
+// sendMessages – Using token from req.body.token
 export const sendMessages = async (req, res, next) => {
 	const { messages, fileByteCode, fileName } = req.body;
-	const userId = getUserIdFromSession(req);
-	if (!userId) {
+	const token = req.body?.token;
+	if (!token) {
 		return res
 			.status(400)
-			.json({ message: "User not authenticated", success: false });
+			.json({ message: "Token not provided", success: false });
 	}
+	if (!isString(token)) return next();
 	if (!messages) {
 		return res.status(400).json({
 			message: "All data not provided",
@@ -419,6 +398,8 @@ export const sendMessages = async (req, res, next) => {
 		});
 	}
 	if (!isObject(messages)) return next();
+
+	const { userId } = getUserIdFromToken(req, res, next);
 
 	try {
 		const user = await User.findOne({ unique_id: userId });
@@ -476,7 +457,12 @@ export const sendMessages = async (req, res, next) => {
 				} else if (mediatype === "video") {
 					payload = createVideoPayload(to, mediaId, caption);
 				} else {
-					payload = createDocumentPayload(to, mediaId, fileName, caption);
+					payload = createDocumentPayload(
+						to,
+						mediaId,
+						fileName,
+						caption,
+					);
 				}
 				break;
 			default:
@@ -506,9 +492,7 @@ export const sendMessages = async (req, res, next) => {
 		});
 		await report.save();
 
-		const letName = req.session?.addedUser?.name
-			? req.session.addedUser.name
-			: user.name;
+		const letName = addedUser?.name ? addedUser.name : user.name;
 
 		await ActivityLogs.create({
 			useradmin: userId,
@@ -527,13 +511,11 @@ export const sendMessages = async (req, res, next) => {
 };
 
 // -------------------------------------------------------------------------
-// getSendTemplate – Only token validation changes
+// getSendTemplate – Using token from req.query.token
 export const getSendTemplate = async (req, res, next) => {
 	try {
-		const userId = getUserIdFromSession(req);
-		if (!userId) {
-			return res.status(400).json({ message: "User not authenticated" });
-		}
+		const { userId } = getUserIdFromToken(req, res, next);
+
 		const { wa_id } = req.query;
 		if (!wa_id) {
 			return res.status(400).json({ message: "All data not provided" });
@@ -562,6 +544,8 @@ export const getSendTemplate = async (req, res, next) => {
 // getAllTemplates – Unchanged (except token not used)
 export const getAllTemplates = async (req, res, next) => {
 	try {
+		const { userId } = getUserIdFromToken(req, res, next);
+
 		const id = req.params?.id;
 		if (!isString(id)) return next();
 		const updatedTemplates = await Template.find({
@@ -585,6 +569,8 @@ export const getAllTemplates = async (req, res, next) => {
 // getSingleTemplate – Unchanged (except token not used)
 export const getSingleTemplate = async (req, res, next) => {
 	try {
+		const { userId } = getUserIdFromToken(req, res, next);
+
 		const id = req.params?.id;
 		if (!isString(id)) return next();
 		const updatedTemplate = await Template.findOne({
@@ -602,7 +588,7 @@ export const getSingleTemplate = async (req, res, next) => {
 };
 
 // -------------------------------------------------------------------------
-// sendTemplate – Only token validation changes
+// sendTemplate – Using token from req.body.token
 export const sendTemplate = async (req, res, next) => {
 	try {
 		let { templateId, contactListId, variables, contactList } = req.body;
@@ -618,16 +604,13 @@ export const sendTemplate = async (req, res, next) => {
 		variables =
 			typeof variables === "string" ? JSON.parse(variables) : variables;
 
-		const userId = getUserIdFromSession(req);
-		if (!userId) {
-			return res.status(400).json({ message: "User not authenticated" });
-		}
+		const { userId } = getUserIdFromToken(req, res, next);
 
-		const addedUser = req.session?.addedUser;
 		let user = await User.findOne({ unique_id: userId });
 
-		const phone_number = user.FB_PHONE_NUMBERS.find((n) => n.selected === true)
-			?.phone_number_id;
+		const phone_number = user.FB_PHONE_NUMBERS.find(
+			(n) => n.selected === true,
+		)?.phone_number_id;
 
 		if (!phone_number) {
 			throw new Error("No phone number selected.");
@@ -665,9 +648,7 @@ export const sendTemplate = async (req, res, next) => {
 
 		await report.save();
 
-		const name = req.session?.addedUser?.name
-			? req.session.addedUser.name
-			: user.name;
+		const name = addedUser?.name ? addedUser.name : user.name;
 
 		await ActivityLogs.create({
 			useradmin: userId,
@@ -688,7 +669,6 @@ export const sendTemplate = async (req, res, next) => {
 		});
 	}
 };
-
 
 // OLD (using token from req.body)
 // const token = req.body?.token;
@@ -1422,7 +1402,7 @@ export const sendTemplate = async (req, res, next) => {
 // 			components,
 // 			type: "Template",
 // 		});
-		
+
 // 		await report.save();
 
 // 		const name = addedUser?.name ? addedUser?.name : user.name;

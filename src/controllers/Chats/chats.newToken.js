@@ -30,6 +30,25 @@ const letterToDigit = {
 	N: "9",
 };
 
+// Helper function to extract userId from the token record.
+export async function getUserIdFromToken(req, res, next) {
+    const token = req.body?.token;
+    if (!token) {
+        res.status(400).json({ message: "Token not provided" });
+        return;
+    }
+    if (!isString(token)) return next();
+    try {
+        const tokenData = await validateToken(token);
+        return tokenData.userId;
+    } catch (err) {
+        res.status(400).json({
+            success: false,
+            message: err || "Token error",
+        });
+    }
+}
+
 /**
  * Generates a token by inserting mapped characters from the [timestampStr] into the [baseHash].
  * Insertion is done in reverse order so that each insertion does not affect the positions of earlier ones.
