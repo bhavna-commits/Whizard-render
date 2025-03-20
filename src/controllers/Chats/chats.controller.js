@@ -75,7 +75,7 @@ export const getSetToken = async (req, res) => {
 
 		// Prepare data for rendering
 		const renderData = {
-			token: tokenRecord.accessToken,
+			token: tokenRecord.token,
 			photo: req.session?.addedUser?.photo || req.session?.user?.photo,
 			name: req.session?.addedUser?.name || req.session?.user?.name,
 			color: req.session?.addedUser?.color || req.session?.user?.color,
