@@ -1,6 +1,7 @@
 import crypto from "crypto";
 import Token from "../../models/token.model.js";
 import { generateUniqueId } from "../../utils/otpGenerator.js";
+import { isString } from "../../middleWares/sanitiseInput.js";
 
 // Mapping for digits to letters
 const digitToLetter = {
