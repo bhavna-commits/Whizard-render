@@ -41,7 +41,7 @@ export async function getUserIdFromToken(req, res, next) {
     if (!isString(token)) return next();
     try {
         const tokenData = await validateToken(token);
-        return tokenData.userId;
+        return tokenData;
     } catch (err) {
         res.status(400).json({
             success: false,
