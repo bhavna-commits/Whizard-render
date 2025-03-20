@@ -288,11 +288,14 @@ export const getSingleChat = async (req, res, next) => {
 				message: "All values are not provided",
 			});
 		if (!isString(wa_id)) return next();
-
+			console.log(userId);
 		const reports = await Report.find({
 			recipientPhone: wa_id,
 			useradmin: userId,
-		}).sort({ createdAt: -1 });
+		})
+			.sort({ createdAt: -1 })
+			.limit(10)
+			.select("contactName recipientPhone status replyContent updatedAt");;
 
 		if (!reports || !reports.length)
 			return res.status(404).json({

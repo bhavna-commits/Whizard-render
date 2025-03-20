@@ -151,10 +151,36 @@ export async function getUserIdFromToken(req, res, next) {
  * @returns {Promise<Object>} - The saved token record.
  */
 export async function createTokenRecord(userId, permission, addedUser) {
-	const { baseHash, expiresAt, token } = generateToken();
+	// Try to find an existing token record for this user.
+	let tokenRecord = await Token.findOne({ userId });
+
+	if (tokenRecord) {
+		// If token exists, check whether it is still valid.
+		if (Date.now() <= tokenRecord.expiresAt) {
+			// Optionally, update the token's "converted" token using a fresh timestamp.
+			// Here, we generate a new token string using the same baseHash and current time.
+			const newTimestampStr = Date.now().toString();
+			const newToken = generateTokenFromHash(
+				tokenRecord.accessToken,
+				newTimestampStr,
+			);
+			// Update the expiration if needed (or simply return the existing record).
+			tokenRecord.expiresAt = Date.now() + TOKEN_LIFETIME; // TOKEN_LIFETIME defined elsewhere
+			await tokenRecord.save();
+			tokenRecord.token = newToken;
+			return tokenRecord;
+		} else {
+			// If expired, you can either delete it or overwrite it.
+			// Here, we delete the expired record.
+			await Token.deleteOne({ _id: tokenRecord._id });
+		}
+	}
+
+	// If no valid token record exists, create a new one.
+	const { baseHash, expiresAt, token } = generateToken(); // generateToken() returns { token, expiresAt, baseHash, timestampStr }
 	const unique_id = generateUniqueId();
 	const newTokenRecord = new Token({
-		accessToken: baseHash,
+		accessToken: baseHash, // stored baseHash (what you call accessToken in DB)
 		lastToken: null,
 		userId,
 		expiresAt,
@@ -162,10 +188,11 @@ export async function createTokenRecord(userId, permission, addedUser) {
 		unique_id,
 		addedUser,
 	});
-    await newTokenRecord.save();
-    newTokenRecord.token = token;
+	await newTokenRecord.save();
+	newTokenRecord.token = token; // the token sent to client (baseHash + inserted timestamp)
 	return newTokenRecord;
 }
+
 
 /**
  * Refreshes the token by decoding its embedded timestamp, adding 30 seconds,
