@@ -270,6 +270,7 @@ export const buildCommonChatFields = (reportItem, wa_id, overrides = {}) => {
 		type: "text",
 		recive: reportItem.status === "REPLIED" ? "recive" : "send",
 		status: reportItem.status === "REPLIED" ? "recive" : "send",
+		components: [],
 		...overrides,
 	};
 };

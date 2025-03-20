@@ -105,6 +105,9 @@ export const getUsers = async (req, res, next) => {
 		if (!tokenRecord) return;
 		const { userId, token } = tokenRecord;
 
+		const skip = parseInt(req.body?.skip, 10) || 0;
+		if (!isNumber(skip)) return next();
+
 		// Find the user using the decoded userId.
 		const user = await User.findOne({ unique_id: userId });
 		if (!user) {
@@ -125,8 +128,10 @@ export const getUsers = async (req, res, next) => {
 		const formattedReports = await fetchAndFormatReports(
 			userId,
 			phoneNumber.phone_number_id,
+			skip,
 		);
-		if (formattedReports.length === 0) {
+
+		if (formattedReports.length == 0) {
 			return res.status(404).json({
 				message: "No Reports Found",
 				success: false,
@@ -191,9 +196,7 @@ export const getMoreChats = async (req, res, next) => {
 		const limit = 10;
 
 		if (!wa_id) {
-			return res
-				.status(400)
-				.json({ message: "wa_id not provided or skip not provided" });
+			return res.status(400).json({ message: "All values not provided" });
 		}
 
 		if (!isString(wa_id)) return next();
@@ -205,8 +208,7 @@ export const getMoreChats = async (req, res, next) => {
 		})
 			.sort({ createdAt: -1 })
 			.skip(skip)
-			.limit(limit)
-			.select("contactName recipientPhone status replyContent updatedAt");
+			.limit(limit);
 
 		if (!reports || reports.length === 0) {
 			return res.status(200).json({ chats: [], success: true });
@@ -268,6 +270,7 @@ export const getRefreshToken = async (req, res, next) => {
 			message: "Token refreshed successfully",
 			token: token,
 			success: true,
+			permission: permissionValue,
 		});
 	} catch (error) {
 		console.error("Error in getRefreshToken:", error);
@@ -285,27 +288,28 @@ export const getSingleChat = async (req, res, next) => {
 			next,
 		);
 
-		const { wa_id } = req.body;
-		if (!wa_id)
-			return res.status(400).json({
-				success: false,
-				message: "All values are not provided",
-			});
+		const wa_id = req.body?.wa_id;
+		const skip = parseInt(req.body?.skip, 10) || 0;
+		const limit = 10;
+
+		if (!wa_id) {
+			return res.status(400).json({ message: "All values not provided" });
+		}
+
 		if (!isString(wa_id)) return next();
+		if (!isNumber(skip)) return next();
 
 		const reports = await Report.find({
-			recipientPhone: wa_id,
 			useradmin: userId,
+			recipientPhone: wa_id,
 		})
 			.sort({ createdAt: -1 })
-			.limit(10)
-			.select("contactName recipientPhone status replyContent updatedAt");
+			.skip(skip)
+			.limit(limit);
 
-		if (!reports || !reports.length)
-			return res.status(404).json({
-				success: false,
-				message: "No reports found",
-			});
+		if (!reports || reports.length == 0) {
+			return res.status(200).json({ chats: [], success: true });
+		}
 
 		let formattedChats = [];
 		for (const reportItem of reports) {
@@ -314,13 +318,11 @@ export const getSingleChat = async (req, res, next) => {
 				reportItem.type == "Template" ||
 				reportItem.type == "Campaign"
 			) {
-				chatsForReport = await processTemplateReport(
-					reportItem,
-					wa_id,
-					reportItem.messageTemplate,
-				);
+				chatsForReport = buildCommonChatFields(reportItem, wa_id, {
+					components: reportItem.components,
+				});
 			} else {
-				if (reportItem.media.url) {
+				if (reportItem.media_type) {
 					chatsForReport = processMediaReport(reportItem, wa_id);
 				} else if (reportItem.textSent || reportItem.replyContent) {
 					chatsForReport = processTextReport(reportItem, wa_id);
@@ -414,11 +416,8 @@ export const sendMessages = async (req, res, next) => {
 		}
 		if (!isObject(messages)) return next();
 
-		console.log(userId, token);
-
 		const user = await User.findOne({ unique_id: userId });
 
-		console.log(user);
 		const accessToken = user.FB_ACCESS_TOKEN;
 
 		const mediaMessages = ["image", "video", "document"].includes(
