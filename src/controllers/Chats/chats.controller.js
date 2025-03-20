@@ -99,13 +99,22 @@ export const getSetToken = async (req, res) => {
 // getUsers – Now using token validation to get the userId
 export const getUsers = async (req, res, next) => {
 	try {
-		const { userId, token } = getUserIdFromToken(req, res, next);
+		// Await the token record from our helper.
+		const tokenRecord = await getUserIdFromToken(req, res, next);
+		// If for some reason tokenRecord is not valid, stop processing.
+		if (!tokenRecord) return;
+		const { userId, token } = tokenRecord;
 
+		// Find the user using the decoded userId.
 		const user = await User.findOne({ unique_id: userId });
+		if (!user) {
+			return res
+				.status(404)
+				.json({ message: "User not found", success: false });
+		}
 		const phoneNumber = user.FB_PHONE_NUMBERS.find(
 			(d) => d.selected == true,
 		);
-
 		if (!phoneNumber) {
 			return res.status(400).json({
 				message: "No phone number found for this user",
@@ -117,7 +126,6 @@ export const getUsers = async (req, res, next) => {
 			userId,
 			phoneNumber.phone_number_id,
 		);
-
 		if (formattedReports.length === 0) {
 			return res.status(404).json({
 				message: "No Reports Found",
@@ -129,7 +137,7 @@ export const getUsers = async (req, res, next) => {
 			msg: formattedReports.reverse(),
 			success: true,
 			phoneNumber,
-			token,
+			token, // return the refreshed token
 		});
 	} catch (error) {
 		console.error("Error in getUsers:", error);
@@ -670,7 +678,7 @@ export const sendTemplate = async (req, res, next) => {
 //   return res.status(400).json({ message: "Token not provided" });
 // }
 // if (!isString(token)) return next();
-// let 
+// let
 // try {
 //   tokenData = validateToken(token);
 // } catch (err) {

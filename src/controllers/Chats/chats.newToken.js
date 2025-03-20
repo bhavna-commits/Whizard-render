@@ -5,30 +5,30 @@ import { isString } from "../../middleWares/sanitiseInput.js";
 
 // Mapping for digits to letters
 const digitToLetter = {
-  0: "Z",
-  1: "J",
-  2: "j",
-  3: "K",
-  4: "l",
-  5: "L",
-  6: "m",
-  7: "M",
-  8: "n",
-  9: "N",
+	0: "Z",
+	1: "J",
+	2: "j",
+	3: "K",
+	4: "l",
+	5: "L",
+	6: "m",
+	7: "M",
+	8: "n",
+	9: "N",
 };
 
 // Reverse mapping for decoding letters back to digits
 const letterToDigit = {
-  Z: "0",
-  J: "1",
-  j: "2",
-  K: "3",
-  l: "4",
-  L: "5",
-  m: "6",
-  M: "7",
-  n: "8",
-  N: "9",
+	Z: "0",
+	J: "1",
+	j: "2",
+	K: "3",
+	l: "4",
+	L: "5",
+	m: "6",
+	M: "7",
+	n: "8",
+	N: "9",
 };
 
 // Lifetime for a token (e.g., 2 minutes in milliseconds)
@@ -42,13 +42,15 @@ const TOKEN_LIFETIME = 2 * 60 * 1000;
  * @returns {string} The generated token (to be sent to the client).
  */
 function generateTokenFromHash(baseHash, timestampStr) {
-  const mapped = timestampStr.split("").map(digit => digitToLetter[digit] || digit);
-  let token = baseHash;
-  for (let i = mapped.length - 1; i >= 0; i--) {
-    const pos = 3 + 4 * i;
-    token = token.slice(0, pos) + mapped[i] + token.slice(pos);
-  }
-  return token;
+	const mapped = timestampStr
+		.split("")
+		.map((digit) => digitToLetter[digit] || digit);
+	let token = baseHash;
+	for (let i = mapped.length - 1; i >= 0; i--) {
+		const pos = 3 + 4 * i;
+		token = token.slice(0, pos) + mapped[i] + token.slice(pos);
+	}
+	return token;
 }
 
 /**
@@ -62,19 +64,21 @@ function generateTokenFromHash(baseHash, timestampStr) {
  *    - baseHash: The original base hash (stored as accessToken in DB).
  */
 function decodeToken(token, insertionCount = 13) {
-  const tokenArray = token.split('');
-  const extracted = [];
-  // Remove inserted characters in descending order so indices are preserved.
-  for (let i = insertionCount - 1; i >= 0; i--) {
-    const pos = 3 + 5 * i; // final positions after shifting
-    const removed = tokenArray.splice(pos, 1)[0];
-    extracted.push(removed);
-  }
-  extracted.reverse();
-  const timestampDigits = extracted.map(letter => letterToDigit[letter] || letter);
-  const timestamp = timestampDigits.join('');
-  const baseHashResult = tokenArray.join('');
-  return { timestamp, baseHash: baseHashResult };
+	const tokenArray = token.split("");
+	const extracted = [];
+	// Remove inserted characters in descending order so indices are preserved.
+	for (let i = insertionCount - 1; i >= 0; i--) {
+		const pos = 3 + 5 * i; // final positions after shifting
+		const removed = tokenArray.splice(pos, 1)[0];
+		extracted.push(removed);
+	}
+	extracted.reverse();
+	const timestampDigits = extracted.map(
+		(letter) => letterToDigit[letter] || letter,
+	);
+	const timestamp = timestampDigits.join("");
+	const baseHashResult = tokenArray.join("");
+	return { timestamp, baseHash: baseHashResult };
 }
 
 /**
@@ -84,11 +88,11 @@ function decodeToken(token, insertionCount = 13) {
  * @returns {Object} An object with token, expiresAt, baseHash, and timestampStr.
  */
 export function generateToken() {
-  const baseHash = crypto.randomBytes(32).toString("hex"); // 64-character hex string
-  const timestampStr = Date.now().toString();
-  const token = generateTokenFromHash(baseHash, timestampStr);
-  const expiresAt = Date.now() + TOKEN_LIFETIME;
-  return { token, expiresAt, baseHash, timestampStr };
+	const baseHash = crypto.randomBytes(32).toString("hex"); // 64-character hex string
+	const timestampStr = Date.now().toString();
+	const token = generateTokenFromHash(baseHash, timestampStr);
+	const expiresAt = Date.now() + TOKEN_LIFETIME;
+	return { token, expiresAt, baseHash, timestampStr };
 }
 
 /**
@@ -106,41 +110,37 @@ export function generateToken() {
  * @returns {Promise<Object>} The updated token record (with new converted token in a field).
  */
 export async function getUserIdFromToken(req, res, next) {
-  const token = req.body?.token;
-  if (!token) {
-    res.status(400).json({ message: "Token not provided" });
-    return;
-  }
-  if (typeof token !== "string") return next();
-
-  try {
-    // Decode the token; assuming the original timestamp length is 13 digits.
-    const { timestamp, baseHash } = decodeToken(token, 13);
-    // Find the token record by matching the baseHash (which is stored in DB as accessToken)
-    const tokenRecord = await Token.findOne({ accessToken: baseHash });
-    if (!tokenRecord) {
-      throw new Error("Token not found");
-    }
-    // Check expiration: for example, if the decoded timestamp plus TOKEN_LIFETIME is less than now, token is expired.
-    const decodedTimestamp = Number(timestamp);
-    if (Date.now() > decodedTimestamp + TOKEN_LIFETIME) {
-      throw new Error("Token has expired");
-    }
-    // If valid, generate a new token with the same baseHash but new timestamp.
-    const newTimestampStr = Date.now().toString();
-    const newToken = generateTokenFromHash(tokenRecord.accessToken, newTimestampStr);
-    // Update the token record's expiration.
-    tokenRecord.expiresAt = Date.now() + TOKEN_LIFETIME;
-    await tokenRecord.save();
-    // Add the new token (converted token) to the returned record.
-    tokenRecord.token = newToken;
-    return tokenRecord;
-  } catch (err) {
-    res.status(400).json({
-      success: false,
-      message: err.message || "Token error",
-    });
-  }
+	const token = req.body?.token;
+	if (!token) {
+		throw new Error("Token not provided");
+	}
+	if (typeof token !== "string") {
+		throw new Error("Token must be a string");
+	}
+	// Decode the token; assuming a timestamp length of 13 digits.
+	const { timestamp, baseHash } = decodeToken(token, 13);
+	// Find the token record by matching the baseHash (stored in DB as accessToken).
+	const tokenRecord = await Token.findOne({ accessToken: baseHash });
+	if (!tokenRecord) {
+		throw new Error("Token not found");
+	}
+	// Check token expiration: we assume token lifetime is defined in TOKEN_LIFETIME.
+	const decodedTimestamp = Number(timestamp);
+	if (Date.now() > decodedTimestamp + TOKEN_LIFETIME) {
+		throw new Error("Token has expired");
+	}
+	// Generate a new token with a fresh timestamp using the same baseHash.
+	const newTimestampStr = Date.now().toString();
+	const newToken = generateTokenFromHash(
+		tokenRecord.accessToken,
+		newTimestampStr,
+	);
+	// Update the token record's expiration.
+	tokenRecord.expiresAt = Date.now() + TOKEN_LIFETIME;
+	await tokenRecord.save();
+	// Add the new (converted) token to the record.
+	tokenRecord.token = newToken;
+	return tokenRecord;
 }
 
 /**
@@ -151,10 +151,10 @@ export async function getUserIdFromToken(req, res, next) {
  * @returns {Promise<Object>} - The saved token record.
  */
 export async function createTokenRecord(userId, permission, addedUser) {
-	const { token, expiresAt } = generateToken();
+	const { baseHash, expiresAt, token } = generateToken();
 	const unique_id = generateUniqueId();
 	const newTokenRecord = new Token({
-		accessToken: token,
+		accessToken: baseHash,
 		lastToken: null,
 		userId,
 		expiresAt,
@@ -162,7 +162,8 @@ export async function createTokenRecord(userId, permission, addedUser) {
 		unique_id,
 		addedUser,
 	});
-	await newTokenRecord.save();
+    await newTokenRecord.save();
+    newTokenRecord.token = token;
 	return newTokenRecord;
 }
 
