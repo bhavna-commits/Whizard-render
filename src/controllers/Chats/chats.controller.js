@@ -99,7 +99,7 @@ export const getSetToken = async (req, res) => {
 // getUsers – Now using token validation to get the userId
 export const getUsers = async (req, res, next) => {
 	try {
-		const { userId } = getUserIdFromToken(req, res, next);
+		const { userId, token } = getUserIdFromToken(req, res, next);
 
 		const user = await User.findOne({ unique_id: userId });
 		const phoneNumber = user.FB_PHONE_NUMBERS.find(
@@ -129,6 +129,7 @@ export const getUsers = async (req, res, next) => {
 			msg: formattedReports.reverse(),
 			success: true,
 			phoneNumber,
+			token,
 		});
 	} catch (error) {
 		console.error("Error in getUsers:", error);
@@ -140,7 +141,7 @@ export const getUsers = async (req, res, next) => {
 // getMoreUsers – Using token from req.body.token
 export const getMoreUsers = async (req, res, next) => {
 	try {
-		const { userId } = getUserIdFromToken(req, res, next);
+		const { userId, token } = getUserIdFromToken(req, res, next);
 
 		const phoneNumberId = req.body?.phoneNumberId;
 		const skip = parseInt(req.body?.skip, 10) || 0;
@@ -163,6 +164,7 @@ export const getMoreUsers = async (req, res, next) => {
 		res.status(200).json({
 			msg: formattedReports.reverse(),
 			success: true,
+			token,
 		});
 	} catch (error) {
 		console.error("Error in getMoreUsers:", error);
@@ -174,7 +176,7 @@ export const getMoreUsers = async (req, res, next) => {
 // getMoreChats – Using token from req.body.token
 export const getMoreChats = async (req, res, next) => {
 	try {
-		const { userId } = getUserIdFromToken(req, res, next);
+		const { userId, token } = getUserIdFromToken(req, res, next);
 
 		const wa_id = req.body?.wa_id;
 		const skip = parseInt(req.body?.skip, 10) || 0;
@@ -219,6 +221,7 @@ export const getMoreChats = async (req, res, next) => {
 		res.status(200).json({
 			chats: formattedReports.reverse(),
 			success: true,
+			token,
 		});
 	} catch (error) {
 		console.error("Error in getMoreChats:", error);
@@ -230,15 +233,15 @@ export const getMoreChats = async (req, res, next) => {
 // getRefreshToken – Now using token from req.body.token for refresh
 export const getRefreshToken = async (req, res, next) => {
 	try {
-		const { userId, addedUser } = getUserIdFromToken(req, res, next);
+		const { userId, addedUser, token } = getUserIdFromToken(req, res, next);
 
 		// Determine permissions (this may use additional info from tokenData or user lookup)
 		// In your system, you may retrieve additional user/permission data as needed.
 		let permissionValue, accessData;
 
-		if (tokenData.addedUser && tokenData.addedUser.permissions) {
+		if (addedUser && addedUser.permissions) {
 			accessData = await Permissions.findOne({
-				unique_id: tokenData.addedUser.permissions,
+				unique_id: addedUser.permissions,
 			});
 			if (!accessData || !accessData.chats?.view) {
 				return res.render("errors/notAllowed");
@@ -249,17 +252,9 @@ export const getRefreshToken = async (req, res, next) => {
 			permissionValue = accessData.access.chats.chat;
 		}
 
-		// Create a new token record in the database
-		const tokenRecord = await createTokenRecord(
-			userId,
-			permissionValue,
-			addedUser,
-		);
-
 		res.status(200).json({
 			message: "Token refreshed successfully",
-			token: tokenRecord.accessToken,
-			expiresAt: tokenRecord.expiresAt,
+			token: token,
 			success: true,
 		});
 	} catch (error) {
@@ -272,7 +267,11 @@ export const getRefreshToken = async (req, res, next) => {
 // getSingleChat – Using token from req.body.token
 export const getSingleChat = async (req, res, next) => {
 	try {
-		const { userId, permission } = getUserIdFromToken(req, res, next);
+		const { userId, permission, token } = getUserIdFromToken(
+			req,
+			res,
+			next,
+		);
 
 		const { wa_id } = req.body;
 		if (!wa_id)
@@ -314,6 +313,7 @@ export const getSingleChat = async (req, res, next) => {
 			success: true,
 			chats: formattedChats.reverse(),
 			permission,
+			token,
 		});
 	} catch (error) {
 		console.error("Error in getSingleChat:", error);
@@ -327,7 +327,7 @@ export const getSingleChat = async (req, res, next) => {
 // searchUsers – Using token from req.body.token
 export const searchUsers = async (req, res, next) => {
 	try {
-		const { userId } = getUserIdFromToken(req, res, next);
+		const { userId, token } = getUserIdFromToken(req, res, next);
 
 		const search = req.body?.search;
 		const phoneNumberId = req.body?.phoneNumberId;
@@ -372,7 +372,7 @@ export const searchUsers = async (req, res, next) => {
 			};
 		});
 
-		res.status(200).json({ msg: formattedReports, success: true });
+		res.status(200).json({ msg: formattedReports, success: true, token });
 	} catch (error) {
 		console.error("Error in searchUsers:", error);
 		res.status(400).json({ message: error.message, success: false });
@@ -382,25 +382,18 @@ export const searchUsers = async (req, res, next) => {
 // -------------------------------------------------------------------------
 // sendMessages – Using token from req.body.token
 export const sendMessages = async (req, res, next) => {
-	const { messages, fileByteCode, fileName } = req.body;
-	const token = req.body?.token;
-	if (!token) {
-		return res
-			.status(400)
-			.json({ message: "Token not provided", success: false });
-	}
-	if (!isString(token)) return next();
-	if (!messages) {
-		return res.status(400).json({
-			message: "All data not provided",
-			success: false,
-		});
-	}
-	if (!isObject(messages)) return next();
-
-	const { userId } = getUserIdFromToken(req, res, next);
-
 	try {
+		const { messages, fileByteCode, fileName } = req.body;
+		const { userId, token } = getUserIdFromToken(req, res, next);
+
+		if (!messages) {
+			return res.status(400).json({
+				message: "All data not provided",
+				success: false,
+			});
+		}
+		if (!isObject(messages)) return next();
+
 		const user = await User.findOne({ unique_id: userId });
 		const accessToken = user.FB_ACCESS_TOKEN;
 
@@ -472,6 +465,7 @@ export const sendMessages = async (req, res, next) => {
 		res.status(200).json({
 			message: "Message sent successfully",
 			success: true,
+			token,
 		});
 
 		const report = new Report({
@@ -543,7 +537,7 @@ export const getSendTemplate = async (req, res, next) => {
 // getAllTemplates – Unchanged (except token not used)
 export const getAllTemplates = async (req, res, next) => {
 	try {
-		const { userId } = getUserIdFromToken(req, res, next);
+		// const { userId, token } = getUserIdFromToken(req, res, next);
 
 		const id = req.params?.id;
 		if (!isString(id)) return next();
@@ -555,6 +549,7 @@ export const getAllTemplates = async (req, res, next) => {
 		res.json({
 			success: true,
 			data: updatedTemplates,
+			token,
 		});
 	} catch (error) {
 		res.status(500).json({
@@ -568,7 +563,7 @@ export const getAllTemplates = async (req, res, next) => {
 // getSingleTemplate – Unchanged (except token not used)
 export const getSingleTemplate = async (req, res, next) => {
 	try {
-		const { userId } = getUserIdFromToken(req, res, next);
+		// const { userId } = getUserIdFromToken(req, res, next);
 
 		const id = req.params?.id;
 		if (!isString(id)) return next();
@@ -675,7 +670,7 @@ export const sendTemplate = async (req, res, next) => {
 //   return res.status(400).json({ message: "Token not provided" });
 // }
 // if (!isString(token)) return next();
-// let tokenData;
+// let 
 // try {
 //   tokenData = validateToken(token);
 // } catch (err) {

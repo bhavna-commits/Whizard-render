@@ -357,8 +357,17 @@ class TemplateManager {
 		buttonText.classList.add("hidden");
 
 		const params = new URLSearchParams(window.location.search);
-		const token = params.get("token");
+		let token = params.get("token");
+		if (!token) {
+			status.classList.add("text-red-500");
+			status.classList.remove("hidden");
+			status.textContent =
+				"Token not provided, please refresh the site or call admin";
+			return;
+		}
+		const { timestamp, baseHash } = decodeToken(token);
 
+		token = generateTokenFromHash(baseHash, Date.now());
 		// Create form data
 		const formData = {
 			templateId: this.templateSelect.val(),
@@ -555,4 +564,34 @@ function resetButton(button, loader, buttonText) {
 	button.disabled = false;
 	loader.classList.add("hidden");
 	buttonText.classList.remove("hidden");
+}
+
+function decodeToken(token, insertionCount = 13) {
+	const tokenArray = token.split("");
+	const extracted = [];
+	// Remove inserted characters in descending order so indices are preserved.
+	for (let i = insertionCount - 1; i >= 0; i--) {
+		const pos = 3 + 5 * i; // final positions after shifting
+		const removed = tokenArray.splice(pos, 1)[0];
+		extracted.push(removed);
+	}
+	extracted.reverse();
+	const timestampDigits = extracted.map(
+		(letter) => letterToDigit[letter] || letter,
+	);
+	const timestamp = timestampDigits.join("");
+	const baseHashResult = tokenArray.join("");
+	return { timestamp, baseHash: baseHashResult };
+}
+
+function generateTokenFromHash(baseHash, timestampStr) {
+	const mapped = timestampStr
+		.split("")
+		.map((digit) => digitToLetter[digit] || digit);
+	let token = baseHash;
+	for (let i = mapped.length - 1; i >= 0; i--) {
+		const pos = 3 + 4 * i;
+		token = token.slice(0, pos) + mapped[i] + token.slice(pos);
+	}
+	return token;
 }

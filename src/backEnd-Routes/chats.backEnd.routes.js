@@ -2,7 +2,7 @@ import express from "express";
 import multer from "multer";
 import {
 	getUsers,
-	getRefreshToken,
+	// getRefreshToken,
 	getSingleChat,
 	getMoreChats,
 	getMoreUsers,
@@ -24,7 +24,7 @@ router.get("/sendTemplate", getSendTemplate, trackSanitationFailures);
 
 router.post("/verify-chats", getUsers, trackSanitationFailures);
 
-router.post("/refresh-token", getRefreshToken, trackSanitationFailures);
+// router.post("/refresh-token", getRefreshToken, trackSanitationFailures);
 
 router.post("/single-chat", getSingleChat, trackSanitationFailures);
 
