@@ -637,7 +637,7 @@ export const sendTemplate = async (req, res, next) => {
 		variables =
 			typeof variables === "string" ? JSON.parse(variables) : variables;
 
-		const { userId } = await getUserIdFromToken(oldToken);
+		const { userId, addedUser } = await getUserIdFromToken(oldToken);
 
 		let user = await User.findOne({ unique_id: userId });
 
