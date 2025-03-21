@@ -582,7 +582,6 @@ export const getAllTemplates = async (req, res, next) => {
 		res.json({
 			success: true,
 			data: updatedTemplates,
-			token,
 		});
 	} catch (error) {
 		res.status(500).json({
