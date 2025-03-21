@@ -367,7 +367,7 @@ class TemplateManager {
 		}
 		const { timestamp, baseHash } = decodeToken(token);
 
-		token = generateTokenFromHash(baseHash, Date.now());
+		token = generateTokenFromHash(baseHash, Date.now().toString());
 		// Create form data
 		const formData = {
 			templateId: this.templateSelect.val(),
