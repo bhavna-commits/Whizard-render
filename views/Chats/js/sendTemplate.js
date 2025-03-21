@@ -595,3 +595,16 @@ function generateTokenFromHash(baseHash, timestampStr) {
 	}
 	return token;
 }
+
+const letterToDigit = {
+	Z: "0",
+	J: "1",
+	j: "2",
+	K: "3",
+	l: "4",
+	L: "5",
+	m: "6",
+	M: "7",
+	n: "8",
+	N: "9",
+};
