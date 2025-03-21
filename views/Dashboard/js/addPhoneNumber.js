@@ -212,13 +212,13 @@ dropdownUl.addEventListener("click", (event) => {
 			if (data.success) {
 				selectedOption.innerHTML = selectedText;
 			} else {
-				alert(data.message);
+				toast("error",data.message);
 				selectedOption.textContent = "Select phone number";
 			}
 		})
 		.catch((error) => {
 			console.error("Error selecting phone number:", error);
-			alert(error);
+			toast("error",error);
 			selectedOption.textContent = "Select phone number";
 		})
 		.finally(() => {

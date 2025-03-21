@@ -4,7 +4,7 @@
 	toastContainer.id = "toast-container";
 	// Tailwind classes: fixed at top right with some spacing and a high z-index
 	toastContainer.className =
-		"fixed top-5 right-5 z-50 flex flex-col space-y-2";
+		"fixed top-5 left-1/2 transform -translate-x-1/2 z-50 flex flex-col space-y-2";
 	document.body.appendChild(toastContainer);
 
 	// Global toast function
