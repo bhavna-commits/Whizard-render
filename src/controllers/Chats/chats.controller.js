@@ -327,7 +327,7 @@ export const getSingleChat = async (req, res, next) => {
 				});
 				// console.log(chatsForReport);
 			} else {
-				if (reportItem.media.url) {
+				if (reportItem.media_type) {
 					chatsForReport = processMediaReport(reportItem, wa_id);
 				} else if (reportItem.textSent || reportItem.replyContent) {
 					chatsForReport = processTextReport(reportItem, wa_id);
@@ -414,7 +414,7 @@ export const sendMessages = async (req, res, next) => {
 	try {
 		const { messages, fileByteCode, fileName } = req.body;
 		const oldToken = checkToken(req, next);
-		const { userId, token } = await getUserIdFromToken(oldToken);
+		const { userId, token, addedUser } = await getUserIdFromToken(oldToken);
 
 		if (!messages) {
 			return res.status(400).json({
