@@ -323,6 +323,7 @@ export const getSingleChat = async (req, res, next) => {
 			) {
 				chatsForReport = buildCommonChatFields(reportItem, wa_id, {
 					components: reportItem.components,
+					templatename: reportItem.templatename,
 				});
 				// console.log(chatsForReport);
 			} else {
