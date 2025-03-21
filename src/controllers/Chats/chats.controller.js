@@ -327,7 +327,7 @@ export const getSingleChat = async (req, res, next) => {
 				});
 				// console.log(chatsForReport);
 			} else {
-				if (reportItem.media_type) {
+				if (reportItem.media.url) {
 					chatsForReport = processMediaReport(reportItem, wa_id);
 				} else if (reportItem.textSent || reportItem.replyContent) {
 					chatsForReport = processTextReport(reportItem, wa_id);
@@ -515,6 +515,7 @@ export const sendMessages = async (req, res, next) => {
 			textSent: messageText,
 			media: { url, fileName, caption },
 			type: "Chat",
+			media_type: mediatype,
 		});
 		await report.save();
 
