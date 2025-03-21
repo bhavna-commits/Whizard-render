@@ -280,6 +280,7 @@ export async function sendMessagesReports(
 
 			reportData.components = template.components;
 			reportData.templateId = campaign.templateId;
+			reportData.templatename = template.name;
 			reportData.type = "Campaign";
 			const chat = new Chat(reportData);
 			await chat.save();

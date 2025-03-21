@@ -275,7 +275,10 @@ export const getRefreshToken = async (req, res, next) => {
 		});
 	} catch (error) {
 		console.error("Error in getRefreshToken:", error);
-		res.status(500).json({ message: error.message || error, success: false });
+		res.status(500).json({
+			message: error.message || error,
+			success: false,
+		});
 	}
 };
 
@@ -322,6 +325,7 @@ export const getSingleChat = async (req, res, next) => {
 				chatsForReport = buildCommonChatFields(reportItem, wa_id, {
 					components: reportItem.components,
 				});
+				// console.log(chatsForReport);
 			} else {
 				if (reportItem.media_type) {
 					chatsForReport = processMediaReport(reportItem, wa_id);
@@ -426,9 +430,11 @@ export const sendMessages = async (req, res, next) => {
 		);
 
 		let tempFilePath = "";
+		let url = "";
 		if (mediaMessages && fileByteCode) {
 			const tempDir = path.join(__dirname, "uploads", userId);
 			tempFilePath = path.join(tempDir, fileName);
+			url = `https://whizard.onrender.com/uploads/${userId}/${fileName}`;
 			fs.mkdirSync(tempDir, { recursive: true });
 			fs.writeFileSync(tempFilePath, Buffer.from(fileByteCode, "base64"));
 		}
@@ -504,7 +510,7 @@ export const sendMessages = async (req, res, next) => {
 			status: "SENT",
 			messageId: data.messages[0].id,
 			textSent: messageText,
-			media: { url: tempFilePath, fileName, caption },
+			media: { url, fileName, caption },
 			type: "Chat",
 		});
 		await report.save();
@@ -532,8 +538,8 @@ export const sendMessages = async (req, res, next) => {
 export const getSendTemplate = async (req, res, next) => {
 	try {
 		const { userId } = await getUserIdFromToken(req, res, next);
-
 		const { wa_id } = req.query;
+
 		if (!wa_id) {
 			return res.status(400).json({ message: "All data not provided" });
 		}
@@ -553,7 +559,7 @@ export const getSendTemplate = async (req, res, next) => {
 		res.status(200).render("Chats/sendTemplate", { data, userId });
 	} catch (err) {
 		console.error("Error getting send template:", err);
-		res.status(500).render("errors/serverError");
+		res.status(500).render("errors/chatsError");
 	}
 };
 
@@ -627,21 +633,22 @@ export const sendTemplate = async (req, res, next) => {
 		let user = await User.findOne({ unique_id: userId });
 
 		const phone_number = user.FB_PHONE_NUMBERS.find(
-			(n) => n.selected === true,
+			(n) => n.selected == true,
 		)?.phone_number_id;
 
 		if (!phone_number) {
 			throw new Error("No phone number selected.");
 		}
 
-		const { data, messageTemplate, components } = await sendTestMessage(
-			user,
-			templateId,
-			variables,
-			contactListId,
-			contactList[0]?.recipientPhone,
-			phone_number,
-		);
+		const { data, messageTemplate, components, templatename } =
+			await sendTestMessage(
+				user,
+				templateId,
+				variables,
+				contactListId,
+				contactList[0]?.recipientPhone,
+				phone_number,
+			);
 
 		let campaign = await Campaign.findOne({ contactListId }).sort({
 			createdAt: -1,
@@ -661,6 +668,7 @@ export const sendTemplate = async (req, res, next) => {
 			messageTemplate,
 			templateId,
 			components,
+			templatename,
 			type: "Template",
 		});
 

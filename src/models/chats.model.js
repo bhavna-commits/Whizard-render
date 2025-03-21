@@ -54,6 +54,7 @@ const ChatsSchema = new mongoose.Schema(
 			enum: ["Campaign", "Template", "Chat"],
 			required: true,
 		},
+		templatename: { type: String, default: "" },
 	},
 	{
 		timestamps: false,

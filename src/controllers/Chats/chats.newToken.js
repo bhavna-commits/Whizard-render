@@ -120,7 +120,7 @@ export async function getUserIdFromToken(req, res, next) {
 	// Decode the token; assuming a timestamp length of 13 digits.
     const { timestamp, baseHash } = decodeToken(token, 13);
     
-    console.log("timestamp :", timestamp, "current :", Date.now());
+    // console.log("timestamp :", timestamp, "current :", Date.now());
 	// Find the token record by matching the baseHash (stored in DB as accessToken).
     const tokenRecord = await Token.findOne({ accessToken: baseHash });
 
