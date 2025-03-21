@@ -347,6 +347,7 @@ export async function sendTestMessage(
 		// Find contacts by contactListId
 		const contactList = await Contacts.find({
 			contactId: contactListId,
+			wa_id: test,
 		});
 
 		if (contactList.length === 0) {
