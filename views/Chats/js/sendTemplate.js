@@ -608,3 +608,16 @@ const letterToDigit = {
 	n: "8",
 	N: "9",
 };
+
+const digitToLetter = {
+	0: "Z",
+	1: "J",
+	2: "j",
+	3: "K",
+	4: "l",
+	5: "L",
+	6: "m",
+	7: "M",
+	8: "n",
+	9: "N",
+};
