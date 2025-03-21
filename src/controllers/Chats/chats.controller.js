@@ -337,10 +337,11 @@ export const getSingleChat = async (req, res, next) => {
 
 		return res.status(200).json({
 			success: true,
-			chats: formattedChats.reverse(),
+			chats: formattedChats.filter((item) => item !== "").reverse(),
 			permission,
 			token,
 		});
+
 	} catch (error) {
 		console.error("Error in getSingleChat:", error);
 		return res
