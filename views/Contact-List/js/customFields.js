@@ -23,11 +23,11 @@ document.addEventListener("DOMContentLoaded", function () {
 					window.location.reload();
 				} else {
 					const data = await response.json();
-					alert(data.message || "Error adding custom field");
+					toast("error",data.message || "Error adding custom field");
 				}
 			} catch (error) {
 				console.error("Error:", error);
-				alert("Error adding custom field");
+				toast("error","Error adding custom field");
 			}
 		});
 	}
@@ -50,10 +50,10 @@ async function deleteField(fieldId) {
 			window.location.reload();
 		} else {
 			const data = await response.json();
-			alert(data.message || "Error deleting custom field");
+			toast("error",data.message || "Error deleting custom field");
 		}
 	} catch (error) {
 		console.error("Error:", error);
-		alert("Error deleting custom field");
+		toast("error","Error deleting custom field");
 	}
 }

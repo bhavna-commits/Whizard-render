@@ -98,12 +98,12 @@ function openDeleteModal(contactId, contactName) {
 					deleteModal.hide(); // Hide the modal after successful deletion
 					window.location.reload(); // Reload the page
 				} else {
-					alert("Error deleting contact: " + data.message);
+					toast("error", data.message);
 				}
 			})
 			.catch((error) => {
 				console.error("Error:", error);
+				toast("error", error);
 			});
 	};
 }
-

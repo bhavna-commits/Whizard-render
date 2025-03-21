@@ -86,7 +86,7 @@ contactListForm.addEventListener("submit", async function (e) {
 	fileUploadSection.classList.remove("hidden");
 
 	if (!file) {
-		alert("Please upload a file.");
+		toast("info","Please upload a file.");
 		return;
 	}
 
@@ -125,7 +125,7 @@ contactListForm.addEventListener("submit", async function (e) {
 				);
 			});
 		} else {
-			alert("Unsupported file type");
+			toast("info","Unsupported file type");
 			return;
 		}
 
@@ -163,7 +163,7 @@ contactListForm.addEventListener("submit", async function (e) {
 				submitButton.classList.remove("hidden");
 			} else {
 				if (data.message) {
-					alert(data.message);
+					toast("error",data.message);
 				} else {
 					displayErrors(data);
 				}
@@ -202,7 +202,7 @@ submitButton.addEventListener("click", async () => {
 		if (data.success) {
 			location.reload();
 		} else {
-			alert(data.message);
+			toast("error",data.message);
 		}
 	} catch (error) {
 		console.error("Error creating list:", error);
@@ -364,7 +364,7 @@ function getSampleCSV() {
 		})
 		.catch((error) => {
 			console.error("Error downloading file:", error);
-			alert("There was an error downloading the file.");
+			toast("error","There was an error downloading the file.");
 		});
 }
 

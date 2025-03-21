@@ -373,7 +373,6 @@ export const updateCSVOnFieldDelete = async (id, fieldToDelete) => {
 };
 
 export const createContact = async (req, res, next) => {
-	console.log("here");
 	try {
 		const contactData = req.body;
 		const { Name, contactId, wa_id, countryCode, ...newContactData } =
@@ -401,7 +400,7 @@ export const createContact = async (req, res, next) => {
 
 		const numberExists = await Contacts.findOne({
 			contactId,
-			wa_id,
+			wa_id: `${countryCode.slice(1)}${wa_id}`,
 		});
 
 		if (numberExists) {

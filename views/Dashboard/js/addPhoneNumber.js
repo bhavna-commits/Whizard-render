@@ -91,7 +91,7 @@ dropdownButton.addEventListener("click", async (e) => {
 		// dropdownMenu.classList.toggle("hidden");
 	} catch (error) {
 		console.error("Error updating phone numbers:", error);
-		alert(error.message);
+		toast("error",error.message);
 	} finally {
 		loader.classList.add("hidden");
 		text.classList.remove("hidden");

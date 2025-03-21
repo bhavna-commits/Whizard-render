@@ -411,12 +411,18 @@ class TemplateManager {
 					formData.append("schedule", unixTimestamp);
 					formData.append("test", null); // Append the schedule timestamp
 				} else {
-					alert("Invalid date or time. Please check your selection.");
+					toast(
+						"info",
+						"Invalid date or time. Please check your selection.",
+					);
 					resetButton(button, loader, buttonText);
 					return;
 				}
 			} else {
-				alert("Please select both date and time for scheduling.");
+				toast(
+					"info",
+					"Please select both date and time for scheduling.",
+				);
 				resetButton(button, loader, buttonText);
 				return;
 			}
@@ -438,7 +444,10 @@ class TemplateManager {
 				const value = $(this).val();
 				if (value === null || value === "Select a value") {
 					isValid = false;
-					alert(`Please select a value for variable: {${variable}}`);
+					toast(
+						"info",
+						`Please select a value for variable: {${variable}}`,
+					);
 					resetButton(button, loader, buttonText);
 					return false; // Exit early if invalid
 				}
@@ -472,13 +481,16 @@ class TemplateManager {
 
 				const result = await response.json();
 				if (response.ok) {
-					alert("Test campaign sent successfully!");
+					toast("success", "Test campaign sent successfully!");
 				} else {
-					alert(result.message);
+					toast("error", result.message);
 				}
 			} catch (error) {
 				console.error("Error sending test campaign:", error);
-				alert("An error occurred while sending the test campaign.");
+				toast(
+					"error",
+					"An error occurred while sending the test campaign.",
+				);
 			} finally {
 				resetButton(button, loader, buttonText);
 			}
@@ -495,14 +507,14 @@ class TemplateManager {
 
 			const result = await response.json();
 			if (response.ok) {
-				alert("Campaign created successfully!");
+				toast("success", "Campaign created successfully!");
 				location.href = "/reports/campaign-list";
 			} else {
-				alert(`Error: ${result.message}`);
+				toast("error", result.message);
 			}
 		} catch (error) {
 			console.error("Error submitting campaign:", error);
-			alert("An error occurred while creating the campaign.");
+			toast("error", "An error occurred while creating the campaign.");
 		} finally {
 			resetButton(button, loader, buttonText);
 		}
