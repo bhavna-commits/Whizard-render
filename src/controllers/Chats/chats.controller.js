@@ -19,7 +19,11 @@ import { uploadMedia, sendMessage, getMediaUrl } from "./chats.functions.js";
 // 	generateRefreshToken,
 // 	isTokenExpired,
 // } from "./chats.token.js";
-import { createTokenRecord, getUserIdFromToken } from "./chats.newToken.js";
+import {
+	checkToken,
+	createTokenRecord,
+	getUserIdFromToken,
+} from "./chats.newToken.js";
 import {
 	fetchAndFormatReports,
 	createTextPayload,
@@ -100,11 +104,8 @@ export const getSetToken = async (req, res) => {
 // getUsers – Now using token validation to get the userId
 export const getUsers = async (req, res, next) => {
 	try {
-		// Await the token record from our helper.
-		const tokenRecord = await getUserIdFromToken(req, res, next);
-		// If for some reason tokenRecord is not valid, stop processing.
-		if (!tokenRecord) return;
-		const { userId, token } = tokenRecord;
+		const oldToken = checkToken(req, next);
+		const { userId, token } = await getUserIdFromToken(oldToken);
 
 		const skip = parseInt(req.body?.skip, 10) || 0;
 		if (!isNumber(skip)) return next();
@@ -155,7 +156,8 @@ export const getUsers = async (req, res, next) => {
 // getMoreUsers – Using token from req.body.token
 export const getMoreUsers = async (req, res, next) => {
 	try {
-		const { userId, token } = await getUserIdFromToken(req, res, next);
+		const oldToken = checkToken(req, next);
+		const { userId, token } = await getUserIdFromToken(oldToken);
 
 		const phoneNumberId = req.body?.phoneNumberId;
 		const skip = parseInt(req.body?.skip, 10) || 0;
@@ -190,7 +192,8 @@ export const getMoreUsers = async (req, res, next) => {
 // getMoreChats – Using token from req.body.token
 export const getMoreChats = async (req, res, next) => {
 	try {
-		const { userId, token } = await getUserIdFromToken(req, res, next);
+		const oldToken = checkToken(req, next);
+		const { userId, token } = await getUserIdFromToken(oldToken);
 
 		const wa_id = req.body?.wa_id;
 		const skip = parseInt(req.body?.skip, 10) || 0;
@@ -244,11 +247,8 @@ export const getMoreChats = async (req, res, next) => {
 // getRefreshToken – Now using token from req.body.token for refresh
 export const getRefreshToken = async (req, res, next) => {
 	try {
-		const { userId, addedUser, token } = await getUserIdFromToken(
-			req,
-			res,
-			next,
-		);
+		const oldToken = checkToken(req, next);
+		const { userId, addedUser, token } = await getUserIdFromToken(oldToken);
 
 		// Determine permissions (this may use additional info from tokenData or user lookup)
 		// In your system, you may retrieve additional user/permission data as needed.
@@ -286,10 +286,9 @@ export const getRefreshToken = async (req, res, next) => {
 // getSingleChat – Using token from req.body.token
 export const getSingleChat = async (req, res, next) => {
 	try {
+		const oldToken = checkToken(req, next);
 		const { userId, permission, token } = await getUserIdFromToken(
-			req,
-			res,
-			next,
+			oldToken,
 		);
 
 		const wa_id = req.body?.wa_id;
@@ -354,7 +353,8 @@ export const getSingleChat = async (req, res, next) => {
 // searchUsers – Using token from req.body.token
 export const searchUsers = async (req, res, next) => {
 	try {
-		const { userId, token } = await getUserIdFromToken(req, res, next);
+		const oldToken = checkToken(req, next);
+		const { userId, token } = await getUserIdFromToken(oldToken);
 
 		const search = req.body?.search;
 		const phoneNumberId = req.body?.phoneNumberId;
@@ -411,7 +411,8 @@ export const searchUsers = async (req, res, next) => {
 export const sendMessages = async (req, res, next) => {
 	try {
 		const { messages, fileByteCode, fileName } = req.body;
-		const { userId, token } = await getUserIdFromToken(req, res, next);
+		const oldToken = checkToken(req, next);
+		const { userId, token } = await getUserIdFromToken(oldToken);
 
 		if (!messages) {
 			return res.status(400).json({
@@ -537,13 +538,14 @@ export const sendMessages = async (req, res, next) => {
 // getSendTemplate – Using token from req.query.token
 export const getSendTemplate = async (req, res, next) => {
 	try {
-		const { userId } = await getUserIdFromToken(req, res, next);
-		const { wa_id } = req.query;
+		const { wa_id, token: oldToken } = req.query;
 
-		if (!wa_id) {
+		if (!wa_id || !oldToken) {
 			return res.status(400).json({ message: "All data not provided" });
 		}
 		if (!isString(wa_id)) return next();
+
+		const { userId } = await getUserIdFromToken(oldToken);
 
 		const contactData = await Contacts.findOne({
 			useradmin: userId,
@@ -615,20 +617,27 @@ export const getSingleTemplate = async (req, res, next) => {
 // sendTemplate – Using token from req.body.token
 export const sendTemplate = async (req, res, next) => {
 	try {
-		let { templateId, contactListId, variables, contactList } = req.body;
+		let { templateId, contactListId, variables, contactList, token: oldToken } =
+			req.body;
 
-		if (!templateId || !contactListId) {
+		if (
+			!templateId ||
+			!contactListId ||
+			!variables ||
+			!contactList ||
+			!oldToken
+		) {
 			return res.status(400).json({
-				message: "Template ID and Contact List ID are required",
+				message: "All Data not provided",
 			});
 		}
 
-		if (!isString(templateId, contactListId)) return next();
+		if (!isString(templateId, contactListId, oldToken)) return next();
 
 		variables =
 			typeof variables === "string" ? JSON.parse(variables) : variables;
 
-		const { userId } = await getUserIdFromToken(req, res, next);
+		const { userId } = await getUserIdFromToken(oldToken);
 
 		let user = await User.findOne({ unique_id: userId });
 

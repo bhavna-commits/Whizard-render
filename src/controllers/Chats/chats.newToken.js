@@ -95,6 +95,18 @@ export function generateToken() {
 	return { token, expiresAt, baseHash, timestampStr };
 }
 
+export function checkToken(req, next) {
+	const token = req.body?.token;
+	if (!token) {
+		throw "Token not provided";
+	}
+	if (typeof token !== "string") {
+		throw "Token must be a string";
+	}
+	if (!isString(token)) return next();
+	return token;
+}
+
 /**
  * Validates the token received from the client:
  *  - Reads the token from req.body.token.
@@ -109,20 +121,13 @@ export function generateToken() {
  * @param {Function} next - The next middleware.
  * @returns {Promise<Object>} The updated token record (with new converted token in a field).
  */
-export async function getUserIdFromToken(req, res, next) {
-	const token = req.body?.token;
-	if (!token) {
-		throw "Token not provided";
-	}
-	if (typeof token !== "string") {
-		throw "Token must be a string";
-	}
+export async function getUserIdFromToken(token) {
 	// Decode the token; assuming a timestamp length of 13 digits.
-    const { timestamp, baseHash } = decodeToken(token, 13);
-    
-    // console.log("timestamp :", timestamp, "current :", Date.now());
+	const { timestamp, baseHash } = decodeToken(token, 13);
+
+	// console.log("timestamp :", timestamp, "current :", Date.now());
 	// Find the token record by matching the baseHash (stored in DB as accessToken).
-    const tokenRecord = await Token.findOne({ accessToken: baseHash });
+	const tokenRecord = await Token.findOne({ accessToken: baseHash });
 
 	if (!tokenRecord) {
 		throw "Token not found";
