@@ -117,6 +117,7 @@ router.post("/webhook", async (req, res) => {
 
 		for (const entryItem of entry) {
 			const user = await User.findOne({ WABA_ID: entryItem.id });
+			console.log(user);
 			if (!user) continue; // Skip if no user found
 			console.log(JSON.stringify(entryItem));
 
