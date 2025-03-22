@@ -98,9 +98,9 @@ export const fetchAndFormatReports = async (
 
 			return {
 				lastmessage:
-					report.replyContent || report.textSent || "No recent reply",
+					report.replyContent || report.textSent || report.media_type || "No recent reply",
 				wa_id: report.recipientPhone,
-				status: isReplyRecent ? 0 : 1,
+				status: isReplyRecent ? 1 : 0,
 				name: report.contactName,
 				usertimestmp: report.updatedAt,
 				campaignId: report.campaignId,
