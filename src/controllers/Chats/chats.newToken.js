@@ -32,7 +32,7 @@ const letterToDigit = {
 };
 
 // Lifetime for a token (e.g., 2 minutes in milliseconds)
-const TOKEN_LIFETIME = 30 * 1000;
+const TOKEN_LIFETIME = 2 * 60 * 1000;
 
 /**
  * Generates a token by inserting mapped characters from [timestampStr] into [baseHash].
@@ -134,7 +134,7 @@ export async function getUserIdFromToken(token) {
 	}
 	// Check token expiration: we assume token lifetime is defined in TOKEN_LIFETIME.
 	const decodedTimestamp = Number(timestamp);
-	if (Date.now() > decodedTimestamp + TOKEN_LIFETIME) {
+	if (decodedTimestamp > tokenRecord.expiresAt) {
 		throw "Token has expired";
 	}
 	// Generate a new token with a fresh timestamp using the same baseHash.
