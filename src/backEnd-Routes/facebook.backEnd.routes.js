@@ -269,6 +269,11 @@ router.post("/webhook", async (req, res) => {
 								recipientPhone,
 							});
 
+							let chat = await Chat.findOne({
+								campaignId: campaign.unique_id,
+								recipientPhone,
+							});
+
 							// If there's an existing report, update it with reply content or media info
 							if (report) {
 								if (type === "text") {
@@ -281,30 +286,38 @@ router.post("/webhook", async (req, res) => {
 								await report.save();
 							}
 
+							if (chat) {
+								await Chat.create({
+									contactName: chat.contactName,
+									messageId,
+									recipientPhone,
+									WABA_ID: user.WABA_ID || "",
+									FB_PHONE_ID: fbPhoneId,
+									useradmin: user.unique_id || "",
+									status: "REPLIED",
+									updatedAt: timestamp,
+									campaignId: campaign
+										? campaign.unique_id
+										: "",
+									unique_id: generateUniqueId(),
+									// Save message content and media info accordingly
+									replyContent:
+										type === "text" ? text.body : "",
+									textSent: type === "text" ? text.body : "",
+									media:
+										type !== "text" && image
+											? {
+													url: image.url || "",
+													fileName:
+														image.fileName || "",
+													caption: text?.body || "",
+											  }
+											: {},
+									type: "Chat",
+								});
+							}
+
 							// Always create a new Chat record for every message received
-							await Chat.create({
-								messageId,
-								recipientPhone,
-								WABA_ID: user.WABA_ID || "",
-								FB_PHONE_ID: fbPhoneId,
-								useradmin: user.unique_id || "",
-								status: "REPLIED",
-								updatedAt: timestamp,
-								campaignId: campaign ? campaign.unique_id : "",
-								unique_id: generateUniqueId(),
-								// Save message content and media info accordingly
-								replyContent: type === "text" ? text.body : "",
-								textSent: type === "text" ? text.body : "",
-								media:
-									type !== "text" && image
-										? {
-												url: image.url || "",
-												fileName: image.fileName || "",
-												caption: text?.body || "",
-										  }
-										: {},
-								type: "Chat",
-							});
 						}
 					}
 				}

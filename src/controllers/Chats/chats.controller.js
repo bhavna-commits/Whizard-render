@@ -626,7 +626,6 @@ export const sendTemplate = async (req, res, next) => {
 		if (
 			!templateId ||
 			!contactListId ||
-			!variables ||
 			!contactList ||
 			!oldToken
 		) {
