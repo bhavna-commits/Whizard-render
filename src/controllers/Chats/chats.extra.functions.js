@@ -53,10 +53,7 @@ export const fetchAndFormatReports = async (
 				FB_PHONE_ID: phoneNumberId,
 			},
 		},
-		// Sort reports by updatedAt descending so the most recent comes first
-		{
-			$sort: { createdAt: -1 },
-		},
+
 		// Group by recipientPhone (wa_id), keeping only the first document per group
 		{
 			$group: {
@@ -79,6 +76,10 @@ export const fetchAndFormatReports = async (
 				campaignId: 1,
 			},
 		},
+		// Sort reports by updatedAt descending so the most recent comes first
+		{
+			$sort: { createdAt: -1 },
+		},
 		// Apply pagination on the unique records
 		{ $skip: skip },
 		{ $limit: limit },
@@ -89,22 +90,24 @@ export const fetchAndFormatReports = async (
 	}
 
 	// Format the results as needed.
-	const formattedReports = aggregatedReports.map((report) => {
-		const isReplyRecent =
-			report.replyContent &&
-			Date.now() - report.updatedAt < 24 * 60 * 60 * 1000; // less than 24 hours
+	const formattedReports = aggregatedReports
+		.map((report) => {
+			const isReplyRecent =
+				report.replyContent &&
+				Date.now() - report.updatedAt < 24 * 60 * 60 * 1000; // less than 24 hours
 
-		return {
-			lastmessage:
-				report.replyContent || report.textSent || "No recent reply",
-			wa_id: report.recipientPhone,
-			status: isReplyRecent ? 0 : 1,
-			name: report.contactName,
-			usertimestmp: report.updatedAt,
-			campaignId: report.campaignId,
-			is_read: report.status === "READ" ? true : false,
-		};
-	});
+			return {
+				lastmessage:
+					report.replyContent || report.textSent || "No recent reply",
+				wa_id: report.recipientPhone,
+				status: isReplyRecent ? 0 : 1,
+				name: report.contactName,
+				usertimestmp: report.updatedAt,
+				campaignId: report.campaignId,
+				is_read: report.status === "READ" ? true : false,
+			};
+		})
+		.sort((a, b) => b.usertimestmp - a.usertimestmp); // sorts from latest to oldest
 
 	return formattedReports;
 };
