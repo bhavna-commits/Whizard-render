@@ -500,6 +500,8 @@ export const sendMessages = async (req, res, next) => {
 		res.status(200).json({
 			message: "Message sent successfully",
 			success: true,
+			url,
+			caption,
 			token,
 		});
 
@@ -526,8 +528,6 @@ export const sendMessages = async (req, res, next) => {
 		await ActivityLogs.create({
 			useradmin: userId,
 			unique_id: generateUniqueId(),
-			url,
-			caption,
 			name: letName,
 			actions: "Send",
 			details: `Sent message from chats to: ${name}`,
