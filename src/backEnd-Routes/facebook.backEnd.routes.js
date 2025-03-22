@@ -145,14 +145,14 @@ router.post("/webhook", async (req, res) => {
 								.sort({ createdAt: -1 })
 								.limit(1);
 
+							// Update the Report document
 							let report = await Reports.findOne({ messageId });
-
 							if (report) {
 								report.status = status.toUpperCase();
 								report.updatedAt = timestamp * 1000;
 								report.recipientPhone = recipientPhone;
 
-								// Check if the status is "failed"
+								// If the status is "failed", attach error details
 								if (
 									status === "failed" &&
 									errors &&
@@ -166,8 +166,31 @@ router.post("/webhook", async (req, res) => {
 											"No error message provided",
 									};
 								}
-
 								await report.save();
+							}
+
+							// Update the Chat document
+							let chat = await Chat.findOne({ messageId });
+							if (chat) {
+								chat.status = status.toUpperCase();
+								chat.updatedAt = timestamp * 1000;
+								chat.recipientPhone = recipientPhone;
+
+								// Similarly, update error details for failed statuses
+								if (
+									status === "failed" &&
+									errors &&
+									errors.length > 0
+								) {
+									const { code, title } = errors[0];
+									chat.failed = {
+										code: code || "UNKNOWN_ERROR",
+										text:
+											title ||
+											"No error message provided",
+									};
+								}
+								await chat.save();
 							}
 						}
 					}
@@ -252,7 +275,7 @@ router.post("/webhook", async (req, res) => {
 									report.replyContent = String(text.body);
 									report.status = "REPLIED";
 								} else if (type !== "text" && image) {
-									// When a media message is received, we attempt to store a URL (if 
+									// When a media message is received, we attempt to store a URL (if
 									report.status = "REPLIED";
 								}
 								await report.save();
@@ -284,7 +307,6 @@ router.post("/webhook", async (req, res) => {
 							});
 						}
 					}
-
 				}
 			}
 		}
