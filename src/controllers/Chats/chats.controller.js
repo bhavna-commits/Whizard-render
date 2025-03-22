@@ -105,7 +105,7 @@ export const getSetToken = async (req, res) => {
 export const getUsers = async (req, res, next) => {
 	try {
 		const oldToken = checkToken(req, next);
-		const { userId, token } = await getUserIdFromToken(oldToken);
+		const { userId, token, permission } = await getUserIdFromToken(oldToken);
 
 		const skip = parseInt(req.body?.skip, 10) || 0;
 		if (!isNumber(skip)) return next();
@@ -144,7 +144,8 @@ export const getUsers = async (req, res, next) => {
 			msg: formattedReports.reverse(),
 			success: true,
 			phoneNumber,
-			token, // return the refreshed token
+			token,
+			permission,
 		});
 	} catch (error) {
 		console.error("Error in getUsers:", error);
@@ -157,7 +158,7 @@ export const getUsers = async (req, res, next) => {
 export const getMoreUsers = async (req, res, next) => {
 	try {
 		const oldToken = checkToken(req, next);
-		const { userId, token } = await getUserIdFromToken(oldToken);
+		const { userId, token, permission } = await getUserIdFromToken(oldToken);
 
 		const phoneNumberId = req.body?.phoneNumberId;
 		const skip = parseInt(req.body?.skip, 10) || 0;
@@ -181,6 +182,7 @@ export const getMoreUsers = async (req, res, next) => {
 			msg: formattedReports.reverse(),
 			success: true,
 			token,
+			permission,
 		});
 	} catch (error) {
 		console.error("Error in getMoreUsers:", error);
@@ -287,7 +289,7 @@ export const getRefreshToken = async (req, res, next) => {
 export const getSingleChat = async (req, res, next) => {
 	try {
 		const oldToken = checkToken(req, next);
-		const { userId, permission, token } = await getUserIdFromToken(
+		const { userId, token } = await getUserIdFromToken(
 			oldToken,
 		);
 
@@ -339,7 +341,6 @@ export const getSingleChat = async (req, res, next) => {
 		return res.status(200).json({
 			success: true,
 			chats: formattedChats.filter((item) => item !== "").reverse(),
-			permission,
 			token,
 		});
 

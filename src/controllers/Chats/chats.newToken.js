@@ -32,7 +32,7 @@ const letterToDigit = {
 };
 
 // Lifetime for a token (e.g., 2 minutes in milliseconds)
-const TOKEN_LIFETIME = 2 * 60 * 1000;
+const TOKEN_LIFETIME = 30 * 1000;
 
 /**
  * Generates a token by inserting mapped characters from [timestampStr] into [baseHash].
@@ -188,8 +188,7 @@ export async function createTokenRecord(userId, permission, addedUser) {
 	const { baseHash, expiresAt, token } = generateToken(); // generateToken() returns { token, expiresAt, baseHash, timestampStr }
 	const unique_id = generateUniqueId();
 	const newTokenRecord = new Token({
-		accessToken: baseHash, // stored baseHash (what you call accessToken in DB)
-		lastToken: null,
+		accessToken: baseHash,
 		userId,
 		expiresAt,
 		permission,
