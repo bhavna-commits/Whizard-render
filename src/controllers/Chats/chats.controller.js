@@ -105,7 +105,9 @@ export const getSetToken = async (req, res) => {
 export const getUsers = async (req, res, next) => {
 	try {
 		const oldToken = checkToken(req, next);
-		const { userId, token, permission } = await getUserIdFromToken(oldToken);
+		const { userId, token, permission } = await getUserIdFromToken(
+			oldToken,
+		);
 
 		const skip = parseInt(req.body?.skip, 10) || 0;
 		if (!isNumber(skip)) return next();
@@ -158,7 +160,9 @@ export const getUsers = async (req, res, next) => {
 export const getMoreUsers = async (req, res, next) => {
 	try {
 		const oldToken = checkToken(req, next);
-		const { userId, token, permission } = await getUserIdFromToken(oldToken);
+		const { userId, token, permission } = await getUserIdFromToken(
+			oldToken,
+		);
 
 		const phoneNumberId = req.body?.phoneNumberId;
 		const skip = parseInt(req.body?.skip, 10) || 0;
@@ -289,9 +293,7 @@ export const getRefreshToken = async (req, res, next) => {
 export const getSingleChat = async (req, res, next) => {
 	try {
 		const oldToken = checkToken(req, next);
-		const { userId, token } = await getUserIdFromToken(
-			oldToken,
-		);
+		const { userId, token } = await getUserIdFromToken(oldToken);
 
 		const wa_id = req.body?.wa_id;
 		const skip = parseInt(req.body?.skip, 10) || 0;
@@ -343,7 +345,6 @@ export const getSingleChat = async (req, res, next) => {
 			chats: formattedChats.filter((item) => item !== "").reverse(),
 			token,
 		});
-
 	} catch (error) {
 		console.error("Error in getSingleChat:", error);
 		return res
@@ -525,6 +526,8 @@ export const sendMessages = async (req, res, next) => {
 		await ActivityLogs.create({
 			useradmin: userId,
 			unique_id: generateUniqueId(),
+			url,
+			caption,
 			name: letName,
 			actions: "Send",
 			details: `Sent message from chats to: ${name}`,
@@ -620,15 +623,15 @@ export const getSingleTemplate = async (req, res, next) => {
 // sendTemplate – Using token from req.body.token
 export const sendTemplate = async (req, res, next) => {
 	try {
-		let { templateId, contactListId, variables, contactList, token: oldToken } =
-			req.body;
+		let {
+			templateId,
+			contactListId,
+			variables,
+			contactList,
+			token: oldToken,
+		} = req.body;
 
-		if (
-			!templateId ||
-			!contactListId ||
-			!contactList ||
-			!oldToken
-		) {
+		if (!templateId || !contactListId || !contactList || !oldToken) {
 			return res.status(400).json({
 				message: "All Data not provided",
 			});
