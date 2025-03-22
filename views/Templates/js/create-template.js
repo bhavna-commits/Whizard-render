@@ -209,7 +209,7 @@ fileUpload.addEventListener("change", (e) => {
 				errorMessage = `File size exceeds the limit for ${mediaType}. Maximum allowed size is ${maxSize}.`;
 			}
 
-			alert(errorMessage);
+			toast("info",errorMessage);
 			fileUpload.value = "";
 			uploadText.textContent = defaultText;
 		}
@@ -323,7 +323,7 @@ let callBtnCount = 0;
 
 document.getElementById("addWebsiteBtn").addEventListener("click", function () {
 	if (websiteBtnCount >= 1) {
-		alert("You can only add 1 website button.");
+		toast("info","You can only add 1 website button.");
 		return;
 	}
 
@@ -354,7 +354,7 @@ document.getElementById("addWebsiteBtn").addEventListener("click", function () {
 
 document.getElementById("addCallBtn").addEventListener("click", function () {
 	if (callBtnCount >= 1) {
-		alert("You can only add 1 call button.");
+		toast("info","You can only add 1 call button.");
 		return;
 	}
 

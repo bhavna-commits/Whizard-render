@@ -39,7 +39,7 @@ function initializePreview(templateData) {
 	const bodyValidation = validateCurlyBraces(templateData.body);
 
 	if (!bodyValidation.isValid) {
-		alert(bodyValidation.error);
+		toast("info",bodyValidation.error);
 		return false;
 	}
 

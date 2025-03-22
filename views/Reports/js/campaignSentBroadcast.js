@@ -86,12 +86,12 @@ broadcastButton.addEventListener("click", function () {
 			if (data.success) {
 				location.href = "/reports/campaign-list/broadcast";
 			} else {
-				alert("Failed to initiate broadcast");
+				toast("error",data.message);
 			}
 		})
 		.catch((error) => {
 			console.error("Error broadcasting reports:", error);
-			alert("An error occurred");
+			toast("error", error);
 		});
 });
 

@@ -13,7 +13,7 @@
 		const toastElem = document.createElement("div");
 		// Base Tailwind styling for toast appearance
 		toastElem.className =
-			"max-w-xs w-full text-sm font-medium rounded shadow-lg p-4 transform transition-all duration-300 ease-in-out";
+			"max-w-xs w-full text-sm font-medium rounded shadow p-4 transform transition-all duration-300 ease-in-out";
 
 		// Set the background color based on the type
 		switch (type) {
@@ -24,7 +24,7 @@
 				toastElem.classList.add("bg-red-500", "text-white");
 				break;
 			case "info":
-				toastElem.classList.add("bg-blue-500", "text-white");
+				toastElem.classList.add("bg-gray-500", "text-white");
 				break;
 			default:
 				toastElem.classList.add("bg-gray-500", "text-white");

@@ -142,7 +142,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 		// Get user input and check email validity
     const emailInput = document.getElementById("email");
-    if (!emailInput) return alert("no email input found");
+    if (!emailInput) return toast("error","no email input found");
 		const emailWarning = document.getElementById("emailWarning");
 		const email = emailInput.value.trim();
 		const personalEmailPattern =

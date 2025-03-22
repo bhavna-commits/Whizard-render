@@ -144,7 +144,7 @@ async function viewSent() {
 		dataSection.classList.remove("hidden");
 	} catch (err) {
 		console.error("Error fetching data:", err);
-		alert("Failed to fetch data. Please try again.");
+		toast("error", err);
 	} finally {
 		loading.classList.add("hidden");
 	}
@@ -229,7 +229,7 @@ async function viewDelivered() {
 		dataSection.classList.remove("hidden");
 	} catch (err) {
 		console.error("Error fetching data:", err);
-		alert("Failed to fetch data. Please try again.");
+		toast("error",err);
 	} finally {
 		loading.classList.add("hidden");
 	}
@@ -314,7 +314,7 @@ async function viewFailed() {
 		dataSection.classList.remove("hidden");
 	} catch (err) {
 		console.error("Error fetching data:", err);
-		alert("Failed to fetch data. Please try again.");
+		toast("error", err);
 	} finally {
 		loading.classList.add("hidden");
 	}
@@ -399,7 +399,7 @@ async function viewReplied() {
 		dataSection.classList.remove("hidden");
 	} catch (err) {
 		console.error("Error fetching data:", err);
-		alert("Failed to fetch data. Please try again.");
+		toast("error", err);
 	} finally {
 		loading.classList.add("hidden");
 	}
@@ -484,7 +484,7 @@ async function viewRead() {
 		dataSection.classList.remove("hidden");
 	} catch (err) {
 		console.error("Error fetching data:", err);
-		alert("Failed to fetch data. Please try again.");
+		toast("error", err);
 	} finally {
 		loading.classList.add("hidden");
 	}

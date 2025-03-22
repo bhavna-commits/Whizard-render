@@ -645,12 +645,12 @@ async function selectPhoneNumber(event) {
 		if (response.ok) {
 			window.location.reload(); // Reload the page or redirect
 		} else {
-			alert("Failed to select phone number. Please try again.");
+			toast("error","Failed to select phone number. Please try again.");
 		}
 	} catch (error) {
 		// Hide loader and show button text if an error occurs
 
-		alert(error);
+		toast("error",error);
 	} finally {
 		buttonLoader.classList.add("hidden");
 		buttonText.classList.remove("hidden");
@@ -686,10 +686,10 @@ async function deletePhoneNumber(event, phoneNumberId) {
 			window.location.reload(); // Reload the page on success
 		} else {
 			const errorData = await response.json();
-			alert("Failed to delete phone number: " + errorData.message);
+			toast("error", errorData.message);
 		}
 	} catch (error) {
-		alert(error);
+		toast("error",error);
 	} finally {
 		if (buttonLoader) buttonLoader.classList.add("hidden");
 		if (buttonText) buttonText.classList.remove("hidden");

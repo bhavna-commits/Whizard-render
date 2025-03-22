@@ -187,7 +187,7 @@ document.addEventListener("DOMContentLoaded", () => {
           messageElement.style.display = "none";
         }, 5000);
       } catch (error) {
-        alert(error.message); // Alert backend error message
+        toast("error",error.message); // Alert backend error message
       }
     }
   });

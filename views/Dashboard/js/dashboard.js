@@ -61,13 +61,13 @@ function sendDataToBackend() {
 				if (data.success) {
 					openSet2FAPin(phone_number_id);
 				} else {
-					alert(data.error);
+					toast("error",data.error);
 				}
 			})
 			.catch((error) => {
 				hideLoader();
 				console.error("Error saving data:", error);
-				alert(error);
+				toast("error",error);
 			});
 	}
 }

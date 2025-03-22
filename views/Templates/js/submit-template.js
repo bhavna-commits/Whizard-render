@@ -133,10 +133,10 @@ async function submit() {
 		if (res.success) {
 			location.href = "/template";
 		} else {
-			alert(res.message);
+			toast("error", res.message);
 		}
 	} catch (error) {
-		alert(error.message);
+		toast("error", error.message);
 	} finally {
 		// Restore button state
 		submitButton.innerHTML = originalText;
@@ -193,7 +193,8 @@ function validateInputs() {
 
 	inputs.forEach((input) => {
 		if (!input.value.trim()) {
-			alert(
+			toast(
+				"error",
 				`Please fill in the value for variable ${input.dataset.variable}`,
 			);
 			isValid = false;
@@ -243,12 +244,12 @@ function collectTemplateData() {
 
 	// Helper function to display error messages
 	function showError(message) {
-		alert(message);
+		toast("info", message);
 		return false;
 	}
 
 	if (selectedLanguageCode === null) {
-		alert("Please select a language before proceeding.");
+		toast("info", "Please select a language before proceeding.");
 		return false;
 	}
 
@@ -397,7 +398,7 @@ function collectTemplateData() {
 
 		// Set the file input's files property to our newly created File object
 		const fileInput = document.getElementById("file-upload");
-		fileInput.files = dataTransfer.files;	
+		fileInput.files = dataTransfer.files;
 	}
 
 	// Skip header validation if the type is "none"
