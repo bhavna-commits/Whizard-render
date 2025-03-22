@@ -6,6 +6,7 @@ import Campaign from "../models/campaign.model.js";
 import User from "../models/user.model.js";
 import Token from "../models/token.model.js";
 import Reports from "../models/report.model.js";
+import Chat from "../models/chats.model.js";
 // import axios from "axios";
 import { generateUniqueId } from "../utils/otpGenerator.js";
 
@@ -213,6 +214,14 @@ router.post("/webhook", async (req, res) => {
 
 					// Handle incoming messages/replies
 					if (messagingEvent.messages) {
+						// Extract FB_PHONE_ID from webhook metadata if available
+						// This assumes that the messagingEvent contains a metadata object similar to:
+						// "metadata": { "display_phone_number": "...", "phone_number_id": "610364625484830" }
+						const fbPhoneId =
+							messagingEvent.metadata?.phone_number_id ||
+							user.FB_PHONE_ID ||
+							"";
+
 						for (const messageEvent of messagingEvent.messages) {
 							const {
 								id: messageId,
@@ -223,6 +232,7 @@ router.post("/webhook", async (req, res) => {
 								image,
 							} = messageEvent;
 
+							// Fetch the most recent campaign for the user
 							const campaign = await Campaign.findOne({
 								useradmin: user.unique_id,
 								deleted: false,
@@ -230,44 +240,51 @@ router.post("/webhook", async (req, res) => {
 								.sort({ createdAt: -1 })
 								.limit(1);
 
+							// Try to find an existing report for this campaign and recipient
 							let report = await Reports.findOne({
 								campaignId: campaign.unique_id,
 								recipientPhone,
 							});
-							console.log("1", text.body);
+
+							// If there's an existing report, update it with reply content or media info
 							if (report) {
 								if (type === "text") {
-									console.log("2", text.body);
 									report.replyContent = String(text.body);
 									report.status = "REPLIED";
-								} else if (type === "image" && image) {
-									const { id: imageId, mime_type: mimeType } =
-										image;
-
-									// Handle image if needed, e.g. save to disk or cloud
+								} else if (type !== "text" && image) {
+									// When a media message is received, we attempt to store a URL (if 
+									report.status = "REPLIED";
 								}
-
-								await report.save(); // Save the report
-							} else {
-								console.log("3", text.body);
-								await Reports.create({
-									messageId,
-									recipientPhone,
-									WABA_ID: user.WABA_ID || "",
-									FB_PHONE_ID: user.FB_PHONE_ID || "",
-									useradmin: user.unique_id || "",
-									messageId,
-									status: "REPLIED",
-									updatedAt: timestamp,
-									recipientPhone,
-									campaignId: campaign
-										? campaign.unique_id
-										: "",
-									unique_id: generateUniqueId(),
-								});
+								await report.save();
 							}
+
+							// Always create a new Chat record for every message received
+							await Chat.create({
+								messageId,
+								recipientPhone,
+								WABA_ID: user.WABA_ID || "",
+								FB_PHONE_ID: fbPhoneId,
+								useradmin: user.unique_id || "",
+								status: "REPLIED",
+								updatedAt: timestamp,
+								campaignId: campaign ? campaign.unique_id : "",
+								unique_id: generateUniqueId(),
+								// Save message content and media info accordingly
+								replyContent: type === "text" ? text.body : "",
+								textSent: type === "text" ? text.body : "",
+								media:
+									type !== "text" && image
+										? {
+												url: image.url || "",
+												fileName: image.fileName || "",
+												caption: text?.body || "",
+										  }
+										: {},
+								type: "Chat",
+							});
 						}
 					}
+
 				}
 			}
 		}
