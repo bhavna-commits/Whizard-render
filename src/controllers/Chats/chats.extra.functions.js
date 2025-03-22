@@ -53,8 +53,9 @@ export const fetchAndFormatReports = async (
 				FB_PHONE_ID: phoneNumberId,
 			},
 		},
-
-		// Group by recipientPhone (wa_id), keeping only the first document per group
+		// Sort by updatedAt descending so the latest record comes first
+		{ $sort: { updatedAt: -1 } },
+		// Group by recipientPhone (wa_id), keeping only the first document per group (which is the latest due to the sort)
 		{
 			$group: {
 				_id: "$recipientPhone",
@@ -62,9 +63,7 @@ export const fetchAndFormatReports = async (
 			},
 		},
 		// Replace root with the grouped document
-		{
-			$replaceRoot: { newRoot: "$doc" },
-		},
+		{ $replaceRoot: { newRoot: "$doc" } },
 		// Optionally project only the fields you need
 		{
 			$project: {
@@ -74,12 +73,12 @@ export const fetchAndFormatReports = async (
 				replyContent: 1,
 				updatedAt: 1,
 				campaignId: 1,
+				textSent: 1,
+				media_type: 1,
 			},
 		},
-		// Sort reports by updatedAt descending so the most recent comes first
-		{
-			$sort: { createdAt: -1 },
-		},
+		// Final sort by updatedAt descending (if needed)
+		{ $sort: { updatedAt: -1 } },
 		// Apply pagination on the unique records
 		{ $skip: skip },
 		{ $limit: limit },
@@ -98,13 +97,17 @@ export const fetchAndFormatReports = async (
 
 			return {
 				lastmessage:
-					report.replyContent || report.textSent || report.media_type || "No recent reply",
+					report.replyContent ||
+					report.textSent ||
+					report.media_type ||
+					report.messageTemplate ||
+					"No recent reply",
 				wa_id: report.recipientPhone,
 				status: isReplyRecent ? 1 : 0,
 				name: report.contactName,
 				usertimestmp: report.updatedAt,
 				campaignId: report.campaignId,
-				is_read: report.status === "READ" ? true : false,
+				is_read: report.status === "READ",
 			};
 		})
 		.sort((a, b) => b.usertimestmp - a.usertimestmp); // sorts from latest to oldest

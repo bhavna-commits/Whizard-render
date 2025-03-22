@@ -141,7 +141,7 @@ export const getUsers = async (req, res, next) => {
 		}
 
 		res.status(200).json({
-			msg: formattedReports.reverse(),
+			msg: formattedReports,
 			success: true,
 			phoneNumber,
 			token,
