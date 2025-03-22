@@ -103,7 +103,7 @@ export const fetchAndFormatReports = async (
 					report.messageTemplate ||
 					"No recent reply",
 				wa_id: report.recipientPhone,
-				status: isReplyRecent ? 1 : 0,
+				status: isReplyRecent ? 0 : 1,
 				name: report.contactName,
 				usertimestmp: report.updatedAt,
 				campaignId: report.campaignId,
