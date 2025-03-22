@@ -124,8 +124,7 @@ export function checkToken(req, next) {
 export async function getUserIdFromToken(token) {
 	// Decode the token; assuming a timestamp length of 13 digits.
 	const { timestamp, baseHash } = decodeToken(token, 13);
-
-	// console.log("timestamp :", timestamp, "current :", Date.now());
+	console.log("timestamp :", timestamp, "current :", Date.now());
 	// Find the token record by matching the baseHash (stored in DB as accessToken).
 	const tokenRecord = await Token.findOne({ accessToken: baseHash });
 
@@ -223,14 +222,14 @@ export async function refreshToken(oldToken) {
 	}
 
 	// Add 30 seconds to the decoded timestamp
-	const newTimestamp = (decodedTimestamp + 30000).toString();
+	const newTimestamp = (decodedTimestamp + TOKEN_LIFETIME).toString();
 	const newBaseHash = crypto.randomBytes(32).toString("hex");
 	const newToken = generateTokenFromHash(newBaseHash, newTimestamp);
 
 	// Update token record: store the current token as lastToken, update accessToken and expiration.
 	tokenRecord.lastToken = tokenRecord.accessToken;
 	tokenRecord.accessToken = newToken;
-	tokenRecord.expiresAt = Date.now() + 2 * 60 * 1000;
+	tokenRecord.expiresAt = Date.now() + TOKEN_LIFETIME;
 	await tokenRecord.save();
 	return tokenRecord;
 }
