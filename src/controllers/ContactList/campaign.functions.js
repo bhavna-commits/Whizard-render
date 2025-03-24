@@ -347,6 +347,7 @@ export async function sendTestMessage(
 		const contactList = await Contacts.find({
 			contactId: contactListId,
 			wa_id: test,
+			subscribe: 1,
 		});
 
 		if (contactList.length === 0) {
