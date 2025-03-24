@@ -124,7 +124,7 @@ class Preview {
 						.join("/");
 
 					console.log(fileUrl);
-					// headerContent = `<img src="/${fileUrl}" alt="Header Image" class="custom-card-img">`;
+					headerContent = `<img src="/${fileUrl}" alt="Header Image" class="custom-card-img">`;
 				} else if (component.format === "VIDEO") {
 					// Handle video format
 					let fileUrl = component.example?.header_url
