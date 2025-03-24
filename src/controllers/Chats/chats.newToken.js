@@ -124,15 +124,17 @@ export function checkToken(req, next) {
 export async function getUserIdFromToken(token) {
 	// Decode the token; assuming a timestamp length of 13 digits.
 	const { timestamp, baseHash } = decodeToken(token, 13);
-	console.log("timestamp :", timestamp, "current :", Date.now());
 	// Find the token record by matching the baseHash (stored in DB as accessToken).
 	const tokenRecord = await Token.findOne({ accessToken: baseHash });
 
 	if (!tokenRecord) {
 		throw "Token not found";
-	}
+    }
+    
+    
 	// Check token expiration: we assume token lifetime is defined in TOKEN_LIFETIME.
-	const decodedTimestamp = Number(timestamp);
+    const decodedTimestamp = Number(timestamp);
+    console.log("difference :", tokenRecord.expiresAt - decodedTimestamp);
 	if (decodedTimestamp > tokenRecord.expiresAt) {
 		throw "Token has expired";
 	}
@@ -155,6 +157,7 @@ export async function getUserIdFromToken(token) {
  *
  * @param {string} userId - The user's ID.
  * @param {string} permission - The permission level for the user.
+ * @param {string} addedUser - The addedUser level for the user.
  * @returns {Promise<Object>} - The saved token record.
  */
 export async function createTokenRecord(userId, permission, addedUser) {

@@ -60,15 +60,15 @@ export const getSetToken = async (req, res) => {
 		// Check if user has permissions via addedUser
 		if (permissions) {
 			accessData = await Permissions.findOne({ unique_id: permissions });
-			if (!accessData || !accessData.chats?.view) {
+			if (!accessData || !accessData?.chats?.view) {
 				return res.render("errors/notAllowed");
 			}
 			// Use the specific permission for chats from the Permissions model
-			permissionValue = accessData.chats.chat;
+			permissionValue = accessData?.chats?.chat;
 		} else {
 			// Otherwise, fetch the user's access details
 			accessData = await User.findOne({ unique_id: id });
-			permissionValue = accessData.access.chats.chat;
+			permissionValue = accessData?.access?.chats?.chat;
 		}
 
 		// Create a new token record in the database
@@ -96,7 +96,7 @@ export const getSetToken = async (req, res) => {
 		} else {
 			console.error(`Error in getSetToken:`, error.message);
 		}
-		res.render("errors/serverError");
+		res.render("errors/chatsError");
 	}
 };
 
