@@ -46,19 +46,10 @@ export const fetchAndFormatReports = async (
 	limit = 10,
 ) => {
 	// Aggregation pipeline:
+	const now = Date.now();
 	const aggregatedReports = await Report.aggregate([
-		{
-			$match: {
-				useradmin: userId,
-				FB_PHONE_ID: phoneNumberId,
-			},
-		},
-		// Sort by updatedAt descending so the latest documents are first
+		{ $match: { useradmin: userId, FB_PHONE_ID: phoneNumberId } },
 		{ $sort: { updatedAt: -1 } },
-		// Group by recipientPhone while computing:
-		// 1. The latest document (latestDoc)
-		// 2. A flag (hasRecentReply) indicating if any document in the group has a replyContent
-		//    and was updated less than 24 hours ago.
 		{
 			$group: {
 				_id: "$recipientPhone",
@@ -68,30 +59,22 @@ export const fetchAndFormatReports = async (
 						$cond: [
 							{
 								$and: [
-									// Check if replyContent exists (is not null)
-									{ $ne: ["$replyContent", ""] },
-									// Use $$NOW to get the current date in aggregation and compare with updatedAt.
+									{ $ne: ["$replyContent", null] },
 									{
 										$lt: [
-											{
-												$subtract: [
-													"$$NOW",
-													"$updatedAt",
-												],
-											},
-											24 * 60 * 60 * 1000, // 24 hours in milliseconds
+											{ $subtract: [now, "$updatedAt"] },
+											24 * 60 * 60 * 1000,
 										],
 									},
 								],
 							},
-							1, // set flag to 1 if condition is true
-							0, // else 0
+							1,
+							0,
 						],
 					},
 				},
 			},
 		},
-		// Merge the hasRecentReply flag into the latest document for further processing.
 		{
 			$replaceRoot: {
 				newRoot: {
@@ -102,12 +85,11 @@ export const fetchAndFormatReports = async (
 				},
 			},
 		},
-		// Final sort if needed
 		{ $sort: { updatedAt: -1 } },
-		// Apply pagination on the unique records
 		{ $skip: skip },
 		{ $limit: limit },
 	]);
+
 
 	if (!aggregatedReports || aggregatedReports.length === 0) {
 		return [];
