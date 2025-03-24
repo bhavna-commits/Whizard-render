@@ -114,22 +114,24 @@ class Preview {
 
 		// Filter components for header, body, footer, and buttons
 		components.forEach((component) => {
+			console.log(component);
 			if (component.type === "HEADER") {
 				if (component.format === "IMAGE") {
 					// Handle image format
-					let fileUrl = component.example?.header_url?.replace(
-						/\\/g,
-						"/",
-					);
+					let fileUrl = component.example?.header_url
+						?.split("/")
+						.slice(3)
+						.join("/");
 
-					// console.log(fileUrl);
-					headerContent = `<img src="/${fileUrl}" alt="Header Image" class="custom-card-img">`;
+					console.log(fileUrl);
+					// headerContent = `<img src="/${fileUrl}" alt="Header Image" class="custom-card-img">`;
 				} else if (component.format === "VIDEO") {
 					// Handle video format
-					let fileUrl = component.example?.header_url?.replace(
-						/\\/g,
-						"/",
-					);
+					let fileUrl = component.example?.header_url
+						?.split("/")
+						.slice(3)
+						.join("/");
+					console.log(fileUrl);
 					const fileExtension = fileUrl
 						.split(".")
 						.pop()
@@ -142,10 +144,10 @@ class Preview {
                 `;
 				} else if (component.format === "DOCUMENT") {
 					// Handle document format (PDF, DOCX, etc.)
-					let fileUrl = component.example?.header_url?.replace(
-						/\\/g,
-						"/",
-					);
+					let fileUrl = component.example?.header_url
+						?.split("/")
+						.slice(3)
+						.join("/");
 					headerContent = `<a href="/${fileUrl}" target="_blank">Download Document</a>`;
 				} else {
 					headerContent = component.text || "";
