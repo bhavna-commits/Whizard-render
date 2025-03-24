@@ -138,6 +138,8 @@ export async function getUserIdFromToken(token) {
 		decodedTimestamp,
 		" difference :",
 		tokenRecord.expiresAt - decodedTimestamp,
+		" expires At :",
+		tokenRecord.expiresAt,
 	);
 	if (decodedTimestamp > tokenRecord.expiresAt) {
 		throw "Token has expired";
