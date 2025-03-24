@@ -262,6 +262,7 @@ export async function sendMessagesReports(
 				recipientPhone: contact.wa_id,
 				status: response.status,
 				messageId: response.response.messages[0].id,
+				messageTemplate,
 			};
 
 			if (mediaPreview) {
@@ -270,9 +271,6 @@ export async function sendMessagesReports(
 					url: mediaPreview.url,
 					fileName: mediaPreview.fileName,
 				};
-			} else {
-				// Otherwise, store the text preview.
-				reportData.messageTemplate = messageTemplate;
 			}
 
 			const report = new Report(reportData);

@@ -64,19 +64,6 @@ export const fetchAndFormatReports = async (
 		},
 		// Replace root with the grouped document
 		{ $replaceRoot: { newRoot: "$doc" } },
-		// Optionally project only the fields you need
-		{
-			$project: {
-				contactName: 1,
-				recipientPhone: 1,
-				status: 1,
-				replyContent: 1,
-				updatedAt: 1,
-				campaignId: 1,
-				textSent: 1,
-				media_type: 1,
-			},
-		},
 		// Final sort by updatedAt descending (if needed)
 		{ $sort: { updatedAt: -1 } },
 		// Apply pagination on the unique records
