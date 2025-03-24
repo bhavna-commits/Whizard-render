@@ -286,6 +286,7 @@ export function getMediaPreviewFromTemplate(template) {
 
 export function generatePreviewMessage(template, message) {
 	try {
+		console.log(message);
 		let previewMessage = "";
 		// console.log(JSON.stringify(message));
 
