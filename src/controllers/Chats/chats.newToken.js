@@ -133,14 +133,14 @@ export async function getUserIdFromToken(token) {
 
 	// Check token expiration: we assume token lifetime is defined in TOKEN_LIFETIME.
 	const decodedTimestamp = Number(timestamp);
-	console.log(
-		"front-end timestamp :",
-		decodedTimestamp,
-		" difference :",
-		tokenRecord.expiresAt - decodedTimestamp,
-		" expires At :",
-		tokenRecord.expiresAt,
-	);
+	// console.log(
+	// 	"front-end timestamp :",
+	// 	decodedTimestamp,
+	// 	" difference :",
+	// 	tokenRecord.expiresAt - decodedTimestamp,
+	// 	" expires At :",
+	// 	tokenRecord.expiresAt,
+	// );
 	if (decodedTimestamp > Date.now() + TOKEN_LIFETIME) {
 		throw "Token has expired";
 	}
