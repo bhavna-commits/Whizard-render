@@ -46,9 +46,15 @@ export const fetchAndFormatReports = async (
 	limit = 10,
 ) => {
 	// Aggregation pipeline:
-	const now = Date.now();
+	const nowEpoch = Date.now(); // Current epoch in milliseconds
+
 	const aggregatedReports = await Report.aggregate([
-		{ $match: { useradmin: userId, FB_PHONE_ID: phoneNumberId } },
+		{
+			$match: {
+				useradmin: userId,
+				FB_PHONE_ID: phoneNumberId,
+			},
+		},
 		{ $sort: { updatedAt: -1 } },
 		{
 			$group: {
@@ -59,17 +65,36 @@ export const fetchAndFormatReports = async (
 						$cond: [
 							{
 								$and: [
-									{ $ne: ["$replyContent", null] },
+									// Check that replyContent is not null and not empty.
+									{
+										$gt: [
+											{
+												$strLenCP: {
+													$ifNull: [
+														"$replyContent",
+														"",
+													],
+												},
+											},
+											0,
+										],
+									},
+									// Check if the difference is less than 24 hours.
 									{
 										$lt: [
-											{ $subtract: [now, "$updatedAt"] },
+											{
+												$subtract: [
+													nowEpoch,
+													"$updatedAt",
+												],
+											},
 											24 * 60 * 60 * 1000,
 										],
 									},
 								],
 							},
-							1,
-							0,
+							1, // True flag if condition met.
+							0, // Otherwise false.
 						],
 					},
 				},
