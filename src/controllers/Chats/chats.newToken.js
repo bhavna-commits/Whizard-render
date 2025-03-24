@@ -141,7 +141,7 @@ export async function getUserIdFromToken(token) {
 		" expires At :",
 		tokenRecord.expiresAt,
 	);
-	if (decodedTimestamp > tokenRecord.expiresAt) {
+	if (decodedTimestamp > Date.now() + TOKEN_LIFETIME) {
 		throw "Token has expired";
 	}
 	// Generate a new token with a fresh timestamp using the same baseHash.
