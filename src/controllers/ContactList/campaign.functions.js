@@ -286,7 +286,6 @@ export function getMediaPreviewFromTemplate(template) {
 
 export function generatePreviewMessage(template, message) {
 	try {
-		console.log(message);
 		let previewMessage = "";
 		// console.log(JSON.stringify(message));
 
@@ -301,7 +300,7 @@ export function generatePreviewMessage(template, message) {
 		// Process Body component
 
 		let bodyText = template.components.find((c) => c.type === "BODY")?.text;
-		let bodyVariable = message[0]?.parameters;
+		let bodyVariable = message?.find((c) => c.type === "BODY")?.parameters;
 
 		bodyVariable?.forEach((value, index) => {
 			console.log(value);
