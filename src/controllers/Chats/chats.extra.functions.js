@@ -53,18 +53,56 @@ export const fetchAndFormatReports = async (
 				FB_PHONE_ID: phoneNumberId,
 			},
 		},
-		// Sort by updatedAt descending so the latest record comes first
+		// Sort by updatedAt descending so the latest documents are first
 		{ $sort: { updatedAt: -1 } },
-		// Group by recipientPhone (wa_id), keeping only the first document per group (which is the latest due to the sort)
+		// Group by recipientPhone while computing:
+		// 1. The latest document (latestDoc)
+		// 2. A flag (hasRecentReply) indicating if any document in the group has a replyContent
+		//    and was updated less than 24 hours ago.
 		{
 			$group: {
 				_id: "$recipientPhone",
-				doc: { $first: "$$ROOT" },
+				latestDoc: { $first: "$$ROOT" },
+				hasRecentReply: {
+					$max: {
+						$cond: [
+							{
+								$and: [
+									// Check if replyContent exists (is not null)
+									{ $ne: ["$replyContent", ""] },
+									// Use $$NOW to get the current date in aggregation and compare with updatedAt.
+									{
+										$lt: [
+											{
+												$subtract: [
+													"$$NOW",
+													"$updatedAt",
+												],
+											},
+											24 * 60 * 60 * 1000, // 24 hours in milliseconds
+										],
+									},
+								],
+							},
+							1, // set flag to 1 if condition is true
+							0, // else 0
+						],
+					},
+				},
 			},
 		},
-		// Replace root with the grouped document
-		{ $replaceRoot: { newRoot: "$doc" } },
-		// Final sort by updatedAt descending (if needed)
+		// Merge the hasRecentReply flag into the latest document for further processing.
+		{
+			$replaceRoot: {
+				newRoot: {
+					$mergeObjects: [
+						"$latestDoc",
+						{ hasRecentReply: "$hasRecentReply" },
+					],
+				},
+			},
+		},
+		// Final sort if needed
 		{ $sort: { updatedAt: -1 } },
 		// Apply pagination on the unique records
 		{ $skip: skip },
@@ -78,10 +116,6 @@ export const fetchAndFormatReports = async (
 	// Format the results as needed.
 	const formattedReports = aggregatedReports
 		.map((report) => {
-			const isReplyRecent =
-				report.replyContent &&
-				Date.now() - report.updatedAt < 24 * 60 * 60 * 1000; // less than 24 hours
-
 			return {
 				lastmessage:
 					report.replyContent ||
@@ -90,7 +124,8 @@ export const fetchAndFormatReports = async (
 					report.messageTemplate ||
 					"No recent reply",
 				wa_id: report.recipientPhone,
-				status: isReplyRecent ? 0 : 1,
+				// If any document in the group has a recent reply, status is 0.
+				status: report.hasRecentReply === 1 ? 0 : 1,
 				name: report.contactName,
 				usertimestmp: report.updatedAt,
 				campaignId: report.campaignId,
