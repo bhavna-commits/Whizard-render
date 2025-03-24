@@ -24,6 +24,7 @@ export async function sendMessages(campaign, user, unique_id, phone_number) {
 		// Find contacts by contactListId
 		const contactList = await Contacts.find({
 			contactId: campaign.contactListId,
+			subscribe: 1,
 		});
 
 		if (contactList.length == 0) {
