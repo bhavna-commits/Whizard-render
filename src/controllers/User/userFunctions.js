@@ -18,6 +18,10 @@ export const sendEmailVerification = async (email, token) => {
 	}
 };
 
+export const sendOTPOnWhatsApp = async (otp) => {
+	
+}
+
 // Verify the email token
 export const verifyEmailToken = (incomingToken, storedToken, tokenExpiry) => {
 	const hashedIncomingToken = crypto

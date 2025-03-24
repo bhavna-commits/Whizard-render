@@ -303,6 +303,7 @@ export function generatePreviewMessage(template, message) {
 		let bodyVariable = message[0]?.parameters;
 
 		bodyVariable?.forEach((value, index) => {
+			console.log(value);
 			bodyText = bodyText.replace("{{" + (index + 1) + "}}", value.text);
 		});
 

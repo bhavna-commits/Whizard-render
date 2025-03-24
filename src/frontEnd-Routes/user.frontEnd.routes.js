@@ -64,4 +64,8 @@ router.post(
 	createAddedUserPassword,
 );
 
+router.get("/2FA", (req, res) => {
+	res.render("User/2FA");
+});
+
 export default router;
