@@ -88,7 +88,7 @@ export async function sendMessages(campaign, user, unique_id, phone_number) {
 					url: mediaPreview.url,
 					fileName: mediaPreview.fileName,
 				};
-			} 
+			}
 			const report = new Report(reportData);
 			await report.save();
 
@@ -288,7 +288,7 @@ export function getMediaPreviewFromTemplate(template) {
 export function generatePreviewMessage(template, message) {
 	try {
 		let previewMessage = "";
-		// console.log(JSON.stringify(message));
+		console.log(JSON.stringify(message));
 
 		let headerText = template.components.find(
 			(c) => c.type === "HEADER",
@@ -301,7 +301,8 @@ export function generatePreviewMessage(template, message) {
 		// Process Body component
 
 		let bodyText = template.components.find((c) => c.type === "BODY")?.text;
-		let bodyVariable = message?.find((c) => c.type === "BODY")?.parameters;
+		let bodyVariable = message?.find((c) => c.type === "BODY").parameters;
+		console.log(bodyVariable);
 
 		bodyVariable?.forEach((value, index) => {
 			console.log(value);
