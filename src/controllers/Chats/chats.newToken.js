@@ -129,12 +129,16 @@ export async function getUserIdFromToken(token) {
 
 	if (!tokenRecord) {
 		throw "Token not found";
-    }
-    
-    
+	}
+
 	// Check token expiration: we assume token lifetime is defined in TOKEN_LIFETIME.
-    const decodedTimestamp = Number(timestamp);
-    console.log("difference :", tokenRecord.expiresAt - decodedTimestamp);
+	const decodedTimestamp = Number(timestamp);
+	console.log(
+		"front-end timestamp :",
+		decodedTimestamp,
+		" difference :",
+		tokenRecord.expiresAt - decodedTimestamp,
+	);
 	if (decodedTimestamp > tokenRecord.expiresAt) {
 		throw "Token has expired";
 	}
