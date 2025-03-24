@@ -254,6 +254,7 @@ export const getMoreChats = async (req, res, next) => {
 export const getRefreshToken = async (req, res, next) => {
 	try {
 		const oldToken = checkToken(req, next);
+		console.log("inside refresh token");
 		const { userId, addedUser, token } = await getUserIdFromToken(oldToken);
 
 		// Determine permissions (this may use additional info from tokenData or user lookup)
