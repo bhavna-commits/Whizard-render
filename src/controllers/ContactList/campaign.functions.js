@@ -288,37 +288,46 @@ export function getMediaPreviewFromTemplate(template) {
 export function generatePreviewMessage(template, message) {
 	try {
 		let previewMessage = "";
-		console.log(JSON.stringify(message));
-
-		let headerText = template.components.find(
+		// Process HEADER component
+		const headerComponent = template.components.find(
 			(c) => c.type === "HEADER",
-		)?.text;
-
-		if (headerText) {
-			previewMessage += `${headerText}\n`;
+		);
+		if (headerComponent) {
+			if (headerComponent.text) {
+				previewMessage += `${headerComponent.text}\n`;
+			} else if (headerComponent.parameters) {
+				// Check if header parameters contain an image
+				const imageParam = headerComponent.parameters.find(
+					(p) => p.type !== "text",
+				);
+				if (imageParam && imageParam.image && imageParam.image.link) {
+					previewMessage += `[Image: ${imageParam.image.link}]\n`;
+				}
+			}
 		}
 
-		// Process Body component
+		// Process BODY component
+		let bodyComponent = template.components.find((c) => c.type === "BODY");
+		if (bodyComponent) {
+			let bodyText = bodyComponent.text;
+			let bodyVariable = message?.find(
+				(c) => c.type === "BODY",
+			)?.parameters;
 
-		let bodyText = template.components.find((c) => c.type === "BODY")?.text;
-		let bodyVariable = message?.find((c) => c.type === "BODY").parameters;
-		console.log(bodyVariable);
+			bodyVariable?.forEach((value, index) => {
+				bodyText = bodyText.replace(`{{${index + 1}}}`, value.text);
+			});
+			previewMessage += `${bodyText}\n`;
+		}
 
-		bodyVariable?.forEach((value, index) => {
-			console.log(value);
-			bodyText = bodyText.replace("{{" + (index + 1) + "}}", value.text);
-		});
-
-		previewMessage += `${bodyText}\n`;
-
-		// Process Footer component (optional)
+		// Process FOOTER component (optional)
 		const footerComponent = template.components.find(
 			(c) => c.type === "FOOTER",
 		);
 		if (footerComponent) {
 			previewMessage += `${footerComponent.text}\n`;
 		}
-		// console.log(JSON.stringify(previewMessage));
+
 		return previewMessage.trim();
 	} catch (error) {
 		console.error("Error generating preview message:", error.message);
