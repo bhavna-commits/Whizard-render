@@ -271,17 +271,21 @@ class TemplateManager {
 
 	async loadContactLists() {
 		try {
-			// const contactLists = await fetchContactLists();
+			// Clear the select and add a default disabled option.
 			this.recipientSelect
 				.empty()
 				.append(
-					'<option value="" selected>List of recipients</option>',
+					'<option value="" disabled selected>List of recipients</option>',
 				);
 
+			// Loop through contactLists and add each option as disabled.
 			contactLists.forEach((list) => {
-				this.recipientSelect.append(
-					new Option(list.contactName, list.recipientPhone),
+				const option = new Option(
+					list.contactName,
+					list.recipientPhone,
 				);
+				option.disabled = true; // Disable this option.
+				this.recipientSelect.append(option);
 			});
 		} catch (error) {
 			console.error("Error loading contact lists:", error);

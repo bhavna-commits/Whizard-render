@@ -1055,7 +1055,7 @@ export const getSendBroadcast = async (req, res, next) => {
 		// delete req.session.tempData;
 		const permissions = req.session?.addedUser?.permissions;
 		if (permissions) {
-			const access = Permissions.findOne({ unique_id: permissions });
+			const access = await Permissions.findOne({ unique_id: permissions });
 			if (
 				access.contactList.sendBroadcast &&
 				req.session?.addedUser?.whatsAppStatus
