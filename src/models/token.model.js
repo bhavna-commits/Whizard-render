@@ -9,7 +9,7 @@ const tokenSchema = new mongoose.Schema(
 		createdAt: { type: Number, default: () => Date.now() },
 		unique_id: { type: String, required: true },
 		lastToken: { type: String, default: "" },
-		addedUser: { type: String, required: false },
+		addedUser: { type: Object, required: false },
 	},
 	{
 		timestamps: false,
