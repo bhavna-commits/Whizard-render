@@ -129,7 +129,7 @@
 						if (data.success) {
 							window.location.reload();
 						} else {
-							alert('Error deleting template: ' + data.error);
+							toast("error", data.error);
 						}
 					})
 					.catch((error) => console.error('Error:', error));

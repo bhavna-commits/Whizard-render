@@ -453,47 +453,47 @@
 			
 			// fileInput.addEventListener("change", function () {
 			// 	const files = fileInput.files;
-				
+			
 			// 	for (const file of files) {
 			// 		const fileItem = document.createElement("div");
 			// 		fileItem.classList.add("file-item");
-					
+			
 			// 		const fileStatus = document.createElement("div");
 			// 		fileStatus.classList.add("file-status");
-					
+			
 			// 		const fileName = document.createElement("span");
 			// 		fileName.textContent = file.name;
 			// 		fileName.classList.add("status-uploading");
-					
+			
 			// 		const loader = document.createElement("div");
 			// 		loader.classList.add("circular-loader");
-					
+			
 			// 		const statusText = document.createElement("span");
 			// 		statusText.textContent = "Uploading...";
 			// 		statusText.classList.add("status-uploading");
-					
+			
 			// 		const removeButton = document.createElement("span");
 			// 		removeButton.textContent = "✖";
 			// 		removeButton.classList.add("remove-file");
 			// 		removeButton.onclick = () => fileItem.remove();
-					
+			
 			// 		fileStatus.appendChild(loader);
 			// 		fileStatus.appendChild(fileName);
 			// 		fileStatus.appendChild(statusText);
 			// 		fileItem.appendChild(fileStatus);
 			// 		fileItem.appendChild(removeButton);
 			// 		fileList.appendChild(fileItem);
-					
+			
 			// 		setTimeout(() => {
 			// 			loader.remove();
 			// 			statusText.textContent = "Uploaded";
 			// 			statusText.classList.remove("status-uploading");
 			// 			statusText.classList.add("status-uploaded");
-						
+			
 			// 			const uploadedIcon = document.createElement("div");
 			// 			uploadedIcon.classList.add("uploaded-icon");
 			// 			uploadedIcon.textContent = "✔";
-						
+			
 			// 			fileStatus.prepend(uploadedIcon);
 			// 		}, 2000);
 			// 	}
@@ -507,11 +507,11 @@
 					const res = await fetch("/getFaceBookTemplates");
 					const data = await res.json();
 					if (!data.success) {
-						alert(data.error);
+						toast("success", data.error);
 					}
 					location.reload();
 				} catch (err) {
-					alert(err);
+					toast("error", err);
 				} finally {
 					icon.classList.remove("animate-spin");
 				}

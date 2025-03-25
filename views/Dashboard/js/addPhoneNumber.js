@@ -22,7 +22,7 @@ countryOptions.forEach((option) => {
 	option.addEventListener("click", function () {
 		const flag = this.querySelector(".country-flag").textContent;
 		const dialCode = this.querySelector(".country-dial-code").textContent;
-        // console.log(dialCode);
+		// console.log(dialCode);
 		selectedFlag.textContent = flag;
 		selectedDialCode.value = dialCode;
 		countryDropdown.classList.add("hidden");
@@ -91,7 +91,7 @@ dropdownButton.addEventListener("click", async (e) => {
 		// dropdownMenu.classList.toggle("hidden");
 	} catch (error) {
 		console.error("Error updating phone numbers:", error);
-		toast("error",error.message);
+		toast("error", error.message);
 	} finally {
 		loader.classList.add("hidden");
 		text.classList.remove("hidden");
@@ -212,13 +212,13 @@ dropdownUl.addEventListener("click", (event) => {
 			if (data.success) {
 				selectedOption.innerHTML = selectedText;
 			} else {
-				toast("error",data.message);
+				toast("error", data.message);
 				selectedOption.textContent = "Select phone number";
 			}
 		})
 		.catch((error) => {
 			console.error("Error selecting phone number:", error);
-			toast("error",error);
+			toast("error", error);
 			selectedOption.textContent = "Select phone number";
 		})
 		.finally(() => {
@@ -422,8 +422,8 @@ function validateForm() {
 	const name = document.getElementById("name").value.trim();
 	const countryCode = document
 		.getElementById("selectedDialCode")
-        .value.trim();
-    // console.log(countryCode);
+		.value.trim();
+	// console.log(countryCode);
 	const phoneNumber = document.getElementById("phoneNumber").value.trim();
 
 	// Regex for country code: must start with a '+' followed by one or more digits.
@@ -467,8 +467,8 @@ function validateForm() {
 		countryCodeRegex.test(countryCode) &&
 		phoneRegex.test(phoneNumber);
 
-    // console.log(isValid);
-    
+	// console.log(isValid);
+
 	const submitButton = document.getElementById("submitButton");
 	if (isValid) {
 		submitButton.disabled = false;
@@ -542,7 +542,8 @@ async function addPhoneNumber(event) {
 				.classList.remove("hidden");
 
 			// Pass phone number to hidden input in the verify form
-			document.getElementById("hiddenPhoneNumber").value = response.phoneNumberId;
+			document.getElementById("hiddenPhoneNumber").value =
+				response.phoneNumberId;
 		} else {
 			// console.log(response);
 			document
@@ -564,10 +565,10 @@ async function addPhoneNumber(event) {
 async function verifyPhoneNumber(event) {
 	event.preventDefault();
 
-    const otpInputs = [ ...document.querySelectorAll(".otp-verify") ];
-    console.log(otpInputs);
-    const codeInput = otpInputs.map((input) => input.value).join("");
-    console.log(codeInput);
+	const otpInputs = [...document.querySelectorAll(".otp-verify")];
+	console.log(otpInputs);
+	const codeInput = otpInputs.map((input) => input.value).join("");
+	console.log(codeInput);
 	const phoneNumberInput = document.getElementById("hiddenPhoneNumber").value;
 
 	const buttonLoader = event.target.querySelector(".buttonLoader");
@@ -596,8 +597,8 @@ async function verifyPhoneNumber(event) {
 		if (data.success) {
 			document
 				.getElementById("verifyNewNumberError")
-                .classList.add("hidden");
-            document.getElementById("verifyNumberForm").classList.add("hidden");
+				.classList.add("hidden");
+			document.getElementById("verifyNumberForm").classList.add("hidden");
 			document.getElementById("twoFactorForm").classList.remove("hidden");
 		} else {
 			document
@@ -612,8 +613,7 @@ async function verifyPhoneNumber(event) {
 		document
 			.getElementById("verifyNewNumberError")
 			.classList.remove("hidden");
-		document.getElementById("verifyNewNumberError").innerText =
-			error;
+		document.getElementById("verifyNewNumberError").innerText = error;
 	}
 }
 
@@ -645,12 +645,12 @@ async function selectPhoneNumber(event) {
 		if (response.ok) {
 			window.location.reload(); // Reload the page or redirect
 		} else {
-			toast("error","Failed to select phone number. Please try again.");
+			toast("error", "Failed to select phone number. Please try again.");
 		}
 	} catch (error) {
 		// Hide loader and show button text if an error occurs
 
-		toast("error",error);
+		toast("error", error);
 	} finally {
 		buttonLoader.classList.add("hidden");
 		buttonText.classList.remove("hidden");
@@ -689,7 +689,7 @@ async function deletePhoneNumber(event, phoneNumberId) {
 			toast("error", errorData.message);
 		}
 	} catch (error) {
-		toast("error",error);
+		toast("error", error);
 	} finally {
 		if (buttonLoader) buttonLoader.classList.add("hidden");
 		if (buttonText) buttonText.classList.remove("hidden");

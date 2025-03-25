@@ -83,18 +83,18 @@
 					.then(response => response.json())
 					.then(data => {
 						if (data.success) {
-							alert(`User role updated to ${newRoleName}`);
+							toast("success",`User role updated to ${newRoleName}`);
 							location.reload(); // Reload the page to reflect the updated role
 						} else {
-							alert('Failed to update role');
+							toast("error",'Failed to update role');
 						}
 					})
 					.catch(error => {
 						console.error('Error:', error);
-						alert('An error occurred while updating role');
+						toast("error",'An error occurred while updating role');
 					});
 			} else {
-				alert('Please select a role');
+				toast("info",'Please select a role');
 			}
 		};
 	}

@@ -90,14 +90,14 @@
 			});
 			
 			if (response.ok) {
-				alert('Invitation sent successfully!');
+				toast("success", 'Invitation sent successfully!');
 				location.href = "/settings/user-management";
 			} else {
 				const error = await response.json();
-				alert(error.message || 'Error occurred');
+				toast("error", error.message || 'Error occurred');
 			}
 		} catch (error) {
-			alert(error.message);
+			toast("error", error.message);
 		} finally {
 			// Hide spinner and show the button text again
 			document.getElementById('inviteButton').innerHTML = "Invite";
