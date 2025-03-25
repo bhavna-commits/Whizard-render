@@ -41,6 +41,7 @@ import {
 	isObject,
 	isString,
 } from "../../middleWares/sanitiseInput.js";
+import Permissions from "../../models/permissions.model.js";
 
 import { generateUniqueId } from "../../utils/otpGenerator.js";
 import { sendTestMessage } from "../ContactList/campaign.functions.js";
