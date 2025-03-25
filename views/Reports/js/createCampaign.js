@@ -122,7 +122,7 @@ class Preview {
 						.join("/");
 
 					// console.log(fileUrl);
-					headerContent = `<img src="/${fileUrl}" alt="Header Image" class="custom-card-img">`;
+					headerContent = `<img src="/${fileUrl}" alt="Header Image" class="custom-card-img max-h-96" />`;
 				} else if (component.format === "VIDEO") {
 					// Handle video format
 					let fileUrl = component.example?.header_url
@@ -491,7 +491,7 @@ class TemplateManager {
 					location.href = "/reports/campaign-list";
 				}, 1000);
 			} else {
-				toast("error",result.message);
+				toast("error", result.message);
 			}
 		} catch (error) {
 			console.error("Error submitting campaign:", error);

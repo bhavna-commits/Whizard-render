@@ -132,7 +132,7 @@
 						<tbody>
 							<% campaigns.forEach(report => { %>
 							<tr class="hover:bg-gray-100 cursor-pointer border text-gray-700">
-								<td class="border-l border-t border-b rounded-lg py-4 border-gray-200 text-sm">
+								<td class="border-l border-t border-b rounded-lg py-4 px-2 border-gray-200 text-sm">
 									<input type="checkbox" class="checkbox" />
 								</td>
 								<td class="border-t border-b border-gray-200">
@@ -154,9 +154,9 @@
 								<td class="border-t border-b border-gray-200">
 									<%= report.status.charAt(0).toUpperCase() + report.status.slice(1).toLowerCase() %>
 								</td>
-								<td class="border-r border-t border-b rounded-lg border-gray-200 max-w-xs px-5">
+								<td class="border-r border-t border-b rounded-lg border-gray-200 max-w-xs">
 									<p class="inline">
-										<span id="messageText" class="block overflow-hidden text-ellipsis whitespace-nowrap">
+										<span id="messageText" class="block overflow-hidden text-base text-ellipsis whitespace-nowrap">
 											<%= report.messageTemplate || 'No Message Text Available' %>
 										</span>
 										<% if (report.messageTemplate && report.messageTemplate.length > 100) { %>

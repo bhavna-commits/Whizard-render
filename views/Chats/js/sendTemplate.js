@@ -123,15 +123,15 @@ class Preview {
 						.slice(3)
 						.join("/");
 
-					console.log(fileUrl);
-					headerContent = `<img src="/${fileUrl}" alt="Header Image" class="custom-card-img">`;
+					// console.log(fileUrl);
+					headerContent = `<img src="/${fileUrl}" alt="Header Image" class="custom-card-img max-h-96" />`;
 				} else if (component.format === "VIDEO") {
 					// Handle video format
 					let fileUrl = component.example?.header_url
 						?.split("/")
 						.slice(3)
 						.join("/");
-					console.log(fileUrl);
+					// console.log(fileUrl);
 					const fileExtension = fileUrl
 						.split(".")
 						.pop()
