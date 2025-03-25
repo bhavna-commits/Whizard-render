@@ -33,7 +33,7 @@ saveChangesBtn.addEventListener("click", function () {
 		.then((response) => response.json())
 		.then((data) => {
 			if (data.success) {
-				toast("success","Changes saved successfully!");
+				toast("success", "Changes saved successfully!");
 				originalValue = updatedValue; // Update the original value
 				saveChangesBtn.disabled = true;
 				saveChangesBtn.classList.add(
@@ -42,11 +42,11 @@ saveChangesBtn.addEventListener("click", function () {
 				);
 				saveChangesBtn.classList.remove("hover:bg-gray-100");
 			} else {
-				toast("error","Error saving changes: " + data.message);
+				toast("error", data.message);
 			}
 		})
 		.catch((err) => {
-			console.error("Error:", err);
+			console.error("Error editing contact:", err);
 			toast("error", err);
 		});
 });

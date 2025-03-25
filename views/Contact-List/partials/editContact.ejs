@@ -216,21 +216,27 @@
 	}
 	
 	function openDeleteModal (id, name) {
-		const yes = confirm(`Are you sure you want to delete ${name}'s contact`);
-		if (yes) {
-			fetch(`/api/contact-list/contacts/${id}`, {
-					method: "DELETE",
-				})
-				.then((response) => response.json())
-				.then((data) => {
-					if (data.success) {
-						location.reload();
-					} else {
-						toast("error", data.message);
-					}
-				})
-				.catch((err) => console.error("Error:", err));
-		}
-		
-	};
+		// Custom toastConfirm function for modern UI confirmation
+		toastConfirm(`Are you sure you want to delete ${name}'s contact?`)
+			.then((confirmation) => {
+				if (confirmation) {
+					// Proceed with deleting the contact if the user confirmed
+					fetch(`/api/contact-list/contacts/${id}`, {
+							method: "DELETE",
+						})
+						.then((response) => response.json())
+						.then((data) => {
+							if (data.success) {
+								location.reload(); // Reload the page on success
+							} else {
+								toast("error", data.message); // Show error message on failure
+							}
+						})
+						.catch((err) => {
+							console.error("Error:", err);
+							toast("error", "An error occurred while deleting the contact.");
+						});
+				}
+			});
+	}
 </script>

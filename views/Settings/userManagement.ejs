@@ -235,59 +235,63 @@
 		}
 		
 		function deleteUser (userId, name) {
-			const confirmation = confirm(`Are you sure you want to delete user ${name}?`);
+			toastConfirm(`Are you sure you want to delete user ${name}?`).then((confirmation) => {
+				if (confirmation) {
+					fetch('/api/settings/updateUserManagement', {
+							method: 'POST',
+							headers: {
+								'Content-Type': 'application/json',
+							},
+							body: JSON.stringify({
+								action: 'deleteUser',
+								userId
+							}),
+						})
+						.then(response => response.json())
+						.then(data => {
+							if (data.success) {
+								toast("success", `User ${name} deleted successfully`);
+								location.reload(); // Reload the page to reflect the changes
+							} else {
+								toast("error", data.message);
+							}
+						})
+						.catch(error => {
+							console.error('Error:', error);
+							toast("error", error);
+						});
+				}
+			});
 			
-			if (confirmation) {
-				fetch('/api/settings/updateUserManagement', {
-						method: 'POST',
-						headers: {
-							'Content-Type': 'application/json',
-						},
-						body: JSON.stringify({
-							action: 'deleteUser',
-							userId
-						}),
-					})
-					.then(response => response.json())
-					.then(data => {
-						if (data.success) {
-							alert(`User ${name} deleted successfully`);
-							location.reload(); // Reload the page to reflect the changes
-						} else {
-							alert(data.message);
-						}
-					})
-					.catch(error => {
-						console.error('Error:', error);
-						alert('An error occurred while deleting user');
-					});
-			}
+			
 		}
 		
 		function deletePermission (userId, name) {
-			const confirmation = confirm(`Are you sure you want to delete role ${name}?`);
+			toastConfirm(`Are you sure you want to delete role ${name}?`).then((confirmation) => {
+				if (confirmation) {
+					// Proceed with deletion
+					fetch(`/api/settings/deleteRole?id=${userId}&name=${name}`, {
+							method: 'DELETE',
+							headers: {
+								'Content-Type': 'application/json',
+							},
+						})
+						.then(response => response.json())
+						.then(data => {
+							if (data.success) {
+								toast("success", `Role ${name} deleted successfully`);
+								location.reload(); // Reload the page to reflect changes
+							} else {
+								toast("error", 'Failed to delete role');
+							}
+						})
+						.catch(error => {
+							console.error('Error:', error);
+							toast("error", error);
+						});
+				}
+			});
 			
-			if (confirmation) {
-				fetch(`/api/settings/deleteRole?id=${userId}&name=${name}`, {
-						method: 'DELETE',
-						headers: {
-							'Content-Type': 'application/json',
-						},
-					})
-					.then(response => response.json())
-					.then(data => {
-						if (data.success) {
-							alert(`Role ${name} deleted successfully`);
-							location.reload(); // Reload the page to reflect changes
-						} else {
-							alert('Failed to delete role');
-						}
-					})
-					.catch(error => {
-						console.error('Error:', error);
-						alert('An error occurred while deleting the role');
-					});
-			}
 		}
 		
 		// Close dropdown on clicking outside (using document.addEventListener)

@@ -135,7 +135,7 @@ class Preview {
 						.toLowerCase();
 					headerContent = `
                     <video controls class="custom-card-img">
-                        <source src="/${fileUrl}" type="video/${fileExtension}">
+                        <source src="/${fileUrl}" type="video/${fileExtension}" />
                         Your browser does not support the video tag.
                     </video>
                 `;

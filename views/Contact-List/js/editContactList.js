@@ -65,45 +65,34 @@ document
 // Open Delete Modal
 function openDeleteModal(contactId, contactName) {
 	console.log(contactId, contactName); // For debugging
-	// Set the contact name in the modal
-	document.getElementById("deleteContactName").textContent = contactName;
-	// Set the contactId in the hidden input field
-	document.getElementById("deleteContactId").value = contactId;
 
-	// Show the modal
-	const deleteModal = new bootstrap.Modal(
-		document.getElementById("deleteModal"),
-	);
-	deleteModal.show();
-
-	// Add event listener to the "Cancel" button to dismiss the modal
-	document
-		.getElementById("cancelDeleteBtn")
-		.addEventListener("click", function () {
-			deleteModal.hide(); // Manually hide the modal
-		});
-
-	// Get the "Delete" button
-	const confirmDeleteBtn = document.getElementById("confirmDeleteBtn");
-
-	// Add event listener to the delete button
-	confirmDeleteBtn.onclick = function () {
-		// Proceed with the deletion
-		fetch(`/api/contact-list/deleteList/${contactId}`, {
-			method: "DELETE",
-		})
-			.then((response) => response.json())
-			.then((data) => {
-				if (data.success) {
-					deleteModal.hide(); // Hide the modal after successful deletion
-					window.location.reload(); // Reload the page
-				} else {
-					toast("error", data.message);
-				}
+	// Use our custom toastConfirm (Tailwind-based) instead of Bootstrap's modal
+	toastConfirm(
+		`Are you sure you want to delete contact ${contactName}?`,
+	).then((confirmation) => {
+		if (confirmation) {
+			// If the user confirmed "Delete"
+			fetch(`/api/contact-list/deleteList/${contactId}`, {
+				method: "DELETE",
 			})
-			.catch((error) => {
-				console.error("Error:", error);
-				toast("error", error);
-			});
-	};
+				.then((response) => response.json())
+				.then((data) => {
+					if (data.success) {
+						toast(
+							"success",
+							`Contact ${contactName} deleted successfully`,
+						);
+						window.location.reload(); // Reload the page
+					} else {
+						toast("error", data.message);
+					}
+				})
+				.catch((error) => {
+					console.error("Error:", error);
+					toast("error", error);
+				});
+		}
+		// If the user clicked "Cancel" or outside the modal, do nothing
+	});
 }
+
