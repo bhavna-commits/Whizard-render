@@ -390,15 +390,15 @@ function initializeFormSubmission() {
 			);
 
 			if (response.ok) {
-				toast("success","Role added successfully!");
+				toast("success", "Role added successfully!");
 				location.href = "/settings/user-management";
 			} else {
 				const error = await response.json();
-				toast("error",error.message);
+				toast("error", error.message);
 			}
 		} catch (error) {
 			console.error("Error submitting form:", error);
-			toast("error",error.message);
+			toast("error", error.message);
 		} finally {
 			submitButton.disabled = false;
 			submitButton.textContent = submitButtonText;
@@ -444,15 +444,15 @@ function initializeEditFormSubmission() {
 			);
 
 			if (response.ok) {
-				toast("Role updated successfully!");
+				toast("success", "Role updated successfully!");
 				location.href = "/settings/user-management";
 			} else {
 				const error = await response.json();
-				toast(error.message);
+				toast("error", error.message);
 			}
 		} catch (error) {
 			console.error("Error submitting edit form:", error);
-			toast(`Error updating role: ${error.message}`);
+			toast("error", error.message);
 		} finally {
 			submitButton.disabled = false;
 			submitButton.textContent = submitButtonText;

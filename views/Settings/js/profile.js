@@ -62,33 +62,15 @@ document
 			const response = await res.json();
 			// Handle success response
 			if (response.success) {
-				document.getElementById(
-					"message",
-				).innerHTML = `<p class="text-green-500">Profile updated successfully!</p>`;
+				toast("success", "Profile updated successfully!");
 
 				setTimeout(() => {
-					document.getElementById("message").innerHTML = "";
 					location.reload();
 				}, 2000);
 			} else {
-				document.getElementById(
-					"message",
-				).innerHTML = `<p class="text-red-500">Error updating profile: ${
-					response.message || "An error occurred"
-				}</p>`;
-				setTimeout(() => {
-					document.getElementById("message").innerHTML = "";
-				}, 2000);
+				toast("error", response.message);
 			}
 		} catch (error) {
-			// Handle error response
-			document.getElementById(
-				"message",
-			).innerHTML = `<p class="text-red-500">Error updating profile: ${
-				error.message || "An error occurred"
-			}</p>`;
-			setTimeout(() => {
-				document.getElementById("message").innerHTML = "";
-			}, 2000);
+			toast("error", response.message);
 		}
 	});
