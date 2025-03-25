@@ -170,7 +170,7 @@ export const login = async (req, res, next) => {
 			const addedUser = await AddedUser.findOne({
 				email,
 				deleted: false,
-			});
+			}).sort({ createdAt: -1 });
 			// console.log(addedUser);
 			if (addedUser) {
 				if (addedUser.blocked) {
@@ -180,12 +180,10 @@ export const login = async (req, res, next) => {
 				}
 
 				if (!addedUser.password) {
-					return res
-						.status(403)
-						.json({
-							message:
-								"Account is In-Active. Please setup Password through the invitation link",
-						});
+					return res.status(403).json({
+						message:
+							"Account is In-Active. Please setup Password through the invitation link",
+					});
 				}
 
 				// console.log("here : login");
@@ -300,9 +298,7 @@ export const resendEmailOTP = async (req, res) => {
 	}
 };
 
-export const resendWhatsAppOTP = async (req, res) => {
-	
-}
+export const resendWhatsAppOTP = async (req, res) => {};
 
 export const resetPassword = async (req, res) => {
 	const { email } = req.body;
