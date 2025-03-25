@@ -288,34 +288,54 @@ export function getMediaPreviewFromTemplate(template) {
 export function generatePreviewMessage(template, message) {
 	try {
 		let previewMessage = "";
+
 		// Process HEADER component
 		const headerComponent = template.components.find(
 			(c) => c.type === "HEADER",
 		);
 		if (headerComponent) {
-			if (headerComponent.text) {
-				previewMessage += `${headerComponent.text}\n`;
-			} else if (headerComponent.parameters) {
-				// Check if header parameters contain an image
-				const imageParam = headerComponent.parameters.find(
-					(p) => p.type !== "text",
-				);
-				if (imageParam && imageParam.image && imageParam.image.link) {
-					previewMessage += `[Image: ${imageParam.image.link}]\n`;
+			let headerText = headerComponent.text;
+			// Find header parameters from the incoming message payload (matching type "header")
+			const headerParams = message?.find(
+				(c) => c.type === "header",
+			)?.parameters;
+
+			if (headerText) {
+				// Replace placeholders in header text using the header parameters if available.
+				if (headerParams && headerParams.length > 0) {
+					headerParams.forEach((value, index) => {
+						const replacement = value.text;
+						headerText = headerText.replace(
+							`{{${index + 1}}}`,
+							replacement,
+						);
+					});
 				}
+				previewMessage += `${headerText}\n`;
+			} else if (headerComponent.parameters) {
+				// If no header text, iterate over headerComponent.parameters to build the header preview.
+				headerComponent.parameters.forEach((param) => {
+					if (param.type === "text" && param.text) {
+						previewMessage += `${param.text}\n`;
+					} else {
+						const type = param.type;
+						previewMessage += `[Image: ${param[type].link}]\n`;
+					}
+				});
 			}
 		}
 
 		// Process BODY component
-		let bodyComponent = template.components.find((c) => c.type === "BODY");
+		const bodyComponent = template.components.find(
+			(c) => c.type === "BODY",
+		);
 		if (bodyComponent) {
 			let bodyText = bodyComponent.text;
-			let bodyVariable = message?.find(
+			const bodyParams = message?.find(
 				(c) => c.type === "body",
 			)?.parameters;
-
-			bodyVariable?.forEach((value, index) => {
-				bodyText = bodyText.replace(`{{${++index}}}`, value.text);
+			bodyParams?.forEach((value, index) => {
+				bodyText = bodyText.replace(`{{${index + 1}}}`, value.text);
 			});
 			previewMessage += `${bodyText}\n`;
 		}
