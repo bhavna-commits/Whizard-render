@@ -311,11 +311,11 @@ export function generatePreviewMessage(template, message) {
 		if (bodyComponent) {
 			let bodyText = bodyComponent.text;
 			let bodyVariable = message?.find(
-				(c) => c.type === "BODY",
+				(c) => c.type === "body",
 			)?.parameters;
 
 			bodyVariable?.forEach((value, index) => {
-				bodyText = bodyText.replace(`{{${index + 1}}}`, value.text);
+				bodyText = bodyText.replace(`{{${++index}}}`, value.text);
 			});
 			previewMessage += `${bodyText}\n`;
 		}
