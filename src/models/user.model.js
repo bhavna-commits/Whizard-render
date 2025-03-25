@@ -83,7 +83,11 @@ const userSchema = new mongoose.Schema(
 			},
 			settings: {
 				type: { type: Boolean, default: true },
-				userManagement: { type: Boolean, default: true },
+				userManagement: {
+					type: { type: Boolean, default: true },
+					addUser: { type: Boolean, default: true },
+					addPermission: { type: Boolean, default: true },
+				},
 				activityLogs: { type: Boolean, default: true },
 				manageTags: {
 					type: { type: Boolean, default: true },

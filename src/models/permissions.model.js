@@ -47,8 +47,18 @@ const permissionSchema = new Schema(
 		},
 		settings: {
 			type: { type: Boolean, default: false },
-			userManagement: { type: Boolean, default: false },
+			userManagement: {
+				type: { type: Boolean, default: false },
+				addUser: { type: Boolean, default: false },
+				addPermission: { type: Boolean, default: false },
+			},
 			activityLogs: { type: Boolean, default: false },
+			manageTags: {
+				type: { type: Boolean, default: false },
+				delete: { type: Boolean, default: false },
+				add: { type: Boolean, default: false },
+				view: { type: Boolean, default: false },
+			},
 		},
 		createdAt: { type: Number, default: () => Date.now() },
 		updatedAt: { type: Number, default: () => Date.now() },

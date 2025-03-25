@@ -19,40 +19,43 @@ const connectDB = async () => {
 	}
 };
 
-// Migration function to add new keys to the User model
+// Migration function for the User model – setting userManagement keys to true
 const migrateUserModel = async () => {
 	try {
-		// Add default values for the new keys if they do not exist in the User model
 		await User.updateMany(
-			{ "access.templates.editTemplate": { $exists: false } }, // Find users where the key doesn't exist
+			{ "access.settings.userManagement": { $exists: false } }, // Only update if the key doesn't exist
 			{
 				$set: {
-					"access.templates.editTemplate": true, // Set default value for editTemplate
+					"access.settings.userManagement.type": true,
+					"access.settings.userManagement.addUser": true,
+					"access.settings.userManagement.addPermission": true,
 				},
 			},
 		);
-		console.log("User model migration completed successfully");
+		console.log(
+			"User model migration (userManagement) completed successfully",
+		);
 	} catch (error) {
 		console.error("Error running User model migration:", error);
 	}
 };
 
-// Migration function to add new keys to the Permissions model for addedUsers
+// Migration function for the Permissions model – setting userManagement keys to false
 const migratePermissionModel = async () => {
 	try {
-		// Add default values for the new keys if they do not exist in the Permissions model
 		await Permission.updateMany(
-			{ "templates.editTemplate": { $exists: false } }, // Find permissions where the key doesn't exist
+			{ "settings.userManagement": { $exists: false } }, // Only update if the key doesn't exist
 			{
 				$set: {
-					"templates.editTemplate": false, // Set default value for addedUsers (false)
-					// Add other default keys if needed here, e.g.,
-					// "templates.createTemplate": false,
-					// "templates.deleteTemplate": false,
+					"settings.userManagement.type": false,
+					"settings.userManagement.addUser": false,
+					"settings.userManagement.addPermission": false,
 				},
 			},
 		);
-		console.log("Permissions model migration completed successfully");
+		console.log(
+			"Permissions model migration (userManagement) completed successfully",
+		);
 	} catch (error) {
 		console.error("Error running Permissions model migration:", error);
 	}
@@ -62,7 +65,7 @@ const migratePermissionModel = async () => {
 const runMigration = async () => {
 	await connectDB(); // Connect to MongoDB
 
-	// Run migrations for both User and Permissions models
+	// Run migrations for both User and Permissions models (only userManagement)
 	await migrateUserModel();
 	await migratePermissionModel();
 

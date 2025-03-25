@@ -41,7 +41,11 @@ const permissionState = {
 	},
 	settings: {
 		type: false,
-		userManagement: false,
+		userManagement: {
+			type: false,
+			addUser: false,
+			addPermission: false,
+		},
 		activityLogs: false,
 		manageTags: {
 			type: false,
@@ -151,12 +155,13 @@ function populateEditForm(editPermission) {
 						// If this permission is set to true in the editPermission data, check it
 						if (editSection[permKey]) {
 							checkbox.checked = true;
+							checkbox.dispatchEvent(new Event("change")); 
 							updatePermissionState(checkbox, true);
 							updateCheckboxLabel(checkbox);
 
 							// If the option has nested checkboxes (like conversationReports or manageTags)
 							if (
-								(permKey === "conversationReports" ||
+								(permKey === "userManagement" ||
 									permKey === "manageTags") &&
 								editSection[permKey]
 							) {
@@ -238,8 +243,7 @@ function handleOptionToggle(checkbox) {
 	// Only handle nested options if this checkbox is meant to have them
 	if (
 		nestedOptions &&
-		(checkbox.value === "conversationReports" ||
-			checkbox.value === "manageTags")
+		(checkbox.value === "userManagement" || checkbox.value === "manageTags")
 	) {
 		const nestedCheckboxes =
 			nestedOptions.querySelectorAll(".nested-checkbox");
@@ -276,7 +280,9 @@ function updatePermissionState(checkbox, value) {
 		.textContent.toLowerCase()
 		.replace(/\s+/g, "");
 	const checkboxValue = checkbox.value;
-
+	console.log(
+		`Updating permission: [${sectionName}][${checkboxValue}] = ${value}`,
+	);
 	// Special handling for nested checkboxes
 	if (checkbox.classList.contains("nested-checkbox")) {
 		const parentDiv = checkbox.closest("div").parentElement;
@@ -288,8 +294,11 @@ function updatePermissionState(checkbox, value) {
 			parentValue === "conversationReports"
 		) {
 			permissionState.reports.conversationReports[checkboxValue] = value;
-		} else if (sectionName === "settings" && parentValue === "manageTags") {
-			permissionState.settings.manageTags[checkboxValue] = value;
+		} else if (
+			sectionName === "settings" &&
+			parentValue === "userManagement"
+		) {
+			permissionState.settings.userManagement[checkboxValue] = value;
 		}
 	} else {
 		// Handle regular checkboxes based on section
@@ -305,8 +314,8 @@ function updatePermissionState(checkbox, value) {
 				}
 				break;
 			case "settings":
-				if (checkboxValue === "manageTags") {
-					permissionState.settings.manageTags.type = value;
+				if (checkboxValue === "userManagement") {
+					permissionState.settings.userManagement.type = value;
 				} else if (
 					permissionState.settings.hasOwnProperty(checkboxValue)
 				) {

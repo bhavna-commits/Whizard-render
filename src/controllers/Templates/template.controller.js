@@ -227,7 +227,6 @@ export const duplicateTemplate = async (req, res, next) => {
 			const access = await Permissions.findOne({
 				unique_id: permissions,
 			});
-			console.log(access);
 			if (
 				access.templates.createTemplate &&
 				req.session?.addedUser?.whatsAppStatus

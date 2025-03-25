@@ -839,6 +839,7 @@ export const createPermissions = async (req, res, next) => {
 			templates: {
 				type: permissions.templates.type,
 				editTemplate: permissions.templates.editTemplate,
+				duplicateTemplate: permissions.templates.duplicateTemplate,
 				createTemplate: permissions.templates.createTemplate,
 				deleteTemplate: permissions.templates.deleteTemplate,
 			},
@@ -859,7 +860,11 @@ export const createPermissions = async (req, res, next) => {
 			},
 			settings: {
 				type: permissions.settings.type,
-				userManagement: permissions.settings.userManagement,
+				userManagement: {
+					type: permissions.settings.userManagement.type,
+					addUser: permissions.settings.userManagement.addUser,
+					addPermission: permissions.settings.userManagement.addPermission,
+				},
 				activityLogs: permissions.settings.activityLogs,
 				manageTags: {
 					type: permissions.settings.manageTags.type,

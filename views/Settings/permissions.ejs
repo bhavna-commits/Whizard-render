@@ -79,7 +79,7 @@
 					
 				</nav>
 			</div>
-			<div class="mainDiv">		
+			<div class="mainDiv">
 				<div class="flex justify-between items-center my-6">
 					<h1 class="text-lg">Role Management</h1>
 					<div id="statusMessage" class="hidden"></div>
@@ -327,11 +327,23 @@
 											</label>
 										</div>
 									</div> -->
+							<div class="permission-group">
+								<label class="flex items-center space-x-2">
+									<input type="checkbox" name="permissions[settings][]" value="userManagement" class="rounded option-checkbox checkbox text-blue-600" id="user-management">
+									<span class="option-label text-gray-500">User Management</span>
+								</label>
+								<div class="grid-flow-col gap-4 pl-3 nested-options">
+									<label class="flex items-center space-x-2">
+										<input type="checkbox" name="permissions[settings][]" value="addPermission" class="rounded checkboxSmall text-blue-600 text-sm nested-checkbox">
+										<span class="text-sm nested-label text-gray-500">Add Permissions</span>
+									</label>
+									<label class="flex items-center space-x-2">
+										<input type="checkbox" name="permissions[settings][]" value="addUser" class="rounded checkboxSmall text-blue-600 text-sm nested-checkbox">
+										<span class="text-sm nested-label text-gray-500">Add Users</span>
+									</label>
+								</div>
+							</div>
 							
-							<label class="flex items-center space-x-2">
-								<input type="checkbox" name="permissions[settings][]" value="userManagement" class="rounded option-checkbox checkbox text-blue-600" id="user-management">
-								<span class="option-label text-gray-500">User Management</span>
-							</label>
 							<label class="flex items-center space-x-2">
 								<input type="checkbox" name="permissions[settings][]" value="activityLogs" class="rounded option-checkbox checkbox text-blue-600" id="activity-logs">
 								<span class="option-label text-gray-500">Activity Logs</span>
