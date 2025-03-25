@@ -420,6 +420,7 @@ class TemplateManager {
 				status.classList.remove("hidden");
 				status.textContent = result.message;
 				setTimeout(() => {
+					console.log("Redirecting now...");
 					location.href = "https://whizard-chat.web.app/#/homeR";
 				}, 1000);
 			} else {

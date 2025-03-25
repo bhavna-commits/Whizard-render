@@ -808,7 +808,7 @@ export const help = [
 			"Discover how to apply for Official WhatsApp Business API for FREE with Whizard.",
 	},
 	{
-		a: "https://whizardapi.com/how-to-verify-facebook-business/?preview_id=27069&preview_nonce=d96e8ab6a5&_thumbnail_id=-1&preview=true",
+		a: "https://whizardapi.com/how-to-verify-facebook-business/",
 		title: "Verify Facebook Business Manager Account",
 		description:
 			"Click here to see how to Verify a Facebook Business Manager (FBM) Account for WhatsApp Business API with Whizard API",

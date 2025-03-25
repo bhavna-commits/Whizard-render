@@ -227,11 +227,12 @@ export const duplicateTemplate = async (req, res, next) => {
 			const access = await Permissions.findOne({
 				unique_id: permissions,
 			});
+			console.log(access);
 			if (
 				access.templates.createTemplate &&
 				req.session?.addedUser?.whatsAppStatus
 			) {
-				res.status(201).render("Templates/duplicateTemplate", {
+				res.status(200).render("Templates/duplicateTemplate", {
 					access,
 					templateData: originalTemplate,
 					name: req.session?.addedUser?.name,
@@ -241,7 +242,7 @@ export const duplicateTemplate = async (req, res, next) => {
 					whatsAppStatus: req.session?.addedUser?.whatsAppStatus,
 					mediaFileData: mediaFileData
 						? mediaFileData.toString("base64")
-						: null, // Send file data as base64
+						: null, 
 					mediaFileName,
 				});
 			} else {

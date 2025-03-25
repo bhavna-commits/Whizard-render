@@ -27,6 +27,7 @@ const permissionState = {
 		editTemplate: false,
 		createTemplate: false,
 		deleteTemplate: false,
+		duplicateTemplate: false,
 	},
 	reports: {
 		type: false,
