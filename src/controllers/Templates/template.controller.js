@@ -171,7 +171,7 @@ export const getList = async (req, res, next) => {
 	}
 };
 
-export const duplicateTemplate = async (req, res, next) => {
+export const getDuplicateTemplate = async (req, res, next) => {
 	try {
 		const templateId = req.params?.id;
 
@@ -228,7 +228,7 @@ export const duplicateTemplate = async (req, res, next) => {
 				unique_id: permissions,
 			});
 			if (
-				access.templates.createTemplate &&
+				access.templates.duplicateTemplate &&
 				req.session?.addedUser?.whatsAppStatus
 			) {
 				res.status(200).render("Templates/duplicateTemplate", {
@@ -242,6 +242,108 @@ export const duplicateTemplate = async (req, res, next) => {
 					mediaFileData: mediaFileData
 						? mediaFileData.toString("base64")
 						: null, 
+					mediaFileName,
+				});
+			} else {
+				res.render("errors/notAllowed");
+			}
+		} else if (req.session?.user?.whatsAppStatus) {
+			const access = await User.findOne({
+				unique_id: req.session?.user?.id,
+			});
+			res.render("Templates/duplicateTemplate", {
+				access: access.access,
+				templateData: originalTemplate,
+				name: req.session?.user?.name,
+				photo: req.session?.user?.photo,
+				color: req.session?.user?.color,
+				languagesCode,
+				whatsAppStatus: access.whatsAppStatus,
+				mediaFileData: mediaFileData
+					? mediaFileData.toString("base64")
+					: null, // Send file data as base64
+				mediaFileName,
+			});
+		} else {
+			res.render("errors/notAllowed");
+		}
+	} catch (error) {
+		console.error(error);
+		res.status(500).render("errors/serverError");
+	}
+};
+
+export const getEditTemplate = async (req, res, next) => {
+	try {
+		const templateId = req.params?.id;
+
+		if (!templateId)
+			return res.status(404).json({
+				success: false,
+				error: "Template id not found",
+			});
+
+		if (!isString(templateId)) return next();
+		// Find the template by its ID
+		const originalTemplate = await Template.findById(templateId);
+		if (!originalTemplate) {
+			return res
+				.status(404)
+				.json({ success: false, error: "Template not found" });
+		}
+
+		let mediaFileData = null;
+		const headerComponent = originalTemplate.components.find(
+			(component) =>
+				component.type === "HEADER" &&
+				(component.format === "IMAGE" ||
+					component.format == "DOCUMENT"),
+		);
+
+		let mediaFileName = null;
+		// Assuming you have the file path stored in your template
+		if (headerComponent && headerComponent.example?.header_handle?.[0]) {
+			const mediaFileUrl = headerComponent.example.header_handle[0];
+			console.log(mediaFileUrl);
+			mediaFileName = mediaFileUrl.split("/").pop();
+			// Assuming you store the file path on your server
+			const mediaFilePath = path.join(
+				__dirname,
+				"uploads",
+				req.session?.user?.id || req.session?.addedUser?.owner,
+				mediaFileName,
+			);
+
+			// Check if the file exists
+			if (fs.existsSync(mediaFilePath)) {
+				// Read the file and convert it into a buffer or base64 format
+				mediaFileData = fs.readFileSync(mediaFilePath);
+			} else {
+				throw "Media file not found";
+			}
+		}
+
+		// Permissions check (unchanged)
+		const permissions = req.session?.addedUser?.permissions;
+		if (permissions) {
+			const access = await Permissions.findOne({
+				unique_id: permissions,
+			});
+			if (
+				access.templates.editTemplate &&
+				req.session?.addedUser?.whatsAppStatus
+			) {
+				res.status(200).render("Templates/duplicateTemplate", {
+					access,
+					templateData: originalTemplate,
+					name: req.session?.addedUser?.name,
+					photo: req.session?.addedUser?.photo,
+					color: req.session?.addedUser?.color,
+					languagesCode,
+					whatsAppStatus: req.session?.addedUser?.whatsAppStatus,
+					mediaFileData: mediaFileData
+						? mediaFileData.toString("base64")
+						: null,
 					mediaFileName,
 				});
 			} else {

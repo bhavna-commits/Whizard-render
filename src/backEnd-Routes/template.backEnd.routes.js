@@ -3,7 +3,6 @@ import { checkSession } from "../middleWares/checkSession.js";
 import {
 	createTemplate,
 	deleteTemplate,
-	duplicateTemplate,
 	getCampaignSingleTemplates,
 	editTemplate,
 } from "../controllers/Templates/template.controller.js";
