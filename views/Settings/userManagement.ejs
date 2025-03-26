@@ -144,9 +144,13 @@
 											. . .
 										</button>
 										<div id="dropdown-<%= user.unique_id %>" class="hidden absolute bg-white border rounded-lg shadow-lg w-40 right-0 z-10">
-											
+											<% if (access?.settings?.userManagement?.addUser) { %>
 											<button type="button" class="block w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-100" onclick="updateRole('<%= user.email %>', '<%= user.unique_id %>', '<%= user.name %>' , 'dropdown-<%= user.unique_id %>')">Update Role</button>
 											<button type="button" class="block w-full px-4 py-2 text-left text-red-500 hover:bg-gray-100" onclick="deleteUser('<%= user.unique_id %>', '<%= user.name %>')">Delete User</button>
+											<% } else { %>
+											<button type="button" class="block w-full px-4 py-2 text-left text-gray-700 hover:cursor-not-allowed" disabled title="You don't have permissions to access this">Update Role</button>
+											<button type="button" class="block w-full px-4 py-2 text-left text-red-500 hover:cursor-not-allowed" disabled title="You don't have permissions to access this">Delete User</button>
+											<% } %>
 										</div>
 									</div>
 								</td>
