@@ -67,15 +67,28 @@
 					
 				</nav>
 				<div class=" space-x-4 px-3">
-					<button type="button" id="createNewPermissions" onclick="location.href = '/settings/user-management/permissions'" class="inline-flex items-center px-3 py-[10px] border border-transparent text-sm font-medium rounded-md text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black">
+					<% if (access?.settings?.userManagement?.addPermission) { %>
+					<button type="button" id="createNewPermissions" onclick="location.href = '/settings/user-management/permissions'" class="inline-flex items-center px-3 py-[10px] border border-transparent text-sm font-medium rounded-md text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black" >
 						<i class="fa-solid fa-plus pr-2"></i>
 						<span>Add New Permissions</span>
 					</button>
+					<% } else { %>
+					<button type="button" title="You don't have permissions to access this" class="inline-flex items-center px-3 py-[10px] border border-transparent text-sm font-medium rounded-md text-white bg-gray-700 hover:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black" disabled>
+						<i class="fa-solid fa-plus pr-2"></i>
+						<span>Add New Permissions</span>
+					</button>
+					<% } %>
+					<% if (access?.settings?.userManagement?.addUser) { %>
 					<button type="button" id="AddNewUserSmall" onclick="openModal()" class="inline-flex items-center px-3 py-[10px] border border-transparent text-sm font-medium rounded-md text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black">
 						<i class="fa-solid fa-plus pr-2"></i>
 						<span>Add New User</span>
 					</button>
-					
+					<% } else { %>
+					<button type="button" title="You don't have permissions to access this" class="inline-flex items-center px-3 py-[10px] border border-transparent text-sm font-medium rounded-md text-white bg-gray-700 hover:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black" disabled>
+						<i class="fa-solid fa-plus pr-2"></i>
+						<span>Add New User</span>
+					</button>
+					<% } %>
 				</div>
 				
 			</div>

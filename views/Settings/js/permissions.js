@@ -162,7 +162,7 @@ function populateEditForm(editPermission) {
 							// If the option has nested checkboxes (like conversationReports or manageTags)
 							if (
 								(permKey === "userManagement" ||
-									permKey === "manageTags") &&
+									permKey === "conversationReports") &&
 								editSection[permKey]
 							) {
 								// Find nested options container
@@ -243,7 +243,8 @@ function handleOptionToggle(checkbox) {
 	// Only handle nested options if this checkbox is meant to have them
 	if (
 		nestedOptions &&
-		(checkbox.value === "userManagement" || checkbox.value === "manageTags")
+		(checkbox.value === "userManagement" ||
+			checkbox.value === "conversationReports")
 	) {
 		const nestedCheckboxes =
 			nestedOptions.querySelectorAll(".nested-checkbox");

@@ -619,7 +619,7 @@ export const getUserManagement = async (req, res) => {
 		const permission = req.session?.addedUser?.permissions;
 		if (permission) {
 			const access = await Permissions.findOne({ unique_id: permission });
-			if (access.settings.userManagement) {
+			if (access?.settings?.userManagement?.type) {
 				res.render("Settings/userManagement", {
 					access,
 					users,
@@ -756,7 +756,7 @@ export const getPermissions = async (req, res) => {
 		});
 		if (permission) {
 			const access = await Permissions.findOne({ unique_id: permission });
-			if (access.settings.userManagement) {
+			if (access.settings.userManagement?.addPermission) {
 				res.render("Settings/permissions", {
 					access,
 					editPermission,
@@ -805,7 +805,7 @@ export const createPermissions = async (req, res, next) => {
 				.status(400)
 				.json({ message: "Role with this name already exists" });
 		}
-		// console.log(permissions);
+		// console.log(permissions.settings);
 		// Create a new role with permissions
 		const newRole = new Permissions({
 			useradmin,
@@ -912,7 +912,7 @@ export const editPermissions = async (req, res, next) => {
 		}
 
 		// if (!isString(name)) next();
-		// console.log(permissions);
+		// console.log(permissions.settings);
 		// Find the role to update
 		const role = await Permissions.findOne({ unique_id, useradmin });
 		if (!role) {

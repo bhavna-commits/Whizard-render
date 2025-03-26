@@ -92,7 +92,7 @@
 						<h2 class="text-2xl text-black">Account Details</h2>
 						<p>View and update business information and contact information.</p>
 					</div>
-					<% if (access?.settings?.userManagement) { %>
+					<% if (access?.settings?.userManagement?.type) { %>
 					<div onclick="location.href='/settings/user-management'" class="border cursor-pointer rounded-xl text-slate-500 space-y-3 p-3 hover:bg-slate-100">
 						<i class="fa fa-users text-black text-xl" aria-hidden="true"></i>
 						<h2 class="text-2xl text-black">User Management</h2>

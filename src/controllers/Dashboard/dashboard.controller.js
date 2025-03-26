@@ -59,7 +59,6 @@ export const getDashboard = async (req, res) => {
 			const access = await Permissions.findOne({
 				unique_id: permissions,
 			});
-			console.log(access);
 			if (access) {
 				renderData.access = access;
 				res.render("Dashboard/dashboard", renderData);
