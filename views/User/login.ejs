@@ -119,8 +119,8 @@
 					<span id="submitText">Sign In</span></button>
 				<p class="text-center py-2  text-gray-500">Don't have an account yet ? <a href="/register" class="text-black hover:underline-offset-2 hover:text-black ">Register here</a></p>
 			</form>
-			<div class="text-center" id="errorMessage">Error: Invalid login details.</div>
-			<div class="text-center" id="successMessage">Success: Logging in...</div>
+			<!-- <div class="text-center" id="errorMessage"></div>
+			<div class="text-center" id="successMessage"></div> -->
 		</div>
 	</div>
 	
@@ -160,8 +160,8 @@
 			submitText.textContent = '';
 			loader.classList.remove("hidden");
 			// Clear any previous messages
-			document.getElementById('errorMessage').style.display = 'none';
-			document.getElementById('successMessage').style.display = 'none';
+			// document.getElementById('errorMessage').style.display = 'none';
+			// document.getElementById('successMessage').style.display = 'none';
 			
 			try {
 				// Make API call to login route
@@ -183,10 +183,9 @@
 				submitText.textContent = 'Sign In';
 				loader.classList.add("hidden");
 				
-				if (response.ok) {
+				if (data.success) {
 					// Show success message
-					document.getElementById('successMessage').style.display = 'block';
-					
+					toast("success", data.message);
 					// Remember email if the "Remember Me" checkbox is checked
 					if (rememberMe) {
 						localStorage.setItem('rememberedEmail', email);
@@ -196,18 +195,15 @@
 					
 					// Redirect to the dashboard
 					setTimeout(() => {
-						window.location.href = '/';
+						window.location.href = '/2FA';
 					}, 500);
 				} else {
 					// Show error message
-					document.getElementById('errorMessage').textContent = data.message;
-					document.getElementById('errorMessage').style.display = 'block';
-					
+					toast("error", data.message);
 				}
 			} catch (error) {
 				// Handle errors
-				document.getElementById('errorMessage').textContent = 'An error occurred. Please try again.';
-				document.getElementById('errorMessage').style.display = 'block';
+				toast("error", error);
 				submitBtn.disabled = false;
 				submitText.textContent = 'Sign In';
 				loader.classList.add("hidden");

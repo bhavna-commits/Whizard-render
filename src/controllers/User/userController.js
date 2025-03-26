@@ -1,4 +1,8 @@
-import { getRandomColor, sendEmailVerification } from "./userFunctions.js";
+import {
+	getRandomColor,
+	sendEmailVerification,
+	sendOTPOnWhatsApp,
+} from "./userFunctions.js";
 import User from "../../models/user.model.js";
 import AddedUser from "../../models/addedUser.model.js";
 import Permissions from "../../models/permissions.model.js";
@@ -16,6 +20,10 @@ import { isString } from "../../middleWares/sanitiseInput.js";
 import { incrementLoginAttempts } from "../../middleWares/rateLimiter.js";
 
 dotenv.config();
+
+// 2FA settings: if you later set one of these to false the corresponding OTP verification is disabled
+const ENABLE_EMAIL_OTP = true;
+const ENABLE_MOBILE_OTP = false;
 
 export const generateOTP = async (req, res, next) => {
 	try {
@@ -149,29 +157,21 @@ export const login = async (req, res, next) => {
 		});
 
 	if (!isString(email, password)) return next();
-
-	// if (!isValidEmail(email))
-	// 	return res.status(401).json({
-	// 		success: false,
-	// 		message:
-	// 			"Email is not in the valid format or is not a corporate email",
-	// 	});
-
 	if (!validatePassword(password))
-		return res.status(401).json({
-			success: false,
-			message: "Password is not in the valid format.",
-		});
+		return res
+			.status(401)
+			.json({ message: "Password is not in the valid format." });
 
 	try {
 		const user = await User.findOne({ email });
-
 		if (!user) {
+			// If no user found in the primary collection, check the AddedUser model.
 			const addedUser = await AddedUser.findOne({
 				email,
 				deleted: false,
-			}).sort({ createdAt: -1 });
-			// console.log(addedUser);
+			}).sort({
+				createdAt: -1,
+			});
 			if (addedUser) {
 				if (addedUser.blocked) {
 					return res
@@ -186,44 +186,68 @@ export const login = async (req, res, next) => {
 					});
 				}
 
-				// console.log("here : login");
-				const isMatch = bcrypt.compare(password, addedUser.password);
-				// console.log("here: passed");
-
+				const isMatch = await bcrypt.compare(
+					password,
+					addedUser.password,
+				);
 				if (!isMatch) {
 					await incrementLoginAttempts(addedUser);
 					return res
 						.status(400)
 						.json({ message: "Invalid credentials" });
 				}
-
 				await addedUser.save();
 
-				const data = await User.findOne({
-					unique_id: addedUser.useradmin,
-				});
-				// console.log(addedUser);
-				req.session.addedUser = {
-					id: addedUser.unique_id,
-					name: addedUser.name,
-					photo: addedUser?.photo,
-					color: addedUser.color,
-					permissions: addedUser.roleId,
-					owner: addedUser.useradmin,
-					whatsAppStatus: data.WhatsAppConnectStatus,
-				};
+				// If 2FA is enabled for either email or mobile, generate OTPs and store in session
+				if (ENABLE_EMAIL_OTP || ENABLE_MOBILE_OTP) {
+					const emailOTP = ENABLE_EMAIL_OTP
+						? generate6DigitOTP()
+						: null;
+					const mobileOTP = ENABLE_MOBILE_OTP
+						? generate6DigitOTP()
+						: null;
+					const otpExpiry = setOTPExpiry();
+					req.session.otp = {
+						emailOTP,
+						mobileOTP,
+						otpExpiry,
+						userType: "addedUser",
+						userId: addedUser.unique_id,
+					};
 
-				if (rememberMe) {
-					req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000; // 30 days
+					if (ENABLE_EMAIL_OTP) {
+						sendEmailVerification(addedUser.email, emailOTP);
+					}
+					if (ENABLE_MOBILE_OTP) {
+						sendOTPOnWhatsApp(addedUser.phone, mobileOTP);
+					}
+
+					return res.status(200).json({
+						success: true,
+						message: "OTP sent. Please verify to complete login.",
+						requiresOTP: true,
+					});
 				} else {
-					req.session.cookie.maxAge = 3 * 60 * 60 * 1000; // 3 hours
+					// If 2FA is disabled, complete the login normally.
+					req.session.addedUser = {
+						id: addedUser.unique_id,
+						name: addedUser.name,
+						photo: addedUser.photo,
+						color: addedUser.color,
+						permissions: addedUser.roleId,
+						owner: addedUser.useradmin,
+						whatsAppStatus: (
+							await User.findOne({
+								unique_id: addedUser.useradmin,
+							})
+						).WhatsAppConnectStatus,
+					};
 				}
-
-				return res.status(200).json({
-					message: "Login successful",
-				});
+				req.session.cookie.maxAge = rememberMe
+					? 30 * 24 * 60 * 60 * 1000 // 30 days
+					: 3 * 60 * 60 * 1000; // 3 hours
+				return res.status(200).json({ message: "Login successful" });
 			}
-
 			return res.status(400).json({ message: "User not found" });
 		} else {
 			if (user.blocked) {
@@ -233,21 +257,154 @@ export const login = async (req, res, next) => {
 			const now = Date.now();
 			if (user.lockUntil && user.lockUntil > now) {
 				return res.status(429).json({
-					message: `Account locked. Please try again later.`,
+					message: "Account locked. Please try again later.",
 				});
 			}
 
 			const isMatch = await bcrypt.compare(password, user.password);
-
 			if (!isMatch) {
 				await incrementLoginAttempts(user);
 				return res.status(400).json({ message: "Invalid credentials" });
 			}
-
 			await user.save();
 
-			// await createDefaultPermissionsForUser(user.unique_id);
+			// If 2FA is enabled for either email or mobile, generate OTPs and store in session
+			if (ENABLE_EMAIL_OTP || ENABLE_MOBILE_OTP) {
+				const emailOTP = ENABLE_EMAIL_OTP ? generate6DigitOTP() : null;
+				const mobileOTP = ENABLE_MOBILE_OTP
+					? generate6DigitOTP()
+					: null;
+				const otpExpiry = setOTPExpiry();
+				req.session.otp = {
+					emailOTP,
+					mobileOTP,
+					otpExpiry,
+					userType: "user",
+					userId: user.unique_id,
+				};
 
+				if (ENABLE_EMAIL_OTP) {
+					sendEmailVerification(user.email, emailOTP);
+				}
+				if (ENABLE_MOBILE_OTP) {
+					sendOTPOnWhatsApp(user.phone, mobileOTP);
+				}
+
+				return res.status(200).json({
+					success: true,
+					message: "OTP sent. Please verify to complete login.",
+					requiresOTP: true,
+				});
+			} else {
+				req.session.user = {
+					id: user.unique_id,
+					name: user.name,
+					color: user.color,
+					photo: user.profilePhoto,
+					whatsAppStatus: user.WhatsAppConnectStatus,
+				};
+			}
+			req.session.cookie.maxAge = rememberMe
+				? 30 * 24 * 60 * 60 * 1000 // 30 days
+				: 3 * 60 * 60 * 1000; // 3 hours
+
+			return res.status(200).json({ message: "Login successful" });
+		}
+	} catch (error) {
+		return res.status(500).json({ message: "Error logging in", error });
+	}
+};
+
+export const get2FA = async (req, res) => {
+	res.render("User/2FA", { ENABLE_EMAIL_OTP, ENABLE_MOBILE_OTP });
+};
+
+export const verifyOTP = async (req, res, next) => {
+	try {
+		// Expect "type" to be "email", "mobile", or "both"
+		const { type } = req.body;
+		if (!type) {
+			return res.status(400).json({
+				success: false,
+				message: "Invalid input: OTP type is required.",
+			});
+		}
+
+		const otpData = req.session.otp;
+		if (!otpData) {
+			return res.status(400).json({
+				success: false,
+				message: "OTP session expired. Please login again.",
+			});
+		}
+
+		const currentTime = Date.now();
+		if (currentTime > otpData.otpExpiry) {
+			return res.status(400).json({
+				success: false,
+				message: "OTP expired. Please request a new one.",
+			});
+		}
+
+		if (type === "email") {
+			const { otp } = req.body;
+			if (!otp) {
+				return res.status(400).json({
+					success: false,
+					message: "OTP for email is required.",
+				});
+			}
+			if (otpData.emailOTP !== otp) {
+				return res.status(400).json({
+					success: false,
+					message: "Invalid OTP for email.",
+				});
+			}
+		} else if (type === "mobile") {
+			const { otp } = req.body;
+			if (!otp) {
+				return res.status(400).json({
+					success: false,
+					message: "OTP for mobile is required.",
+				});
+			}
+			if (otpData.mobileOTP !== otp) {
+				return res.status(400).json({
+					success: false,
+					message: "Invalid OTP for mobile.",
+				});
+			}
+		} else if (type === "both") {
+			const { emailOTP, mobileOTP } = req.body;
+			if (!emailOTP || !mobileOTP) {
+				return res.status(400).json({
+					success: false,
+					message: "Both emailOTP and mobileOTP are required.",
+				});
+			}
+			if (otpData.emailOTP !== emailOTP) {
+				return res.status(400).json({
+					success: false,
+					message: "Invalid OTP for email.",
+				});
+			}
+			if (otpData.mobileOTP !== mobileOTP) {
+				return res.status(400).json({
+					success: false,
+					message: "Invalid OTP for mobile.",
+				});
+			}
+		} else {
+			return res.status(400).json({
+				success: false,
+				message:
+					"Invalid OTP type. Must be 'email', 'mobile', or 'both'.",
+			});
+		}
+
+		// OTP verified. Retrieve the user based on the stored type.
+		if (otpData.userType === "user") {
+			const user = await User.findOne({ unique_id: otpData.userId });
 			req.session.user = {
 				id: user.unique_id,
 				name: user.name,
@@ -255,19 +412,35 @@ export const login = async (req, res, next) => {
 				photo: user.profilePhoto,
 				whatsAppStatus: user.WhatsAppConnectStatus,
 			};
-
-			if (rememberMe) {
-				req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000; // 30 days
-			} else {
-				req.session.cookie.maxAge = 3 * 60 * 60 * 1000; // 3 hours
-			}
-
-			return res.status(200).json({
-				message: "Login successful",
+		} else if (otpData.userType === "addedUser") {
+			const addedUser = await AddedUser.findOne({
+				unique_id: otpData.userId,
 			});
+			const data = await User.findOne({ unique_id: addedUser.useradmin });
+			req.session.addedUser = {
+				id: addedUser.unique_id,
+				name: addedUser.name,
+				photo: addedUser.photo,
+				color: addedUser.color,
+				permissions: addedUser.roleId,
+				owner: addedUser.useradmin,
+				whatsAppStatus: data.WhatsAppConnectStatus,
+			};
 		}
+
+		// Clear the OTP session data after successful verification.
+		delete req.session.otp;
+
+		return res.status(200).json({
+			success: true,
+			message: "OTP verified successfully. Login completed.",
+		});
 	} catch (error) {
-		return res.status(500).json({ message: "Error logging in", error });
+		return res.status(500).json({
+			success: false,
+			message: "Error verifying OTP",
+			error: error.message,
+		});
 	}
 };
 
@@ -298,7 +471,58 @@ export const resendEmailOTP = async (req, res) => {
 	}
 };
 
-export const resendWhatsAppOTP = async (req, res) => {};
+export const resendOTP = async (req, res) => {
+	try {
+		const otpData = req.session.otp;
+		if (!otpData) {
+			return res
+				.status(400)
+				.json({ message: "Session expired. Please try again." });
+		}
+
+		// Generate a new OTP expiry time
+		const otpExpiry = setOTPExpiry();
+
+		// Depending on the userType, fetch the user from the correct collection
+		let email, phone;
+		if (otpData.userType === "user") {
+			const user = await User.findOne({ unique_id: otpData.userId });
+			if (user) {
+				email = user.email;
+				phone = user.phone;
+			}
+		} else if (otpData.userType === "addedUser") {
+			const addedUser = await AddedUser.findOne({
+				unique_id: otpData.userId,
+			});
+			if (addedUser) {
+				email = addedUser.email;
+				phone = addedUser.phone;
+			}
+		}
+
+		// For each enabled OTP channel, generate a new OTP and update the session.
+		if (ENABLE_EMAIL_OTP && email) {
+			const newEmailOTP = generate6DigitOTP();
+			otpData.emailOTP = newEmailOTP;
+			otpData.otpExpiry = otpExpiry;
+			await sendEmailVerification(email, newEmailOTP);
+		}
+
+		if (ENABLE_MOBILE_OTP && phone) {
+			const newMobileOTP = generate6DigitOTP();
+			otpData.mobileOTP = newMobileOTP;
+			otpData.otpExpiry = otpExpiry;
+			await sendOTPOnWhatsApp(phone, newMobileOTP);
+		}
+
+		return res.status(200).json({ message: "OTP sent successfully." });
+	} catch (error) {
+		return res
+			.status(500)
+			.json({ message: "Error resending OTP.", error: error.message });
+	}
+};
 
 export const resetPassword = async (req, res) => {
 	const { email } = req.body;

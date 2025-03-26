@@ -19,7 +19,11 @@ export const sendEmailVerification = async (email, token) => {
 };
 
 export const sendOTPOnWhatsApp = async (otp) => {
-	
+	try {
+		await sendVerificationEmail(email, token);
+	} catch (error) {
+		throw new Error("Failed to send verification email");
+	}
 }
 
 // Verify the email token

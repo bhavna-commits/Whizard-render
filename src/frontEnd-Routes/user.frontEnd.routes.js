@@ -9,6 +9,7 @@ import {
 	getCreatePassword,
 	createAddedUserPassword,
 } from "../controllers/Settings/settings.controller.js";
+import { get2FA } from "../controllers/User/userController.js";
 
 const router = express.Router();
 
@@ -64,8 +65,6 @@ router.post(
 	createAddedUserPassword,
 );
 
-router.get("/2FA", (req, res) => {
-	res.render("User/2FA");
-});
+router.get("/2FA", get2FA);
 
 export default router;
