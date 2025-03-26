@@ -23,18 +23,19 @@ const connectDB = async () => {
 const migrateUserModel = async () => {
 	try {
 		await User.updateMany(
-			{ "access.settings.userManagement": { $type: "bool" } },
+			{ "access.settings.userManagement.type": { $type: "bool" } },
 			{
 				$set: {
 					"access.settings.userManagement": {
 						type: true,
 						addUser: true,
 						addPermission: true,
+						editPermission: true,
+						deletePermission: true,
 					},
 				},
 			},
 		);
-
 		console.log(
 			"User model migration (userManagement) completed successfully",
 		);
@@ -47,13 +48,15 @@ const migrateUserModel = async () => {
 const migratePermissionModel = async () => {
 	try {
 		await Permission.updateMany(
-			{ "settings.userManagement": { $type: "bool" } }, // Only update if the key doesn't exist
+			{ "settings.userManagement.type": { $type: "bool" } },
 			{
 				$set: {
 					"settings.userManagement": {
-						type: true,
-						addUser: true,
-						addPermission: true,
+						type: false,
+						addUser: false,
+						addPermission: false,
+						editPermission: false,
+						deletePermission: false,
 					},
 				},
 			},

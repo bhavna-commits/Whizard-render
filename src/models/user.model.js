@@ -87,6 +87,8 @@ const userSchema = new mongoose.Schema(
 					type: { type: Boolean, default: true },
 					addUser: { type: Boolean, default: true },
 					addPermission: { type: Boolean, default: true },
+					editPermission: { type: Boolean, default: true },
+					deletePermission: { type: Boolean, default: true },
 				},
 				activityLogs: { type: Boolean, default: true },
 				manageTags: {

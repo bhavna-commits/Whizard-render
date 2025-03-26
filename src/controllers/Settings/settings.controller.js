@@ -619,6 +619,7 @@ export const getUserManagement = async (req, res) => {
 		const permission = req.session?.addedUser?.permissions;
 		if (permission) {
 			const access = await Permissions.findOne({ unique_id: permission });
+			console.log(access?.settings?.userManagement);
 			if (access?.settings?.userManagement?.type) {
 				res.render("Settings/userManagement", {
 					access,
@@ -635,6 +636,7 @@ export const getUserManagement = async (req, res) => {
 		} else {
 			const access = await User.findOne({ unique_id: id });
 			// console.log(access.access);
+			console.log(access?.access?.settings?.userManagement?.editPermission);
 			res.render("Settings/userManagement", {
 				access: access.access,
 				users,
@@ -756,6 +758,7 @@ export const getPermissions = async (req, res) => {
 		});
 		if (permission) {
 			const access = await Permissions.findOne({ unique_id: permission });
+			// console.log(access.settings)
 			if (access.settings.userManagement?.addPermission) {
 				res.render("Settings/permissions", {
 					access,
@@ -863,7 +866,12 @@ export const createPermissions = async (req, res, next) => {
 				userManagement: {
 					type: permissions.settings.userManagement.type,
 					addUser: permissions.settings.userManagement.addUser,
-					addPermission: permissions.settings.userManagement.addPermission,
+					addPermission:
+						permissions.settings.userManagement.addPermission,
+					editPermission:
+						permissions.settings.userManagement.editPermission,
+					deletePermission:
+						permissions.settings.userManagement.deletePermission,
 				},
 				activityLogs: permissions.settings.activityLogs,
 				manageTags: {

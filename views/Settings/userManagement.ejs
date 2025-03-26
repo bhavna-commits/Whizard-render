@@ -68,7 +68,7 @@
 				</nav>
 				<div class=" space-x-4 px-3">
 					<% if (access?.settings?.userManagement?.addPermission) { %>
-					<button type="button" id="createNewPermissions" onclick="location.href = '/settings/user-management/permissions'" class="inline-flex items-center px-3 py-[10px] border border-transparent text-sm font-medium rounded-md text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black" >
+					<button type="button" id="createNewPermissions" onclick="location.href = '/settings/user-management/permissions'" class="inline-flex items-center px-3 py-[10px] border border-transparent text-sm font-medium rounded-md text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black">
 						<i class="fa-solid fa-plus pr-2"></i>
 						<span>Add New Permissions</span>
 					</button>
@@ -120,12 +120,17 @@
 							</tr>
 						</thead>
 						<tbody>
+							<%# console.log(access?.settings?.userManagement?.editPermission) %>
 							<% users.forEach((user, index) => { %>
 							<tr class="text-gray-900">
 								<td class="p-4 text-center"><%= index + 1 %></td>
 								<td class="p-4 text-center"><%= user.name %></td>
 								<td class="p-4 text-center"><%= user.email %></td>
+								<% if (access?.settings?.userManagement?.editPermission) { %>
 								<td class="p-4 text-center hover:cursor-pointer" onclick="location.href= '/settings/user-management/permissions?id=<%= user.roleId %>'" title="click here to edit role"><%= user.roleName %></td>
+								<% } else { %>
+								<td class="p-4 text-center hover:cursor-not-allowed" title="You don't have permissions to access this"><%= user.roleName %></td>
+								<% } %>
 								<td class="p-4 text-center">
 									<% if (user.status === 'Active') { %>
 									<span class="text-orange-500 bg-orange-100 p-2 rounded"><%= user.status %></span>
@@ -188,9 +193,18 @@
 								<td class="px-4 py-3 text-center  border-gray-200"><%= permission.createdBy %></td>
 								<td class="px-4 py-3 text-right relative  border-gray-200 rounded-lg">
 									<div class="flex items-center justify-center">
+										
+										<% if (access?.settings?.userManagement.editPermission) { %>
 										<button class="px-4 py-2 " onclick="location.href= '/settings/user-management/permissions?id=<%= permission.unique_id %>'" title="Update Permission"><img src="svg/editPen.svg" alt="Edit" class="" /></button>
+										<% } else { %>
+										<button class="px-4 py-2 " disabled title="You don't have permissions to access this"><img src="svg/editPen.svg" alt="Edit" class="hover:cursor-not-allowed" /></button>
+										<% } %>
 										<div class="h-4  w-0 border border-[#B8B8B8]"></div>
+										<% if (access?.settings?.userManagement?.deletePermission) { %>
 										<button class="  px-4 py-2 " onclick="deletePermission('<%= permission.unique_id	 %>', '<%= permission.name	 %>')" title="Delete Permission"><img src="svg/bin contact list.svg" alt="Delete" class="" /></button>
+										<% } else { %>
+										<button class="  px-4 py-2 " disabled title="You don't have permissions to access this"><img src="svg/bin contact list.svg" alt="Delete" class="hover:cursor-not-allowed" /></button>
+										<% } %>
 									</div>
 									<!-- <button class="p-2  hover:bg-gray-50 rounded focus:outline-none" onclick="openOptions('<%= index %>')">
 										<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" viewBox="0 0 20 20" fill="currentColor">

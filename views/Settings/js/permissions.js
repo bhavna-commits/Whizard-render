@@ -45,6 +45,8 @@ const permissionState = {
 			type: false,
 			addUser: false,
 			addPermission: false,
+			deletePermission: false,
+			editPermission: false,
 		},
 		activityLogs: false,
 		manageTags: {

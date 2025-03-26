@@ -51,6 +51,8 @@ const permissionSchema = new Schema(
 				type: { type: Boolean, default: false },
 				addUser: { type: Boolean, default: false },
 				addPermission: { type: Boolean, default: false },
+				editPermission: { type: Boolean, default: false },
+				deletePermission: { type: Boolean, default: false },
 			},
 			activityLogs: { type: Boolean, default: false },
 			manageTags: {
