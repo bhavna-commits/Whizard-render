@@ -355,6 +355,74 @@ export function generatePreviewMessage(template, message) {
 	}
 }
 
+export function generatePreviewComponents(template, message) {
+	try {
+		// Process HEADER component
+		const headerComponent = template.components.find(
+			(c) => c.type === "HEADER",
+		);
+		if (headerComponent) {
+			let headerText = headerComponent.text;
+			// Find header parameters from the incoming message payload (matching type "header")
+			const headerParams = message?.find(
+				(c) => c.type === "header",
+			)?.parameters;
+
+			if (headerText) {
+				// Replace placeholders in header text using the header parameters if available.
+				if (headerParams && headerParams.length > 0) {
+					headerParams.forEach((value, index) => {
+						const replacement = value.text;
+						headerText = headerText.replace(
+							`{{${index + 1}}}`,
+							replacement,
+						);
+					});
+				}
+				headerComponent.text = `${headerText}\n`;
+			} else if (headerComponent.parameters) {
+				// If no header text, iterate over headerComponent.parameters to build the header preview.
+				headerComponent.parameters.forEach((param) => {
+					if (param.type === "text" && param.text) {
+						headerComponent.text += `${param.text}\n`;
+					} else {
+						const type = param.type;
+						headerComponent.text += `[Image: ${param[type].link}]\n`;
+					}
+				});
+			}
+		}
+
+		// Process BODY component
+		const bodyComponent = template.components.find(
+			(c) => c.type === "BODY",
+		);
+		if (bodyComponent) {
+			let bodyText = bodyComponent.text;
+			const bodyParams = message?.find(
+				(c) => c.type === "body",
+			)?.parameters;
+			bodyParams?.forEach((value, index) => {
+				bodyText = bodyText.replace(`{{${index + 1}}}`, value.text);
+			});
+			bodyComponent.text = `${bodyText}\n`;
+		}
+
+		// Process FOOTER component (optional)
+		const footerComponent = template.components.find(
+			(c) => c.type === "FOOTER",
+		);
+		if (footerComponent) {
+			footerComponent.text = `${footerComponent.text}\n`;
+		}
+
+		return template.components;
+	} catch (error) {
+		console.error("Error generating preview message:", error.message);
+		throw new Error(`Error generating preview message: ${error.message}`);
+	}
+}
+
 export async function sendTestMessage(
 	user,
 	templateId,
@@ -413,6 +481,11 @@ export async function sendTestMessage(
 			personalizedMessage,
 		);
 
+		const components = generatePreviewComponents(
+			template,
+			personalizedMessage,
+		);
+
 		if (response.status === "FAILED") {
 			console.error(
 				`Failed to send message to ${test}: ${response.response}`,
@@ -425,7 +498,7 @@ export async function sendTestMessage(
 		return {
 			messageTemplate,
 			data: response.response,
-			components: template.components,
+			components,
 			templatename: template.name,
 		};
 	} catch (error) {

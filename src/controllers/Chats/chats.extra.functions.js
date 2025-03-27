@@ -1,3 +1,5 @@
+// @ts-check
+
 import Report from "../../models/chats.model.js";
 import Campaign from "../../models/campaign.model.js";
 import Template from "../../models/templates.model.js";

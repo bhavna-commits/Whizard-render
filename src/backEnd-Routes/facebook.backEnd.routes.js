@@ -309,7 +309,6 @@ router.post("/webhook", async (req, res) => {
 									// Save message content and media info accordingly
 									replyContent:
 										type === "text" ? text.body : "",
-									textSent: type === "text" ? text.body : "",
 									media:
 										type !== "text" && image
 											? {
@@ -337,7 +336,6 @@ router.post("/webhook", async (req, res) => {
 									// Save message content and media info accordingly
 									replyContent:
 										type === "text" ? text.body : "",
-									textSent: type === "text" ? text.body : "",
 									media:
 										type !== "text" && image
 											? {
