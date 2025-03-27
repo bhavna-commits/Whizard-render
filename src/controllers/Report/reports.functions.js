@@ -5,6 +5,7 @@ import {
 	sendMessageThroughWhatsApp,
 	generatePreviewMessage,
 	getMediaPreviewFromTemplate,
+	generatePreviewComponents,
 } from "../ContactList/campaign.functions.js";
 import {
 	sendCampaignReportEmail,
@@ -252,6 +253,11 @@ export async function sendMessagesReports(
 
 			const mediaPreview = getMediaPreviewFromTemplate(template);
 
+			const components = generatePreviewComponents(
+				template,
+				personalizedMessage,
+			);
+
 			let reportData = {
 				WABA_ID: user.WABA_ID,
 				FB_PHONE_ID: phone_number,
@@ -277,7 +283,7 @@ export async function sendMessagesReports(
 			const report = new Report(reportData);
 			await report.save();
 
-			reportData.components = template.components;
+			reportData.components = components;
 			reportData.templateId = campaign.templateId;	
 			reportData.templatename = template.name;
 			reportData.type = "Campaign";

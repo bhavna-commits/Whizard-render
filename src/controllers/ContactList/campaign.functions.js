@@ -57,6 +57,11 @@ export async function sendMessages(campaign, user, unique_id, phone_number) {
 				personalizedMessage,
 			);
 
+			const components = generatePreviewComponents(
+				template,
+				personalizedMessage,
+			);
+
 			if (response.status === "FAILED") {
 				console.error(
 					`Failed to send message to ${contact.wa_id}: ${response.response}`,
@@ -93,7 +98,7 @@ export async function sendMessages(campaign, user, unique_id, phone_number) {
 			const report = new Report(reportData);
 			await report.save();
 
-			reportData.components = template.components;
+			reportData.components = components;
 			reportData.templateId = campaign.templateId;
 			reportData.templatename = template.name;
 			reportData.type = "Campaign";
