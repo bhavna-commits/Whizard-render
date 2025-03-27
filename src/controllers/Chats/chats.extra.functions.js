@@ -66,10 +66,7 @@ export const fetchAndFormatReports = async (
 	// - Otherwise, status is 1.
 	const formattedReports = chats.map((chat) => {
 		let status = 1;
-		if (
-			chat.lastReceive &&
-			(!chat.lastSend || chat.lastReceive >= chat.lastSend)
-		) {
+		if (chat.lastReceive && now - chat.lastReceive < 24 * 60 * 60 * 1000) {
 			status = 0;
 		}
 		return {
@@ -78,8 +75,8 @@ export const fetchAndFormatReports = async (
 			status,
 			name: chat.contactName,
 			usertimestmp: chat.updatedAt,
-			campaignId: chat.campaignId || "", // If available; otherwise empty.
-			is_read: chat.status === "READ" || false, // Assuming you set a status field or flag for read messages.
+			campaignId: chat.campaignId || "", 
+			is_read: chat.status === "READ" || false,
 		};
 	});
 

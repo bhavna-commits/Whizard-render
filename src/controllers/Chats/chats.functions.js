@@ -116,6 +116,7 @@ cron.schedule("* * * * *", async () => {
 			createdAt: -1,
 		});
 
+		console.log(chats);
 		// Create a map for unique groups keyed by "FB_PHONE_ID-recipientPhone"
 		const uniqueChats = new Map();
 		chats.forEach((chat) => {
@@ -140,10 +141,9 @@ cron.schedule("* * * * *", async () => {
 			// - Otherwise, update lastSend and set lastMessage to textSent.
 			const updateData = {
 				updatedAt: chat.updatedAt,
-				lastMessage:
-					chat.status === "REPLIED"
-						? chat.replyContent
-						: chat.textSent,
+				lastMessage: chat.replyContent
+					? chat.replyContent
+					: chat.messageTemplate,
 			};
 
 			if (chat.status === "REPLIED") {
@@ -154,10 +154,11 @@ cron.schedule("* * * * *", async () => {
 
 			if (existingEntry) {
 				// Update the existing entry with the new info
-				await ChatsUsers.updateOne(
+				const up = await ChatsUsers.updateOne(
 					{ _id: existingEntry._id },
 					{ $set: updateData },
 				);
+				console.log(up);
 			} else {
 				// Create a new entry if none exists
 				const newEntry = {
@@ -165,20 +166,19 @@ cron.schedule("* * * * *", async () => {
 					useradmin: chat.useradmin,
 					unique_id: chat.unique_id,
 					contactName: chat.contactName,
+					campaignId: chat.campaignId || "",
 					wa_id: chat.recipientPhone,
 					createdAt: chat.createdAt,
 					updatedAt: chat.updatedAt,
-					lastMessage:
-						chat.status === "REPLIED"
-							? chat.replyContent
-							: chat.textSent,
-					lastSend:
-						chat.status === "REPLIED" ? undefined : chat.updatedAt,
-					lastReceive:
-						chat.status === "REPLIED" ? chat.updatedAt : undefined,
-					status: chat.status,
+					lastMessage: chat.replyContent
+						? chat.replyContent
+						: chat.messageTemplate,
+					lastSend: chat.status === "REPLIED" ? 0 : chat.updatedAt,
+					lastReceive: chat.status === "REPLIED" ? chat.updatedAt : 0,
+					messageStatus: chat.status,
 				};
 				await ChatsUsers.create(newEntry);
+				console.log(newEntry);
 			}
 		}
 
@@ -192,4 +192,3 @@ cron.schedule("* * * * *", async () => {
 		console.error("Error processing chat cron job:", error);
 	}
 });
-
