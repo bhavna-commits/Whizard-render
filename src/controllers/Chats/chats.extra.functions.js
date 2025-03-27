@@ -1,5 +1,3 @@
-// @ts-check
-
 import Report from "../../models/chats.model.js";
 import Campaign from "../../models/campaign.model.js";
 import Template from "../../models/templates.model.js";
@@ -62,10 +60,7 @@ export const fetchAndFormatReports = async (
 		return [];
 	}
 	const now = Date.now();
-	// Format each chat entry into the report structure.
-	// Here, we determine the status based on the relative timestamps:
-	// - If lastReceive is defined and is more recent than lastSend, we assume a reply was received (status 0).
-	// - Otherwise, status is 1.
+
 	const formattedReports = chats.map((chat) => {
 		let status = 1;
 		if (chat.lastReceive && now - chat.lastReceive < 24 * 60 * 60 * 1000) {

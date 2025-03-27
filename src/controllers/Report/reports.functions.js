@@ -282,6 +282,7 @@ export async function sendMessagesReports(
 			reportData.templatename = template.name;
 			reportData.type = "Campaign";
 			const chat = new Chat(reportData);
+			await ChatsTemp.create(reportData);
 			await chat.save();
 		}
 

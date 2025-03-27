@@ -5,6 +5,7 @@ import Contacts from "../../models/contacts.model.js";
 import Campaign from "../../models/campaign.model.js";
 import Report from "../../models/report.model.js";
 import Chat from "../../models/chats.model.js";
+import ChatsTemp from "../../models/chatsTemp.model.js";
 
 dotenv.config();
 
@@ -97,6 +98,7 @@ export async function sendMessages(campaign, user, unique_id, phone_number) {
 			reportData.templatename = template.name;
 			reportData.type = "Campaign";
 			const chat = new Chat(reportData);
+			await ChatsTemp.create(reportData);
 			await chat.save();
 		}
 

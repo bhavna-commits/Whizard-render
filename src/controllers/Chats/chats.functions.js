@@ -141,9 +141,10 @@ cron.schedule("* * * * *", async () => {
 			// - Otherwise, update lastSend and set lastMessage to textSent.
 			const updateData = {
 				updatedAt: chat.updatedAt,
-				lastMessage: chat.replyContent
-					? chat.replyContent
-					: chat.messageTemplate,
+				lastMessage:
+					chat.replyContent ||
+					chat.textSent ||
+					chat.messageTemplate,
 			};
 
 			if (chat.status === "REPLIED") {
@@ -170,9 +171,10 @@ cron.schedule("* * * * *", async () => {
 					wa_id: chat.recipientPhone,
 					createdAt: chat.createdAt,
 					updatedAt: chat.updatedAt,
-					lastMessage: chat.replyContent || 
-						 chat.textSent ||
-						 chat.messageTemplate,
+					lastMessage:
+						chat.replyContent ||
+						chat.textSent ||
+						chat.messageTemplate,
 					lastSend: chat.status === "REPLIED" ? 0 : chat.updatedAt,
 					lastReceive: chat.status === "REPLIED" ? chat.updatedAt : 0,
 					messageStatus: chat.status,
