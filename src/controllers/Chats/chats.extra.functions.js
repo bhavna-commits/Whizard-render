@@ -59,7 +59,7 @@ export const fetchAndFormatReports = async (
 	if (!chats || chats.length === 0) {
 		return [];
 	}
-
+	const now = Date.now();
 	// Format each chat entry into the report structure.
 	// Here, we determine the status based on the relative timestamps:
 	// - If lastReceive is defined and is more recent than lastSend, we assume a reply was received (status 0).
@@ -75,7 +75,7 @@ export const fetchAndFormatReports = async (
 			status,
 			name: chat.contactName,
 			usertimestmp: chat.updatedAt,
-			campaignId: chat.campaignId || "", 
+			campaignId: chat.campaignId || "",
 			is_read: chat.status === "READ" || false,
 		};
 	});
