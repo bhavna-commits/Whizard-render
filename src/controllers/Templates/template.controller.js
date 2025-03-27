@@ -637,20 +637,19 @@ export const getFaceBookTemplates = async (req, res) => {
 
 		// Fetch templates from MongoDB based on logged-in user
 		const mongoTemplates = await Template.find({ useradmin: id });
-		// console.log(mongoTemplates);
 		// Fetch templates from Facebook Graph API
 		const facebookTemplatesResponse = await fetchFacebookTemplates(id);
 		const facebookTemplates = facebookTemplatesResponse.data;
-		// console.log(facebookTemplates);
-		// Loop through the MongoDB templates and update their status based on Facebook data
+
+		// Loop through the MongoDB templates
 		for (let mongoTemplate of mongoTemplates) {
 			// Find the matching template in the Facebook templates by name
 			const matchingFacebookTemplate = facebookTemplates.find(
 				(fbTemplate) => fbTemplate.name === mongoTemplate.name,
 			);
-			// console.log(matchingFaceboo	kTemplate);
-			// If a match is found, update the status in the MongoDB template
+
 			if (matchingFacebookTemplate) {
+				// Update the status in the MongoDB template based on Facebook data
 				let newStatus;
 				let rejectedReason = mongoTemplate.rejected_reason || null;
 
@@ -670,27 +669,31 @@ export const getFaceBookTemplates = async (req, res) => {
 						newStatus = "Pending";
 				}
 
-				// Only update if the status has changed
+				// Only update if the status or rejected_reason has changed.
 				if (
 					mongoTemplate.status !== newStatus ||
 					mongoTemplate.rejected_reason !== rejectedReason
 				) {
 					mongoTemplate.status = newStatus;
-					mongoTemplate.rejected_reason = rejectedReason; // Update rejected reason
-					await mongoTemplate.save(); // Save the updated template
+					mongoTemplate.rejected_reason = rejectedReason;
+					await mongoTemplate.save();
+				}
+			} else {
+				// No matching template found in Facebook data; mark as deleted.
+				if (!mongoTemplate.deleted) {
+					mongoTemplate.deleted = true;
+					await mongoTemplate.save();
 				}
 			}
 		}
 
 		// Respond with the updated templates from MongoDB
 		const updatedTemplates = await Template.find({ useradmin: id });
-		// console.log(updatedTemplates);
 		res.json({
 			success: true,
 			data: updatedTemplates,
 		});
 	} catch (error) {
-		// Handle errors, returning a 500 status code with error message
 		res.status(500).json({
 			success: false,
 			error: error.message,

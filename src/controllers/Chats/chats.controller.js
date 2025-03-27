@@ -153,7 +153,10 @@ export const getUsers = async (req, res, next) => {
 		});
 	} catch (error) {
 		console.error("Error in getUsers:", error);
-		res.status(400).json({ message: error.message, success: false });
+		res.status(400).json({
+			message: error.message || error,
+			success: false,
+		});
 	}
 };
 
@@ -192,7 +195,10 @@ export const getMoreUsers = async (req, res, next) => {
 		});
 	} catch (error) {
 		console.error("Error in getMoreUsers:", error);
-		res.status(400).json({ message: error.message, success: false });
+		res.status(400).json({
+			message: error.message || error,
+			success: false,
+		});
 	}
 };
 
@@ -247,7 +253,10 @@ export const getMoreChats = async (req, res, next) => {
 		});
 	} catch (error) {
 		console.error("Error in getMoreChats:", error);
-		res.status(500).json({ message: error.message, success: false });
+		res.status(500).json({
+			message: error.message || error,
+			success: false,
+		});
 	}
 };
 
@@ -409,7 +418,10 @@ export const searchUsers = async (req, res, next) => {
 		res.status(200).json({ msg: formattedReports, success: true, token });
 	} catch (error) {
 		console.error("Error in searchUsers:", error);
-		res.status(400).json({ message: error.message, success: false });
+		res.status(400).json({
+			message: error.message || error,
+			success: false,
+		});
 	}
 };
 
@@ -555,7 +567,7 @@ export const sendMessages = async (req, res, next) => {
 	} catch (err) {
 		console.error("Error sending message:", err);
 		res.status(500).json({
-			message: err.message,
+			message: err.message || err,
 			success: false,
 		});
 	}
@@ -612,7 +624,7 @@ export const getAllTemplates = async (req, res, next) => {
 	} catch (error) {
 		res.status(500).json({
 			success: false,
-			error: error.message,
+			error: error.message || error,
 		});
 	}
 };
@@ -634,7 +646,7 @@ export const getSingleTemplate = async (req, res, next) => {
 	} catch (error) {
 		res.status(500).json({
 			success: false,
-			error: error.message,
+			error: error.message || error,
 		});
 	}
 };
@@ -745,7 +757,8 @@ export const sendTemplate = async (req, res, next) => {
 	} catch (error) {
 		console.error("Error creating campaign:", error.message);
 		res.status(500).json({
-			message: `Error creating campaign: ${error.message}`,
+			message: error.message || error,
+			success: false,
 		});
 	}
 };

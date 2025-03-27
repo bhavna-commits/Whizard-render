@@ -384,6 +384,7 @@ export function generatePreviewComponents(template, message) {
 							`{{${index + 1}}}`,
 							replacement,
 						);
+						headerText = headerText.replace(`\n`, "");
 					});
 				}
 				headerComponent.text = `${headerText}\n`;
@@ -412,6 +413,7 @@ export function generatePreviewComponents(template, message) {
 			bodyParams?.forEach((value, index) => {
 				bodyText = bodyText.replace(`{{${index + 1}}}`, value.text);
 			});
+			bodyText = bodyText.replace(`\n`, "");
 			bodyComponent.text = `${bodyText}\n`;
 		}
 
@@ -420,6 +422,7 @@ export function generatePreviewComponents(template, message) {
 			(c) => c.type === "FOOTER",
 		);
 		if (footerComponent) {
+			footerComponent.text = footerComponent.text.replace(`\n`, "");
 			footerComponent.text = `${footerComponent.text}\n`;
 		}
 
