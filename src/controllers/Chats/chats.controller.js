@@ -45,6 +45,7 @@ import Permissions from "../../models/permissions.model.js";
 
 import { generateUniqueId } from "../../utils/otpGenerator.js";
 import { sendTestMessage } from "../ContactList/campaign.functions.js";
+import ChatsTemp from "../../models/chatsTemp.model.js";
 
 dotenv.config();
 
@@ -524,6 +525,23 @@ export const sendMessages = async (req, res, next) => {
 			media_type: mediatype,
 		});
 		await report.save();
+		const temp = new ChatsTemp({
+			WABA_ID: user.WABA_ID,
+			FB_PHONE_ID: from,
+			useradmin: user.unique_id,
+			unique_id: generateUniqueId(),
+			campaignName: campaign.name,
+			campaignId: campaign.unique_id,
+			contactName: name,
+			recipientPhone: to,
+			status: "SENT",
+			messageId: data.messages[0].id,
+			textSent: messageText,
+			media: { url, fileName, caption },
+			type: "Chat",
+			media_type: mediatype,
+		});
+		await temp.save();
 
 		const letName = addedUser?.name ? addedUser.name : user.name;
 
@@ -689,6 +707,26 @@ export const sendTemplate = async (req, res, next) => {
 		});
 
 		await report.save();
+
+		const temp = new ChatsTemp({
+			WABA_ID: user.WABA_ID,
+			FB_PHONE_ID: phone_number,
+			useradmin: user.unique_id,
+			unique_id: generateUniqueId(),
+			campaignName: campaign.name,
+			campaignId: campaign.unique_id,
+			contactName: contactList[0]?.contactName,
+			recipientPhone: contactList[0]?.recipientPhone,
+			status: "SENT",
+			messageId: data.messages[0].id,
+			messageTemplate,
+			templateId,
+			components,
+			templatename,
+			type: "Template",
+		});
+
+		await temp.save();
 
 		const name = addedUser?.name ? addedUser.name : user.name;
 

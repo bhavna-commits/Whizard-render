@@ -36,6 +36,26 @@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
 	<script src="https://cdn.tailwindcss.com"></script>
 	<link rel="stylesheet" type="text/css" href="styles/template-preview.css" />
+	<style>
+		.loading-spinner {
+			border: 3px solid rgba(0, 0, 0, 0.1);
+			border-left-color: #fff;
+			border-radius: 100%;
+			width: 16px;
+			height: 16px;
+			animation: spin 1s linear infinite;
+		}
+		
+		@keyframes spin {
+			0% {
+				transform: rotate(0deg);
+			}
+			
+			100% {
+				transform: rotate(360deg);
+			}
+		}
+	</style>
 </head>
 <!-- Loader HTML -->
 <%- include("../commonJS/loader") %>
@@ -163,7 +183,7 @@
 					<div class="flex justify-end">
 						<div class="flex justify-evenly">
 							<button type="button" class="text-gray-500 border p-2 rounded-xl " onclick="location.reload()">Cancel</button>
-							<button type="button" id="saveChanges" class=" bg-black ml-3 text-white py-2 px-4 rounded-xl">Save changes</button>
+							<button type="button" id="saveChanges" class=" bg-black ml-3 text-white py-2 px-4 rounded-xl"><span id="submitText">Save changes</span><span class="inline-block loading-spinner m-auto hidden"></span></button>
 						</div>
 					</div>
 					<div id="message" class="mt-4"></div>

@@ -53,6 +53,13 @@ document
 			document.querySelector('select[name="language"]').value,
 		);
 
+		const loader = document.querySelector(".loading-spinner");
+		const submitBtn = document.querySelector("button[type=submit]");
+		const submitText = document.getElementById("submitText");
+		submitBtn.disabled = true;
+		submitText.textContent = "";
+		loader.classList.remove("hidden");
+
 		try {
 			// Send the form data via Axios
 			const res = await fetch("/api/settings/profile", {
@@ -60,7 +67,11 @@ document
 				body: formData,
 			});
 			const response = await res.json();
-			// Handle success response
+
+			submitBtn.disabled = false;
+			submitText.textContent = "Save changes";
+			loader.classList.add("hidden");
+
 			if (response.success) {
 				toast("success", "Profile updated successfully!");
 
@@ -72,5 +83,8 @@ document
 			}
 		} catch (error) {
 			toast("error", response.message);
+			submitBtn.disabled = false;
+			submitText.textContent = "Save changes";
+			loader.classList.add("hidden");
 		}
 	});

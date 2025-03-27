@@ -9,6 +9,7 @@ import Reports from "../models/report.model.js";
 import Chat from "../models/chats.model.js";
 // import axios from "axios";
 import { generateUniqueId } from "../utils/otpGenerator.js";
+import ChatsTemp from "../models/chatsTemp.model.js";
 
 dotenv.config();
 
@@ -18,6 +19,13 @@ router.post("/auth_code", async (req, res) => {
 	const { access_token: code, waba_id, phone_number_id } = req.body;
 
 	try {
+		const exists = await User.findOne({ WABA_ID: waba_id });
+		if (exists) {
+			return res.status(401).json({
+				success: false,
+				error: "This WhatsApp account is already connected to Whizard.",
+			});
+		}
 		// Step 1: Exchange authorization code for access token
 		let tokenResponse;
 		try {
@@ -102,10 +110,10 @@ router.post("/auth_code", async (req, res) => {
 			req.session.addedUser.whatsAppStatus = "Live";
 		}
 
-		res.status(201).json({ success: true });
+		return res.status(201).json({ success: true });
 	} catch (error) {
 		console.error("Error making request:", error);
-		res.status(500).json({
+		return res.status(500).json({
 			success: false,
 			error: "Failed to complete authentication process.",
 		});
@@ -241,9 +249,7 @@ router.post("/webhook", async (req, res) => {
 						// This assumes that the messagingEvent contains a metadata object similar to:
 						// "metadata": { "display_phone_number": "...", "phone_number_id": "610364625484830" }
 						const fbPhoneId =
-							messagingEvent.metadata?.phone_number_id ||
-							user.FB_PHONE_ID ||
-							"";
+							messagingEvent.metadata?.phone_number_id || "";
 
 						for (const messageEvent of messagingEvent.messages) {
 							const {
@@ -288,6 +294,34 @@ router.post("/webhook", async (req, res) => {
 
 							if (chat) {
 								await Chat.create({
+									contactName: chat.contactName,
+									messageId,
+									recipientPhone,
+									WABA_ID: user.WABA_ID || "",
+									FB_PHONE_ID: fbPhoneId,
+									useradmin: user.unique_id || "",
+									status: "REPLIED",
+									updatedAt: timestamp,
+									campaignId: campaign
+										? campaign.unique_id
+										: "",
+									unique_id: generateUniqueId(),
+									// Save message content and media info accordingly
+									replyContent:
+										type === "text" ? text.body : "",
+									textSent: type === "text" ? text.body : "",
+									media:
+										type !== "text" && image
+											? {
+													url: image.url || "",
+													fileName:
+														image.fileName || "",
+													caption: text?.body || "",
+											  }
+											: {},
+									type: "Chat",
+								});
+								await ChatsTemp.create({
 									contactName: chat.contactName,
 									messageId,
 									recipientPhone,

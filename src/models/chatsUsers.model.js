@@ -1,0 +1,39 @@
+import mongoose, { Schema } from "mongoose";
+
+const ChatsUsersSchema = new mongoose.Schema(
+	{
+		FB_PHONE_ID: { type: String, required: true, index: true },
+		useradmin: { type: String, required: true, index: true },
+		unique_id: { type: String, required: true },
+		contactName: { type: String, required: true },
+		wa_id: { type: String, required: true, index: true },
+		createdAt: {
+			type: Number,
+			default: () => Date.now(),
+			index: true,
+		},
+		updatedAt: {
+			type: Number,
+			default: () => Date.now(),
+			index: true,
+		},
+		lastMessage: { type: String, default: "" },
+		lastSend: { type: Number, default: () => Date.now(), index: true },
+		lastReceive: { type: Number, default: () => Date.now(), index: true },
+		status: { type: String, default: "" },
+	},
+	{
+		timestamps: false,
+		strict: false,
+	},
+);
+
+// Middleware to update timestamps
+ChatsUsersSchema.pre("save", function (next) {
+	if (this.isNew) {
+		this.updatedAt = Date.now();
+	}
+	next();
+});
+
+export default mongoose.model("ChatsUsers", ChatsUsersSchema);

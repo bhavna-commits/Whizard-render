@@ -348,6 +348,7 @@ export const login = async (req, res, next) => {
 						otpExpiry,
 						userType: "addedUser",
 						userId: addedUser.unique_id,
+						rememberMe,
 					};
 
 					if (ENABLE_EMAIL_OTP) {
@@ -378,9 +379,7 @@ export const login = async (req, res, next) => {
 						).WhatsAppConnectStatus,
 					};
 				}
-				req.session.cookie.maxAge = rememberMe
-					? 30 * 24 * 60 * 60 * 1000 // 30 days
-					: 3 * 60 * 60 * 1000; // 3 hours
+				
 				return res.status(200).json({ message: "Login successful" });
 			}
 			return res.status(400).json({ message: "User not found" });
@@ -416,6 +415,7 @@ export const login = async (req, res, next) => {
 					otpExpiry,
 					userType: "user",
 					userId: user.unique_id,
+					rememberMe,
 				};
 
 				if (ENABLE_EMAIL_OTP) {
@@ -439,9 +439,6 @@ export const login = async (req, res, next) => {
 					whatsAppStatus: user.WhatsAppConnectStatus,
 				};
 			}
-			req.session.cookie.maxAge = rememberMe
-				? 30 * 24 * 60 * 60 * 1000 // 30 days
-				: 3 * 60 * 60 * 1000; // 3 hours
 
 			return res.status(200).json({ message: "Login successful" });
 		}
@@ -562,7 +559,9 @@ export const verifyOTP = async (req, res, next) => {
 				whatsAppStatus: data.WhatsAppConnectStatus,
 			};
 		}
-
+		req.session.cookie.maxAge = otpData.rememberMe
+			? 30 * 24 * 60 * 60 * 1000 // 30 days
+			: 3 * 60 * 60 * 1000; // 3 hours
 		// Clear the OTP session data after successful verification.
 		delete req.session.otp;
 

@@ -1,6 +1,7 @@
 import Report from "../../models/chats.model.js";
 import Campaign from "../../models/campaign.model.js";
 import Template from "../../models/templates.model.js";
+import ChatsUsers from "../../models/chatsUsers.model.js";
 
 export function getMimeType(fileName) {
 	const ext = fileName.split(".").pop().toLowerCase();
@@ -45,103 +46,45 @@ export const fetchAndFormatReports = async (
 	skip = 0,
 	limit = 10,
 ) => {
-	// Aggregation pipeline:
-	const nowEpoch = Date.now(); // Current epoch in milliseconds
+	// Query the ChatsUsers collection for the given useradmin and FB_PHONE_ID
+	const chats = await ChatsUsers.find({
+		useradmin: userId,
+		FB_PHONE_ID: phoneNumberId,
+	})
+		.sort({ updatedAt: -1 })
+		.skip(skip)
+		.limit(limit)
+		.lean();
 
-	const aggregatedReports = await Report.aggregate([
-		{
-			$match: {
-				useradmin: userId,
-				FB_PHONE_ID: phoneNumberId,
-			},
-		},
-		{ $sort: { updatedAt: -1 } },
-		{
-			$group: {
-				_id: "$recipientPhone",
-				latestDoc: { $first: "$$ROOT" },
-				hasRecentReply: {
-					$max: {
-						$cond: [
-							{
-								$and: [
-									// Check that replyContent is not null and not empty.
-									{
-										$gt: [
-											{
-												$strLenCP: {
-													$ifNull: [
-														"$replyContent",
-														"",
-													],
-												},
-											},
-											0,
-										],
-									},
-									// Check if the difference is less than 24 hours.
-									{
-										$lt: [
-											{
-												$subtract: [
-													nowEpoch,
-													"$updatedAt",
-												],
-											},
-											24 * 60 * 60 * 1000,
-										],
-									},
-								],
-							},
-							1, // True flag if condition met.
-							0, // Otherwise false.
-						],
-					},
-				},
-			},
-		},
-		{
-			$replaceRoot: {
-				newRoot: {
-					$mergeObjects: [
-						"$latestDoc",
-						{ hasRecentReply: "$hasRecentReply" },
-					],
-				},
-			},
-		},
-		{ $sort: { updatedAt: -1 } },
-		{ $skip: skip },
-		{ $limit: limit },
-	]);
-
-
-	if (!aggregatedReports || aggregatedReports.length === 0) {
+	if (!chats || chats.length === 0) {
 		return [];
 	}
 
-	// Format the results as needed.
-	const formattedReports = aggregatedReports
-		.map((report) => {
-			return {
-				lastmessage:
-					report.replyContent ||
-					report.textSent ||
-					report.media_type ||
-					report.messageTemplate ||
-					"No recent reply",
-				wa_id: report.recipientPhone,
-				// If any document in the group has a recent reply, status is 0.
-				status: report.hasRecentReply === 1 ? 0 : 1,
-				name: report.contactName,
-				usertimestmp: report.updatedAt,
-				campaignId: report.campaignId,
-				is_read: report.status === "READ",
-			};
-		})
-		.sort((a, b) => b.usertimestmp - a.usertimestmp); // sorts from latest to oldest
+	// Format each chat entry into the report structure.
+	// Here, we determine the status based on the relative timestamps:
+	// - If lastReceive is defined and is more recent than lastSend, we assume a reply was received (status 0).
+	// - Otherwise, status is 1.
+	const formattedReports = chats.map((chat) => {
+		let status = 1;
+		if (
+			chat.lastReceive &&
+			(!chat.lastSend || chat.lastReceive >= chat.lastSend)
+		) {
+			status = 0;
+		}
+		return {
+			lastmessage: chat.lastMessage || "No recent reply",
+			wa_id: chat.wa_id, // ChatsUsers uses wa_id in place of recipientPhone.
+			status,
+			name: chat.contactName,
+			usertimestmp: chat.updatedAt,
+			campaignId: chat.campaignId || "", // If available; otherwise empty.
+			is_read: chat.status === "READ" || false, // Assuming you set a status field or flag for read messages.
+		};
+	});
 
-	return formattedReports;
+	// Final sort from latest to oldest by updatedAt (if needed)
+	return formattedReports.sort((a, b) => b.usertimestmp - a.usertimestmp);
 };
 
 export const createTextPayload = (to, body) => ({
