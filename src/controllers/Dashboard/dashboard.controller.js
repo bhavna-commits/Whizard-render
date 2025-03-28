@@ -305,6 +305,8 @@ export const set2FAPin = async (req, res, next) => {
 			});
 		}
 
+		console.log(phoneNumberId, pin);
+
 		if (!isString(pin)) return next();
 
 		const user = await User.findOne({

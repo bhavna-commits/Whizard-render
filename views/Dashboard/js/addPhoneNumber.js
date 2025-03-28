@@ -308,9 +308,14 @@ function openVerifyModal(e, phoneNumberId) {
 
 // function to generateOTP to verify number
 async function generateOTP(event, phoneNumberId, codeMethod, language) {
-	const buttonLoader = event.target.querySelector(".buttonLoader");
+	const buttonLoader = document
+		.getElementById("verifyButton")
+		.querySelector(".buttonLoader");
 	// console.log(buttonLoader);
-	const buttonText = event.target.querySelector(".buttonText");
+	const buttonText = document
+		.getElementById("verifyButton")
+		.querySelector(".buttonText");
+	// console.log(buttonText);
 	try {
 		// Show the loader and hide the button text
 		buttonLoader.classList.remove("hidden");
