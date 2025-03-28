@@ -155,7 +155,7 @@ export const createList = async (req, res, next) => {
 					useradmin: userId,
 					unique_id: generateUniqueId(),
 					Name,
-					wa_idK: `${user.phone}_${keyId}`,
+					wa_idK: `${keyId}_${user.phone}`,
 					wa_id: Number,
 					contactId: contactList.contactId,
 					masterExtra: additionalFields,

@@ -219,48 +219,63 @@
 			const listView = document.getElementById('list-view');
 			const gridView = document.getElementById('grid-view');
 			
-			// Default active state for list view (left position)
-			let isListView = true;
+			// Check localStorage on load and set default if not present
+			if (localStorage.getItem('isListView') === null) {
+				localStorage.setItem('isListView', 'true'); // Default to list view
+			}
 			
-			// Event listener for List Icon
-			option1.addEventListener('click', () => {
-				if (!isListView) {
-					toggle.classList.remove('translate-x-4'); // Move to the left
+			let isListView = localStorage.getItem('isListView') === 'true';
+			
+			// Function to update view based on isListView value
+			function updateView () {
+				if (isListView) {
+					// List view active
+					toggle.classList.remove('translate-x-4');
 					toggle.classList.add('translate-x-0');
 					
-					// Change icons
-					option1.src = 'svg/template-list-red.svg'; // Make list icon red
-					option2.src = 'svg/template-cards-gray.svg'; // Make grid icon gray
+					option1.src = 'svg/template-list-red.svg';
+					option2.src = 'svg/template-cards-gray.svg';
 					
-					isListView = true;
-					
-					// Show list view, hide grid view
 					listView.classList.remove('hidden');
 					listView.classList.add('block');
 					gridView.classList.add('hidden');
 					gridView.classList.remove('block');
+				} else {
+					// Grid view active
+					toggle.classList.remove('translate-x-0');
+					toggle.classList.add('translate-x-[2.0rem]');
+					
+					option2.src = 'svg/template-cards-red.svg';
+					option1.src = 'svg/template-list-gray.svg';
+					
+					gridView.classList.remove('hidden');
+					gridView.classList.add('block');
+					listView.classList.add('hidden');
+					listView.classList.remove('block');
+				}
+			}
+			
+			// Update view on page load
+			updateView();
+			
+			// Event listener for List Icon
+			option1.addEventListener('click', () => {
+				if (!isListView) {
+					isListView = true;
+					localStorage.setItem('isListView', 'true');
+					updateView();
 				}
 			});
 			
 			// Event listener for Grid Icon
 			option2.addEventListener('click', () => {
 				if (isListView) {
-					toggle.classList.remove('translate-x-0'); // Move to the right
-					toggle.classList.add('translate-x-[2.0rem]');
-					
-					// Change icons
-					option2.src = 'svg/template-cards-red.svg'; // Make grid icon red
-					option1.src = 'svg/template-list-gray.svg'; // Make list icon gray
-					
 					isListView = false;
-					
-					// Show grid view, hide list view
-					gridView.classList.remove('hidden');
-					gridView.classList.add('block');
-					listView.classList.add('hidden');
-					listView.classList.remove('block');
+					localStorage.setItem('isListView', 'false');
+					updateView();
 				}
 			});
+			
 			
 			const timestampElements = document.querySelectorAll("[data-timestamp]");
 			

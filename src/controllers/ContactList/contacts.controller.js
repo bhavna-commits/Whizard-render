@@ -415,7 +415,7 @@ export const createContact = async (req, res, next) => {
 			unique_id: generateUniqueId(),
 			contactId,
 			Name,
-			wa_idK: `${user.phone}_${keyId}`,
+			wa_idK: `${keyId}_${user.phone}`,
 			wa_id: `${countryCode.slice(1)}${wa_id}`,
 			masterExtra: newContactData,
 		});

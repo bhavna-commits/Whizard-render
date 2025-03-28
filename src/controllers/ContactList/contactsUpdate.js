@@ -1,14 +1,26 @@
 import ContactsTemp from "../../models/contactsTemp.model.js";
 import ChatsUsers from "../../models/chatsUsers.model.js";
+import { generateUniqueId } from "../../utils/otpGenerator.js";
+import User from "../../models/user.model.js";
+import AddedUser from "../../models/addedUser.model.js";
 
 export const UpdateContacts = async () => {
 	try {
 		const contacts = await ContactsTemp.find();
 
 		for (const contact of contacts) {
+			const owner = await User.findOne({
+				unique_id: contact.useradmin,
+			});
+
+			let agents = await AddedUser.find({
+				useradmin: owner.unique_id,
+				deleted: false,
+			});
+			agents = agents.map((a) => a.unique_id);
 			// Use the wa_id from ContactsTemp for matching.
 			const existingEntry = await ChatsUsers.findOne({
-				FB_PHONE_ID: contact.FB_PHONE_ID,
+				useradmin: contact.useradmin,
 				wa_id: contact.wa_id,
 			});
 
@@ -35,6 +47,7 @@ export const UpdateContacts = async () => {
 				const updateData = {
 					contactName: updatedContactNames,
 					nameContactRelation: updatedRelations,
+					agents,
 				};
 
 				await ChatsUsers.updateOne(
@@ -46,8 +59,7 @@ export const UpdateContacts = async () => {
 				const newEntry = {
 					FB_PHONE_ID: contact.FB_PHONE_ID,
 					useradmin: contact.useradmin,
-					unique_id: contact.unique_id, // Or generate a new unique ID if needed.
-					// Initialize arrays with the current contact's data.
+					unique_id: generateUniqueId(),
 					contactName: [contact.Name],
 					nameContactRelation: [
 						{
@@ -58,6 +70,7 @@ export const UpdateContacts = async () => {
 					wa_id: contact.wa_id,
 					createdAt: contact.createdAt,
 					updatedAt: contact.updatedAt,
+					agents,
 				};
 				await ChatsUsers.create(newEntry);
 			}
