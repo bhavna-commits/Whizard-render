@@ -1,9 +1,9 @@
 import mongoose from "mongoose";
-import User from "./src/models/user.model.js"; // Assuming you have a user model
-import Permission from "./src/models/permissions.model.js";
 import dotenv from "dotenv";
+import Chats from "./src/models/chats.model.js"; // Your existing Chats model
+import ChatsTemp from "./src/models/chatsTemp.model.js"; // Your ChatsTemp model
 
-dotenv.config(); // To load your environment variables
+dotenv.config(); // Load environment variables
 
 // Connect to MongoDB
 const connectDB = async () => {
@@ -14,70 +14,36 @@ const connectDB = async () => {
 		});
 		console.log("MongoDB Connected...");
 	} catch (err) {
-		console.error(err.message);
+		console.error("Error connecting to MongoDB:", err.message);
 		process.exit(1);
 	}
 };
 
-// Migration function for the User model – setting userManagement keys to true
-const migrateUserModel = async () => {
+// Function to copy data from Chats to ChatsTemp
+const copyChatsToTemp = async () => {
 	try {
-		await User.updateMany(
-			{ "access.settings.userManagement.type": { $type: "bool" } },
-			{
-				$set: {
-					"access.settings.userManagement": {
-						type: true,
-						addUser: true,
-						addPermission: true,
-						editPermission: true,
-						deletePermission: true,
-					},
-				},
-			},
-		);
+		// Fetch all documents from the Chats collection
+		const chats = await Chats.find();
+
+		if (!chats.length) {
+			console.log("No documents found in Chats collection.");
+			return;
+		}
+
+		// Insert all chats into the ChatsTemp collection
+		await ChatsTemp.insertMany(chats);
 		console.log(
-			"User model migration (userManagement) completed successfully",
+			`Copied ${chats.length} documents from Chats to ChatsTemp.`,
 		);
 	} catch (error) {
-		console.error("Error running User model migration:", error);
+		console.error("Error copying chats:", error.message);
 	}
 };
 
-// Migration function for the Permissions model – setting userManagement keys to false
-const migratePermissionModel = async () => {
-	try {
-		await Permission.updateMany(
-			{ "settings.userManagement.type": { $type: "bool" } },
-			{
-				$set: {
-					"settings.userManagement": {
-						type: false,
-						addUser: false,
-						addPermission: false,
-						editPermission: false,
-						deletePermission: false,
-					},
-				},
-			},
-		);
-		console.log(
-			"Permissions model migration (userManagement) completed successfully",
-		);
-	} catch (error) {
-		console.error("Error running Permissions model migration:", error);
-	}
-};
-
-// Execute the migration
+// Run the migration
 const runMigration = async () => {
-	await connectDB(); // Connect to MongoDB
-
-	// Run migrations for both User and Permissions models (only userManagement)
-	await migrateUserModel();
-	await migratePermissionModel();
-
-	// Close the database connection after migration
+	await connectDB();
+	await copyChatsToTemp();
 	mongoose.connection.close();
 };
 

@@ -151,12 +151,11 @@ export const createList = async (req, res, next) => {
 		const contactsToSave = parsedData
 			.map((contactData) => {
 				let { Name, Number, ...additionalFields } = contactData;
-				const keyId = generateUniqueId();
 				return new Contacts({
 					useradmin: userId,
+					unique_id: generateUniqueId(),
 					Name,
 					wa_idK: `${user.phone}_${keyId}`,
-					keyId,
 					wa_id: Number,
 					contactId: contactList.contactId,
 					masterExtra: additionalFields,

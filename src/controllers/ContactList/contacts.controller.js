@@ -378,6 +378,13 @@ export const createContact = async (req, res, next) => {
 		const { Name, contactId, wa_id, countryCode, ...newContactData } =
 			contactData;
 
+		if (!contactId || !contactData) {
+			return res.status(400).json({
+				success: false,
+				message: "List ID or contact data is missing",
+			});
+		}
+
 		if (!isObject(contactData)) return next();
 
 		const userId = req.session?.user?.id || req.session?.addedUser?.owner;
@@ -387,14 +394,6 @@ export const createContact = async (req, res, next) => {
 			return res.status(404).json({
 				success: false,
 				message: "User not found.",
-			});
-		}
-		const number = user.phone.countryCode + user.phone.number;
-
-		if (!contactId || !contactData) {
-			return res.status(400).json({
-				success: false,
-				message: "List ID or contact data is missing",
 			});
 		}
 
@@ -409,17 +408,14 @@ export const createContact = async (req, res, next) => {
 				message: "Cannot add same number twice in a list",
 			});
 		}
-		// console.log(`${countryCode.slice(1)}${wa_id}`);
 
-		const keyId = generateUniqueId();
 		// Add the new contact to the Contacts collection
 		const newContact = await Contacts.create({
 			useradmin: userId,
 			unique_id: generateUniqueId(),
-			keyId,
 			contactId,
 			Name,
-			wa_idK: `${number}_${keyId}`,
+			wa_idK: `${user.phone}_${keyId}`,
 			wa_id: `${countryCode.slice(1)}${wa_id}`,
 			masterExtra: newContactData,
 		});

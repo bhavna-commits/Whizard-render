@@ -350,6 +350,12 @@ async function generateOTP(event, phoneNumberId, codeMethod, language) {
 		} else {
 			document
 				.getElementById("verifyNewNumberError")
+				.classList.remove("text-green-500", "bg-green-100", "hidden");
+			document
+				.getElementById("verifyNewNumberError")
+				.classList.add("bg-red-100", "text-red-700");
+			document
+				.getElementById("verifyNewNumberError")
 				.classList.remove("hidden");
 			document.getElementById("verifyNewNumberError").innerText =
 				data.message || "Failed to send OTP. Please try again.";
