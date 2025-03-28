@@ -255,18 +255,43 @@ export const updatePassword = async (req, res, next) => {
 
 		// If logoutDevices is true, clear the session and redirect to login
 		if (logoutDevices) {
-			req.session.user = null;
-			req.session.addedUser = null;
-			return res.render("login");
-		} else {
-			// Otherwise, return success response
-			return res
-				.status(200)
-				.json({ message: "Password updated successfully" });
+			// Assuming your session store supports an 'all' method to retrieve sessions
+			req.sessionStore.all((err, sessions) => {
+				if (err) {
+					console.error("Error fetching sessions:", err);
+					return res
+						.status(500)
+						.json({ success: false, message: "Internal error" });
+				}
+
+				// Loop through sessions and remove those matching the user id
+				Object.keys(sessions).forEach((sessionID) => {
+					const sessionData = sessions[sessionID];
+					// Depending on how you store your user info in session, adjust this:
+					const sessionUserId = sessionData.user
+						? sessionData.user.id
+						: sessionData.addedUser?.id;
+					if (sessionUserId === user.id) {
+						req.sessionStore.destroy(sessionID, (destroyErr) => {
+							if (destroyErr)
+								console.error(
+									`Error destroying session ${sessionID}:`,
+									destroyErr,
+								);
+						});
+					}
+				});
+			});
 		}
+		return res
+			.status(200)
+			.json({ success: true, message: "Password updated successfully" });
 	} catch (error) {
 		console.error(error);
-		res.status(500).json({ success: false, message: error.message });
+		res.status(500).json({
+			success: false,
+			message: error.message || error,
+		});
 	}
 };
 
@@ -636,7 +661,9 @@ export const getUserManagement = async (req, res) => {
 		} else {
 			const access = await User.findOne({ unique_id: id });
 			// console.log(access.access);
-			console.log(access?.access?.settings?.userManagement?.editPermission);
+			console.log(
+				access?.access?.settings?.userManagement?.editPermission,
+			);
 			res.render("Settings/userManagement", {
 				access: access.access,
 				users,
