@@ -1,6 +1,7 @@
 import MongoStore from "connect-mongo";
 import dotenv from "dotenv";
 import session from "express-session";
+import mongoose from "mongoose";
 
 dotenv.config();
 
@@ -11,8 +12,10 @@ const sessionMiddleware = session({
 	resave: false,
 	saveUninitialized: false,
 	store: MongoStore.create({
+		client: mongoose.connection.getClient(),
 		mongoUrl: process.env.MONGO_URI,
 		ttl: maxAge / 1000, // ttl in seconds
+		collectionName: "sessions",
 	}),
 	cookie: {
 		maxAge: maxAge,

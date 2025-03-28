@@ -1,5 +1,6 @@
 import path from "path";
 import bcrypt from "bcrypt";
+import mongoose from "mongoose";
 import { isString } from "../../middleWares/sanitiseInput.js";
 import {
 	generateUniqueId,
@@ -194,7 +195,8 @@ export const updatePassword = async (req, res, next) => {
 		if (!isString(currentPassword, newPassword)) return next();
 		// Determine whether it's a regular user or an added user
 		if (req.session?.addedUser) {
-			id = req.session?.addedUser?.id;
+			// Use the owner's id for an addedUser so that all sessions for this account get cleared
+			id = req.session.addedUser.owner;
 			isAddedUser = true;
 		} else {
 			id = req.session?.user?.id;
@@ -204,7 +206,9 @@ export const updatePassword = async (req, res, next) => {
 		// Check if the user is found based on the session type
 		let user;
 		if (isAddedUser) {
-			user = await AddedUser.findOne({ unique_id: id });
+			user = await AddedUser.findOne({
+				unique_id: req.session.addedUser.id,
+			});
 		} else {
 			user = await User.findOne({ unique_id: id });
 		}
@@ -216,8 +220,7 @@ export const updatePassword = async (req, res, next) => {
 		}
 
 		// Check if the current password matches the one in the database
-		const isMatch = bcrypt.compare(currentPassword, user.password);
-
+		const isMatch = await bcrypt.compare(currentPassword, user.password);
 		if (!isMatch) {
 			return res
 				.status(400)
@@ -233,10 +236,8 @@ export const updatePassword = async (req, res, next) => {
 			});
 		}
 
-		// Hash the new password
+		// Hash the new password and update
 		const hashedPassword = await bcrypt.hash(newPassword, 10);
-
-		// Update the password for the respective user
 		user.password = hashedPassword;
 		await user.save();
 
@@ -253,42 +254,115 @@ export const updatePassword = async (req, res, next) => {
 			details: `${user.name} updated their password`,
 		});
 
-		// If logoutDevices is true, clear the session and redirect to login
 		if (logoutDevices) {
-			// Assuming your session store supports an 'all' method to retrieve sessions
-			req.sessionStore.all((err, sessions) => {
-				if (err) {
-					console.error("Error fetching sessions:", err);
-					return res
-						.status(500)
-						.json({ success: false, message: "Internal error" });
+			try {
+				// Step 1: Get all session documents from the MongoDB collection
+				const db = mongoose.connection.db;
+				if (!db) {
+					throw "Mongoose database connection not established";
+				}
+				const sessions = await db
+					.collection("sessions")
+					.find({})
+					.toArray();
+
+				const destroyPromises = [];
+
+				// Step 2: Iterate over each session document
+				for (const sessionDoc of sessions) {
+					if (!sessionDoc || !sessionDoc._id || !sessionDoc.session) {
+						console.warn(
+							`Skipping malformed session document: ${JSON.stringify(
+								sessionDoc,
+							)}`,
+						);
+						continue;
+					}
+
+					// Parse the session data (stored as a JSON string in MongoDB)
+					let sessionData;
+					try {
+						sessionData = JSON.parse(sessionDoc.session);
+					} catch (parseErr) {
+						console.warn(
+							`Skipping session with invalid JSON: ${sessionDoc._id}`,
+						);
+						continue;
+					}
+
+					// Step 3: Check if the session belongs to the user
+					const isUserSession =
+						sessionData.user && sessionData.user.id === id;
+					const isAddedUserSession =
+						sessionData.addedUser &&
+						sessionData.addedUser.owner === id;
+
+					if (isUserSession || isAddedUserSession) {
+						// Step 4: Queue the session for destruction
+						destroyPromises.push(
+							new Promise((resolve, reject) => {
+								req.sessionStore.destroy(
+									sessionDoc._id,
+									(err) => {
+										if (err) {
+											console.error(
+												`Error destroying session ${sessionDoc._id}:`,
+												err,
+											);
+											reject(err);
+										} else {
+											console.log(
+												`Destroyed session ${sessionDoc._id} for user ${id}`,
+											);
+											resolve();
+										}
+									},
+								);
+							}),
+						);
+					}
 				}
 
-				// Loop through sessions and remove those matching the user id
-				Object.keys(sessions).forEach((sessionID) => {
-					const sessionData = sessions[sessionID];
-					// Depending on how you store your user info in session, adjust this:
-					const sessionUserId = sessionData.user
-						? sessionData.user.id
-						: sessionData.addedUser?.id;
-					if (sessionUserId === user.id) {
-						req.sessionStore.destroy(sessionID, (destroyErr) => {
-							if (destroyErr)
-								console.error(
-									`Error destroying session ${sessionID}:`,
-									destroyErr,
-								);
-						});
-					}
+				// Step 5: Wait for all matching sessions to be destroyed
+				await Promise.all(destroyPromises);
+
+				// Step 6: Destroy the current session
+				await new Promise((resolve, reject) => {
+					req.session.destroy((err) => {
+						if (err) {
+							console.error(
+								"Error destroying current session:",
+								err,
+							);
+							reject(err);
+						} else {
+							res.clearCookie("connect.sid");
+							resolve();
+						}
+					});
 				});
-			});
+
+				return res.status(200).json({
+					success: true,
+					message:
+						"Password updated successfully, logged out from all devices",
+				});
+			} catch (error) {
+				console.error("Error in updatePassword:", error);
+				return res.status(500).json({
+					success: false,
+					message: "Error updating password",
+					error: error.message,
+				});
+			}
 		}
+
 		return res
 			.status(200)
 			.json({ success: true, message: "Password updated successfully" });
 	} catch (error) {
 		console.error(error);
-		res.status(500).json({
+		return res.status(500).json({
 			success: false,
 			message: error.message || error,
 		});
