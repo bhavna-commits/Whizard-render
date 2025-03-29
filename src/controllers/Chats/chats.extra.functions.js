@@ -70,7 +70,7 @@ export const fetchAndFormatReports = async (
 			lastmessage: chat.lastMessage || "No recent reply",
 			wa_id: chat.wa_id, // ChatsUsers uses wa_id in place of recipientPhone.
 			status,
-			name: chat.contactName,
+			name: chat.contactName.toString(),
 			usertimestmp: chat.updatedAt,
 			campaignId: chat.campaignId || "",
 			is_read: chat.status === "READ" || false,

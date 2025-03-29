@@ -1014,7 +1014,7 @@ agenda.define("process campaign", async (job) => {
 		let user = await User.findOne({ unique_id: campaign.useradmin });
 
 		const phone_number = user.FB_PHONE_NUMBERS.find(
-			(n) => n.selected == true,
+			(n) => n.selected === true,
 		).phone_number_id;
 
 		if (!phone_number) {
