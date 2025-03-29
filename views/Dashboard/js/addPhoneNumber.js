@@ -754,6 +754,10 @@ function closeAddNumber() {
 	modalContent.classList.remove("opacity-100", "scale-100");
 	modalContent.classList.add("opacity-0", "scale-95");
 
+	document.getElementById("addNumberForm").classList.remove("hidden");
+	document.getElementById("twoFactorForm").classList.add("hidden");
+	document.getElementById("verifyNumberForm").classList.add("hidden");
+
 	// Wait for the transition to complete before hiding the modal
 	setTimeout(() => {
 		modal.classList.add("hidden");
