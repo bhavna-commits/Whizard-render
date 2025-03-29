@@ -13,11 +13,11 @@ export const UpdateContacts = async () => {
 				unique_id: contact.useradmin,
 			});
 
-			let agents = await AddedUser.find({
+			let agent = await AddedUser.find({
 				useradmin: owner.unique_id,
 				deleted: false,
 			});
-			agents = agents.map((a) => a.unique_id);
+			agent = agent.map((a) => a.unique_id);
 			// Use the wa_id from ContactsTemp for matching.
 			const existingEntry = await ChatsUsers.findOne({
 				useradmin: contact.useradmin,
@@ -47,7 +47,7 @@ export const UpdateContacts = async () => {
 				const updateData = {
 					contactName: updatedContactNames,
 					nameContactRelation: updatedRelations,
-					agents,
+					agent,
 				};
 
 				await ChatsUsers.updateOne(
@@ -70,7 +70,7 @@ export const UpdateContacts = async () => {
 					wa_id: contact.wa_id,
 					createdAt: contact.createdAt,
 					updatedAt: contact.updatedAt,
-					agents,
+					agent,
 				};
 				await ChatsUsers.create(newEntry);
 			}

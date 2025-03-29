@@ -68,7 +68,7 @@ export const fetchAndFormatReports = async (
 		}
 		return {
 			lastmessage: chat.lastMessage || "No recent reply",
-			wa_id: chat.wa_id, // ChatsUsers uses wa_id in place of recipientPhone.
+			wa_id: chat.wa_id, 
 			status,
 			name: chat.contactName.toString(),
 			usertimestmp: chat.updatedAt,

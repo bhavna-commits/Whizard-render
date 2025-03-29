@@ -51,15 +51,16 @@ export const generateOTP = async (req, res, next) => {
 				message: "Password is not in the valid format.",
 			});
 		const user = await User.findOne({ email });
-		const phone = `${countryCode}${phoneNumber}`;
-		const mobileExists = await User.findOne({ phone });
-
+		console.log(user);
 		if (user) {
 			return res
 				.status(409)
 				.json({ success: false, message: "Email already exists" });
 		}
 
+		const phone = `${countryCode}${phoneNumber}`;
+		const mobileExists = await User.findOne({ phone });
+		
 		if (mobileExists) {
 			return res.status(409).json({
 				success: false,

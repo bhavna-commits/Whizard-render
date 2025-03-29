@@ -4,7 +4,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 	// Get email from the URL
 	const urlParams = new URLSearchParams(window.location.search);
-	const email = urlParams.get("number");
+	const email = urlParams.get("email");
 
 	// Pre-fill email input
 	if (email) {
@@ -60,7 +60,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 		try {
 			// Make API request to verify OTP
-			const response = await fetch("/api/users/verify-number", {
+			const response = await fetch("/api/users/verify-email", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
@@ -145,7 +145,7 @@ document.addEventListener("DOMContentLoaded", () => {
 				}, 1000);
 
 				// Call backend API to resend OTP
-				const response = await fetch("/api/users/resend-whatsapp-otp", {
+				const response = await fetch("/api/users/resend-email-otp", {
 					method: "POST",
 					headers: {
 						"Content-Type": "application/json",
