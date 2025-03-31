@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import dotenv from "dotenv";
-import { UpdateContacts } from "./src/controllers/ContactList/contactsUpdate.js";
+import { UpdateContacts } from "./contactsUpdate.js";
 
 dotenv.config(); // Load environment variables
 

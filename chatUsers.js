@@ -1,21 +1,35 @@
-import ChatsTemp from "../../models/chatsTemp.model.js";
-import ChatsUsers from "../../models/chatsUsers.model.js";
+import { MongoClient } from "mongodb";
+import dotenv from "dotenv";
+dotenv.config();
 
-export const chatsUsers = async () => {
+const url = process.env.MONGO_URI; // Mongo URI already contains the db name
+const client = new MongoClient(url, { useUnifiedTopology: true });
+
+async function chatsUsers() {
 	try {
-		// Retrieve all chats from ChatsTemp, sorted by createdAt descending (newest first)
-		const chats = await ChatsTemp.find().sort({ createdAt: -1 });
-		console.log(chats);
+		await client.connect();
+		console.log("Connected to DB");
 
-		// Process each chat record individually
+		const db = client.db(); // Uses the db name from your connection URI
+		// Replace these with your actual collection names
+		const chatsTempCollection = db.collection("chatsTemp");
+		const chatsUsersCollection = db.collection("chatsUsers");
+
+		// Retrieve all chats from chatsTemp, sorted by createdAt descending (newest first)
+		const chats = await chatsTempCollection
+			.find()
+			.sort({ createdAt: -1 })
+			.toArray();
+		console.log("Chats from temp:", chats);
+
 		for (const chat of chats) {
-			// Find an existing ChatsUsers entry for this combination of FB_PHONE_ID and recipientPhone (wa_id)
-			const existingEntry = await ChatsUsers.findOne({
+			// Find an existing chatsUsers entry by matching FB_PHONE_ID and recipientPhone (as wa_id)
+			const existingEntry = await chatsUsersCollection.findOne({
 				FB_PHONE_ID: chat.FB_PHONE_ID,
 				wa_id: chat.recipientPhone,
 			});
 
-			// Prepare the data to update or insert
+			// Prepare the update data
 			const updateData = {
 				updatedAt: chat.updatedAt,
 				lastMessage:
@@ -29,8 +43,8 @@ export const chatsUsers = async () => {
 			}
 
 			if (existingEntry) {
-				// Update the existing entry with the new data
-				await ChatsUsers.updateOne(
+				// Update the existing entry
+				await chatsUsersCollection.updateOne(
 					{ _id: existingEntry._id },
 					{ $set: updateData },
 				);
@@ -54,19 +68,22 @@ export const chatsUsers = async () => {
 					lastReceive: chat.status === "REPLIED" ? chat.updatedAt : 0,
 					messageStatus: chat.status,
 				};
-				await ChatsUsers.create(newEntry);
+				await chatsUsersCollection.insertOne(newEntry);
 				console.log("Created new entry:", newEntry);
 			}
 		}
 
-		// After processing, delete all records from ChatsTemp
-		await ChatsTemp.deleteMany({});
+		// After processing, delete all records from chatsTemp
+		await chatsTempCollection.deleteMany({});
 		console.log(
 			"Processed and cleared temporary chats at",
 			new Date().toLocaleString(),
 		);
 	} catch (error) {
 		console.error("Error processing chat cron job:", error);
+	} finally {
+		await client.close();
 	}
+}
 
-};
+chatsUsers();

@@ -24,7 +24,7 @@ export const sendCampaignReportEmail = async (campaignId, userId) => {
 		console.log(campaignId, userId);
 		let campaignName;
 		const user = await User.findOne({ unique_id: userId });
-		if (!user?.email) throw new Error("User email not found");
+		if (!user?.email) throw "User email not found";
 
 		// Fetch campaign report data
 		const limit = 6;

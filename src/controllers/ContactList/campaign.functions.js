@@ -296,6 +296,7 @@ export function generatePreviewMessage(template, message) {
 	try {
 		let previewMessage = "";
 
+		console.log(JSON.stringify(template), JSON.stringify(message));
 		// Process HEADER component
 		const headerComponent = template.components.find(
 			(c) => c.type === "HEADER",
@@ -355,6 +356,8 @@ export function generatePreviewMessage(template, message) {
 			previewMessage += `${footerComponent.text}\n`;
 		}
 
+		console.log("preiview message :", previewMessage);
+
 		return previewMessage.trim();
 	} catch (error) {
 		console.error("Error generating preview message:", error.message);
@@ -364,8 +367,11 @@ export function generatePreviewMessage(template, message) {
 
 export function generatePreviewComponents(template, message) {
 	try {
+		// Deep clone the template to avoid modifying the original
+		const clonedTemplate = JSON.parse(JSON.stringify(template));
+
 		// Process HEADER component
-		const headerComponent = template.components.find(
+		const headerComponent = clonedTemplate.components.find(
 			(c) => c.type === "HEADER",
 		);
 		if (headerComponent) {
@@ -402,7 +408,7 @@ export function generatePreviewComponents(template, message) {
 		}
 
 		// Process BODY component
-		const bodyComponent = template.components.find(
+		const bodyComponent = clonedTemplate.components.find(
 			(c) => c.type === "BODY",
 		);
 		if (bodyComponent) {
@@ -418,7 +424,7 @@ export function generatePreviewComponents(template, message) {
 		}
 
 		// Process FOOTER component (optional)
-		const footerComponent = template.components.find(
+		const footerComponent = clonedTemplate.components.find(
 			(c) => c.type === "FOOTER",
 		);
 		if (footerComponent) {
@@ -426,7 +432,8 @@ export function generatePreviewComponents(template, message) {
 			footerComponent.text = `${footerComponent.text}\n`;
 		}
 
-		return template.components;
+		// Return the cloned template components
+		return clonedTemplate.components;
 	} catch (error) {
 		console.error("Error generating preview message:", error.message);
 		throw new Error(`Error generating preview message: ${error.message}`);
