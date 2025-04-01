@@ -632,6 +632,7 @@ $(document).ready(() => {
 	flatpickr("#datePicker", {
 		dateFormat: "d/m/Y",
 		defaultDate: "today",
+		minDate: "today",
 		allowInput: true,
 	});
 
