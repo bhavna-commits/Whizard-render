@@ -108,7 +108,8 @@ export async function sendMessages(campaign, user, unique_id, phone_number) {
 		}
 
 		// Update the campaign status to 'SENT' after messages are sent
-		await Campaign.findByIdAndUpdate(campaign._id, { status: "SENT" });
+		campaign.status = "SENT";
+		await campaign.save();
 	} catch (error) {
 		console.error("Error sending messages:", error.message);
 		throw new Error(`${error.message}`);

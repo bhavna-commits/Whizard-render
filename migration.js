@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import dotenv from "dotenv";
-import { UpdateContacts } from "./contactsUpdate.js";
+import Campaign from "./src/models/campaign.model.js";
 
 dotenv.config(); // Load environment variables
 
@@ -18,11 +18,26 @@ const connectDB = async () => {
 	}
 };
 
+// Function to update campaigns
+const updateCampaignStatus = async () => {
+	try {
+		const result = await Campaign.updateMany(
+			{ status: "PENDING" }, // Filter condition
+			{ status: "SENT" }, // Update condition
+		);
+		console.log(
+			`${result.modifiedCount} campaign(s) updated from "PENDING" to "SENT"`,
+		);
+	} catch (error) {
+		console.error("Error updating campaign statuses:", error.message);
+	}
+};
+
 // Run the migration
 const runMigration = async () => {
 	await connectDB();
-	await UpdateContacts();
-	mongoose.connection.close();
+	await updateCampaignStatus();
+	mongoose.connection.close(); // Close the database connection after migration
 };
 
 runMigration();

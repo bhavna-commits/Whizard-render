@@ -284,7 +284,7 @@ export async function sendMessagesReports(
 			await report.save();
 
 			reportData.components = components;
-			reportData.templateId = campaign.templateId;	
+			reportData.templateId = campaign.templateId;
 			reportData.templatename = template.name;
 			reportData.type = "Campaign";
 			const chat = new Chat(reportData);
@@ -293,7 +293,8 @@ export async function sendMessagesReports(
 		}
 
 		// Update the campaign status to 'SENT' after messages are sent
-		await Campaign.findByIdAndUpdate(campaign._id, { status: "SENT" });
+		campaign.status = "SENT";
+		await campaign.save();
 	} catch (error) {
 		console.error("Error sending messages:", error.message);
 		throw new Error(`${error.message}`);
@@ -1059,7 +1060,7 @@ agenda.define("process reports campaign", async (job) => {
 		).phone_number_id;
 
 		if (!phone_number) {
-			throw new Error("No phone number selected.");
+			throw "No phone number selected.";
 		}
 
 		if (campaign?.status === "IN_QUEUE") {

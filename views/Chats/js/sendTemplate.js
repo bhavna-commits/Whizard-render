@@ -421,7 +421,7 @@ class TemplateManager {
 				status.textContent = result.message;
 				setTimeout(() => {
 					console.log("Redirecting now...");
-					location.href = "https://whizard-chat--test-whizard-b1g5huag.web.app/#/homeR";
+					location.href = "https://whizard-chat.web.app/#/homeR";
 				}, 1000);
 			} else {
 				status.classList.add("text-red-500");

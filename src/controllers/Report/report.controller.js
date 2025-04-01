@@ -46,11 +46,11 @@ export const getCampaignList = async (req, res, next) => {
 		};
 
 		if (status === "scheduled") {
-			matchQuery["status"] = { $in: ["SCHEDULED", "IN_QUEUE"] };
-		} else if (status === "all") {
+			matchQuery["status"] = { $in: ["SCHEDULED", "IN_QUEUE", "PENDING"] };
+		} else if (status === "all" || !status) {
 			delete matchQuery["status"];
 		} else {
-			matchQuery["status"] = { $nin: ["SCHEDULED", "IN_QUEUE"] };
+			matchQuery["status"] = { $nin: ["SCHEDULED", "IN_QUEUE", "PENDING"] };
 		}
 
 		if (timeFrame) {

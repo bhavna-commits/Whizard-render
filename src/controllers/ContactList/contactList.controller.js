@@ -138,6 +138,10 @@ export const createList = async (req, res, next) => {
 			});
 		}
 
+		const keyId = user.FB_PHONE_NUMBERS.find(
+			(d) => d.selected === true,
+		).phone_number_id;
+
 		const participantCount = parsedData.length;
 
 		// Create a new Contact List
