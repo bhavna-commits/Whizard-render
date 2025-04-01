@@ -1071,7 +1071,7 @@ agenda.define("process reports campaign", async (job) => {
 				contactList,
 				phone_number,
 			);
-
+			
 			await Campaign.findOneAndUpdate(
 				{ unique_id: campaignId },
 				{ status: "SENT" },

@@ -17,9 +17,7 @@ export async function sendMessages(campaign, user, unique_id, phone_number) {
 		});
 
 		if (!template) {
-			throw new Error(
-				`Template with ID ${campaign.templateId} not found`,
-			);
+			throw `Template with ID ${campaign.templateId} not found`;
 		}
 
 		// Find contacts by contactListId
@@ -28,10 +26,8 @@ export async function sendMessages(campaign, user, unique_id, phone_number) {
 			subscribe: 1,
 		});
 
-		if (contactList.length == 0) {
-			throw new Error(
-				`No contacts found for contact list ID ${campaign.contactListId}`,
-			);
+		if (contactList.length === 0) {
+			throw `No contacts found for contact list ID ${campaign.contactListId}`;
 		}
 
 		// Loop through each contact in the contact list
