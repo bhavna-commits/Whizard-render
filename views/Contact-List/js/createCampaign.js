@@ -639,7 +639,8 @@ $(document).ready(() => {
 		enableTime: true,
 		noCalendar: true,
 		dateFormat: "h:i K",
-		defaultDate: "13:00",
+		defaultDate: currentTime(),
+		minTime: current24HourTime(),
 		allowInput: true,
 	});
 });
@@ -648,3 +649,28 @@ function resetButton(button, loader, buttonText) {
 	loader.classList.add("hidden");
 	buttonText.classList.remove("hidden");
 }
+
+const currentTime = () => {
+	const now = new Date();
+	let hours = now.getHours();
+	let minutes = now.getMinutes();
+
+	// Format hours and minutes to be in "h:i K" format
+	const isPM = hours >= 12;
+	hours = hours % 12 || 12; // Convert 24-hour to 12-hour format
+	minutes = minutes < 10 ? `0${minutes}` : minutes; // Add leading zero to minutes if needed
+	const ampm = isPM ? "PM" : "AM";
+
+	return `${hours}:${minutes} ${ampm}`;
+};
+
+const current24HourTime = () => {
+	const now = new Date();
+	let hours = now.getHours();
+	let minutes = now.getMinutes();
+
+	// Format hours and minutes to be in "H:i" format (24-hour format)
+	minutes = minutes < 10 ? `0${minutes}` : minutes; // Add leading zero to minutes if needed
+
+	return `${hours}:${minutes}`;
+};

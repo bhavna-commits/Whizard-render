@@ -36,7 +36,7 @@ export const sendVerificationEmail = async (userEmail, otp) => {
               <p style="font-size: 18px; font-weight: bold; margin-bottom: 15px;">
                 Your OTP is: <strong style="font-size: 24px; color: #4a90e2;">${otp}</strong>
               </p>
-              <p style="font-size: 14px; color: #777;">This OTP is valid for the next 10 minutes.</p>
+              <p style="font-size: 14px; color: #777;">This OTP is valid for the next 3 minutes.</p>
             </div>
             <!-- Footer -->
             <div style="background-color: #f4f7fc; text-align: center; padding: 15px;">
