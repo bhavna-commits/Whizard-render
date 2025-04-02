@@ -390,9 +390,9 @@ export const createContact = async (req, res, next) => {
 		const userId = req.session?.user?.id || req.session?.addedUser?.owner;
 		const user = await User.findOne({ unique_id: userId });
 
-		const keyId = user.FB_PHONE_NUMBERS.find(
+		const keyId = user?.FB_PHONE_NUMBERS?.find(
 			(d) => d.selected === true,
-		).phone_number_id;
+		)?.phone_number_id;
 
 		if (!user) {
 			return res.status(404).json({
