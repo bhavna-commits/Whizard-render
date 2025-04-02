@@ -58,6 +58,7 @@ const templateSchema = new Schema(
 			default: false,
 			index: true, // Index for deleted flag to support soft delete functionality
 		},
+		logs: Schema.Types.Mixed,
 	},
 	{ timestamps: false, strict: false },
 );

@@ -96,7 +96,12 @@ export const overview = async (id, userId, page, limit, skip) =>
 						$filter: {
 							input: "$reports",
 							as: "report",
-							cond: { $eq: ["$$report.status", "DELIVERED"] },
+							cond: {
+								$and: [
+									{ $ne: ["$$report.status", "SENT"] },
+									{ $ne: ["$$report.status", "FAILED"] },
+								],
+							},
 						},
 					},
 				},
@@ -105,7 +110,9 @@ export const overview = async (id, userId, page, limit, skip) =>
 						$filter: {
 							input: "$reports",
 							as: "report",
-							cond: { $eq: ["$$report.status", "READ"] },
+							cond: {
+								$in: ["$$report.status", ["READ", "REPLIED"]],
+							},
 						},
 					},
 				},
@@ -548,7 +555,8 @@ export const getDeliveredReportsById = async (req, res, next) => {
 												"$$campaignId",
 											],
 										},
-										{ $eq: ["$status", "DELIVERED"] },
+										{ $ne: ["$status", "FAILED"] },
+										{ $ne: ["$status", "SENT"] },
 									],
 								},
 							},
@@ -664,7 +672,12 @@ export const getReadReportsById = async (req, res, next) => {
 												"$$campaignId",
 											],
 										},
-										{ $eq: ["$status", "READ"] },
+										{
+											$in: [
+												"$status",
+												["READ", "REPLIED"],
+											],
+										},
 									],
 								},
 							},

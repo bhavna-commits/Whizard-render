@@ -10,6 +10,9 @@ import Chat from "../models/chats.model.js";
 // import axios from "axios";
 import { generateUniqueId } from "../utils/otpGenerator.js";
 import ChatsTemp from "../models/chatsTemp.model.js";
+import TempStatus from "../models/TempStatus.model.js";
+import TempMessage from "../models/TempMessage.model.js";
+import TempTemplateRejection from "../models/TempTemplateRejection.model.js";
 
 dotenv.config();
 
@@ -120,22 +123,262 @@ router.post("/auth_code", async (req, res) => {
 	}
 });
 
+// router.post("/webhook", async (req, res) => {
+// 	try {
+// 		const { entry } = req.body;
+
+// 		for (const entryItem of entry) {
+// 			const user = await User.findOne({ WABA_ID: entryItem.id });
+// 			// console.log(user);
+// 			if (!user) continue; // Skip if no user found
+// 			console.log(JSON.stringify(entryItem));
+
+// 			if (entryItem.changes) {
+// 				for (const change of entryItem.changes) {
+// 					const messagingEvent = change.value;
+// 					console.log(messagingEvent);
+
+// 					// Handle template status updates
+// 					if (messagingEvent.statuses) {
+// 						for (const statusEvent of messagingEvent.statuses) {
+// 							const {
+// 								id: messageId,
+// 								status,
+// 								timestamp,
+// 								recipient_id: recipientPhone,
+// 								errors,
+// 							} = statusEvent;
+
+// 							const campaign = await Campaign.findOne({
+// 								useradmin: user.unique_id,
+// 								deleted: false,
+// 							})
+// 								.sort({ createdAt: -1 })
+// 								.limit(1);
+
+// 							// Update the Report document
+// 							let report = await Reports.findOne({ messageId });
+// 							if (report) {
+// 								report.status = status.toUpperCase();
+// 								report.updatedAt = timestamp * 1000;
+// 								report.recipientPhone = recipientPhone;
+
+// 								// If the status is "failed", attach error details
+// 								if (
+// 									status === "failed" &&
+// 									errors &&
+// 									errors.length > 0
+// 								) {
+// 									const { code, title } = errors[0];
+// 									report.failed = {
+// 										code: code || "UNKNOWN_ERROR",
+// 										text:
+// 											title ||
+// 											"No error message provided",
+// 									};
+// 								}
+// 								await report.save();
+// 							}
+
+// 							// Update the Chat document
+// 							let chat = await Chat.findOne({ messageId });
+// 							if (chat) {
+// 								chat.status = status.toUpperCase();
+// 								chat.updatedAt = timestamp * 1000;
+// 								chat.recipientPhone = recipientPhone;
+
+// 								// Similarly, update error details for failed statuses
+// 								if (
+// 									status === "failed" &&
+// 									errors &&
+// 									errors.length > 0
+// 								) {
+// 									const { code, title } = errors[0];
+// 									chat.failed = {
+// 										code: code || "UNKNOWN_ERROR",
+// 										text:
+// 											title ||
+// 											"No error message provided",
+// 									};
+// 								}
+// 								await chat.save();
+// 							}
+// 						}
+// 					}
+
+// 					// Check for template rejection (Updated for both old and new JSON structure)
+// 					if (
+// 						messagingEvent.event === "REJECTED" ||
+// 						messagingEvent.status === "REJECTED"
+// 					) {
+// 						let templateId,
+// 							templateName,
+// 							templateLanguage,
+// 							rejectedReason;
+
+// 						if (messagingEvent.event === "REJECTED") {
+// 							// New structure with the rejection reason inside 'changes'
+// 							templateId = messagingEvent.message_template_id;
+// 							templateName = messagingEvent.message_template_name;
+// 							templateLanguage =
+// 								messagingEvent.message_template_language;
+// 							rejectedReason = messagingEvent.reason;
+// 						} else if (messagingEvent.status === "REJECTED") {
+// 							// Old structure without detailed reason
+// 							templateId = entryItem.id;
+// 							rejectedReason = "Unknown reason";
+// 						}
+
+// 						// Update the template status and rejection reason in the database
+// 						let template = await Template.findOne({
+// 							template_id: String(templateId),
+// 						});
+// 						console.log(template);
+// 						if (template) {
+// 							template.status = "Rejected";
+// 							template.rejected_reason = rejectedReason;
+
+// 							await template.save();
+// 						} else {
+// 							console.log(
+// 								`Template with ID ${templateId} not found.`,
+// 							);
+// 						}
+// 					}
+
+// 					// Handle incoming messages/replies
+// 					if (messagingEvent.messages) {
+// 						// Extract FB_PHONE_ID from webhook metadata if available
+// 						// This assumes that the messagingEvent contains a metadata object similar to:
+// 						// "metadata": { "display_phone_number": "...", "phone_number_id": "610364625484830" }
+// 						const fbPhoneId =
+// 							messagingEvent.metadata?.phone_number_id || "";
+
+// 						for (const messageEvent of messagingEvent.messages) {
+// 							const {
+// 								id: messageId,
+// 								from: recipientPhone,
+// 								timestamp,
+// 								text,
+// 								type,
+// 								image,
+// 							} = messageEvent;
+
+// 							// Fetch the most recent campaign for the user
+// 							const campaign = await Campaign.findOne({
+// 								useradmin: user.unique_id,
+// 								deleted: false,
+// 							})
+// 								.sort({ createdAt: -1 })
+// 								.limit(1);
+
+// 							// Try to find an existing report for this campaign and recipient
+// 							let report = await Reports.findOne({
+// 								campaignId: campaign.unique_id,
+// 								recipientPhone,
+// 							});
+
+// 							let chat = await Chat.findOne({
+// 								campaignId: campaign.unique_id,
+// 								recipientPhone,
+// 							});
+
+// 							// If there's an existing report, update it with reply content or media info
+// 							if (report) {
+// 								if (type === "text") {
+// 									report.replyContent = String(text.body);
+// 									report.status = "REPLIED";
+// 								} else if (type !== "text" && image) {
+// 									// When a media message is received, we attempt to store a URL (if
+// 									report.status = "REPLIED";
+// 								}
+// 								await report.save();
+// 							}
+
+// 							if (chat) {
+// 								await Chat.create({
+// 									contactName: chat.contactName,
+// 									messageId,
+// 									recipientPhone,
+// 									WABA_ID: user.WABA_ID || "",
+// 									FB_PHONE_ID: fbPhoneId,
+// 									useradmin: user.unique_id || "",
+// 									status: "REPLIED",
+// 									updatedAt: timestamp,
+// 									campaignId: campaign
+// 										? campaign.unique_id
+// 										: "",
+// 									unique_id: generateUniqueId(),
+// 									// Save message content and media info accordingly
+// 									replyContent:
+// 										type === "text" ? text.body : "",
+// 									media:
+// 										type !== "text" && image
+// 											? {
+// 													url: image.url || "",
+// 													fileName:
+// 														image.fileName || "",
+// 													caption: text?.body || "",
+// 											  }
+// 											: {},
+// 									type: "Chat",
+// 								});
+// 								await ChatsTemp.create({
+// 									contactName: chat.contactName,
+// 									messageId,
+// 									recipientPhone,
+// 									WABA_ID: user.WABA_ID || "",
+// 									FB_PHONE_ID: fbPhoneId,
+// 									useradmin: user.unique_id || "",
+// 									status: "REPLIED",
+// 									updatedAt: timestamp,
+// 									campaignId: campaign
+// 										? campaign.unique_id
+// 										: "",
+// 									unique_id: generateUniqueId(),
+// 									// Save message content and media info accordingly
+// 									replyContent:
+// 										type === "text" ? text.body : "",
+// 									media:
+// 										type !== "text" && image
+// 											? {
+// 													url: image.url || "",
+// 													fileName:
+// 														image.fileName || "",
+// 													caption: text?.body || "",
+// 											  }
+// 											: {},
+// 									type: "Chat",
+// 								});
+// 							}
+
+// 							// Always create a new Chat record for every message received
+// 						}
+// 					}
+// 				}
+// 			}
+// 		}
+
+// 		res.status(200).send("EVENT_RECEIVED");
+// 	} catch (err) {
+// 		console.error("Error processing webhook:", err);
+// 		res.status(500).send("Server Error");
+// 	}
+// });
+
+
 router.post("/webhook", async (req, res) => {
 	try {
 		const { entry } = req.body;
 
 		for (const entryItem of entry) {
-			const user = await User.findOne({ WABA_ID: entryItem.id });
-			// console.log(user);
-			if (!user) continue; // Skip if no user found
-			console.log(JSON.stringify(entryItem));
+			const wabaId = entryItem.id;
 
 			if (entryItem.changes) {
 				for (const change of entryItem.changes) {
 					const messagingEvent = change.value;
-					console.log(messagingEvent);
 
-					// Handle template status updates
+					// Handle status events
 					if (messagingEvent.statuses) {
 						for (const statusEvent of messagingEvent.statuses) {
 							const {
@@ -146,64 +389,20 @@ router.post("/webhook", async (req, res) => {
 								errors,
 							} = statusEvent;
 
-							const campaign = await Campaign.findOne({
-								useradmin: user.unique_id,
-								deleted: false,
-							})
-								.sort({ createdAt: -1 })
-								.limit(1);
-
-							// Update the Report document
-							let report = await Reports.findOne({ messageId });
-							if (report) {
-								report.status = status.toUpperCase();
-								report.updatedAt = timestamp * 1000;
-								report.recipientPhone = recipientPhone;
-
-								// If the status is "failed", attach error details
-								if (
-									status === "failed" &&
-									errors &&
-									errors.length > 0
-								) {
-									const { code, title } = errors[0];
-									report.failed = {
-										code: code || "UNKNOWN_ERROR",
-										text:
-											title ||
-											"No error message provided",
-									};
-								}
-								await report.save();
-							}
-
-							// Update the Chat document
-							let chat = await Chat.findOne({ messageId });
-							if (chat) {
-								chat.status = status.toUpperCase();
-								chat.updatedAt = timestamp * 1000;
-								chat.recipientPhone = recipientPhone;
-
-								// Similarly, update error details for failed statuses
-								if (
-									status === "failed" &&
-									errors &&
-									errors.length > 0
-								) {
-									const { code, title } = errors[0];
-									chat.failed = {
-										code: code || "UNKNOWN_ERROR",
-										text:
-											title ||
-											"No error message provided",
-									};
-								}
-								await chat.save();
-							}
+							const tempStatus = new TempStatus({
+								wabaId,
+								messageId,
+								status: status.toUpperCase(),
+								timestamp: timestamp * 1000,
+								recipientPhone,
+								error: errors || [],
+								rawData: statusEvent,
+							});
+							await tempStatus.save();
 						}
 					}
 
-					// Check for template rejection (Updated for both old and new JSON structure)
+					// Handle template rejections
 					if (
 						messagingEvent.event === "REJECTED" ||
 						messagingEvent.status === "REJECTED"
@@ -214,40 +413,29 @@ router.post("/webhook", async (req, res) => {
 							rejectedReason;
 
 						if (messagingEvent.event === "REJECTED") {
-							// New structure with the rejection reason inside 'changes'
 							templateId = messagingEvent.message_template_id;
 							templateName = messagingEvent.message_template_name;
 							templateLanguage =
 								messagingEvent.message_template_language;
 							rejectedReason = messagingEvent.reason;
 						} else if (messagingEvent.status === "REJECTED") {
-							// Old structure without detailed reason
 							templateId = entryItem.id;
 							rejectedReason = "Unknown reason";
 						}
 
-						// Update the template status and rejection reason in the database
-						let template = await Template.findOne({
-							template_id: String(templateId),
+						const tempRejection = new TempTemplateRejection({
+							wabaId,
+							templateId: String(templateId),
+							templateName,
+							templateLanguage,
+							rejectedReason,
+							rawData: messagingEvent,
 						});
-						console.log(template);
-						if (template) {
-							template.status = "Rejected";
-							template.rejected_reason = rejectedReason;
-
-							await template.save();
-						} else {
-							console.log(
-								`Template with ID ${templateId} not found.`,
-							);
-						}
+						await tempRejection.save();
 					}
 
 					// Handle incoming messages/replies
 					if (messagingEvent.messages) {
-						// Extract FB_PHONE_ID from webhook metadata if available
-						// This assumes that the messagingEvent contains a metadata object similar to:
-						// "metadata": { "display_phone_number": "...", "phone_number_id": "610364625484830" }
 						const fbPhoneId =
 							messagingEvent.metadata?.phone_number_id || "";
 
@@ -260,96 +448,18 @@ router.post("/webhook", async (req, res) => {
 								type,
 								image,
 							} = messageEvent;
-
-							// Fetch the most recent campaign for the user
-							const campaign = await Campaign.findOne({
-								useradmin: user.unique_id,
-								deleted: false,
-							})
-								.sort({ createdAt: -1 })
-								.limit(1);
-
-							// Try to find an existing report for this campaign and recipient
-							let report = await Reports.findOne({
-								campaignId: campaign.unique_id,
-								recipientPhone,
+							const tempMessage = new TempMessage({
+								wabaId,
+								messageId,
+								from: recipientPhone,
+								timestamp,
+								type,
+								text,
+								image,
+								fbPhoneId,
+								rawData: messageEvent,
 							});
-
-							let chat = await Chat.findOne({
-								campaignId: campaign.unique_id,
-								recipientPhone,
-							});
-
-							// If there's an existing report, update it with reply content or media info
-							if (report) {
-								if (type === "text") {
-									report.replyContent = String(text.body);
-									report.status = "REPLIED";
-								} else if (type !== "text" && image) {
-									// When a media message is received, we attempt to store a URL (if
-									report.status = "REPLIED";
-								}
-								await report.save();
-							}
-
-							if (chat) {
-								await Chat.create({
-									contactName: chat.contactName,
-									messageId,
-									recipientPhone,
-									WABA_ID: user.WABA_ID || "",
-									FB_PHONE_ID: fbPhoneId,
-									useradmin: user.unique_id || "",
-									status: "REPLIED",
-									updatedAt: timestamp,
-									campaignId: campaign
-										? campaign.unique_id
-										: "",
-									unique_id: generateUniqueId(),
-									// Save message content and media info accordingly
-									replyContent:
-										type === "text" ? text.body : "",
-									media:
-										type !== "text" && image
-											? {
-													url: image.url || "",
-													fileName:
-														image.fileName || "",
-													caption: text?.body || "",
-											  }
-											: {},
-									type: "Chat",
-								});
-								await ChatsTemp.create({
-									contactName: chat.contactName,
-									messageId,
-									recipientPhone,
-									WABA_ID: user.WABA_ID || "",
-									FB_PHONE_ID: fbPhoneId,
-									useradmin: user.unique_id || "",
-									status: "REPLIED",
-									updatedAt: timestamp,
-									campaignId: campaign
-										? campaign.unique_id
-										: "",
-									unique_id: generateUniqueId(),
-									// Save message content and media info accordingly
-									replyContent:
-										type === "text" ? text.body : "",
-									media:
-										type !== "text" && image
-											? {
-													url: image.url || "",
-													fileName:
-														image.fileName || "",
-													caption: text?.body || "",
-											  }
-											: {},
-									type: "Chat",
-								});
-							}
-
-							// Always create a new Chat record for every message received
+							await tempMessage.save();
 						}
 					}
 				}

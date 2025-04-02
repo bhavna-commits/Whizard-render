@@ -43,6 +43,7 @@ const CampaignReportSchema = new mongoose.Schema(
 			fileName: { type: String, default: "" },
 			caption: { type: String, default: "" },
 		},
+		logs: Schema.Types.Mixed,
 	},
 	{
 		timestamps: false,

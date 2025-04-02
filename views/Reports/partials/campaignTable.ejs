@@ -53,13 +53,13 @@
 						<%= campaign.total %>
 					</td>
 					<td class="text-gray-500 border-t border-b border-gray-200">
-						<%= campaign.sent %>
+						<%= campaign.sent  %>
 					</td>
 					<td class="text-gray-500 border-t border-b border-gray-200">
-						<%= campaign.delivered %>
+						<%= campaign.delivered + campaign.read + campaign.replied %>
 					</td>
 					<td class="text-gray-500 border-t border-b border-gray-200">
-						<%= campaign.read %>
+						<%= campaign.read + campaign.replied %>
 					</td>
 					<td class="text-gray-500 border-t border-b border-gray-200" title="<%=   %>">
 						<%= campaign.failed %>
