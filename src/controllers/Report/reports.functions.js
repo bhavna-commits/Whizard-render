@@ -14,6 +14,7 @@ import {
 import { agenda } from "../../config/db.js";
 import Template from "../../models/templates.model.js";
 import Contacts from "../../models/contacts.model.js";
+import Permissions from "../../models/permissions.model.js";
 import Campaign from "../../models/campaign.model.js";
 import Report from "../../models/report.model.js";
 import User from "../../models/user.model.js";
@@ -1071,7 +1072,7 @@ agenda.define("process reports campaign", async (job) => {
 				contactList,
 				phone_number,
 			);
-			
+
 			await Campaign.findOneAndUpdate(
 				{ unique_id: campaignId },
 				{ status: "SENT" },

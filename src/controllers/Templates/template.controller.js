@@ -200,8 +200,8 @@ export const getDuplicateTemplate = async (req, res, next) => {
 
 		let mediaFileName = null;
 		// Assuming you have the file path stored in your template
-		if (headerComponent && headerComponent.example?.header_handle?.[0]) {
-			const mediaFileUrl = headerComponent.example.header_handle[0];
+		if (headerComponent && headerComponent.example?.header_url) {
+			const mediaFileUrl = headerComponent.example.header_url;
 			console.log(mediaFileUrl);
 			mediaFileName = mediaFileUrl.split("/").pop();
 			// Assuming you store the file path on your server
@@ -241,7 +241,7 @@ export const getDuplicateTemplate = async (req, res, next) => {
 					whatsAppStatus: req.session?.addedUser?.whatsAppStatus,
 					mediaFileData: mediaFileData
 						? mediaFileData.toString("base64")
-						: null, 
+						: null,
 					mediaFileName,
 				});
 			} else {
@@ -302,8 +302,8 @@ export const getEditTemplate = async (req, res, next) => {
 
 		let mediaFileName = null;
 		// Assuming you have the file path stored in your template
-		if (headerComponent && headerComponent.example?.header_handle?.[0]) {
-			const mediaFileUrl = headerComponent.example.header_handle[0];
+		if (headerComponent && headerComponent.example?.header_url) {
+			const mediaFileUrl = headerComponent.example.header_url;
 			console.log(mediaFileUrl);
 			mediaFileName = mediaFileUrl.split("/").pop();
 			// Assuming you store the file path on your server

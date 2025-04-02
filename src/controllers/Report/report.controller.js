@@ -510,6 +510,8 @@ export const createCampaign = async (req, res, next) => {
 			phoneNumberId: phone_number,
 		});
 
+		let message = "Campaign created successfully";
+
 		if (!schedule) {
 			await sendMessagesReports(
 				newCampaign,
@@ -535,6 +537,8 @@ export const createCampaign = async (req, res, next) => {
 				actions: "Send",
 				details: `Sent campaign named: ${name}`,
 			});
+
+			message = "Campaign created successfully";
 		} else {
 			newCampaign.scheduledAt = Number(schedule) * 1000;
 			newCampaign.status = "SCHEDULED";
@@ -555,7 +559,7 @@ export const createCampaign = async (req, res, next) => {
 				details: `Scheduled new campaign named: ${name}`,
 			});
 		}
-
+		message = "Campaign scheduled successfully";
 		// try {
 		// 	const userId =
 		// 		id;
@@ -580,7 +584,7 @@ export const createCampaign = async (req, res, next) => {
 		// Save the campaign
 		await newCampaign.save();
 		res.status(201).json({
-			message: "Campaign created successfully",
+			message,
 			campaign: newCampaign,
 		});
 	} catch (error) {

@@ -484,6 +484,7 @@ export const createCampaign = async (req, res, next) => {
 		}
 
 		// console.log(test);
+		let message = "Campaign created successfully";
 
 		if (test) {
 			// console.log("var :", typeof variables);
@@ -519,7 +520,7 @@ export const createCampaign = async (req, res, next) => {
 				console.log("error sending test message :", error);
 				return res.status(500).json({
 					success: false,
-					message: "Error sending text message",
+					message: error,
 				});
 			}
 		}
@@ -559,6 +560,8 @@ export const createCampaign = async (req, res, next) => {
 				actions: "Send",
 				details: `Sent campaign named: ${name}`,
 			});
+
+			message = "Campaign created successfully";
 		} else {
 			newCampaign.scheduledAt = Number(schedule) * 1000;
 			newCampaign.status = "SCHEDULED";
@@ -585,18 +588,22 @@ export const createCampaign = async (req, res, next) => {
 				actions: "Send",
 				details: `Scheduled new campaign named: ${name}`,
 			});
+
+			message = "Campaign scheduled successfully";
 		}
 
 		// Save the campaign
 		await newCampaign.save();
 		res.status(201).json({
-			message: "Campaign created successfully",
+			message,
 			campaign: newCampaign,
+			success: true
 		});
 	} catch (error) {
-		console.error("Error creating campaign:", error.message);
+		console.error("Error creating campaign:", error.message || error);
 		res.status(500).json({
-			message: `Error creating campaign: ${error.message}`,
+			message: error.message || error,
+			success: false
 		});
 	}
 };

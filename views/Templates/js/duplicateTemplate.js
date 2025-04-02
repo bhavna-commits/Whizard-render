@@ -44,11 +44,11 @@ if (headerText) {
 // If it's an image in the header component
 else if (
 	headerComponent?.format === "IMAGE" &&
-	headerComponent?.example?.header_handle?.[0]
+	headerComponent?.example?.header_url
 ) {
 	document.getElementById("mediaTypeDropdown").value = "media";
 
-	const imageUrl = headerComponent.example.header_handle[0]
+	const imageUrl = headerComponent.example.header_url
 		.split("/")
 		.slice(3)
 		.join("/");
@@ -64,10 +64,10 @@ else if (
 // If it's a document in the header component
 else if (
 	headerComponent?.format === "DOCUMENT" &&
-	headerComponent?.example?.header_handle?.[0]
+	headerComponent?.example?.header_url
 ) {
 	document.getElementById("mediaTypeDropdown").value = "media";
-	const documentUrl = headerComponent.example.header_handle[0]
+	const documentUrl = headerComponent.example.header_url
 		.split("/")
 		.slice(3)
 		.join("/");

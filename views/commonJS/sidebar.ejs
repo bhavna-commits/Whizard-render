@@ -29,7 +29,7 @@
 				Chats
 			</a>
 			<% } else { %>
-			<a href="javascript:void(0);" class="cursor-not-allowed">
+			<a href="javascript:void(0);" class="hover:cursor-not-allowed" title="You don't have permission to access this" >
 				<span class="icon"><img loading="lazy" src="svg/chats.svg" /></span>
 				Chats
 			</a>
@@ -44,7 +44,7 @@
 				Contact List
 			</a>
 			<% } else { %>
-			<a href="javascript:void(0);" class="cursor-not-allowed">
+			<a href="javascript:void(0);" class="hover:cursor-not-allowed" title="You don't have permission to access this">
 				<span class="icon"><img loading="lazy" src="svg/contact-list.svg" /></span>
 				Contact List
 			</a>
@@ -59,7 +59,7 @@
 				Template
 			</a>
 			<% } else { %>
-			<a href="javascript:void(0);" class="cursor-not-allowed">
+			<a href="javascript:void(0);" class="hover:cursor-not-allowed" title="You don't have permission to access this">
 				<span class="icon"><img loading="lazy" src="svg/template.svg" /></span>
 				Template
 			</a>
@@ -74,7 +74,7 @@
 				Settings
 			</a>
 			<% } else { %>
-			<a href="javascript:void(0);" class="cursor-not-allowed">
+			<a href="javascript:void(0);" class="hover:cursor-not-allowed" title="You don't have permission to access this">
 				<span class="icon"><img loading="lazy" src="svg/settings.svg" /></span>
 				Settings
 			</a>
@@ -90,12 +90,20 @@
 					Reports
 				</a>
 				<div id="reportMenu" class="report-card hidden">
+					<% if (access?.reports?.conversationReports?.type) { %>
 					<a href="/reports/campaign-list" class="flex flex-row items-center"><img loading="lazy" src="svg/conversationReport.svg" class="pr-2" />Campaign Report</a>
+					<% } else { %>
+					<a href="javascript:void(0);" class="flex flex-row items-center hover:cursor-not-allowed" title="You don't have permission to access this"><img loading="lazy" src="svg/conversationReport.svg" class="pr-2" />Campaign Report</a>
+					<% } %>
+					<% if (access?.reports?.costReports) { %>
 					<a href="/reports/cost-report" class="flex flex-row items-center"><img loading="lazy" src="svg/costReport.svg" class="pr-2" />Cost Report</a>
+					<% } else { %>
+					<a href="javascript:void(0);" class="flex flex-row items-center hover:cursor-not-allowed" title="You don't have permission to access this"><img loading="lazy" src="svg/costReport.svg" class="pr-2" />Cost Report</a>
+					<% } %>
 				</div>
 			</div>
 			<% } else { %>
-			<a href="javascript:void(0);" class="cursor-not-allowed">
+			<a href="javascript:void(0);" class="hover:cursor-not-allowed" title="You don't have permission to access this">
 				<span class="icon"><img loading="lazy" src="svg/reports.svg" /></span>
 				Reports
 			</a>

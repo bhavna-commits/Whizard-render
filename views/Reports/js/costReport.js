@@ -46,6 +46,7 @@ async function fetchAnalytics(startDate, endDate) {
 
 		if (!startDate || !endDate) {
 			console.error("Invalid dates:", { startDate, endDate });
+			toast("error", `Invalid dates : ${startDate}, ${endDate}`);
 			return null;
 		}
 
@@ -60,7 +61,8 @@ async function fetchAnalytics(startDate, endDate) {
 		// Process the fetched data
 		return processAnalyticsData(response.data, startDate, endDate);
 	} catch (error) {
-		console.error("Error fetching analytics:", error);
+		console.error("Error fetching analytics:", error.response.data.error);
+		toast("error", error.response.data.error);
 		return null;
 	} finally {
 		// Hide loaders regardless of success/failure
