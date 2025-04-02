@@ -921,7 +921,7 @@ export const getCreateCampaign = async (req, res) => {
 		} else {
 			res.render("errors/notAllowed");
 		}
-	} else if (req.session?.user?.whatsAppStatus) {
+	} else if (req.session?.user?.whatsAppStatus === "Live") {
 		const access = await User.findOne({ unique_id: req.session?.user?.id });
 		res.render("Contact-List/createCampaign", {
 			access: access.access,

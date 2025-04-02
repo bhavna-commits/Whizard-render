@@ -263,23 +263,45 @@
 				<h2 class="section-title">Quick Actions</h2>
 				<% if (access?.dashboard?.quickActions) { %>
 				<div class="grid-container">
+					<% if (status == "Pending") { %>
 					<div class="feature-box">
 						<h3 class="feature-title">Broadcast Messages</h3>
 						<p class="feature-description">Quickly send personalized updates or promotions to your audience at scale.</p>
 						<button type="button" onclick="location.href = '/contact-list/createCampaign'" class="feature-button">Send Now</button>
 					</div>
-					
+					<% } else { %>
+					<div class="feature-box">
+						<h3 class="feature-title">Broadcast Messages</h3>
+						<p class="feature-description">Quickly send personalized updates or promotions to your audience at scale.</p>
+						<button type="button" title="You don't have permissions to access this" class="feature-button hover:cursor-not-allowed" disabled>Send Now</button>
+					</div>
+					<% } %>
+					<% if (access?.templates?.createTemplate) { %>
 					<div class="feature-box">
 						<h3 class="feature-title">Create Template</h3>
 						<p class="feature-description">Design message templates for WhatsApp approval to streamline your communication.</p>
 						<button type="button" onclick="location.href = '/create-template'" class="feature-button">Create Now</button>
 					</div>
-					
+					<% } else { %>
+					<div class="feature-box">
+						<h3 class="feature-title">Create Template</h3>
+						<p class="feature-description">Design message templates for WhatsApp approval to streamline your communication.</p>
+						<button type="button" title="You don't have permissions to access this" class="feature-button hover:cursor-not-allowed" disabled>Create Now</button>
+					</div>
+					<% } %>
+					<% if (access?.contactList?.type) { %>
 					<div class="feature-box">
 						<h3 class="feature-title">Import Contacts</h3>
 						<p class="feature-description">Upload your contact database</p>
 						<button type="button" onclick="location.href = '/contact-list'" class="feature-button">Import</button>
 					</div>
+					<% } else { %>
+					<div class="feature-box">
+						<h3 class="feature-title">Import Contacts</h3>
+						<p class="feature-description">Upload your contact database</p>
+						<button type="button" title="You don't have permissions to access this" class="feature-button hover:cursor-not-allowed" disabled>Import</button>
+					</div>
+					<% } %>
 				</div>
 				<% } else { %>
 				<div class="grid-container">
