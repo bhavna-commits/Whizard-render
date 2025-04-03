@@ -285,7 +285,7 @@ input[type="number"] {
 }
 
 .sidebar ul li:nth-child(1) {
-	margin-top: 1.5rem;
+	margin-top: 0.5rem;
 }
 
 .sidebar ul li a {
@@ -434,13 +434,14 @@ input[type="number"] {
 
 .left-section {
 	background-color: #f9f9f9;
-	padding: 2rem;
+	padding: 1rem;
 	text-align: left;
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
 	max-width: 55%;
-	max-height: 100vh;
+	height: 100%;
+	/* border: #000 1px solid; */
 }
 
 .right-section {
@@ -451,6 +452,7 @@ input[type="number"] {
 	display: flex;
 	justify-content: center;
 	flex-direction: column;
+	/* border: #000 1px solid; */
 }
 
 .left-section h1 {
