@@ -75,10 +75,10 @@
 							<label for="name" class="form-label text-gray-500">Company Name</label>
 							<input type="text" class="form-control" id="name" name="name" placeholder="Enter your Company's Name" required />
 						</div>
-						<div class="">
+						<div class="relative mb-2">
 							<label for="description" class="form-label text-gray-500">Description</label>
 							<textarea class="form-control" id="description" name="description" placeholder="Tell us a bit about your company..." rows="2" maxlength="100" required></textarea>
-							<div class="form-text text-gray-500 mt-2 text-sm text-right" id="wordCount">
+							<div class="form-text text-gray-500 text-xs text-right absolute right-3 bottom-0" id="wordCount">
 								0/100 words
 							</div>
 						</div>
@@ -89,7 +89,7 @@
 									<span id="selectedFlag"></span> &nbsp;
 									<input type="text" name="countryCode" id="countrySearch" placeholder="Search country..." class="p-0 placeholder:text-gray-500" />
 									<div class="rotate-180">
-										<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="18px" fill="black" class="text-black z-20">
+										<svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="black" class="text-black z-20">
 											<path d="M480-528 296-344l-56-56 240-240 240 240-56 56-184-184Z" />
 										</svg>
 									</div>
@@ -112,42 +112,52 @@
 							<!-- State Input (initially disabled and hidden) -->
 							<input type="text" id="stateInput" class="hidden form-control placeholder:text-gray-500" placeholder="Enter your state" />
 							<!-- State Dropdown (initially disabled) -->
-							<select id="stateDropdown" class="form-control">
-								<option value="">Select State</option>
-							</select>
+							<div class="select-wrapper">
+								<select id="stateDropdown" class="form-control ">
+									<option value="">Select State</option>
+								</select>
+							</div>
+							
 						</div>
 						
 						<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
 							<div>
 								<label for="companySize" class="form-label text-gray-500">Company Size</label>
-								<select id="companySize" name="companySize" class="form-control text-sm" required>
-									<option value="">Select company size</option>
-									<% size.forEach(function(s) { %>
-									<option value="<%= s %>"><%= s %></option>
-									<% }); %>
-								</select>
+								<div class="select-wrapper">
+									<select id="companySize" name="companySize" class="form-control " required>
+										<option value="">Select company size</option>
+										<% size.forEach(function(s) { %>
+										<option value="<%= s %>"><%= s %></option>
+										<% }); %>
+									</select>
+								</div>
+								
 							</div>
 							
 							<div>
 								<label for="industry" class="form-label text-gray-500">Industry/Category</label>
-								<select id="industry" name="industry" class="form-control text-sm" required>
-									<option value="">Select industry type</option>
-									<% industryCategory.forEach(function(industry) { %>
-									<option value="<%= industry %>"><%= industry %></option>
-									<% }); %>
-								</select>
+								<div class="select-wrapper">
+									<select id="industry" name="industry" class="form-control " required>
+										<option value="">Select industry type</option>
+										<% industryCategory.forEach(function(industry) { %>
+										<option value="<%= industry %>"><%= industry %></option>
+										<% }); %>
+									</select>
+								</div>
+								
 							</div>
 						</div>
 						
 						<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
 							<div>
 								<label for="jobRole" class="form-label text-gray-500">Job Role</label>
-								<select id="jobRole" name="jobRole" class="form-control text-sm" required>
-									<option value="">Select your role</option>
-									<% roles.forEach(function(role) { %>
-									<option value="<%= role %>"><%= role %></option>
-									<% }); %>
-								</select>
+								<div class="select-wrapper"><select id="jobRole" name="jobRole" class="form-control " required>
+										<option value="">Select your role</option>
+										<% roles.forEach(function(role) { %>
+										<option value="<%= role %>"><%= role %></option>
+										<% }); %>
+									</select></div>
+								
 							</div>
 							
 							<div>
