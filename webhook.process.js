@@ -1,13 +1,30 @@
 import TempStatus from "./src/models/TempStatus.model.js";
 import TempMessage from "./src/models/TempMessage.model.js";
 import TempTemplateRejection from "./src/models/TempTemplateRejection.model.js";
-
+import dotenv from "dotenv";
+import mongoose from "mongoose";
 // Import your main models
 import User from "./src/models/user.model.js";
 import Campaign from "./src/models/campaign.model.js";
-import Reports from "./src/models/campaignreport.model.js";
-import Chat from "./src/models/chat.model.js";
-import Template from "./src/models/template.model.js";
+import Reports from "./src/models/report.model.js";
+import Chat from "./src/models/chats.model.js";
+import Template from "./src/models/templates.model.js";
+
+dotenv.config(); // Load environment variables
+
+// Connect to MongoDB
+const connectDB = async () => {
+    try {
+        await mongoose.connect(process.env.MONGO_URI, {
+            useNewUrlParser: true,
+            useUnifiedTopology: true,
+        });
+        console.log("MongoDB Connected...");
+    } catch (err) {
+        console.error("Error connecting to MongoDB:", err.message);
+        process.exit(1);
+    }
+};
 
 // Process Temp Statuses and update Reports
 export const processTempStatuses = async () => {
@@ -154,9 +171,11 @@ export const processTempTemplateRejections = async () => {
 
 // Run all processing tasks together
 export const processAllTempEvents = async () => {
+    await connectDB();
 	await processTempStatuses();
 	await processTempMessages();
-	await processTempTemplateRejections();
+    await processTempTemplateRejections();
+    mongoose.connection.close();
 };
 
 processAllTempEvents();

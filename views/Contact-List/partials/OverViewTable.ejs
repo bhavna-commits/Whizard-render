@@ -3,17 +3,17 @@
 	<table class="text-center min-w-full bg-white border-separate border-spacing-y-4">
 		<tbody>
 			<!-- Table Header -->
-			<tr class="text-gray-400">
-				<td class="px-2 py-3">Sno.</td>
-				<td class="min-w-[10%] ">Name</td>
-				<td class="min-w-[10%]">Number</td>
-				<td class="min-w-[10%]">Created at</td>
+			<tr class="text-gray-400 ">
+				<td class="px-2 pb-3">Sno.</td>
+				<td class="min-w-[10%] px-2 pb-3">Name</td>
+				<td class="min-w-[10%] px-2 pb-3">Number</td>
+				<td class="min-w-[10%] px-2 pb-3">Created at</td>
 				<% if (contacts[0]?.masterExtra) { %>
 				<% Object.keys(contacts[0].masterExtra).forEach(function(key) { %>
-				<td class="min-w-[10%] text-gray-400 "><%= key %></td>
+				<td class="min-w-[10%] text-gray-400 px-2 pb-3"><%= key %></td>
 				<% }); %>
 				<% } %>
-				<td class=" sticky right-0 bg-white">Actions</td>
+				<td class=" sticky right-0 bg-white px-2 pb-3">Actions</td>
 			</tr>
 			
 			<!-- Table Rows -->

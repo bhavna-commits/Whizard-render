@@ -10,15 +10,7 @@ import Template from "../../models/templates.model.js";
 import Contacts from "../../models/contacts.model.js";
 import ActivityLogs from "../../models/activityLogs.model.js";
 import { uploadMedia, sendMessage, getMediaUrl } from "./chats.functions.js";
-// import {
-// 	setToken,
-// 	getToken,
-// 	getStoredTokens,
-// 	saveStoredTokens,
-// 	validateToken,
-// 	generateRefreshToken,
-// 	isTokenExpired,
-// } from "./chats.token.js";
+// import { setToken, getToken, getStoredTokens, saveStoredTokens, validateToken, generateRefreshToken, isTokenExpired } from "./chats.token.js";
 import {
 	checkToken,
 	createTokenRecord,
@@ -42,7 +34,6 @@ import {
 	isString,
 } from "../../middleWares/sanitiseInput.js";
 import Permissions from "../../models/permissions.model.js";
-
 import { generateUniqueId } from "../../utils/otpGenerator.js";
 import { sendTestMessage } from "../ContactList/campaign.functions.js";
 import ChatsTemp from "../../models/chatsTemp.model.js";
@@ -51,6 +42,18 @@ dotenv.config();
 
 const __dirname = path.resolve();
 
+/**
+ * Renders the chats view with a new token.
+ *
+ * Retrieves the user's unique id from session data, checks permissions, creates a token record,
+ * and renders the Chats view with user details.
+ *
+ * @async
+ * @function getSetToken
+ * @param {object} req - Express request object.
+ * @param {object} res - Express response object.
+ * @returns {void}
+ */
 export const getSetToken = async (req, res) => {
 	try {
 		// Get the user's unique ID from the session
@@ -102,8 +105,19 @@ export const getSetToken = async (req, res) => {
 	}
 };
 
-// -------------------------------------------------------------------------
-// getUsers – Now using token validation to get the userId
+/**
+ * Retrieves users based on token and returns formatted reports.
+ *
+ * Validates token, retrieves the user by ID, gets the selected phone number,
+ * and returns formatted reports with pagination.
+ *
+ * @async
+ * @function getUsers
+ * @param {object} req - Express request object.
+ * @param {object} res - Express response object.
+ * @param {function} next - Express next middleware function.
+ * @returns {void}
+ */
 export const getUsers = async (req, res, next) => {
 	try {
 		const oldToken = checkToken(req, next);
@@ -160,8 +174,18 @@ export const getUsers = async (req, res, next) => {
 	}
 };
 
-// -------------------------------------------------------------------------
-// getMoreUsers – Using token from req.body.token
+/**
+ * Retrieves additional users (reports) based on token and pagination.
+ *
+ * Uses the token from request, retrieves additional formatted reports based on provided phoneNumberId and skip.
+ *
+ * @async
+ * @function getMoreUsers
+ * @param {object} req - Express request object.
+ * @param {object} res - Express response object.
+ * @param {function} next - Express next middleware function.
+ * @returns {void}
+ */
 export const getMoreUsers = async (req, res, next) => {
 	try {
 		const oldToken = checkToken(req, next);
@@ -202,8 +226,19 @@ export const getMoreUsers = async (req, res, next) => {
 	}
 };
 
-// -------------------------------------------------------------------------
-// getMoreChats – Using token from req.body.token
+/**
+ * Retrieves more chats for a specific recipient.
+ *
+ * Fetches chats (reports) for a recipient identified by wa_id with pagination, formats them,
+ * and returns the chat data.
+ *
+ * @async
+ * @function getMoreChats
+ * @param {object} req - Express request object.
+ * @param {object} res - Express response object.
+ * @param {function} next - Express next middleware function.
+ * @returns {void}
+ */
 export const getMoreChats = async (req, res, next) => {
 	try {
 		const oldToken = checkToken(req, next);
@@ -260,16 +295,23 @@ export const getMoreChats = async (req, res, next) => {
 	}
 };
 
-// -------------------------------------------------------------------------
-// getRefreshToken – Now using token from req.body.token for refresh
+/**
+ * Refreshes the token using the token from the request body.
+ *
+ * Validates the old token, checks permissions, and returns a refreshed token along with permission details.
+ *
+ * @async
+ * @function getRefreshToken
+ * @param {object} req - Express request object.
+ * @param {object} res - Express response object.
+ * @param {function} next - Express next middleware function.
+ * @returns {void}
+ */
 export const getRefreshToken = async (req, res, next) => {
 	try {
 		const oldToken = checkToken(req, next);
-		// console.log("inside refresh token");
 		const { userId, addedUser, token } = await getUserIdFromToken(oldToken);
 
-		// Determine permissions (this may use additional info from tokenData or user lookup)
-		// In your system, you may retrieve additional user/permission data as needed.
 		let permissionValue, accessData;
 
 		if (addedUser && addedUser.permissions) {
@@ -300,8 +342,18 @@ export const getRefreshToken = async (req, res, next) => {
 	}
 };
 
-// -------------------------------------------------------------------------
-// getSingleChat – Using token from req.body.token
+/**
+ * Retrieves a single chat for a given recipient.
+ *
+ * Fetches chat reports for a recipient identified by wa_id, processes them, and returns the chat data.
+ *
+ * @async
+ * @function getSingleChat
+ * @param {object} req - Express request object.
+ * @param {object} res - Express response object.
+ * @param {function} next - Express next middleware function.
+ * @returns {void}
+ */
 export const getSingleChat = async (req, res, next) => {
 	try {
 		const oldToken = checkToken(req, next);
@@ -341,7 +393,6 @@ export const getSingleChat = async (req, res, next) => {
 					components: reportItem.components,
 					templatename: reportItem.templatename,
 				});
-				// console.log(chatsForReport);
 			} else {
 				if (reportItem.media_type) {
 					chatsForReport = processMediaReport(reportItem, wa_id);
@@ -365,8 +416,18 @@ export const getSingleChat = async (req, res, next) => {
 	}
 };
 
-// -------------------------------------------------------------------------
-// searchUsers – Using token from req.body.token
+/**
+ * Searches for users by name or phone number using the provided search term.
+ *
+ * Validates input, searches for matching reports, and returns the formatted report data.
+ *
+ * @async
+ * @function searchUsers
+ * @param {object} req - Express request object.
+ * @param {object} res - Express response object.
+ * @param {function} next - Express next middleware function.
+ * @returns {void}
+ */
 export const searchUsers = async (req, res, next) => {
 	try {
 		const oldToken = checkToken(req, next);
@@ -425,8 +486,19 @@ export const searchUsers = async (req, res, next) => {
 	}
 };
 
-// -------------------------------------------------------------------------
-// sendMessages – Using token from req.body.token
+/**
+ * Sends messages (text or media) based on the provided payload.
+ *
+ * Processes media if needed, sends the message via the sendMessage function,
+ * creates a report and temporary chat record, and logs the activity.
+ *
+ * @async
+ * @function sendMessages
+ * @param {object} req - Express request object.
+ * @param {object} res - Express response object.
+ * @param {function} next - Express next middleware function.
+ * @returns {void}
+ */
 export const sendMessages = async (req, res, next) => {
 	try {
 		const { messages, fileByteCode, fileName } = req.body;
@@ -573,8 +645,18 @@ export const sendMessages = async (req, res, next) => {
 	}
 };
 
-// -------------------------------------------------------------------------
-// getSendTemplate – Using token from req.query.token
+/**
+ * Renders the send template view for a specific contact.
+ *
+ * Retrieves contact details using the provided wa_id and renders the send template page.
+ *
+ * @async
+ * @function getSendTemplate
+ * @param {object} req - Express request object.
+ * @param {object} res - Express response object.
+ * @param {function} next - Express next middleware function.
+ * @returns {void}
+ */
 export const getSendTemplate = async (req, res, next) => {
 	try {
 		const { wa_id, token: oldToken } = req.query;
@@ -604,12 +686,20 @@ export const getSendTemplate = async (req, res, next) => {
 	}
 };
 
-// -------------------------------------------------------------------------
-// getAllTemplates – Unchanged (except token not used)
+/**
+ * Retrieves all approved templates for a given user.
+ *
+ * Finds templates for the user by id that are not deleted and have status "Approved".
+ *
+ * @async
+ * @function getAllTemplates
+ * @param {object} req - Express request object.
+ * @param {object} res - Express response object.
+ * @param {function} next - Express next middleware function.
+ * @returns {void}
+ */
 export const getAllTemplates = async (req, res, next) => {
 	try {
-		// const { userId, token } = getUserIdFromToken(req, res, next);
-
 		const id = req.params?.id;
 		if (!isString(id)) return next();
 		const updatedTemplates = await Template.find({
@@ -629,12 +719,20 @@ export const getAllTemplates = async (req, res, next) => {
 	}
 };
 
-// -------------------------------------------------------------------------
-// getSingleTemplate – Unchanged (except token not used)
+/**
+ * Retrieves a single approved template by unique id.
+ *
+ * Finds a template using unique_id that is not deleted and has status "Approved".
+ *
+ * @async
+ * @function getSingleTemplate
+ * @param {object} req - Express request object.
+ * @param {object} res - Express response object.
+ * @param {function} next - Express next middleware function.
+ * @returns {void}
+ */
 export const getSingleTemplate = async (req, res, next) => {
 	try {
-		// const { userId } = getUserIdFromToken(req, res, next);
-
 		const id = req.params?.id;
 		if (!isString(id)) return next();
 		const updatedTemplate = await Template.findOne({
@@ -651,8 +749,19 @@ export const getSingleTemplate = async (req, res, next) => {
 	}
 };
 
-// -------------------------------------------------------------------------
-// sendTemplate – Using token from req.body.token
+/**
+ * Sends a message template to a contact.
+ *
+ * Validates input data, sends a test message using the provided template,
+ * creates a report and a temporary chat record, logs the activity, and returns a success response.
+ *
+ * @async
+ * @function sendTemplate
+ * @param {object} req - Express request object.
+ * @param {object} res - Express response object.
+ * @param {function} next - Express next middleware function.
+ * @returns {void}
+ */
 export const sendTemplate = async (req, res, next) => {
 	try {
 		let {
