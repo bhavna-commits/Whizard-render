@@ -1,38 +1,42 @@
-import TempStatus from "./src/models/TempStatus.model.js";
-import TempMessage from "./src/models/TempMessage.model.js";
-import TempTemplateRejection from "./src/models/TempTemplateRejection.model.js";
 import dotenv from "dotenv";
+import crypto from "crypto";
 import mongoose from "mongoose";
-// Import your main models
-import User from "./src/models/user.model.js";
-import Campaign from "./src/models/campaign.model.js";
-import Reports from "./src/models/report.model.js";
-import Chat from "./src/models/chats.model.js";
-import Template from "./src/models/templates.model.js";
 
-dotenv.config(); // Load environment variables
+dotenv.config(); 
 
-// Connect to MongoDB
-const connectDB = async () => {
-    try {
-        await mongoose.connect(process.env.MONGO_URI, {
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
-        });
-        console.log("MongoDB Connected...");
-    } catch (err) {
-        console.error("Error connecting to MongoDB:", err.message);
-        process.exit(1);
-    }
+export const generateUniqueId = () => {
+	return crypto.randomBytes(5).toString("hex").slice(0, 10);
 };
 
-// Process Temp Statuses and update Reports
+let TempStatus,
+	Reports,
+	User,
+	Campaign,
+	TempMessage,
+    Chat,
+    ChatsTemp,
+	Contacts,
+	TempTemplateRejection,
+	Template;
+
+const connectDB = async () => {
+	try {
+		await mongoose.connect(process.env.MONGO_URI, {
+			useNewUrlParser: true,
+			useUnifiedTopology: true,
+		});
+		console.log("MongoDB Connected...");
+	} catch (err) {
+		console.error("Error connecting to MongoDB:", err.message);
+		process.exit(1);
+	}
+};
+
 export const processTempStatuses = async () => {
 	try {
-		const tempStatuses = await TempStatus.find();
-
+		const tempStatuses = await TempStatus.find().toArray();
+		// console.log(tempStatuses);
 		for (const temp of tempStatuses) {
-			// Retrieve the corresponding user using WABA id saved in the temp record
 			const user = await User.findOne({ WABA_ID: temp.wabaId });
 			if (!user) {
 				console.warn(
@@ -41,23 +45,24 @@ export const processTempStatuses = async () => {
 				continue;
 			}
 
-			// Retrieve the latest campaign for this user
-			const campaign = await Campaign.findOne({
+			const campaign = await Campaign.find({
+				// phoneNumberId: temp.fbPhoneId,
 				useradmin: user.unique_id,
 				deleted: false,
 			})
 				.sort({ createdAt: -1 })
-				.limit(1);
+				.limit(1)
+				.toArray();
 
-			// Prepare the update object
+			console.log(campaign[0].name);
+
 			const updateFields = {
 				status: temp.status,
-				updatedAt: temp.timestamp,
+				updatedAt: temp.timestamp * 1000,
 				recipientPhone: temp.recipientPhone,
-				...(campaign && { campaignId: campaign.unique_id }),
+				...(campaign[0] && { campaignId: campaign[0].unique_id }),
 			};
 
-			// If the status is FAILED and error details exist, attach error details
 			if (
 				temp.status === "FAILED" &&
 				temp.error &&
@@ -72,15 +77,10 @@ export const processTempStatuses = async () => {
 
 			await Reports.updateOne(
 				{ messageId: temp.messageId },
-				{
-					$set: updateFields,
-					$push: { logs: temp.rawData },
-				},
+				{ $set: updateFields, $push: { logs: temp.rawData } },
 				{ upsert: true },
 			);
 		}
-
-		// Delete processed temp statuses
 		await TempStatus.deleteMany({});
 		console.log("Temp statuses processed and cleared.");
 	} catch (error) {
@@ -88,13 +88,12 @@ export const processTempStatuses = async () => {
 	}
 };
 
-// Process Temp Messages and insert Chat records
 export const processTempMessages = async () => {
 	try {
-		const tempMessages = await TempMessage.find();
+		const tempMessages = await TempMessage.find().toArray();
 
 		for (const temp of tempMessages) {
-			// Look up the user using wabaId from the temp message
+			if (temp.type === "unsupported") continue;
 			const user = await User.findOne({ WABA_ID: temp.wabaId });
 			if (!user) {
 				console.warn(
@@ -103,20 +102,29 @@ export const processTempMessages = async () => {
 				continue;
 			}
 
-			// Retrieve the latest campaign for this user
-			const campaign = await Campaign.findOne({
+			const campaign = await Campaign.find({
 				useradmin: user.unique_id,
 				deleted: false,
 			})
 				.sort({ createdAt: -1 })
-				.limit(1);
+				.limit(1)
+				.toArray();
 
-			// Create a new Chat record with the temp message data
-			await Chat.create({
+			const contactName = await Contacts.findOne({
+				contactId: campaign[0]?.contactListId,
+				wa_id: temp.from,
+			});
+			// console.log(contactName);
+            // console.log(temp.type, temp.text?.body);
+            const data = {
+				WABA_ID: user.WABA_ID,
+				useradmin: user.unique_id,
+				unique_id: generateUniqueId(),
 				messageId: temp.messageId,
 				recipientPhone: temp.from,
-				status: "REPLIED", // or adjust logic as needed
-				updatedAt: temp.timestamp,
+				status: "REPLIED",
+				updatedAt: temp.timestamp * 1000,
+				contactName: contactName.Name,
 				FB_PHONE_ID: temp.fbPhoneId,
 				replyContent: temp.type === "text" ? temp.text?.body : "",
 				media:
@@ -128,12 +136,13 @@ export const processTempMessages = async () => {
 						  }
 						: {},
 				type: "Chat",
-				...(campaign && { campaignId: campaign.unique_id }),
-				// Optionally, add additional fields if needed
-			});
+				...(campaign[0] && { campaignId: campaign[0].unique_id }),
+				...(campaign[0] && { campaignName: campaign[0].name }),
+			};
+            await Chat.insertOne(data);
+            await ChatsTemp.insertOne(data);
 		}
 
-		// Delete processed temp messages
 		await TempMessage.deleteMany({});
 		console.log("Temp messages processed and cleared.");
 	} catch (error) {
@@ -141,14 +150,10 @@ export const processTempMessages = async () => {
 	}
 };
 
-// Process Temp Template Rejections and update Templates
 export const processTempTemplateRejections = async () => {
 	try {
-		const tempRejections = await TempTemplateRejection.find();
-
+		const tempRejections = await TempTemplateRejection.find().toArray();
 		for (const temp of tempRejections) {
-			// If you store wabaId with the template rejection, you could optionally verify the correct user here
-			// For now, we simply update the template by its id.
 			await Template.updateOne(
 				{ template_id: String(temp.templateId) },
 				{
@@ -160,8 +165,6 @@ export const processTempTemplateRejections = async () => {
 				},
 			);
 		}
-
-		// Delete processed temp template rejections
 		await TempTemplateRejection.deleteMany({});
 		console.log("Temp template rejections processed and cleared.");
 	} catch (error) {
@@ -169,13 +172,32 @@ export const processTempTemplateRejections = async () => {
 	}
 };
 
-// Run all processing tasks together
 export const processAllTempEvents = async () => {
-    await connectDB();
+	await connectDB();
+	const db = mongoose.connection.db;
+	TempStatus = db.collection("tempstatuses");
+	// console.log(TempStatus);
+	Reports = db.collection("campaignreports");
+	// console.log(Reports);
+	User = db.collection("users");
+	// console.log(User);
+	Campaign = db.collection("campaigns");
+	// console.log(Campaign);
+	TempMessage = db.collection("tempmessages");
+	// console.log(TempMessage);
+	Chat = db.collection("chats");
+    // console.log(Chat);
+    ChatsTemp = db.collection("chatstemps");
+	Contacts = db.collection("contacts");
+	// console.log(Contacts);
+	TempTemplateRejection = db.collection("temptemplaterejections");
+	// console.log(TempTemplateRejection);
+	Template = db.collection("templates");
+	// console.log(Template);
 	await processTempStatuses();
 	await processTempMessages();
-    await processTempTemplateRejections();
-    mongoose.connection.close();
+	await processTempTemplateRejections();
+	mongoose.connection.close();
 };
 
 processAllTempEvents();

@@ -12,6 +12,16 @@ document.addEventListener("DOMContentLoaded", function () {
 
 	let selectedCountry = null;
 
+	function loadFlag() {
+		selectedCountry = countries.find(
+			(country) => country.name === user.country,
+		);
+		// Clear any old content
+		selectedFlag.innerHTML = `<img src="flags/${selectedCountry.code}.svg" alt="${selectedCountry.code}.svg" />`;
+	}
+
+	loadFlag();
+
 	// Load the respective states based on the selected country on page load
 	const loadStatesForSelectedCountry = () => {
 		const countryName = countrySearchInput.value; // Get the selected country name
@@ -130,11 +140,16 @@ document.addEventListener("DOMContentLoaded", function () {
 
 	countryOptions.forEach((option) => {
 		option.addEventListener("click", function () {
-			const flag = this.querySelector(".country-flag").textContent;
 			const countryName = this.querySelector(".country-name").textContent;
 
+			const flagImg = this.querySelector(".country-flag").cloneNode(true);
+			// Clear any old content
+			selectedFlag.innerHTML = "";
+
+			// Insert the full <img> element
+			selectedFlag.appendChild(flagImg);
+
 			// Update selected flag and country name
-			selectedFlag.textContent = flag;
 			countrySearchInput.value = countryName;
 			countryDropdown.classList.add("hidden");
 

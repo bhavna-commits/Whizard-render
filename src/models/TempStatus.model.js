@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 
 const tempStatusSchema = new mongoose.Schema({
+    fbPhoneId: { type: String, required: true },
 	wabaId: { type: String, required: true },
 	messageId: { type: String, required: true },
 	status: { type: String, required: true },

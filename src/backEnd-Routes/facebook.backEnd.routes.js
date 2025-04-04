@@ -380,7 +380,10 @@ router.post("/webhook", async (req, res) => {
 
 					// Handle status events
 					if (messagingEvent.statuses) {
+						const fbPhoneId =
+							messagingEvent.metadata?.phone_number_id || "";
 						for (const statusEvent of messagingEvent.statuses) {
+							console.log(statusEvent);
 							const {
 								id: messageId,
 								status,
@@ -390,6 +393,7 @@ router.post("/webhook", async (req, res) => {
 							} = statusEvent;
 
 							const tempStatus = new TempStatus({
+								fbPhoneId,
 								wabaId,
 								messageId,
 								status: status.toUpperCase(),
@@ -407,6 +411,7 @@ router.post("/webhook", async (req, res) => {
 						messagingEvent.event === "REJECTED" ||
 						messagingEvent.status === "REJECTED"
 					) {
+						console.log(messagingEvent);
 						let templateId,
 							templateName,
 							templateLanguage,
@@ -436,6 +441,7 @@ router.post("/webhook", async (req, res) => {
 
 					// Handle incoming messages/replies
 					if (messagingEvent.messages) {
+						console.log(messagingEvent.messages);
 						const fbPhoneId =
 							messagingEvent.metadata?.phone_number_id || "";
 

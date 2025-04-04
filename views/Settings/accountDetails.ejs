@@ -137,11 +137,12 @@
 										</svg>
 									</div>
 								</button>
-								<div class="country-dropdown hidden " id="countryDropdown">
+								<div class="country-dropdown hidden" id="countryDropdown">
 									<div class="countries-list">
 										<% countries.forEach(function(country) { %>
-										<button type="button" class="country-option ">
-											<span class="country-flag"><%= country.flag %></span>
+										<button type="button" class="country-option focus:outline-none">
+											<!-- <span class="country-flag"><% country.flag %></span> -->
+											<img src="flags/<%= country.code %>.svg" alt="<%= country.code %> flag" class="w-5 h-5 inline-block country-flag" />
 											<span class="country-name"><%= country.name %></span>
 										</button>
 										<% }); %>

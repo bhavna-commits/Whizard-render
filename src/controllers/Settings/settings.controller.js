@@ -393,9 +393,9 @@ export const accountDetails = async (req, res) => {
 					industryCategory,
 					size,
 					roles,
-					photo: req.session.user?.photo,
-					name: req.session.user.name,
-					color: req.session.user.color,
+					photo: req.session.addedUser?.photo,
+					name: req.session.addedUser.name,
+					color: req.session.addedUser.color,
 				});
 			} else {
 				res.render("errors/notAllowed");

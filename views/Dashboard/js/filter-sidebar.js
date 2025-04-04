@@ -17,7 +17,7 @@ flatpickr("#filterDate", {
 			let [startDate, endDate] = dateStr.split("to");
 
 			const url = new URL(window.location.href);
-			
+
 			startDate = startDate?.trim();
 			endDate = endDate?.trim();
 			if (endDate) {
@@ -27,9 +27,8 @@ flatpickr("#filterDate", {
 			}
 
 			// Update the URL with the selected dates
-			
+
 			url.searchParams.set("startDate", startDate);
-			
 
 			// Redirect to updated URL after both dates are selected
 			window.location.href = url.toString();
@@ -45,15 +44,42 @@ const overlay = document.getElementById("overlay");
 // const closeBtn = document.getElementById("closeBtn");
 const loading = document.getElementById("loading");
 
-// Close sidebar
-function closeSidebar() {
-	filterSidebar.classList.remove("open");
-	overlay.classList.remove("active");
-	document.body.style.overflow = "auto";
-}
-
 closeBtn.addEventListener("click", closeSidebar);
 overlay.addEventListener("click", closeSidebar);
+
+const watchDemo = document.querySelector(".watchDemo");
+const demoModal = document.querySelector(".demoModal");
+const closeDemo = document.querySelector(".closeDemo");
+const modalContent = document.querySelector(".modalContent");
+
+const openModal = () => {
+	demoModal.classList.remove("hidden");
+	setTimeout(() => {
+		modalContent.classList.remove("scale-95", "opacity-0");
+		modalContent.classList.add("scale-100", "opacity-100");
+	}, 10); // allow reflow
+};
+
+const closeModal = () => {
+	modalContent.classList.remove("scale-100", "opacity-100");
+	modalContent.classList.add("scale-95", "opacity-0");
+	setTimeout(() => {
+		demoModal.classList.add("hidden");
+	}, 300); // match the transition duration
+};
+
+watchDemo.addEventListener("click", openModal);
+closeDemo.addEventListener("click", closeModal);
+
+demoModal.addEventListener("click", (e) => {
+	if (e.target === demoModal) closeModal();
+});
+
+document.addEventListener("keydown", (e) => {
+	if (e.key === "Escape" && !demoModal.classList.contains("hidden")) {
+		closeModal();
+	}
+});
 
 // Event listener for close button
 document.getElementById("closeBtn").addEventListener("click", () => {
@@ -64,6 +90,13 @@ document.getElementById("closeBtn").addEventListener("click", () => {
 	overlay.classList.remove("active");
 	document.body.style.overflow = "auto";
 });
+
+// Close sidebar
+function closeSidebar() {
+	filterSidebar.classList.remove("open");
+	overlay.classList.remove("active");
+	document.body.style.overflow = "auto";
+}
 
 async function viewSent() {
 	const url = new URL(window.location.href);
@@ -229,7 +262,7 @@ async function viewDelivered() {
 		dataSection.classList.remove("hidden");
 	} catch (err) {
 		console.error("Error fetching data:", err);
-		toast("error",err);
+		toast("error", err);
 	} finally {
 		loading.classList.add("hidden");
 	}

@@ -73,7 +73,7 @@ document.addEventListener("DOMContentLoaded", function () {
 				// console.log(result);
 			}
 		} catch (error) {
-      console.log(error);
+			console.log(error);
 			errorMessage.classList.remove("hidden");
 			errorMessage.textContent = error.message; // Display the error message
 		} finally {
@@ -93,11 +93,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
 	countryOptions.forEach((option) => {
 		option.addEventListener("click", function () {
-			const flag = this.querySelector(".country-flag").textContent;
+			const flagImg = this.querySelector(".country-flag").cloneNode(true);
+			// Clear any old content
+			selectedFlag.innerHTML = "";
+
+			// Insert the full <img> element
+			selectedFlag.appendChild(flagImg);
+
 			const countryName = this.querySelector(".country-name").textContent;
 
 			// Update selected flag and country name
-			selectedFlag.textContent = flag;
+			// selectedFlag.textContent = flag;
 			countrySearchInput.value = countryName;
 			countryDropdown.classList.add("hidden");
 
