@@ -6,7 +6,7 @@
 			<span id="selectedOption" class="">
 				<% 
           // Find the selected phone number and display it
-          const selectedNumber = user.FB_PHONE_NUMBERS.find(number => number.selected == true);
+          const selectedNumber = user.FB_PHONE_NUMBERS.find(number => number.selected === true);
         //   console.log(selectedNumber);
         %>
 				<%= selectedNumber ? (selectedNumber.friendly_name || selectedNumber.phone_number_id) : "Select phone number" %>
@@ -20,7 +20,7 @@
 			<span id="selectedOption" class="">
 				<% 
           // Find the selected phone number and display it
-          const selectedNumber = user.FB_PHONE_NUMBERS.find(number => number.selected == true);
+          const selectedNumber = user.FB_PHONE_NUMBERS.find(number => number.selected === true);
         //   console.log(selectedNumber);
         %>
 				<%= selectedNumber ? (selectedNumber.friendly_name || selectedNumber.phone_number_id) : "Select phone number" %>

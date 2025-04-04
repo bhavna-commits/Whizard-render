@@ -274,19 +274,19 @@ function checkOTPInputs() {
 		btn.disabled = false;
 		// Remove disabled styling and add enabled styling (adjust classes as needed)
 		btn.classList.remove("bg-gray-400", "cursor-not-allowed");
-		btn.classList.add("bg-blue-600", "cursor-pointer");
+		btn.classList.add("bg-black", "cursor-pointer");
 		btn2.disabled = false;
 		// Remove disabled styling and add enabled styling (adjust classes as needed)
 		btn2.classList.remove("bg-gray-400", "cursor-not-allowed");
-		btn2.classList.add("bg-blue-600", "cursor-pointer");
+		btn2.classList.add("bg-black", "cursor-pointer");
 	} else {
 		// console.log("heredsds")
 		btn.disabled = true;
 		btn.classList.add("bg-gray-400", "cursor-not-allowed");
-		btn.classList.remove("bg-blue-600", "cursor-pointer");
+		btn.classList.remove("bg-black", "cursor-pointer");
 		btn2.disabled = true;
 		btn2.classList.add("bg-gray-400", "cursor-not-allowed");
-		btn2.classList.remove("bg-blue-600", "cursor-pointer");
+		btn2.classList.remove("bg-black", "cursor-pointer");
 	}
 }
 

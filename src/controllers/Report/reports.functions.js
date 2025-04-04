@@ -19,6 +19,7 @@ import Campaign from "../../models/campaign.model.js";
 import Report from "../../models/report.model.js";
 import User from "../../models/user.model.js";
 import Chat from "../../models/chats.model.js";
+import ChatsTemp from "../../models/chatsTemp.model.js";
 import { generateUniqueId } from "../../utils/otpGenerator.js";
 import { sendMessages } from "../ContactList/campaign.functions.js";
 import { isString, isNumber } from "../../middleWares/sanitiseInput.js";
