@@ -8,7 +8,7 @@
 	
 	<div class="filter-section">
 		<form id="editContactForm">
-			<input type="hidden" id="edit-contact-id" name="keyId">
+			<input type="hidden" id="edit-contact-id" />
 			
 			<div class="form-group">
 				<label for="edit-contact-name">Name</label>
@@ -159,6 +159,7 @@
 		.addEventListener("submit", function (event) {
 			event.preventDefault();
 			const contactId = document.getElementById("edit-contact-id").value;
+			console.log(contactId);
 			let formData = new FormData(this);
 			
 			const saveButton = this.querySelector("button[type='submit']");

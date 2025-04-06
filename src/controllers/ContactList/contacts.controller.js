@@ -38,6 +38,7 @@ export const csvFilePath = path.join(
 export const updateContact = async (req, res, next) => {
 	const contactId = req.params?.id;
 	const { name, tags, validated } = req.body;
+	console.log(name, tags, validated);
 	if (!contactId) {
 		return res.status(401).json({
 			success: false,
@@ -56,7 +57,7 @@ export const updateContact = async (req, res, next) => {
 		// Find the contact by ID and update the fields
 		const updatedContact = await ContactList.findByIdAndUpdate(
 			contactId,
-			{ name, tags, validated },
+			{ Name, tags, validated },
 			{ new: true },
 		);
 
@@ -223,6 +224,8 @@ export const editContact = async (req, res, next) => {
 		if (!isObject(updatedData)) return next();
 		if (!isString(id)) return next();
 
+		// console.log(id);
+
 		let wa_id = "";
 
 		const setData = {};
@@ -240,8 +243,8 @@ export const editContact = async (req, res, next) => {
 
 		// console.log(setData);
 
-		const contacts = await Contacts.findOneAndUpdate(
-			{ keyId: id },
+		const contacts = await Contacts.findByIdAndUpdate(
+			id,
 			{ $set: setData },
 			{ new: true, strict: false },
 		);
@@ -259,7 +262,8 @@ export const editContact = async (req, res, next) => {
 
 		res.json({ success: true });
 	} catch (error) {
-		res.json({ success: false, message: error.message });
+		console.error("Error Editing contact :", error.message || error);
+		res.json({ success: false, message: error.message || error });
 	}
 };
 
@@ -597,13 +601,13 @@ export const createCampaign = async (req, res, next) => {
 		res.status(201).json({
 			message,
 			campaign: newCampaign,
-			success: true
+			success: true,
 		});
 	} catch (error) {
 		console.error("Error creating campaign:", error.message || error);
 		res.status(500).json({
 			message: error.message || error,
-			success: false
+			success: false,
 		});
 	}
 };

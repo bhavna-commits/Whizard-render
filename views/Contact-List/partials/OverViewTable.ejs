@@ -107,7 +107,7 @@
 	
 	function openEditModal (contactData) {
 		const contact = JSON.parse(contactData);
-		document.getElementById("edit-contact-id").value = contact.keyId;
+		document.getElementById("edit-contact-id").value = contact._id;
 		document.getElementById("edit-contact-name").value = contact.Name;
 		
 		const dynamicFieldsContainer = document.getElementById(
