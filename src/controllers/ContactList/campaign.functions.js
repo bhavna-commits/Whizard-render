@@ -217,10 +217,10 @@ export async function sendMessageThroughWhatsApp(
 		};
 
 		// Log the constructed requestData payload for debugging
-		// console.log(
-		// 	"Request Data Payload:",
-		// 	JSON.stringify(requestData, null, 2),
-		// );
+		console.log(
+			"Request Data Payload:",
+			JSON.stringify(messageComponents, null, 2),
+		);
 
 		// Find the selected phone number from the user's array
 
@@ -516,7 +516,7 @@ export async function sendTestMessage(
 			templatename: template.name,
 		};
 	} catch (error) {
-		console.error("Error sending messages:", error.message);
-		throw new Error(`${error.message}`);
+		console.error("Error sending messages:", error.message || error);
+		throw error.message || error;
 	}
 }

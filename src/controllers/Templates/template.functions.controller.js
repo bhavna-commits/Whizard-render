@@ -212,19 +212,21 @@ export const saveTemplateToDatabase = async (
 			// filePath = await getMediaUrl(filePath, accessToken);
 
 			const headerComponent = newTemplate.components.find(
-				(component) => component.type == "HEADER",
+				(component) => component.type === "HEADER",
 			);
 
 			if (headerComponent) {
 				let fileUrl = `${url}/uploads/${id}/${req.file?.filename}`;
 				// Depending on the header format, update the header_url with the file path
-				if (headerComponent.format == "IMAGE") {
+				if (headerComponent.format === "IMAGE") {
 					headerComponent.example.header_handle = [filePath];
 					headerComponent.example.header_url = fileUrl;
-				} else if (headerComponent.format == "VIDEO") {
+				} else if (headerComponent.format === "VIDEO") {
+					
 					headerComponent.example.header_url = fileUrl;
-					headerComponent.example.header_handle = [filePath];
-				} else if (headerComponent.format == "DOCUMENT") {
+					headerComponent.example.header_handle = [ filePath ];
+					console.log(headerComponent.example.header_url);
+				} else if (headerComponent.format === "DOCUMENT") {
 					headerComponent.example.header_url = fileUrl;
 					headerComponent.example.header_handle = [filePath];
 				}

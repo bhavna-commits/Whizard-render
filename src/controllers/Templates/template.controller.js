@@ -13,6 +13,7 @@ import {
 	updateTemplateOnFacebook,
 	createComponents,
 	uploadAndRetrieveMediaURL,
+	uploadMediaResumable,
 } from "./template.functions.controller.js";
 import { getMimeType } from "../Chats/chats.extra.functions.js";
 import { generateUniqueId } from "../../utils/otpGenerator.js";
@@ -424,33 +425,7 @@ export const editTemplate = async (req, res, next) => {
 		const user = await User.findOne({ unique_id: id });
 
 		if (req.file) {
-			// Extract the actual phone number id from the user's FB_PHONE_NUMBERS array.
-			// const phoneNumberObj = user.FB_PHONE_NUMBERS.find(
-			// 	(u) => u.selected === true,
-			// );
-			// if (!phoneNumberObj)
-			// 	return res
-			// 		.status(400)
-			// 		.json({
-			// 			success: false,
-			// 			message: "No phone number selected",
-			// 		});
-			// const phoneNumberId = phoneNumberObj.phone_number_id;
-
-			// // Construct the local file path (ensure the file was saved locally)
-			// let filePath = path.join(url, "uploads", id, req.file.filename);
-			// const accessToken = user.FB_ACCESS_TOKEN;
-			// const mediaType = getMimeType(req.file.filename); // e.g., "image/jpeg"
-
-			// Upload file to Meta and get media URL
-			// const { mediaUrl } = await uploadAndRetrieveMediaURL(
-			// 	accessToken,
-			// 	phoneNumberId,
-			// 	filePath,
-			// 	mediaType,
-			// 	req.file.filename,
-			// );
-
+		
 			let filePath = path.join(
 				__dirname,
 				"uploads",
@@ -458,9 +433,6 @@ export const editTemplate = async (req, res, next) => {
 				req.file.filename,
 			);
 
-			// const phoneNumberId = user.FB_PHONE_NUMBERS.find(
-			// 	(u) => u.selected == true,
-			// );
 			const accessToken = user.FB_ACCESS_TOKEN;
 
 			const appId = process.env.FB_APP_ID;
@@ -472,7 +444,19 @@ export const editTemplate = async (req, res, next) => {
 				(component) => component.type === "HEADER",
 			);
 			if (headerComponent) {
-				headerComponent.example.header_handle = [filePath];
+				let fileUrl = `${url}/uploads/${id}/${req.file?.filename}`;
+				// Depending on the header format, update the header_url with the file path
+				if (headerComponent.format === "IMAGE") {
+					headerComponent.example.header_handle = [filePath];
+					headerComponent.example.header_url = fileUrl;
+				} else if (headerComponent.format === "VIDEO") {
+					headerComponent.example.header_url = fileUrl;
+					headerComponent.example.header_handle = [filePath];
+					console.log(headerComponent.example.header_url);
+				} else if (headerComponent.format === "DOCUMENT") {
+					headerComponent.example.header_url = fileUrl;
+					headerComponent.example.header_handle = [filePath];
+				}
 			}
 		}
 

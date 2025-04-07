@@ -457,8 +457,7 @@ export const verifyNumber = async (req, res, next) => {
 		console.error("Error verifying number:", error);
 		res.status(500).json({
 			success: false,
-			message:
-				error || "Failed to verify number. Please try again.",
+			message: error || "Failed to verify number. Please try again.",
 		});
 	}
 };
@@ -727,12 +726,25 @@ const fetchDashboardData = async (userId, query) => {
 					},
 					messagesDelivered: {
 						$sum: {
-							$cond: [{ $eq: ["$status", "DELIVERED"] }, 1, 0],
+							$cond: [
+								{
+									$in: [
+										"$status",
+										["DELIVERED", "READ", "REPLIED"],
+									],
+								},
+								1,
+								0,
+							],
 						},
 					},
 					messagesRead: {
 						$sum: {
-							$cond: [{ $eq: ["$status", "READ"] }, 1, 0],
+							$cond: [
+								{ $in: ["$status", ["READ", "REPLIED"]] },
+								1,
+								0,
+							],
 						},
 					},
 					messagesReplied: {
