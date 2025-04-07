@@ -162,13 +162,15 @@
 					<!-- Language Dropdown -->
 					<div class="flex justify-between items-center ">
 						<label class=" text-[#191919]">Language</label>
-						<select name="language" class="w-3/5 p-3 border rounded-xl bg-white">
-							<% languages.forEach(function(lang) { %>
-							<option value="<%= lang %>" <%= (user?.language ? user.language : 'English') === lang ? 'selected' : '' %>>
-								<%= lang %>
-							</option>
-							<% }); %>
-						</select>
+						<div class="select-wrapper w-3/5">
+							<select name="language" class="w-full p-3 border rounded-xl bg-white">
+								<% languages.forEach(function(lang) { %>
+								<option value="<%= lang %>" <%= (user?.language ? user.language : 'English') === lang ? 'selected' : '' %>>
+									<%= lang %>
+								</option>
+								<% }); %>
+							</select>
+						</div>
 					</div>
 					
 					<!-- Password Field -->

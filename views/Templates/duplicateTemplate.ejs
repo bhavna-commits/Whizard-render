@@ -230,18 +230,20 @@
 									<span class="text-gray-400 small text-sm">(optional)</span>
 								</h6>
 							</div>
-							<div class="header-dropdown form-group">
-								<select id="mediaTypeDropdown" class="cursor-pointer w-full rounded-md border border-gray-300 bg-white py-2 mt-4 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
-									<option class="text-sm" value="none">
-										None
-									</option>
-									<option class="text-sm" value="text">
-										Text
-									</option>
-									<option class="text-sm" value="media">
-										Media
-									</option>
-								</select>
+							<div class="header-dropdown form-group text-gray-400">
+								<div class="select-wrapper   mt-4">
+									<select id="mediaTypeDropdown" class="cursor-pointer py-2 pl-2 w-full rounded-md border border-gray-300 bg-white  text-sm focus:border-blue-200 focus:outline-none focus:ring-1 focus:ring-blue-200">
+										<option class="text-sm" value="none">
+											None
+										</option>
+										<option class="text-sm" value="text">
+											Text
+										</option>
+										<option class="text-sm" value="media">
+											Media
+										</option>
+									</select>
+								</div>
 							</div>
 						</div>
 					</div>
@@ -258,12 +260,14 @@
 					<div id="mediaInputContainer" class="hidden w-full h-10 mt-2">
 						<!-- Media Type Selection -->
 						
-						<select id="mediaType" class="w-48 pl-2 cursor-pointer rounded-md border border-gray-300 bg-white py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 mr-5">
-							<option value="image">Image</option>
-							<option value="video">Video</option>
-							<option value="document">Document</option>
-							<option value="location">Location</option>
-						</select>
+						<div class="select-wrapper w-48  mr-5">
+							<select id="mediaType" class="w-full pl-2 cursor-pointer rounded-md border border-gray-300 bg-white py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 ">
+								<option value="image">Image</option>
+								<option value="video">Video</option>
+								<option value="document">Document</option>
+								<option value="location">Location</option>
+							</select>
+						</div>
 						
 						<!-- File Upload -->
 						<label id="uploadLabel" for="file-upload" class="px-3 h-full cursor-pointer rounded-md border border-gray-300 text-gray-400 focus-within:outline-none focus-within:ring-2 focus-within:ring-blue-500 focus-within:ring-offset-2 hover:bg-gray-100 flex items-center justify-between">

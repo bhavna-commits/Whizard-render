@@ -219,7 +219,7 @@ export const saveTemplateToDatabase = async (
 				let fileUrl = `${url}/uploads/${id}/${req.file?.filename}`;
 				// Depending on the header format, update the header_url with the file path
 				if (headerComponent.format == "IMAGE") {
-					headerComponent.example.header_handle = [ filePath ];
+					headerComponent.example.header_handle = [filePath];
 					headerComponent.example.header_url = fileUrl;
 				} else if (headerComponent.format == "VIDEO") {
 					headerComponent.example.header_url = fileUrl;
@@ -246,7 +246,7 @@ export const saveTemplateToDatabase = async (
 		return newTemplate;
 	} catch (error) {
 		console.error("Error saving template to database:", error);
-		throw new Error(`Error saving template to database: ${error.message}`);
+		throw error.message || error;
 	}
 };
 
@@ -304,11 +304,12 @@ export async function submitTemplateToFacebook(savedTemplate, id) {
 		// console.log(error.response.data.error);
 		// Handle different error types
 		if (error.response) {
-			throw new Error(
-				error.response.data.error?.error_user_msg ||
-					error.response.data.error?.error_user_title ||
-					error.response.data.error?.message ||
-					"Unknown error from Facebook",
+			throw (
+				"Error from Meta: " +
+					error.response.data.error?.error_user_msg ||
+				error.response.data.error?.error_user_title ||
+				error.response.data.error?.message ||
+				"Unknown error from Facebook"
 			);
 		} else if (error.request) {
 			// Request was made but no response received

@@ -155,44 +155,49 @@
 							<label for="state" class="form-label text-[#191919]">State</label>
 							<div class="w-3/5 ">
 								<input type="text" id="stateInput" class="hidden form-control " value="<%= user.state %>" placeholder="Enter your state" />
-								<select id="stateDropdown" class="form-control text-[#191919]">
-									<option value="<%= user.state %>"><%= user.state %></option>
-								</select>
+								<div class="select-wrapper">
+									<select id="stateDropdown" class="form-control text-[#191919]">
+										<option value="<%= user.state %>"><%= user.state %></option>
+									</select>
+								</div>
 							</div>
 						</div>
 						
 						
 						<div class="mb-4 flex justify-between items-center">
 							<label for="companySize" class="form-label text-[#191919]">Company Size</label>
-							<select id="companySize" name="companySize" class="form-control w-3/5 text-[#191919]" required>
-								<option value="">Select company size</option>
-								<% size.forEach(function(s) { %>
-								<option value="<%= s %>" <%= user.companySize === s ? 'selected' : '' %>><%= s %></option>
-								<% }); %>
-							</select>
-							
+							<div class="select-wrapper  w-3/5">
+								<select id="companySize" name="companySize" class="form-control text-[#191919]" required>
+									<option value="">Select company size</option>
+									<% size.forEach(function(s) { %>
+									<option value="<%= s %>" <%= user.companySize === s ? 'selected' : '' %>><%= s %></option>
+									<% }); %>
+								</select>
+							</div>
 						</div>
 						
 						<div class="mb-4 flex justify-between items-center">
 							<label for="industry" class="form-label text-[#191919]">Industry/Category</label>
-							<select id="industry" name="industry" class="form-control w-3/5 text-[#191919]" required>
-								<option value="">Select industry type</option>
-								<% industryCategory.forEach(function(industry) { %>
-								<option value="<%= industry %>" <%= user.industry === industry ? 'selected' : '' %>><%= industry %></option>
-								<% }); %>
-							</select>
-							
+							<div class="select-wrapper  w-3/5">
+								<select id="industry" name="industry" class="form-control text-[#191919]" required>
+									<option value="">Select industry type</option>
+									<% industryCategory.forEach(function(industry) { %>
+									<option value="<%= industry %>" <%= user.industry === industry ? 'selected' : '' %>><%= industry %></option>
+									<% }); %>
+								</select>
+							</div>
 						</div>
 						
 						<div class="mb-4 flex justify-between items-center">
 							<label for="jobRole" class="form-label text-[#191919]">Job Role</label>
-							<select id="jobRole" name="jobRole" class="form-control w-3/5 text-[#191919]" required>
-								<option value="">Select your role</option>
-								<% roles.forEach(function(role) { %>
-								<option value="<%= role %>" <%= user.jobRole === role ? 'selected' : '' %>><%= role %></option>
-								<% }); %>
-							</select>
-							
+							<div class="select-wrapper  w-3/5">
+								<select id="jobRole" name="jobRole" class="form-control text-[#191919]" required>
+									<option value="">Select your role</option>
+									<% roles.forEach(function(role) { %>
+									<option value="<%= role %>" <%= user.jobRole === role ? 'selected' : '' %>><%= role %></option>
+									<% }); %>
+								</select>
+							</div>
 						</div>
 						
 						<div class="mb-4 flex justify-between items-center">

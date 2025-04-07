@@ -15,12 +15,14 @@
 					</div>
 					<div class="mb-4">
 						<label class="block text-gray-500 mb-2">Role</label>
-						<select id="userRoleUpdate" name="userRoleUpdate" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-500 leading-tight focus:outline-none focus:shadow-outline">
-							<option value="">Select role</option>
-							<% permissions.forEach(function(permission) { %>
-							<option value="<%= permission.unique_id %>"><%= permission.name %></option>
-							<% }); %>
-						</select>
+						<div class="select-wrapper">
+							<select id="userRoleUpdate" name="userRoleUpdate" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-500 leading-tight focus:outline-none focus:shadow-outline">
+								<option value="">Select role</option>
+								<% permissions.forEach(function(permission) { %>
+								<option value="<%= permission.unique_id %>"><%= permission.name %></option>
+								<% }); %>
+							</select>
+						</div>
 					</div>
 					<div class="flex items-center justify-between mt-5">
 						<button type="submit" id="updateButton" class="bg-black hover:bg-gray-800 text-white py-2 px-4 rounded focus:outline-none focus:shadow-outline flex items-center justify-center">
@@ -63,9 +65,9 @@
 		form.onsubmit = function (event) {
 			event.preventDefault();
 			
-		const selectElement = document.getElementById('userRoleUpdate');
-		const newRoleId = selectElement.value;
-		const newRoleName = selectElement.options[selectElement.selectedIndex].textContent;
+			const selectElement = document.getElementById('userRoleUpdate');
+			const newRoleId = selectElement.value;
+			const newRoleName = selectElement.options[selectElement.selectedIndex].textContent;
 			
 			if (newRoleName) {
 				fetch('/api/settings/updateUserManagement', {
@@ -83,18 +85,18 @@
 					.then(response => response.json())
 					.then(data => {
 						if (data.success) {
-							toast("success",`User role updated to ${newRoleName}`);
+							toast("success", `User role updated to ${newRoleName}`);
 							location.reload(); // Reload the page to reflect the updated role
 						} else {
-							toast("error",'Failed to update role');
+							toast("error", 'Failed to update role');
 						}
 					})
 					.catch(error => {
 						console.error('Error:', error);
-						toast("error",'An error occurred while updating role');
+						toast("error", 'An error occurred while updating role');
 					});
 			} else {
-				toast("info",'Please select a role');
+				toast("info", 'Please select a role');
 			}
 		};
 	}

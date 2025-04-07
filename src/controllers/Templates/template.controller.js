@@ -78,7 +78,7 @@ export const createTemplate = async (req, res, next) => {
 		console.error("Error creating template:", error);
 		res.status(500).json({
 			success: false,
-			message: `Error creating template: ${error.message}`,
+			message: error.message || error,
 		});
 	}
 };
