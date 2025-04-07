@@ -15,7 +15,6 @@ import {
 	uploadAndRetrieveMediaURL,
 	uploadMediaResumable,
 } from "./template.functions.controller.js";
-import { getMimeType } from "../Chats/chats.extra.functions.js";
 import { generateUniqueId } from "../../utils/otpGenerator.js";
 import { languages, languagesCode } from "../../utils/dropDown.js";
 import {
