@@ -58,7 +58,7 @@ export const processTempStatuses = async () => {
 
 			const updateFields = {
 				status: temp.status,
-				updatedAt: temp.timestamp * 1000,
+				updatedAt: temp.timestamp,
 				recipientPhone: temp.recipientPhone,
 				...(campaign[0] && { campaignId: campaign[0].unique_id }),
 			};
@@ -123,7 +123,7 @@ export const processTempMessages = async () => {
 				messageId: temp.messageId,
 				recipientPhone: temp.from,
 				status: "REPLIED",
-				updatedAt: temp.timestamp * 1000,
+				updatedAt: temp.timestamp,
 				contactName: contactName.Name,
 				FB_PHONE_ID: temp.fbPhoneId,
 				replyContent: temp.type === "text" ? temp.text?.body : "",

@@ -458,7 +458,7 @@ router.post("/webhook", async (req, res) => {
 								wabaId,
 								messageId,
 								from: recipientPhone,
-								timestamp,
+								timestamp: timestamp * 1000,
 								type,
 								text,
 								image,

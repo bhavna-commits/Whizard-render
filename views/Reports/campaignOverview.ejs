@@ -152,7 +152,7 @@
 								<% campaigns.forEach(report => { %>
 								<tr class="hover:bg-gray-100 cursor-pointer border text-gray-700">
 									<td class="border-l border-t border-b rounded-lg py-4 border-gray-200 text-sm ">
-										<%= new Date(report.timestamp * 1000 || report.updatedAt).toLocaleDateString() %>
+										<%= new Date(report.updatedAt).toLocaleDateString() %>
 									</td>
 									<td class="border-t border-b border-gray-200">
 										<div class="inline-flex justify-center items-center h-fit w-fit px-2 py-1 rounded-full " style=" 

@@ -12,14 +12,21 @@
 					<h6 class="custom-card-header">
 						<%- component.text.replace(/\n/g, '<br>') %>
 					</h6>
-					<% } else if (component.format === 'IMAGE' && component.example?.header_handle?.[0]) { %>
+					<% } else if (component.format === 'IMAGE' && component.example?.header_url) { %>
 					<img src="<%= component.example?.header_url?.split("/").slice(3).join("/") %>" alt="Header Media" class="custom-card-img">
+					<% } else if (component.format === 'VIDEO' && component.example?.header_url) { %>
+					<video class="custom-card-video" controls>
+						<source src="<%= component.example?.header_url?.split("/").slice(3).join("/") %>" type="video/mp4">
+						Your browser does not support the video tag.
+					</video>
+					<% } else if (component.format === 'DOCUMENT' && component.example?.header_url) { %>
+					<iframe src="<%= component.example?.header_url?.split("/").slice(3).join("/") %>" class="custom-card-document" style="width:100%; height:500px; border: none;"></iframe>
 					<% } %>
 					<% } %>
-					<% }); %>
+					
 					
 					<!-- BODY AND FOOTER COMPONENTS -->
-					<% template.components.forEach(component => { %>
+					
 					<% if (component.type === 'BODY') { %>
 					<p class="custom-card-body-text py-2">
 						<%- component.text.replace(/\n/g, '<br>') %>
@@ -29,10 +36,10 @@
 						<%- component.text.replace(/\n/g, '<br>') %>
 					</p>
 					<% } %>
-					<% }); %>
+					
 					
 					<!-- BUTTON COMPONENTS -->
-					<% template.components.forEach(component => { %>
+					
 					<% if (component.type === 'BUTTONS') { %>
 					<% component.buttons.forEach(button => { %>
 					<% if (button.type == "PHONE_NUMBER") { %>
@@ -43,7 +50,8 @@
 					<button class="w-full border-b border-gray-300 py-2" id="websiteBtn" draggable="true" onclick="window.open('<%= button.url %>', '_blank')" style="color: #6A67FF;">
 						<i class="fa fa-external-link mx-2"></i><%= button.text %>
 					</button>
-					<% } %>	
+					<% } %>
+					
 					<% }); %>
 					<% } %>
 					<% }); %>

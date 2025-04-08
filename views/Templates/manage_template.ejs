@@ -28,6 +28,11 @@
 
 <body>
 	
+	<div id="deleteLoader" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-400 bg-opacity-75 backdrop-blur-sm text-4xl hidden">
+		<!-- Black Spinner -->
+		Deleting
+		<div class="w-10 h-10 border-4 border-t-transparent border-black rounded-full animate-spin ml-4"></div>
+	</div>
 	
 	<!-- Sidebar -->
 	<div class="layout-container">
@@ -143,11 +148,11 @@
 						</svg>
 						<span class="ml-1">Filter</span>
 					</div>
-					<% if (access?.templates?.createTemplate && whatsAppStatus == "Live") { %>
+					<% if (access?.templates?.createTemplate && whatsAppStatus === "Live") { %>
 					<button type="button" class="flex items-center bg-blue-500 text-white px-4 py-2 rounded" onclick="getStatus()">
 						<i class="fas fa-sync mr-2"></i>Sync Facebook
 					</button>
-					<% } else if (whatsAppStatus == "Pending")  { %>
+					<% } else if (whatsAppStatus === "Pending")  { %>
 					<button type="button" class="flex items-center bg-blue-300 text-white px-4 py-2 rounded hover:cursor-not-allowed" title="Connect with whatsApp Business API to send message" disabled>
 						<i class="fas fa-sync mr-2"></i>Sync Facebook
 					</button>
@@ -219,46 +224,44 @@
 			const listView = document.getElementById('list-view');
 			const gridView = document.getElementById('grid-view');
 			
-			// Check localStorage on load and set default if not present
+			// default in localStorage
 			if (localStorage.getItem('isListView') === null) {
-				localStorage.setItem('isListView', 'true'); // Default to list view
+				localStorage.setItem('isListView', 'true');
 			}
-			
 			let isListView = localStorage.getItem('isListView') === 'true';
 			
-			// Function to update view based on isListView value
+			// make sure transform is present
+			toggle.classList.add('transform');
+			
 			function updateView () {
+				// clean slate: remove both possible translate classes
+				toggle.classList.remove('translate-x-0', 'translate-x-8');
+				
 				if (isListView) {
-					// List view active
-					toggle.classList.remove('translate-x-4');
+					// move toggle back to 0
 					toggle.classList.add('translate-x-0');
 					
 					option1.src = 'svg/template-list-red.svg';
 					option2.src = 'svg/template-cards-gray.svg';
 					
 					listView.classList.remove('hidden');
-					listView.classList.add('block');
 					gridView.classList.add('hidden');
-					gridView.classList.remove('block');
 				} else {
-					// Grid view active
-					toggle.classList.remove('translate-x-0');
-					toggle.classList.add('translate-x-[2.0rem]');
+					// shift toggle to the right by 2rem (translate-x-8)
+					toggle.classList.add('translate-x-8');
 					
 					option2.src = 'svg/template-cards-red.svg';
 					option1.src = 'svg/template-list-gray.svg';
 					
 					gridView.classList.remove('hidden');
-					gridView.classList.add('block');
 					listView.classList.add('hidden');
-					listView.classList.remove('block');
 				}
 			}
 			
-			// Update view on page load
+			// init
 			updateView();
 			
-			// Event listener for List Icon
+			// handlers
 			option1.addEventListener('click', () => {
 				if (!isListView) {
 					isListView = true;
@@ -266,8 +269,6 @@
 					updateView();
 				}
 			});
-			
-			// Event listener for Grid Icon
 			option2.addEventListener('click', () => {
 				if (isListView) {
 					isListView = false;

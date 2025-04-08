@@ -83,6 +83,8 @@
 	
 	
 	<script>
+		const deleteLoader = document.getElementById("deleteLoader");
+		console.log(deleteLoader);
 		// Helper function to format date in "29 Aug-2024 at 02:05 AM" format
 		function formatTimestamp (timestamp) {
 			const date = new Date(timestamp);
@@ -116,8 +118,10 @@
 		}
 		
 		// Function to confirm deletion
-		function confirmDelete (templateId) {
-			if (confirm('Are you sure you want to delete this template?')) {
+		async function confirmDelete (templateId) {
+			const yes = await toastConfirm('Are you sure you want to delete this template?');
+			if (yes) {
+				deleteLoader.classList.remove("hidden");
 				fetch(`/api/templates/delete/${templateId}`, {
 						method: 'DELETE',
 						headers: {
@@ -132,7 +136,9 @@
 							toast("error", data.error);
 						}
 					})
-					.catch((error) => console.error('Error:', error));
+					.catch((error) => console.error('Error:', error)).finally(() => {
+						deleteLoader.classList.add("hidden");
+					});
 			}
 		}
 	</script>
