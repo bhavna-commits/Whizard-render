@@ -85,7 +85,7 @@ document
 				if (fileInput.type === "application/pdf") {
 					const iframe = document.createElement("iframe");
 					iframe.src = URL.createObjectURL(fileInput);
-					iframe.style.width = "auto";
+					iframe.style.maxWidth = "100%";
 					iframe.style.height = "auto";
 					iframe.style.objectFit = "contain";
 					// Append to previewHeader
