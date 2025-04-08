@@ -145,7 +145,7 @@ class Preview {
 						?.split("/")
 						.slice(3)
 						.join("/");
-					headerContent = `<a href="/${fileUrl}" target="_blank">Download Document</a>`;
+					headerContent = `<iframe src="/${fileUrl}" class="max-w-full h-auto object-contain"></iframe>`;
 				} else {
 					headerContent = component.text || "";
 				}
