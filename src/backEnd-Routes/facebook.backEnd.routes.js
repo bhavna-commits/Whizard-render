@@ -400,7 +400,7 @@ router.post("/webhook", async (req, res) => {
 								timestamp: timestamp * 1000,
 								recipientPhone,
 								error: errors || [],
-								rawData: statusEvent,
+								// rawData: statusEvent,
 							});
 							await tempStatus.save();
 						}
@@ -434,7 +434,7 @@ router.post("/webhook", async (req, res) => {
 							templateName,
 							templateLanguage,
 							rejectedReason,
-							rawData: messagingEvent,
+							// rawData: messagingEvent,
 						});
 						await tempRejection.save();
 					}
@@ -463,7 +463,7 @@ router.post("/webhook", async (req, res) => {
 								text,
 								image,
 								fbPhoneId,
-								rawData: messageEvent,
+								// rawData: messageEvent,
 							});
 							await tempMessage.save();
 						}

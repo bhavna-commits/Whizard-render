@@ -1,6 +1,5 @@
 document
-	.getElementById("bodyInput")
-	.addEventListener("keypress", function (event) {
+	.getElementById("bodyInput")?.addEventListener("keypress", function (event) {
 		if (event.key === "Enter") {
 			document.execCommand("formatBlock", false, "p");
 			document.execCommand("fontSize", false, "2");
@@ -23,8 +22,7 @@ document.addEventListener("click", function (event) {
 });
 
 document
-	.getElementById("mediaTypeDropdown")
-	.addEventListener("change", function (e) {
+	.getElementById("mediaTypeDropdown")?.addEventListener("change", function (e) {
 		const selectedValue = e.target.value;
 		const previewHeader = document.getElementById("previewHeader");
 		const previewHead = document.getElementById("previewHead");
@@ -108,7 +106,7 @@ document
 	});
 
 // Listen for changes in the file upload input to update the preview dynamically
-document.getElementById("file-upload").addEventListener("change", function () {
+document.getElementById("file-upload")?.addEventListener("change", function () {
 	const mediaTypeDropdown = document.getElementById("mediaTypeDropdown");
 	mediaTypeDropdown.dispatchEvent(new Event("change"));
 });
@@ -118,7 +116,7 @@ const none = document.getElementById("noneInputContainer");
 const text = document.getElementById("headerInputContainer");
 const media = document.getElementById("mediaInputContainer");
 
-dropDown.addEventListener("change", (e) => {
+dropDown?.addEventListener("change", (e) => {
 	const value = e.target.value;
 	// console.log(value);
 	text.classList.add("hidden");
@@ -146,7 +144,7 @@ const removeFileIcon = document.getElementById("removeFile");
 const uploadLabel = document.getElementById("uploadLabel");
 
 // Default text to reset when file is removed
-const defaultText = uploadText.textContent;
+const defaultText = uploadText?.textContent;
 
 // Allowed file types by category
 const allowedFileTypes = {
@@ -178,7 +176,7 @@ const allowedFileTypes = {
 	location: ["application/gpx+xml", "application/vnd.google-earth.kml+xml"],
 };
 
-fileUpload.addEventListener("change", (e) => {
+fileUpload?.addEventListener("change", (e) => {
 	e.stopPropagation();
 	const file = e.target.files[0];
 
@@ -248,14 +246,14 @@ function validateFileSize(fileSize, mediaType) {
 	return fileSize <= sizeLimits[mediaType];
 }
 
-removeFileIcon.addEventListener("click", (e) => {
+removeFileIcon?.addEventListener("click", (e) => {
 	e.stopPropagation();
 	fileUpload.value = "";
 	uploadText.textContent = defaultText;
 	removeFileIcon.classList.add("hidden");
 });
 
-document.getElementById("mediaType").addEventListener("change", (e) => {
+document.getElementById("mediaType")?.addEventListener("change", (e) => {
 	const value = e.target.value;
 
 	if (value === "image") {
@@ -269,7 +267,7 @@ document.getElementById("mediaType").addEventListener("change", (e) => {
 	}
 });
 
-document.getElementById("footerInput").addEventListener("input", function () {
+document.getElementById("footerInput")?.addEventListener("input", function () {
 	const footerInput = this.value;
 
 	document.getElementById("previewFooter").innerHTML = footerInput.replace(

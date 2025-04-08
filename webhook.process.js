@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 import crypto from "crypto";
 import mongoose from "mongoose";
 
-dotenv.config(); 
+dotenv.config();
 
 export const generateUniqueId = () => {
 	return crypto.randomBytes(5).toString("hex").slice(0, 10);
@@ -13,24 +13,24 @@ let TempStatus,
 	User,
 	Campaign,
 	TempMessage,
-    Chat,
-    ChatsTemp,
+	Chat,
+	ChatsTemp,
 	Contacts,
 	TempTemplateRejection,
 	Template;
 
-const connectDB = async () => {
-	try {
-		await mongoose.connect(process.env.MONGO_URI, {
-			useNewUrlParser: true,
-			useUnifiedTopology: true,
-		});
-		console.log("MongoDB Connected...");
-	} catch (err) {
-		console.error("Error connecting to MongoDB:", err.message);
-		process.exit(1);
-	}
-};
+// const connectDB = async () => {
+// 	try {
+// 		await mongoose.connect(process.env.MONGO_URI, {
+// 			useNewUrlParser: true,
+// 			useUnifiedTopology: true,
+// 		});
+// 		console.log("MongoDB Connected...");
+// 	} catch (err) {
+// 		console.error("Error connecting to MongoDB:", err.message);
+// 		process.exit(1);
+// 	}
+// };
 
 export const processTempStatuses = async () => {
 	try {
@@ -77,11 +77,18 @@ export const processTempStatuses = async () => {
 
 			await Reports.updateOne(
 				{ messageId: temp.messageId },
-				{ $set: updateFields, $push: { logs: temp.rawData } },
-				{ upsert: true },
+				{ $set: updateFields },
 			);
 		}
-		await TempStatus.deleteMany({});
+        await TempStatus.deleteMany({});
+        // await Reports.deleteMany({
+		// 	$or: [
+		// 		{ WABA_ID: { $exists: false } }, // field doesn’t exist
+		// 		{ WABA_ID: null }, // field is null or non-existent
+		// 		{ WABA_ID: "" }, // field is empty string
+		// 	],
+		// });
+
 		console.log("Temp statuses processed and cleared.");
 	} catch (error) {
 		console.error("Error processing temp statuses:", error);
@@ -115,8 +122,8 @@ export const processTempMessages = async () => {
 				wa_id: temp.from,
 			});
 			// console.log(contactName);
-            // console.log(temp.type, temp.text?.body);
-            const data = {
+			// console.log(temp.type, temp.text?.body);
+			const data = {
 				WABA_ID: user.WABA_ID,
 				useradmin: user.unique_id,
 				unique_id: generateUniqueId(),
@@ -139,8 +146,8 @@ export const processTempMessages = async () => {
 				...(campaign[0] && { campaignId: campaign[0].unique_id }),
 				...(campaign[0] && { campaignName: campaign[0].name }),
 			};
-            await Chat.insertOne(data);
-            await ChatsTemp.insertOne(data);
+			await Chat.insertOne(data);
+			await ChatsTemp.insertOne(data);
 		}
 
 		await TempMessage.deleteMany({});
@@ -173,7 +180,7 @@ export const processTempTemplateRejections = async () => {
 };
 
 export const processAllTempEvents = async () => {
-	await connectDB();
+	// await connectDB();
 	const db = mongoose.connection.db;
 	TempStatus = db.collection("tempstatuses");
 	// console.log(TempStatus);
@@ -186,8 +193,8 @@ export const processAllTempEvents = async () => {
 	TempMessage = db.collection("tempmessages");
 	// console.log(TempMessage);
 	Chat = db.collection("chats");
-    // console.log(Chat);
-    ChatsTemp = db.collection("chatstemps");
+	// console.log(Chat);
+	ChatsTemp = db.collection("chatstemps");
 	Contacts = db.collection("contacts");
 	// console.log(Contacts);
 	TempTemplateRejection = db.collection("temptemplaterejections");
@@ -197,7 +204,7 @@ export const processAllTempEvents = async () => {
 	await processTempStatuses();
 	await processTempMessages();
 	await processTempTemplateRejections();
-	mongoose.connection.close();
+	// mongoose.connection.close();
 };
 
-processAllTempEvents();
+// processAllTempEvents();
