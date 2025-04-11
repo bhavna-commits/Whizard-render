@@ -50,6 +50,7 @@ export const fetchAndFormatReports = async (
 	// Query the ChatsUsers collection for the given useradmin and FB_PHONE_ID
 	let chats;
 	if (permission) {
+		console.log("owner");
 		chats = await ChatsUsers.find({
 			FB_PHONE_ID: phoneNumberId,
 		})
@@ -58,6 +59,7 @@ export const fetchAndFormatReports = async (
 			.limit(limit)
 			.lean();
 	} else {
+		console.log("self");
 		chats = await ChatsUsers.find({
 			FB_PHONE_ID: phoneNumberId,
 			agent: { $in: addedUser.unique_id },
@@ -67,7 +69,7 @@ export const fetchAndFormatReports = async (
 			.limit(limit)
 			.lean();
 	}
-	console.log("hj", chats);
+	
 	if (!chats || chats.length === 0) {
 		return [];
 	}
