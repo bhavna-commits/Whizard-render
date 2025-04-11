@@ -42,19 +42,34 @@ export const determineMediaType = (url) => {
 
 export const fetchAndFormatReports = async (
 	userId,
+	addedUser,
+	permission,
 	phoneNumberId,
 	skip = 0,
 	limit = 10,
 ) => {
 	// Query the ChatsUsers collection for the given useradmin and FB_PHONE_ID
-	const chats = await ChatsUsers.find({
-		useradmin: userId,
-		FB_PHONE_ID: phoneNumberId,
-	})
-		.sort({ updatedAt: -1 })
-		.skip(skip)
-		.limit(limit)
-		.lean();
+	let chats;
+	if (permission) {
+		chats = await ChatsUsers.find({
+			useradmin: userId,
+			FB_PHONE_ID: phoneNumberId,
+		})
+			.sort({ updatedAt: -1 })
+			.skip(skip)
+			.limit(limit)
+			.lean();
+	} else {
+		chats = await ChatsUsers.find({
+			useradmin: userId,
+			FB_PHONE_ID: phoneNumberId,
+			agent: { $in: addedUser.unique_id },
+		})
+			.sort({ updatedAt: -1 })
+			.skip(skip)
+			.limit(limit)
+			.lean();
+	}
 
 	if (!chats || chats.length === 0) {
 		return [];
@@ -68,7 +83,7 @@ export const fetchAndFormatReports = async (
 		}
 		return {
 			lastmessage: chat.lastMessage || "No recent reply",
-			wa_id: chat.wa_id, 
+			wa_id: chat.wa_id,
 			status,
 			name: chat.contactName.toString(),
 			usertimestmp: chat.updatedAt,

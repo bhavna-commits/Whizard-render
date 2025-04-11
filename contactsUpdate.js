@@ -15,46 +15,47 @@ async function updateContacts() {
 		await client.connect();
 		console.log("Connected to DB");
 
-		const db = client.db(); // Uses the db name from your connection URI
-		// Adjust collection names as necessary
+		const db = client.db();
 		const contactsTempCollection = db.collection("contactsTemp");
 		const chatsUsersCollection = db.collection("chatsUsers");
-		const usersCollection = db.collection("user"); // or "users" if that’s your collection name
-		const addedUsersCollection = db.collection("addedUser"); // or "addedUsers"
 
 		const contacts = await contactsTempCollection.find().toArray();
 
+		const existingEntriesMap = new Map();
+
+		// Fetch all existing wa_id + useradmin combos to avoid findOne per contact
+		const waUserPairs = contacts.map((c) => ({
+			wa_id: c.wa_id,
+			useradmin: c.useradmin,
+		}));
+
+		const existingEntries = await chatsUsersCollection
+			.find({ $or: waUserPairs })
+			.toArray();
+
+		for (const entry of existingEntries) {
+			existingEntriesMap.set(`${entry.useradmin}_${entry.wa_id}`, entry);
+		}
+
+		const bulkOps = [];
+		const newEntries = [];
+
 		for (const contact of contacts) {
-			// Get owner details from the users collection
-			const owner = await usersCollection.findOne({
-				unique_id: contact.useradmin,
-			});
-			if (!owner) continue;
-
-			// Get agents from the addedUsers collection
-			let agents = await addedUsersCollection
-				.find({ useradmin: owner.unique_id, deleted: false })
-				.toArray();
-			agents = agents.map((a) => a.unique_id);
-
-			// Try to find an existing chatsUsers entry using useradmin and wa_id
-			const existingEntry = await chatsUsersCollection.findOne({
-				useradmin: contact.useradmin,
-				wa_id: contact.wa_id,
-			});
+			const key = `${contact.useradmin}_${contact.wa_id}`;
+			const existingEntry = existingEntriesMap.get(key);
 
 			if (existingEntry) {
-				// Prepare updated arrays for contactName and nameContactRelation.
+				// Update existing
 				let updatedContactNames = existingEntry.contactName || [];
 				if (!updatedContactNames.includes(contact.Name)) {
 					updatedContactNames.push(contact.Name);
 				}
 
 				let updatedRelations = existingEntry.nameContactRelation || [];
-				// Check if a relation with this contactId already exists.
 				const relationExists = updatedRelations.some(
 					(rel) => rel.contactListId === contact.contactId,
 				);
+
 				if (!relationExists) {
 					updatedRelations.push({
 						name: contact.Name,
@@ -62,20 +63,22 @@ async function updateContacts() {
 					});
 				}
 
-				// Update the existing entry with new data.
-				const updateData = {
-					contactName: updatedContactNames,
-					nameContactRelation: updatedRelations,
-					agent: agents,
-				};
-
-				await chatsUsersCollection.updateOne(
-					{ _id: existingEntry._id },
-					{ $set: updateData },
-				);
+				bulkOps.push({
+					updateOne: {
+						filter: { _id: existingEntry._id },
+						update: {
+							$set: {
+								contactName: updatedContactNames,
+								nameContactRelation: updatedRelations,
+								agent: [contact.agent],
+								updatedAt: contact.updatedAt,
+							},
+						},
+					},
+				});
 			} else {
-				// Create a new entry if none exists.
-				const newEntry = {
+				// Prepare new insert
+				newEntries.push({
 					FB_PHONE_ID: contact.FB_PHONE_ID,
 					useradmin: contact.useradmin,
 					unique_id: generateUniqueId(),
@@ -89,13 +92,19 @@ async function updateContacts() {
 					wa_id: contact.wa_id,
 					createdAt: contact.createdAt,
 					updatedAt: contact.updatedAt,
-					agent: agents,
-				};
-				await chatsUsersCollection.insertOne(newEntry);
+					agent: [contact.agent],
+				});
 			}
 		}
 
-		// After processing, clear the temporary contacts collection.
+		// Perform all updates and inserts at once
+		if (bulkOps.length) {
+			await chatsUsersCollection.bulkWrite(bulkOps);
+		}
+		if (newEntries.length) {
+			await chatsUsersCollection.insertMany(newEntries);
+		}
+
 		await contactsTempCollection.deleteMany({});
 		console.log(
 			"Processed and cleared temporary contacts at",

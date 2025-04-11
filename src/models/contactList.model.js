@@ -5,6 +5,7 @@ const contactListSchema = new Schema(
 		useradmin: { type: String, required: true, index: true },
 		contalistName: { type: String, required: true, index: true },
 		contactId: { type: String, required: true, index: true },
+		agent: [],
 		adddate: {
 			type: Number,
 			default: () => Date.now(),

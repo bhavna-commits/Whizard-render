@@ -1,6 +1,7 @@
 import path from "path";
 import fs from "fs";
 import ContactList from "../../models/contactList.model.js";
+import ContactListTemp from "../../models/contactsTemp.model.js";
 import Contacts from "../../models/contacts.model.js";
 import {
 	isNumber,
@@ -127,6 +128,7 @@ export const createList = async (req, res, next) => {
 		}
 
 		const userId = req.session?.user?.id || req.session?.addedUser?.owner;
+		const addedUserId = req.session?.addedUser?.id;
 		const parsedData = req.session?.csvData?.parsedData;
 		const listName = req.session?.csvData?.listName;
 
@@ -144,13 +146,15 @@ export const createList = async (req, res, next) => {
 
 		const participantCount = parsedData.length;
 
-		// Create a new Contact List
-		const contactList = new ContactList({
+		const cList = {
 			contalistName: listName,
 			useradmin: userId,
 			participantCount,
 			contactId: generateUniqueId(),
-		});
+			...(addedUserId && { agent: [addedUserId] }),
+		};
+		// Create a new Contact List
+		const contactList = new ContactList(cList);
 
 		const contactsToSave = parsedData
 			.map((contactData) => {
@@ -199,6 +203,7 @@ export const createList = async (req, res, next) => {
 		}
 
 		await contactList.save();
+		await ContactListTemp.create(cList);
 
 		res.json({
 			success: true,
@@ -600,86 +605,97 @@ export const updateContactListName = async (req, res) => {
 
 export const getList = async (req, res) => {
 	try {
-		const userId = req.session?.user?.id || req.session?.addedUser?.owner;
+		const userSession = req.session;
+		const isAddedUser = !!userSession?.addedUser;
+		const userId = userSession?.user?.id || userSession?.addedUser?.owner;
+		const addedUserId = userSession?.addedUser?.id;
+		const permissionsId = userSession?.addedUser?.permissions;
+
 		const page = parseInt(req.query.page) || 1;
 		const limit = 6;
 		const skip = (page - 1) * limit;
 
-		if (!isNumber(page)) return next();
+		if (!isNumber(page)) return res.render("errors/notFound");
 
-		const result = await ContactList.aggregate([
+		let access = null;
+		let matchQuery = {
+			useradmin: userId,
+			contact_status: { $ne: 0 },
+		};
+
+		if (permissionsId) {
+			access = await Permissions.findOne({ unique_id: permissionsId });
+
+			if (!access?.contactList?.allList) {
+				// Only match if the agent field contains the added user's ID
+				if (addedUserId) {
+					matchQuery.agent = { $in: [addedUserId] };
+				} else {
+					// No access and no agent ID? Return no results
+					return res.render("Contact-List/contact-list", {
+						access,
+						countries,
+						contacts: [],
+						page,
+						totalPages: 0,
+						headers: [],
+						data: [],
+						errors: [],
+						photo: userSession?.addedUser?.photo,
+						name: userSession?.addedUser?.name,
+						color: userSession?.addedUser?.color,
+						whatsAppStatus: userSession?.addedUser?.whatsAppStatus,
+					});
+				}
+			}
+		}
+
+		const aggregationPipeline = [
+			{ $match: matchQuery },
+			{ $sort: { adddate: -1 } },
 			{
-				// Match the documents where useradmin matches the userId and contact_status is not 0
-				$match: {
-					useradmin: userId,
-					contact_status: { $ne: 0 },
-				},
-			},
-			{
-				$sort: { adddate: -1 },
-			},
-			{
-				// Use $facet to return both paginated results and total count
 				$facet: {
-					paginatedResults: [
-						{ $skip: parseInt(skip) },
-						{ $limit: parseInt(limit) },
-					],
+					paginatedResults: [{ $skip: skip }, { $limit: limit }],
 					totalCount: [{ $count: "total" }],
 				},
 			},
-		]);
+		];
 
-		// Extract paginated results and total count from the aggregation result
+		const result = await ContactList.aggregate(aggregationPipeline);
+
 		const contactLists = result[0]?.paginatedResults || [];
 		const totalCount = result[0]?.totalCount[0]?.total || 0;
-
-		// Calculate total pages
 		const totalPages = Math.ceil(totalCount / limit);
 
-		const permissions = req.session?.addedUser?.permissions;
-		if (permissions) {
-			const access = await Permissions.findOne({
-				unique_id: permissions,
-			});
-			if (access.contactList) {
-				res.render("Contact-List/contact-list", {
-					access: access,
-					countries: countries,
-					contacts: contactLists,
-					page,
-					totalPages,
-					headers: [],
-					data: [],
-					errors: [],
-					photo: req.session?.addedUser?.photo,
-					name: req.session?.addedUser?.name,
-					color: req.session?.addedUser?.color,
-					whatsAppStatus: req.session?.addedUser?.whatsAppStatus,
-				});
-			} else {
-				res.render("errors/notAllowed");
-			}
-		} else {
-			const access = await User.findOne({
-				unique_id: req.session?.user?.id,
-			});
-			// console.log(access.access);
-			res.render("Contact-List/contact-list", {
-				access: access.access,
-				countries: countries,
-				contacts: contactLists,
-				page,
-				totalPages,
-				headers: [],
-				data: [],
-				errors: [],
-				photo: req.session.user?.photo,
-				name: req.session.user?.name,
-				color: req.session.user?.color,
-				whatsAppStatus: req.session?.user?.whatsAppStatus,
-			});
-		}
+		const baseRenderData = {
+			access:
+				access ?? (await User.findOne({ unique_id: userId }))?.access,
+			countries,
+			contacts: contactLists,
+			page,
+			totalPages,
+			headers: [],
+			data: [],
+			errors: [],
+			photo: isAddedUser
+				? userSession.addedUser?.photo
+				: userSession.user?.photo,
+			name: isAddedUser
+				? userSession.addedUser?.name
+				: userSession.user?.name,
+			color: isAddedUser
+				? userSession.addedUser?.color
+				: userSession.user?.color,
+			whatsAppStatus: isAddedUser
+				? userSession.addedUser?.whatsAppStatus
+				: userSession.user?.whatsAppStatus,
+		};
+
+		const hasPermission = access?.contactList?.type ?? true;
+
+		if (!hasPermission) return res.render("errors/notAllowed");
+
+		res.render("Contact-List/contact-list", baseRenderData);
 	} catch (error) {
 		console.error(error);
 		res.render("errors/serverError");

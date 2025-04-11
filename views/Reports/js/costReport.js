@@ -8,6 +8,7 @@ function getQuarterDates() {
 
 // Initialize Flatpickr with simpler configuration
 let fpInstance;
+let dataForCSV = [];
 
 // Initialize date picker after DOM content is loaded
 function initializeDatePicker() {
@@ -70,8 +71,6 @@ async function fetchAnalytics(startDate, endDate) {
 		chargesLoading.classList.add("hidden");
 	}
 }
-
-let dataForCSV = [];
 
 function processAnalyticsData(rawData, startDate, endDate) {
 	const timeseriesMap = new Map();

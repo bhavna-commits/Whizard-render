@@ -36,6 +36,11 @@ flatpickr("#filterDate", {
 	},
 });
 
+const data = await fetchAnalytics(startDate, endDate);
+if (data) {
+	updateUI(data);
+}
+
 const filterSidebar = document.getElementById("filterSidebar");
 const dataSection = document.getElementById("dataSection");
 const userName = document.getElementById("userName");
@@ -521,4 +526,50 @@ async function viewRead() {
 	} finally {
 		loading.classList.add("hidden");
 	}
+}
+
+async function fetchAnalytics(startDate, endDate) {
+	const text = document.getElementById("totalCost");
+
+	try {
+		text.innerHTML = `<div id="analyticsLoading" class="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-10">
+								<div class="animate-spin inline-block w-8 h-8 border-4 border-black border-t-transparent rounded-full"></div>
+							</div>`;
+
+		if (!startDate || !endDate) {
+			console.error("Invalid dates:", { startDate, endDate });
+			toast("error", `Invalid dates : ${startDate}, ${endDate}`);
+			return null;
+		}
+
+		// Convert to Unix timestamps
+		const startUnix = Math.floor(startDate.getTime() / 1000);
+		const endUnix = Math.floor(endDate.getTime() / 1000) + 86400;
+
+		const response = await axios.get("/reports/get-cost-report", {
+			params: { start: startUnix, end: endUnix },
+		});
+
+		// Process the fetched data
+		return processAnalyticsData(response.data, startDate, endDate);
+	} catch (error) {
+		console.error("Error fetching analytics:", error.response.data.error);
+		toast("error", error.response.data.error);
+		return null;
+	} finally {
+		// Hide loaders regardless of success/failure
+		analyticsLoading.classList.add("hidden");
+		chargesLoading.classList.add("hidden");
+	}
+}
+
+function processAnalyticsData(rawData) {
+	let cost = 0;
+	// Process rawData to update timeseriesMap with real data
+	rawData.forEach((point) => {
+		cost += point.cost || 0;
+	});
+
+	document.getElementById("totalCost").textContent = cost;
+	// return cost;
 }

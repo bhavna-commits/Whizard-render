@@ -1,51 +1,28 @@
 import { Schema, model } from "mongoose";
 
-const contactsSchema = new Schema(
+const contactListSchema = new Schema(
 	{
-		userlive: { type: Number, default: 0 },
-		wa_idK: { type: String },
-		keyId: { type: String },
-		subscribe: { type: Number, default: 1 },
-		subscribe_date: {
+		useradmin: { type: String, required: true, index: true },
+		contalistName: { type: String, required: true, index: true },
+		contactId: { type: String, required: true, index: true },
+		agent: [],
+		adddate: {
 			type: Number,
 			default: () => Date.now(),
+			index: true,
 		},
-		subscribe_update: {
+		contact_status: {
 			type: Number,
-			default: () => Date.now(),
+			required: true,
+			default: 1,
+			index: true,
 		},
-		unsubscribe_date: { type: Number, default: 0 },
-		Name: { type: String, index: true },
-		wa_id: { type: String, index: true },
-		usertimestmp: {
-			type: Number,
-			default: () => Date.now(),
-		},
-		userupdate: { type: Number },
-		user_bot: { type: Number, default: 0 },
-		usertimestmpup: {
-			type: Number,
-			default: () => Date.now(),
-		},
-		masterExtra: { type: Schema.Types.Mixed },
-		contactId: { type: String, index: true },
-		useradmin: { type: String, required: true },
+		participantCount: { type: Number, required: true, index: true },
+		createdAt: { type: Number, default: () => Date.now() },
 	},
 	{ timestamps: false, strict: false },
 );
 
-contactsSchema.pre("save", function (next) {
-	this.usertimestmp = Date.now();
-	this.subscribe_date = Date.now();
-	if (!this.subscribe_update) {
-		this.subscribe_update = Date.now();
-	}
-	if (!this.usertimestmpup) {
-		this.usertimestmpup = Date.now();
-	}
-	next();
-});
+const ContactList = model("contactsTemp", contactListSchema);
 
-const ContactsTemp = model("ContactsTemp", contactsSchema);
-
-export default ContactsTemp;
+export default ContactList;

@@ -18,6 +18,10 @@ const permissionSchema = new Schema(
 			type: { type: Boolean, default: false },
 			view: { type: Boolean, default: false },
 			chat: { type: Boolean, default: false },
+			allChats: {
+				view: { type: Boolean, default: false },
+				chat: { type: Boolean, default: false },
+			},
 		},
 		contactList: {
 			type: { type: Boolean, default: false },
@@ -28,6 +32,7 @@ const permissionSchema = new Schema(
 			addContactListCSV: { type: Boolean, default: false },
 			deleteList: { type: Boolean, default: false },
 			sendBroadcast: { type: Boolean, default: false },
+			allList: { type: Boolean, default: false },
 		},
 		templates: {
 			type: { type: Boolean, default: false },
