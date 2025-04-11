@@ -41,7 +41,6 @@ export const determineMediaType = (url) => {
 };
 
 export const fetchAndFormatReports = async (
-	userId,
 	addedUser,
 	permission,
 	phoneNumberId,
@@ -52,7 +51,6 @@ export const fetchAndFormatReports = async (
 	let chats;
 	if (permission) {
 		chats = await ChatsUsers.find({
-			useradmin: userId,
 			FB_PHONE_ID: phoneNumberId,
 		})
 			.sort({ updatedAt: -1 })
@@ -61,7 +59,6 @@ export const fetchAndFormatReports = async (
 			.lean();
 	} else {
 		chats = await ChatsUsers.find({
-			useradmin: userId,
 			FB_PHONE_ID: phoneNumberId,
 			agent: { $in: addedUser.unique_id },
 		})
@@ -70,7 +67,7 @@ export const fetchAndFormatReports = async (
 			.limit(limit)
 			.lean();
 	}
-
+	console.log("hj", chats);
 	if (!chats || chats.length === 0) {
 		return [];
 	}

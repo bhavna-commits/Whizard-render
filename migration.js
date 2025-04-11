@@ -8,26 +8,20 @@ await mongoose.connect(process.env.MONGO_URI);
 
 // Update in User model
 const result = await userModel.updateMany(
-	{ "access.chats.allChats": { $exists: false } },
+	{ "access.chats.allChats": { $exists: true } },
 	{
 		$set: {
-			"access.chats.allChats": {
-				view: true,
-				chat: true,
-			},
+			"access.chats.allChats": true,
 		},
 	},
 );
 
 // Update in Permissions model
 const resul = await permissionsModel.updateMany(
-	{ "chats.allChats": { $exists: false } },
+	{ "chats.allChats": { $exists: true } },
 	{
 		$set: {
-			"chats.allChats": {
-				view: false,
-				chat: false,
-			},
+			"chats.allChats": false,
 		},
 	},
 );

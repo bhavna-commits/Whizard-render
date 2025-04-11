@@ -4,7 +4,7 @@ const permissionState = {
 		connectNow: false,
 		viewUsers: false,
 		quickActions: false,
-		addPhoneNumber: false, 
+		addPhoneNumber: false,
 	},
 	chats: {
 		type: false,
@@ -22,6 +22,7 @@ const permissionState = {
 		deleteList: false,
 		sendBroadcast: false,
 		customField: false,
+		allList: false,
 	},
 	templates: {
 		type: false,

@@ -95,7 +95,7 @@ export const getSetToken = async (req, res) => {
 
 		// Create a new token record in the database
 		const tokenRecord = await createTokenRecord(
-			id,
+			addedUser?.id || id,
 			permissionValue,
 			addedUser,
 		);
@@ -156,7 +156,6 @@ export const getUsers = async (req, res, next) => {
 		if (!isNumber(skip)) return next();
 
 		const formattedReports = await fetchAndFormatReports(
-			userId,
 			addedUser,
 			permission?.allChats,
 			phoneNumberId,

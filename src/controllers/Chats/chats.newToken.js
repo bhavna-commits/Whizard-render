@@ -195,7 +195,7 @@ export async function createTokenRecord(userId, permission, addedUser) {
 	// If no valid token record exists, create a new one.
 	const { baseHash, expiresAt, token } = generateToken(); // generateToken() returns { token, expiresAt, baseHash, timestampStr }
 	const unique_id = generateUniqueId();
-	console.log(permission);
+
 	const newTokenRecord = new Token({
 		accessToken: baseHash,
 		userId,

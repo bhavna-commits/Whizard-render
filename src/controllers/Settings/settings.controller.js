@@ -910,78 +910,29 @@ export const createPermissions = async (req, res, next) => {
 				.json({ message: "Role with this name already exists" });
 		}
 		// console.log(permissions.settings);
+		const { dashboard, chats, contactlist, templates, reports, settings } =
+			permissions;
 		// Create a new role with permissions
+		console.log(contactlist);
 		const newRole = new Permissions({
 			useradmin,
 			name,
 			unique_id,
 			createdBy: req.session?.user?.name || req.session?.addedUser?.name,
-			dashboard: {
-				connectNow: permissions.dashboard.connectNow,
-				viewUsers: permissions.dashboard.viewUsers,
-				quickActions: permissions.dashboard.quickActions,
-				addNumber: permissions.dashboard.addNumber,
-			},
-			chats: {
-				type: permissions.chats.type,
-				chat: permissions.chats.chat,
-				view: permissions.chats.view,
-				allChats: permissions.chats.allChats,
-			},
-			contactList: {
-				type: permissions.contactlist.type,
-				addContactIndividual:
-					permissions.contactlist.addContactIndividual,
-				editContactIndividual:
-					permissions.contactlist.editContactIndividual,
-				deleteContactIndividual:
-					permissions.contactlist.deleteContactIndividual,
-				addContactListCSV: permissions.contactlist.addContactListCSV,
-				deleteList: permissions.contactlist.deleteList,
-				sendBroadcast: permissions.contactlist.sendBroadcast,
-				customField: permissions.contactlist.customField,
-			},
-			templates: {
-				type: permissions.templates.type,
-				editTemplate: permissions.templates.editTemplate,
-				duplicateTemplate: permissions.templates.duplicateTemplate,
-				createTemplate: permissions.templates.createTemplate,
-				deleteTemplate: permissions.templates.deleteTemplate,
-			},
+			dashboard: { ...dashboard },
+			chats: { ...chats },
+			contactList: { ...contactlist },
+			templates: { ...templates },
 			reports: {
-				type: permissions.reports.type,
+				...reports,
 				conversationReports: {
-					type: permissions.reports.conversationReports.type,
-					viewReports:
-						permissions.reports.conversationReports.viewReports,
-					retargetingUsers:
-						permissions.reports.conversationReports
-							.retargetingUsers,
-					redirectToVpchat:
-						permissions.reports.conversationReports
-							.redirectToVpchat,
+					...reports.conversationReports,
 				},
-				costReports: permissions.reports.costReports,
 			},
 			settings: {
-				type: permissions.settings.type,
-				userManagement: {
-					type: permissions.settings.userManagement.type,
-					addUser: permissions.settings.userManagement.addUser,
-					addPermission:
-						permissions.settings.userManagement.addPermission,
-					editPermission:
-						permissions.settings.userManagement.editPermission,
-					deletePermission:
-						permissions.settings.userManagement.deletePermission,
-				},
-				activityLogs: permissions.settings.activityLogs,
-				manageTags: {
-					type: permissions.settings.manageTags.type,
-					delete: permissions.settings.manageTags.delete,
-					add: permissions.settings.manageTags.add,
-					view: permissions.settings.manageTags.view,
-				},
+				...settings,
+				userManagement: { ...settings.userManagement },
+				manageTags: { ...settings.manageTags },
 			},
 		});
 
@@ -1029,66 +980,24 @@ export const editPermissions = async (req, res, next) => {
 			return res.status(404).json({ message: "Role not found" });
 		}
 
-		// Update role values using the permissions from the request body
-		role.dashboard = {
-			connectNow: permissions.dashboard.connectNow,
-			viewUsers: permissions.dashboard.viewUsers,
-			quickActions: permissions.dashboard.quickActions,
-			addPhoneNumber: permissions.dashboard.addPhoneNumber,
-		};
-		// console.log(role.dashboard);
-		role.chats = {
-			type: permissions.chats.type,
-			view: permissions.chats.view,
-			chat: permissions.chats.chat,
-		};
-		// console.log(role.chats);
-		role.contactList = {
-			type: permissions.contactlist.type,
-			addContactIndividual: permissions.contactlist.addContactIndividual,
-			editContactIndividual:
-				permissions.contactlist.editContactIndividual,
-			deleteContactIndividual:
-				permissions.contactlist.deleteContactIndividual,
-			addContactListCSV: permissions.contactlist.addContactListCSV,
-			deleteList: permissions.contactlist.deleteList,
-			sendBroadcast: permissions.contactlist.sendBroadcast,
-			customField: permissions.contactlist.customField,
-		};
-		// console.log(role.contactList);
-		role.templates = {
-			type: permissions.templates.type,
-			editTemplate: permissions.templates.editTemplate,
-			createTemplate: permissions.templates.createTemplate,
-			deleteTemplate: permissions.templates.deleteTemplate,
-		};
-		// console.log(role.templates);
+		const { dashboard, chats, contactlist, templates, reports, settings } =
+			permissions;
+
+		// Update role values
+		role.dashboard = { ...dashboard };
+		role.chats = { ...chats }; // fixed typo: was `chat`
+		role.contactList = { ...contactlist };
+		role.templates = { ...templates };
 		role.reports = {
-			type: permissions.reports.type,
-			conversationReports: {
-				type: permissions.reports.conversationReports.type,
-				viewReports:
-					permissions.reports.conversationReports.viewReports,
-				retargetingUsers:
-					permissions.reports.conversationReports.retargetingUsers,
-				redirectToVpchat:
-					permissions.reports.conversationReports.redirectToVpchat,
-			},
-			costReports: permissions.reports.costReports,
+			...reports,
+			conversationReports: { ...reports.conversationReports },
 		};
-		// console.log(role.reports);
 		role.settings = {
-			type: permissions.settings.type,
-			userManagement: permissions.settings.userManagement,
-			activityLogs: permissions.settings.activityLogs,
-			manageTags: {
-				type: permissions.settings.manageTags.type,
-				delete: permissions.settings.manageTags.delete,
-				add: permissions.settings.manageTags.add,
-				view: permissions.settings.manageTags.view,
-			},
+			...settings,
+			userManagement: { ...settings.userManagement },
+			manageTags: { ...settings.manageTags },
 		};
-		// console.log(role.settings);
+
 		await role.save();
 
 		// Log the update action in ActivityLogs
