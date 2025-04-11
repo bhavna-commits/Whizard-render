@@ -62,7 +62,7 @@ export const getSetToken = async (req, res) => {
 		let permissionValue, accessData;
 
 		const user = await User.findOne({ unique_id: id });
-
+		console.log(user)
 		if (!user) {
 			return res
 				.status(404)
@@ -89,6 +89,7 @@ export const getSetToken = async (req, res) => {
 			// Use the specific permission for chats from the Permissions model
 			permissionValue = accessData?.chats;
 		} else {
+			console.log("here");
 			// Otherwise, fetch the user's access details
 			permissionValue = user?.access?.chats;
 		}
@@ -106,7 +107,7 @@ export const getSetToken = async (req, res) => {
 			photo: req.session?.addedUser?.photo || req.session?.user?.photo,
 			name: req.session?.addedUser?.name || req.session?.user?.name,
 			color: req.session?.addedUser?.color || req.session?.user?.color,
-			access: permissions ? accessData : accessData.access,
+			access: permissions ? accessData : user.access,
 			phoneNumberId: phoneNumber.phone_number_id,
 			phoneNumberName: phoneNumber.friendly_name,
 		};
