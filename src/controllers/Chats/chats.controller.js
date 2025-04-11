@@ -62,7 +62,7 @@ export const getSetToken = async (req, res) => {
 		let permissionValue, accessData;
 
 		const user = await User.findOne({ unique_id: id });
-		console.log(user)
+
 		if (!user) {
 			return res
 				.status(404)
@@ -89,7 +89,6 @@ export const getSetToken = async (req, res) => {
 			// Use the specific permission for chats from the Permissions model
 			permissionValue = accessData?.chats;
 		} else {
-			console.log("here");
 			// Otherwise, fetch the user's access details
 			permissionValue = user?.access?.chats;
 		}
@@ -159,7 +158,7 @@ export const getUsers = async (req, res, next) => {
 		const formattedReports = await fetchAndFormatReports(
 			userId,
 			addedUser,
-			permission?.allChats?.chat,
+			permission?.allChats,
 			phoneNumberId,
 			skip,
 		);
@@ -168,7 +167,7 @@ export const getUsers = async (req, res, next) => {
 			msg: formattedReports?.reverse(),
 			success: true,
 			token,
-			permission: permission?.chat || permission?.allChats?.chat,
+			permission: permission?.chat || permission?.allChats,
 		});
 	} catch (error) {
 		console.error("Error in getMoreUsers:", error || error.message);
@@ -205,10 +204,9 @@ export const getRefreshToken = async (req, res, next) => {
 			if (!accessData || !accessData.chats?.view) {
 				return res.render("errors/notAllowed");
 			}
-			permissionValue = accessData.chats.chat;
+			permissionValue = accessData.chats.chat || accessData.chats.allChats;
 		} else {
-			accessData = await User.findOne({ unique_id: userId });
-			permissionValue = accessData.access.chats.chat;
+			permissionValue = true;
 		}
 
 		res.status(200).json({

@@ -18,10 +18,7 @@ const permissionSchema = new Schema(
 			type: { type: Boolean, default: false },
 			view: { type: Boolean, default: false },
 			chat: { type: Boolean, default: false },
-			allChats: {
-				view: { type: Boolean, default: false },
-				chat: { type: Boolean, default: false },
-			},
+			allChats: { type: Boolean, default: false },
 		},
 		contactList: {
 			type: { type: Boolean, default: false },

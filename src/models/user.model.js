@@ -54,6 +54,7 @@ const userSchema = new mongoose.Schema(
 				redirectToVpchat: { type: Boolean, default: true },
 				view: { type: Boolean, default: true },
 				chat: { type: Boolean, default: true },
+				allChats: { type: Boolean, default: true },
 			},
 			contactList: {
 				type: { type: Boolean, default: true },

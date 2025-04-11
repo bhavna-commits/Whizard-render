@@ -926,6 +926,7 @@ export const createPermissions = async (req, res, next) => {
 				type: permissions.chats.type,
 				chat: permissions.chats.chat,
 				view: permissions.chats.view,
+				allChats: permissions.chats.allChats,
 			},
 			contactList: {
 				type: permissions.contactlist.type,

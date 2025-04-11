@@ -36,11 +36,6 @@ flatpickr("#filterDate", {
 	},
 });
 
-const data = await fetchAnalytics(startDate, endDate);
-if (data) {
-	updateUI(data);
-}
-
 const filterSidebar = document.getElementById("filterSidebar");
 const dataSection = document.getElementById("dataSection");
 const userName = document.getElementById("userName");
@@ -573,3 +568,12 @@ function processAnalyticsData(rawData) {
 	document.getElementById("totalCost").textContent = cost;
 	// return cost;
 }
+
+async function costReport() {
+	const data = await fetchAnalytics();
+	if (data) {
+		updateUI(data);
+	}
+}
+
+costReport();

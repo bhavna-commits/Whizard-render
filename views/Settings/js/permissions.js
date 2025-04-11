@@ -4,13 +4,14 @@ const permissionState = {
 		connectNow: false,
 		viewUsers: false,
 		quickActions: false,
-		addPhoneNumber: false, // added key for consistency with checkbox value
+		addPhoneNumber: false, 
 	},
 	chats: {
 		type: false,
 		redirectToVpchat: false,
 		view: false,
 		chat: false,
+		allChats: false,
 	},
 	contactlist: {
 		type: false,
@@ -157,7 +158,7 @@ function populateEditForm(editPermission) {
 						// If this permission is set to true in the editPermission data, check it
 						if (editSection[permKey]) {
 							checkbox.checked = true;
-							checkbox.dispatchEvent(new Event("change")); 
+							checkbox.dispatchEvent(new Event("change"));
 							updatePermissionState(checkbox, true);
 							updateCheckboxLabel(checkbox);
 
