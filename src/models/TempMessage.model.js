@@ -10,7 +10,7 @@ const tempMessageSchema = new mongoose.Schema({
 	image: { type: Object }, // Store image info if available
 	fbPhoneId: { type: String },
 	// Optionally store extra raw data for later processing
-	rawData: { type: Object, required: true },
+	rawData: { type: Object, required: false },
 	createdAt: { type: Date, default: Date.now },
 });
 

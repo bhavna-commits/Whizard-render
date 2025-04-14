@@ -10,7 +10,6 @@ import User from "../../models/user.model.js";
 import ActivityLogs from "../../models/activityLogs.model.js";
 import AddedUser from "../../models/addedUser.model.js";
 import Permissions from "../../models/permissions.model.js";
-
 import {
 	languages,
 	countries,
@@ -1093,20 +1092,80 @@ export const updateUserManagement = async (req, res) => {
 					.json({ success: true, message: "Status updated" });
 
 			case "updateRole":
+				// 1) Update the user’s role in the DB
 				user = await AddedUser.findOneAndUpdate(
 					{ unique_id: userId, deleted: false },
 					{ roleName: newRoleName, roleId: newRoleId },
 					{ new: true },
 				);
-				// console.log(user);
 				if (!user) {
 					return res
 						.status(404)
 						.json({ success: false, message: "User not found" });
 				}
-				return res
-					.status(200)
-					.json({ success: true, message: "Role updated" });
+
+				// 2) Now patch any live sessions for that addedUser
+				sessionStore.all(async (err, sessions) => {
+					if (err) {
+						console.error("Error fetching sessions:", err);
+						return res
+							.status(500)
+							.json({
+								success: false,
+								message: "Error fetching sessions",
+							});
+					}
+
+					const updatePromises = [];
+
+					// sessions is an object: { sid1: sessionObj1, sid2: sessionObj2, ... }
+					for (const [sid, sess] of Object.entries(sessions)) {
+						// only touch sessions for this addedUser *and* the old permission
+						if (
+							sess.addedUser?.id === userId
+						) {
+							// swap in the new roleId
+							sess.addedUser.permissions = newRoleId;
+
+							updatePromises.push(
+								new Promise((resolve, reject) => {
+									sessionStore.set(sid, sess, (err) => {
+										if (err) {
+											console.error(
+												`Error updating session ${sid}:`,
+												err,
+											);
+											return reject(err);
+										}
+										console.log(
+											`Session ${sid} updated to new roleId`,
+										);
+										resolve();
+									});
+								}),
+							);
+						}
+					}
+
+					try {
+						await Promise.all(updatePromises);
+						return res
+							.status(200)
+							.json({
+								success: true,
+								message: "Role and sessions updated",
+							});
+					} catch (e) {
+						console.error("Failed to update some sessions:", e);
+						return res
+							.status(500)
+							.json({
+								success: false,
+								message: "Error updating sessions",
+							});
+					}
+				});
+				break;
 
 			case "deleteUser":
 				try {

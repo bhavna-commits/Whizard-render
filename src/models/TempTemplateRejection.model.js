@@ -7,7 +7,7 @@ const tempTemplateRejectionSchema = new mongoose.Schema({
 	templateLanguage: { type: String },
 	rejectedReason: { type: String, required: true },
 	// Optionally store the full raw event for further processing
-	rawData: { type: Object, required: true },
+	rawData: { type: Object, required: false },
 	createdAt: { type: Date, default: Date.now },
 });
 

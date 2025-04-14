@@ -9,7 +9,7 @@ const tempStatusSchema = new mongoose.Schema({
 	recipientPhone: { type: String },
 	error: { type: Array, default: [] },
 	// Optionally store extra raw data for later processing
-	rawData: { type: Object, required: true },
+	rawData: { type: Object, required: false },
 	createdAt: { type: Date, default: Date.now },
 });
 
