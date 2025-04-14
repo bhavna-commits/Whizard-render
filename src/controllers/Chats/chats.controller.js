@@ -95,7 +95,7 @@ export const getSetToken = async (req, res) => {
 
 		// Create a new token record in the database
 		const tokenRecord = await createTokenRecord(
-			addedUser?.id || id,
+			id,
 			permissionValue,
 			addedUser,
 		);
@@ -138,6 +138,7 @@ export const getSetToken = async (req, res) => {
  * @returns {void}
  */
 export const getUsers = async (req, res, next) => {
+	
 	try {
 		const oldToken = checkToken(req, next);
 		const { userId, token, permission, addedUser } =
@@ -155,8 +156,6 @@ export const getUsers = async (req, res, next) => {
 		if (!isString(phoneNumberId)) return next();
 		if (!isNumber(skip)) return next();
 
-		console.log(permission);
-
 		const formattedReports = await fetchAndFormatReports(
 			addedUser,
 			permission?.allChats,
@@ -171,7 +170,7 @@ export const getUsers = async (req, res, next) => {
 			permission: permission?.chat || permission?.allChats,
 		});
 	} catch (error) {
-		console.error("Error in getMoreUsers:", error || error.message);
+		console.error("Error in getMoreUsers:", error.message || error);
 		res.status(400).json({
 			message: error.message || error,
 			success: false,

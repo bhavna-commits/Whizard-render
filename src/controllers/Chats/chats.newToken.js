@@ -168,7 +168,12 @@ export async function getUserIdFromToken(token) {
  */
 export async function createTokenRecord(userId, permission, addedUser) {
 	// Try to find an existing token record for this user.
-	let tokenRecord = await Token.findOne({ userId });
+	let tokenRecord = await Token.findOne({
+		"addedUser.id": addedUser?.id,
+	});
+	if (!tokenRecord) {
+		tokenRecord = await Token.findOne({ userId });
+	}
 
 	if (tokenRecord) {
 		// If token exists, check whether it is still valid.
@@ -182,8 +187,10 @@ export async function createTokenRecord(userId, permission, addedUser) {
 			);
 			// Update the expiration if needed (or simply return the existing record).
 			tokenRecord.expiresAt = Date.now() + TOKEN_LIFETIME; // TOKEN_LIFETIME defined elsewhere
+			tokenRecord.addedUser = addedUser;
 			await tokenRecord.save();
 			tokenRecord.token = newToken;
+
 			return tokenRecord;
 		} else {
 			// If expired, you can either delete it or overwrite it.
