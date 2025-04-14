@@ -165,7 +165,7 @@ export const getUsers = async (req, res, next) => {
 		);
 
 		res.status(200).json({
-			msg: formattedReports,
+			msg: formattedReports?.reverse(),
 			success: true,
 			token,
 			permission: permission?.chat || permission?.allChats,
