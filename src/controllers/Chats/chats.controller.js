@@ -155,6 +155,8 @@ export const getUsers = async (req, res, next) => {
 		if (!isString(phoneNumberId)) return next();
 		if (!isNumber(skip)) return next();
 
+		console.log(permission);
+
 		const formattedReports = await fetchAndFormatReports(
 			addedUser,
 			permission?.allChats,
