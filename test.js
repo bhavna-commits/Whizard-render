@@ -1,8 +1,14 @@
-import crypto from "crypto";
+import mongoose from "mongoose";
+import dotenv from "dotenv";
+import userModel from "./src/models/user.model.js";
+import permissionsModel from "./src/models/permissions.model.js";
 
-export const generateUniqueId = () => {
-    return crypto.randomBytes(5).toString(16)
-        // .slice(0, 10);
-};
+dotenv.config();
+await mongoose.connect(process.env.MONGO_URI);
 
-console.log(generateUniqueId());
+const getData = async () => {
+    const result = await userModel.findById("674d4bc3e26ff93ef8cfc1db");
+    console.log(result.access.chats);
+}
+
+getData();
