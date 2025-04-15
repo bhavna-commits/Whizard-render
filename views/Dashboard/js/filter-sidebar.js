@@ -5,7 +5,9 @@ const endDate1 = urlt.searchParams.get("endDate");
 if (startDate1 && endDate1) {
 	const span = document.getElementById("showDateFilter");
 	span.textContent = `${startDate1} to ${endDate1}`;
-	costReport(new Date(startDate1), new Date(endDate1));
+	const startLocal = parseLocalMidnight(startDate1);
+	const endLocal = parseLocalMidnight(endDate1);
+	costReport(startLocal, endLocal);
 } else {
 	costReport();
 }
@@ -542,7 +544,9 @@ async function fetchAnalytics(startDate, endDate) {
 		} else {
 			// Convert to Unix timestamps
 			startUnix = Math.floor(startDate.getTime() / 1000);
-			endUnix = Math.floor(endDate.getTime() / 1000) + 86400;
+			endUnix = Math.floor(
+				(endDate.getTime() + 24 * 60 * 60 * 1000) / 1000,
+			);
 		}
 
 		// build query string
@@ -589,4 +593,10 @@ async function costReport(start, end) {
 	if (data) {
 		updateUI(data);
 	}
+}
+
+function parseLocalMidnight(dateStr) {
+	const [year, month, day] = dateStr.split("-").map(Number);
+	// monthIndex is zero‑based
+	return new Date(year, month - 1, day);
 }
