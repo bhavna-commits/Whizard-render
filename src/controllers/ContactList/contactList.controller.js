@@ -167,12 +167,14 @@ export const createList = async (req, res, next) => {
 					wa_id: Number,
 					contactId: contactList.contactId,
 					masterExtra: additionalFields,
+					...(addedUserId && { agent: [addedUserId] }),
 				});
 			})
 			.filter((contact) => contact !== null);
 
 		if (contactsToSave.length > 0) {
 			await Contacts.insertMany(contactsToSave);
+			await ContactListTemp.insertMany(contactsToSave);
 		} else {
 			return res.status(400).json({
 				success: false,
@@ -203,7 +205,6 @@ export const createList = async (req, res, next) => {
 		}
 
 		await contactList.save();
-		await ContactListTemp.create(cList);
 
 		res.json({
 			success: true,

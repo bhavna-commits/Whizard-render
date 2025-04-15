@@ -1,9 +1,12 @@
 import { MongoClient } from "mongodb";
+import crypto from "crypto";
+import contactsTempCollection from "./src/models/contactsTemp.model.js";
+import chatsUsersCollection from "./src/models/chatsUsers.model.js";
 import dotenv from "dotenv";
 dotenv.config();
 
-const url = process.env.MONGO_URI; // Mongo URI already contains the db name
-const client = new MongoClient(url, { useUnifiedTopology: true });
+// const url = process.env.MONGO_URI; // Mongo URI already contains the db name
+// const client = new MongoClient(url, { useUnifiedTopology: true });
 
 // Minimal unique ID generator
 export const generateUniqueId = () => {
@@ -12,14 +15,14 @@ export const generateUniqueId = () => {
 
 export async function updateContacts() {
 	try {
-		await client.connect();
+		// await client.connect();
 		console.log("Connected to DB");
 
-		const db = client.db();
-		const contactsTempCollection = db.collection("contactsTemp");
-		const chatsUsersCollection = db.collection("chatsUsers");
+		// const db = client.db();
+		// const contactsTempCollection = db.collection("contactsTemp");
+		// const chatsUsersCollection = db.collection("chatsUsers");
 
-		const contacts = await contactsTempCollection.find().toArray();
+		const contacts = await contactsTempCollection.find();
 
 		const existingEntriesMap = new Map();
 
@@ -29,10 +32,9 @@ export async function updateContacts() {
 			useradmin: c.useradmin,
 		}));
 
-		const existingEntries = await chatsUsersCollection
-			.find({ $or: waUserPairs })
-			.toArray();
-
+		const existingEntries = await chatsUsersCollection.find({
+			$or: waUserPairs,
+		});
 		for (const entry of existingEntries) {
 			existingEntriesMap.set(`${entry.useradmin}_${entry.wa_id}`, entry);
 		}
@@ -117,4 +119,4 @@ export async function updateContacts() {
 	}
 }
 
-updateContacts();
+// updateContacts();

@@ -7,6 +7,7 @@ import { getMimeType } from "./chats.extra.functions.js";
 import ChatsTemp from "../../models/chatsTemp.model.js";
 import ChatsUsers from "../../models/chatsUsers.model.js";
 import { processAllTempEvents } from "../../../webhook.process.js";
+import { updateContacts } from "../../../contactsUpdate cron.js";
 
 dotenv.config();
 
@@ -112,6 +113,7 @@ export const sendMessage = async (accessToken, phoneNumberId, payload) => {
 
 cron.schedule("* * * * *", async () => {
 	await processAllTempEvents();
+	await updateContacts();
 		try {
 			// Retrieve all chats from ChatsTemp, sorted by createdAt descending (newest first)
 			const chats = await ChatsTemp.find().sort({ createdAt: -1 });

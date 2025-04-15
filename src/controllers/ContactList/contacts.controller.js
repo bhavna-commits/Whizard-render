@@ -23,6 +23,7 @@ import {
 } from "../../middleWares/sanitiseInput.js";
 
 import { sendCampaignScheduledEmail } from "../../services/OTP/reportsEmail.js";
+import ContactsTemp from "../../models/contactsTemp.model.js";
 
 export const __filename = fileURLToPath(import.meta.url);
 export const __dirname = path.dirname(__filename);
@@ -392,6 +393,7 @@ export const createContact = async (req, res, next) => {
 		if (!isObject(contactData)) return next();
 
 		const userId = req.session?.user?.id || req.session?.addedUser?.owner;
+		const addedUserId = req.session?.addedUser?.id;
 		const user = await User.findOne({ unique_id: userId });
 
 		const keyId = user?.FB_PHONE_NUMBERS?.find(
@@ -417,8 +419,7 @@ export const createContact = async (req, res, next) => {
 			});
 		}
 
-		// Add the new contact to the Contacts collection
-		const newContact = await Contacts.create({
+		const contact = {
 			useradmin: userId,
 			unique_id: generateUniqueId(),
 			contactId,
@@ -426,7 +427,11 @@ export const createContact = async (req, res, next) => {
 			wa_idK: `${keyId}_${user.phone}`,
 			wa_id: `${countryCode.slice(1)}${wa_id}`,
 			masterExtra: newContactData,
-		});
+			...(addedUserId && { agent: [addedUserId] }),
+		};
+		// Add the new contact to the Contacts collection
+		const newContact = await Contacts.create(contact);
+		await ContactsTemp.create(contact);
 
 		const contactListId = newContact.contactId;
 		await ContactList.findOneAndUpdate(
@@ -761,31 +766,38 @@ export const getFilteredContacts = async (req, res, next) => {
 		filters.forEach((filter) => {
 			if (filter.field === "subscribe_date" && filter.value) {
 				matchStage.$and = matchStage.$and || [];
-				const [startDate, endDate] = filter.value?.split(" to ");
+				const [startDate, endDate] = filter.value?.split(" to ") || [];
 
-				// Convert start date to timestamp
-				const convertedStartDate = new Date(
-					Date.UTC(
-						parseInt(startDate.split("-")[0]), // year
-						parseInt(startDate.split("-")[1]) - 1, // month (0-indexed in JS Date)
-						parseInt(startDate.split("-")[2]), // day
-					),
-				).getTime();
-
-				// Check if endDate is defined
-				let convertedEndDate = Infinity; // Default to Infinity if no endDate is provided
-				if (endDate) {
-					convertedEndDate = new Date(
-						Date.UTC(
-							parseInt(endDate.split("-")[0]), // year
-							parseInt(endDate.split("-")[1]) - 1, // month (0-indexed in JS Date)
-							parseInt(endDate.split("-")[2]), // day
-						),
-					).getTime();
+				// helper to get local‑midnight timestamp
+				function toLocalMidnightTs(dateStr) {
+					const [y, m, d] = dateStr.split("-").map(Number);
+					// new Date(year, monthIndex, day) is local 00:00
+					return new Date(y, m - 1, d).getTime();
 				}
 
-				console.log("Converted Start Date:", convertedStartDate);
-				console.log("Converted End Date:", convertedEndDate);
+				if (!startDate) {
+					console.error(
+						"No start date! filter.value was:",
+						filter.value,
+					);
+					return;
+				}
+
+				const convertedStartDate = toLocalMidnightTs(startDate);
+				let convertedEndDate = Infinity;
+
+				if (endDate) {
+					convertedEndDate = toLocalMidnightTs(endDate);
+				}
+
+				console.log(
+					"Converted Start Date (local ms):",
+					convertedStartDate,
+				);
+				console.log(
+					"Converted End Date   (local ms):",
+					convertedEndDate,
+				);
 
 				// Apply filter for subscribe_date (handle case where endDate may not be provided)
 				matchStage.$and.push({
