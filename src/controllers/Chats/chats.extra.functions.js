@@ -59,7 +59,7 @@ export const fetchAndFormatReports = async (
 			.limit(limit)
 			.lean();
 	} else {
-		console.log(addedUser.id);
+		console.log(phoneNumberId);
 		chats = await ChatsUsers.find({
 			FB_PHONE_ID: phoneNumberId,
 			agent: { $in: [addedUser.id] },
