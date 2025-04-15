@@ -1109,7 +1109,7 @@ export const updateUserManagement = async (req, res) => {
 					{ new: true },
 				);
 				if (!user) {
-					console.warn("⚠️ updateRole: no user found for", userId);
+					// console.warn("⚠️ updateRole: no user found for", userId);
 					return res
 						.status(404)
 						.json({ success: false, message: "User not found" });
@@ -1117,13 +1117,13 @@ export const updateUserManagement = async (req, res) => {
 
 				// fetch & debug
 				const allSessions = await sessionColl.find({}).toArray();
-				console.log(
-					`🔍 Found ${allSessions.length} total session docs`,
-				);
+				// console.log(
+				// 	`🔍 Found ${allSessions.length} total session docs`,
+				// );
 
 				const bulkOps = [];
 				allSessions.forEach((doc) => {
-					console.log("→ checking session _id=", doc._id);
+					// console.log("→ checking session _id=", doc._id);
 					let sess;
 					try {
 						sess = JSON.parse(doc.session);
@@ -1136,10 +1136,10 @@ export const updateUserManagement = async (req, res) => {
 					}
 
 					if (sess.addedUser?.id === userId) {
-						console.log(
-							`   ✔ match! old perms=`,
-							sess.addedUser.permissions,
-						);
+						// console.log(
+						// 	`   ✔ match! old perms=`,
+						// 	sess.addedUser.permissions,
+						// );
 						sess.addedUser.permissions = newRoleId;
 						bulkOps.push({
 							updateOne: {
@@ -1165,13 +1165,13 @@ export const updateUserManagement = async (req, res) => {
 			case "deleteUser":
 				// fetch & debug
 				const sessions = await sessionColl.find({}).toArray();
-				console.log(
-					`🔍 Found ${sessions.length} total session docs (for delete)`,
-				);
+				// console.log(
+				// 	`🔍 Found ${sessions.length} total session docs (for delete)`,
+				// );
 				const toDeleteIds = [];
 
 				sessions.forEach((doc) => {
-					console.log("→ checking session _id=", doc._id);
+					// console.log("→ checking session _id=", doc._id);
 					let sess;
 					try {
 						sess = JSON.parse(doc.session);
@@ -1183,7 +1183,7 @@ export const updateUserManagement = async (req, res) => {
 						return;
 					}
 					if (sess.addedUser?.id === userId) {
-						console.log(`   🗑️ marking for deletion`);
+						// console.log(`   🗑️ marking for deletion`);
 						toDeleteIds.push(doc._id);
 					}
 				});
@@ -1199,7 +1199,7 @@ export const updateUserManagement = async (req, res) => {
 					{ new: true },
 				);
 				if (!user) {
-					console.warn("⚠️ deleteUser: no user found for", userId);
+					// console.warn("⚠️ deleteUser: no user found for", userId);
 					return res
 						.status(404)
 						.json({ success: false, message: "User not found" });

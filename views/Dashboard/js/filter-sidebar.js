@@ -5,6 +5,9 @@ const endDate1 = urlt.searchParams.get("endDate");
 if (startDate1 && endDate1) {
 	const span = document.getElementById("showDateFilter");
 	span.textContent = `${startDate1} to ${endDate1}`;
+	costReport(new Date(startDate1), new Date(endDate1));
+} else {
+	costReport();
 }
 
 flatpickr("#filterDate", {
@@ -527,37 +530,46 @@ async function fetchAnalytics(startDate, endDate) {
 	const text = document.getElementById("totalCost");
 
 	try {
-		text.innerHTML = `<div id="analyticsLoading" class="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-10">
-								<div class="animate-spin inline-block w-8 h-8 border-4 border-black border-t-transparent rounded-full"></div>
-							</div>`;
-		
-		let startUnix;
-		let endUnix;
+		// show spinner
+		text.innerHTML = `<div class="animate-spin inline-block w-8 h-8 border-4 border-black border-t-transparent rounded-full"></div>`;
+
+		let startUnix = null;
+		let endUnix = null;
 
 		if (!startDate || !endDate) {
 			// console.error("Invalid dates:", { startDate, endDate });
-			// toast("error", `Invalid dates : ${startDate}, ${endDate}`);
+			// toast("error", Invalid dates : ${startDate}, ${endDate});
+		} else {
+			// Convert to Unix timestamps
+			startUnix = Math.floor(startDate.getTime() / 1000);
+			endUnix = Math.floor(endDate.getTime() / 1000) + 86400;
+		}
+
+		// build query string
+		const qs = new URLSearchParams({ start: startUnix, end: endUnix });
+
+		const res = await fetch(`/reports/get-cost-report?${qs.toString()}`, {
+			method: "GET",
+			headers: {
+				Accept: "application/json",
+			},
+		});
+
+		if (!res.ok) {
+			const err = await res.json().catch(() => ({}));
+			console.error("Fetch error:", err.error || res.statusText);
+			toast("error", err.error || "Failed to fetch analytics");
 			return null;
 		}
 
-		// Convert to Unix timestamps
-		startUnix = Math.floor(startDate.getTime() / 1000);
-		endUnix = Math.floor(endDate.getTime() / 1000) + 86400;
+		const data = await res.json();
+		// console.log("🎉 got data:", data);
 
-		const response = await axios.get("/reports/get-cost-report", {
-			params: { start: startUnix, end: endUnix },
-		});
-
-		// Process the fetched data
-		return processAnalyticsData(response.data, startDate, endDate);
-	} catch (error) {
-		console.error("Error fetching analytics:", error.response.data.error);
-		toast("error", error.response.data.error);
+		return processAnalyticsData(data, startDate, endDate);
+	} catch (err) {
+		console.error("Unexpected error fetching analytics:", err);
+		toast("error", err.message || "Something went wrong");
 		return null;
-	} finally {
-		// Hide loaders regardless of success/failure
-		analyticsLoading.classList.add("hidden");
-		chargesLoading.classList.add("hidden");
 	}
 }
 
@@ -568,15 +580,13 @@ function processAnalyticsData(rawData) {
 		cost += point.cost || 0;
 	});
 
-	document.getElementById("totalCost").textContent = cost;
+	document.getElementById("totalCost").innerHTML = cost.toFixed(2);
 	// return cost;
 }
 
-async function costReport() {
-	const data = await fetchAnalytics();
+async function costReport(start, end) {
+	const data = await fetchAnalytics(start, end);
 	if (data) {
 		updateUI(data);
 	}
 }
-
-costReport();

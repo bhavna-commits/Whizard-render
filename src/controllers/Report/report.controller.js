@@ -46,11 +46,15 @@ export const getCampaignList = async (req, res, next) => {
 		};
 
 		if (status === "scheduled") {
-			matchQuery["status"] = { $in: ["SCHEDULED", "IN_QUEUE", "PENDING"] };
+			matchQuery["status"] = {
+				$in: ["SCHEDULED", "IN_QUEUE", "PENDING"],
+			};
 		} else if (status === "all" || !status) {
 			delete matchQuery["status"];
 		} else {
-			matchQuery["status"] = { $nin: ["SCHEDULED", "IN_QUEUE", "PENDING"] };
+			matchQuery["status"] = {
+				$nin: ["SCHEDULED", "IN_QUEUE", "PENDING"],
+			};
 		}
 
 		if (timeFrame) {
@@ -68,7 +72,7 @@ export const getCampaignList = async (req, res, next) => {
 
 				matchQuery["createdAt"] = {
 					$gte: startDate.getTime(),
-					$lte: endDate.getTime(), 
+					$lte: endDate.getTime(),
 				};
 			}
 		}
@@ -383,7 +387,9 @@ export const getSendBroadcast = async (req, res, next) => {
 		// delete req.session.tempData;
 		const permissions = req.session?.addedUser?.permissions;
 		if (permissions) {
-			const access = await Permissions.findOne({ unique_id: permissions });
+			const access = await Permissions.findOne({
+				unique_id: permissions,
+			});
 			if (
 				access.contactList.sendBroadcast &&
 				req.session?.addedUser?.whatsAppStatus
@@ -610,6 +616,17 @@ export const getCostReport = async (req, res) => {
 			});
 		}
 
+		if (!isString(req.query.start, req.query.end)) return next();
+		
+		req.query.start = JSON.parse(req.query.start);
+		req.query.end = JSON.parse(req.query.end);
+
+		console.log(
+			typeof req.query.start,
+			req.query.start,
+			typeof req.query.end,
+			req.query.end,
+		);
 		// Get timestamps from query parameters
 		const start =
 			req.query.start ||
