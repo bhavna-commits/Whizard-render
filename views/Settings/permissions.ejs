@@ -115,14 +115,14 @@
 					
 					<!-- Chats Section -->
 					<div class=" flex justify-between items-center toggle-section border-b pb-4">
-						<div class="flex justify-between items-center w-[15%] relative">
-							<h2 class="">Chats</h2>
-							<div class="flex items-center space-x-2">
+						
+						<h2 class="">Chats</h2>
+						<!-- <div class="flex items-center space-x-2">
 								<label class="relative flex items-center cursor-pointer ">
-									<!-- Hidden checkbox input -->
+									
 									<input type="checkbox" name="permissions[chats]" class="sr-only peer section-toggle">
 									
-									<!-- Toggle switch -->
+								
 									<div class="w-11 h-6  bg-gray-200 peer-focus:outline-none peer-focus:ring-4 
 												peer-focus:ring-blue-300 rounded-full peer 
 												peer-checked:after:translate-x-full peer-checked:after:border-white 
@@ -130,24 +130,24 @@
 												after:bg-white after:border-gray-300 after:border after:rounded-full 
 												after:h-5 after:w-5 after:transition-all peer-checked:bg-black"></div>
 									
-									<!-- Label text -->
+									
 									<span class="ml-3 text-sm font-medium toggle-label text-gray-500">No</span>
 								</label>
 								
-							</div>
-						</div>
-						<div class="options-container grid grid-cols-1 md:grid-cols-4 w-[60%]">
-							<label class="flex items-center space-x-2 min-w-fit">
+							</div> -->
+						
+						<div class="grid grid-cols-1 md:grid-cols-4 w-[60%]">
+							<!-- <label class="flex items-center space-x-2 min-w-fit">
 								<input type="checkbox" name="permissions[chats][]" value="view" class="rounded checkbox option-checkbox text-black" disabled />
 								<span class="option-label text-gray-500">View</span>
+							</label> -->
+							<label class="flex items-center space-x-2 min-w-fit">
+								<input type="checkbox" name="permissions[chats][enabled]" value="chat" class="rounded checkbox text-black" />
+								<span class="option-label text-black">Individual Chat</span>
 							</label>
 							<label class="flex items-center space-x-2 min-w-fit">
-								<input type="checkbox" name="permissions[chats][]" value="chat" class="rounded checkbox option-checkbox text-black" disabled />
-								<span class="option-label text-gray-500">Chat</span>
-							</label>
-							<label class="flex items-center space-x-2 min-w-fit">
-								<input type="checkbox" name="permissions[chats][]" value="allChats" class="rounded checkbox option-checkbox text-black" disabled />
-								<span class="option-label text-gray-500">All Chats</span>
+								<input type="checkbox" name="permissions[chats][enabled]" value="allChats" class="rounded checkbox text-black" />
+								<span class="option-label text-black">All Chats</span>
 							</label>
 						</div>
 					</div>
@@ -203,7 +203,7 @@
 							</label>
 							<label class="flex items-center space-x-2">
 								<input type="checkbox" name="permissions[contactlist][]" value="allList" class="rounded option-checkbox text-blue-600 checkbox" />
-								<span class="option-label text-gray-500">All List</span>
+								<span class="option-label text-gray-500">All Contact List</span>
 							</label>
 						</div>
 					</div>

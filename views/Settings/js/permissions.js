@@ -7,7 +7,6 @@ const permissionState = {
 		addPhoneNumber: false,
 	},
 	chats: {
-		type: false,
 		redirectToVpchat: false,
 		view: false,
 		chat: false,
@@ -90,6 +89,58 @@ function initializeDashboardSection() {
 	});
 }
 
+function initializeChatsSection() {
+	// Find the dashboard section by matching the header text
+	const sections = document.querySelectorAll(".toggle-section");
+	let dashboardSection;
+	sections.forEach((section) => {
+		const title = section
+			.querySelector("h2")
+			.textContent.trim()
+			.toLowerCase();
+		if (title === "chats") {
+			dashboardSection = section;
+		}
+	});
+
+	if (!dashboardSection) {
+		console.warn("Chats section not found.");
+		return;
+	}
+
+	// Attach event listeners to all checkboxes in the dashboard section
+	const dashboardCheckboxes = dashboardSection.querySelectorAll(
+		"input[type='checkbox']",
+	);
+	dashboardCheckboxes.forEach((checkbox) => {
+		checkbox.addEventListener("change", () =>
+			handleChatsOptionToggle(checkbox),
+		);
+	});
+}
+
+function handleChatsOptionToggle(checkbox) {
+	const isChecked = checkbox.checked;
+	const permissionKey = checkbox.value; // e.g., "connectNow", "quickActions", "addPhoneNumber"
+
+	// Update the dashboard permissions state
+	if (permissionState.chats.hasOwnProperty(permissionKey)) {
+		permissionState.chats[permissionKey] = isChecked;
+	} else {
+		console.warn(
+			`Permission key "${permissionKey}" not defined in dashboard state.`,
+		);
+	}
+
+	// Optionally update the label styling if needed
+	const label = checkbox.nextElementSibling;
+	if (label) {
+		// For example, apply a class when checked (adjust as needed)
+		label.classList.toggle("text-gray-900", isChecked);
+		label.classList.toggle("text-gray-500", !isChecked);
+	}
+}
+
 function handleDashboardOptionToggle(checkbox) {
 	const isChecked = checkbox.checked;
 	const permissionKey = checkbox.value; // e.g., "connectNow", "quickActions", "addPhoneNumber"
@@ -126,8 +177,9 @@ function populateEditForm(editPermission) {
 			(sectionName === "contactlist"
 				? editPermission["contactList"]
 				: null);
-
-		if (sectionName == "dashboard") {
+		
+		console.log(sectionName);
+		if (sectionName === "dashboard" || sectionName === "chats") {
 			// For dashboard, update checkboxes regardless of a toggle state
 			if (editSection) {
 				section
@@ -505,6 +557,7 @@ function resetPermissionState() {
 document.addEventListener("DOMContentLoaded", function () {
 	initializeForm(); // existing initialization for toggles and checkboxes
 	initializeDashboardSection();
+	initializeChatsSection();
 	if (editPermissionJS) {
 		initializeEditFormSubmission();
 		populateEditForm(editPermissionJS);

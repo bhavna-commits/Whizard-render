@@ -120,7 +120,7 @@ export function checkToken(req, next) {
  * @param {Object} res - The Express response.
  * @param {Function} next - The next middleware.
  * @returns {Promise<Object>} The updated token record (with new converted token in a field).
- */
+ */1
 export async function getUserIdFromToken(token) {
 	// Decode the token; assuming a timestamp length of 13 digits.
 	const { timestamp, baseHash } = decodeToken(token, 13);
