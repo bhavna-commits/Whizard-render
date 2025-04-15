@@ -59,10 +59,10 @@ export const fetchAndFormatReports = async (
 			.limit(limit)
 			.lean();
 	} else {
-		console.log(addedUser.unique_id);
+		console.log(addedUser.id);
 		chats = await ChatsUsers.find({
 			FB_PHONE_ID: phoneNumberId,
-			agent: addedUser.unique_id,
+			agent: addedUser.id,
 		})
 			.sort({ updatedAt: -1 })
 			.skip(skip)
