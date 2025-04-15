@@ -15,71 +15,98 @@ export const generateUniqueId = () => {
 
 export async function updateContacts() {
 	try {
-		// await client.connect();
-		console.log("Connected to DB");
+		console.log("✅ Starting contacts update");
 
-		// const db = client.db();
-		// const contactsTempCollection = db.collection("contactsTemp");
-		// const chatsUsersCollection = db.collection("chatsUsers");
+		// 1) Load all temp contacts
+		const contacts = await contactsTempCollection.find().lean();
+		if (!contacts.length) {
+			console.log("⚠️  No temp contacts found, nothing to do");
+			return;
+		}
 
-		const contacts = await contactsTempCollection.find();
-
-		const existingEntriesMap = new Map();
-
-		// Fetch all existing wa_id + useradmin combos to avoid findOne per contact
+		// 2) Build filter array for existing lookups
 		const waUserPairs = contacts.map((c) => ({
 			wa_id: c.wa_id,
 			useradmin: c.useradmin,
 		}));
 
-		const existingEntries = await chatsUsersCollection.find({
-			$or: waUserPairs,
-		});
-		for (const entry of existingEntries) {
-			existingEntriesMap.set(`${entry.useradmin}_${entry.wa_id}`, entry);
+		// 3) Fetch existing entries only if we have filters
+		let existingEntries = [];
+		if (waUserPairs.length) {
+			existingEntries = await chatsUsersCollection
+				.find({ $or: waUserPairs })
+				.lean();
 		}
+
+		// 4) Map existing by composite key
+		const existingMap = new Map();
+		existingEntries.forEach((entry) => {
+			existingMap.set(`${entry.useradmin}_${entry.wa_id}`, entry);
+		});
 
 		const bulkOps = [];
 		const newEntries = [];
 
 		for (const contact of contacts) {
 			const key = `${contact.useradmin}_${contact.wa_id}`;
-			const existingEntry = existingEntriesMap.get(key);
+			const ex = existingMap.get(key);
 
-			if (existingEntry) {
-				// Update existing
-				let updatedContactNames = existingEntry.contactName || [];
+			if (ex) {
+				// --- Merge contactName array ---
+				const updatedContactNames = Array.isArray(ex.contactName)
+					? [...ex.contactName]
+					: [];
 				if (!updatedContactNames.includes(contact.Name)) {
 					updatedContactNames.push(contact.Name);
 				}
 
-				let updatedRelations = existingEntry.nameContactRelation || [];
-				const relationExists = updatedRelations.some(
-					(rel) => rel.contactListId === contact.contactId,
-				);
-
-				if (!relationExists) {
+				// --- Merge nameContactRelation array ---
+				const updatedRelations = Array.isArray(ex.nameContactRelation)
+					? [...ex.nameContactRelation]
+					: [];
+				if (
+					!updatedRelations.some(
+						(r) => r.contactListId === contact.contactId,
+					)
+				) {
 					updatedRelations.push({
 						name: contact.Name,
 						contactListId: contact.contactId,
 					});
 				}
 
+				// --- Merge agent array without nesting ---
+				const existingAgents = Array.isArray(ex.agent)
+					? [...ex.agent]
+					: [];
+				const incomingAgents = Array.isArray(contact.agent)
+					? contact.agent
+					: [contact.agent];
+				for (const ag of incomingAgents) {
+					if (!existingAgents.includes(ag)) {
+						existingAgents.push(ag);
+					}
+				}
+
 				bulkOps.push({
 					updateOne: {
-						filter: { _id: existingEntry._id },
+						filter: { _id: ex._id },
 						update: {
 							$set: {
 								contactName: updatedContactNames,
 								nameContactRelation: updatedRelations,
-								agent: [contact.agent],
+								agent: existingAgents,
 								updatedAt: contact.updatedAt,
 							},
 						},
 					},
 				});
 			} else {
-				// Prepare new insert
+				// --- New entry ---
+				const agentsArr = Array.isArray(contact.agent)
+					? contact.agent
+					: [contact.agent];
+
 				newEntries.push({
 					FB_PHONE_ID: contact.FB_PHONE_ID,
 					useradmin: contact.useradmin,
@@ -94,28 +121,26 @@ export async function updateContacts() {
 					wa_id: contact.wa_id,
 					createdAt: contact.createdAt,
 					updatedAt: contact.updatedAt,
-					agent: [contact.agent],
+					agent: agentsArr,
 				});
 			}
 		}
 
-		// Perform all updates and inserts at once
+		// 5) Execute bulk updates & inserts
 		if (bulkOps.length) {
-			await chatsUsersCollection.bulkWrite(bulkOps);
+			const result = await chatsUsersCollection.bulkWrite(bulkOps);
+			console.log(`🛠️  Modified ${result.modifiedCount} existing docs`);
 		}
 		if (newEntries.length) {
-			await chatsUsersCollection.insertMany(newEntries);
+			const inserted = await chatsUsersCollection.insertMany(newEntries);
+			console.log(`➕ Inserted ${inserted.length} new docs`);
 		}
 
-		await contactsTempCollection.deleteMany({});
-		console.log(
-			"Processed and cleared temporary contacts at",
-			new Date().toLocaleString(),
-		);
+		// 6) Clear temp collection
+		const del = await contactsTempCollection.deleteMany({});
+		console.log(`🗑️  Cleared ${del.deletedCount} temp contacts`);
 	} catch (error) {
-		console.error("Error processing contacts update:", error);
-	} finally {
-		await client.close();
+		console.error("🔥 Error processing contacts update:", error);
 	}
 }
 
