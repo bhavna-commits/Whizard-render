@@ -188,6 +188,7 @@ export async function createTokenRecord(userId, permission, addedUser) {
 			// Update the expiration if needed (or simply return the existing record).
 			tokenRecord.expiresAt = Date.now() + TOKEN_LIFETIME; // TOKEN_LIFETIME defined elsewhere
 			tokenRecord.addedUser = addedUser;
+			tokenRecord.permission = permission;
 			await tokenRecord.save();
 			tokenRecord.token = newToken;
 

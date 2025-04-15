@@ -83,8 +83,8 @@ export const getSetToken = async (req, res) => {
 		// Check if user has permissions via addedUser
 		if (permissions) {
 			accessData = await Permissions.findOne({ unique_id: permissions });
-			console.log(accessData.chats);
-			if (!accessData || !accessData?.chats?.chat || !accessData?.chats?.allChats) {
+
+			if (!accessData?.chats?.chat && !accessData?.chats?.allChats) {
 				return res.render("errors/notAllowed");
 			}
 			// Use the specific permission for chats from the Permissions model
@@ -157,6 +157,7 @@ export const getUsers = async (req, res, next) => {
 		if (!isString(phoneNumberId)) return next();
 		if (!isNumber(skip)) return next();
 
+		console.log(per)
 		const formattedReports = await fetchAndFormatReports(
 			addedUser,
 			permission?.allChats,
