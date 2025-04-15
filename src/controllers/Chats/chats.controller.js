@@ -83,6 +83,7 @@ export const getSetToken = async (req, res) => {
 		// Check if user has permissions via addedUser
 		if (permissions) {
 			accessData = await Permissions.findOne({ unique_id: permissions });
+			console.log(accessData.chats);
 			if (!accessData || !accessData?.chats?.chat || !accessData?.chats?.allChats) {
 				return res.render("errors/notAllowed");
 			}

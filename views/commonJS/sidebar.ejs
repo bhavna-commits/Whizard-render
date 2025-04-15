@@ -23,13 +23,13 @@
 		
 		<!-- Chats: Conditionally rendered based on permissions -->
 		<li>
-			<% if (access?.chats?.type) { %>
+			<% if (access?.chats?.chat || access?.chats?.allChats) { %>
 			<a href="/chats" class="chats-link">
 				<span class="icon"><img loading="lazy" src="svg/chats.svg" /></span>
 				Chats
 			</a>
 			<% } else { %>
-			<a href="javascript:void(0);" class="hover:cursor-not-allowed" title="You don't have permission to access this" >
+			<a href="javascript:void(0);" class="hover:cursor-not-allowed" title="You don't have permission to access this">
 				<span class="icon"><img loading="lazy" src="svg/chats.svg" /></span>
 				Chats
 			</a>

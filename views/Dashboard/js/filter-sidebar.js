@@ -530,16 +530,19 @@ async function fetchAnalytics(startDate, endDate) {
 		text.innerHTML = `<div id="analyticsLoading" class="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-10">
 								<div class="animate-spin inline-block w-8 h-8 border-4 border-black border-t-transparent rounded-full"></div>
 							</div>`;
+		
+		let startUnix;
+		let endUnix;
 
 		if (!startDate || !endDate) {
-			console.error("Invalid dates:", { startDate, endDate });
-			toast("error", `Invalid dates : ${startDate}, ${endDate}`);
+			// console.error("Invalid dates:", { startDate, endDate });
+			// toast("error", `Invalid dates : ${startDate}, ${endDate}`);
 			return null;
 		}
 
 		// Convert to Unix timestamps
-		const startUnix = Math.floor(startDate.getTime() / 1000);
-		const endUnix = Math.floor(endDate.getTime() / 1000) + 86400;
+		startUnix = Math.floor(startDate.getTime() / 1000);
+		endUnix = Math.floor(endDate.getTime() / 1000) + 86400;
 
 		const response = await axios.get("/reports/get-cost-report", {
 			params: { start: startUnix, end: endUnix },
