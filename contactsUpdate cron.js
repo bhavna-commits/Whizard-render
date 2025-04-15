@@ -137,8 +137,8 @@ export async function updateContacts() {
 		}
 
 		// 6) Clear temp collection
-		// const del = await contactsTempCollection.deleteMany({});
-		// console.log(`🗑️  Cleared ${del.deletedCount} temp contacts`);
+		const del = await contactsTempCollection.deleteMany({});
+		console.log(`🗑️  Cleared ${del.deletedCount} temp contacts`);
 	} catch (error) {
 		console.error("🔥 Error processing contacts update:", error);
 	}
