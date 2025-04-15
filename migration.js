@@ -1,33 +1,52 @@
-import mongoose from "mongoose";
+import { MongoClient } from "mongodb";
 import dotenv from "dotenv";
-import userModel from "./src/models/user.model.js";
-import permissionsModel from "./src/models/permissions.model.js";
-
 dotenv.config();
-await mongoose.connect(process.env.MONGO_URI);
 
-// Update in User model
-const result = await userModel.updateMany(
-	{ "access.chats.allChats.view": { $exists: true } },
-	{
-		$set: {
-			"access.chats.allChats": true,
-		},
-	},
-);
+const client = new MongoClient(process.env.MONGO_URI, {
+	useUnifiedTopology: true,
+});
 
-// Update in Permissions model
-const resul = await permissionsModel.updateMany(
-	{ "chats.allChats.view": { $exists: true } },
-	{
-		$set: {
-			"chats.allChats": false,
-		},
-	},
-);
+async function flattenAgentField() {
+	try {
+		await client.connect();
+		console.log("✅ Connected to MongoDB");
 
-console.log(
-	`✅ Updated ${result.modifiedCount} in Users and ${resul.modifiedCount} in Permissions`,
-);
+		const db = client.db();
+		const collection = db.collection("chatsusers");
 
-await mongoose.disconnect();
+		const results = await collection
+			.find({ agent: { $exists: true } })
+			.project({ agent: 1 })
+			.limit(10)
+			.toArray();
+		console.log(JSON.stringify(results, null, 2));
+
+
+		// Find docs where agent contains any nested array using aggregation expression
+		const docs = await collection
+			.find()
+			.toArray();
+
+		console.log(docs);
+
+		let updatedCount = 0;
+
+		for (const doc of docs) {
+			const flattened = doc.agent.flat();
+			await collection.updateOne(
+				{ _id: doc._id },
+				{ $set: { agent: flattened } },
+			);
+			updatedCount++;
+		}
+
+		console.log(`🛠️ Flattened 'agent' arrays in ${updatedCount} documents`);
+	} catch (err) {
+		console.error("🔥 Error during migration:", err);
+	} finally {
+		await client.close();
+		console.log("👋 Disconnected from MongoDB");
+	}
+}
+
+flattenAgentField();
