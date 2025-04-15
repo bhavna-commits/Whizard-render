@@ -1065,16 +1065,25 @@ export const createAddedUserPassword = async (req, res, next) => {
 };
 
 export const updateUserManagement = async (req, res) => {
-	const userId = req.body?.userId;
-	const action = req.body?.action;
-	const status = req.body?.status;
-	const newRoleId = req.body?.newRoleId;
-	const newRoleName = req.body?.newRoleName;
-	// console.log(action, newRoleId, newRoleName, email);
+	const { userId, action, status, newRoleId, newRoleName } = req.body;
+
 	try {
+		// 0) Make sure mongoose is actually connected
+		if (mongoose.connection.readyState !== 1) {
+			console.error(
+				"🚨 Mongoose not connected:",
+				mongoose.connection.readyState,
+			);
+			return res
+				.status(500)
+				.json({ success: false, message: "DB not ready" });
+		}
+
+		// 1) Grab the raw sessions collection
+		const sessionColl = mongoose.connection.db.collection("sessions");
+		console.log("👍 sessions collection name:", sessionColl.collectionName);
+
 		let user;
-		const sessionStore = req.sessionStore;
-		// console.log(sessionStore); // Access the session store
 		switch (action) {
 			case "updateStatus":
 				user = await AddedUser.findOneAndUpdate(
@@ -1083,6 +1092,7 @@ export const updateUserManagement = async (req, res) => {
 					{ new: true },
 				);
 				if (!user) {
+					console.warn("⚠️ updateStatus: no user found for", userId);
 					return res
 						.status(404)
 						.json({ success: false, message: "User not found" });
@@ -1092,189 +1102,130 @@ export const updateUserManagement = async (req, res) => {
 					.json({ success: true, message: "Status updated" });
 
 			case "updateRole":
-				// 1) Update the user’s role in the DB
+				// DB update
 				user = await AddedUser.findOneAndUpdate(
 					{ unique_id: userId, deleted: false },
 					{ roleName: newRoleName, roleId: newRoleId },
 					{ new: true },
 				);
 				if (!user) {
+					console.warn("⚠️ updateRole: no user found for", userId);
 					return res
 						.status(404)
 						.json({ success: false, message: "User not found" });
 				}
 
-				// 2) Now patch any live sessions for that addedUser
-				sessionStore.all(async (err, sessions) => {
-					if (err) {
-						console.error("Error fetching sessions:", err);
-						return res
-							.status(500)
-							.json({
-								success: false,
-								message: "Error fetching sessions",
-							});
-					}
+				// fetch & debug
+				const allSessions = await sessionColl.find({}).toArray();
+				console.log(
+					`🔍 Found ${allSessions.length} total session docs`,
+				);
 
-					const updatePromises = [];
-
-					// sessions is an object: { sid1: sessionObj1, sid2: sessionObj2, ... }
-					for (const [sid, sess] of Object.entries(sessions)) {
-						// only touch sessions for this addedUser *and* the old permission
-						if (
-							sess.addedUser?.id === userId
-						) {
-							// swap in the new roleId
-							sess.addedUser.permissions = newRoleId;
-
-							updatePromises.push(
-								new Promise((resolve, reject) => {
-									sessionStore.set(sid, sess, (err) => {
-										if (err) {
-											console.error(
-												`Error updating session ${sid}:`,
-												err,
-											);
-											return reject(err);
-										}
-										console.log(
-											`Session ${sid} updated to new roleId`,
-										);
-										resolve();
-									});
-								}),
-							);
-						}
-					}
-
+				const bulkOps = [];
+				allSessions.forEach((doc) => {
+					console.log("→ checking session _id=", doc._id);
+					let sess;
 					try {
-						await Promise.all(updatePromises);
-						return res
-							.status(200)
-							.json({
-								success: true,
-								message: "Role and sessions updated",
-							});
-					} catch (e) {
-						console.error("Failed to update some sessions:", e);
-						return res
-							.status(500)
-							.json({
-								success: false,
-								message: "Error updating sessions",
-							});
+						sess = JSON.parse(doc.session);
+					} catch (err) {
+						console.error(
+							`   ✖ malformed JSON in session ${doc._id}`,
+							err,
+						);
+						return;
+					}
+
+					if (sess.addedUser?.id === userId) {
+						console.log(
+							`   ✔ match! old perms=`,
+							sess.addedUser.permissions,
+						);
+						sess.addedUser.permissions = newRoleId;
+						bulkOps.push({
+							updateOne: {
+								filter: { _id: doc._id },
+								update: {
+									$set: { session: JSON.stringify(sess) },
+								},
+							},
+						});
 					}
 				});
-				break;
+
+				console.log(`🚀 Queued ${bulkOps.length} session updates`);
+				if (bulkOps.length) await sessionColl.bulkWrite(bulkOps);
+
+				return res
+					.status(200)
+					.json({
+						success: true,
+						message: "Role and sessions updated",
+					});
 
 			case "deleteUser":
-				try {
-					// Fetch all active sessions from the session store
-					sessionStore.all(async (err, sessions) => {
-						if (err) {
-							console.error("Error fetching sessions: ", err);
-							return res.status(500).json({
-								success: false,
-								message: "Error fetching sessions",
-							});
-						}
+				// fetch & debug
+				const sessions = await sessionColl.find({}).toArray();
+				console.log(
+					`🔍 Found ${sessions.length} total session docs (for delete)`,
+				);
+				const toDeleteIds = [];
 
-						let destroyPromises = [];
-
-						// Loop through each session and destroy the ones with matching addedUser id
-						sessions.forEach((session) => {
-							if (!session || !session.session) {
-								console.warn("Skipping undefined session");
-								return;
-							}
-
-							let sessionData;
-							try {
-								sessionData = JSON.parse(session.session); // Parse session data
-							} catch (error) {
-								console.error(
-									"Error parsing session data: ",
-									error,
-								);
-								return;
-							}
-
-							if (
-								sessionData.addedUser &&
-								sessionData.addedUser.id == userId
-							) {
-								// Push the destroy promise to the array
-								destroyPromises.push(
-									new Promise((resolve, reject) => {
-										sessionStore.destroy(
-											session._id,
-											(err) => {
-												if (err) {
-													console.error(
-														"Error destroying session: ",
-														err,
-													);
-													reject(err);
-												} else {
-													console.log(
-														`Session ${session._id} destroyed.`,
-													);
-													resolve();
-												}
-											},
-										);
-									}),
-								);
-							}
-						});
-
-						// Wait for all destroy operations to complete
-						try {
-							await Promise.all(destroyPromises);
-						} catch (destroyError) {
-							console.error(
-								"Error destroying sessions: ",
-								destroyError,
-							);
-							return res.status(500).json({
-								success: false,
-								message: "Error destroying sessions",
-							});
-						}
-
-						// Mark the user as deleted in the AddedUser collection
-						user = await AddedUser.findOneAndUpdate(
-							{ unique_id: userId, deleted: false },
-							{ deleted: true },
-							{ new: true },
+				sessions.forEach((doc) => {
+					console.log("→ checking session _id=", doc._id);
+					let sess;
+					try {
+						sess = JSON.parse(doc.session);
+					} catch (err) {
+						console.error(
+							`   ✖ malformed JSON in session ${doc._id}`,
+							err,
 						);
+						return;
+					}
+					if (sess.addedUser?.id === userId) {
+						console.log(`   🗑️ marking for deletion`);
+						toDeleteIds.push(doc._id);
+					}
+				});
 
-						if (!user) {
-							return res.status(404).json({
-								success: false,
-								message: "User not found",
-							});
-						}
+				console.log(`🗑️ Deleting ${toDeleteIds.length} sessions`);
+				if (toDeleteIds.length)
+					await sessionColl.deleteMany({ _id: { $in: toDeleteIds } });
 
-						return res.status(200).json({
-							success: true,
-							message: "User deleted and session(s) destroyed",
-						});
-					});
-				} catch (error) {
-					console.error(error);
-					return res.status(500).json({
-						success: false,
-						message: "Server error",
-						error,
-					});
+				// soft‑delete user
+				user = await AddedUser.findOneAndUpdate(
+					{ unique_id: userId, deleted: false },
+					{ deleted: true },
+					{ new: true },
+				);
+				if (!user) {
+					console.warn("⚠️ deleteUser: no user found for", userId);
+					return res
+						.status(404)
+						.json({ success: false, message: "User not found" });
 				}
+
+				return res
+					.status(200)
+					.json({
+						success: true,
+						message: "User deleted and sessions destroyed",
+					});
+
+			default:
+				return res
+					.status(400)
+					.json({ success: false, message: "Invalid action" });
 		}
 	} catch (error) {
-		console.error(error);
+		console.error("🔥 updateUserManagement error:", error);
 		return res
 			.status(500)
-			.json({ success: false, message: "Server error", error });
+			.json({
+				success: false,
+				message: "Server error",
+				error: error.message,
+			});
 	}
 };
 
