@@ -222,9 +222,8 @@ export const saveTemplateToDatabase = async (
 					headerComponent.example.header_handle = [filePath];
 					headerComponent.example.header_url = fileUrl;
 				} else if (headerComponent.format === "VIDEO") {
-					
 					headerComponent.example.header_url = fileUrl;
-					headerComponent.example.header_handle = [ filePath ];
+					headerComponent.example.header_handle = [filePath];
 					console.log(headerComponent.example.header_url);
 				} else if (headerComponent.format === "DOCUMENT") {
 					headerComponent.example.header_url = fileUrl;
@@ -339,16 +338,23 @@ export async function updateTemplateOnFacebook(originalTemplate, user) {
 					[Symbol("mongoose#documentArrayParent")]: symbol,
 					...cleanComponent
 				} = component;
+				if (
+					cleanComponent.example &&
+					cleanComponent.example.header_url
+				) {
+					delete cleanComponent.example.header_url;
+				}
+
 				return cleanComponent;
 			},
 		);
-
+		// console.log(JSON.stringify(cleanedComponents));
 		// Prepare the request data
 		const requestData = {
 			category: originalTemplate.category.toUpperCase(), // Facebook requires uppercase
 			components: cleanedComponents,
 		};
-		// console.log(JSON.stringify(requestData));
+		console.log(JSON.stringify(requestData));
 		// POST request to the WhatsApp template API endpoint
 		const response = await axios.post(
 			`https://graph.facebook.com/${process.env.FB_GRAPH_VERSION}/${originalTemplate.template_id}`,

@@ -420,7 +420,6 @@ export const editTemplate = async (req, res, next) => {
 		originalTemplate.name = templateName;
 		originalTemplate.selectedLanguageCode = selectedLanguageCode;
 		originalTemplate.url = url;
-		console.log(JSON.stringify(components));
 		originalTemplate.components = components;
 
 		const user = await User.findOne({ unique_id: id });
@@ -463,6 +462,7 @@ export const editTemplate = async (req, res, next) => {
 			}
 		}
 
+		
 		// Update the template on Facebook
 		const updatedData = await updateTemplateOnFacebook(
 			originalTemplate,
