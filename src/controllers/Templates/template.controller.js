@@ -195,7 +195,8 @@ export const getDuplicateTemplate = async (req, res, next) => {
 			(component) =>
 				component.type === "HEADER" &&
 				(component.format === "IMAGE" ||
-					component.format == "DOCUMENT"),
+					component.format === "DOCUMENT" ||
+					component.format === "VIDEO"),
 		);
 
 		let mediaFileName = null;
@@ -419,12 +420,12 @@ export const editTemplate = async (req, res, next) => {
 		originalTemplate.name = templateName;
 		originalTemplate.selectedLanguageCode = selectedLanguageCode;
 		originalTemplate.url = url;
+		console.log(JSON.stringify(components));
 		originalTemplate.components = components;
 
 		const user = await User.findOne({ unique_id: id });
 
 		if (req.file) {
-		
 			let filePath = path.join(
 				__dirname,
 				"uploads",
@@ -446,13 +447,16 @@ export const editTemplate = async (req, res, next) => {
 				let fileUrl = `${url}/uploads/${id}/${req.file?.filename}`;
 				// Depending on the header format, update the header_url with the file path
 				if (headerComponent.format === "IMAGE") {
+					console.log("img");
 					headerComponent.example.header_handle = [filePath];
 					headerComponent.example.header_url = fileUrl;
 				} else if (headerComponent.format === "VIDEO") {
+					console.log("vid");
 					headerComponent.example.header_url = fileUrl;
 					headerComponent.example.header_handle = [filePath];
 					console.log(headerComponent.example.header_url);
 				} else if (headerComponent.format === "DOCUMENT") {
+					console.log("doc");
 					headerComponent.example.header_url = fileUrl;
 					headerComponent.example.header_handle = [filePath];
 				}

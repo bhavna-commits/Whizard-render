@@ -75,10 +75,10 @@ else if (
 	// Update the preview for the document
 	document.getElementById(
 		"previewHeader",
-	).innerHTML = `<a href="${documentUrl}" target="_blank" class="custom-card-document">View Document</a>`;
+	).innerHTML = `<iframe src="/${documentUrl}" class="max-w-full h-auto object-contain"></iframe>`;
 	document.getElementById(
 		"previewHead",
-	).innerHTML = `<a href="${documentUrl}" target="_blank" class="custom-card-document">View Document</a>`;
+	).innerHTML = `<iframe src="/${documentUrl}" class="max-w-full h-auto object-contain"></iframe>`;
 }
 // If no headerText or media, default the dropdown to "none"
 else {

@@ -418,7 +418,7 @@ export const fetchFacebookTemplates = async (id) => {
 
 export function createComponents(templateData, dynamicVariables) {
 	const components = [];
-	// console.log(templateData.header.content);
+	console.log(templateData.header.type);
 	// Add HEADER component based on type
 	if (templateData.header.type === "text") {
 		if (dynamicVariables.header && dynamicVariables.header.length > 0) {
