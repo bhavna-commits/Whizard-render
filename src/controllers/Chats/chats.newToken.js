@@ -120,7 +120,8 @@ export function checkToken(req, next) {
  * @param {Object} res - The Express response.
  * @param {Function} next - The next middleware.
  * @returns {Promise<Object>} The updated token record (with new converted token in a field).
- */1
+ */
+
 export async function getUserIdFromToken(token) {
 	// Decode the token; assuming a timestamp length of 13 digits.
 	const { timestamp, baseHash } = decodeToken(token, 13);
@@ -133,14 +134,7 @@ export async function getUserIdFromToken(token) {
 
 	// Check token expiration: we assume token lifetime is defined in TOKEN_LIFETIME.
 	const decodedTimestamp = Number(timestamp);
-	// console.log(
-	// 	"front-end timestamp :",
-	// 	decodedTimestamp,
-	// 	" difference :",
-	// 	tokenRecord.expiresAt - decodedTimestamp,
-	// 	" expires At :",
-	// 	tokenRecord.expiresAt,
-	// );
+
 	if (decodedTimestamp > Date.now() + TOKEN_LIFETIME) {
 		throw "Token has expired";
 	}
@@ -168,12 +162,8 @@ export async function getUserIdFromToken(token) {
  */
 export async function createTokenRecord(userId, permission, addedUser) {
 	// Try to find an existing token record for this user.
-	let tokenRecord = await Token.findOne({
-		"addedUser.id": addedUser?.id,
-	});
-	if (!tokenRecord) {
-		tokenRecord = await Token.findOne({ userId });
-	}
+
+	const tokenRecord = await Token.findOne({ userId });
 
 	if (tokenRecord) {
 		// If token exists, check whether it is still valid.
@@ -190,9 +180,7 @@ export async function createTokenRecord(userId, permission, addedUser) {
 			tokenRecord.addedUser = addedUser;
 			tokenRecord.permission = permission;
 			await tokenRecord.save();
-			tokenRecord.token = newToken;
-
-			return tokenRecord;
+			return newToken;
 		} else {
 			// If expired, you can either delete it or overwrite it.
 			// Here, we delete the expired record.

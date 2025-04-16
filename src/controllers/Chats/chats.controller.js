@@ -202,10 +202,13 @@ export const getRefreshToken = async (req, res, next) => {
 			accessData = await Permissions.findOne({
 				unique_id: addedUser.permissions,
 			});
-			if (!accessData || !accessData.chats?.view) {
-				return res.render("errors/notAllowed");
+			if (!accessData?.chats?.chat && !accessData?.chats?.allChats) {
+				return res.status(500).json({
+					message: "Permission Error: Not Allowed",
+					success: false,
+				});;
 			}
-			permissionValue = accessData.chats.chat || accessData.chats.allChats;
+			permissionValue = accessData?.chats?.chat || accessData?.chats?.allChats;
 		} else {
 			permissionValue = true;
 		}
