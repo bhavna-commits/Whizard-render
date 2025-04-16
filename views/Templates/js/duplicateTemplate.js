@@ -79,7 +79,31 @@ else if (
 	document.getElementById(
 		"previewHead",
 	).innerHTML = `<iframe src="/${documentUrl}" class="max-w-full h-auto object-contain"></iframe>`;
+} else if (
+	headerComponent?.format === "VIDEO" &&
+	headerComponent?.example?.header_url
+) {
+	// 1️⃣ Switch dropdown to video mode
+	document.getElementById("mediaTypeDropdown").value = "media";
+
+	// 2️⃣ Strip off the first three path segments, same as docs
+	const videoUrl = headerComponent.example.header_url
+		.split("/")
+		.slice(3)
+		.join("/");
+
+	// 3️⃣ Render the video player with controls + fallback text
+	const videoMarkup = `
+    <video controls class="max-w-full h-auto object-contain">
+      <source src="/${videoUrl}" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
+  `;
+
+	document.getElementById("previewHeader").innerHTML = videoMarkup;
+	document.getElementById("previewHead").innerHTML = videoMarkup;
 }
+
 // If no headerText or media, default the dropdown to "none"
 else {
 	document.getElementById("mediaTypeDropdown").value = "none";

@@ -472,6 +472,27 @@ export const editTemplate = async (req, res, next) => {
 			originalTemplate.template_id = updatedData.id;
 		}
 
+		if (req.file) {
+			const headerComponent = originalTemplate.components.find(
+				(component) => component.type === "HEADER",
+			);
+			if (headerComponent) {
+				let fileUrl = `${url}/uploads/${id}/${req.file?.filename}`;
+				// Depending on the header format, update the header_url with the file path
+				if (headerComponent.format === "IMAGE") {
+					console.log("img");
+					headerComponent.example.header_url = fileUrl;
+				} else if (headerComponent.format === "VIDEO") {
+					console.log("vid");
+					headerComponent.example.header_url = fileUrl;
+					console.log(headerComponent.example.header_url);
+				} else if (headerComponent.format === "DOCUMENT") {
+					console.log("doc");
+					headerComponent.example.header_url = fileUrl;
+				}
+			}
+		}
+
 		// Save the updated template in DB
 		await originalTemplate.save();
 
@@ -623,16 +644,16 @@ export const getFaceBookTemplates = async (req, res) => {
 		const id = req.session?.user?.id || req.session?.addedUser?.owner;
 
 		// Fetch templates from MongoDB based on logged-in user
-		const mongoTemplates = await Template.find({ useradmin: id });
+		const mongoTemplates = await Template.find({ useradmin: id, deleted: false });
 		// Fetch templates from Facebook Graph API
 		const facebookTemplatesResponse = await fetchFacebookTemplates(id);
 		const facebookTemplates = facebookTemplatesResponse.data;
-
+		console.log(facebookTemplates[ 0 ]);
 		// Loop through the MongoDB templates
 		for (let mongoTemplate of mongoTemplates) {
 			// Find the matching template in the Facebook templates by name
 			const matchingFacebookTemplate = facebookTemplates.find(
-				(fbTemplate) => fbTemplate.name === mongoTemplate.name,
+				(fbTemplate) => fbTemplate.id === mongoTemplate.template_id,
 			);
 
 			if (matchingFacebookTemplate) {
