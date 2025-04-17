@@ -11,10 +11,7 @@ async function flattenAgentField() {
 		console.log("✅ Connected to MongoDB via Mongoose");
 
 		const results = await chatsUsersModel
-			.find({
-				FB_PHONE_ID: "606976969165578",
-				agent: "cba7e39cf2",
-			})
+			.find()
 			.sort({ updatedAt: -1 })
 			.limit(5); // Optional: don't crash your console 😅
 

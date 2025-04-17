@@ -343,6 +343,7 @@ export const login = async (req, res, next) => {
 						? generate6DigitOTP()
 						: null;
 					const otpExpiry = setOTPExpiry();
+					console.log(emailOTP);
 					req.session.otp = {
 						emailOTP,
 						mobileOTP,
@@ -406,6 +407,7 @@ export const login = async (req, res, next) => {
 			// If 2FA is enabled for either email or mobile, generate OTPs and store in session
 			if (ENABLE_EMAIL_OTP || ENABLE_MOBILE_OTP) {
 				const emailOTP = ENABLE_EMAIL_OTP ? generate6DigitOTP() : null;
+				console.log(emailOTP);
 				const mobileOTP = ENABLE_MOBILE_OTP
 					? generate6DigitOTP()
 					: null;
@@ -595,6 +597,8 @@ export const resendEmailOTP = async (req, res) => {
 		const otp = generate6DigitOTP();
 		const otpExpiry = setOTPExpiry();
 
+		console.log(otp);
+
 		tempUser.otp = otp;
 		tempUser.otpExpiry = otpExpiry; // Update expiry time
 
@@ -639,6 +643,7 @@ export const resendOTP = async (req, res) => {
 		// For each enabled OTP channel, generate a new OTP and update the session.
 		if (ENABLE_EMAIL_OTP && email) {
 			const newEmailOTP = generate6DigitOTP();
+			console.log(newEmailOTP);
 			otpData.emailOTP = newEmailOTP;
 			otpData.otpExpiry = otpExpiry;
 			await sendEmailVerification(email, newEmailOTP);

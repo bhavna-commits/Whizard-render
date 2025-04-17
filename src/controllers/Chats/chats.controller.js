@@ -478,23 +478,23 @@ export const sendMessages = async (req, res, next) => {
 			token,
 		});
 
-		const report = new Report({
-			WABA_ID: user.WABA_ID,
-			FB_PHONE_ID: from,
-			useradmin: user.unique_id,
-			unique_id: generateUniqueId(),
-			campaignName: campaign.name,
-			campaignId: campaign.unique_id,
-			contactName: name,
-			recipientPhone: to,
-			status: "SENT",
-			messageId: data.messages[0].id,
-			textSent: messageText,
-			media: { url, fileName, caption },
-			type: "Chat",
-			media_type: mediatype,
-		});
-		await report.save();
+		// const report = new Report({
+		// 	WABA_ID: user.WABA_ID,
+		// 	FB_PHONE_ID: from,
+		// 	useradmin: user.unique_id,
+		// 	unique_id: generateUniqueId(),
+		// 	campaignName: campaign.name,
+		// 	campaignId: campaign.unique_id,
+		// 	contactName: name,
+		// 	recipientPhone: to,
+		// 	status: "SENT",
+		// 	messageId: data.messages[0].id,
+		// 	textSent: messageText,
+		// 	media: { url, fileName, caption },
+		// 	type: "Chat",
+		// 	media_type: mediatype,
+		// });
+		// await report.save();
 		const temp = new ChatsTemp({
 			WABA_ID: user.WABA_ID,
 			FB_PHONE_ID: from,

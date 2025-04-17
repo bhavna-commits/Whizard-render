@@ -89,7 +89,7 @@ export const fetchAndFormatReports = async (
 		return {
 			lastmessage: chat.lastMessage || "No recent reply",
 			wa_id: chat.wa_id,
-			status,
+			status: 0,
 			name: chat.contactName.toString(),
 			usertimestmp: chat.updatedAt,
 			campaignId: chat.campaignId || "",
