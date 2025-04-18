@@ -125,6 +125,7 @@
 	</div>
 	
 	<script>
+		const OTPLogin = <%- JSON.parse(OTPLogin) %>;
 		// Toggle password visibility
 		document.getElementById('togglePassword').addEventListener('click', function () {
 			const passwordInput = document.getElementById('password');
@@ -192,10 +193,12 @@
 					} else {
 						localStorage.removeItem('rememberedEmail');
 					}
-					
+					if (OTPLogin) return setTimeout(() => {
+						window.location.href = '/2FA';
+					}, 500);
 					// Redirect to the dashboard
 					setTimeout(() => {
-						window.location.href = '/2FA';
+						window.location.href = '/';
 					}, 500);
 				} else {
 					// Show error message

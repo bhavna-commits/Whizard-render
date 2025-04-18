@@ -1,13 +1,14 @@
 import mongoose from "mongoose";
 
 const tempMessageSchema = new mongoose.Schema({
-    wabaId: { type: String, required: true },
+	name: { type: String, required: false },
+	wabaId: { type: String, required: true },
 	messageId: { type: String, required: true },
 	from: { type: String, required: true }, // recipientPhone
 	timestamp: { type: Number, required: true },
 	type: { type: String, required: true },
 	text: { type: Object }, // Store the text object as received
-	image: { type: Object }, // Store image info if available
+	media: { type: Object }, // Store image info if available
 	fbPhoneId: { type: String },
 	// Optionally store extra raw data for later processing
 	rawData: { type: Object, required: false },

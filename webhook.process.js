@@ -8,6 +8,25 @@ export const generateUniqueId = () => {
 	return crypto.randomBytes(5).toString("hex").slice(0, 10);
 };
 
+/**
+ * Fetches media metadata (URL, MIME type, filename) for a given media ID.
+ * @param {string} mediaId - The media ID from the webhook payload.
+ * @returns {Promise<object>} - Resolves to media metadata.
+ */
+async function fetchMediaUrl(mediaId) {
+  const graphUrl = `https://graph.facebook.com/${FB_GRAPH_VERSION}/${mediaId}`;
+  const response = await axios.get(graphUrl, {
+    headers: { Authorization: `Bearer ${ACCESS_TOKEN}` },
+    responseType: 'json',
+  });
+
+  return {
+    url: response.data.url,
+    mimeType: response.data.mime_type,
+    filename: response.data.filename || null,
+  };
+}
+
 let TempStatus,
 	Reports,
 	User,
@@ -80,8 +99,8 @@ export const processTempStatuses = async () => {
 				{ $set: updateFields },
 			);
 		}
-        await TempStatus.deleteMany({});
-        // await Reports.deleteMany({
+		await TempStatus.deleteMany({});
+		// await Reports.deleteMany({
 		// 	$or: [
 		// 		{ WABA_ID: { $exists: false } }, // field doesn’t exist
 		// 		{ WABA_ID: null }, // field is null or non-existent
@@ -121,8 +140,18 @@ export const processTempMessages = async () => {
 				contactId: campaign[0]?.contactListId,
 				wa_id: temp.from,
 			});
-			// console.log(contactName);
-			// console.log(temp.type, temp.text?.body);
+
+			let media = {};
+			if (temp.type === "image") {
+				media = await fetchMediaUrl(temp?.media?.mediaId, user.FB_ACCESS_TOKEN);
+			} else if (temp.type === "video") {
+				media = await fetchMediaUrl(temp?.media?.mediaId, user.FB_ACCESS_TOKEN);
+			} else if (temp.type === "document") {
+				media = await fetchMediaUrl(temp?.media?.mediaId, user.FB_ACCESS_TOKEN);
+			} else if (temp.type === "audio") {
+				media = await fetchMediaUrl(temp?.media?.mediaId, user.FB_ACCESS_TOKEN);
+			}
+
 			const data = {
 				WABA_ID: user.WABA_ID,
 				useradmin: user.unique_id,
@@ -131,7 +160,7 @@ export const processTempMessages = async () => {
 				recipientPhone: temp.from,
 				status: "REPLIED",
 				updatedAt: temp.timestamp,
-				contactName: contactName.Name,
+				contactName: contactName.Name || temp.name,
 				FB_PHONE_ID: temp.fbPhoneId,
 				replyContent: temp.type === "text" ? temp.text?.body : "",
 				media:
@@ -141,7 +170,11 @@ export const processTempMessages = async () => {
 								fileName: temp.image.fileName || "",
 								caption: temp.text?.body || "",
 						  }
-						: {},
+						: {
+								url: temp?.media?.url || "",
+								fileName: temp?.media?.filename || "",
+								caption: temp.text?.body || "",
+						  },
 				type: "Chat",
 				...(campaign[0] && { campaignId: campaign[0].unique_id }),
 				...(campaign[0] && { campaignName: campaign[0].name }),

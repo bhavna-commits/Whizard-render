@@ -15,15 +15,12 @@ import {
 	validatePassword,
 } from "../../utils/otpGenerator.js";
 import { DEFAULT_PERMISSIONS } from "../../utils/defaultPermissions.js";
-import dotenv from "dotenv";
 import { isString } from "../../middleWares/sanitiseInput.js";
 import { incrementLoginAttempts } from "../../middleWares/rateLimiter.js";
 
-dotenv.config();
-
 // 2FA settings: if you later set one of these to false the corresponding OTP verification is disabled
-const ENABLE_EMAIL_OTP = true;
-const ENABLE_MOBILE_OTP = false;
+const ENABLE_EMAIL_OTP = Boolean(process.env.EMAIL_OTP_LOGIN);
+const ENABLE_MOBILE_OTP = Boolean(process.env.MOBILE_OTP_LOGIN);
 
 export const generateOTP = async (req, res, next) => {
 	try {
@@ -60,7 +57,7 @@ export const generateOTP = async (req, res, next) => {
 
 		const phone = `${countryCode}${phoneNumber}`;
 		const mobileExists = await User.findOne({ phone });
-		
+
 		if (mobileExists) {
 			return res.status(409).json({
 				success: false,
@@ -282,7 +279,6 @@ export const verifyEmail = async (req, res, next) => {
 // 	}
 // };
 
-
 export const login = async (req, res, next) => {
 	const { email, password, rememberMe } = req.body;
 
@@ -343,7 +339,7 @@ export const login = async (req, res, next) => {
 						? generate6DigitOTP()
 						: null;
 					const otpExpiry = setOTPExpiry();
-					console.log(emailOTP);
+
 					req.session.otp = {
 						emailOTP,
 						mobileOTP,
@@ -381,13 +377,17 @@ export const login = async (req, res, next) => {
 						).WhatsAppConnectStatus,
 					};
 				}
-				
-				return res.status(200).json({ message: "Login successful" });
+
+				return res
+					.status(200)
+					.json({ message: "Login successful", success: true });
 			}
 			return res.status(400).json({ message: "User not found" });
 		} else {
 			if (user.blocked) {
-				return res.status(403).json({ message: "Account is blocked." });
+				return res
+					.status(403)
+					.json({ message: "Account is blocked.", success: false });
 			}
 
 			const now = Date.now();
@@ -400,7 +400,9 @@ export const login = async (req, res, next) => {
 			const isMatch = await bcrypt.compare(password, user.password);
 			if (!isMatch) {
 				await incrementLoginAttempts(user);
-				return res.status(400).json({ message: "Invalid credentials" });
+				return res
+					.status(400)
+					.json({ message: "Invalid credentials", success: false });
 			}
 			await user.save();
 
@@ -443,7 +445,9 @@ export const login = async (req, res, next) => {
 				};
 			}
 
-			return res.status(200).json({ message: "Login successful" });
+			return res
+				.status(200)
+				.json({ message: "Login successful", success: true });
 		}
 	} catch (error) {
 		return res.status(500).json({ message: "Error logging in", error });

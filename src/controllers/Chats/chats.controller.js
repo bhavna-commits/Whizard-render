@@ -70,7 +70,7 @@ export const getSetToken = async (req, res) => {
 		}
 
 		const phoneNumber = user.FB_PHONE_NUMBERS.find(
-			(d) => d.selected == true,
+			(d) => d.selected === true,
 		);
 
 		if (!phoneNumber) {
@@ -99,6 +99,7 @@ export const getSetToken = async (req, res) => {
 			id,
 			permissionValue,
 			addedUser,
+			phoneNumber.phone_number_id,
 		);
 
 		// Prepare data for rendering
@@ -139,7 +140,6 @@ export const getSetToken = async (req, res) => {
  * @returns {void}
  */
 export const getUsers = async (req, res, next) => {
-	
 	try {
 		const oldToken = checkToken(req, next);
 		const { userId, token, permission, addedUser } =
@@ -147,7 +147,7 @@ export const getUsers = async (req, res, next) => {
 
 		const phoneNumberId = req.body?.phoneNumberId;
 		const skip = parseInt(req.body?.skip, 10) || 0;
-
+		
 		if (!phoneNumberId) {
 			return res
 				.status(400)
@@ -206,9 +206,10 @@ export const getRefreshToken = async (req, res, next) => {
 				return res.status(500).json({
 					message: "Permission Error: Not Allowed",
 					success: false,
-				});;
+				});
 			}
-			permissionValue = accessData?.chats?.chat || accessData?.chats?.allChats;
+			permissionValue =
+				accessData?.chats?.chat || accessData?.chats?.allChats;
 		} else {
 			permissionValue = true;
 		}
@@ -280,7 +281,7 @@ export const getSingleChat = async (req, res, next) => {
 					templatename: reportItem.templatename,
 				});
 			} else {
-				if (reportItem.media_type) {
+				if (reportItem.media) {
 					chatsForReport = processMediaReport(reportItem, wa_id);
 				} else if (reportItem.textSent || reportItem.replyContent) {
 					chatsForReport = processTextReport(reportItem, wa_id);
@@ -288,6 +289,8 @@ export const getSingleChat = async (req, res, next) => {
 			}
 			formattedChats.push(chatsForReport);
 		}
+
+		console.log(formattedChats);
 
 		return res.status(200).json({
 			success: true,
@@ -695,25 +698,25 @@ export const sendTemplate = async (req, res, next) => {
 			createdAt: -1,
 		});
 
-		const report = new Report({
-			WABA_ID: user.WABA_ID,
-			FB_PHONE_ID: phone_number,
-			useradmin: user.unique_id,
-			unique_id: generateUniqueId(),
-			campaignName: campaign.name,
-			campaignId: campaign.unique_id,
-			contactName: contactList[0]?.contactName,
-			recipientPhone: contactList[0]?.recipientPhone,
-			status: "SENT",
-			messageId: data.messages[0].id,
-			messageTemplate,
-			templateId,
-			components,
-			templatename,
-			type: "Template",
-		});
+		// const report = new Report({
+		// 	WABA_ID: user.WABA_ID,
+		// 	FB_PHONE_ID: phone_number,
+		// 	useradmin: user.unique_id,
+		// 	unique_id: generateUniqueId(),
+		// 	campaignName: campaign.name,
+		// 	campaignId: campaign.unique_id,
+		// 	contactName: contactList[0]?.contactName,
+		// 	recipientPhone: contactList[0]?.recipientPhone,
+		// 	status: "SENT",
+		// 	messageId: data.messages[0].id,
+		// 	messageTemplate,
+		// 	templateId,
+		// 	components,
+		// 	templatename,
+		// 	type: "Template",
+		// });
 
-		await report.save();
+		// await report.save();
 
 		const temp = new ChatsTemp({
 			WABA_ID: user.WABA_ID,
@@ -731,6 +734,7 @@ export const sendTemplate = async (req, res, next) => {
 			components,
 			templatename,
 			type: "Template",
+			agent: addedUser.id,
 		});
 
 		await temp.save();

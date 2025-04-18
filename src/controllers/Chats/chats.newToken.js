@@ -160,7 +160,7 @@ export async function getUserIdFromToken(token) {
  * @param {string} addedUser - The addedUser level for the user.
  * @returns {Promise<Object>} - The saved token record.
  */
-export async function createTokenRecord(userId, permission, addedUser) {
+export async function createTokenRecord(userId, permission, addedUser, phoneNumberId) {
 	// Try to find an existing token record for this user.
 
 	const tokenRecord = await Token.findOne({ userId });

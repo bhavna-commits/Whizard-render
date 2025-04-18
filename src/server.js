@@ -1,12 +1,11 @@
+import dotenv from "dotenv";
+dotenv.config();
 import app from "./routes.app.js";
 import { connectDB } from "./config/db.js";
-import dotenv from "dotenv";
 import https from "https";
 import fs from "fs";
 import path from "path";
 import { agenda } from "./config/db.js";
-
-dotenv.config();
 
 connectDB();
 

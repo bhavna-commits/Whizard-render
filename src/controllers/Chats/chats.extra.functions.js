@@ -1,5 +1,3 @@
-import Report from "../../models/chats.model.js";
-import Campaign from "../../models/campaign.model.js";
 import Template from "../../models/templates.model.js";
 import ChatsUsers from "../../models/chatsUsers.model.js";
 
@@ -89,7 +87,7 @@ export const fetchAndFormatReports = async (
 		return {
 			lastmessage: chat.lastMessage || "No recent reply",
 			wa_id: chat.wa_id,
-			status: 0,
+			status,
 			name: chat.contactName.toString(),
 			usertimestmp: chat.updatedAt,
 			campaignId: chat.campaignId || "",
@@ -294,10 +292,10 @@ export const processTemplateReport = async (reportItem, wa_id, text) => {
 
 export const processMediaReport = (reportItem, wa_id) => {
 	// Use media values from the report.
-	const { url, caption } = reportItem.media;
+	const { url, caption, fileName } = reportItem.media;
 	return buildCommonChatFields(reportItem, wa_id, {
 		media_message: { link: url || "", caption: caption || "" },
-		media_type: url ? determineMediaType(reportItem.media.fileName) : "",
+		media_type: url ? determineMediaType(fileName) : "",
 	});
 };
 

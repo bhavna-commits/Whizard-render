@@ -34,7 +34,11 @@ router.get("/resetPassword", (req, res) => {
 });
 
 router.get("/login", (req, res) => {
-	res.render("User/login");
+	res.render("User/login", {
+		OTPLogin:
+			Boolean(process.env.EMAIL_OTP_LOGIN) ||
+			Boolean(process.env.MOBILE_OTP_LOGIN),
+	});
 });
 
 router.get("/verify-email", (req, res) => {
