@@ -8,7 +8,7 @@ const tempMessageSchema = new mongoose.Schema({
 	timestamp: { type: Number, required: true },
 	type: { type: String, required: true },
 	text: { type: Object }, // Store the text object as received
-	media: { type: Object }, // Store image info if available
+	mediaId: { type: String, default: "" }, // Store image info if available
 	fbPhoneId: { type: String },
 	// Optionally store extra raw data for later processing
 	rawData: { type: Object, required: false },

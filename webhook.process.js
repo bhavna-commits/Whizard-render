@@ -1,6 +1,7 @@
 import dotenv from "dotenv";
 import crypto from "crypto";
 import mongoose from "mongoose";
+import axios from "axios";
 
 dotenv.config();
 
@@ -13,18 +14,18 @@ export const generateUniqueId = () => {
  * @param {string} mediaId - The media ID from the webhook payload.
  * @returns {Promise<object>} - Resolves to media metadata.
  */
-async function fetchMediaUrl(mediaId) {
-  const graphUrl = `https://graph.facebook.com/${FB_GRAPH_VERSION}/${mediaId}`;
-  const response = await axios.get(graphUrl, {
-    headers: { Authorization: `Bearer ${ACCESS_TOKEN}` },
-    responseType: 'json',
-  });
+async function fetchMediaUrl(mediaId, ACCESS_TOKEN) {
+	const graphUrl = `https://graph.facebook.com/${process.env.FB_GRAPH_VERSION}/${mediaId}`;
+	const response = await axios.get(graphUrl, {
+		headers: { Authorization: `Bearer ${ACCESS_TOKEN}` },
+		responseType: "json",
+	});
 
-  return {
-    url: response.data.url,
-    mimeType: response.data.mime_type,
-    filename: response.data.filename || null,
-  };
+	return {
+		url: response.data.url,
+		mimeType: response.data.mime_type,
+		filename: response.data.filename || null,
+	};
 }
 
 let TempStatus,
@@ -143,14 +144,16 @@ export const processTempMessages = async () => {
 
 			let media = {};
 			if (temp.type === "image") {
-				media = await fetchMediaUrl(temp?.media?.mediaId, user.FB_ACCESS_TOKEN);
+				media = await fetchMediaUrl(temp.mediaId, user.FB_ACCESS_TOKEN);
 			} else if (temp.type === "video") {
-				media = await fetchMediaUrl(temp?.media?.mediaId, user.FB_ACCESS_TOKEN);
+				media = await fetchMediaUrl(temp.mediaId, user.FB_ACCESS_TOKEN);
 			} else if (temp.type === "document") {
-				media = await fetchMediaUrl(temp?.media?.mediaId, user.FB_ACCESS_TOKEN);
+				media = await fetchMediaUrl(temp.mediaId, user.FB_ACCESS_TOKEN);
 			} else if (temp.type === "audio") {
-				media = await fetchMediaUrl(temp?.media?.mediaId, user.FB_ACCESS_TOKEN);
+				media = await fetchMediaUrl(temp.mediaId, user.FB_ACCESS_TOKEN);
 			}
+
+			console.log(media);
 
 			const data = {
 				WABA_ID: user.WABA_ID,

@@ -172,7 +172,7 @@ cron.schedule("* * * * *", async () => {
 			}
 
 			// After processing, delete all records from ChatsTemp
-			await ChatsTemp.deleteMany({});
+			// await ChatsTemp.deleteMany({});
 			console.log(
 				"Processed and cleared temporary chats at",
 				new Date().toLocaleString(),

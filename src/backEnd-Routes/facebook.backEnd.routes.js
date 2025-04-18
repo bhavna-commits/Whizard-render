@@ -124,7 +124,7 @@ router.post("/webhook", async (req, res) => {
 			if (entryItem.changes) {
 				const change = entryItem.changes[0];
 				const messagingEvent = change.value;
-
+				console.log(JSON.stringify(entryItem));
 				// Handle status events
 				if (messagingEvent.statuses) {
 					const fbPhoneId =
@@ -223,7 +223,7 @@ router.post("/webhook", async (req, res) => {
 						timestamp: timestamp * 1000,
 						type,
 						text: text || null,
-						media: {mediaId, },
+						mediaId,
 						fbPhoneId,
 						// rawData: messageEvent,
 					});
