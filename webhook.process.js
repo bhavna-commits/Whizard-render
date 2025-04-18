@@ -160,7 +160,7 @@ export const processTempMessages = async () => {
 				recipientPhone: temp.from,
 				status: "REPLIED",
 				updatedAt: temp.timestamp,
-				contactName: contactName.Name || temp.name,
+				contactName: contactName?.Name || temp?.name,
 				FB_PHONE_ID: temp.fbPhoneId,
 				replyContent: temp.type === "text" ? temp.text?.body : "",
 				media:

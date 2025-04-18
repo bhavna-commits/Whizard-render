@@ -46,31 +46,18 @@ export const fetchAndFormatReports = async (
 	limit = 10,
 ) => {
 	// Query the ChatsUsers collection for the given useradmin and FB_PHONE_ID
-	let chats;
-	if (permission) {
-		console.log("owner");
-		chats = await ChatsUsers.find({
-			FB_PHONE_ID: phoneNumberId,
-		})
-			.sort({ updatedAt: -1 })
-			.skip(skip)
-			.limit(limit)
-			.lean();
-	} else {
-		console.log({
-			FB_PHONE_ID: phoneNumberId,
-			agent: addedUser.id,
-		});
-
-		chats = await ChatsUsers.find({
-			FB_PHONE_ID: phoneNumberId,
-			agent: addedUser.id,
-		})
-			.sort({ updatedAt: -1 })
-			.skip(skip)
-			.limit(limit)
-			.lean();
+	let query = {
+		FB_PHONE_ID: phoneNumberId,
+	};
+	if (!permission) {
+		query.agent = addedUser.id;
 	}
+
+	const chats = await ChatsUsers.find()
+		.sort({ updatedAt: -1 })
+		.skip(skip)
+		.limit(limit)
+		.lean();
 
 	console.log(chats);
 
@@ -250,7 +237,7 @@ export const buildCommonChatFields = (reportItem, wa_id, overrides = {}) => {
 		media_type: "",
 		cmpid: reportItem.campaignId,
 		wa_idK: reportItem.wa_idK || "",
-		keyId: reportItem.keyId || "",
+		keyId: reportItem.FB_PHONE_ID || "",
 		mId: reportItem.messageId || "",
 		name: reportItem.contactName || "user",
 		wa_id,

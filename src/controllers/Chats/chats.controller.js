@@ -147,7 +147,7 @@ export const getUsers = async (req, res, next) => {
 
 		const phoneNumberId = req.body?.phoneNumberId;
 		const skip = parseInt(req.body?.skip, 10) || 0;
-		
+
 		if (!phoneNumberId) {
 			return res
 				.status(400)
@@ -281,7 +281,7 @@ export const getSingleChat = async (req, res, next) => {
 					templatename: reportItem.templatename,
 				});
 			} else {
-				if (reportItem.media) {
+				if (reportItem?.media?.url) {
 					chatsForReport = processMediaReport(reportItem, wa_id);
 				} else if (reportItem.textSent || reportItem.replyContent) {
 					chatsForReport = processTextReport(reportItem, wa_id);

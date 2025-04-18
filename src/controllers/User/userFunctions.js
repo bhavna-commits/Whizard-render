@@ -14,17 +14,17 @@ export const sendEmailVerification = async (email, token) => {
 	try {
 		await sendVerificationEmail(email, token);
 	} catch (error) {
-		throw new Error("Failed to send verification email");
+		throw "Failed to send verification email";
 	}
 };
 
-export const sendOTPOnWhatsApp = async (otp) => {
+export const sendOTPOnWhatsApp = async (email, token) => {
 	try {
 		await sendVerificationEmail(email, token);
 	} catch (error) {
-		throw new Error("Failed to send verification email");
+		throw "Failed to send verification email";
 	}
-}
+};
 
 // Verify the email token
 export const verifyEmailToken = (incomingToken, storedToken, tokenExpiry) => {

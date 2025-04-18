@@ -350,10 +350,10 @@ export const login = async (req, res, next) => {
 					};
 
 					if (ENABLE_EMAIL_OTP) {
-						sendEmailVerification(addedUser.email, emailOTP);
+						await sendEmailVerification(addedUser.email, emailOTP);
 					}
 					if (ENABLE_MOBILE_OTP) {
-						sendOTPOnWhatsApp(addedUser.phone, mobileOTP);
+						await sendOTPOnWhatsApp(addedUser.phone, mobileOTP);
 					}
 
 					return res.status(200).json({
@@ -424,10 +424,10 @@ export const login = async (req, res, next) => {
 				};
 
 				if (ENABLE_EMAIL_OTP) {
-					sendEmailVerification(user.email, emailOTP);
+					await sendEmailVerification(user.email, emailOTP);
 				}
 				if (ENABLE_MOBILE_OTP) {
-					sendOTPOnWhatsApp(user.phone, mobileOTP);
+					await sendOTPOnWhatsApp(user.phone, mobileOTP);
 				}
 
 				return res.status(200).json({
@@ -436,6 +436,8 @@ export const login = async (req, res, next) => {
 					requiresOTP: true,
 				});
 			} else {
+				// const emailOTP = "123456";
+				// await sendEmailVerification(user.email, emailOTP);
 				req.session.user = {
 					id: user.unique_id,
 					name: user.name,
@@ -450,7 +452,8 @@ export const login = async (req, res, next) => {
 				.json({ message: "Login successful", success: true });
 		}
 	} catch (error) {
-		return res.status(500).json({ message: "Error logging in", error });
+		console.error("Error logging in", error);
+		return res.status(500).json({ message: error, success: false });
 	}
 };
 
