@@ -39,7 +39,7 @@ export const determineMediaType = (url) => {
 };
 
 export const fetchAndFormatReports = async (
-	addedUser,
+	agentId,
 	permission,
 	phoneNumberId,
 	skip = 0,
@@ -50,7 +50,7 @@ export const fetchAndFormatReports = async (
 		FB_PHONE_ID: phoneNumberId,
 	};
 	if (!permission) {
-		query.agent = addedUser.id;
+		query.agent = agentId;
 	}
 
 	const chats = await ChatsUsers.find()
@@ -234,7 +234,7 @@ export const createChatsComponents = (templateData, dynamicVariables) => {
 export const buildCommonChatFields = (reportItem, wa_id, overrides = {}) => {
 	return {
 		media_message: { link: "", caption: "" },
-		media_type: "",
+		media_type: reportItem.media_type,
 		cmpid: reportItem.campaignId,
 		wa_idK: reportItem.wa_idK || "",
 		keyId: reportItem.FB_PHONE_ID || "",
@@ -279,10 +279,9 @@ export const processTemplateReport = async (reportItem, wa_id, text) => {
 
 export const processMediaReport = (reportItem, wa_id) => {
 	// Use media values from the report.
-	const { url, caption, fileName } = reportItem.media;
+	const { url, caption } = reportItem.media;
 	return buildCommonChatFields(reportItem, wa_id, {
 		media_message: { link: url || "", caption: caption || "" },
-		media_type: url ? determineMediaType(fileName) : "",
 	});
 };
 

@@ -56,73 +56,52 @@ const __dirname = path.resolve();
  */
 export const getSetToken = async (req, res) => {
 	try {
-		// Get the user's unique ID from the session
-		const id = req.session?.user?.id || req.session?.addedUser?.owner;
-		const addedUser = req.session?.addedUser;
-		const permissions = req.session?.addedUser?.permissions;
-		let permissionValue, accessData;
+		// identify owner and agent
+		const ownerId = req.session.user?.id;
+		const added = req.session.addedUser;
+		const permissions = added?.permissions;
 
-		const user = await User.findOne({ unique_id: id });
-
-		if (!user) {
+		// fetch user record
+		const user = await User.findOne({ unique_id: ownerId });
+		if (!user)
 			return res
 				.status(404)
 				.json({ message: "User not found", success: false });
-		}
 
-		const phoneNumber = user.FB_PHONE_NUMBERS.find(
-			(d) => d.selected === true,
-		);
+		// pick phone number
+		const phone = user.FB_PHONE_NUMBERS.find((f) => f.selected);
+		if (!phone)
+			return res
+				.status(400)
+				.json({ message: "No phone number found", success: false });
 
-		if (!phoneNumber) {
-			return res.status(400).json({
-				message: "No phone number found for this user",
-				success: false,
-			});
-		}
-
-		// Check if user has permissions via addedUser
+		// resolve permissionValue
+		let permissionValue;
+		let accessData;
 		if (permissions) {
 			accessData = await Permissions.findOne({ unique_id: permissions });
-
-			if (!accessData?.chats?.chat && !accessData?.chats?.allChats) {
+			if (!accessData?.chats?.chat && !accessData?.chats?.allChats)
 				return res.render("errors/notAllowed");
-			}
-			// Use the specific permission for chats from the Permissions model
 			permissionValue = accessData?.chats;
 		} else {
-			// Otherwise, fetch the user's access details
 			permissionValue = user?.access?.chats;
 		}
 
-		// Create a new token record in the database
-		const tokenRecord = await createTokenRecord(
-			id,
-			permissionValue,
-			addedUser,
-			phoneNumber.phone_number_id,
-		);
+		// create or update token record
+		const token = await createTokenRecord(ownerId, permissionValue, added);
 
-		// Prepare data for rendering
-		const renderData = {
-			token: tokenRecord.token,
-			photo: req.session?.addedUser?.photo || req.session?.user?.photo,
-			name: req.session?.addedUser?.name || req.session?.user?.name,
-			color: req.session?.addedUser?.color || req.session?.user?.color,
+		// render with correct details
+		res.render("Chats/chats", {
+			token,
+			photo: added?.photo || req.session.user?.photo,
+			name: added?.name || req.session.user?.name,
+			color: added?.color || req.session.user?.color,
 			access: permissions ? accessData : user.access,
-			phoneNumberId: phoneNumber.phone_number_id,
-			phoneNumberName: phoneNumber.friendly_name,
-		};
-
-		res.render("Chats/chats", renderData);
+			phoneNumberId: phone.phone_number_id,
+			phoneNumberName: phone.friendly_name,
+		});
 	} catch (error) {
-		if (error.response) {
-			console.error(
-				`Error in getSetToken: Status ${error.response.status} - ${error.response.statusText}`,
-			);
-		} else {
-			console.error(`Error in getSetToken:`, error.message);
-		}
+		console.error("Error in getSetToken:", error);
 		res.render("errors/chatsError");
 	}
 };
@@ -140,11 +119,12 @@ export const getSetToken = async (req, res) => {
  * @param {function} next - Express next middleware function.
  * @returns {void}
  */
-export const getUsers = async (req, res, next) => {
+export const getUsers = async (req, res) => {
 	try {
-		const oldToken = checkToken(req, next);
-		const { userId, token, permission, addedUser } =
-			await getUserIdFromToken(oldToken);
+		const oldToken = checkToken(req);
+		const { userId, token, permission, agentId } = await getUserIdFromToken(
+			oldToken,
+		);
 
 		const phoneNumberId = req.body?.phoneNumberId;
 		const skip = parseInt(req.body?.skip, 10) || 0;
@@ -155,15 +135,17 @@ export const getUsers = async (req, res, next) => {
 				.json({ message: "Phone number ID not provided" });
 		}
 
-		if (!isString(phoneNumberId)) return next();
-		if (!isNumber(skip)) return next();
+		if (!isString(phoneNumberId)) throw "Invalid Input";
+		if (!isNumber(skip)) throw "Invalid Input";
 
 		const formattedReports = await fetchAndFormatReports(
-			addedUser,
+			agentId,
 			permission?.allChats,
 			phoneNumberId,
 			skip,
 		);
+
+		console.log(formattedReports);
 
 		res.status(200).json({
 			msg: formattedReports,
@@ -192,28 +174,12 @@ export const getUsers = async (req, res, next) => {
  * @param {function} next - Express next middleware function.
  * @returns {void}
  */
-export const getRefreshToken = async (req, res, next) => {
+export const getRefreshToken = async (req, res) => {
 	try {
-		const oldToken = checkToken(req, next);
-		const { userId, addedUser, token } = await getUserIdFromToken(oldToken);
+		const oldToken = checkToken(req);
+		const { token, permission } = await getUserIdFromToken(oldToken);
 
-		let permissionValue, accessData;
-
-		if (addedUser && addedUser.permissions) {
-			accessData = await Permissions.findOne({
-				unique_id: addedUser.permissions,
-			});
-			if (!accessData?.chats?.chat && !accessData?.chats?.allChats) {
-				return res.status(500).json({
-					message: "Permission Error: Not Allowed",
-					success: false,
-				});
-			}
-			permissionValue =
-				accessData?.chats?.chat || accessData?.chats?.allChats;
-		} else {
-			permissionValue = true;
-		}
+		let permissionValue = permission?.chat || permission?.allChats;
 
 		res.status(200).json({
 			message: "Token refreshed successfully",
@@ -222,7 +188,7 @@ export const getRefreshToken = async (req, res, next) => {
 			permission: permissionValue,
 		});
 	} catch (error) {
-		console.error("Error in getRefreshToken:", error);
+		console.error("Error in getRefreshToken:", error.message || error);
 		res.status(500).json({
 			message: error.message || error,
 			success: false,
@@ -242,9 +208,9 @@ export const getRefreshToken = async (req, res, next) => {
  * @param {function} next - Express next middleware function.
  * @returns {void}
  */
-export const getSingleChat = async (req, res, next) => {
+export const getSingleChat = async (req, res) => {
 	try {
-		const oldToken = checkToken(req, next);
+		const oldToken = checkToken(req);
 		const { userId, token } = await getUserIdFromToken(oldToken);
 
 		const wa_id = req.body?.wa_id;
@@ -282,7 +248,7 @@ export const getSingleChat = async (req, res, next) => {
 					templatename: reportItem.templatename,
 				});
 			} else {
-				if (reportItem?.media?.url) {
+				if (reportItem?.media_type) {
 					chatsForReport = processMediaReport(reportItem, wa_id);
 				} else if (reportItem.textSent || reportItem.replyContent) {
 					chatsForReport = processTextReport(reportItem, wa_id);
@@ -318,9 +284,9 @@ export const getSingleChat = async (req, res, next) => {
  * @param {function} next - Express next middleware function.
  * @returns {void}
  */
-export const searchUsers = async (req, res, next) => {
+export const searchUsers = async (req, res) => {
 	try {
-		const oldToken = checkToken(req, next);
+		const oldToken = checkToken(req);
 		const { userId, token } = await getUserIdFromToken(oldToken);
 
 		const search = req.body?.search;
@@ -389,10 +355,10 @@ export const searchUsers = async (req, res, next) => {
  * @param {function} next - Express next middleware function.
  * @returns {void}
  */
-export const sendMessages = async (req, res, next) => {
+export const sendMessages = async (req, res) => {
 	try {
 		const { messages, fileByteCode, fileName } = req.body;
-		const oldToken = checkToken(req, next);
+		const oldToken = checkToken(req);
 		const { userId, token, addedUser } = await getUserIdFromToken(oldToken);
 
 		if (!messages) {
@@ -447,7 +413,7 @@ export const sendMessages = async (req, res, next) => {
 			case "video":
 			case "document":
 				if (!tempFilePath) {
-					throw new Error("Missing media file for media message");
+					throw "Missing media file for media message";
 				}
 				mediaId = await uploadMedia(
 					accessToken,
@@ -547,7 +513,7 @@ export const sendMessages = async (req, res, next) => {
  * @param {function} next - Express next middleware function.
  * @returns {void}
  */
-export const getSendTemplate = async (req, res, next) => {
+export const getSendTemplate = async (req, res) => {
 	try {
 		const { wa_id, token: oldToken } = req.query;
 
@@ -588,7 +554,7 @@ export const getSendTemplate = async (req, res, next) => {
  * @param {function} next - Express next middleware function.
  * @returns {void}
  */
-export const getAllTemplates = async (req, res, next) => {
+export const getAllTemplates = async (req, res) => {
 	try {
 		const id = req.params?.id;
 		if (!isString(id)) return next();
@@ -621,7 +587,7 @@ export const getAllTemplates = async (req, res, next) => {
  * @param {function} next - Express next middleware function.
  * @returns {void}
  */
-export const getSingleTemplate = async (req, res, next) => {
+export const getSingleTemplate = async (req, res) => {
 	try {
 		const id = req.params?.id;
 		if (!isString(id)) return next();
@@ -652,7 +618,7 @@ export const getSingleTemplate = async (req, res, next) => {
  * @param {function} next - Express next middleware function.
  * @returns {void}
  */
-export const sendTemplate = async (req, res, next) => {
+export const sendTemplate = async (req, res) => {
 	try {
 		let {
 			templateId,
@@ -778,7 +744,7 @@ export const sendTemplate = async (req, res, next) => {
  * @returns {Buffer}
  */
 
-export const getMedia = async (req, res, next) => {
+export const getMedia = async (req, res) => {
 	try {
 		const { token: oldToken, mediaId } = req.query;
 
@@ -805,7 +771,6 @@ export const getMedia = async (req, res, next) => {
 		res.set("Content-Type", mime_type);
 		res.set("Content-Disposition", `inline; filename="${url}"`);
 		fileRes.data.pipe(res);
-		
 	} catch (error) {
 		console.error("Error getting Media:", error.message || error);
 		res.status(500).json({

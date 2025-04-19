@@ -1,21 +1,20 @@
 import mongoose from "mongoose";
 
+// Updated Token schema with userId & agentId (one record per login)
 const tokenSchema = new mongoose.Schema(
 	{
-		accessToken: { type: String, required: true },
-		userId: { type: String, required: true },
+		userId: { type: String, required: true }, // owner id
+		agentId: { type: String, required: true }, // same as userId if owner login, else added user id
+		baseHash: { type: String, required: true },
 		expiresAt: { type: Number, required: true },
-		permission: { type: mongoose.Schema.Types.Mixed, required: false },
-		createdAt: { type: Number, default: Date.now },
+		permission: { type: mongoose.Schema.Types.Mixed, required: true },
 		unique_id: { type: String, required: true },
-		lastToken: { type: String, default: "" },
-		addedUser: { type: Object, required: false },
 	},
-	{
-		timestamps: false,
-		strict: false,
-	},
+	{ timestamps: true, strict: false },
 );
+
+// ensure one token per (userId, agentId) pair
+tokenSchema.index({ userId: 1, agentId: 1 }, { unique: true });
 
 const Token = mongoose.model("Token", tokenSchema);
 

@@ -5,13 +5,7 @@ import axios from "axios";
 
 dotenv.config();
 
-
-
-
 const dev = true;
-
-
-
 
 function getURL() {
 	return dev
@@ -110,6 +104,10 @@ export const processTempStatuses = async () => {
 				};
 			}
 
+			await Chat.updateOne(
+				{ messageId: temp.messageId },
+				{ $set: updateFields },
+			);
 			await Reports.updateOne(
 				{ messageId: temp.messageId },
 				{ $set: updateFields },
@@ -157,17 +155,6 @@ export const processTempMessages = async () => {
 				wa_id: temp.from,
 			});
 
-			// let media = {};
-			// if (temp.type === "image") {
-			// 	media = await fetchMediaUrl(temp.mediaId, user.FB_ACCESS_TOKEN);
-			// } else if (temp.type === "video") {
-			// 	media = await fetchMediaUrl(temp.mediaId, user.FB_ACCESS_TOKEN);
-			// } else if (temp.type === "document") {
-			// 	media = await fetchMediaUrl(temp.mediaId, user.FB_ACCESS_TOKEN);
-			// } else if (temp.type === "audio") {
-			// 	media = await fetchMediaUrl(temp.mediaId, user.FB_ACCESS_TOKEN);
-			// }
-
 			const data = {
 				WABA_ID: user.WABA_ID,
 				useradmin: user.unique_id,
@@ -194,6 +181,7 @@ export const processTempMessages = async () => {
 						  }
 						: {},
 				type: "Chat",
+				media_type: temp.type !== "text" ? type : "",
 				...(campaign[0] && { campaignId: campaign[0].unique_id }),
 				...(campaign[0] && { campaignName: campaign[0].name }),
 			};

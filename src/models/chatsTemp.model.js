@@ -56,6 +56,7 @@ const ChatsTempSchema = new mongoose.Schema(
 		},
 		templatename: { type: String, default: "" },
 		agent: [],
+		media_type: { type: String, default: "" },
 	},
 	{
 		timestamps: false,

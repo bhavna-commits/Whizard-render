@@ -95,13 +95,10 @@ export function generateToken() {
 	return { token, expiresAt, baseHash, timestampStr };
 }
 
-export function checkToken(req, next) {
+export function checkToken(req) {
 	const token = req.body?.token;
 	if (!token) {
 		throw "Token not provided";
-	}
-	if (typeof token !== "string") {
-		throw "Token must be a string";
 	}
 	if (!isString(token)) throw "Invalid Input";
 	return token;
@@ -126,10 +123,10 @@ export async function getUserIdFromToken(token) {
 	// Decode the token; assuming a timestamp length of 13 digits.
 	const { timestamp, baseHash } = decodeToken(token, 13);
 	// Find the token record by matching the baseHash (stored in DB as accessToken).
-	const tokenRecord = await Token.findOne({ accessToken: baseHash });
+	const tokenRecord = await Token.findOne({ baseHash });
 
 	if (!tokenRecord) {
-		throw "Token not found";
+		throw "Invalid Login";
 	}
 
 	// Check token expiration: we assume token lifetime is defined in TOKEN_LIFETIME.
@@ -141,7 +138,7 @@ export async function getUserIdFromToken(token) {
 	// Generate a new token with a fresh timestamp using the same baseHash.
 	const newTimestampStr = Date.now().toString();
 	const newToken = generateTokenFromHash(
-		tokenRecord.accessToken,
+		tokenRecord.baseHash,
 		newTimestampStr,
 	);
 	// Update the token record's expiration.
@@ -153,56 +150,49 @@ export async function getUserIdFromToken(token) {
 }
 
 /**
- * Creates and saves a new token record in the database upon user login.
- *
- * @param {string} userId - The user's ID.
- * @param {string} permission - The permission level for the user.
- * @param {string} addedUser - The addedUser level for the user.
- * @returns {Promise<Object>} - The saved token record.
+ * Creates or updates a token record for a given owner (userId) and agent (agentId).
+ * If agentId not provided, assumes owner login (agentId === userId).
  */
-export async function createTokenRecord(userId, permission, addedUser, phoneNumberId) {
-	// Try to find an existing token record for this user.
+export async function createTokenRecord(userId, permission, addedUser) {
+	// determine agentId (owner vs added user)
+	const agentId = addedUser?.id || userId;
 
-	const tokenRecord = await Token.findOne({ userId });
+	// try to find existing record for this pair
+	let tokenRecord = await Token.findOne({ userId, agentId });
+	const now = Date.now();
 
 	if (tokenRecord) {
-		// If token exists, check whether it is still valid.
-		if (Date.now() <= tokenRecord.expiresAt) {
-			// Optionally, update the token's "converted" token using a fresh timestamp.
-			// Here, we generate a new token string using the same baseHash and current time.
-			const newTimestampStr = Date.now().toString();
-			const newToken = generateTokenFromHash(
-				tokenRecord.accessToken,
-				newTimestampStr,
-			);
-			// Update the expiration if needed (or simply return the existing record).
-			tokenRecord.expiresAt = Date.now() + TOKEN_LIFETIME; // TOKEN_LIFETIME defined elsewhere
-			tokenRecord.addedUser = addedUser;
+		// if still valid, refresh expires and permission
+		if (now <= tokenRecord.expiresAt) {
+			tokenRecord.baseHash = refreshBaseHash(tokenRecord.baseHash);
+			tokenRecord.expiresAt = now + TOKEN_LIFETIME;
 			tokenRecord.permission = permission;
 			await tokenRecord.save();
-			return newToken;
-		} else {
-			// If expired, you can either delete it or overwrite it.
-			// Here, we delete the expired record.
-			await Token.deleteOne({ _id: tokenRecord._id });
+			return generateTokenFromHash(tokenRecord.baseHash, now.toString());
 		}
+		// expired: regenerate entirely
+		const { baseHash, expiresAt, token } = generateToken();
+		tokenRecord.baseHash = baseHash;
+		tokenRecord.expiresAt = expiresAt;
+		tokenRecord.permission = permission;
+		await tokenRecord.save();
+		return token;
 	}
 
-	// If no valid token record exists, create a new one.
-	const { baseHash, expiresAt, token } = generateToken(); // generateToken() returns { token, expiresAt, baseHash, timestampStr }
+	// no record yet: create a new one
+	const { baseHash, expiresAt, token } = generateToken();
 	const unique_id = generateUniqueId();
 
-	const newTokenRecord = new Token({
-		accessToken: baseHash,
+	tokenRecord = new Token({
 		userId,
+		agentId,
+		baseHash,
 		expiresAt,
 		permission,
 		unique_id,
-		addedUser,
 	});
-	await newTokenRecord.save();
-	newTokenRecord.token = token; // the token sent to client (baseHash + inserted timestamp)
-	return newTokenRecord;
+	await tokenRecord.save();
+	return token;
 }
 
 /**
