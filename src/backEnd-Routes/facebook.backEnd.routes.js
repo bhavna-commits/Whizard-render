@@ -222,7 +222,7 @@ router.post("/webhook", async (req, res) => {
 						from: senderPhone,
 						timestamp: timestamp * 1000,
 						type,
-						text: text || null,
+						text: text || image?.caption || video?.caption || document?.caption || audio?.caption,
 						mediaId,
 						fbPhoneId,
 						// rawData: messageEvent,

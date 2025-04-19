@@ -5,6 +5,20 @@ import axios from "axios";
 
 dotenv.config();
 
+
+
+
+const dev = true;
+
+
+
+
+function getURL() {
+	return dev
+		? "https://whizard.onrender.com/chats/get-media"
+		: "https://chat.lifestylehead.com/chats/get-media";
+}
+
 export const generateUniqueId = () => {
 	return crypto.randomBytes(5).toString("hex").slice(0, 10);
 };
@@ -21,6 +35,7 @@ async function fetchMediaUrl(mediaId, ACCESS_TOKEN) {
 		responseType: "json",
 	});
 
+	// console.log(response.data);
 	return {
 		url: response.data.url,
 		mimeType: response.data.mime_type,
@@ -142,18 +157,16 @@ export const processTempMessages = async () => {
 				wa_id: temp.from,
 			});
 
-			let media = {};
-			if (temp.type === "image") {
-				media = await fetchMediaUrl(temp.mediaId, user.FB_ACCESS_TOKEN);
-			} else if (temp.type === "video") {
-				media = await fetchMediaUrl(temp.mediaId, user.FB_ACCESS_TOKEN);
-			} else if (temp.type === "document") {
-				media = await fetchMediaUrl(temp.mediaId, user.FB_ACCESS_TOKEN);
-			} else if (temp.type === "audio") {
-				media = await fetchMediaUrl(temp.mediaId, user.FB_ACCESS_TOKEN);
-			}
-
-			console.log(media);
+			// let media = {};
+			// if (temp.type === "image") {
+			// 	media = await fetchMediaUrl(temp.mediaId, user.FB_ACCESS_TOKEN);
+			// } else if (temp.type === "video") {
+			// 	media = await fetchMediaUrl(temp.mediaId, user.FB_ACCESS_TOKEN);
+			// } else if (temp.type === "document") {
+			// 	media = await fetchMediaUrl(temp.mediaId, user.FB_ACCESS_TOKEN);
+			// } else if (temp.type === "audio") {
+			// 	media = await fetchMediaUrl(temp.mediaId, user.FB_ACCESS_TOKEN);
+			// }
 
 			const data = {
 				WABA_ID: user.WABA_ID,
@@ -167,17 +180,19 @@ export const processTempMessages = async () => {
 				FB_PHONE_ID: temp.fbPhoneId,
 				replyContent: temp.type === "text" ? temp.text?.body : "",
 				media:
-					temp.type !== "text" && temp.image
+					temp.type !== "text"
 						? {
-								url: temp.image.url || "",
-								fileName: temp.image.fileName || "",
+								url:
+									getURL() +
+										`?mediaId=${temp.mediaId}&phoneId=${temp.fbPhoneId}` ||
+									"",
+								fileName:
+									getURL() +
+										`?mediaId=${temp.mediaId}&phoneId=${temp.fbPhoneId}` ||
+									"",
 								caption: temp.text?.body || "",
 						  }
-						: {
-								url: temp?.media?.url || "",
-								fileName: temp?.media?.filename || "",
-								caption: temp.text?.body || "",
-						  },
+						: {},
 				type: "Chat",
 				...(campaign[0] && { campaignId: campaign[0].unique_id }),
 				...(campaign[0] && { campaignName: campaign[0].name }),

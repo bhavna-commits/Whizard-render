@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import axios from "axios";
 import { Buffer } from "buffer";
 import dotenv from "dotenv";
 import User from "../../models/user.model.js";
@@ -254,8 +255,8 @@ export const getSingleChat = async (req, res, next) => {
 			return res.status(400).json({ message: "All values not provided" });
 		}
 
-		if (!isString(wa_id)) return next();
-		if (!isNumber(skip)) return next();
+		if (!isString(wa_id)) throw "Invalid Input";
+		if (!isNumber(skip)) throw "Invalid Input";
 
 		const reports = await Report.find({
 			useradmin: userId,
@@ -330,7 +331,7 @@ export const searchUsers = async (req, res, next) => {
 				success: false,
 			});
 		}
-		if (!isString(search)) return next();
+		if (!isString(search)) throw "Invalid Input";
 
 		const reports = await Report.find({
 			useradmin: userId,
@@ -400,7 +401,7 @@ export const sendMessages = async (req, res, next) => {
 				success: false,
 			});
 		}
-		if (!isObject(messages)) return next();
+		if (!isObject(messages)) throw "Invalid Input";
 
 		const user = await User.findOne({ unique_id: userId });
 
@@ -553,7 +554,7 @@ export const getSendTemplate = async (req, res, next) => {
 		if (!wa_id || !oldToken) {
 			return res.status(400).json({ message: "All data not provided" });
 		}
-		if (!isString(wa_id)) return next();
+		if (!isString(wa_id)) throw "Invalid Input";
 
 		const { userId } = await getUserIdFromToken(oldToken);
 
@@ -667,7 +668,8 @@ export const sendTemplate = async (req, res, next) => {
 			});
 		}
 
-		if (!isString(templateId, contactListId, oldToken)) return next();
+		if (!isString(templateId, contactListId, oldToken))
+			throw "Invalid Input";
 
 		variables =
 			typeof variables === "string" ? JSON.parse(variables) : variables;
@@ -681,7 +683,7 @@ export const sendTemplate = async (req, res, next) => {
 		)?.phone_number_id;
 
 		if (!phone_number) {
-			throw new Error("No phone number selected.");
+			throw "No phone number selected.";
 		}
 
 		const { data, messageTemplate, components, templatename } =
@@ -754,7 +756,58 @@ export const sendTemplate = async (req, res, next) => {
 			success: true,
 		});
 	} catch (error) {
-		console.error("Error creating campaign:", error.message);
+		console.error("Error creating campaign:", error.message || error);
+		res.status(500).json({
+			message: error.message || error,
+			success: false,
+		});
+	}
+};
+
+/**
+ * Gets url of the designated file from facebook.
+ *
+ * This is get request on url,
+ * creates a inline rendered version of the asked file.
+ *
+ * @async
+ * @function sendTemplate
+ * @param {object} req - Express request object.
+ * @param {object} res - Express response object.
+ * @param {function} next - Express next middleware function.
+ * @returns {Buffer}
+ */
+
+export const getMedia = async (req, res, next) => {
+	try {
+		const { token: oldToken, mediaId } = req.query;
+
+		if (!oldToken || !mediaId) {
+			throw "No token or mediaId provided";
+		}
+
+		if (!isString(oldToken, mediaId)) throw "Invalid Input";
+
+		const { userId } = await getUserIdFromToken(oldToken);
+
+		let user = await User.findOne({ unique_id: userId });
+
+		const { url, mime_type } = await getMediaUrl(
+			user.FB_ACCESS_TOKEN,
+			mediaId,
+		);
+
+		const fileRes = await axios.get(url, {
+			headers: { Authorization: `Bearer ${user.FB_ACCESS_TOKEN}` },
+			responseType: "stream",
+		});
+
+		res.set("Content-Type", mime_type);
+		res.set("Content-Disposition", `inline; filename="${url}"`);
+		fileRes.data.pipe(res);
+		
+	} catch (error) {
+		console.error("Error getting Media:", error.message || error);
 		res.status(500).json({
 			message: error.message || error,
 			success: false,

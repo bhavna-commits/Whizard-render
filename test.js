@@ -1,14 +1,13 @@
-import mongoose from "mongoose";
-import dotenv from "dotenv";
-import userModel from "./src/models/user.model.js";
-import permissionsModel from "./src/models/permissions.model.js";
+import { getMediaUrl } from "./src/controllers/Chats/chats.functions.js";
 
-dotenv.config();
-await mongoose.connect(process.env.MONGO_URI);
+const token =
+	"EAAmWdWtcPz4BOxPQe3cbk22vFqscMzSE6OaDLX19dbkDnS10jcSTrpPwTh97pUAPYqTVMUirUPmnObieSBVY1svWQFMFeeVnFb6qsi69FdKJZB9JpDsZANkhVwenQ2mmcevr1M883XFITtb1eQSQtwbnJcS05RXa5ULqHTAJZAGDZAxkzsGjMubp";
 
-const getData = async () => {
-    const result = await userModel.findById("674d4bc3e26ff93ef8cfc1db");
-    console.log(result.access.chats);
+const mediaId = "696280686155122";
+
+async function name(params) {
+    const { url } = await getMediaUrl(token, mediaId);
+    console.log(url);
 }
 
-getData();
+name();

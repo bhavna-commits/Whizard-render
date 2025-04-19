@@ -103,7 +103,7 @@ export function checkToken(req, next) {
 	if (typeof token !== "string") {
 		throw "Token must be a string";
 	}
-	if (!isString(token)) return next();
+	if (!isString(token)) throw "Invalid Input";
 	return token;
 }
 
