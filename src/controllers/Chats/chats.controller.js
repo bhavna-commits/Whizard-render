@@ -37,6 +37,7 @@ import Permissions from "../../models/permissions.model.js";
 import { generateUniqueId } from "../../utils/otpGenerator.js";
 import { sendTestMessage } from "../ContactList/campaign.functions.js";
 import ChatsTemp from "../../models/chatsTemp.model.js";
+import AddedUser from "../../models/addedUser.model.js";
 
 dotenv.config();
 
@@ -60,7 +61,7 @@ export const getSetToken = async (req, res) => {
 		const ownerId = req.session.user?.id;
 		const added = req.session.addedUser;
 		const permissions = added?.permissions;
-
+		let addedName;
 		// fetch user record
 		const user = await User.findOne({ unique_id: ownerId });
 		if (!user)
@@ -68,6 +69,8 @@ export const getSetToken = async (req, res) => {
 				.status(404)
 				.json({ message: "User not found", success: false });
 
+		if (added) {addedName = await AddedUser.findOne({unique_id: added.id})}
+		
 		// pick phone number
 		const phone = user.FB_PHONE_NUMBERS.find((f) => f.selected);
 		if (!phone)
@@ -88,7 +91,7 @@ export const getSetToken = async (req, res) => {
 		}
 
 		// create or update token record
-		const token = await createTokenRecord(ownerId, permissionValue, added);
+		const token = await createTokenRecord(ownerId, permissionValue, added, name);
 
 		// render with correct details
 		res.render("Chats/chats", {
@@ -359,7 +362,7 @@ export const sendMessages = async (req, res) => {
 	try {
 		const { messages, fileByteCode, fileName } = req.body;
 		const oldToken = checkToken(req);
-		const { userId, token, addedUser } = await getUserIdFromToken(oldToken);
+		const { userId, token, name, agentId } = await getUserIdFromToken(oldToken);
 
 		if (!messages) {
 			return res.status(400).json({
@@ -382,7 +385,9 @@ export const sendMessages = async (req, res) => {
 		if (mediaMessages && fileByteCode) {
 			const tempDir = path.join(__dirname, "uploads", userId);
 			tempFilePath = path.join(tempDir, fileName);
-			url = `https://whizard.onrender.com/uploads/${userId}/${fileName}`;
+			url = !Boolean(process.env.PROD)
+				? `https://whizard.onrender.com/uploads/${userId}/${fileName}`
+				: `https://chat.lifestylehead.com/uploads/${userId}/${fileName}`;
 			fs.mkdirSync(tempDir, { recursive: true });
 			fs.writeFileSync(tempFilePath, Buffer.from(fileByteCode, "base64"));
 		}
@@ -394,7 +399,7 @@ export const sendMessages = async (req, res) => {
 			message: messageText,
 			caption,
 			campaignId,
-			name,
+			name: contactName,
 		} = messages;
 
 		const campaign = await Campaign.findOne({
@@ -448,23 +453,6 @@ export const sendMessages = async (req, res) => {
 			token,
 		});
 
-		// const report = new Report({
-		// 	WABA_ID: user.WABA_ID,
-		// 	FB_PHONE_ID: from,
-		// 	useradmin: user.unique_id,
-		// 	unique_id: generateUniqueId(),
-		// 	campaignName: campaign.name,
-		// 	campaignId: campaign.unique_id,
-		// 	contactName: name,
-		// 	recipientPhone: to,
-		// 	status: "SENT",
-		// 	messageId: data.messages[0].id,
-		// 	textSent: messageText,
-		// 	media: { url, fileName, caption },
-		// 	type: "Chat",
-		// 	media_type: mediatype,
-		// });
-		// await report.save();
 		const temp = new ChatsTemp({
 			WABA_ID: user.WABA_ID,
 			FB_PHONE_ID: from,
@@ -472,7 +460,7 @@ export const sendMessages = async (req, res) => {
 			unique_id: generateUniqueId(),
 			campaignName: campaign.name,
 			campaignId: campaign.unique_id,
-			contactName: name,
+			contactName,
 			recipientPhone: to,
 			status: "SENT",
 			messageId: data.messages[0].id,
@@ -480,15 +468,14 @@ export const sendMessages = async (req, res) => {
 			media: { url, fileName, caption },
 			type: "Chat",
 			media_type: mediatype,
+			agent: agentId,
 		});
 		await temp.save();
-
-		const letName = addedUser?.name ? addedUser.name : user.name;
 
 		await ActivityLogs.create({
 			useradmin: userId,
 			unique_id: generateUniqueId(),
-			name: letName,
+			name,
 			actions: "Send",
 			details: `Sent message from chats to: ${name}`,
 		});

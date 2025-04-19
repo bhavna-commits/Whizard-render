@@ -474,6 +474,8 @@ export const createCampaign = async (req, res, next) => {
 
 		let id = req.session?.user?.id || req.session?.addedUser?.owner;
 
+		const addedUserId = req.session?.addedUser?.id;
+
 		let user = await User.findOne({ unique_id: id });
 
 		const phone_number = user.FB_PHONE_NUMBERS.find(
@@ -525,6 +527,7 @@ export const createCampaign = async (req, res, next) => {
 				generateUniqueId(),
 				contactList,
 				phone_number,
+				addedUserId,
 			);
 
 			const time = Date.now() + 15 * 60 * 1000;

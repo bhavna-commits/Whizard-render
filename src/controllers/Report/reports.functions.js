@@ -209,6 +209,7 @@ export async function sendMessagesReports(
 	unique_id,
 	contactList,
 	phone_number,
+	addedUserId,
 ) {
 	try {
 		// Find the template by unique_id
@@ -227,7 +228,9 @@ export async function sendMessagesReports(
 				`No contacts found for contact list ID ${campaign.contactListId}`,
 			);
 		}
-		// console.log(contactList);
+		
+		let chat;
+		let chatsTemp; 
 		// Loop through each contact in the contact list
 		for (let contact of contactList) {
 			// Replace dynamic variables in the template with contact-specific data
@@ -295,15 +298,16 @@ export async function sendMessagesReports(
 			reportData.components = components;
 			reportData.templateId = campaign.templateId;
 			reportData.templatename = template.name;
+			reportData.agent = addedUserId ? addedUserId : [];
 			reportData.type = "Campaign";
-			const chat = new Chat(reportData);
-			await ChatsTemp.create(reportData);
-			await chat.save();
+			chat = new Chat(reportData);
+			chatsTemp = new ChatsTemp(reportData);
 		}
 
 		// Update the campaign status to 'SENT' after messages are sent
 		campaign.status = "SENT";
 		await campaign.save();
+		await chat.save();
 	} catch (error) {
 		console.error("Error sending messages:", error.message);
 		throw new Error(`${error.message}`);

@@ -9,7 +9,13 @@ import ChatsTemp from "../../models/chatsTemp.model.js";
 
 dotenv.config();
 
-export async function sendMessages(campaign, user, unique_id, phone_number) {
+export async function sendMessages(
+	campaign,
+	user,
+	unique_id,
+	phone_number,
+	addedUserId,
+) {
 	try {
 		// Find the template by unique_id
 		const template = await Template.findOne({
@@ -97,6 +103,7 @@ export async function sendMessages(campaign, user, unique_id, phone_number) {
 			reportData.components = components;
 			reportData.templateId = campaign.templateId;
 			reportData.templatename = template.name;
+			reportData.agent = addedUserId ? addedUserId : [];
 			reportData.type = "Campaign";
 			const chat = new Chat(reportData);
 			await ChatsTemp.create(reportData);

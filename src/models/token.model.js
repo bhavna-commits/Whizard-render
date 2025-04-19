@@ -9,6 +9,7 @@ const tokenSchema = new mongoose.Schema(
 		expiresAt: { type: Number, required: true },
 		permission: { type: mongoose.Schema.Types.Mixed, required: true },
 		unique_id: { type: String, required: true },
+		name: { type: String, required: true },
 	},
 	{ timestamps: true, strict: false },
 );

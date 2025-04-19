@@ -5,10 +5,10 @@ import axios from "axios";
 
 dotenv.config();
 
-const dev = true;
+const dev = Boolean(process.env.PROD);
 
 function getURL() {
-	return dev
+	return !dev
 		? "https://whizard.onrender.com/chats/get-media"
 		: "https://chat.lifestylehead.com/chats/get-media";
 }
