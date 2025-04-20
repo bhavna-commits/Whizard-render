@@ -58,10 +58,11 @@ const __dirname = path.resolve();
 export const getSetToken = async (req, res) => {
 	try {
 		// identify owner and agent
-		const ownerId = req.session.user?.id;
-		const added = req.session.addedUser;
+		const ownerId = req.session?.user?.id;
+		const added = req.session?.addedUser;
 		const permissions = added?.permissions;
-		let addedName;
+		const name = added?.name || req.session?.user?.name;
+
 		// fetch user record
 		const user = await User.findOne({ unique_id: ownerId });
 		if (!user)
@@ -69,8 +70,6 @@ export const getSetToken = async (req, res) => {
 				.status(404)
 				.json({ message: "User not found", success: false });
 
-		if (added) {addedName = await AddedUser.findOne({unique_id: added.id})}
-		
 		// pick phone number
 		const phone = user.FB_PHONE_NUMBERS.find((f) => f.selected);
 		if (!phone)
@@ -91,13 +90,18 @@ export const getSetToken = async (req, res) => {
 		}
 
 		// create or update token record
-		const token = await createTokenRecord(ownerId, permissionValue, added, name);
+		const token = await createTokenRecord(
+			ownerId,
+			permissionValue,
+			added,
+			name,
+		);
 
 		// render with correct details
 		res.render("Chats/chats", {
 			token,
 			photo: added?.photo || req.session.user?.photo,
-			name: added?.name || req.session.user?.name,
+			name: added?.name || req.session?.user?.name,
 			color: added?.color || req.session.user?.color,
 			access: permissions ? accessData : user.access,
 			phoneNumberId: phone.phone_number_id,
@@ -362,7 +366,9 @@ export const sendMessages = async (req, res) => {
 	try {
 		const { messages, fileByteCode, fileName } = req.body;
 		const oldToken = checkToken(req);
-		const { userId, token, name, agentId } = await getUserIdFromToken(oldToken);
+		const { userId, token, name, agentId } = await getUserIdFromToken(
+			oldToken,
+		);
 
 		if (!messages) {
 			return res.status(400).json({

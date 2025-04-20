@@ -153,7 +153,7 @@ export async function getUserIdFromToken(token) {
  * Creates or updates a token record for a given owner (userId) and agent (agentId).
  * If agentId not provided, assumes owner login (agentId === userId).
  */
-export async function createTokenRecord(userId, permission, addedUser) {
+export async function createTokenRecord(userId, permission, addedUser, name) {
 	// determine agentId (owner vs added user)
 	const agentId = addedUser?.id || userId;
 
@@ -167,6 +167,7 @@ export async function createTokenRecord(userId, permission, addedUser) {
 			tokenRecord.baseHash = refreshBaseHash(tokenRecord.baseHash);
 			tokenRecord.expiresAt = now + TOKEN_LIFETIME;
 			tokenRecord.permission = permission;
+			tokenRecord.name = name;
 			await tokenRecord.save();
 			return generateTokenFromHash(tokenRecord.baseHash, now.toString());
 		}
@@ -175,6 +176,7 @@ export async function createTokenRecord(userId, permission, addedUser) {
 		tokenRecord.baseHash = baseHash;
 		tokenRecord.expiresAt = expiresAt;
 		tokenRecord.permission = permission;
+		tokenRecord.name = name;
 		await tokenRecord.save();
 		return token;
 	}
@@ -190,6 +192,7 @@ export async function createTokenRecord(userId, permission, addedUser) {
 		expiresAt,
 		permission,
 		unique_id,
+		name,	
 	});
 	await tokenRecord.save();
 	return token;
