@@ -1,5 +1,6 @@
 import Template from "../../models/templates.model.js";
 import ChatsUsers from "../../models/chatsUsers.model.js";
+import { type } from "os";
 
 export function getMimeType(fileName) {
 	const ext = fileName.split(".").pop().toLowerCase();

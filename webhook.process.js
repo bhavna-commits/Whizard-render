@@ -177,19 +177,27 @@ export const processTempMessages = async () => {
 									getURL() +
 										`?mediaId=${temp.mediaId}&phoneId=${temp.fbPhoneId}` ||
 									"",
-								caption: temp.text?.body || "",
+								caption: temp.text || "",
 						  }
 						: {},
 				type: "Chat",
-				media_type: temp.type !== "text" ? type : "",
+				media_type: temp.type !== "text" ? temp.type : "",
 				...(campaign[0] && { campaignId: campaign[0].unique_id }),
 				...(campaign[0] && { campaignName: campaign[0].name }),
 			};
-			await Chat.insertOne(data);
-			await ChatsTemp.insertOne(data);
+			await Chat.updateOne(
+				{ messageId: data.messageId },
+				{ $set: data },
+				{ upsert: true },
+			);
+			await ChatsTemp.updateOne(
+				{ messageId: data.messageId },
+				{ $set: data },
+				{ upsert: true },
+			);
 		}
 
-		await TempMessage.deleteMany({});
+		// await TempMessage.deleteMany({});
 		console.log("Temp messages processed and cleared.");
 	} catch (error) {
 		console.error("Error processing temp messages:", error);
@@ -211,7 +219,7 @@ export const processTempTemplateRejections = async () => {
 				},
 			);
 		}
-		await TempTemplateRejection.deleteMany({});
+		// await TempTemplateRejection.deleteMany({});
 		console.log("Temp template rejections processed and cleared.");
 	} catch (error) {
 		console.error("Error processing temp template rejections:", error);
