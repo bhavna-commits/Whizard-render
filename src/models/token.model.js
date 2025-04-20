@@ -15,7 +15,7 @@ const tokenSchema = new mongoose.Schema(
 );
 
 // ensure one token per (userId, agentId) pair
-tokenSchema.index({ userId: 1, agentId: 1 }, { unique: true });
+tokenSchema.index({ userId: 1, agentId: 1 });
 
 const Token = mongoose.model("Token", tokenSchema);
 
