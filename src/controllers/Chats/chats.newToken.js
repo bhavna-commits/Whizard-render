@@ -164,7 +164,6 @@ export async function createTokenRecord(userId, permission, addedUser, name) {
 	if (tokenRecord) {
 		// if still valid, refresh expires and permission
 		if (now <= tokenRecord.expiresAt) {
-			tokenRecord.baseHash = refreshBaseHash(tokenRecord.baseHash);
 			tokenRecord.expiresAt = now + TOKEN_LIFETIME;
 			tokenRecord.permission = permission;
 			tokenRecord.name = name;
