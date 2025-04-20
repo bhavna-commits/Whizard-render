@@ -53,7 +53,7 @@ export const fetchAndFormatReports = async (
 		query.agent = agentId;
 	}
 
-	const chats = await ChatsUsers.find()
+	const chats = await ChatsUsers.find(query)
 		.sort({ updatedAt: -1 })
 		.skip(skip)
 		.limit(limit)
