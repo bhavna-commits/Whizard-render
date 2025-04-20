@@ -58,7 +58,7 @@ const __dirname = path.resolve();
 export const getSetToken = async (req, res) => {
 	try {
 		// identify owner and agent
-		const ownerId = req.session?.user?.id;
+		const ownerId = req.session?.user?.id || req.session?.addedUser?.owner;
 		const added = req.session?.addedUser;
 		const permissions = added?.permissions;
 		const name = added?.name || req.session?.user?.name;
@@ -66,16 +66,12 @@ export const getSetToken = async (req, res) => {
 		// fetch user record
 		const user = await User.findOne({ unique_id: ownerId });
 		if (!user)
-			return res
-				.status(404)
-				.json({ message: "User not found", success: false });
+			return res.render("errors/chatsError");
 
 		// pick phone number
 		const phone = user.FB_PHONE_NUMBERS.find((f) => f.selected);
 		if (!phone)
-			return res
-				.status(400)
-				.json({ message: "No phone number found", success: false });
+			return res.render("errors/chatsError");
 
 		// resolve permissionValue
 		let permissionValue;
