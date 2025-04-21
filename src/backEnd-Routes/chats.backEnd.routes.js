@@ -12,6 +12,7 @@ import {
 	getAllTemplates,
 	getSingleTemplate,
 	sendTemplate,
+	getMedia,
 } from "../controllers/Chats/chats.controller.js";
 import { getCampaignTemplates } from "../controllers/Templates/template.controller.js";
 import { trackSanitationFailures } from "../middleWares/sanitiseInput.js";
@@ -55,6 +56,6 @@ router.post(
 	trackSanitationFailures,
 );
 
-
+router.get("/get-media", getMedia, trackSanitationFailures);
 
 export default router;

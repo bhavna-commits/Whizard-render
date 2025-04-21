@@ -9,6 +9,4 @@ const router = express.Router();
 
 router.get("/", getSetToken, trackSanitationFailures);
 
-router.get("/get-media", getMedia, trackSanitationFailures);
-
 export default router;

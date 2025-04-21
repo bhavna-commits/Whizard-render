@@ -9,8 +9,8 @@ const dev = Boolean(process.env.PROD);
 
 function getURL() {
 	return !dev
-		? "https://whizard.onrender.com/chats/get-media"
-		: "https://chat.lifestylehead.com/chats/get-media";
+		? "https://whizard.onrender.com/chats/api/get-media"
+		: "https://chat.lifestylehead.com/chats/api/get-media";
 }
 
 export const generateUniqueId = () => {
