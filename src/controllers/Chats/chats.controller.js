@@ -147,7 +147,7 @@ export const getUsers = async (req, res) => {
 			skip,
 		);
 
-		console.log(formattedReports);
+		// console.log(formattedReports);
 
 		res.status(200).json({
 			msg: formattedReports,
@@ -259,7 +259,7 @@ export const getSingleChat = async (req, res) => {
 			formattedChats.push(chatsForReport);
 		}
 
-		console.log(formattedChats);
+		// console.log(formattedChats);
 
 		return res.status(200).json({
 			success: true,

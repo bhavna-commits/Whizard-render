@@ -462,7 +462,6 @@ export const editTemplate = async (req, res, next) => {
 			}
 		}
 
-		
 		// Update the template on Facebook
 		const updatedData = await updateTemplateOnFacebook(
 			originalTemplate,
@@ -644,11 +643,14 @@ export const getFaceBookTemplates = async (req, res) => {
 		const id = req.session?.user?.id || req.session?.addedUser?.owner;
 
 		// Fetch templates from MongoDB based on logged-in user
-		const mongoTemplates = await Template.find({ useradmin: id, deleted: false });
+		const mongoTemplates = await Template.find({
+			useradmin: id,
+			deleted: false,
+		});
 		// Fetch templates from Facebook Graph API
 		const facebookTemplatesResponse = await fetchFacebookTemplates(id);
 		const facebookTemplates = facebookTemplatesResponse.data;
-		console.log(facebookTemplates[ 0 ]);
+		console.log(facebookTemplates);
 		// Loop through the MongoDB templates
 		for (let mongoTemplate of mongoTemplates) {
 			// Find the matching template in the Facebook templates by name
@@ -684,6 +686,7 @@ export const getFaceBookTemplates = async (req, res) => {
 				) {
 					mongoTemplate.status = newStatus;
 					mongoTemplate.rejected_reason = rejectedReason;
+					mongoTemplate.name = matchingFacebookTemplate.name;
 					await mongoTemplate.save();
 				}
 			} else {

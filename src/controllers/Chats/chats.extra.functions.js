@@ -59,7 +59,7 @@ export const fetchAndFormatReports = async (
 		.limit(limit)
 		.lean();
 
-	console.log(chats);
+	// console.log(chats);
 
 	if (!chats || chats.length === 0) {
 		return [];
