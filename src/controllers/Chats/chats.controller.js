@@ -738,34 +738,59 @@ export const sendTemplate = async (req, res) => {
 export const getMedia = async (req, res) => {
 	try {
 		const { phoneId, mediaId } = req.query;
+		if (!phoneId || !mediaId) throw "Incomplete details provided";
 
-		console.log(phoneId, typeof phoneId, typeof mediaId);
-
-		if (!phoneId || !mediaId) {
-			throw "Incomplete details provided";
-		}
-
-		if (!isString(phoneId, mediaId)) throw "Invalid Input";
-
-		let user = await User.findOne({
+		// Find user and fetch the FB media URL + MIME type:
+		const user = await User.findOne({
 			"FB_PHONE_NUMBERS.phone_number_id": phoneId,
 		});
-
 		const { url, mime_type } = await getMediaUrl(
 			user.FB_ACCESS_TOKEN,
 			mediaId,
 		);
 
+		// Forward Range header if present:
+		const range = req.headers.range;
+		const upstreamHeaders = {
+			Authorization: `Bearer ${user.FB_ACCESS_TOKEN}`,
+			...(range && { Range: range }),
+		};
+
 		const fileRes = await axios.get(url, {
-			headers: { Authorization: `Bearer ${user.FB_ACCESS_TOKEN}` },
+			headers: upstreamHeaders,
 			responseType: "stream",
 		});
 
+		// CORS – allow embedding on other origins
+		res.set("Access-Control-Allow-Origin", "*");
+		res.set("Access-Control-Allow-Methods", "GET,OPTIONS");
+		res.set("Access-Control-Allow-Headers", "Content-Type,Range");
+		if (req.method === "OPTIONS") return res.sendStatus(200);
+
+		// Main headers
 		res.set("Content-Type", mime_type);
-		res.set("Content-Disposition", `inline; filename="${url}"`);
+		res.set(
+			"Content-Disposition",
+			`inline; filename="${path.basename(url)}"`,
+		);
+
+		// Partial‑content support
+		if (fileRes.status === 206) {
+			res.status(206);
+			res.set(
+				"Accept-Ranges",
+				fileRes.headers["accept-ranges"] || "bytes",
+			);
+			res.set("Content-Range", fileRes.headers["content-range"]);
+			res.set("Content-Length", fileRes.headers["content-length"]);
+		} else {
+			res.set("Content-Length", fileRes.headers["content-length"]);
+		}
+
+		// Stream the data
 		fileRes.data.pipe(res);
 	} catch (error) {
-		console.error("Error getting Media:", error.message || error);
+		console.error("Error getting Media:", error);
 		res.status(500).render("errors/chatsError");
 	}
 };
