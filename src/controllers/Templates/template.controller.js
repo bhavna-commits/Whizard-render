@@ -664,6 +664,8 @@ export const getFaceBookTemplates = async (req, res) => {
 			return map;
 		}, {});
 
+		console.log(fbTemplateMap);
+
 		// Prepare bulk operations to minimize database round-trips
 		const bulkOps = mongoTemplates
 			.map((mongoTpl) => {
