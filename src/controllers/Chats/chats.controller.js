@@ -38,6 +38,7 @@ import { generateUniqueId } from "../../utils/otpGenerator.js";
 import { sendTestMessage } from "../ContactList/campaign.functions.js";
 import ChatsTemp from "../../models/chatsTemp.model.js";
 import AddedUser from "../../models/addedUser.model.js";
+import Chats from "../../models/chats.model.js";
 
 dotenv.config();
 
@@ -455,7 +456,7 @@ export const sendMessages = async (req, res) => {
 			token,
 		});
 
-		const temp = new ChatsTemp({
+		const d = {
 			WABA_ID: user.WABA_ID,
 			FB_PHONE_ID: from,
 			useradmin: user.unique_id,
@@ -471,8 +472,11 @@ export const sendMessages = async (req, res) => {
 			type: "Chat",
 			media_type: mediatype,
 			agent: agentId,
-		});
+		};
+		const temp = new ChatsTemp(d);
+		const newChat = new Chats(d);
 		await temp.save();
+		await newChat.save();
 
 		await ActivityLogs.create({
 			useradmin: userId,

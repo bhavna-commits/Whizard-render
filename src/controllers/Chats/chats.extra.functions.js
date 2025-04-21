@@ -78,7 +78,7 @@ export const fetchAndFormatReports = async (
 			name: chat.contactName.toString(),
 			usertimestmp: chat.updatedAt,
 			campaignId: chat.campaignId || "",
-			is_read: chat.status === "READ" || false,
+			is_read: chat.status === "READ",
 		};
 	});
 

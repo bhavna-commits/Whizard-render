@@ -113,7 +113,7 @@ export const processTempStatuses = async () => {
 				{ $set: updateFields },
 			);
 		}
-		// await TempStatus.deleteMany({});
+		await TempStatus.deleteMany({});
 		// await Reports.deleteMany({
 		// 	$or: [
 		// 		{ WABA_ID: { $exists: false } }, // field doesn’t exist
@@ -197,7 +197,7 @@ export const processTempMessages = async () => {
 			);
 		}
 
-		// await TempMessage.deleteMany({});
+		await TempMessage.deleteMany({});
 		console.log("Temp messages processed and cleared.");
 	} catch (error) {
 		console.error("Error processing temp messages:", error);

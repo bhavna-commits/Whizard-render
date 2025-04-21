@@ -18,7 +18,7 @@ async function chatsUsers() {
 		// Retrieve all chats from chatsTemp, sorted by createdAt descending (newest first)
 		const chats = await chatsTempCollection
 			.find()
-			.sort({ createdAt: -1 })
+			.sort({ updatedAt: -1 })
 			.toArray();
 		console.log("Chats from temp:", chats);
 
