@@ -66,13 +66,11 @@ export const getSetToken = async (req, res) => {
 
 		// fetch user record
 		const user = await User.findOne({ unique_id: ownerId });
-		if (!user)
-			return res.render("errors/chatsError");
+		if (!user) return res.render("errors/chatsError");
 
 		// pick phone number
 		const phone = user.FB_PHONE_NUMBERS.find((f) => f.selected);
-		if (!phone)
-			return res.render("errors/chatsError");
+		if (!phone) return res.render("errors/chatsError");
 
 		// resolve permissionValue
 		let permissionValue;
@@ -739,17 +737,17 @@ export const sendTemplate = async (req, res) => {
 
 export const getMedia = async (req, res) => {
 	try {
-		const { token: oldToken, mediaId } = req.query;
+		const { phoneId, mediaId } = req.query;
 
-		if (!oldToken || !mediaId) {
-			throw "No token or mediaId provided";
+		if (!phoneId || !mediaId) {
+			throw "Incomplete details provided";
 		}
 
-		if (!isString(oldToken, mediaId)) throw "Invalid Input";
+		if (!isString(phoneId, mediaId)) throw "Invalid Input";
 
-		const { userId } = await getUserIdFromToken(oldToken);
-
-		let user = await User.findOne({ unique_id: userId });
+		let user = await User.findOne({
+			"FB_PHONE_NUMBERS.phone_number_id": phoneId,
+		});
 
 		const { url, mime_type } = await getMediaUrl(
 			user.FB_ACCESS_TOKEN,

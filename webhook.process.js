@@ -113,7 +113,7 @@ export const processTempStatuses = async () => {
 				{ $set: updateFields },
 			);
 		}
-		await TempStatus.deleteMany({});
+		// await TempStatus.deleteMany({});
 		// await Reports.deleteMany({
 		// 	$or: [
 		// 		{ WABA_ID: { $exists: false } }, // field doesn’t exist
