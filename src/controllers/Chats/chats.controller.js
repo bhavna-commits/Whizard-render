@@ -738,59 +738,54 @@ export const sendTemplate = async (req, res) => {
 export const getMedia = async (req, res) => {
 	try {
 		const { phoneId, mediaId } = req.query;
-		if (!phoneId || !mediaId) throw "Incomplete details provided";
+		if (!phoneId || !mediaId) {
+			return res.status(400).send("Incomplete details provided");
+		}
 
-		// Find user and fetch the FB media URL + MIME type:
 		const user = await User.findOne({
 			"FB_PHONE_NUMBERS.phone_number_id": phoneId,
 		});
-		const { url, mime_type } = await getMediaUrl(
-			user.FB_ACCESS_TOKEN,
-			mediaId,
-		);
 
-		// Forward Range header if present:
-		const range = req.headers.range;
-		const upstreamHeaders = {
-			Authorization: `Bearer ${user.FB_ACCESS_TOKEN}`,
-			...(range && { Range: range }),
-		};
+		if (!user) return res.status(404).send("User not found");
 
-		const fileRes = await axios.get(url, {
-			headers: upstreamHeaders,
-			responseType: "stream",
+		const mediaInfo = await getMediaUrl(user.FB_ACCESS_TOKEN, mediaId);
+		if (!mediaInfo.success || !mediaInfo.url) {
+			throw mediaInfo.message || "Media URL not found";
+		}
+
+		const { url } = mediaInfo;
+
+		// Fetch actual media as binary stream (like the legacy `request`)
+		const mediaResponse = await axios.get(url, {
+			responseType: "arraybuffer", // grab binary, not stream here for cleaner fallback
+			headers: {
+				Authorization: `Bearer ${user.FB_ACCESS_TOKEN}`,
+				"User-Agent":
+					"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/68.0 Safari/537.36",
+			},
 		});
 
-		// CORS – allow embedding on other origins
-		res.set("Access-Control-Allow-Origin", "*");
-		res.set("Access-Control-Allow-Methods", "GET,OPTIONS");
-		res.set("Access-Control-Allow-Headers", "Content-Type,Range");
-		if (req.method === "OPTIONS") return res.sendStatus(200);
+		const contentType =
+			mediaResponse.headers["content-type"] || "application/octet-stream";
 
-		// Main headers
-		res.set("Content-Type", mime_type);
-		res.set(
+		res.setHeader("Content-Type", contentType);
+		res.setHeader(
 			"Content-Disposition",
 			`inline; filename="${path.basename(url)}"`,
 		);
+		res.setHeader("Access-Control-Allow-Origin", "*");
+		res.setHeader("Access-Control-Allow-Methods", "GET,OPTIONS");
+		res.setHeader("Access-Control-Allow-Headers", "Content-Type,Range");
+		res.setHeader(
+			"Access-Control-Expose-Headers",
+			"Accept-Ranges,Content-Range,Content-Length",
+		);
 
-		// Partial‑content support
-		if (fileRes.status === 206) {
-			res.status(206);
-			res.set(
-				"Accept-Ranges",
-				fileRes.headers["accept-ranges"] || "bytes",
-			);
-			res.set("Content-Range", fileRes.headers["content-range"]);
-			res.set("Content-Length", fileRes.headers["content-length"]);
-		} else {
-			res.set("Content-Length", fileRes.headers["content-length"]);
-		}
-
-		// Stream the data
-		fileRes.data.pipe(res);
-	} catch (error) {
-		console.error("Error getting Media:", error);
-		res.status(500).render("errors/chatsError");
+		return res.send(mediaResponse.data);
+	} catch (err) {
+		console.error("Error getting media:", err);
+		return res.redirect(
+			"https://whizardapi.com/wp-content/uploads/thegem-logos/logo_08af4735e93afc82f50321cd58f0d703_2x.png",
+		);
 	}
 };
