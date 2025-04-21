@@ -751,8 +751,6 @@ export const getMedia = async (req, res) => {
 			"FB_PHONE_NUMBERS.phone_number_id": phoneId,
 		});
 
-		console.log(user);
-
 		const { url, mime_type } = await getMediaUrl(
 			user.FB_ACCESS_TOKEN,
 			mediaId,
