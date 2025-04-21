@@ -63,9 +63,10 @@ let TempStatus,
 
 export const processTempStatuses = async () => {
 	try {
-		const tempStatuses = await TempStatus.find().toArray();
+		const tempStatuses = await TempStatus.find().sort({ updatedAt: -1 }).toArray();
 		// console.log(tempStatuses);
 		for (const temp of tempStatuses) {
+			if (temp.status === "SENT") continue;
 			const user = await User.findOne({ WABA_ID: temp.wabaId });
 			if (!user) {
 				console.warn(

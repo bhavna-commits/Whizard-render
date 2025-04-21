@@ -739,6 +739,8 @@ export const getMedia = async (req, res) => {
 	try {
 		const { phoneId, mediaId } = req.query;
 
+		console.log(phoneId, typeof phoneId, typeof mediaId);
+
 		if (!phoneId || !mediaId) {
 			throw "Incomplete details provided";
 		}
@@ -748,6 +750,8 @@ export const getMedia = async (req, res) => {
 		let user = await User.findOne({
 			"FB_PHONE_NUMBERS.phone_number_id": phoneId,
 		});
+
+		console.log(user);
 
 		const { url, mime_type } = await getMediaUrl(
 			user.FB_ACCESS_TOKEN,
