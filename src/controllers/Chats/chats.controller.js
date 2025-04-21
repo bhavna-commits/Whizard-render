@@ -766,9 +766,6 @@ export const getMedia = async (req, res) => {
 		fileRes.data.pipe(res);
 	} catch (error) {
 		console.error("Error getting Media:", error.message || error);
-		res.status(500).json({
-			message: error.message || error,
-			success: false,
-		});
+		res.status(500).render("errors/chatsError");
 	}
 };
