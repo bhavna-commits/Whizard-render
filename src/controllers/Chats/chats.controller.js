@@ -231,7 +231,7 @@ export const getSingleChat = async (req, res) => {
 			useradmin: userId,
 			recipientPhone: wa_id,
 		})
-			.sort({ createdAt: -1 })
+			.sort({ updatedAt: -1 })
 			.skip(skip)
 			.limit(limit);
 
