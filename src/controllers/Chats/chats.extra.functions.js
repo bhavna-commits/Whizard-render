@@ -54,10 +54,9 @@ export const fetchAndFormatReports = async (
 
 	// If a search term is provided, add $or for contactName / wa_id
 	if (searchTerm) {
-		const regex = new RegExp(searchTerm, "imsx");
 		query.$or = [
-			{ contactName: { $regex: regex } },
-			{ wa_id: { $regex: regex } },
+			{ contactName: { $regex: searchTerm, $options: "imsx" } },
+			{ wa_id: { $regex: searchTerm, $options: "imsx" } },
 		];
 	}
 
