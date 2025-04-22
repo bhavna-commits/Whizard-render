@@ -3,8 +3,8 @@ import mongoose, { Schema } from "mongoose";
 const ChatsTempSchema = new mongoose.Schema(
 	{
 		WABA_ID: { type: String, required: true },
-		FB_PHONE_ID: { type: String, required: true },
-		useradmin: { type: String, required: true, index: true },
+		FB_PHONE_ID: { type: String, required: true, index: true },
+		useradmin: { type: String, required: true },
 		unique_id: { type: String, required: true },
 		campaignId: {
 			type: String,
@@ -38,6 +38,7 @@ const ChatsTempSchema = new mongoose.Schema(
 		updatedAt: {
 			type: Number,
 			default: () => Date.now(),
+			index: true,
 		},
 		deleted: { type: Boolean, default: false, index: true },
 		messageId: { type: String, required: true, unique: true },

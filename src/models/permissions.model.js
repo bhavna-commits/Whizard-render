@@ -4,9 +4,9 @@ const Schema = mongoose.Schema;
 
 const permissionSchema = new Schema(
 	{
-		useradmin: { type: String, ref: "User", required: true },
+		useradmin: { type: String, ref: "User", required: true, index: true },
 		name: { type: String, required: true },
-		unique_id: { type: String, required: true },
+		unique_id: { type: String, required: true, index: true },
 		deleted: { type: Boolean, default: false },
 		dashboard: {
 			connectNow: { type: Boolean, default: false },

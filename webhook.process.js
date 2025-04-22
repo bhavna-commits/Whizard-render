@@ -44,7 +44,7 @@ const connectDB = async () => {
 export const processTempStatuses = async () => {
 	try {
 		const tempStatuses = await TempStatus.find()
-			.sort({ updatedAt: -1 })
+			.sort({ createdAt: -1 })
 			.toArray();
 		// console.log(tempStatuses);
 		for (const temp of tempStatuses) {
@@ -96,7 +96,7 @@ export const processTempStatuses = async () => {
 				{ $set: updateFields },
 			);
 		}
-		await TempStatus.deleteMany({});
+		// await TempStatus.deleteMany({});
 		// await Reports.deleteMany({
 		// 	$or: [
 		// 		{ WABA_ID: { $exists: false } }, // field doesn’t exist
@@ -180,7 +180,7 @@ export const processTempMessages = async () => {
 			);
 		}
 
-		await TempMessage.deleteMany({});
+		// await TempMessage.deleteMany({});
 		console.log("Temp messages processed and cleared.");
 	} catch (error) {
 		console.error("Error processing temp messages:", error);
@@ -211,7 +211,7 @@ export const processTempTemplateRejections = async () => {
 
 export const processChatsToChatsUsers = async () => {
 	try {
-		const chats = await ChatsTemp.find().sort({ updatedAt: -1 }).toArray();
+		const chats = await ChatsTemp.find().sort({ updatedAt: 1 }).toArray();
 
 		for (const chat of chats) {
 			const existingEntry = await ChatsUsers.findOne({
@@ -272,6 +272,8 @@ export const processChatsToChatsUsers = async () => {
 			}
 		}
 
+		// await ChatsTemp.deleteMany({});
+
 		console.log(
 			"Processed and cleared temporary chats at",
 			new Date().toLocaleString(),
@@ -285,28 +287,19 @@ export const processAllTempEvents = async () => {
 	await connectDB();
 	const db = mongoose.connection.db;
 	TempStatus = db.collection("tempstatuses");
-	// console.log(TempStatus);
 	Reports = db.collection("campaignreports");
-	// console.log(Reports);
 	User = db.collection("users");
-	// console.log(User);
 	Campaign = db.collection("campaigns");
-	// console.log(Campaign);
 	TempMessage = db.collection("tempmessages");
-	// console.log(TempMessage);
 	Chat = db.collection("chats");
-	// console.log(Chat);
 	ChatsTemp = db.collection("chatstemps");
 	ChatsUsers = db.collection("chatsusers");
 	Contacts = db.collection("contacts");
-	// console.log(Contacts);
 	TempTemplateRejection = db.collection("temptemplaterejections");
-	// console.log(TempTemplateRejection);
 	Template = db.collection("templates");
-	// console.log(Template);
-	await processTempStatuses();
-	await processTempMessages();
-	await processTempTemplateRejections();
+	// await processTempStatuses();
+	// await processTempMessages();
+	// await processTempTemplateRejections();
 	await processChatsToChatsUsers();
 	mongoose.connection.close();
 };

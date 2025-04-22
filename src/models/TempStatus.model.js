@@ -10,7 +10,7 @@ const tempStatusSchema = new mongoose.Schema({
 	error: { type: Array, default: [] },
 	// Optionally store extra raw data for later processing
 	rawData: { type: Object, required: false },
-	createdAt: { type: Date, default: Date.now },
+	createdAt: { type: Date, default: Date.now, index: true },
 });
 
 export default mongoose.model("TempStatus", tempStatusSchema);

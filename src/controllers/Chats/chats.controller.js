@@ -310,7 +310,7 @@ export const searchUsers = async (req, res) => {
 			phoneNumberId,
 			0,
 			search,
-		);;
+		);
 
 		res.status(200).json({ msg: formattedReports, success: true, token });
 	} catch (error) {

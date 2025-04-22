@@ -2,20 +2,18 @@ import mongoose from "mongoose";
 
 const CampaignSchema = new mongoose.Schema(
 	{
-		name: { type: String, required: true, index: true },
+		name: { type: String, required: true },
 		useradmin: { type: String, required: true, index: true },
 		unique_id: { type: String, required: true, index: true },
 		templateId: {
 			type: String,
 			ref: "Template",
 			required: true,
-			index: true,
 		},
 		contactListId: {
 			type: String,
 			ref: "ContactList",
 			required: true,
-			index: true,
 		},
 		variables: { type: Map },
 		scheduledAt: { type: Number, index: true },

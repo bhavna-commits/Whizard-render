@@ -74,7 +74,7 @@ export const fetchAndFormatReports = async (
 		const isRecent =
 			chat.lastReceive && now - chat.lastReceive < 24 * 3600_000;
 		return {
-			lastmessage: chat.lastMessage || "No recent reply",
+			lastmessage: chat.lastMessage || chat?.media_type ||  "No recent reply",
 			wa_id: chat.wa_id,
 			status: isRecent ? 0 : 1, // 0 = new/recent, 1 = older
 			name: chat.contactName.toString(),
