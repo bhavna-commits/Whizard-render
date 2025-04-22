@@ -240,6 +240,27 @@ export const saveTemplateToDatabase = async (
 			newTemplate.template_id = data.id;
 		}
 
+		if (req.file) {
+			const headerComponent = originalTemplate.components.find(
+				(component) => component.type === "HEADER",
+			);
+			if (headerComponent) {
+				let fileUrl = `${url}/uploads/${id}/${req.file?.filename}`;
+				// Depending on the header format, update the header_url with the file path
+				if (headerComponent.format === "IMAGE") {
+					console.log("img");
+					headerComponent.example.header_url = fileUrl;
+				} else if (headerComponent.format === "VIDEO") {
+					console.log("vid");
+					headerComponent.example.header_url = fileUrl;
+					console.log(headerComponent.example.header_url);
+				} else if (headerComponent.format === "DOCUMENT") {
+					console.log("doc");
+					headerComponent.example.header_url = fileUrl;
+				}
+			}
+		}
+
 		// if (req.file) {
 		// 	const mediaUrl = await getMediaUrl(filePath, accessToken);
 		// }

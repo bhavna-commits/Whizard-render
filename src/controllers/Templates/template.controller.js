@@ -60,6 +60,7 @@ export const createTemplate = async (req, res, next) => {
 			url,
 		);
 
+		
 		await ActivityLogs.create({
 			useradmin: id,
 			unique_id: generateUniqueId(),
