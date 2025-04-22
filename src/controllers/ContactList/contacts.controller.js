@@ -58,7 +58,7 @@ export const updateContact = async (req, res, next) => {
 		// Find the contact by ID and update the fields
 		const updatedContact = await ContactList.findByIdAndUpdate(
 			contactId,
-			{ Name, tags, validated },
+			{ Name: name, tags, validated },
 			{ new: true },
 		);
 
@@ -219,7 +219,7 @@ export const editContact = async (req, res, next) => {
 		if (!id || !updatedData) {
 			return res.status(401).json({
 				success: false,
-				message: "front-end is not providing complete data",
+				message: "Complete Data not Provided",
 			});
 		}
 		if (!isObject(updatedData)) return next();
@@ -410,6 +410,7 @@ export const createContact = async (req, res, next) => {
 		const numberExists = await Contacts.findOne({
 			contactId,
 			wa_id: `${countryCode.slice(1)}${wa_id}`,
+			subscribe: 1
 		});
 
 		if (numberExists) {
