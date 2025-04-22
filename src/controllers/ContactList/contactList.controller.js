@@ -751,15 +751,17 @@ export const searchContactLists = async (req, res, next) => {
 		const trimmedQuery = query.trim();
 		const escapeRegex = (text) =>
 			text.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
-		const escapedQuery = escapeRegex(trimmedQuery);
 
-		// Aggregation pipeline with conditional regex search
+		let escapedQuery = escapeRegex(trimmedQuery);
+
+		// Replace spaces with .*, so "john doe" becomes "john.*doe"
+		escapedQuery = escapedQuery.replace(/\s+/g, ".*");
+
 		const matchStage = {
 			useradmin: userId,
 			contact_status: { $ne: 0 },
 		};
 
-		// Only add regex search if query is not empty
 		if (escapedQuery) {
 			matchStage.contalistName = {
 				$regex: escapedQuery,
