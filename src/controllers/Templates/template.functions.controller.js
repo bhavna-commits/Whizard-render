@@ -179,10 +179,10 @@ export const saveTemplateToDatabase = async (
 			language: selectedLanguageCode,
 		});
 
+		let headerComponent;
+
 		// Check if there is a file uploaded and update the corresponding header component with the file URL
 		if (req.file) {
-			// let filePath = `/uploads/${id}/${req.file?.filename}`;
-			// filePath = encodeURI(filePath);
 
 			let filePath = path.join(
 				__dirname,
@@ -193,25 +193,13 @@ export const saveTemplateToDatabase = async (
 
 			const user = await User.findOne({ unique_id: id });
 
-			// const phoneNumberId = user.FB_PHONE_NUMBERS.find(
-			// 	(u) => u.selected == true,
-			// );
 			const accessToken = user.FB_ACCESS_TOKEN;
 
-			// filePath = await uploadAndRetrieveMediaURL(
-			// 	accessToken,
-			// 	phoneNumberId,
-			// 	filePath,
-			// 	mediaType,
-			// 	req.file?.filename,
-			// );
 			const appId = process.env.FB_APP_ID;
 
 			filePath = await uploadMediaResumable(accessToken, appId, filePath);
 
-			// filePath = await getMediaUrl(filePath, accessToken);
-
-			const headerComponent = newTemplate.components.find(
+			headerComponent = newTemplate.components.find(
 				(component) => component.type === "HEADER",
 			);
 
@@ -241,9 +229,6 @@ export const saveTemplateToDatabase = async (
 		}
 
 		if (req.file) {
-			const headerComponent = originalTemplate.components.find(
-				(component) => component.type === "HEADER",
-			);
 			if (headerComponent) {
 				let fileUrl = `${url}/uploads/${id}/${req.file?.filename}`;
 				// Depending on the header format, update the header_url with the file path
@@ -261,10 +246,6 @@ export const saveTemplateToDatabase = async (
 			}
 		}
 
-		// if (req.file) {
-		// 	const mediaUrl = await getMediaUrl(filePath, accessToken);
-		// }
-		// Return the saved template object after successful saving
 		return newTemplate;
 	} catch (error) {
 		console.error("Error saving template to database:", error);
