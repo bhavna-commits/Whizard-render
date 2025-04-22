@@ -290,7 +290,9 @@ export const getSingleChat = async (req, res) => {
 export const searchUsers = async (req, res) => {
 	try {
 		const oldToken = checkToken(req);
-		const { userId, token } = await getUserIdFromToken(oldToken);
+		const { userId, token, permission, agentId } = await getUserIdFromToken(
+			oldToken,
+		);
 
 		const search = req.body?.search;
 		const phoneNumberId = req.body?.phoneNumberId;
@@ -302,38 +304,13 @@ export const searchUsers = async (req, res) => {
 		}
 		if (!isString(search)) throw "Invalid Input";
 
-		const reports = await Report.find({
-			useradmin: userId,
-			FB_PHONE_ID: phoneNumberId,
-			$or: [
-				{ contactName: { $regex: search, $options: "imsx" } },
-				{ recipientPhone: { $regex: search, $options: "imsx" } },
-			],
-		})
-			.sort({ updatedAt: -1 })
-			.limit(10)
-			.select("contactName recipientPhone status replyContent updatedAt");
-
-		if (!reports || reports.length === 0) {
-			return res.status(400).json({
-				message: "No matching reports found for the search criteria",
-				success: false,
-			});
-		}
-
-		const formattedReports = reports.map((report) => {
-			const isReplyRecent =
-				report.replyContent &&
-				Date.now() - report.updatedAt < 24 * 60 * 60 * 1000;
-			return {
-				lastmessage: report.replyContent || "No recent reply",
-				wa_id: report.recipientPhone,
-				status: isReplyRecent ? 1 : 0,
-				name: report.contactName,
-				usertimestmp: report.updatedAt,
-				is_read: report.status === "READ" ? true : false,
-			};
-		});
+		const formattedReports = await fetchAndFormatReports(
+			agentId,
+			permission?.allChats,
+			phoneNumberId,
+			0,
+			search,
+		);;
 
 		res.status(200).json({ msg: formattedReports, success: true, token });
 	} catch (error) {

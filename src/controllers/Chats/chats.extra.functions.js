@@ -40,41 +40,44 @@ export const determineMediaType = (url) => {
 
 export const fetchAndFormatReports = async (
 	agentId,
-	permission,
+	permissionAllChats,
 	phoneNumberId,
 	skip = 0,
+	searchTerm = "",
 	limit = 10,
 ) => {
-	// Query the ChatsUsers collection for the given useradmin and FB_PHONE_ID
-	let query = {
-		FB_PHONE_ID: phoneNumberId,
-	};
-	if (!permission) {
+	// Build base query
+	const query = { FB_PHONE_ID: phoneNumberId };
+	if (!permissionAllChats) {
 		query.agent = agentId;
 	}
 
+	// If a search term is provided, add $or for contactName / wa_id
+	if (searchTerm) {
+		const regex = new RegExp(searchTerm, "imsx");
+		query.$or = [
+			{ contactName: { $regex: regex } },
+			{ wa_id: { $regex: regex } },
+		];
+	}
+
+	// Pull raw chat docs
 	const chats = await ChatsUsers.find(query)
 		.sort({ updatedAt: -1 })
 		.skip(skip)
 		.limit(limit)
 		.lean();
 
-	// console.log(chats);
+	if (!chats.length) return [];
 
-	if (!chats || chats.length === 0) {
-		return [];
-	}
 	const now = Date.now();
-
-	const formattedReports = chats.map((chat) => {
-		let status = 1;
-		if (chat.lastReceive && now - chat.lastReceive < 24 * 60 * 60 * 1000) {
-			status = 0;
-		}
+	const formatted = chats.map((chat) => {
+		const isRecent =
+			chat.lastReceive && now - chat.lastReceive < 24 * 3600_000;
 		return {
 			lastmessage: chat.lastMessage || "No recent reply",
 			wa_id: chat.wa_id,
-			status,
+			status: isRecent ? 0 : 1, // 0 = new/recent, 1 = older
 			name: chat.contactName.toString(),
 			usertimestmp: chat.updatedAt,
 			campaignId: chat.campaignId || "",
@@ -82,8 +85,8 @@ export const fetchAndFormatReports = async (
 		};
 	});
 
-	// Final sort from latest to oldest by updatedAt (if needed)
-	return formattedReports.sort((a, b) => b.usertimestmp - a.usertimestmp);
+	// Already sorted by updatedAt descending; can return directly
+	return formatted;
 };
 
 export const createTextPayload = (to, body) => ({
