@@ -101,6 +101,7 @@ export const getSetToken = async (req, res) => {
 			access: permissions ? accessData : user.access,
 			phoneNumberId: phone.phone_number_id,
 			phoneNumberName: phone.friendly_name,
+			phoneNumber: phone.number,
 		});
 	} catch (error) {
 		console.error("Error in getSetToken:", error);
