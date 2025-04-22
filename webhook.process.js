@@ -1,7 +1,6 @@
 import dotenv from "dotenv";
 import crypto from "crypto";
 import mongoose from "mongoose";
-import axios from "axios";
 
 dotenv.config();
 
@@ -17,26 +16,6 @@ export const generateUniqueId = () => {
 	return crypto.randomBytes(5).toString("hex").slice(0, 10);
 };
 
-/**
- * Fetches media metadata (URL, MIME type, filename) for a given media ID.
- * @param {string} mediaId - The media ID from the webhook payload.
- * @returns {Promise<object>} - Resolves to media metadata.
- */
-async function fetchMediaUrl(mediaId, ACCESS_TOKEN) {
-	const graphUrl = `https://graph.facebook.com/${process.env.FB_GRAPH_VERSION}/${mediaId}`;
-	const response = await axios.get(graphUrl, {
-		headers: { Authorization: `Bearer ${ACCESS_TOKEN}` },
-		responseType: "json",
-	});
-
-	// console.log(response.data);
-	return {
-		url: response.data.url,
-		mimeType: response.data.mime_type,
-		filename: response.data.filename || null,
-	};
-}
-
 let TempStatus,
 	Reports,
 	User,
@@ -46,24 +25,27 @@ let TempStatus,
 	ChatsTemp,
 	Contacts,
 	TempTemplateRejection,
-	Template;
+	Template,
+	ChatsUsers;
 
-// const connectDB = async () => {
-// 	try {
-// 		await mongoose.connect(process.env.MONGO_URI, {
-// 			useNewUrlParser: true,
-// 			useUnifiedTopology: true,
-// 		});
-// 		console.log("MongoDB Connected...");
-// 	} catch (err) {
-// 		console.error("Error connecting to MongoDB:", err.message);
-// 		process.exit(1);
-// 	}
-// };
+const connectDB = async () => {
+	try {
+		await mongoose.connect(process.env.MONGO_URI, {
+			useNewUrlParser: true,
+			useUnifiedTopology: true,
+		});
+		console.log("MongoDB Connected...");
+	} catch (err) {
+		console.error("Error connecting to MongoDB:", err.message);
+		process.exit(1);
+	}
+};
 
 export const processTempStatuses = async () => {
 	try {
-		const tempStatuses = await TempStatus.find().sort({ updatedAt: -1 }).toArray();
+		const tempStatuses = await TempStatus.find()
+			.sort({ updatedAt: -1 })
+			.toArray();
 		// console.log(tempStatuses);
 		for (const temp of tempStatuses) {
 			if (temp.status === "SENT") continue;
@@ -227,8 +209,80 @@ export const processTempTemplateRejections = async () => {
 	}
 };
 
+export const processChatsToChatsUsers = async () => {
+	try {
+		const chats = await ChatsTemp.find().sort({ updatedAt: -1 }).toArray();
+
+		for (const chat of chats) {
+			const existingEntry = await ChatsUsers.findOne({
+				FB_PHONE_ID: chat.FB_PHONE_ID,
+				wa_id: chat.recipientPhone,
+			});
+
+			// Normalize incoming agent into an array
+			const incomingAgents = Array.isArray(chat.agent)
+				? chat.agent
+				: [chat.agent];
+
+			// Base update data for timestamps & last messages
+			const baseSet = {
+				updatedAt: chat.updatedAt,
+				lastMessage:
+					chat.replyContent || chat.textSent || chat.messageTemplate,
+			};
+
+			if (chat.status === "REPLIED") {
+				baseSet.lastReceive = chat.updatedAt;
+				baseSet.messageStatus = "REPLIED";
+			} else {
+				baseSet.lastSend = chat.updatedAt;
+			}
+
+			if (existingEntry) {
+				// Push new agents onto the existing array (avoid dupes with $addToSet if desired)
+				await ChatsUsers.updateOne(
+					{ _id: existingEntry._id },
+					{
+						$set: baseSet,
+						// Choose one:
+						// $push: { agent: { $each: incomingAgents } }
+						$addToSet: { agent: { $each: incomingAgents } },
+					},
+				);
+				console.log("Appended agents to entry _id:", existingEntry._id);
+			} else {
+				// First time: create with agent array
+				const newEntry = {
+					FB_PHONE_ID: chat.FB_PHONE_ID,
+					useradmin: chat.useradmin,
+					unique_id: chat.unique_id,
+					contactName: chat.contactName,
+					campaignId: chat.campaignId || "",
+					wa_id: chat.recipientPhone,
+					createdAt: chat.createdAt,
+					updatedAt: chat.updatedAt,
+					lastMessage: baseSet.lastMessage,
+					lastSend: chat.status === "REPLIED" ? 0 : chat.updatedAt,
+					lastReceive: chat.status === "REPLIED" ? chat.updatedAt : 0,
+					messageStatus: chat.status,
+					agent: incomingAgents,
+				};
+				await ChatsUsers.create(newEntry);
+				console.log("Created new entry with agents:", incomingAgents);
+			}
+		}
+
+		console.log(
+			"Processed and cleared temporary chats at",
+			new Date().toLocaleString(),
+		);
+	} catch (error) {
+		console.error("Error processing chat cron job:", error);
+	}
+};
+
 export const processAllTempEvents = async () => {
-	// await connectDB();
+	await connectDB();
 	const db = mongoose.connection.db;
 	TempStatus = db.collection("tempstatuses");
 	// console.log(TempStatus);
@@ -243,6 +297,7 @@ export const processAllTempEvents = async () => {
 	Chat = db.collection("chats");
 	// console.log(Chat);
 	ChatsTemp = db.collection("chatstemps");
+	ChatsUsers = db.collection("chatsusers");
 	Contacts = db.collection("contacts");
 	// console.log(Contacts);
 	TempTemplateRejection = db.collection("temptemplaterejections");
@@ -252,7 +307,8 @@ export const processAllTempEvents = async () => {
 	await processTempStatuses();
 	await processTempMessages();
 	await processTempTemplateRejections();
-	// mongoose.connection.close();
+	await processChatsToChatsUsers();
+	mongoose.connection.close();
 };
 
 // processAllTempEvents();

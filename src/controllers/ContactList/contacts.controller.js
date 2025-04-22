@@ -750,12 +750,12 @@ export const generateTableAndCheckFields = (
 export const getFilteredContacts = async (req, res, next) => {
 	try {
 		const id = req.params?.id;
-		const page = parseInt(req.query.page) || 1;
+		const page = parseInt(req.query?.page) || 1;
 		const limit = 6;
 		const skip = (page - 1) * limit;
 
 		// Get filters from the request body
-		const filters = req.body.filters || [];
+		const filters = req.body?.filters || [];
 
 		if (!isString(id)) return next();
 		if (!isNumber(page)) return next();
@@ -775,7 +775,7 @@ export const getFilteredContacts = async (req, res, next) => {
 				function toLocalMidnightTs(dateStr) {
 					const [y, m, d] = dateStr.split("-").map(Number);
 					// new Date(year, monthIndex, day) is local 00:00
-					return new Date(y, m - 1, d).getTime();
+					return new Date(y, m - 1, d + 1).getTime();
 				}
 
 				if (!startDate) {

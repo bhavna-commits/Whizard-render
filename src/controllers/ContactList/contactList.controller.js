@@ -746,17 +746,12 @@ export const searchContactLists = async (req, res, next) => {
 	if (!isString(query)) return next();
 	if (!isNumber(page)) return next();
 
-	console.log("Searching for:", query);
-	console.log("User ID:", userId);
-
 	try {
 		// Trim spaces and escape regex special characters
 		const trimmedQuery = query.trim();
 		const escapeRegex = (text) =>
 			text.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
 		const escapedQuery = escapeRegex(trimmedQuery);
-
-		// console.log("Escaped Query:", escapedQuery); // Debugging the query
 
 		// Aggregation pipeline with conditional regex search
 		const matchStage = {
