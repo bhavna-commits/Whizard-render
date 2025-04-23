@@ -27,6 +27,7 @@ export const getDashboard = async (req, res) => {
 		// Fetch updated phone numbers
 		// user = await getPhoneNumbers(user);
 
+		
 		const permissions = req.session?.addedUser?.permissions;
 		const renderData = {
 			help,
