@@ -95,9 +95,9 @@ export const getSetToken = async (req, res) => {
 				name: added?.name || req.session?.user?.name,
 				color: added?.color || req.session.user?.color,
 				access: permissions ? accessData : user.access,
-				phoneNumberId: null,
-				phoneNumberName: null,
-				phoneNumber: null,
+				phoneNumberId: "null",
+				phoneNumberName: "null",
+				phoneNumber: "null",
 			});
 		}
 
