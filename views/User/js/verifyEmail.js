@@ -54,7 +54,7 @@ document.addEventListener("DOMContentLoaded", () => {
 		const verifyText = document.getElementById("verifyText");
 		const verifySpinner = document.getElementById("verifySpinner");
 		verifyText.style.display = "none";
-		verifySpinner.style.display = "inline-block";
+		verifySpinner.style.display = "block";
 		document.getElementById("verifyOtp").disabled = true;
 		console.log(document.getElementById("email").value);
 
@@ -67,21 +67,23 @@ document.addEventListener("DOMContentLoaded", () => {
 				},
 				body: JSON.stringify({
 					otp,
-					number: document.getElementById("email").value,
+					email: document.getElementById("email").value,
 				}),
 			});
 
 			const data = await response.json();
 
-			if (response.ok) {
+			console.log(data);
+
+			if (data.success) {
 				// OTP verified, redirect or show success message
 				window.location.href = "/about";
 			} else {
-				throw new Error(data.message);
+				throw data;
 			}
 		} catch (error) {
 			// Show error message from the backend
-			verifyText.style.display = "inline-block";
+			verifyText.style.display = "block";
 			verifySpinner.style.display = "none";
 			document.getElementById("verifyOtp").disabled = false;
 			verifyText.textContent = error.message;
@@ -151,13 +153,13 @@ document.addEventListener("DOMContentLoaded", () => {
 						"Content-Type": "application/json",
 					},
 					body: JSON.stringify({
-						number: document.getElementById("email").value,
+						email: document.getElementById("email").value,
 					}),
 				});
 
 				const data = await response.json();
 
-				if (!response.ok) {
+				if (!data.success) {
 					// Show error message
 					messageElement.classList.add("alert-danger");
 					messageElement.classList.remove("alert-success");
@@ -175,7 +177,7 @@ document.addEventListener("DOMContentLoaded", () => {
 					messageElement.style.display = "none";
 				}, 5000);
 			} catch (error) {
-				toast("error",error.message); // Alert backend error message
+				toast("error", error.message); // Alert backend error message
 			}
 		}
 	});

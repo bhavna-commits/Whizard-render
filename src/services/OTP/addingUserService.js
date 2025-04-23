@@ -17,7 +17,7 @@ export default async function sendAddUserMail(name, invitationLink, email) {
 	const mailOptions = {
 		from: process.env.EMAIL_USER,
 		to: email,
-		subject: "Invitation to Join Whizz",
+		subject: "Invitation to Join Whizard",
 		html: `
                 <html>
                     <body style="background-color: #f4f7fc; font-family: 'Figtree', sans-serif; padding: 20px;">

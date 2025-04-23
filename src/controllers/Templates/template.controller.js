@@ -422,6 +422,7 @@ export const editTemplate = async (req, res, next) => {
 		originalTemplate.selectedLanguageCode = selectedLanguageCode;
 		originalTemplate.url = url;
 		originalTemplate.components = components;
+		originalTemplate.status = "Pending";
 
 		const user = await User.findOne({ unique_id: id });
 

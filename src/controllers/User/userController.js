@@ -97,6 +97,9 @@ export const generateOTP = async (req, res, next) => {
 
 export const verifyEmail = async (req, res, next) => {
 	const { otp, email } = req.body;
+
+	console.log(otp, email);
+
 	if (!otp || !email) {
 		return res.json({
 			success: false,
@@ -108,6 +111,8 @@ export const verifyEmail = async (req, res, next) => {
 
 	try {
 		const tempUser = req.session?.tempUser;
+
+		console.log(tempUser);
 
 		if (!tempUser) {
 			return res.status(400).json({

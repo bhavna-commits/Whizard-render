@@ -706,11 +706,16 @@ export const getList = async (req, res) => {
 export const getContactList = async (req, res) => {
 	try {
 		const id = req.session?.user?.id || req.session?.addedUser?.owner;
+		const addedUserId = req.session?.addedUser?.id;
 
-		const contactLists = await ContactList.find({
+		const query = {
 			useradmin: id,
 			contact_status: { $ne: 0 },
-		}).sort({
+		};
+
+		if (addedUserId) query.agent = addedUserId;
+
+		const contactLists = await ContactList.find(query).sort({
 			adddate: -1,
 		});
 

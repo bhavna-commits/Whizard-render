@@ -1,6 +1,6 @@
 // Ensure spinner is hidden initially
 document.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("verifySpinner").style.display = "none";
+  // document.getElementById("verifySpinner").style.display = "none";
 
   // Get email from the URL
   const urlParams = new URLSearchParams(window.location.search);
@@ -46,12 +46,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const otpInputs = [...document.querySelectorAll(".otp-input")];
     const otp = otpInputs.map((input) => input.value).join("");
 
-    // Show loading spinner and disable button
+    // Show loading spinner and disable button 
     const verifyText = document.getElementById("verifyText");
     const verifySpinner = document.getElementById("verifySpinner");
     const successMessage = document.getElementById("successMessage");
     verifyText.style.display = "none";
-    verifySpinner.style.display = "inline-block";
+    verifySpinner.style.display = "block";
     document.getElementById("verifyOtp").disabled = true;
 
     const email = document.getElementById("email").value;
@@ -73,7 +73,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const encodedEmail = encodeURIComponent(email);
       if (response.ok) {
         // OTP verified, show success message and delay redirect
-        verifyText.style.display = "inline-block";
+        verifyText.style.display = "block";
         verifySpinner.style.display = "none";
         document.getElementById("verifyOtp").disabled = false;
 
@@ -92,7 +92,7 @@ document.addEventListener("DOMContentLoaded", () => {
       //  548014
     } catch (error) {
       // Show error message from the backend
-      verifyText.style.display = "inline-block";
+      verifyText.style.display = "block";
       verifySpinner.style.display = "none";
       document.getElementById("verifyOtp").disabled = false;
       verifyText.textContent = error.message;

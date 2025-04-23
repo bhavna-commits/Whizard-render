@@ -142,70 +142,70 @@ document.addEventListener("DOMContentLoaded", function () {
 
 		// Get user input and check email validity
     const emailInput = document.getElementById("email");
-    if (!emailInput) return toast("error","no email input found");
-		const emailWarning = document.getElementById("emailWarning");
-		const email = emailInput.value.trim();
-		const personalEmailPattern =
-			/@(gmail\.com|yahoo\.com|hotmail\.com|aol\.com|outlook\.com|icloud\.com|live\.com|msn\.com|mail\.com|zoho\.com|yandex\.com|protonmail\.com|gmx\.com|me\.com|fastmail\.com|pm\.me|mailinator\.com|tutanota\.com|10minutemail\.com|guerrillamail\.com|temp-mail\.org|getnada\.com|maildrop\.cc|trashmail\.com|fakeinbox\.com|dispostable\.com|sharklasers\.com|mailnesia\.com|yopmail\.com|throwawaymail\.com|mohmal\.com|emailondeck\.com|temporarymail\.com|tempmail\.net|luxusmail\.com|anonbox\.net|burnermail\.io|mytemp\.email)$/i;
-
-		if (personalEmailPattern.test(email)) {
-			emailWarning.classList.remove("hidden");
-			return;
-		} else {
-			emailWarning.classList.add("hidden");
-		}
-
-		// Disable submit button and show spinner
-		submitBtn.disabled = true;
-		submitBtn.innerHTML = `<div class="loading-spinner"></div>`;
-
-		// Perform password validation
-		const password = document.getElementById("password").value.trim();
-		const confirmPassword = document
-			.getElementById("confirmPassword")
-			.value.trim();
-		const passwordError = document.getElementById("passwordError");
-		const confirmPasswordError = document.getElementById(
-			"confirmPasswordError",
-		);
-
-		const passwordRegex =
-			/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-
-		if (!passwordRegex.test(password)) {
-			passwordError.style.display = "block";
-			passwordError.textContent =
-				"Password must be at least 8 characters long, include 1 lowercase, 1 uppercase letter, 1 number, and 1 special character.";
-			submitBtn.disabled = false;
-			submitBtn.innerHTML = "Sign Up";
-			return;
-		} else {
-			passwordError.style.display = "none"; // Hide error if valid
-		}
-
-		// Validate confirm password
-		if (password !== confirmPassword) {
-			confirmPasswordError.style.display = "block";
-			confirmPasswordError.textContent = "Passwords do not match.";
-			submitBtn.disabled = false;
-			submitBtn.innerHTML = "Sign Up";
-			return;
-		} else {
-			confirmPasswordError.style.display = "none"; // Hide error if match
-		}
-
-		// Prepare form data for submission
-		const formData = {
-			name: document.getElementById("name").value.trim(),
-			email,
-			countryCode: selectedDialCode.value,
-			country: document.getElementById("countrySearch").value.trim(),
-			phoneNumber: document.getElementById("phone").value.trim(),
-			password,
-			confirmPassword,
-		};
-
+		if (!emailInput) return toast("error", "no email input found");
 		try {
+			const emailWarning = document.getElementById("emailWarning");
+			const email = emailInput.value.trim();
+			const personalEmailPattern =
+				/@(gmail\.com|yahoo\.com|hotmail\.com|aol\.com|outlook\.com|icloud\.com|live\.com|msn\.com|mail\.com|zoho\.com|yandex\.com|protonmail\.com|gmx\.com|me\.com|fastmail\.com|pm\.me|mailinator\.com|tutanota\.com|10minutemail\.com|guerrillamail\.com|temp-mail\.org|getnada\.com|maildrop\.cc|trashmail\.com|fakeinbox\.com|dispostable\.com|sharklasers\.com|mailnesia\.com|yopmail\.com|throwawaymail\.com|mohmal\.com|emailondeck\.com|temporarymail\.com|tempmail\.net|luxusmail\.com|anonbox\.net|burnermail\.io|mytemp\.email)$/i;
+
+			if (personalEmailPattern.test(email)) {
+				emailWarning.classList.remove("hidden");
+				return;
+			} else {
+				emailWarning.classList.add("hidden");
+			}
+
+			// Disable submit button and show spinner
+			submitBtn.disabled = true;
+			submitBtn.innerHTML = `<div class="loading-spinner"></div>`;
+
+			// Perform password validation
+			const password = document.getElementById("password").value.trim();
+			const confirmPassword = document
+				.getElementById("confirmPassword")
+				.value.trim();
+			const passwordError = document.getElementById("passwordError");
+			const confirmPasswordError = document.getElementById(
+				"confirmPasswordError",
+			);
+
+			const passwordRegex =
+				/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
+			if (!passwordRegex.test(password)) {
+				passwordError.style.display = "block";
+				passwordError.textContent =
+					"Password must be at least 8 characters long, include 1 lowercase, 1 uppercase letter, 1 number, and 1 special character.";
+				submitBtn.disabled = false;
+				submitBtn.innerHTML = "Sign Up";
+				return;
+			} else {
+				passwordError.style.display = "none"; // Hide error if valid
+			}
+
+			// Validate confirm password
+			if (password !== confirmPassword) {
+				confirmPasswordError.style.display = "block";
+				confirmPasswordError.textContent = "Passwords do not match.";
+				submitBtn.disabled = false;
+				submitBtn.innerHTML = "Sign Up";
+				return;
+			} else {
+				confirmPasswordError.style.display = "none"; // Hide error if match
+			}
+
+			// Prepare form data for submission
+			const formData = {
+				name: document.getElementById("name").value.trim(),
+				email,
+				countryCode: selectedDialCode.value,
+				country: document.getElementById("countrySearch").value.trim(),
+				phoneNumber: document.getElementById("phone").value.trim(),
+				password,
+				confirmPassword,
+			};
+
 			const response = await fetch("/api/users/generateOTP", {
 				method: "POST",
 				headers: {
