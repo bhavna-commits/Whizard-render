@@ -1,4 +1,4 @@
-import dotenv from 'dotenv';
+import dotenv from "dotenv";
 import nodemailer from "nodemailer";
 
 dotenv.config();
@@ -15,10 +15,11 @@ const transporter = nodemailer.createTransport({
 
 // Function to send verification email
 export const sendVerificationEmail = async (userEmail, otp) => {
+	console.log(userEmail);
 	const mailOptions = {
 		from: process.env.EMAIL_USER,
 		to: userEmail,
-		subject: "Email Verification for Whizz",
+		subject: "Email Verification for Whizard",
 		html: `
       <html>
         <body style="background-color: #f4f7fc; font-family: 'Arial', sans-serif; padding: 20px;">
@@ -40,7 +41,7 @@ export const sendVerificationEmail = async (userEmail, otp) => {
             </div>
             <!-- Footer -->
             <div style="background-color: #f4f7fc; text-align: center; padding: 15px;">
-              <p style="font-size: 12px; color: #999;">If you didn’t initiate this request, please disregard this email. For any suspicious activity, contact us at <a href="mailto:support@whizz.com" style="color: #4a90e2;">support@whizz.com</a></p>
+              <p style="font-size: 12px; color: #999;">If you didn’t initiate this request, please disregard this email. For any suspicious activity, contact us at <a href="mailto:contact@whizardapi.com" style="color: #4a90e2;">contact@whizardapi.com</a></p>
             </div>
           </div>
         </body>

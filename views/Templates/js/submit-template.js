@@ -376,31 +376,6 @@ function collectTemplateData() {
 	const headerType = headerTypeDropdown.value;
 	templateData.header = { type: headerType, content: null };
 
-	// Assuming you get mediaFileData and mediaFileName from the backend
-	if (mediaFileData && mediaFileName) {
-		// Decode the base64 string back into binary data
-		const byteString = atob(mediaFileData);
-
-		// Create an array of bytes
-		const byteArray = new Uint8Array(byteString.length);
-		for (let i = 0; i < byteString.length; i++) {
-			byteArray[i] = byteString.charCodeAt(i);
-		}
-
-		// Create a new Blob object of the appropriate type (assuming image/jpeg here, adjust based on your actual file type)
-		const file = new File([byteArray], mediaFileName, {
-			type: "image/jpeg", // Adjust the MIME type if necessary based on the file type
-		});
-
-		// Create a DataTransfer object to mimic a user input
-		const dataTransfer = new DataTransfer();
-		dataTransfer.items.add(file);
-
-		// Set the file input's files property to our newly created File object
-		const fileInput = document.getElementById("file-upload");
-		fileInput.files = dataTransfer.files;
-	}
-
 	// Skip header validation if the type is "none"
 	if (headerType === "none") {
 		templateData.header.content = null;

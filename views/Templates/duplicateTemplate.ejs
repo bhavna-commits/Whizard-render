@@ -152,7 +152,7 @@
 							const ul = document.getElementById("language-options");
 							const li = ul.getElementsByTagName("li");
 							
-							for (let i = 0; i <	li.length; i++) {
+							for (let i = 0; i < li.length; i++) {
 								const txtValue = li[i].textContent || li[i].innerText;
 								if (txtValue.toLowerCase().indexOf(filter) > -1) {
 									li[i].style.display = "";
@@ -462,6 +462,50 @@
 		const data = <%- JSON.stringify(templateData) %>;
 		const mediaFileData = <%- JSON.stringify(mediaFileData) %>;
 		const mediaFileName = <%- JSON.stringify(mediaFileName) %>;
+		
+		// Assuming you get mediaFileData and mediaFileName from the backend
+		if (mediaFileData && mediaFileName) {
+			const byteString = atob(mediaFileData);
+			const byteArray = new Uint8Array(byteString.length);
+			for (let i = 0; i < byteString.length; i++) {
+				byteArray[i] = byteString.charCodeAt(i);
+			}
+			
+			// Get file extension from the filename
+			const extension = mediaFileName.split('.').pop().toLowerCase();
+			
+			// Map of file extensions to MIME types
+			const mimeTypes = {
+				jpg: "image/jpeg",
+				jpeg: "image/jpeg",
+				png: "image/png",
+				gif: "image/gif",
+				webp: "image/webp",
+				pdf: "application/pdf",
+				txt: "text/plain",
+				mp3: "audio/mpeg",
+				mp4: "video/mp4",
+				json: "application/json",
+				csv: "text/csv",
+				doc: "application/msword",
+				docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+				xls: "application/vnd.ms-excel",
+				xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+			};
+			
+			const mimeType = mimeTypes[extension] || "application/octet-stream"; // Fallback if unknown
+			
+			const file = new File([byteArray], mediaFileName, {
+				type: mimeType,
+			});
+			
+			const dataTransfer = new DataTransfer();
+			dataTransfer.items.add(file);
+			
+			const fileInput = document.getElementById("file-upload");
+			fileInput.files = dataTransfer.files;
+		}
+		
 		// console.log(JSON.stringify(data));
 	</script>
 	<script src="/toast.js"></script>

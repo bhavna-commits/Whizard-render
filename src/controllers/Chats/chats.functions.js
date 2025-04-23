@@ -109,6 +109,8 @@ export const sendMessage = async (accessToken, phoneNumberId, payload) => {
 };
 
 // cron.schedule("* * * * *", async () => {
-// 		await processAllTempEvents();
+// 	await processAllTempEvents();
 // 	// 	await updateContacts();
 // });
+
+// console.log(cron)
