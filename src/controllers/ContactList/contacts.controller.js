@@ -305,7 +305,7 @@ export const deleteContact = async (req, res, next) => {
 			name: req.session?.user?.name
 				? req.session?.user?.name
 				: req.session?.addedUser?.name,
-			actions: "Update",
+			actions: "Delete",
 			details: `Deleted contact of : ${contact.Name}`,
 		});
 

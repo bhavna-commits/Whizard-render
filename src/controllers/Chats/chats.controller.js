@@ -68,6 +68,19 @@ export const getSetToken = async (req, res) => {
 		const user = await User.findOne({ unique_id: ownerId });
 		if (!user) return res.render("errors/chatsError");
 
+		if (user.WhatsAppConnectStatus === "Pending") {
+			return res.render("Chats/chats", {
+				token,
+				photo: added?.photo || req.session.user?.photo,
+				name: added?.name || req.session?.user?.name,
+				color: added?.color || req.session.user?.color,
+				access: permissions ? accessData : user.access,
+				phoneNumberId: "",
+				phoneNumberName: "",
+				phoneNumber: "",
+			});
+		}
+
 		// pick phone number
 		const phone = user.FB_PHONE_NUMBERS.find((f) => f.selected);
 		if (!phone) return res.render("errors/chatsError");

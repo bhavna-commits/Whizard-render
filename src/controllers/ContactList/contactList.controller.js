@@ -505,7 +505,7 @@ export const deleteCustomField = async (req, res, next) => {
 				unique_id: generateUniqueId(),
 				name: req.session?.user?.name || req.session?.addedUser?.name,
 				actions: "Delete",
-				details: `Marked the custom field named: ${field.clname} as deleted and removed from CSV`,
+				details: `${field.clname} is deleted and removed from CSV`,
 			});
 
 			// Update the status to 0 to mark it as deleted in MongoDB
