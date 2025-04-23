@@ -271,7 +271,7 @@
 						<h5>Approximate Cost</h5>
 						
 						<div class="">
-							<h4 id="totalCost" class=""></h4>
+							<h4 id="totalCost" class="">0</h4>
 							<!-- <button type="button" onclick="viewFailed()" class="border rounded-2xl px-3 py-1 shadow-sm text-sm h-fit">
 								View user
 							</button> -->
@@ -416,6 +416,7 @@
 		const app_id = <%- JSON.stringify(app) %>;
 		const config_id = <%- JSON.stringify(config) %>;
 		const graph_v = <%- JSON.stringify(graph) %>;
+		const fbStatus = <%- JSON.stringify(status) %>;
 		
 		const helpBtn = document.getElementById('helpBtn');
 		const closeBtn = document.getElementById('closeBtn');

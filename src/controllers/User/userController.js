@@ -609,16 +609,21 @@ export const resendEmailOTP = async (req, res) => {
 		const otp = generate6DigitOTP();
 		const otpExpiry = setOTPExpiry();
 
-		console.log(otp);
-
 		tempUser.otp = otp;
 		tempUser.otpExpiry = otpExpiry; // Update expiry time
 
 		await sendEmailVerification(email, otp);
 
-		res.status(200).json({ message: "OTP sent successfully." });
+		res.status(200).json({
+			message: "OTP sent successfully.",
+			success: true,
+		});
 	} catch (error) {
-		res.status(500).json({ message: "Error resending OTP.", error });
+		res.status(500).json({
+			message: "Error resending OTP.",
+			error,
+			success: false,
+		});
 	}
 };
 
@@ -655,7 +660,7 @@ export const resendOTP = async (req, res) => {
 		// For each enabled OTP channel, generate a new OTP and update the session.
 		if (ENABLE_EMAIL_OTP && email) {
 			const newEmailOTP = generate6DigitOTP();
-			console.log(newEmailOTP);
+			// console.log(newEmailOTP);
 			otpData.emailOTP = newEmailOTP;
 			otpData.otpExpiry = otpExpiry;
 			await sendEmailVerification(email, newEmailOTP);
@@ -668,11 +673,17 @@ export const resendOTP = async (req, res) => {
 			await sendOTPOnWhatsApp(phone, newMobileOTP);
 		}
 
-		return res.status(200).json({ message: "OTP sent successfully." });
+		return res
+			.status(200)
+			.json({ message: "OTP sent successfully.", success: true });
 	} catch (error) {
 		return res
 			.status(500)
-			.json({ message: "Error resending OTP.", error: error.message });
+			.json({
+				message: "Error resending OTP.",
+				error: error.message,
+				success: false,
+			});
 	}
 };
 
@@ -715,12 +726,15 @@ export const resetPassword = async (req, res) => {
 		await sendEmailVerification(email, otp);
 
 		// Send success response to the frontend
-		return res.status(200).json({ message: "OTP sent successfully" });
+		return res
+			.status(200)
+			.json({ message: "OTP sent successfully", success: true });
 	} catch (error) {
 		console.error("Error occurred while sending OTP:", error);
 		// If any error occurs, send an error response
 		return res.status(500).json({
 			message: "An error occurred while sending OTP",
+			success: false,
 		});
 	}
 };
@@ -761,12 +775,15 @@ export const changePassword = async (req, res, next) => {
 		// Respond with a success message
 		return res
 			.status(200)
-			.json({ message: "Password changed successfully" });
+			.json({ message: "Password changed successfully", success: true });
 	} catch (error) {
 		console.error("Error changing password:", error);
 		return res
 			.status(500)
-			.json({ message: "Server error, please try again later" });
+			.json({
+				message: "Server error, please try again later",
+				success: false,
+			});
 	}
 };
 

@@ -1,5 +1,7 @@
 const urlt = new URL(window.location.href);
 
+
+
 const startDate1 = urlt.searchParams.get("startDate");
 const endDate1 = urlt.searchParams.get("endDate");
 if (startDate1 && endDate1) {
@@ -589,9 +591,11 @@ function processAnalyticsData(rawData) {
 }
 
 async function costReport(start, end) {
-	const data = await fetchAnalytics(start, end);
-	if (data) {
-		updateUI(data);
+	if (fbStatus !== "Pending") {
+		const data = await fetchAnalytics(start, end);
+		if (data) {
+			updateUI(data);
+		}
 	}
 }
 

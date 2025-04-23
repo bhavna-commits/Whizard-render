@@ -51,6 +51,7 @@ document.addEventListener("DOMContentLoaded", () => {
 		const otp = otpInputs.map((input) => input.value).join("");
 
 		// Show loading spinner and disable button
+		const successMessage = document.getElementById("successMessage");
 		const verifyText = document.getElementById("verifyText");
 		const verifySpinner = document.getElementById("verifySpinner");
 		verifyText.style.display = "none";
@@ -73,8 +74,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
 			const data = await response.json();
 
-			console.log(data);
-
 			if (data.success) {
 				// OTP verified, redirect or show success message
 				window.location.href = "/about";
@@ -86,7 +85,9 @@ document.addEventListener("DOMContentLoaded", () => {
 			verifyText.style.display = "block";
 			verifySpinner.style.display = "none";
 			document.getElementById("verifyOtp").disabled = false;
-			verifyText.textContent = error.message;
+			successMessage.textContent = error.message;
+			successMessage.style.color = "red";
+			successMessage.style.display = "block";
 		}
 	});
 

@@ -1,4 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
+	const successMessage = document.getElementById("successMessage");
 	// Reusable function to attach OTP input behavior to a set of inputs
 	attachOtpListeners(".otp-input");
 
@@ -78,16 +79,20 @@ document.addEventListener("DOMContentLoaded", () => {
 					}),
 				});
 				const data = await response.json();
-				if (response.ok) {
+				if (data.success) {
 					window.location.href = "/";
 				} else {
-					throw new Error(data.message);
+					successMessage.textContent = data.message;
+					successMessage.style.color = "red";
+					successMessage.style.display = "block";
 				}
 			} catch (error) {
 				verifyText.style.display = "inline-block";
 				verifySpinner.style.display = "none";
 				verifyButton.disabled = false;
-				verifyText.textContent = error.message;
+				successMessage.textContent = error.message;
+				successMessage.style.color = "red";
+				successMessage.style.display = "block";
 			}
 		});
 
@@ -111,22 +116,24 @@ document.addEventListener("DOMContentLoaded", () => {
 						const messageElement = document.getElementById(
 							"resendCombinedOtpMessage",
 						);
-						if (!response.ok) {
-							messageElement.classList.add("alert-danger");
-							messageElement.classList.remove("alert-success");
-							messageElement.textContent = data.message;
+						if (!data.success) {
+							successMessage.textContent = data.message;
+							successMessage.style.color = "red";
+							successMessage.style.display = "block";
 						} else {
-							messageElement.classList.add("alert-success");
-							messageElement.classList.remove("alert-danger");
-							messageElement.textContent =
-								"OTP sent successfully";
+							successMessage.textContent = data.message;
+							successMessage.style.color = "green";
+							successMessage.style.display = "block";
 						}
-						messageElement.style.display = "block";
+
 						setTimeout(() => {
-							messageElement.style.display = "none";
+							successMessage.style.display = "none";
 						}, 5000);
 					} catch (error) {
 						console.error(error);
+						successMessage.textContent = error.message;
+						successMessage.style.color = "red";
+						successMessage.style.display = "block";
 					}
 				}
 			});
@@ -158,16 +165,20 @@ document.addEventListener("DOMContentLoaded", () => {
 					}),
 				});
 				const data = await response.json();
-				if (response.ok) {
+				if (data.success) {
 					window.location.href = "/";
 				} else {
-					throw new Error(data.message);
+					successMessage.textContent = data.message;
+					successMessage.style.color = "red";
+					successMessage.style.display = "block";
 				}
 			} catch (error) {
 				verifyText.style.display = "inline-block";
 				verifySpinner.style.display = "none";
 				verifyButton.disabled = false;
-				verifyText.textContent = error.message;
+				successMessage.textContent = error.message;
+				successMessage.style.color = "red";
+				successMessage.style.display = "block";
 			}
 		});
 
@@ -186,25 +197,25 @@ document.addEventListener("DOMContentLoaded", () => {
 							headers: { "Content-Type": "application/json" },
 						});
 						const data = await response.json();
-						const messageElement = document.getElementById(
-							"resendMobileOtpMessage",
-						);
-						if (!response.ok) {
-							messageElement.classList.add("alert-danger");
-							messageElement.classList.remove("alert-success");
-							messageElement.textContent = data.message;
+
+						if (!data.success) {
+							successMessage.textContent = data.message;
+							successMessage.style.color = "red";
+							successMessage.style.display = "block";
 						} else {
-							messageElement.classList.add("alert-success");
-							messageElement.classList.remove("alert-danger");
-							messageElement.textContent =
-								"OTP sent successfully";
+							successMessage.textContent = data.message;
+							successMessage.style.color = "green";
+							successMessage.style.display = "block";
 						}
-						messageElement.style.display = "block";
+
 						setTimeout(() => {
-							messageElement.style.display = "none";
+							successMessage.style.display = "none";
 						}, 5000);
 					} catch (error) {
 						console.error(error);
+						successMessage.textContent = error.message;
+						successMessage.style.color = "red";
+						successMessage.style.display = "block";
 					}
 				}
 			});
@@ -234,16 +245,24 @@ document.addEventListener("DOMContentLoaded", () => {
 					}),
 				});
 				const data = await response.json();
-				if (response.ok) {
+				if (data.success) {
 					window.location.href = "/";
 				} else {
-					throw new Error(data.message);
+					successMessage.textContent = data.message;
+					successMessage.style.color = "red";
+					successMessage.style.display = "block";
 				}
 			} catch (error) {
 				verifyText.style.display = "inline-block";
 				verifySpinner.style.display = "none";
 				verifyButton.disabled = false;
-				verifyText.textContent = error.message;
+				successMessage.textContent = error.message;
+				successMessage.style.color = "red";
+				successMessage.style.display = "block";
+			} finally {
+				verifyText.style.display = "inline-block";
+				verifySpinner.style.display = "none";
+				verifyButton.disabled = false;
 			}
 		});
 
@@ -252,6 +271,14 @@ document.addEventListener("DOMContentLoaded", () => {
 			resendEmailOtp.addEventListener("click", async () => {
 				setupResendTimer("resendEmailOtp", "resendEmailOtpMessage");
 				console.log("ghjk");
+				const verifyButton = document.getElementById("verifyEmailOtp");
+				const verifyText = document.getElementById("verifyEmailText");
+				const verifySpinner =
+					document.getElementById("verifyEmailSpinner");
+				verifyText.style.display = "none";
+				verifySpinner.style.display = "inline-block";
+				verifyButton.disabled = true;
+
 				try {
 					const response = await fetch(
 						"/api/users/resend-whatsapp-otp",
@@ -261,24 +288,26 @@ document.addEventListener("DOMContentLoaded", () => {
 						},
 					);
 					const data = await response.json();
-					const messageElement = document.getElementById(
-						"resendEmailOtpMessage",
-					);
-					if (!response.ok) {
-						messageElement.classList.add("alert-danger");
-						messageElement.classList.remove("alert-success");
-						messageElement.textContent = data.message;
+					if (data.success) {
+						successMessage.textContent = data.message;
+						successMessage.style.color = "green";
+						successMessage.style.display = "block";
 					} else {
-						messageElement.classList.add("alert-success");
-						messageElement.classList.remove("alert-danger");
-						messageElement.textContent = "OTP sent successfully";
+						successMessage.textContent = data.message;
+						successMessage.style.color = "red";
+						successMessage.style.display = "block";
 					}
-					messageElement.style.display = "block";
-					setTimeout(() => {
-						messageElement.style.display = "none";
-					}, 5000);
 				} catch (error) {
-					console.error(error);
+					verifyText.style.display = "inline-block";
+					verifySpinner.style.display = "none";
+					verifyButton.disabled = false;
+					successMessage.textContent = error.message;
+					successMessage.style.color = "red";
+					successMessage.style.display = "block";
+				} finally {
+					verifyText.style.display = "inline-block";
+					verifySpinner.style.display = "none";
+					verifyButton.disabled = false;
 				}
 			});
 		}
