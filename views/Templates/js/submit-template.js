@@ -322,7 +322,7 @@ function collectTemplateData() {
 				buttonData.type = "URL";
 
 				// Validate URL
-				if (!websiteUrl || !websiteUrl.startsWith("http")) {
+				if (!websiteUrl || !websiteUrl.startsWith("https://")) {
 					showError(
 						`Button ${
 							index + 1

@@ -104,7 +104,7 @@ const fbLoginCallback = (response) => {
 
 // Launch method
 const launchWhatsAppSignup = () => {
-	console.log(config_id);
+	// console.log(config_id);
 	FB.login(fbLoginCallback, {
 		config_id: config_id,
 		response_type: "code",
