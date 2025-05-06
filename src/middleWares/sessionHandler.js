@@ -20,7 +20,7 @@ const sessionMiddleware = session({
 	}),
 	cookie: {
 		maxAge,
-		httpOnly: true,
+		// httpOnly: true,
 		secure: isProd,
 		sameSite: isProd ? "strict" : "lax",
 	},

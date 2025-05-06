@@ -355,6 +355,10 @@ export const login = async (req, res, next) => {
 						rememberMe,
 					};
 
+					// req.session.save((err) => {
+					// 	if (err) console.error("Session save error:", err);
+					// });
+
 					if (ENABLE_EMAIL_OTP) {
 						await sendEmailVerification(addedUser.email, emailOTP);
 					}
@@ -428,6 +432,10 @@ export const login = async (req, res, next) => {
 					userId: user.unique_id,
 					rememberMe,
 				};
+
+				// req.session.save((err) => {
+				// 	if (err) console.error("Session save error:", err);
+				// });
 
 				if (ENABLE_EMAIL_OTP) {
 					await sendEmailVerification(user.email, emailOTP);
