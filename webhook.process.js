@@ -1,6 +1,9 @@
 import dotenv from "dotenv";
 import crypto from "crypto";
 import mongoose from "mongoose";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
 
 dotenv.config();
 
@@ -93,6 +96,12 @@ export const processTempStatuses = async () => {
 
 		if (bulkChatOps.length) await Chat.bulkWrite(bulkChatOps);
 		if (bulkReportOps.length) await Reports.bulkWrite(bulkReportOps);
+
+		if (bulkChatOps.length || bulkReportOps.length) {
+			await TempStatus.deleteMany({});
+			console.log("🧹 Deleted processed temp statuses");
+		}
+
 		console.log("Bulk processed temp statuses.");
 	} catch (error) {
 		console.error("Error processing temp statuses (bulk):", error);
@@ -171,6 +180,12 @@ export const processTempMessages = async () => {
 
 		if (chatOps.length) await Chat.bulkWrite(chatOps);
 		if (tempChatOps.length) await ChatsTemp.bulkWrite(tempChatOps);
+
+		if (chatOps.length || tempChatOps.length) {
+			await TempMessage.deleteMany({});
+			console.log("🧹 Deleted processed temp messages");
+		}
+
 		console.log("Bulk processed temp messages.");
 	} catch (error) {
 		console.error("Error processing temp messages (bulk):", error);
@@ -194,6 +209,12 @@ export const processTempTemplateRejections = async () => {
 		}));
 
 		if (ops.length) await Template.bulkWrite(ops);
+
+		if (ops.length) {
+			await TempTemplateRejection.deleteMany({});
+			console.log("🧹 Deleted processed template rejections");
+		}
+
 		console.log("Bulk processed template rejections.");
 	} catch (error) {
 		console.error("Error processing template rejections (bulk):", error);
@@ -272,8 +293,9 @@ export const processChatsToChatsUsers = async () => {
 			console.log(`Bulk processed ${bulkOps.length} chats ✅`);
 		}
 
-		// Uncomment when ready to clean up temp data
-		// await ChatsTemp.deleteMany({});
+		await ChatsTemp.deleteMany({});
+		console.log("🧹 Deleted processed temp chats");
+
 		console.log("All done at", new Date().toLocaleString());
 	} catch (error) {
 		console.error("Error in bulk chat processing:", error);
@@ -298,7 +320,8 @@ export const processAllTempEvents = async () => {
 	await processTempMessages();
 	await processTempTemplateRejections();
 	await processChatsToChatsUsers();
-	mongoose.connection.close();
 };
 
-// processAllTempEvents();
+if (process.argv[1] === __filename) {
+	processAllTempEvents();
+}

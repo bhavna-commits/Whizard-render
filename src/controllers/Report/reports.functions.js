@@ -228,9 +228,9 @@ export async function sendMessagesReports(
 				`No contacts found for contact list ID ${campaign.contactListId}`,
 			);
 		}
-		
+
 		let chat;
-		let chatsTemp; 
+		let chatsTemp;
 		// Loop through each contact in the contact list
 		for (let contact of contactList) {
 			// Replace dynamic variables in the template with contact-specific data

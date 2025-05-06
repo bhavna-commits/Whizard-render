@@ -610,6 +610,8 @@ const getPhoneNumbers = async (user) => {
 			);
 		}
 
+		// console.log(data.data);
+
 		// Check if there are phone numbers returned
 		if (data.data && data.data.length > 0) {
 			// Prepare phone numbers to match your schema
