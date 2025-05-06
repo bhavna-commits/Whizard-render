@@ -21,7 +21,7 @@ const sessionMiddleware = session({
 	cookie: {
 		maxAge,
 		httpOnly: true,
-		secure: false,
+		secure: isProd,
 		sameSite: isProd ? "strict" : "lax",
 	},
 });
