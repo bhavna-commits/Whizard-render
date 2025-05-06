@@ -17,6 +17,7 @@ import {
 import { DEFAULT_PERMISSIONS } from "../../utils/defaultPermissions.js";
 import { isString } from "../../middleWares/sanitiseInput.js";
 import { incrementLoginAttempts } from "../../middleWares/rateLimiter.js";
+import Login from "../../models/login.model.js";
 
 // 2FA settings: if you later set one of these to false the corresponding OTP verification is disabled
 const ENABLE_EMAIL_OTP = Boolean(process.env.EMAIL_OTP_LOGIN);
@@ -98,7 +99,7 @@ export const generateOTP = async (req, res, next) => {
 export const verifyEmail = async (req, res, next) => {
 	const { otp, email } = req.body;
 
-	console.log(otp, email);
+	// console.log(otp, email);
 
 	if (!otp || !email) {
 		return res.json({
@@ -552,6 +553,17 @@ export const verifyOTP = async (req, res, next) => {
 		// OTP verified. Retrieve the user based on the stored type.
 		if (otpData.userType === "user") {
 			const user = await User.findOne({ unique_id: otpData.userId });
+			const login = await Login.findOne({ id: otpData.userId });
+			if (login) {
+				login.time = Date.now();
+				await login.save();
+			} else {
+				await Login.create({
+					id: otpData.userId,
+					type: "Owner",
+					time: Date.now(),
+				});
+			}
 			req.session.user = {
 				id: user.unique_id,
 				name: user.name,
@@ -563,6 +575,17 @@ export const verifyOTP = async (req, res, next) => {
 			const addedUser = await AddedUser.findOne({
 				unique_id: otpData.userId,
 			});
+			const login = await Login.findOne({ id: otpData.userId });
+			if (login) {
+				login.time = Date.now();
+				await login.save();
+			} else {
+				await Login.create({
+					id: otpData.userId,
+					type: addedUser.roleName,
+					time: Date.now(),
+				});
+			}
 			const data = await User.findOne({ unique_id: addedUser.useradmin });
 			req.session.addedUser = {
 				id: addedUser.unique_id,
@@ -677,13 +700,11 @@ export const resendOTP = async (req, res) => {
 			.status(200)
 			.json({ message: "OTP sent successfully.", success: true });
 	} catch (error) {
-		return res
-			.status(500)
-			.json({
-				message: "Error resending OTP.",
-				error: error.message,
-				success: false,
-			});
+		return res.status(500).json({
+			message: "Error resending OTP.",
+			error: error.message,
+			success: false,
+		});
 	}
 };
 
@@ -778,12 +799,10 @@ export const changePassword = async (req, res, next) => {
 			.json({ message: "Password changed successfully", success: true });
 	} catch (error) {
 		console.error("Error changing password:", error);
-		return res
-			.status(500)
-			.json({
-				message: "Server error, please try again later",
-				success: false,
-			});
+		return res.status(500).json({
+			message: "Server error, please try again later",
+			success: false,
+		});
 	}
 };
 

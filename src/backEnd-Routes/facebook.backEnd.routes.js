@@ -1,9 +1,11 @@
 import express from "express";
 import dotenv from "dotenv";
+import cron from "node-cron";
 import User from "../models/user.model.js";
 import TempStatus from "../models/TempStatus.model.js";
 import TempMessage from "../models/TempMessage.model.js";
 import TempTemplateRejection from "../models/TempTemplateRejection.model.js";
+import { refreshBusinessToken, scheduleRefresh } from "../services/facebook/refreshToken.facebook.js";
 
 dotenv.config();
 
@@ -20,10 +22,10 @@ router.post("/auth_code", async (req, res) => {
 				error: "This WhatsApp account is already connected to Whizard.",
 			});
 		}
-		// Step 1: Exchange authorization code for access token
+
 		let tokenResponse;
 		try {
-			const tokenUrl = `https://graph.facebook.com/v22.0/oauth/access_token`;
+			const tokenUrl = `https://graph.facebook.com/${process.env.FB_GRAPH_VERSION}/oauth/access_token`;
 			tokenResponse = await fetch(tokenUrl, {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
@@ -35,26 +37,23 @@ router.post("/auth_code", async (req, res) => {
 			});
 			tokenResponse = await tokenResponse.json();
 			if (tokenResponse?.error) {
-				console.log(
-					"Error while exchanging code for access token:",
-					tokenResponse.error.message,
-				);
+				console.log("Token error:", tokenResponse.error.message);
 				return res.status(400).json({
 					success: false,
 					message: tokenResponse.error.message,
 				});
 			}
 		} catch (error) {
-			console.error("Error details while exchanging token:", error);
+			console.error("Token exchange error:", error);
 			return res.status(500).json({
 				success: false,
-				message: "Error exchanging code for access token.",
+				message: "Token exchange failed.",
 			});
 		}
-		console.log("Token exchange response:", tokenResponse);
+
 		const { access_token: newAccessToken, expires_in } = tokenResponse;
 
-		// Step 2: Subscribe the app to the WABA (webhooks)
+		// Subscribe to webhook
 		try {
 			const subscribeUrl = `https://graph.facebook.com/${process.env.FB_GRAPH_VERSION}/${waba_id}/subscribed_apps`;
 			const subscribeResponse = await fetch(subscribeUrl, {
@@ -67,20 +66,18 @@ router.post("/auth_code", async (req, res) => {
 			const subscribeData = await subscribeResponse.json();
 			if (!subscribeResponse.ok) {
 				throw new Error(
-					subscribeData.error?.message ||
-						"Failed to subscribe app to WABA.",
+					subscribeData.error?.message || "WABA subscription failed.",
 				);
 			}
-			console.log("Subscription response:", subscribeData);
 		} catch (error) {
-			console.error("Error subscribing app:", error);
+			console.error("WABA subscribe error:", error);
 			return res.status(500).json({
 				success: false,
-				message: "Failed to subscribe app to WABA.",
+				message: "WABA subscription failed.",
 			});
 		}
 
-		// Step 3: Update user data with WABA and token details
+		// Save to DB
 		const userId = req.session?.user?.id || req.session?.addedUser?.owner;
 		await User.findOneAndUpdate(
 			{ unique_id: userId },
@@ -97,19 +94,31 @@ router.post("/auth_code", async (req, res) => {
 			{ new: true },
 		);
 
-		// Update session data accordingly
+		// Update session
 		if (req.session?.user) {
 			req.session.user.whatsAppStatus = "Live";
 		} else if (req.session?.addedUser) {
 			req.session.addedUser.whatsAppStatus = "Live";
 		}
 
+		// Schedule a refresh ~50 days from now (to avoid expiry)
+		if (expires_in) {
+			const runAt = new Date(Date.now() + 50 * 24 * 60 * 60 * 1000);
+			scheduleRefresh(runAt, () =>
+				refreshBusinessToken(userId, waba_id, newAccessToken),
+			);
+
+			console.log(
+				`Scheduled refresh job on ${refreshDate.toUTCString()}`,
+			);
+		}
+
 		return res.status(201).json({ success: true });
 	} catch (error) {
-		console.error("Error making request:", error);
+		console.error("General error:", error);
 		return res.status(500).json({
 			success: false,
-			error: "Failed to complete authentication process.",
+			error: "Authentication process failed.",
 		});
 	}
 });
@@ -222,7 +231,12 @@ router.post("/webhook", async (req, res) => {
 						from: senderPhone,
 						timestamp: timestamp * 1000,
 						type,
-						text: text || image?.caption || video?.caption || document?.caption || audio?.caption,
+						text:
+							text ||
+							image?.caption ||
+							video?.caption ||
+							document?.caption ||
+							audio?.caption,
 						mediaId,
 						fbPhoneId,
 						// rawData: messageEvent,
@@ -238,5 +252,20 @@ router.post("/webhook", async (req, res) => {
 		res.status(500).send("Server Error");
 	}
 });
+
+async function scheduleAllRefreshJobs() {
+	const now = new Date();
+	const users = await User.find({ nextRefreshAt: { $lte: now } });
+	users.forEach((user) => {
+		scheduleRefresh(
+			user.unique_id,
+			user.WABA_ID,
+			user.FB_ACCESS_TOKEN,
+			user.nextRefreshAt,
+		);
+	});
+}
+
+scheduleAllRefreshJobs();
 
 export default router;

@@ -710,6 +710,8 @@ export const getCostReport = async (req, res) => {
 				}
 			}
 		}
+
+		return res.json(data_points);
 		// console.log(data_points);
 		// Check permissions and render response
 		const permissions = req.session?.addedUser?.permissions;
@@ -727,7 +729,7 @@ export const getCostReport = async (req, res) => {
 			const access = await User.findOne({
 				unique_id: req.session?.user?.id,
 			});
-			return res.json(data_points);
+			
 		}
 	} catch (error) {
 		console.error("Error fetching cost report :", error);

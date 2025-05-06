@@ -31,7 +31,7 @@ export const sendVerificationEmail = async (userEmail, otp) => {
             <div style="padding: 0px 10px; text-align: center;">
               <h4 style="font-size: 24px; margin-bottom: 15px; color: black;">Verify Your Email</h4>
               <p style="font-size: 16px; color: #555; margin-bottom: 20px;">
-                We noticed a recent activity on your Whizz account. To ensure the security of your information, we’ve sent you an OTP.
+                We noticed a recent activity on your Whizard account. To ensure the security of your information, we’ve sent you an OTP.
               </p>
               <p style="font-size: 18px; font-weight: bold; margin-bottom: 15px;">
                 Your OTP is: <strong style="font-size: 24px; color: #4a90e2;">${otp}</strong>

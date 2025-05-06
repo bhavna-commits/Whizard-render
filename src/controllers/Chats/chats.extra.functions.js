@@ -39,6 +39,7 @@ export const determineMediaType = (url) => {
 };
 
 export const fetchAndFormatReports = async (
+	userId,
 	agentId,
 	permissionAllChats,
 	phoneNumberId,
@@ -47,7 +48,7 @@ export const fetchAndFormatReports = async (
 	limit = 10,
 ) => {
 	// Build base query
-	const query = { FB_PHONE_ID: phoneNumberId };
+	const query = { FB_PHONE_ID: phoneNumberId, useradmin: userId };
 	if (!permissionAllChats) {
 		query.agent = agentId;
 	}

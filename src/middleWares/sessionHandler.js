@@ -6,6 +6,7 @@ import mongoose from "mongoose";
 dotenv.config();
 
 const maxAge = 60 * 60 * 1000;
+const isProd = Boolean(process.env.PROD);
 
 const sessionMiddleware = session({
 	secret: process.env.SESSION_SECRET || "defaultSecret",
@@ -14,21 +15,19 @@ const sessionMiddleware = session({
 	store: MongoStore.create({
 		client: mongoose.connection.getClient(),
 		mongoUrl: process.env.MONGO_URI,
-		ttl: maxAge / 1000, // ttl in seconds
+		ttl: maxAge / 1000,
 		collectionName: "sessions",
 	}),
 	cookie: {
-		maxAge: maxAge,
+		maxAge,
 		httpOnly: true,
-		secure: false,
-		sameSite: "lax",
+		secure: isProd,
+		sameSite: isProd ? "strict" : "lax",
 	},
 });
 
-if (process.env.NODE_ENV !== "production") {
-	console.log(
-		`Session Configured: Secure=${process.env.NODE_ENV === "production"}`,
-	);
+if (!isProd) {
+	console.log(`Running in dev mode → secure=false, sameSite="lax"`);
 }
 
 export default sessionMiddleware;

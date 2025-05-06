@@ -1,4 +1,3 @@
-// Helper function to retrieve input values for dynamic variables
 function getDynamicValue(inputs, variable) {
 	for (const input of inputs) {
 		if (input.getAttribute("data-variable") == variable) {
@@ -104,7 +103,7 @@ async function submit() {
 
 		const editURL = location.href.split("/")[4];
 
-		if (editURL == "edit") {
+		if (editURL === "edit") {
 			const url = location.href.split("/");
 			const templateId = url[url.length - 2];
 
@@ -136,7 +135,8 @@ async function submit() {
 			toast("error", res.message);
 		}
 	} catch (error) {
-		toast("error", error.message);
+		toast("error", error.message || error);
+		console.log(error);
 	} finally {
 		// Restore button state
 		submitButton.innerHTML = originalText;
@@ -165,7 +165,6 @@ function generatePreviewWebsite(templateData) {
 	}
 }
 
-// Generate Call Button Preview with FA icon
 function generatePreviewCall(templateData) {
 	const previewButtons = document.getElementById("previewButton");
 	let url = templateData.buttons.filter(
@@ -204,7 +203,6 @@ function validateInputs() {
 	return isValid;
 }
 
-// Validate double curly braces format and extract numbers
 function validateCurlyBraces(text) {
 	if (!text) return { isValid: true, numbers: [] };
 
@@ -238,7 +236,6 @@ function validateCurlyBraces(text) {
 	};
 }
 
-// Collect all template data
 function collectTemplateData() {
 	const templateData = {};
 

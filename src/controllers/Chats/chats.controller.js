@@ -155,6 +155,7 @@ export const getUsers = async (req, res) => {
 		if (!isNumber(skip)) throw "Invalid Input";
 
 		const formattedReports = await fetchAndFormatReports(
+			userId,
 			agentId,
 			permission?.allChats,
 			phoneNumberId,

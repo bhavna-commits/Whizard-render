@@ -10,16 +10,16 @@ import { agenda } from "./config/db.js";
 connectDB();
 
 const __dirname = path.resolve();
-// Path to your certificate and private key
-const privateKey = fs.readFileSync(
-	path.join(__dirname, "certs", "private-key-no-passphrase.pem"),
-	"utf8",
-);
-const certificate = fs.readFileSync(
-	path.join(__dirname, "certs", "certificate.pem"),
-	"utf8",
-);
-const credentials = { key: privateKey, cert: certificate };
+// // Path to your certificate and private key
+// const privateKey = fs.readFileSync(
+// 	path.join(__dirname, "certs", "private-key-no-passphrase.pem"),
+// 	"utf8",
+// );
+// const certificate = fs.readFileSync(
+// 	path.join(__dirname, "certs", "certificate.pem"),
+// 	"utf8",
+// );
+// const credentials = { key: privateKey, cert: certificate };
 
 agenda.on("ready", async () => {
 	console.log("Agenda started");

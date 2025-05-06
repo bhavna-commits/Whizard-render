@@ -479,9 +479,10 @@ input[type="number"] {
 	background-color: white;
 	/* padding: 60px; */
 	min-width: 40%;
-	max-width: 50%;
+	max-width: 40%;
 	display: flex;
-	justify-content: center;
+	/* align-items: center; */
+	justify-content: start;
 	flex-direction: column;
 	/* border: #000 1px solid; */
 }

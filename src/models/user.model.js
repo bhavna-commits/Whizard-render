@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
 const userSchema = new mongoose.Schema(
 	{
@@ -13,7 +13,7 @@ const userSchema = new mongoose.Schema(
 			},
 		],
 		FB_ACCESS_TOKEN: { type: String, required: false },
-		FB_ACCESS_TOKEN_EXPIRY: { type: Number, required: false },
+		FB_ACCESS_EXPIRES_IN: { type: Number, required: false },
 		profilePhoto: { type: String, required: false },
 		name: { type: String, required: true, index: true }, // Index for quicker name lookup
 		email: { type: String, required: true, unique: true }, // Unique index for email
@@ -117,6 +117,7 @@ const userSchema = new mongoose.Schema(
 			type: Number,
 			default: 0,
 		},
+		nextRefreshAt: { type: Schema.Types.Mixed },
 	},
 	{ timestamps: false, strict: false },
 );
