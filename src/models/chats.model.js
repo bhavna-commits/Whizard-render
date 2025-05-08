@@ -2,7 +2,7 @@ import mongoose, { Schema } from "mongoose";
 
 const ChatsSchema = new mongoose.Schema(
 	{
-		WABA_ID: { type: String, required: true },
+		WABA_ID: { type: String, required: true, index: true },
 		FB_PHONE_ID: { type: String, required: true, index: true },
 		useradmin: { type: String, required: true, index: true },
 		unique_id: { type: String, required: true },
@@ -24,7 +24,6 @@ const ChatsSchema = new mongoose.Schema(
 			type: String,
 			enum: ["SENT", "DELIVERED", "READ", "FAILED", "REPLIED"],
 			required: true,
-
 		},
 		failed: {
 			code: String,
@@ -37,7 +36,7 @@ const ChatsSchema = new mongoose.Schema(
 		updatedAt: {
 			type: Number,
 			default: () => Date.now(),
-			index: true
+			index: true,
 		},
 		deleted: { type: Boolean, default: false, index: true },
 		messageId: { type: String, required: true, unique: true },

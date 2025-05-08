@@ -103,7 +103,7 @@ export async function sendMessages(
 			reportData.components = components;
 			reportData.templateId = campaign.templateId;
 			reportData.templatename = template.name;
-			reportData.agent = addedUserId ? addedUserId : [];
+			reportData.agent = addedUserId ? addedUserId : user.unique_id;
 			reportData.type = "Campaign";
 			const chat = new Chat(reportData);
 			await ChatsTemp.create(reportData);

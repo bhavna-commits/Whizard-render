@@ -1,13 +1,42 @@
-import { getMediaUrl } from "./src/controllers/Chats/chats.functions.js";
+import mongoose from "mongoose";
+import ChatsUsers from "./src/models/chatsUsers.model.js";
+import dotenv from "dotenv";
 
-const token =
-	"EAAmWdWtcPz4BOxPQe3cbk22vFqscMzSE6OaDLX19dbkDnS10jcSTrpPwTh97pUAPYqTVMUirUPmnObieSBVY1svWQFMFeeVnFb6qsi69FdKJZB9JpDsZANkhVwenQ2mmcevr1M883XFITtb1eQSQtwbnJcS05RXa5ULqHTAJZAGDZAxkzsGjMubp";
+dotenv.config();
+const MONGO_URI = process.env.MONGO_URI;
 
-const mediaId = "696280686155122";
+async function cleanAgents() {
+	try {
+		await mongoose.connect(MONGO_URI);
+		console.log("✅ Connected to MongoDB");
 
-async function name(params) {
-    const { url } = await getMediaUrl(token, mediaId);
-    console.log(url);
+		const chats = await ChatsUsers.find({
+			agent: { $exists: true, $not: { $size: 0 } },
+		});
+
+		let cleanedCount = 0;
+
+		for (const chat of chats) {
+			const original = chat.agent || [];
+
+			// Remove nulls + deduplicate
+			const cleaned = [...new Set(original.filter(Boolean))];
+
+			// Only update if it's actually different
+			if (cleaned.length !== original.length) {
+				chat.agent = cleaned;
+				await chat.save();
+				cleanedCount++;
+			}
+		}
+
+		console.log(`✅ Cleaned ${cleanedCount} chat user(s).`);
+	} catch (err) {
+		console.error("🔥 Error cleaning agents:", err);
+	} finally {
+		await mongoose.disconnect();
+		console.log("👋 Disconnected from MongoDB");
+	}
 }
 
-name();
+cleanAgents();

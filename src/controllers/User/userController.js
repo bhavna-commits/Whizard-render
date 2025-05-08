@@ -558,20 +558,30 @@ export const verifyOTP = async (req, res, next) => {
 			});
 		}
 
-		// OTP verified. Retrieve the user based on the stored type.
+		let user;
+		let keyId;
+
 		if (otpData.userType === "user") {
-			const user = await User.findOne({ unique_id: otpData.userId });
-			const login = await Login.findOne({ id: otpData.userId });
-			if (login) {
-				login.time = Date.now();
-				await login.save();
-			} else {
-				await Login.create({
-					id: otpData.userId,
-					type: "Owner",
-					time: Date.now(),
-				});
-			}
+			user = await User.findOne({ unique_id: otpData.userId });
+
+			// keyId = user?.FB_PHONE_NUMBERS?.find(
+			// 	(d) => d.selected === true,
+			// )?.phone_number_id;
+
+			// const login = await Login.findOne({ id: otpData.userId });
+
+			// if (login) {
+			// 	(login.FB_PHONE_ID = keyId || ""), (login.time = Date.now());
+			// 	await login.save();
+			// } else {
+			// 	await Login.create({
+			// 		id: otpData.userId,
+			// 		FB_PHONE_ID: keyId || "",
+			// 		WABA_ID: user.WABA_ID,
+			// 		time: Date.now(),
+			// 	});
+			// }
+
 			req.session.user = {
 				id: user.unique_id,
 				name: user.name,
@@ -583,18 +593,27 @@ export const verifyOTP = async (req, res, next) => {
 			const addedUser = await AddedUser.findOne({
 				unique_id: otpData.userId,
 			});
+
 			const login = await Login.findOne({ id: otpData.userId });
-			if (login) {
-				login.time = Date.now();
-				await login.save();
+
+			if (addedUser.roleId === "UnAssignedChats") {
+				if (login) {
+					login.time = Date.now();
+					await login.save();
+				} else {
+					await Login.create({
+						id: otpData.userId,
+						FB_PHONE_ID: keyId || "",
+						WABA_ID: user.WABA_ID,
+						time: Date.now(),
+					});
+				}
 			} else {
-				await Login.create({
-					id: otpData.userId,
-					type: addedUser.roleName,
-					time: Date.now(),
-				});
+				if (login) {
+					await Login.deleteOne({ id: otpData.userId });
+				}
 			}
-			const data = await User.findOne({ unique_id: addedUser.useradmin });
+
 			req.session.addedUser = {
 				id: addedUser.unique_id,
 				name: addedUser.name,
@@ -602,13 +621,13 @@ export const verifyOTP = async (req, res, next) => {
 				color: addedUser.color,
 				permissions: addedUser.roleId,
 				owner: addedUser.useradmin,
-				whatsAppStatus: data.WhatsAppConnectStatus,
+				whatsAppStatus: user.WhatsAppConnectStatus,
 			};
 		}
 		req.session.cookie.maxAge = otpData.rememberMe
-			? 30 * 24 * 60 * 60 * 1000 // 30 days
-			: 3 * 60 * 60 * 1000; // 3 hours
-		// Clear the OTP session data after successful verification.
+			? 30 * 24 * 60 * 60 * 1000
+			: 3 * 60 * 60 * 1000;
+
 		delete req.session.otp;
 
 		return res.status(200).json({

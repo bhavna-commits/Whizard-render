@@ -240,7 +240,9 @@ export const processChatsToChatsUsers = async () => {
 
 			const incomingAgents = Array.isArray(chat.agent)
 				? chat.agent
-				: [chat.agent];
+				: chat.agent
+				? [chat.agent]
+				: [];
 
 			const baseSet = {
 				updatedAt: chat.updatedAt,
@@ -261,22 +263,6 @@ export const processChatsToChatsUsers = async () => {
 			const update = {
 				$set: baseSet,
 				$addToSet: { agent: { $each: incomingAgents } },
-			};
-
-			const upsertDoc = {
-				FB_PHONE_ID: chat.FB_PHONE_ID,
-				useradmin: chat.useradmin,
-				unique_id: chat.unique_id,
-				contactName: chat.contactName,
-				campaignId: chat.campaignId || "",
-				wa_id: chat.recipientPhone,
-				createdAt: chat.createdAt,
-				updatedAt: chat.updatedAt,
-				lastMessage: baseSet.lastMessage,
-				lastSend: chat.status === "REPLIED" ? 0 : chat.updatedAt,
-				lastReceive: chat.status === "REPLIED" ? chat.updatedAt : 0,
-				messageStatus: chat.status,
-				agent: incomingAgents,
 			};
 
 			bulkOps.push({

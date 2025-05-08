@@ -18,7 +18,7 @@ dotenv.config();
 export const getDashboard = async (req, res) => {
 	try {
 		const id = req.session?.user?.id || req.session?.addedUser?.owner;
-
+		// console.log(req.session?.addedUser);
 		// Get user details
 		let user = await User.findOne({ unique_id: id });
 		// Fetch dashboard data using the helper function

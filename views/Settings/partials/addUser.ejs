@@ -17,10 +17,11 @@
 						<label class="block text-gray-500 mb-2">Role</label>
 						<div class="select-wrapper">
 							<select id="userRole" name="userRole" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-500 leading-tight focus:outline-none focus:shadow-outline">
-								<option value="">Select role</option>
+								<option disabled selected>Select role</option>
 								<% permissions.forEach(function(permission) { %>
 								<option value="<%= permission.name %>"><%= permission.name %></option>
 								<% }); %>
+								<option value="UnAssignedChats">Unassigned Chats Support</option>
 							</select>
 						</div>
 					</div>
@@ -64,14 +65,21 @@
 	document.getElementById('addUserForm').addEventListener('submit', async (e) => {
 		e.preventDefault();
 		const role = document.getElementById('userRole').value;
+		
 		const permission = permissions.find(p => p.name === role);
 		const formData = {
 			name: document.getElementById('userName').value,
 			email: document.getElementById('userEmail').value,
-			roleId: permission.unique_id,
 			roleName: role,
 			url: window.location.origin
 		};
+		
+		if (role === "UnAssignedChats") {
+			formData.roleId = "UnAssignedChats";
+			formData.roleName = "Unassigned Chats Support"
+		} else {
+			formData.roleId = permission.unique_id;
+		}
 		
 		// Show spinner and hide the button text
 		document.getElementById('inviteButton').innerHTML = `

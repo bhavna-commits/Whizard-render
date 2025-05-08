@@ -3,6 +3,7 @@ import fs from "fs";
 import ContactList from "../../models/contactList.model.js";
 import ContactListTemp from "../../models/contactsTemp.model.js";
 import Contacts from "../../models/contacts.model.js";
+import ChatsUsers from "../../models/chatsUsers.model.js";
 import {
 	isNumber,
 	isString,
@@ -145,36 +146,40 @@ export const createList = async (req, res, next) => {
 		)?.phone_number_id;
 
 		const participantCount = parsedData.length;
+		const agentToAssign = addedUserId || userId;
 
 		const cList = {
 			contalistName: listName,
 			useradmin: userId,
 			participantCount,
 			contactId: generateUniqueId(),
-			...(addedUserId && { agent: [addedUserId] }),
+			agent: [agentToAssign], // 👈 this prevents array-in-array issues
 		};
+
 		// Create a new Contact List
 		const contactList = new ContactList(cList);
 
 		const contactsToSave = parsedData
 			.map((contactData) => {
 				let { Name, Number, ...additionalFields } = contactData;
+
 				return new Contacts({
 					useradmin: userId,
 					unique_id: generateUniqueId(),
+					keyId,
 					Name,
 					wa_idK: `${keyId}_${user.phone}`,
 					wa_id: Number,
 					contactId: contactList.contactId,
 					masterExtra: additionalFields,
-					...(addedUserId && { agent: [addedUserId] }),
+					agent: [agentToAssign], // 👈 consistent and clean
 				});
 			})
 			.filter((contact) => contact !== null);
 
 		if (contactsToSave.length > 0) {
 			await Contacts.insertMany(contactsToSave);
-			await ContactListTemp.insertMany(contactsToSave);
+			// await ContactListTemp.insertMany(contactsToSave);
 		} else {
 			return res.status(400).json({
 				success: false,
@@ -211,6 +216,29 @@ export const createList = async (req, res, next) => {
 			message: "Contact list and contacts created successfully",
 			dynamicAttributes,
 		});
+
+		const importedNumbers = parsedData.map((c) => c.Number);
+
+		const updateQuery = {
+			useradmin: userId,
+			wa_id: { $in: importedNumbers },
+			FB_PHONE_ID: keyId,
+		};
+
+		const updateData = {
+			$addToSet: { agent: agentToAssign },
+		};
+
+		const updateResult = await ChatsUsers.updateMany(
+			updateQuery,
+			updateData,
+			{ upsert: true },
+		);
+
+		console.log(
+			`📨 Updated ${updateResult.modifiedCount} chat(s): ` +
+				`+agent, set FB_PHONE_ID → ${selectedPhoneId}`,
+		);
 	} catch (error) {
 		console.error(error);
 		res.status(500).json({

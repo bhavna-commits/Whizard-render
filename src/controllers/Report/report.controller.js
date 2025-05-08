@@ -567,28 +567,8 @@ export const createCampaign = async (req, res, next) => {
 				actions: "Send",
 				details: `Scheduled new campaign named: ${name}`,
 			});
+			message = "Campaign scheduled successfully";
 		}
-		message = "Campaign scheduled successfully";
-		// try {
-		// 	const userId =
-		// 		id;
-		// 	const user = await User.findOne({ unique_id: userId });
-
-		// 	if (user?.email) {
-		// 		await sendCampaignScheduledEmail(
-		// 			user.email,
-		// 			name,
-		// 			newCampaign.scheduledAt,
-		// 		);
-		// 	} else {
-		// 		console.warn("No email found for user:", userId);
-		// 	}
-		// } catch (emailError) {
-		// 	console.error(
-		// 		"Failed to send scheduled confirmation email:",
-		// 		emailError,
-		// 	);
-		// }
 
 		// Save the campaign
 		await newCampaign.save();
@@ -620,7 +600,7 @@ export const getCostReport = async (req, res) => {
 		}
 
 		if (!isString(req.query.start, req.query.end)) return next();
-		
+
 		req.query.start = JSON.parse(req.query.start);
 		req.query.end = JSON.parse(req.query.end);
 
@@ -729,7 +709,6 @@ export const getCostReport = async (req, res) => {
 			const access = await User.findOne({
 				unique_id: req.session?.user?.id,
 			});
-			
 		}
 	} catch (error) {
 		console.error("Error fetching cost report :", error);

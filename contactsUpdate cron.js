@@ -5,10 +5,6 @@ import chatsUsersCollection from "./src/models/chatsUsers.model.js";
 import dotenv from "dotenv";
 dotenv.config();
 
-// const url = process.env.MONGO_URI; // Mongo URI already contains the db name
-// const client = new MongoClient(url, { useUnifiedTopology: true });
-
-// Minimal unique ID generator
 export const generateUniqueId = () => {
 	return crypto.randomBytes(5).toString("hex").slice(0, 10);
 };
@@ -17,20 +13,17 @@ export async function updateContacts() {
 	try {
 		console.log("✅ Starting contacts update");
 
-		// 1) Load all temp contacts
 		const contacts = await contactsTempCollection.find().lean();
 		if (!contacts.length) {
 			console.log("⚠️  No temp contacts found, nothing to do");
 			return;
 		}
 
-		// 2) Build filter array for existing lookups
+		// Use $and to properly pair wa_id + useradmin
 		const waUserPairs = contacts.map((c) => ({
-			wa_id: c.wa_id,
-			useradmin: c.useradmin,
+			$and: [{ wa_id: c.wa_id }, { useradmin: c.useradmin }],
 		}));
 
-		// 3) Fetch existing entries only if we have filters
 		let existingEntries = [];
 		if (waUserPairs.length) {
 			existingEntries = await chatsUsersCollection
@@ -38,7 +31,6 @@ export async function updateContacts() {
 				.lean();
 		}
 
-		// 4) Map existing by composite key
 		const existingMap = new Map();
 		existingEntries.forEach((entry) => {
 			existingMap.set(`${entry.useradmin}_${entry.wa_id}`, entry);
@@ -52,15 +44,13 @@ export async function updateContacts() {
 			const ex = existingMap.get(key);
 
 			if (ex) {
-				// --- Merge contactName array ---
-				const updatedContactNames = Array.isArray(ex.contactName)
-					? [...ex.contactName]
-					: [];
-				if (!updatedContactNames.includes(contact.Name)) {
-					updatedContactNames.push(contact.Name);
-				}
+				// Merge contactName using Set to prevent duplicates
+				const updatedContactNames = new Set(
+					Array.isArray(ex.contactName) ? ex.contactName : [],
+				);
+				updatedContactNames.add(contact.Name);
 
-				// --- Merge nameContactRelation array ---
+				// Merge nameContactRelation
 				const updatedRelations = Array.isArray(ex.nameContactRelation)
 					? [...ex.nameContactRelation]
 					: [];
@@ -75,73 +65,43 @@ export async function updateContacts() {
 					});
 				}
 
-				// --- Merge agent array without nesting ---
-				const existingAgents = Array.isArray(ex.agent)
-					? [...ex.agent]
-					: [];
+				// Merge agents with deduplication
+				const existingAgents = new Set(
+					Array.isArray(ex.agent) ? ex.agent : [],
+				);
 				const incomingAgents = Array.isArray(contact.agent)
 					? contact.agent
 					: [contact.agent];
-				for (const ag of incomingAgents) {
-					if (!existingAgents.includes(ag)) {
-						existingAgents.push(ag);
-					}
-				}
+				incomingAgents.forEach((ag) => existingAgents.add(ag));
 
 				bulkOps.push({
 					updateOne: {
 						filter: { _id: ex._id },
 						update: {
 							$set: {
-								contactName: updatedContactNames,
+								contactName: [...updatedContactNames],
 								nameContactRelation: updatedRelations,
-								agent: existingAgents,
+								agent: [...existingAgents],
 								updatedAt: contact.updatedAt,
 							},
 						},
 					},
 				});
-			} else {
-				// --- New entry ---
-				const agentsArr = Array.isArray(contact.agent)
-					? contact.agent
-					: [contact.agent];
-
-				newEntries.push({
-					FB_PHONE_ID: contact.FB_PHONE_ID,
-					useradmin: contact.useradmin,
-					unique_id: generateUniqueId(),
-					contactName: [contact.Name],
-					nameContactRelation: [
-						{
-							name: contact.Name,
-							contactListId: contact.contactId,
-						},
-					],
-					wa_id: contact.wa_id,
-					createdAt: contact.createdAt,
-					updatedAt: contact.updatedAt,
-					agent: agentsArr,
-				});
 			}
 		}
 
-		// 5) Execute bulk updates & inserts
 		if (bulkOps.length) {
 			const result = await chatsUsersCollection.bulkWrite(bulkOps);
 			console.log(`🛠️  Modified ${result.modifiedCount} existing docs`);
 		}
 		if (newEntries.length) {
 			const inserted = await chatsUsersCollection.insertMany(newEntries);
-			console.log(`➕ Inserted ${inserted.length} new docs`);
+			console.log(`➕ Inserted ${newEntries.length} new docs`);
 		}
 
-		// 6) Clear temp collection
 		const del = await contactsTempCollection.deleteMany({});
 		console.log(`🗑️  Cleared ${del.deletedCount} temp contacts`);
 	} catch (error) {
 		console.error("🔥 Error processing contacts update:", error);
 	}
 }
-
-// updateContacts();

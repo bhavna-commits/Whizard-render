@@ -575,6 +575,7 @@ async function fetchAnalytics(startDate, endDate) {
 	} catch (err) {
 		console.error("Unexpected error fetching analytics:", err);
 		toast("error", err.message || "Something went wrong");
+		text.innerHTML = 0;
 		return null;
 	}
 }

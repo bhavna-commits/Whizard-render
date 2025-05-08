@@ -298,7 +298,7 @@ export async function sendMessagesReports(
 			reportData.components = components;
 			reportData.templateId = campaign.templateId;
 			reportData.templatename = template.name;
-			reportData.agent = addedUserId ? addedUserId : [];
+			reportData.agent = addedUserId ? addedUserId : user.unique_id;
 			reportData.type = "Campaign";
 			chat = new Chat(reportData);
 			chatsTemp = new ChatsTemp(reportData);

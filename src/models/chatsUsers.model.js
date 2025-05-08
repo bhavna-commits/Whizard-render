@@ -2,6 +2,7 @@ import mongoose, { Schema } from "mongoose";
 
 const ChatsUsersSchema = new mongoose.Schema(
 	{
+		// WABA_ID: { type: String, required: true, index: true },
 		FB_PHONE_ID: { type: String, required: true, index: true },
 		useradmin: { type: String, required: true, index: true },
 		unique_id: { type: String, required: true },

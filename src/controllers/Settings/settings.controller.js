@@ -9,6 +9,7 @@ import {
 import User from "../../models/user.model.js";
 import ActivityLogs from "../../models/activityLogs.model.js";
 import AddedUser from "../../models/addedUser.model.js";
+import Login from "../../models/login.model.js";
 import Permissions from "../../models/permissions.model.js";
 import {
 	languages,
@@ -20,7 +21,6 @@ import {
 import sendAddUserMail from "../../services/OTP/addingUserService.js";
 import dotenv from "dotenv";
 import { getRandomColor } from "../User/userFunctions.js";
-import { access } from "fs";
 
 dotenv.config();
 
@@ -763,39 +763,36 @@ export const sendUserInvitation = async (req, res, next) => {
 
 		let { name, email, roleId, roleName, url } = req.body;
 
-		// Validate input
 		if (!isString(name, email, roleId, roleName)) {
-			return next(); // Ensure that execution stops here if validation fails
+			return next(); 
 		}
 
 		let exists = await User.findOne({ name, unique_id: adminId });
 		if (exists) {
-			return res.status(409).json({ message: "Name already in use" }); // Use return to stop further execution
+			return res.status(409).json({ message: "Name already in use" }); 
 		}
 
-		// Check if the name already exists in the AddedUser collection
 		exists = await AddedUser.findOne({
 			name,
 			deleted: false,
 			useradmin: adminId,
 		});
 		if (exists) {
-			return res.status(409).json({ message: "Name already in use" }); // Use return to stop further execution
+			return res.status(409).json({ message: "Name already in use" }); 
 		}
 
-		// Check if the user already exists in the User collection
 		exists = await User.findOne({ email });
 		if (exists) {
-			return res.status(409).json({ message: "Email already in use" }); // Use return to stop further execution
+			return res.status(409).json({ message: "Email already in use" }); 
 		}
 
-		// Check if the user already exists in the AddedUser collection
 		exists = await AddedUser.findOne({ email, deleted: false });
 		if (exists) {
-			return res.status(409).json({ message: "Email already in use" }); // Use return to stop further execution
+			return res.status(409).json({ message: "Email already in use" }); 
 		}
 
-		// If user does not exist, create a new entry
+		console.log(roleId, roleName);
+
 		const newUser = new AddedUser({
 			unique_id: generateUniqueId(),
 			name,
@@ -912,7 +909,7 @@ export const createPermissions = async (req, res, next) => {
 		const { dashboard, chats, contactlist, templates, reports, settings } =
 			permissions;
 		// Create a new role with permissions
-		console.log(contactlist);
+		// console.log(contactlist);
 		const newRole = new Permissions({
 			useradmin,
 			name,
@@ -1103,6 +1100,8 @@ export const updateUserManagement = async (req, res) => {
 
 			case "updateRole":
 				// DB update
+
+				console.log(newRoleName, newRoleId);
 				user = await AddedUser.findOneAndUpdate(
 					{ unique_id: userId, deleted: false },
 					{ roleName: newRoleName, roleId: newRoleId },
@@ -1115,12 +1114,14 @@ export const updateUserManagement = async (req, res) => {
 						.json({ success: false, message: "User not found" });
 				}
 
-				// fetch & debug
-				const allSessions = await sessionColl.find({}).toArray();
-				// console.log(
-				// 	`🔍 Found ${allSessions.length} total session docs`,
-				// );
+				const permission = await Permissions.findOne({ unique_id: newRoleId });
 
+				if (!permission?.chats?.allChats) {
+					const login = await Login.findOne({ id: userId });
+				}
+
+				const allSessions = await sessionColl.find({}).toArray();
+				
 				const bulkOps = [];
 				allSessions.forEach((doc) => {
 					// console.log("→ checking session _id=", doc._id);

@@ -8,6 +8,7 @@ import Report from "../../models/chats.model.js";
 import Campaign from "../../models/campaign.model.js";
 import Template from "../../models/templates.model.js";
 import Contacts from "../../models/contacts.model.js";
+import ChatsUsers from "../../models/chatsUsers.model.js";
 import ActivityLogs from "../../models/activityLogs.model.js";
 import { uploadMedia, sendMessage, getMediaUrl } from "./chats.functions.js";
 // import { setToken, getToken, getStoredTokens, saveStoredTokens, validateToken, generateRefreshToken, isTokenExpired } from "./chats.token.js";
@@ -161,6 +162,13 @@ export const getUsers = async (req, res) => {
 			phoneNumberId,
 			skip,
 		);
+
+		// const support = await ChatsUsers.findOne({
+		// 	FB_PHONE_ID: phoneNumberId,
+		// 	wa_id: "917982959619",
+		// 	agent: { $size: 0 }, // ← this does the trick
+		// });
+
 
 		// console.log(formattedReports);
 
