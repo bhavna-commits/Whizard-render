@@ -259,6 +259,8 @@ router.post("/auth_code", async (req, res) => {
 // 	}
 // });
 
+let agents = [];
+
 router.post("/webhook", async (req, res) => {
 	try {
 		const { entry } = req.body;
