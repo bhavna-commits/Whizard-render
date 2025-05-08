@@ -91,7 +91,6 @@ let support = "";
 app.post("/webhook", async (req, res) => {
 	try {
 		const { entry } = req.body;
-		console.log(req.body);
 
 		for (const entryItem of entry) {
 			const wabaId = entryItem.id;
@@ -99,7 +98,7 @@ app.post("/webhook", async (req, res) => {
 			if (entryItem.changes) {
 				const change = entryItem.changes[0];
 				const messagingEvent = change.value;
-
+				console.log(JSON.stringify(entryItem));
 				// Handle status events
 				if (messagingEvent.statuses) {
 					const fbPhoneId =
@@ -160,68 +159,77 @@ app.post("/webhook", async (req, res) => {
 					await tempRejection.save();
 				}
 
-				// Handle incoming messages/replies
-				if (messagingEvent.messages) {
-					console.log(messagingEvent);
+				if (messagingEvent?.messages) {
 					const fbPhoneId =
 						messagingEvent.metadata?.phone_number_id || "";
-					const name = messagingEvent.contacts[0]?.profile?.name;
+					const name = messagingEvent.contacts?.[0]?.profile?.name;
 					const messageEvent = messagingEvent.messages[0];
 					const {
 						id: messageId,
-						from: recipientPhone,
+						from: senderPhone,
 						timestamp,
-						text,
 						type,
+						text,
 						image,
+						video,
+						document,
+						audio,
 					} = messageEvent;
+
+					// Determine mediaUrl if the message contains a file
+					let mediaId = "";
+					if (type === "image" && image?.id) {
+						mediaId = image.id;
+					} else if (type === "video" && video?.id) {
+						mediaId = video.id;
+					} else if (type === "document" && document?.id) {
+						mediaId = document.id;
+					} else if (type === "audio" && audio?.id) {
+						mediaId = audio.id;
+					}
+
+					// Build and save the TempMessage
 					const tempMessage = new TempMessage({
 						name,
 						wabaId,
 						messageId,
-						from: recipientPhone,
+						from: senderPhone,
 						timestamp: timestamp * 1000,
 						type,
-						text,
-						image,
+						text:
+							text ||
+							image?.caption ||
+							video?.caption ||
+							document?.caption ||
+							audio?.caption,
+						mediaId,
 						fbPhoneId,
-						// rawData: messageEvent,
+
 					});
 					await tempMessage.save();
 
 					try {
 						const c = await ChatsUsers.findOne({
 							FB_PHONE_ID: fbPhoneId,
-							wa_id: recipientPhone,
+							wa_id: senderPhone,
 						});
 
-						if (!chats.length) {
-							console.log(
-								"⚠️ No chats found for given FB_PHONE_ID",
-							);
-							return;
-						}
-
 						agents = c.agents;
-
-						// support = await ChatsUsers.findOne({
-						// 	FB_PHONE_ID: fbPhoneId,
-						// 	wa_id: recipientPhone,
-						// 	agent: { $size: 0 },
-						// });
 
 						console.log("🔍 Agents:", agents, "support :", support);
 					} catch (err) {
 						console.error("Error adding agent in chats:", err);
 					}
 				}
+
+				
 			}
 		}
 
 		res.status(200).send("EVENT_RECEIVED");
 	} catch (err) {
 		console.error("Error processing webhook:", err);
-		res.status(500).send("Server Error");
+		res.status(200).send("EVENT_RECEIVED");
 	}
 });
 

@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import ChatsUsers from "./src/models/chatsUsers.model.js";
+import ChatsUsers from "./src/models/chatsUsers.model.js"; // adjust path if needed
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -10,27 +10,14 @@ async function cleanAgents() {
 		await mongoose.connect(MONGO_URI);
 		console.log("✅ Connected to MongoDB");
 
-		const chats = await ChatsUsers.find({
-			agent: { $exists: true, $not: { $size: 0 } },
-		});
-
-		let cleanedCount = 0;
+		const chats = await ChatsUsers.find({ agent: null });
 
 		for (const chat of chats) {
-			const original = chat.agent || [];
-
-			// Remove nulls + deduplicate
-			const cleaned = [...new Set(original.filter(Boolean))];
-
-			// Only update if it's actually different
-			if (cleaned.length !== original.length) {
-				chat.agent = cleaned;
-				await chat.save();
-				cleanedCount++;
-			}
+			chat.agent = []; 
+			await chat.save();
 		}
 
-		console.log(`✅ Cleaned ${cleanedCount} chat user(s).`);
+		console.log(`✅ Cleaned ${chats.length} chat user(s).`);
 	} catch (err) {
 		console.error("🔥 Error cleaning agents:", err);
 	} finally {
