@@ -384,7 +384,7 @@ router.post("/webhook", async (req, res) => {
 							wa_id: senderPhone,
 						});
 
-						agents = c.agents;
+						agents = c.agent;
 
 						console.log("🔍 Agents:", agents, "support :", support);
 					} catch (err) {
