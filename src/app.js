@@ -2,7 +2,7 @@ import express from "express";
 import sessionMiddleware from "./middleWares/sessionHandler.js";
 import corsMiddleware from "./middleWares/cors.js";
 import { Server } from "socket.io";
-import http from "http";
+import https from "https";
 import { getUsers, sendMessages, searchUsers, getSingleChat } from "./controllers/Chats/chats.controller.js";
 
 const app = express();
@@ -24,13 +24,21 @@ app.locals.ifEquals = (arg1, arg2, options) => {
 
 app.use(sessionMiddleware);
 
-const httpsServer = http.createServer(app);
+const httpsServer = https.createServer(app);
 
 const io = new Server(httpsServer, {
 	cors: { origin: "*" },
 });
 
 io.on("connection", (socket) => {
+
+	socket.on("connect", () => {
+		console.log("Connected to WebSocket server ✅");
+	});
+	socket.on("connect_error", (err) => {
+		console.error("WebSocket connection failed ❌", err);
+	});
+
 	console.log("User connected:", socket.id);
 
 	socket.on("initial-users_idal_com", async (data) => {
