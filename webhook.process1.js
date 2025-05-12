@@ -300,11 +300,12 @@ export const processTempMessages = async () => {
 
 		const cuOps = Object.entries(convoMap).map(([keydata, info]) => {
 			const [wa_id, fbPhoneId, wabaId] = keydata.split("_");
-			const useradmin = wabaAgent[wabaId];
-			console.log(info.lastMsg)
+			const useradmin = wabaAgent[ wabaId ];
+			
+			console.log(wa_id, info.lastMsg)
 			return {
 				updateOne: {
-					filter: { FB_PHONE_ID: fbPhoneId, useradmin },
+					filter: { FB_PHONE_ID: fbPhoneId, useradmin, wa_id },
 					update: {
 						$set: {
 							wa_id,
@@ -349,13 +350,13 @@ export const processTempMessages = async () => {
 		}
 
 		// 🔥 Delete only processed messages
-		// const processedIds = tempMessages.map((m) => m._id);
-		// if (processedIds.length) {
-		// 	await TempMessage.deleteMany({ _id: { $in: processedIds } });
-		// 	console.log(
-		// 		`🧹 Deleted ${processedIds.length} processed temp messages`,
-		// 	);
-		// }
+		const processedIds = tempMessages.map((m) => m._id);
+		if (processedIds.length) {
+			await TempMessage.deleteMany({ _id: { $in: processedIds } });
+			console.log(
+				`🧹 Deleted ${processedIds.length} processed temp messages`,
+			);
+		}
 
 		console.log("✔️ processTempMessages complete");
 	} catch (err) {

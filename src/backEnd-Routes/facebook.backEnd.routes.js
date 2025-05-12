@@ -361,8 +361,7 @@ router.post("/webhook", async (req, res) => {
 						mediaId = audio.id;
 					}
 
-					// Build and save the TempMessage
-					const tempMessage = new TempMessage({
+					await TempMessage.create({
 						name,
 						wabaId,
 						messageId,
@@ -379,7 +378,33 @@ router.post("/webhook", async (req, res) => {
 						fbPhoneId,
 						status: "receive",
 					});
-					await tempMessage.save();
+
+					await Chats.create({
+						WABA_ID: wabaId,
+						FB_PHONE_ID: fbPhoneId,
+						useradmin: "-",
+						unique_id: "-",
+						campaignId: "-",
+						templateId: "-",
+						contactName: name,
+						recipientPhone: senderPhone,
+						status: "REPLIED",
+						updatedAt: timestamp * 1000,
+						messageId,
+						text: type === "text" ? text?.body : "",
+						media:
+							type !== "text"
+								? {
+										url: mediaId,
+										fileName: mediaId,
+										caption: text || "",
+								  }
+								: {},
+
+						type: "Chat",
+						media_type: type !== "text" ? type : "",
+						agent: [],
+					});
 
 					try {
 						const c = await ChatsUsers.findOne({
@@ -389,7 +414,7 @@ router.post("/webhook", async (req, res) => {
 
 						agents = c.agent;
 
-						console.log("🔍 Agents:", agents);
+						console.log("🔍 Agents:", agents, "support :", support);
 					} catch (err) {
 						console.error("Error adding agent in chats:", err);
 					}
