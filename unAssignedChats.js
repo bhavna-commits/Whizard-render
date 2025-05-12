@@ -1,8 +1,6 @@
 import mongoose from "mongoose";
 import dotenv from "dotenv";
-import ChatsUsers from "./src/models/chatsUsers.model.js";
 import Permissions from "./src/models/permissions.model.js";
-import AddedUser from "./src/models/addedUser.model.js";
 
 dotenv.config();
 
@@ -22,8 +20,8 @@ const UnAssignedChats = {
 	chats: {
 		type: false,
 		view: false,
-		chat: false,
-		allChats: true,
+		chat: true,
+		allChats: false,
 	},
 	contactList: {
 		type: false,
@@ -76,24 +74,27 @@ async function run() {
 		await mongoose.connect(MONGO_URI);
 		console.log("✅ Connected to MongoDB");
 
-		const { dashboard, chats, contactList, templates, reports, settings } =
-			UnAssignedChats;
+		// 🔍 Delete existing permission first
+		const deleted = await Permissions.findOneAndDelete({
+			unique_id: "UnAssignedChats",
+		});
+		if (deleted) {
+			console.log(`🗑️ Deleted existing permission: ${deleted.name}`);
+		} else {
+			console.log("ℹ️ No existing UnAssignedChats permission found.");
+		}
 
+		// ➕ Add the new permission
 		const newRole = new Permissions({
 			useradmin: "staticPermission",
 			name: "Unassigned Chats Support",
 			unique_id: "UnAssignedChats",
 			createdBy: "Default",
-			dashboard,
-			chats,
-			contactList,
-			templates,
-			reports,
-			settings,
+			...UnAssignedChats,
 		});
 
-		console.log(newRole);
 		await newRole.save();
+		console.log("✅ New permission saved successfully!");
 	} catch (err) {
 		console.error("🔥 Error:", err);
 	} finally {

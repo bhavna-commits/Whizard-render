@@ -69,6 +69,7 @@ export const previewContactList = async (req, res, next) => {
 		const contactList = await ContactList.findOne({
 			useradmin: req.session?.user?.id || req.session?.addedUser?.owner,
 			contalistName: listName,
+			contact_status: 1,
 		});
 
 		if (contactList) {
@@ -153,7 +154,7 @@ export const createList = async (req, res, next) => {
 			useradmin: userId,
 			participantCount,
 			contactId: generateUniqueId(),
-			agent: [agentToAssign], // 👈 this prevents array-in-array issues
+			agent: [agentToAssign],
 		};
 
 		// Create a new Contact List
@@ -217,28 +218,33 @@ export const createList = async (req, res, next) => {
 			dynamicAttributes,
 		});
 
-		const importedNumbers = parsedData.map((c) => c.Number);
+		const ops = parsedData.map((c) => {
+			const wa_id = c.Number;
+			const name = c.Name;
 
-		const updateQuery = {
-			useradmin: userId,
-			wa_id: { $in: importedNumbers },
-			FB_PHONE_ID: keyId,
-		};
+			return {
+				updateOne: {
+					filter: {
+						useradmin: userId,
+						wa_id,
+						FB_PHONE_ID: keyId,
+					},
+					update: {
+						$addToSet: {
+							agent: agentToAssign,
+							contactName: name,
+							nameContactRelation: {
+								name,
+								contactListId: contactList.contactId,
+							},
+						},
+					},
+					upsert: true,
+				},
+			};
+		});
 
-		const updateData = {
-			$addToSet: { agent: agentToAssign },
-		};
-
-		const updateResult = await ChatsUsers.updateMany(
-			updateQuery,
-			updateData,
-			{ upsert: true },
-		);
-
-		console.log(
-			`📨 Updated ${updateResult.modifiedCount} chat(s): ` +
-				`+agent, set FB_PHONE_ID → ${selectedPhoneId}`,
-		);
+		await ChatsUsers.bulkWrite(ops);
 	} catch (error) {
 		console.error(error);
 		res.status(500).json({

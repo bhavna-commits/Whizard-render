@@ -72,7 +72,11 @@ export const getSetToken = async (req, res) => {
 		// resolve permissionValue
 		let permissionValue;
 		let accessData;
+		let type;
 		if (permissions) {
+			if (permissions === "") {
+
+			}
 			accessData = await Permissions.findOne({ unique_id: permissions });
 			if (!accessData?.chats?.chat && !accessData?.chats?.allChats)
 				return res.render("errors/notAllowed");
@@ -87,6 +91,7 @@ export const getSetToken = async (req, res) => {
 			permissionValue,
 			added,
 			name,
+			type
 		);
 
 		if (user.WhatsAppConnectStatus === "Pending") {

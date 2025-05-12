@@ -246,32 +246,44 @@ export const editContact = async (req, res, next) => {
 			{ new: true, strict: false },
 		);
 
-		// Only update ChatsUsers if wa_id actually changed
-		if (setData.wa_id) {
-			const userId =
-				req.session?.user?.id || req.session?.addedUser?.owner;
-			const addedUserId = req.session?.addedUser?.id;
-			const agentToAssign = addedUserId || userId;
-
-			const user = await User.findOne({ unique_id: userId });
-			const keyId = user?.FB_PHONE_NUMBERS?.find(
-				(d) => d.selected,
-			)?.phone_number_id;
-
-			const updateQuery = {
-				useradmin: userId,
-				wa_id: setData.wa_id,
-				FB_PHONE_ID: keyId,
-			};
-
-			const updateData = {
-				$addToSet: { agent: agentToAssign },
-			};
-
-			await ChatsUsers.updateOne(updateQuery, updateData, {
-				upsert: true,
+		if (!contacts) {
+			return res.status(404).json({
+				success: false,
+				message: "Contact not found",
 			});
 		}
+
+		// Only update ChatsUsers if wa_id actually changed
+		const userId = req.session?.user?.id || req.session?.addedUser?.owner;
+		const addedUserId = req.session?.addedUser?.id;
+		const agentToAssign = addedUserId || userId;
+
+		const user = await User.findOne({ unique_id: userId });
+		const keyId = user?.FB_PHONE_NUMBERS?.find(
+			(d) => d.selected,
+		)?.phone_number_id;
+
+		const updateQuery = {
+			useradmin: userId,
+			wa_id: setData.wa_id,
+			FB_PHONE_ID: keyId,
+		};
+
+		const updateData = {
+			$addToSet: {
+				agent: agentToAssign,
+				contactName: setData.Name,
+				nameContactRelation: {
+					name: setData.Name,
+					contactListId: contacts.contactId, 
+				},
+			},
+		};
+
+		await ChatsUsers.updateOne(updateQuery, updateData, {
+			upsert: true,
+		});
+
 
 		await ActivityLogs.create({
 			useradmin: req.session?.user?.id || req.session?.addedUser?.owner,
@@ -426,8 +438,15 @@ export const createContact = async (req, res, next) => {
 		const keyId = user?.FB_PHONE_NUMBERS?.find(
 			(d) => d.selected,
 		)?.phone_number_id;
+		
+		if (!keyId) {
+			return res.status(400).json({
+				success: false,
+				message: "No phone number selected for the user.",
+			});
+		}
 
-		const fullWaId = `${countryCode.slice(1)}${wa_id}`;
+		const fullWaId = `${countryCode?.slice(1)}${wa_id}`;
 		const agentToAssign = addedUserId || userId;
 
 		// Check for duplicate contact
@@ -444,6 +463,7 @@ export const createContact = async (req, res, next) => {
 			});
 		}
 
+		// Create new contact
 		const contact = {
 			useradmin: userId,
 			unique_id: generateUniqueId(),
@@ -453,6 +473,7 @@ export const createContact = async (req, res, next) => {
 			wa_id: fullWaId,
 			masterExtra: newContactData,
 			agent: [agentToAssign],
+			createdAt: Date.now(),
 		};
 
 		const newContact = await Contacts.create(contact);
@@ -471,23 +492,37 @@ export const createContact = async (req, res, next) => {
 			details: `Created a new contact: ${newContact.Name}`,
 		});
 
-		// Upsert in ChatsUsers
-		const updateQuery = {
-			useradmin: userId,
-			wa_id: fullWaId,
-			FB_PHONE_ID: keyId,
-		};
+		// ✅ Upsert in ChatsUsers with full data
+		if (Name && contactId) {
+			const updateQuery = {
+				useradmin: userId,
+				wa_id: fullWaId,
+				FB_PHONE_ID: keyId,
+			};
 
-		const updateData = {
-			$addToSet: { agent: agentToAssign },
-		};
+			const updateData = {
+				$addToSet: {
+					agent: agentToAssign,
+					contactName: Name,
+					nameContactRelation: {
+						name: Name,
+						contactListId: contactId,
+					},
+				},
+			};
 
-		await ChatsUsers.updateOne(updateQuery, updateData, { upsert: true });
+			await ChatsUsers.updateOne(updateQuery, updateData, {
+				upsert: true,
+			});
+		}
 
 		res.status(201).json({ success: true, contact: newContact });
 	} catch (error) {
-		console.error("Error adding contact:", error.message);
-		res.status(500).json({ success: false, message: error.message });
+		console.error("Error adding contact:", error.message || error);
+		res.status(500).json({
+			success: false,
+			message: error.message || error,
+		});
 	}
 };
 

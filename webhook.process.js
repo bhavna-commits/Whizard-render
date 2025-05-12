@@ -29,7 +29,8 @@ let TempStatus,
 	Contacts,
 	TempTemplateRejection,
 	Template,
-	ChatsUsers;
+	ChatsUsers,
+	addedUser;
 
 const connectDB = async () => {
 	try {
@@ -238,6 +239,10 @@ export const processChatsToChatsUsers = async () => {
 				wa_id: chat.recipientPhone,
 			};
 
+			const agentUser = await addedUser.findOne({ roleId: "UnAssignedChats", useradmin: chat.useradmin });
+
+			
+
 			const incomingAgents = Array.isArray(chat.agent)
 				? chat.agent
 				: chat.agent
@@ -302,6 +307,7 @@ export const processAllTempEvents = async () => {
 	Contacts = db.collection("contacts");
 	TempTemplateRejection = db.collection("temptemplaterejections");
 	Template = db.collection("templates");
+	addedUser = db.collection("addedusers");
 	await processTempStatuses();
 	await processTempMessages();
 	await processTempTemplateRejections();

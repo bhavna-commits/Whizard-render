@@ -153,7 +153,7 @@ export async function getUserIdFromToken(token) {
  * Creates or updates a token record for a given owner (userId) and agent (agentId).
  * If agentId not provided, assumes owner login (agentId === userId).
  */
-export async function createTokenRecord(userId, permission, addedUser, name) {
+export async function createTokenRecord(userId, permission, addedUser, name, tokenType) {
 	// determine agentId (owner vs added user)
 	const agentId = addedUser?.id || userId;
 
@@ -191,7 +191,8 @@ export async function createTokenRecord(userId, permission, addedUser, name) {
 		expiresAt,
 		permission,
 		unique_id,
-		name,	
+		name,
+		tokenType,
 	});
 	await tokenRecord.save();
 	return token;

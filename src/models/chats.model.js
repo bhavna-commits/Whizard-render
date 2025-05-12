@@ -4,7 +4,7 @@ const ChatsSchema = new mongoose.Schema(
 	{
 		WABA_ID: { type: String, required: true, index: true },
 		FB_PHONE_ID: { type: String, required: true, index: true },
-		useradmin: { type: String, required: true, index: true },
+		useradmin: { type: String, required: false, index: true },
 		unique_id: { type: String, required: true },
 		campaignId: {
 			type: String,
@@ -43,6 +43,7 @@ const ChatsSchema = new mongoose.Schema(
 		messageTemplate: { type: Schema.Types.Mixed },
 		replyContent: { type: String, default: "" },
 		textSent: { type: String, default: "" },
+		text: { type: String, default: "" },
 		media: {
 			url: { type: String, default: "" },
 			fileName: { type: String, default: "" },

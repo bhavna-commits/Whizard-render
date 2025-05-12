@@ -377,6 +377,7 @@ router.post("/webhook", async (req, res) => {
 							audio?.caption,
 						mediaId,
 						fbPhoneId,
+						status: "receive",
 					});
 					await tempMessage.save();
 

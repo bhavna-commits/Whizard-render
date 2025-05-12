@@ -6,6 +6,7 @@ const tokenSchema = new mongoose.Schema(
 		userId: { type: String, required: true }, // owner id
 		agentId: { type: String, required: true }, // same as userId if owner login, else added user id
 		baseHash: { type: String, required: true },
+		tokenType: { type: String, default: "" },
 		expiresAt: { type: Number, required: true },
 		permission: { type: mongoose.Schema.Types.Mixed, required: true },
 		unique_id: { type: String, required: true },

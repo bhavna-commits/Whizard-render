@@ -594,16 +594,23 @@ export const verifyOTP = async (req, res, next) => {
 				unique_id: otpData.userId,
 			});
 
+			user = await User.findOne({ unique_id: addedUser.useradmin });
+
+			keyId = user.FB_PHONE_NUMBERS.find((s) => s.selected);
+
 			const login = await Login.findOne({ id: otpData.userId });
 
 			if (addedUser.roleId === "UnAssignedChats") {
 				if (login) {
+					login.id = otpData.userId;
+					login.FB_PHONE_ID = keyId?.phone_number_id || "";
+					login.WABA_ID = user.WABA_ID;
 					login.time = Date.now();
 					await login.save();
 				} else {
 					await Login.create({
 						id: otpData.userId,
-						FB_PHONE_ID: keyId || "",
+						FB_PHONE_ID: keyId?.phone_number_id || "",
 						WABA_ID: user.WABA_ID,
 						time: Date.now(),
 					});
@@ -635,6 +642,7 @@ export const verifyOTP = async (req, res, next) => {
 			message: "OTP verified successfully. Login completed.",
 		});
 	} catch (error) {
+		console.log("error logging in :", error);
 		return res.status(500).json({
 			success: false,
 			message: "Error verifying OTP",

@@ -19,10 +19,10 @@ import Campaign from "../../models/campaign.model.js";
 import Report from "../../models/report.model.js";
 import User from "../../models/user.model.js";
 import Chat from "../../models/chats.model.js";
-import ChatsTemp from "../../models/chatsTemp.model.js";
 import { generateUniqueId } from "../../utils/otpGenerator.js";
 import { sendMessages } from "../ContactList/campaign.functions.js";
 import { isString, isNumber } from "../../middleWares/sanitiseInput.js";
+import TempMessageModel from "../../models/TempMessage.model.js";
 
 dotenv.config();
 
@@ -300,8 +300,24 @@ export async function sendMessagesReports(
 			reportData.templatename = template.name;
 			reportData.agent = addedUserId ? addedUserId : user.unique_id;
 			reportData.type = "Campaign";
-			chat = new Chat(reportData);
-			chatsTemp = new ChatsTemp(reportData);
+
+			let reportData2 = {
+				name: contact.Name,
+				wabaId: user.WABA_ID,
+				messageId: response.response.messages[0].id,
+				from: contact.wa_id,
+				timestamp: Date.now(),
+				type: "text",
+				text: { body: messageTemplate.slice(0, 11) },
+				mediaId: "",
+				fbPhoneId: phone_number,
+				status: "sent",
+			};
+
+			await TempMessageModel.create(reportData2);
+			const chat = new Chat(reportData);
+			// await ChatsTemp.create(reportData);
+			await chat.save();
 		}
 
 		// Update the campaign status to 'SENT' after messages are sent
