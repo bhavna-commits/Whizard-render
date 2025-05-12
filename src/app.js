@@ -2,7 +2,7 @@ import express from "express";
 import sessionMiddleware from "./middleWares/sessionHandler.js";
 import corsMiddleware from "./middleWares/cors.js";
 import { Server } from "socket.io";
-import https from "https";
+import http from "http";
 import { getUsers, sendMessages, searchUsers, getSingleChat } from "./controllers/Chats/chats.controller.js";
 
 const app = express();
@@ -24,7 +24,7 @@ app.locals.ifEquals = (arg1, arg2, options) => {
 
 app.use(sessionMiddleware);
 
-const httpsServer = https.createServer(app);
+const httpsServer = http.createServer(app);
 
 const io = new Server(httpsServer, {
 	cors: { origin: "*" },
