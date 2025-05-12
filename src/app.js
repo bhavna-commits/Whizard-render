@@ -3,6 +3,7 @@ import sessionMiddleware from "./middleWares/sessionHandler.js";
 import corsMiddleware from "./middleWares/cors.js";
 import { Server } from "socket.io";
 import http from "http";
+import { getUsers, sendMessages, searchUsers, getSingleChat } from "./controllers/Chats/chats.controller.js";
 
 const app = express();
 
@@ -26,7 +27,7 @@ app.use(sessionMiddleware);
 const httpsServer = http.createServer(app);
 
 const io = new Server(httpsServer, {
-	cors: { origin: "*" }, // Allow all origins (adjust for security)
+	cors: { origin: "*" },
 });
 
 io.on("connection", (socket) => {

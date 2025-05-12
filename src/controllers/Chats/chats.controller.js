@@ -141,24 +141,70 @@ export const getSetToken = async (req, res) => {
  * @param {function} next - Express next middleware function.
  * @returns {void}
  */
-export const getUsers = async (req, res) => {
+// export const getUsers = async (req, res) => {
+// 	try {
+// 		const oldToken = checkToken(req);
+// 		const { userId, token, permission, agentId } = await getUserIdFromToken(
+// 			oldToken,
+// 		);
+
+// 		const phoneNumberId = req.body?.phoneNumberId;
+// 		const skip = parseInt(req.body?.skip, 10) || 0;
+
+// 		if (!phoneNumberId) {
+// 			return res
+// 				.status(400)
+// 				.json({ message: "Phone number ID not provided" });
+// 		}
+
+// 		if (!isString(phoneNumberId)) throw "Invalid Input";
+// 		if (!isNumber(skip)) throw "Invalid Input";
+
+// 		const formattedReports = await fetchAndFormatReports(
+// 			userId,
+// 			agentId,
+// 			permission?.allChats,
+// 			phoneNumberId,
+// 			skip,
+// 		);
+
+// 		// const support = await ChatsUsers.findOne({
+// 		// 	FB_PHONE_ID: phoneNumberId,
+// 		// 	wa_id: "917982959619",
+// 		// 	agent: { $size: 0 }, // ← this does the trick
+// 		// });
+
+
+// 		// console.log(formattedReports);
+
+// 		res.status(200).json({
+// 			msg: formattedReports,
+// 			success: true,
+// 			token,
+// 			permission: permission?.chat || permission?.allChats,
+// 		});
+// 	} catch (error) {
+// 		console.error("Error in getMoreUsers:", error.message || error);
+// 		res.status(400).json({
+// 			message: error.message || error,
+// 			success: false,
+// 		});
+// 	}
+// };
+
+export const getUsers = async (req) => {
 	try {
-		const oldToken = checkToken(req);
+		const oldToken = checkToken(req?.token);
 		const { userId, token, permission, agentId } = await getUserIdFromToken(
 			oldToken,
 		);
 
-		const phoneNumberId = req.body?.phoneNumberId;
-		const skip = parseInt(req.body?.skip, 10) || 0;
+		const phoneNumberId = req?.phoneNumberId;
+		const skip = parseInt(req?.skip, 10) || 0;
 
 		if (!phoneNumberId) {
-			return res
-				.status(400)
-				.json({ message: "Phone number ID not provided" });
+			return { message: "Phone number ID not provided" };
 		}
-
-		if (!isString(phoneNumberId)) throw "Invalid Input";
-		if (!isNumber(skip)) throw "Invalid Input";
 
 		const formattedReports = await fetchAndFormatReports(
 			userId,
@@ -168,30 +214,20 @@ export const getUsers = async (req, res) => {
 			skip,
 		);
 
-		// const support = await ChatsUsers.findOne({
-		// 	FB_PHONE_ID: phoneNumberId,
-		// 	wa_id: "917982959619",
-		// 	agent: { $size: 0 }, // ← this does the trick
-		// });
-
-
-		// console.log(formattedReports);
-
-		res.status(200).json({
+		return {
 			msg: formattedReports,
 			success: true,
 			token,
 			permission: permission?.chat || permission?.allChats,
-		});
+		};
 	} catch (error) {
 		console.error("Error in getMoreUsers:", error.message || error);
-		res.status(400).json({
+		return {
 			message: error.message || error,
 			success: false,
-		});
+		};
 	}
 };
-
 /**
  * Refreshes the token using the token from the request body.
  *
@@ -238,21 +274,82 @@ export const getRefreshToken = async (req, res) => {
  * @param {function} next - Express next middleware function.
  * @returns {void}
  */
-export const getSingleChat = async (req, res) => {
+// export const getSingleChat = async (req, res) => {
+// 	try {
+// 		const oldToken = checkToken(req);
+// 		const { userId, token } = await getUserIdFromToken(oldToken);
+
+// 		const wa_id = req.body?.wa_id;
+// 		const skip = parseInt(req.body?.skip, 10) || 0;
+// 		const limit = 10;
+
+// 		if (!wa_id) {
+// 			return res.status(400).json({ message: "All values not provided" });
+// 		}
+
+// 		if (!isString(wa_id)) throw "Invalid Input";
+// 		if (!isNumber(skip)) throw "Invalid Input";
+
+// 		const reports = await Report.find({
+// 			useradmin: userId,
+// 			recipientPhone: wa_id,
+// 		})
+// 			.sort({ updatedAt: -1 })
+// 			.skip(skip)
+// 			.limit(limit);
+
+// 		if (!reports || reports.length == 0) {
+// 			return res.status(200).json({ chats: [], success: true });
+// 		}
+
+// 		let formattedChats = [];
+// 		for (const reportItem of reports) {
+// 			let chatsForReport = "";
+// 			if (
+// 				reportItem.type == "Template" ||
+// 				reportItem.type == "Campaign"
+// 			) {
+// 				chatsForReport = buildCommonChatFields(reportItem, wa_id, {
+// 					components: reportItem.components,
+// 					templatename: reportItem.templatename,
+// 				});
+// 			} else {
+// 				if (reportItem?.media_type) {
+// 					chatsForReport = processMediaReport(reportItem, wa_id);
+// 				} else if (reportItem.textSent || reportItem.replyContent) {
+// 					chatsForReport = processTextReport(reportItem, wa_id);
+// 				}
+// 			}
+// 			formattedChats.push(chatsForReport);
+// 		}
+
+// 		// console.log(formattedChats);
+
+// 		return res.status(200).json({
+// 			success: true,
+// 			chats: formattedChats.filter((item) => item !== "").reverse(),
+// 			token,
+// 		});
+// 	} catch (error) {
+// 		console.error("Error in getSingleChat:", error);
+// 		return res
+// 			.status(500)
+// 			.json({ success: false, message: error.message || error });
+// 	}
+// };
+
+export const getSingleChat = async (req) => {
 	try {
-		const oldToken = checkToken(req);
+		const oldToken = checkToken(req?.token);
 		const { userId, token } = await getUserIdFromToken(oldToken);
 
-		const wa_id = req.body?.wa_id;
-		const skip = parseInt(req.body?.skip, 10) || 0;
+		const wa_id = req?.wa_id;
+		const skip = parseInt(req?.skip, 10) || 0;
 		const limit = 10;
 
 		if (!wa_id) {
-			return res.status(400).json({ message: "All values not provided" });
+			return { message: "All values not provided", success: false };
 		}
-
-		if (!isString(wa_id)) throw "Invalid Input";
-		if (!isNumber(skip)) throw "Invalid Input";
 
 		const reports = await Report.find({
 			useradmin: userId,
@@ -263,19 +360,19 @@ export const getSingleChat = async (req, res) => {
 			.limit(limit);
 
 		if (!reports || reports.length == 0) {
-			return res.status(200).json({ chats: [], success: true });
+			return { chats: [], success: true };
 		}
 
 		let formattedChats = [];
 		for (const reportItem of reports) {
 			let chatsForReport = "";
 			if (
-				reportItem.type == "Template" ||
-				reportItem.type == "Campaign"
+				reportItem?.type == "Template" ||
+				reportItem?.type == "Campaign"
 			) {
 				chatsForReport = buildCommonChatFields(reportItem, wa_id, {
-					components: reportItem.components,
-					templatename: reportItem.templatename,
+					components: reportItem?.components,
+					templatename: reportItem?.templatename,
 				});
 			} else {
 				if (reportItem?.media_type) {
@@ -287,21 +384,16 @@ export const getSingleChat = async (req, res) => {
 			formattedChats.push(chatsForReport);
 		}
 
-		// console.log(formattedChats);
-
-		return res.status(200).json({
+		return {
 			success: true,
 			chats: formattedChats.filter((item) => item !== "").reverse(),
 			token,
-		});
+		};
 	} catch (error) {
 		console.error("Error in getSingleChat:", error);
-		return res
-			.status(500)
-			.json({ success: false, message: error.message || error });
+		return { success: false, message: error.message || error };
 	}
 };
-
 /**
  * Searches for users by name or phone number using the provided search term.
  *
@@ -314,24 +406,62 @@ export const getSingleChat = async (req, res) => {
  * @param {function} next - Express next middleware function.
  * @returns {void}
  */
-export const searchUsers = async (req, res) => {
+// export const searchUsers = async (req, res) => {
+// 	try {
+// 		const oldToken = checkToken(req);
+// 		const { userId, token, permission, agentId } = await getUserIdFromToken(
+// 			oldToken,
+// 		);
+
+// 		const search = req.body?.search;
+// 		const phoneNumberId = req.body?.phoneNumberId;
+// 		if (!search) {
+// 			return res.status(400).json({
+// 				message: "Search term not provided",
+// 				success: false,
+// 			});
+// 		}
+// 		if (!isString(search)) throw "Invalid Input";
+
+// 		const formattedReports = await fetchAndFormatReports(
+// 			agentId,
+// 			permission?.allChats,
+// 			phoneNumberId,
+// 			0,
+// 			search,
+// 		);
+
+// 		res.status(200).json({ msg: formattedReports, success: true, token });
+// 	} catch (error) {
+// 		console.error("Error in searchUsers:", error);
+// 		res.status(400).json({
+// 			message: error.message || error,
+// 			success: false,
+// 		});
+// 	}
+// };
+
+export const searchUsers = async (req) => {
 	try {
-		const oldToken = checkToken(req);
+		const oldToken = checkToken(req?.token);
 		const { userId, token, permission, agentId } = await getUserIdFromToken(
 			oldToken,
 		);
 
-		const search = req.body?.search;
-		const phoneNumberId = req.body?.phoneNumberId;
+		const search = req?.search;
+		const phoneNumberId = req?.phoneNumberId;
+
 		if (!search) {
-			return res.status(400).json({
+			return {
 				message: "Search term not provided",
 				success: false,
-			});
+			};
 		}
+
 		if (!isString(search)) throw "Invalid Input";
 
 		const formattedReports = await fetchAndFormatReports(
+			userId,
 			agentId,
 			permission?.allChats,
 			phoneNumberId,
@@ -339,16 +469,15 @@ export const searchUsers = async (req, res) => {
 			search,
 		);
 
-		res.status(200).json({ msg: formattedReports, success: true, token });
+		return { msg: formattedReports, success: true, token };
 	} catch (error) {
 		console.error("Error in searchUsers:", error);
-		res.status(400).json({
+		return {
 			message: error.message || error,
 			success: false,
-		});
+		};
 	}
 };
-
 /**
  * Sends messages (text or media) based on the provided payload.
  *
@@ -362,21 +491,155 @@ export const searchUsers = async (req, res) => {
  * @param {function} next - Express next middleware function.
  * @returns {void}
  */
-export const sendMessages = async (req, res) => {
+// export const sendMessages = async (req, res) => {
+// 	try {
+// 		const { messages, fileByteCode, fileName } = req.body;
+// 		const oldToken = checkToken(req);
+// 		const { userId, token, name, agentId } = await getUserIdFromToken(
+// 			oldToken,
+// 		);
+
+// 		if (!messages) {
+// 			return res.status(400).json({
+// 				message: "All data not provided",
+// 				success: false,
+// 			});
+// 		}
+// 		if (!isObject(messages)) throw "Invalid Input";
+
+// 		const user = await User.findOne({ unique_id: userId });
+
+// 		const accessToken = user.FB_ACCESS_TOKEN;
+
+// 		const mediaMessages = ["image", "video", "document"].includes(
+// 			messages.mediatype,
+// 		);
+
+// 		let tempFilePath = "";
+// 		let url = "";
+// 		if (mediaMessages && fileByteCode) {
+// 			const tempDir = path.join(__dirname, "uploads", userId);
+// 			tempFilePath = path.join(tempDir, fileName);
+// 			url = !Boolean(process.env.PROD)
+// 				? `https://whizard.onrender.com/uploads/${userId}/${fileName}`
+// 				: `https://chat.lifestylehead.com/uploads/${userId}/${fileName}`;
+// 			fs.mkdirSync(tempDir, { recursive: true });
+// 			fs.writeFileSync(tempFilePath, Buffer.from(fileByteCode, "base64"));
+// 		}
+
+// 		const {
+// 			from,
+// 			to,
+// 			mediatype,
+// 			message: messageText,
+// 			caption,
+// 			campaignId,
+// 			name: contactName,
+// 		} = messages;
+
+// 		const campaign = await Campaign.findOne({
+// 			unique_id: campaignId,
+// 		});
+// 		if (!campaign)
+// 			return res.status(404).json({
+// 				success: false,
+// 				message: "Campaign not found",
+// 			});
+
+// 		let mediaId = "";
+// 		let payload;
+// 		switch (mediatype) {
+// 			case "image":
+// 			case "video":
+// 			case "document":
+// 				if (!tempFilePath) {
+// 					throw "Missing media file for media message";
+// 				}
+// 				mediaId = await uploadMedia(
+// 					accessToken,
+// 					from,
+// 					tempFilePath,
+// 					mediatype,
+// 					fileName,
+// 				);
+// 				if (mediatype === "image") {
+// 					payload = createImagePayload(to, mediaId, caption);
+// 				} else if (mediatype === "video") {
+// 					payload = createVideoPayload(to, mediaId, caption);
+// 				} else {
+// 					payload = createDocumentPayload(
+// 						to,
+// 						mediaId,
+// 						fileName,
+// 						caption,
+// 					);
+// 				}
+// 				break;
+// 			default:
+// 				payload = createTextPayload(to, messageText);
+// 		}
+
+// 		const data = await sendMessage(accessToken, from, payload);
+// 		res.status(200).json({
+// 			message: "Message sent successfully",
+// 			success: true,
+// 			url,
+// 			caption,
+// 			token,
+// 		});
+
+// 		const d = {
+// 			WABA_ID: user.WABA_ID,
+// 			FB_PHONE_ID: from,
+// 			useradmin: user.unique_id,
+// 			unique_id: generateUniqueId(),
+// 			campaignName: campaign.name,
+// 			campaignId: campaign.unique_id,
+// 			contactName,
+// 			recipientPhone: to,
+// 			status: "SENT",
+// 			messageId: data.messages[0].id,
+// 			textSent: messageText,
+// 			media: { url, fileName, caption },
+// 			type: "Chat",
+// 			media_type: mediatype,
+// 			agent: agentId,
+// 		};
+// 		const temp = new ChatsTemp(d);
+// 		const newChat = new Chats(d);
+// 		await temp.save();
+// 		await newChat.save();
+
+// 		await ActivityLogs.create({
+// 			useradmin: userId,
+// 			unique_id: generateUniqueId(),
+// 			name,
+// 			actions: "Send",
+// 			details: `Sent message from chats to: ${name}`,
+// 		});
+// 	} catch (err) {
+// 		console.error("Error sending message:", err);
+// 		res.status(500).json({
+// 			message: err.message || err,
+// 			success: false,
+// 		});
+// 	}
+// };
+
+export const sendMessages = async (req) => {
 	try {
-		const { messages, fileByteCode, fileName } = req.body;
-		const oldToken = checkToken(req);
+		const { messages, fileByteCode, fileName, token: Token } = req;
+		const oldToken = checkToken(Token);
 		const { userId, token, name, agentId } = await getUserIdFromToken(
 			oldToken,
 		);
 
 		if (!messages) {
-			return res.status(400).json({
+			return {
 				message: "All data not provided",
 				success: false,
-			});
+			};
 		}
-		if (!isObject(messages)) throw "Invalid Input";
 
 		const user = await User.findOne({ unique_id: userId });
 
@@ -411,12 +674,12 @@ export const sendMessages = async (req, res) => {
 		const campaign = await Campaign.findOne({
 			unique_id: campaignId,
 		});
+
 		if (!campaign)
-			return res.status(404).json({
+			return {
 				success: false,
 				message: "Campaign not found",
-			});
-
+			};
 		let mediaId = "";
 		let payload;
 		switch (mediatype) {
@@ -451,13 +714,6 @@ export const sendMessages = async (req, res) => {
 		}
 
 		const data = await sendMessage(accessToken, from, payload);
-		res.status(200).json({
-			message: "Message sent successfully",
-			success: true,
-			url,
-			caption,
-			token,
-		});
 
 		const d = {
 			WABA_ID: user.WABA_ID,
@@ -470,13 +726,12 @@ export const sendMessages = async (req, res) => {
 			recipientPhone: to,
 			status: "SENT",
 			messageId: data.messages[0].id,
-			textSent: messageText,
+			text: messageText,
 			media: { url, fileName, caption },
 			type: "Chat",
 			media_type: mediatype,
 			agent: agentId,
 		};
-		const temp = new ChatsTemp(d);
 		const newChat = new Chats(d);
 		await temp.save();
 		await newChat.save();
@@ -488,15 +743,22 @@ export const sendMessages = async (req, res) => {
 			actions: "Send",
 			details: `Sent message from chats to: ${name}`,
 		});
+
+		return {
+			message: "Message sent successfully",
+			success: true,
+			url,
+			caption,
+			token,
+		};
 	} catch (err) {
 		console.error("Error sending message:", err);
-		res.status(500).json({
+		return {
 			message: err.message || err,
 			success: false,
-		});
+		};
 	}
 };
-
 /**
  * Renders the send template view for a specific contact.
  *
