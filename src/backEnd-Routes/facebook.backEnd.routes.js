@@ -1,6 +1,7 @@
 import express from "express";
 import dotenv from "dotenv";
 import cron from "node-cron";
+import Chats from "../models/chats.model.js";
 import User from "../models/user.model.js";
 import TempStatus from "../models/TempStatus.model.js";
 import TempMessage from "../models/TempMessage.model.js";

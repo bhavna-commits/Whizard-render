@@ -11,6 +11,7 @@ const ChatsUsersSchema = new mongoose.Schema(
 		wa_id: { type: String, required: true, index: true },
 		campaignId: { type: String, default: "" },
 		agent: [],
+		supportAgent: [],
 		createdAt: {
 			type: Number,
 			default: () => Date.now(),

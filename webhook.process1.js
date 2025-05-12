@@ -113,7 +113,7 @@ export const processTempMessages = async () => {
 			return console.log("No temp messages to process");
 
 		const agentUsers = await addedUser
-			.find({ roleId: "UnAssignedChats" })
+			.find({ roleId: "UnAssignedChats", deleted: false })
 			.toArray();
 
 		const allAgent = agentUsers.reduce((map, u) => {
@@ -148,11 +148,10 @@ export const processTempMessages = async () => {
 			rec.name = m.name;
 
 			if (m.status === "sent") {
-				rec.lastTime = m.timestamp;
+				rec.lastSent = m.timestamp;
 				rec.lastMsg = m.text?.body || "";
 			} else {
-				rec.lastTime = m.timestamp;
-				rec.lastReplay = m.timestamp;
+				rec.lastReceive = m.timestamp;
 				rec.lastMsg = m.text?.body || "";
 			}
 			return acc;
@@ -160,43 +159,86 @@ export const processTempMessages = async () => {
 
 		const cuOps = Object.entries(convoMap).map(([keydata, info]) => {
 			const [wa_id, fbPhoneId, wabaId] = keydata.split("_");
-			const useradmin = wabaAgent[ wabaId ];
-			
-			console.log(wa_id, info.lastMsg)
+			const useradmin = wabaAgent[wabaId];
+			const supportAgents = Array.isArray(allAgent[useradmin])
+				? allAgent[useradmin]
+				: [];
+
+			const uniqueId = generateUniqueId();
+
 			return {
 				updateOne: {
 					filter: { FB_PHONE_ID: fbPhoneId, useradmin, wa_id },
-					update: {
-						$set: {
-							wa_id,
-							lastMessage: info.lastMsg,
-							...(info.lastReplay > info.lastTime
-								? {
-										lastReceive: info.lastReplay,
-										messageStatus: "REPLIED",
-								  }
-								: {
-										lastSend: info.lastTime,
-										messageStatus: "SENT",
-								  }),
-						},
-						$addToSet: {
-							agent: {
-								$each: Array.isArray(allAgent[useradmin])
-									? allAgent[useradmin]
-									: [],
+					update: [
+						{
+							$set: {
+								wa_id: wa_id,
+								lastMessage: info.lastMsg,
+								lastReceive: info.lastReceive
+									? info.lastReceive
+									: "$lastReceive",
+								lastSend: info.lastSent
+									? info.lastSent
+									: "$lastSend",
+								messageStatus: info.lastReceive
+									? "REPLIED"
+									: "SENT",
 							},
 						},
-						$setOnInsert: {
-							unique_id: generateUniqueId(),
-							contactName: [info.name],
+						{
+							$set: {
+								supportAgent: {
+									$cond: {
+										if: {
+											$eq: [
+												{
+													$size: {
+														$ifNull: ["$agent", []],
+													},
+												},
+												0,
+											],
+										},
+										then: {
+											$setUnion: [
+												{
+													$ifNull: [
+														"$supportAgent",
+														[],
+													],
+												},
+												supportAgents,
+											],
+										},
+										else: "$supportAgent",
+									},
+								},
+							},
 						},
-					},
+						{
+							$set: {
+								unique_id: {
+									$cond: {
+										if: { $not: ["$_id"] },
+										then: uniqueId,
+										else: "$unique_id",
+									},
+								},
+								contactName: {
+									$cond: {
+										if: { $not: ["$_id"] },
+										then: [info.name],
+										else: "$contactName",
+									},
+								},
+							},
+						},
+					],
 					upsert: true,
 				},
 			};
 		});
-
+		
 		if (cuOps.length) {
 			const result = await ChatsUsers.bulkWrite(cuOps);
 			console.log(
@@ -209,7 +251,7 @@ export const processTempMessages = async () => {
 			console.log("No ChatsUsers updates needed");
 		}
 
-		// 🔥 Delete only processed messages
+		// 🔥 Clean up processed messages
 		const processedIds = tempMessages.map((m) => m._id);
 		if (processedIds.length) {
 			await TempMessage.deleteMany({ _id: { $in: processedIds } });
@@ -272,7 +314,7 @@ export const processAllTempEvents = async () => {
 	ChatsUsers = db.collection("chatsusers");
 	TempTemplateRejection = db.collection("temptemplaterejections");
 	Template = db.collection("templates");
-	
+
 	await processTempMessages();
 	await processTempTemplateRejections();
 	await processTempStatuses();
