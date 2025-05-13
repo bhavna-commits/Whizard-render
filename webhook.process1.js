@@ -110,7 +110,7 @@ export const processTempStatuses = async () => {
 export const processTempMessages = async () => {
 	try {
 		const tempMessages = await TempMessage.find().toArray();
-		const chats = await Chat.find({ useradmin: "dummy" }).toArray();
+		const chats = await Chat.find({ useradmin: "-" }).toArray();
 
 		if (!tempMessages.length)
 			return console.log("No temp messages to process");
@@ -432,7 +432,7 @@ export const processAllTempEvents = async () => {
 	User = db.collection("users");
 	Campaign = db.collection("campaigns");
 	TempMessage = db.collection("tempmessages");
-	Chat = db.collection("campaignreports");
+	Chat = db.collection("chats");
 	addedUser = db.collection("addedusers");
 	ChatsUsers = db.collection("chatsusers");
 	TempTemplateRejection = db.collection("temptemplaterejections");
