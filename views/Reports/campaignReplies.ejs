@@ -159,11 +159,9 @@
 								<td class="border-r border-t border-b rounded-lg border-gray-200 max-w-xs">
 									<p class="inline">
 										<span id="messageText" class="block overflow-hidden  text-base text-ellipsis whitespace-nowrap">
-											<%= report.messageTemplate || 'No Message Text Available' %>
-										</span>
-										<% if (report.messageTemplate && report.messageTemplate.length > 100) { %>
-										<button id="readMoreBtn" class="text-gray-900 hover:text-gray-900 italic" onclick="toggleReadMore(event)">Read more</button>
-										<% } %>
+											<%= report?.media_type %>
+											<%= report?.text %>
+										</span>										
 									</p>
 								</td>
 							</tr>

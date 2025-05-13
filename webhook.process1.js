@@ -160,7 +160,7 @@ export const processTempMessages = async () => {
 
 			return {
 				updateOne: {
-					filter: { WABA_ID: chat.WABA_ID },
+					filter: { WABA_ID: chat.WABA_ID, messageId: chat.messageId },
 					update: {
 						$set: {
 							useradmin,

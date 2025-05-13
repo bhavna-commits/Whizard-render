@@ -34,9 +34,15 @@
 				default: () => Date.now(),
 			},
 			deleted: { type: Boolean, default: false, index: true },
-			messageId: { type: String, required: true, unique: true },
+			messageId: {
+				type: String,
+				required: true,
+				unique: true,
+				index: true,
+			},
 			messageTemplate: { type: Schema.Types.Mixed },
 			text: { type: String, default: "" },
+			media_type: { type: String, default: "" },
 			media: {
 				url: { type: String, default: "" },
 				fileName: { type: String, default: "" },

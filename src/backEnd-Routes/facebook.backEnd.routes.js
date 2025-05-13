@@ -393,7 +393,7 @@ router.post("/webhook", async (req, res) => {
 						status: "REPLIED",
 						updatedAt: timestamp * 1000,
 						messageId,
-						text: type === "text" ? text?.body : "",
+						text: type === "text" ? text?.body : text,
 						media:
 							type !== "text"
 								? {

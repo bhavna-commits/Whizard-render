@@ -39,7 +39,7 @@ const ChatsSchema = new mongoose.Schema(
 			index: true,
 		},
 		deleted: { type: Boolean, default: false, index: true },
-		messageId: { type: String, required: true, unique: true },
+		messageId: { type: String, required: true, unique: true, index: true },
 		messageTemplate: { type: Schema.Types.Mixed },
 		replyContent: { type: String, default: "" },
 		textSent: { type: String, default: "" },
