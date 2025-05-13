@@ -405,7 +405,6 @@ router.post("/webhook", async (req, res) => {
 
 						type: "Chat",
 						media_type: type !== "text" ? type : "",
-						agent: [],
 					};
 
 					await Chats.create(replyChat);
@@ -420,7 +419,7 @@ router.post("/webhook", async (req, res) => {
 
 						agents = c.agent;
 
-						console.log("🔍 Agents:", agents, "support :", support);
+						console.log("🔍 Agents:", agents);
 					} catch (err) {
 						console.error("Error adding agent in chats:", err);
 					}
