@@ -135,43 +135,123 @@ export const processTempMessages = async () => {
 		}
 
 		const campaignMap = {};
-		const campaignDocs = await Campaign.find({
-			useradmin: { $in: Object.values(wabaAgent) },
-			deleted: false,
-		})
-			.sort({ createdAt: -1 })
-			.toArray();
+		const campaignDocs = await Campaign.aggregate([
+			{
+				$match: {
+					useradmin: { $in: Object.values(wabaAgent) },
+					deleted: false,
+				},
+			},
+			{
+				$sort: { createdAt: -1 },
+			},
+			{
+				$group: {
+					_id: "$useradmin",
+					doc: { $first: "$$ROOT" },
+				},
+			},
+		]).toArray();
 
-		for (const camp of campaignDocs) {
-			if (!campaignMap[camp.useradmin]) {
-				campaignMap[camp.useradmin] = {
-					campaignId: camp.unique_id,
-					campaignName: camp.name,
-				};
+		for (const entry of campaignDocs) {
+			const camp = entry.doc;
+			campaignMap[camp.useradmin] = {
+				campaignId: camp.unique_id,
+				campaignName: camp.name,
+			};
+		}
+
+		const reportDocs = await Reports.find({
+			campaignId: { $in: campaignDocs.map((c) => c.doc.unique_id) },
+		}).toArray();
+
+		const existingReplyPhones = new Set();
+		const phoneToMessageIdMap = {};
+
+		for (const r of reportDocs) {
+			if (r.status === "REPLIED") {
+				existingReplyPhones.add(r.recipientPhone);
 			}
 		}
 
-		const chatUpdates = chats.map((chat) => {
+		// console.log(chats);
+
+		const chatUpdates = [];
+		const reportUpserts = [];
+
+		for (const chat of chats) {
 			const useradmin = wabaAgent[chat.WABA_ID];
 			const campaign = campaignMap[useradmin] || {
 				campaignId: "-",
 				campaignName: "-",
 			};
 
-			return {
+			chat.useradmin = useradmin;
+			chat.unique_id = generateUniqueId();
+			chat.campaignId = campaign.campaignId;
+			chat.campaignName = campaign.campaignName;
+
+			chatUpdates.push({
 				updateOne: {
-					filter: { WABA_ID: chat.WABA_ID, messageId: chat.messageId },
+					filter: { _id: chat._id },
 					update: {
 						$set: {
-							useradmin,
-							unique_id: generateUniqueId(),
-							campaignId: campaign.campaignId,
-							campaignName: campaign.campaignName,
+							useradmin: chat.useradmin,
+							unique_id: chat.unique_id,
+							campaignId: chat.campaignId,
+							campaignName: chat.campaignName,
 						},
 					},
 				},
-			};
-		});
+			});
+
+			
+
+			if (
+				chat.status === "REPLIED" &&
+				!existingReplyPhones.has(chat.recipientPhone)
+			) {
+				existingReplyPhones.add(chat.recipientPhone);
+				phoneToMessageIdMap[chat.recipientPhone] = chat.messageId;
+				console.log(existingReplyPhones, chat.recipientPhone);
+				reportUpserts.push({
+					updateOne: {
+						filter: { messageId: chat.messageId },
+						update: {
+							$setOnInsert: {
+								WABA_ID: chat.WABA_ID,
+								FB_PHONE_ID: chat.FB_PHONE_ID,
+								useradmin: chat.useradmin,
+								unique_id: chat.unique_id,
+								campaignId: chat.campaignId,
+								contactName: chat.contactName,
+								recipientPhone: chat.recipientPhone,
+								status: chat.status,
+								updatedAt: chat.updatedAt,
+								createdAt: chat.updatedAt,
+								messageId: chat.messageId,
+								replyContent: chat.text,
+								textSent: "",
+								media: chat.media || {},
+							},
+						},
+						upsert: true,
+					},
+				});
+			}
+		}
+
+		if (chatUpdates.length) {
+			const result = await Chat.bulkWrite(chatUpdates);
+			console.log(
+				`Chats updated: ${result.modifiedCount}, upserted: ${result.upsertedCount}`,
+			);
+		}
+
+		if (reportUpserts.length) {
+			const result = await Reports.bulkWrite(reportUpserts);
+			console.log(`📝 REPLIED reports upserted: ${result.upsertedCount}`);
+		}
 
 		const convoMap = tempMessages.reduce((acc, m) => {
 			const key = `${m.from}_${m.fbPhoneId}_${m.wabaId}`;

@@ -115,7 +115,7 @@ export const getCampaignList = async (req, res, next) => {
 							$filter: {
 								input: "$reports",
 								as: "report",
-								cond: { $ne: ["$$report.status", "FAILED"] },
+								cond: { $ne: ["$$report.status", "REPLIED"] },
 							},
 						},
 					},

@@ -409,8 +409,6 @@ router.post("/webhook", async (req, res) => {
 
 					await Chats.create(replyChat);
 
-					await Report.create(replyChat);
-
 					try {
 						const c = await ChatsUsers.findOne({
 							FB_PHONE_ID: fbPhoneId,
