@@ -11,6 +11,7 @@ import {
 	getSingleChat,
 } from "./controllers/Chats/chats.controller.js";
 import path from "path";
+import fs from "fs";
 import { agenda } from "./config/db.js";
 
 connectDB();
