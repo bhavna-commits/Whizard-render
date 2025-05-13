@@ -846,9 +846,9 @@ export const searchContactLists = async (req, res, next) => {
 					contacts: contactLists,
 					totalPages,
 					page,
-					photo: req.session.user?.photo,
-					name: req.session.user.name,
-					color: req.session.user.color,
+					photo: req.session.addedUser?.photo,
+					name: req.session.addedUser.name,
+					color: req.session.addedUser.color,
 					whatsAppStatus: req.session?.addedUser?.whatsAppStatus,
 				});
 			} else {

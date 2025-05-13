@@ -323,7 +323,7 @@ export async function sendMessagesReports(
 		// Update the campaign status to 'SENT' after messages are sent
 		campaign.status = "SENT";
 		await campaign.save();
-		await chat.save();
+		// await chat.save();
 	} catch (error) {
 		console.error("Error sending messages:", error.message);
 		throw new Error(`${error.message}`);

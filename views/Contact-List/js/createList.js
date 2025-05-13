@@ -1,7 +1,7 @@
 const modal = document.getElementById("campaignModal");
-const createModal = modal.querySelector(".bg-white");
+const createModal = modal?.querySelector(".bg-white");
 const showModalBtn = document.getElementById("create-List");
-const createcloseBtn = modal.querySelector(".close");
+const createcloseBtn = modal?.querySelector(".close");
 const contactListForm = document.getElementById("contactListForm");
 const downloadBtn = document.getElementById("downloadTemplate");
 const previewSection = document.getElementById("previewSection");
@@ -14,9 +14,9 @@ const submitButton = document.getElementById("createList");
 
 // Show modal with animation
 function showModal() {
-	modal.classList.remove("pointer-events-none");
-	modal.offsetHeight;
-	modal.classList.add("opacity-100");
+	modal?.classList.remove("pointer-events-none");
+	modal?.offsetHeight;
+	modal?.classList.add("opacity-100");
 	createModal.classList.remove("scale-95");
 	createModal.classList.add("scale-100");
 }
@@ -53,13 +53,13 @@ function hideModal() {
 }
 
 // Show modal
-showModalBtn.addEventListener("click", showModal);
+showModalBtn?.addEventListener("click", showModal);
 
 // Close modal
-createcloseBtn.addEventListener("click", hideModal);
+createcloseBtn?.addEventListener("click", hideModal);
 
 // Close modal when clicking outside
-modal.addEventListener("click", function (event) {
+modal?.addEventListener("click", function (event) {
 	if (event.target === modal || event.target === modal.firstElementChild) {
 		hideModal();
 	}
@@ -70,7 +70,7 @@ let file = null;
 const fileInput = document.getElementById("contactFile");
 const fileLabel = document.getElementById("fileLabel");
 
-fileInput.addEventListener("change", function (e) {
+fileInput?.addEventListener("change", function (e) {
 	const fileName = e.target.files[0]?.name || "Choose File";
 	fileLabel.textContent = fileName;
 	file = e.target.files[0];
@@ -79,14 +79,14 @@ fileInput.addEventListener("change", function (e) {
 });
 
 // Form submission and file validation
-contactListForm.addEventListener("submit", async function (e) {
+contactListForm?.addEventListener("submit", async function (e) {
 	e.preventDefault();
 
 	previewSection.classList.add("hidden");
 	fileUploadSection.classList.remove("hidden");
 
 	if (!file) {
-		toast("info","Please upload a file.");
+		toast("info", "Please upload a file.");
 		return;
 	}
 
@@ -125,7 +125,7 @@ contactListForm.addEventListener("submit", async function (e) {
 				);
 			});
 		} else {
-			toast("info","Unsupported file type");
+			toast("info", "Unsupported file type");
 			return;
 		}
 
@@ -163,7 +163,7 @@ contactListForm.addEventListener("submit", async function (e) {
 				submitButton.classList.remove("hidden");
 			} else {
 				if (data.message) {
-					toast("error",data.message);
+					toast("error", data.message);
 				} else {
 					displayErrors(data);
 				}
@@ -182,7 +182,7 @@ contactListForm.addEventListener("submit", async function (e) {
 	}
 });
 
-submitButton.addEventListener("click", async () => {
+submitButton?.addEventListener("click", async () => {
 	try {
 		submitButton.innerHTML = `<div class="flex justify-center items-center">
   											<div class="w-4 h-4 border-2 border-t-transparent border-white rounded-full animate-spin"></div>
@@ -202,7 +202,7 @@ submitButton.addEventListener("click", async () => {
 		if (data.success) {
 			location.reload();
 		} else {
-			toast("error",data.message);
+			toast("error", data.message);
 		}
 	} catch (error) {
 		console.error("Error creating list:", error);
@@ -364,7 +364,7 @@ function getSampleCSV() {
 		})
 		.catch((error) => {
 			console.error("Error downloading file:", error);
-			toast("error","There was an error downloading the file.");
+			toast("error", "There was an error downloading the file.");
 		});
 }
 
@@ -375,7 +375,6 @@ let debounceTimer;
 
 searchInput.addEventListener("input", function () {
 	const query = searchInput.value;
-
 	// Clear existing timer
 	clearTimeout(debounceTimer);
 
