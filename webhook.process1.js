@@ -174,10 +174,6 @@ export const processTempMessages = async () => {
 			}
 		}
 
-		console.log(chats);
-
-		console.log(existingReplyPhones);
-
 		const chatUpdates = [];
 		const reportUpserts = [];
 
