@@ -10,7 +10,7 @@ import { agenda } from "./config/db.js";
 
 connectDB();
 
-const __dirname = path.resolve();
+// const __dirname = path.resolve();
 // // Path to your certificate and private key
 // const privateKey = fs.readFileSync(
 // 	path.join(__dirname, "certs", "private-key-no-passphrase.pem"),

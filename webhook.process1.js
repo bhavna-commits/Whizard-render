@@ -41,6 +41,11 @@ export const processTempStatuses = async () => {
 			.sort({ createdAt: -1 })
 			.toArray();
 
+		if (!tempStatuses.length) {
+			console.log("No temp statuses to process");
+			return;
+		}
+
 		const bulkChatOps = [];
 		const bulkReportOps = [];
 		const processedIds = [];
@@ -48,22 +53,10 @@ export const processTempStatuses = async () => {
 		for (const temp of tempStatuses) {
 			if (temp.status === "SENT") continue;
 
-			const user = await User.findOne({ WABA_ID: temp.wabaId });
-			if (!user) continue;
-
-			const campaign = await Campaign.find({
-				useradmin: user.unique_id,
-				deleted: false,
-			})
-				.sort({ createdAt: -1 })
-				.limit(1)
-				.toArray();
-
 			const updateFields = {
 				status: temp.status,
 				updatedAt: temp.timestamp,
 				recipientPhone: temp.recipientPhone,
-				...(campaign[0] && { campaignId: campaign[0].unique_id }),
 			};
 
 			if (temp.status === "FAILED" && temp.error?.length) {
@@ -90,17 +83,25 @@ export const processTempStatuses = async () => {
 			processedIds.push(temp._id);
 		}
 
-		if (bulkChatOps.length) await Chat.bulkWrite(bulkChatOps);
-		if (bulkReportOps.length) await Reports.bulkWrite(bulkReportOps);
-
-		if (processedIds.length) {
-			await TempStatus.deleteMany({ _id: { $in: processedIds } });
+		if (bulkChatOps.length) {
+			const chatResult = await Chat.bulkWrite(bulkChatOps);
 			console.log(
-				`🧹 Deleted ${processedIds.length} processed temp statuses`,
+				`Chats updated: ${chatResult.modifiedCount}, upserted: ${chatResult.upsertedCount}`,
+			);
+		}
+		if (bulkReportOps.length) {
+			const reportResult = await Reports.bulkWrite(bulkReportOps);
+			console.log(
+				`Reports updated: ${reportResult.modifiedCount}, upserted: ${reportResult.upsertedCount}`,
 			);
 		}
 
-		console.log("Bulk processed temp statuses.");
+		// if (processedIds.length) {
+		//   await TempStatus.deleteMany({ _id: { $in: processedIds } });
+		//   console.log(`🧹 Deleted ${processedIds.length} processed temp statuses`);
+		// }
+
+		console.log("✔️ Bulk processed temp statuses complete.");
 	} catch (error) {
 		console.error("Error processing temp statuses (bulk):", error);
 	}
@@ -109,6 +110,8 @@ export const processTempStatuses = async () => {
 export const processTempMessages = async () => {
 	try {
 		const tempMessages = await TempMessage.find().toArray();
+		const chats = await Chat.find({ useradmin: "-" }).toArray();
+
 		if (!tempMessages.length)
 			return console.log("No temp messages to process");
 
@@ -130,6 +133,45 @@ export const processTempMessages = async () => {
 		for (const u of allUsers) {
 			wabaAgent[u.WABA_ID] = u.unique_id;
 		}
+
+		const campaignMap = {};
+		const campaignDocs = await Campaign.find({
+			useradmin: { $in: Object.values(wabaAgent) },
+			deleted: false,
+		})
+			.sort({ createdAt: -1 })
+			.toArray();
+
+		for (const camp of campaignDocs) {
+			if (!campaignMap[camp.useradmin]) {
+				campaignMap[camp.useradmin] = {
+					campaignId: camp.unique_id,
+					campaignName: camp.name,
+				};
+			}
+		}
+
+		const chatUpdates = chats.map((chat) => {
+			const useradmin = wabaAgent[chat.WABA_ID];
+			const campaign = campaignMap[useradmin] || {
+				campaignId: "-",
+				campaignName: "-",
+			};
+
+			return {
+				updateOne: {
+					filter: { WABA_ID: chat.WABA_ID },
+					update: {
+						$set: {
+							useradmin,
+							unique_id: generateUniqueId(),
+							campaignId: campaign.campaignId,
+							campaignName: campaign.campaignName,
+						},
+					},
+				},
+			};
+		});
 
 		const convoMap = tempMessages.reduce((acc, m) => {
 			const key = `${m.from}_${m.fbPhoneId}_${m.wabaId}`;
@@ -238,7 +280,7 @@ export const processTempMessages = async () => {
 				},
 			};
 		});
-		
+
 		if (cuOps.length) {
 			const result = await ChatsUsers.bulkWrite(cuOps);
 			console.log(
@@ -251,14 +293,20 @@ export const processTempMessages = async () => {
 			console.log("No ChatsUsers updates needed");
 		}
 
-		// 🔥 Clean up processed messages
-		const processedIds = tempMessages.map((m) => m._id);
-		if (processedIds.length) {
-			await TempMessage.deleteMany({ _id: { $in: processedIds } });
+		if (chatUpdates.length) {
+			const result = await Chat.bulkWrite(chatUpdates);
 			console.log(
-				`🧹 Deleted ${processedIds.length} processed temp messages`,
+				`Chats updated: ${result.modifiedCount}, upserted: ${result.upsertedCount}`,
 			);
 		}
+
+		// const processedIds = tempMessages.map((m) => m._id);
+		// if (processedIds.length) {
+		// 	await TempMessage.deleteMany({ _id: { $in: processedIds } });
+		// 	console.log(
+		// 		`🧹 Deleted ${processedIds.length} processed temp messages`,
+		// 	);
+		// }
 
 		console.log("✔️ processTempMessages complete");
 	} catch (err) {
@@ -278,7 +326,6 @@ export const processTempTemplateRejections = async () => {
 						status: "Rejected",
 						rejected_reason: temp.rejectedReason,
 					},
-					$push: { logs: temp.rawData },
 				},
 			},
 		}));
@@ -309,7 +356,7 @@ export const processAllTempEvents = async () => {
 	User = db.collection("users");
 	Campaign = db.collection("campaigns");
 	TempMessage = db.collection("tempmessages");
-	Chat = db.collection("chats");
+	Chat = db.collection("campaignreports");
 	addedUser = db.collection("addedusers");
 	ChatsUsers = db.collection("chatsusers");
 	TempTemplateRejection = db.collection("temptemplaterejections");

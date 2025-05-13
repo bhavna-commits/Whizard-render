@@ -2,6 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 import cron from "node-cron";
 import Chats from "../models/chats.model.js";
+import Report from "../models/report.model.js";
 import User from "../models/user.model.js";
 import TempStatus from "../models/TempStatus.model.js";
 import TempMessage from "../models/TempMessage.model.js";
@@ -380,7 +381,7 @@ router.post("/webhook", async (req, res) => {
 						status: "receive",
 					});
 
-					await Chats.create({
+					const replyChat = {
 						WABA_ID: wabaId,
 						FB_PHONE_ID: fbPhoneId,
 						useradmin: "-",
@@ -405,7 +406,11 @@ router.post("/webhook", async (req, res) => {
 						type: "Chat",
 						media_type: type !== "text" ? type : "",
 						agent: [],
-					});
+					};
+
+					await Chats.create(replyChat);
+
+					await Report.create(replyChat);
 
 					try {
 						const c = await ChatsUsers.findOne({
