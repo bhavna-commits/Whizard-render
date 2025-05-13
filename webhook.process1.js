@@ -110,7 +110,7 @@ export const processTempStatuses = async () => {
 export const processTempMessages = async () => {
 	try {
 		const tempMessages = await TempMessage.find().toArray();
-		const chats = await Chat.find({ useradmin: "-" }).toArray();
+		const chats = await Chat.find({ useradmin: "dummy" }).toArray();
 
 		if (!tempMessages.length)
 			return console.log("No temp messages to process");
@@ -174,7 +174,9 @@ export const processTempMessages = async () => {
 			}
 		}
 
-		// console.log(chats);
+		console.log(chats);
+
+		console.log(existingReplyPhones);
 
 		const chatUpdates = [];
 		const reportUpserts = [];
@@ -186,26 +188,21 @@ export const processTempMessages = async () => {
 				campaignName: "-",
 			};
 
-			chat.useradmin = useradmin;
-			chat.unique_id = generateUniqueId();
-			chat.campaignId = campaign.campaignId;
-			chat.campaignName = campaign.campaignName;
+			const updatePayload = {
+				useradmin,
+				unique_id: generateUniqueId(),
+				campaignId: campaign.campaignId,
+				campaignName: campaign.campaignName,
+			};
+
+			delete updatePayload._id; // just in case
 
 			chatUpdates.push({
 				updateOne: {
 					filter: { _id: chat._id },
-					update: {
-						$set: {
-							useradmin: chat.useradmin,
-							unique_id: chat.unique_id,
-							campaignId: chat.campaignId,
-							campaignName: chat.campaignName,
-						},
-					},
+					update: { $set: updatePayload },
 				},
 			});
-
-			
 
 			if (
 				chat.status === "REPLIED" &&
@@ -213,7 +210,7 @@ export const processTempMessages = async () => {
 			) {
 				existingReplyPhones.add(chat.recipientPhone);
 				phoneToMessageIdMap[chat.recipientPhone] = chat.messageId;
-				console.log(existingReplyPhones, chat.recipientPhone);
+
 				reportUpserts.push({
 					updateOne: {
 						filter: { messageId: chat.messageId },
@@ -221,17 +218,16 @@ export const processTempMessages = async () => {
 							$setOnInsert: {
 								WABA_ID: chat.WABA_ID,
 								FB_PHONE_ID: chat.FB_PHONE_ID,
-								useradmin: chat.useradmin,
-								unique_id: chat.unique_id,
-								campaignId: chat.campaignId,
+								useradmin: updatePayload.useradmin,
+								unique_id: updatePayload.unique_id,
+								campaignId: updatePayload.campaignId,
 								contactName: chat.contactName,
 								recipientPhone: chat.recipientPhone,
 								status: chat.status,
 								updatedAt: chat.updatedAt,
 								createdAt: chat.updatedAt,
 								messageId: chat.messageId,
-								replyContent: chat.text,
-								textSent: "",
+								text: chat.text,
 								media: chat.media || {},
 							},
 						},
