@@ -40,12 +40,6 @@ const io = new Server(httpsServer, {
 });
 
 io.on("connection", (socket) => {
-	socket.on("connect", () => {
-		console.log("Connected to WebSocket server ✅");
-	});
-	socket.on("connect_error", (err) => {
-		console.error("WebSocket connection failed ❌", err);
-	});
 
 	console.log("User connected:", socket.id);
 
