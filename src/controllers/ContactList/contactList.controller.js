@@ -150,6 +150,7 @@ export const createList = async (req, res, next) => {
 		const agentToAssign = addedUserId || userId;
 
 		const cList = {
+			FB_PHONE_ID: keyId,
 			contalistName: listName,
 			useradmin: userId,
 			participantCount,
@@ -165,22 +166,20 @@ export const createList = async (req, res, next) => {
 				let { Name, Number, ...additionalFields } = contactData;
 
 				return new Contacts({
-					useradmin: userId,
-					unique_id: generateUniqueId(),
-					keyId,
+					FB_PHONE_ID: keyId,
 					Name,
-					wa_idK: `${keyId}_${user.phone}`,
-					wa_id: Number,
-					contactId: contactList.contactId,
+					wa_id: String(Number),
+					usertimestmp: Date.now(),
 					masterExtra: additionalFields,
-					agent: [agentToAssign], // 👈 consistent and clean
+					contactId: contactList.contactId,
+					useradmin: userId,
+					agent: [agentToAssign],
 				});
 			})
 			.filter((contact) => contact !== null);
 
 		if (contactsToSave.length > 0) {
 			await Contacts.insertMany(contactsToSave);
-			// await ContactListTemp.insertMany(contactsToSave);
 		} else {
 			return res.status(400).json({
 				success: false,
@@ -652,8 +651,15 @@ export const getList = async (req, res) => {
 
 		if (!isNumber(page)) return res.render("errors/notFound");
 
+		const user = await User.findOne({ unique_id: userId });
+
+		const FB_PHONE_ID = user.FB_PHONE_NUMBERS.find(
+			(n) => n.selected,
+		).phone_number_id;
+
 		let access = null;
 		let matchQuery = {
+			FB_PHONE_ID,
 			useradmin: userId,
 			contact_status: { $ne: 0 },
 		};

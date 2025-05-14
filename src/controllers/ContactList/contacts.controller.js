@@ -25,6 +25,8 @@ import {
 
 import { sendCampaignScheduledEmail } from "../../services/OTP/reportsEmail.js";
 import ContactsTemp from "../../models/contactsTemp.model.js";
+import chatsUsersModel from "../../models/chatsUsers.model.js";
+import { group } from "console";
 
 export const __filename = fileURLToPath(import.meta.url);
 export const __dirname = path.dirname(__filename);
@@ -275,7 +277,7 @@ export const editContact = async (req, res, next) => {
 				contactName: setData.Name,
 				nameContactRelation: {
 					name: setData.Name,
-					contactListId: contacts.contactId, 
+					contactListId: contacts.contactId,
 				},
 			},
 		};
@@ -283,7 +285,6 @@ export const editContact = async (req, res, next) => {
 		await ChatsUsers.updateOne(updateQuery, updateData, {
 			upsert: true,
 		});
-
 
 		await ActivityLogs.create({
 			useradmin: req.session?.user?.id || req.session?.addedUser?.owner,
@@ -438,7 +439,7 @@ export const createContact = async (req, res, next) => {
 		const keyId = user?.FB_PHONE_NUMBERS?.find(
 			(d) => d.selected,
 		)?.phone_number_id;
-		
+
 		if (!keyId) {
 			return res.status(400).json({
 				success: false,
@@ -463,21 +464,18 @@ export const createContact = async (req, res, next) => {
 			});
 		}
 
-		// Create new contact
 		const contact = {
 			useradmin: userId,
-			unique_id: generateUniqueId(),
 			contactId,
 			Name,
-			wa_idK: `${keyId}_${user.phone}`,
 			wa_id: fullWaId,
+			FB_PHONE_ID: keyId,
 			masterExtra: newContactData,
 			agent: [agentToAssign],
-			createdAt: Date.now(),
-		};
+			usertimestmp: Date.now(),
+		};		  
 
 		const newContact = await Contacts.create(contact);
-		await ContactsTemp.create(contact);
 
 		await ContactList.findOneAndUpdate(
 			{ contactId },
@@ -561,7 +559,6 @@ export const createCampaign = async (req, res, next) => {
 			throw new Error("No phone number selected.");
 		}
 
-		// console.log(test);
 		let message = "Campaign created successfully";
 
 		if (test) {
@@ -603,7 +600,6 @@ export const createCampaign = async (req, res, next) => {
 			}
 		}
 
-		// Create new campaign object
 		const newCampaign = new Campaign({
 			useradmin: id,
 			unique_id: generateUniqueId(),
@@ -615,19 +611,15 @@ export const createCampaign = async (req, res, next) => {
 		});
 
 		if (!schedule) {
-			await sendMessages(
+			let time = Date.now() + 10 * 1000;
+			let reportTime = new Date(time);
+
+			agenda.schedule(reportTime, "process campaign", {
 				newCampaign,
 				user,
-				generateUniqueId(),
+				unique_id: generateUniqueId(),
 				phone_number,
 				addedUserId,
-			);
-
-			const time = Date.now() + 15 * 60 * 1000;
-			const reportTime = new Date(time);
-			agenda.schedule(reportTime, "send campaign report email", {
-				campaignId: newCampaign.unique_id,
-				userId: newCampaign.useradmin,
 			});
 
 			await ActivityLogs.create({
@@ -644,6 +636,17 @@ export const createCampaign = async (req, res, next) => {
 		} else {
 			newCampaign.scheduledAt = Number(schedule) * 1000;
 			newCampaign.status = "SCHEDULED";
+
+			let time = Number(schedule) * 1000;
+			let reportTime = new Date(time);
+
+			agenda.schedule(reportTime, "process campaign", {
+				newCampaign,
+				user,
+				unique_id: generateUniqueId(),
+				phone_number,
+				addedUserId,
+			});
 
 			await sendCampaignScheduledEmail(
 				user.email,
@@ -663,8 +666,60 @@ export const createCampaign = async (req, res, next) => {
 
 			message = "Campaign scheduled successfully";
 		}
+		const contactList = await Contacts.find({
+			contactId: contactListId,
+			subscribe: 1,
+		});
 
-		// Save the campaign
+		const contactNumberGroup = contactList.map((c) => c.wa_id);
+
+		const chatUsers = await chatsUsersModel.find({
+			useradmin: id,
+			FB_PHONE_ID: phone_number,
+			wa_id: { $in: contactNumberGroup },
+		});
+
+		const chatNumbers = chatUsers.map((c) => c.wa_id);
+
+		const newContacts = contactList.filter(
+			(c) => !chatNumbers.includes(c.wa_id),
+		);
+
+		const chatusersToInsert = newContacts.map((c) => ({
+			wa_id: c.wa_id,
+			useradmin: id,
+			unique_id: generateUniqueId(),
+			FB_PHONE_ID: phone_number,
+			contactName: c.Name,
+			campaignName: newCampaign.name,
+			campaignId: newCampaign.unique_id,
+			updatedAt: Date.now(),
+			lastMessage: "-",
+			lastSend: Date.now(),
+			messageStatus: "SENT",
+			replyStatus: 0,
+			agent: addedUserId || id,
+		}));
+
+		if (chatusersToInsert.length > 0) {
+			await chatsUsersModel.insertMany(chatusersToInsert);
+		}
+
+		await chatsUsersModel.updateMany(
+			{
+				useradmin: id,
+				FB_PHONE_ID: phone_number,
+				wa_id: { $in: contactNumberGroup },
+			},
+			{
+				$set: {
+					replyStatus: 0,
+					campaignName: newCampaign.name,
+					campaignId: newCampaign.unique_id,
+				},
+			},
+		);
+
 		await newCampaign.save();
 		res.status(201).json({
 			message,

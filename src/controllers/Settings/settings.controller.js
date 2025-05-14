@@ -764,12 +764,14 @@ export const sendUserInvitation = async (req, res, next) => {
 		let { name, email, roleId, roleName, url } = req.body;
 
 		if (!isString(name, email, roleId, roleName)) {
-			return next(); 
+			return next();
 		}
 
 		let exists = await User.findOne({ name, unique_id: adminId });
 		if (exists) {
-			return res.status(409).json({ message: "Name already in use" }); 
+			return res
+				.status(409)
+				.json({ success: false, message: "Name already in use" });
 		}
 
 		exists = await AddedUser.findOne({
@@ -778,22 +780,45 @@ export const sendUserInvitation = async (req, res, next) => {
 			useradmin: adminId,
 		});
 		if (exists) {
-			return res.status(409).json({ message: "Name already in use" }); 
-		}
-
-		exists = await User.findOne({ email });
-		if (exists) {
-			return res.status(409).json({ message: "Email already in use" }); 
+			return res
+				.status(409)
+				.json({ success: false, message: "Name already in use" });
 		}
 
 		exists = await AddedUser.findOne({ email, deleted: false });
 		if (exists) {
-			return res.status(409).json({ message: "Email already in use" }); 
+			return res
+				.status(409)
+				.json({ success: false, message: "Email already in use" });
+		}
+
+		exists = await User.findOne({ email });
+		if (exists) {
+			return res
+				.status(409)
+				.json({ success: false, message: "Email already in use" });
+		}
+
+		exists = await User.findOne({ unique_id: adminId });
+
+		const FB_PHONE_ID = exists?.FB_PHONE_NUMBERS?.find(
+			(s) => s.selected,
+		)?.phone_number_id;
+
+		if (!FB_PHONE_ID) {
+			return res
+				.status(409)
+				.json({
+					success: false,
+					message:
+						"Facebook Phone Number not selected or doesn't exist",
+				});
 		}
 
 		console.log(roleId, roleName);
 
 		const newUser = new AddedUser({
+			FB_PHONE_ID,
 			unique_id: generateUniqueId(),
 			name,
 			email,
@@ -1114,14 +1139,16 @@ export const updateUserManagement = async (req, res) => {
 						.json({ success: false, message: "User not found" });
 				}
 
-				const permission = await Permissions.findOne({ unique_id: newRoleId });
+				const permission = await Permissions.findOne({
+					unique_id: newRoleId,
+				});
 
 				if (!permission?.chats?.allChats) {
 					const login = await Login.findOne({ id: userId });
 				}
 
 				const allSessions = await sessionColl.find({}).toArray();
-				
+
 				const bulkOps = [];
 				allSessions.forEach((doc) => {
 					// console.log("→ checking session _id=", doc._id);
@@ -1156,12 +1183,10 @@ export const updateUserManagement = async (req, res) => {
 				console.log(`🚀 Queued ${bulkOps.length} session updates`);
 				if (bulkOps.length) await sessionColl.bulkWrite(bulkOps);
 
-				return res
-					.status(200)
-					.json({
-						success: true,
-						message: "Role and sessions updated",
-					});
+				return res.status(200).json({
+					success: true,
+					message: "Role and sessions updated",
+				});
 
 			case "deleteUser":
 				// fetch & debug
@@ -1206,12 +1231,10 @@ export const updateUserManagement = async (req, res) => {
 						.json({ success: false, message: "User not found" });
 				}
 
-				return res
-					.status(200)
-					.json({
-						success: true,
-						message: "User deleted and sessions destroyed",
-					});
+				return res.status(200).json({
+					success: true,
+					message: "User deleted and sessions destroyed",
+				});
 
 			default:
 				return res
@@ -1220,13 +1243,11 @@ export const updateUserManagement = async (req, res) => {
 		}
 	} catch (error) {
 		console.error("🔥 updateUserManagement error:", error);
-		return res
-			.status(500)
-			.json({
-				success: false,
-				message: "Server error",
-				error: error.message,
-			});
+		return res.status(500).json({
+			success: false,
+			message: "Server error",
+			error: error.message,
+		});
 	}
 };
 

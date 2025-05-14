@@ -247,7 +247,7 @@ export const getCampaignListFilter = async (req, res, next) => {
 			},
 			{
 				$lookup: {
-					from: "chats", // Reports collection
+					from: "chats",
 					localField: "unique_id",
 					foreignField: "campaignId",
 					as: "reports",
@@ -486,27 +486,19 @@ export const createCampaign = async (req, res, next) => {
 			throw new Error("No phone number selected.");
 		}
 
-		// Find contacts by contactListId
 		const contactLists = await Contacts.find({
 			contactId: contactListId,
 		});
 
-		// console.log(contactLists);
-
 		contactList = contactLists.filter((c) => {
-			// console.log(c.wa_id);
 			return contactList.some((cl) => {
-				console.log(cl.recipientPhone);
 				return (
-					c.wa_id === cl.recipientPhone || // Match directly with wa_id
-					"91" + c.wa_id === cl.recipientPhone // Match with "91" prefix
+					c.wa_id === cl.recipientPhone ||
+					"91" + c.wa_id === cl.recipientPhone
 				);
 			});
 		});
 
-		// console.log(phone_number);
-
-		// Create new campaign object
 		const newCampaign = new Campaign({
 			useradmin: id,
 			unique_id: generateUniqueId(),
@@ -521,17 +513,21 @@ export const createCampaign = async (req, res, next) => {
 		let message = "Campaign created successfully";
 
 		if (!schedule) {
-			await sendMessagesReports(
+			let time = Date.now() + 2 * 60 * 1000;
+			let reportTime = new Date(time);
+
+			agenda.schedule(reportTime, "process reports campaign", {
 				newCampaign,
 				user,
-				generateUniqueId(),
+				unique_id: generateUniqueId(),
 				contactList,
 				phone_number,
 				addedUserId,
-			);
+			});
 
-			const time = Date.now() + 15 * 60 * 1000;
-			const reportTime = new Date(time);
+			time = Date.now() + 15 * 60 * 1000;
+			reportTime = new Date(time);
+
 			agenda.schedule(reportTime, "send campaign report email", {
 				campaignId: newCampaign.unique_id,
 				userId: newCampaign.useradmin,

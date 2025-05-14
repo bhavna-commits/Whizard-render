@@ -12,6 +12,7 @@ import {
 // import { getFbAccessToken } from "../../backEnd-Routes/facebook.backEnd.routes.js";
 import { isString } from "../../middleWares/sanitiseInput.js";
 import { countries, help } from "../../utils/dropDown.js";
+import chatsModel from "../../models/chats.model.js";
 
 dotenv.config();
 
@@ -701,7 +702,7 @@ const fetchDashboardData = async (userId, query) => {
 		}
 
 		// Query for campaign report overview
-		const campaignOverview = await Report.aggregate([
+		const campaignOverview = await chatsModel.aggregate([
 			{ $match: filter },
 			{
 				$group: {

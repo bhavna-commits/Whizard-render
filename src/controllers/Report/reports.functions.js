@@ -37,7 +37,7 @@ export const overview = async (id, userId, page, limit, skip) =>
 		},
 		{
 			$lookup: {
-				from: "campaignreports",
+				from: "chats",
 				let: {
 					campaignUniqueId: "$unique_id",
 					campaignUseradmin: "$useradmin",
@@ -447,7 +447,7 @@ export const getSentReportsById = async (req, res, next) => {
 			},
 			{
 				$lookup: {
-					from: "campaignreports",
+					from: "chats",
 					let: { campaignId: "$unique_id" },
 					pipeline: [
 						{
@@ -563,7 +563,7 @@ export const getDeliveredReportsById = async (req, res, next) => {
 			},
 			{
 				$lookup: {
-					from: "campaignreports",
+					from: "chats",
 					let: { campaignId: "$unique_id" },
 					pipeline: [
 						{
@@ -680,7 +680,7 @@ export const getReadReportsById = async (req, res, next) => {
 			},
 			{
 				$lookup: {
-					from: "campaignreports",
+					from: "chats",
 					let: { campaignId: "$unique_id" },
 					pipeline: [
 						{
@@ -803,7 +803,7 @@ export const getRepliesReportsById = async (req, res, next) => {
 			},
 			{
 				$lookup: {
-					from: "campaignreports",
+					from: "chats",
 					let: { campaignId: "$unique_id" },
 					pipeline: [
 						{
@@ -919,7 +919,7 @@ export const getFailedReportsById = async (req, res, next) => {
 			},
 			{
 				$lookup: {
-					from: "campaignreports",
+					from: "chats",
 					let: { campaignId: "$unique_id" },
 					pipeline: [
 						{
@@ -1017,110 +1017,69 @@ export const getFailedReportsById = async (req, res, next) => {
 	}
 };
 
-const scheduleCampaign = async (campaign) => {
-	try {
-		const { scheduledAt, unique_id, contactListId, contactList } = campaign;
-		if (contactList) {
-			agenda.schedule(new Date(scheduledAt), "process reports campaign", {
-				campaignId: unique_id,
-				contactList,
-				scheduledAt,
-			});
-		} else {
-			agenda.schedule(new Date(scheduledAt), "process campaign", {
-				campaignId: unique_id,
-				contactListId,
-				scheduledAt,
-			});
-		}
-		// Mark the campaign as IN_QUEUE so it won’t be processed multiple times
-		await Campaign.findOneAndUpdate({ unique_id }, { status: "IN_QUEUE" });
-		console.log(`Campaign ${unique_id} scheduled successfully.`);
-	} catch (err) {
-		console.error("Error schedling campagin", err);
-	}
-};
-
 agenda.define("process campaign", async (job) => {
-	const { campaignId } = job.attrs.data;
+	const { newCampaign, user, unique_id, phone_number, addedUserId } =
+		job.attrs.data;
 
+	console.log("Sending Campaign");
 	try {
-		const campaign = await Campaign.findOne({ unique_id: campaignId });
+		await sendMessages(
+			newCampaign,
+			user,
+			unique_id,
+			phone_number,
+			addedUserId,
+		);
 
-		let user = await User.findOne({ unique_id: campaign.useradmin });
+		await Campaign.updateOne(
+			{ _id: newCampaign._id },
+			{ $set: { status: "SENT" } },
+		);
 
-		const phone_number = user.FB_PHONE_NUMBERS.find(
-			(n) => n.selected === true,
-		).phone_number_id;
+		const time = Date.now() + 15 * 60 * 1000;
+		const reportTime = new Date(time);
 
-		if (!phone_number) {
-			throw new Error("No phone number selected.");
-		}
-
-		if (campaign?.status === "IN_QUEUE") {
-			await sendMessages(
-				campaign,
-				user,
-				generateUniqueId(),
-				phone_number,
-			);
-
-			await Campaign.findOneAndUpdate(
-				{ unique_id: campaignId },
-				{ status: "SENT" },
-			);
-
-			const time = Date.now() + 15 * 60 * 1000;
-			const reportTime = new Date(time);
-			agenda.schedule(reportTime, "send campaign report email", {
-				campaignId,
-				userId: campaign.useradmin,
-			});
-		}
+		agenda.schedule(reportTime, "send campaign report email", {
+			campaignId: newCampaign.unique_id,
+			userId: newCampaign.useradmin,
+		});
 	} catch (error) {
-		console.error(`Error processing campaign ${campaignId}:`, error);
+		console.error(
+			`Error processing campaign ${newCampaign.unique_id}:`,
+			error,
+		);
 	}
 });
 
 agenda.define("process reports campaign", async (job) => {
-	const { campaignId, contactList } = job.attrs.data;
-
+	const { newCampaign, user, unique_id, phone_number, addedUserId } =
+		job.attrs.data;
+	console.log("here");
 	try {
-		const campaign = await Campaign.findOne({ unique_id: campaignId });
+		await sendMessagesReports(
+			newCampaign,
+			user,
+			unique_id,
+			phone_number,
+			addedUserId,
+		);
 
-		let user = await User.findOne({ unique_id: campaign.useradmin });
+		await Campaign.findOneAndUpdate(
+			{ unique_id: newCampaign.unique_id },
+			{ status: "SENT" },
+		);
 
-		const phone_number = user.FB_PHONE_NUMBERS.find(
-			(n) => n.selected == true,
-		).phone_number_id;
-
-		if (!phone_number) {
-			throw "No phone number selected.";
-		}
-
-		if (campaign?.status === "IN_QUEUE") {
-			await sendMessagesReports(
-				campaign,
-				user,
-				generateUniqueId(),
-				contactList,
-				phone_number,
-			);
-
-			await Campaign.findOneAndUpdate(
-				{ unique_id: campaignId },
-				{ status: "SENT" },
-			);
-
-			const time = Date.now() + 15 * 60 * 1000;
-			const reportTime = new Date(time);
-			agenda.schedule(reportTime, "send campaign report email", {
-				campaignId,
-				userId: campaign.useradmin,
-			});
-		}
+		const time = Date.now() + 15 * 60 * 1000;
+		const reportTime = new Date(time);
+		agenda.schedule(reportTime, "send campaign report email", {
+			campaignId: newCampaign.unique_id,
+			userId: newCampaign.useradmin,
+		});
 	} catch (error) {
-		console.error(`Error processing campaign ${campaignId}:`, error);
+		console.error(
+			`Error processing campaign ${newCampaign.unique_id}:`,
+			error,
+		);
 	}
 });
 
@@ -1129,20 +1088,19 @@ agenda.define("send campaign report email", async (job) => {
 	await sendCampaignReportEmail(campaignId, userId);
 });
 
-cron.schedule("* * * * *", async () => {
-	try {
-		const now = Date.now();
-		// console.log(now);
-		// Find all campaigns that are scheduled to be sent
-		const scheduledCampaigns = await Campaign.find({
-			scheduledAt: { $lte: now },
-			status: "SCHEDULED",
-		});
+// cron.schedule("* * * * *", async () => {
+// 	try {
+// 		const now = Date.now();
 
-		for (let campaign of scheduledCampaigns) {
-			await scheduleCampaign(campaign);
-		}
-	} catch (error) {
-		console.error("Error checking scheduled campaigns:", error);
-	}
-});
+// 		const scheduledCampaigns = await Campaign.find({
+// 			scheduledAt: { $lte: now },
+// 			status: "SCHEDULED",
+// 		});
+
+// 		for (let campaign of scheduledCampaigns) {
+// 			await scheduleCampaign(campaign);
+// 		}
+// 	} catch (error) {
+// 		console.error("Error checking scheduled campaigns:", error);
+// 	}
+// });

@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 
 const addedUserSchema = new mongoose.Schema(
 	{
+		FB_PHONE_ID: { type: String, required: true, index: true },
 		unique_id: { type: String, required: true, unique: true, index: true },
 		email: { type: String, required: true, index: true },
 		name: { type: String, required: true, index: true },

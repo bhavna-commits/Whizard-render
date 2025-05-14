@@ -2,6 +2,7 @@ import { Schema, model } from "mongoose";
 
 const contactListSchema = new Schema(
 	{
+		FB_PHONE_ID: { type: String, required: true, index: true },
 		useradmin: { type: String, required: true, index: true },
 		contalistName: { type: String, required: true, index: true },
 		contactId: { type: String, required: true, index: true },
