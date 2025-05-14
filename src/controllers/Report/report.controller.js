@@ -100,7 +100,7 @@ export const getCampaignList = async (req, res, next) => {
 			},
 			{
 				$lookup: {
-					from: "campaignreports",
+					from: "chats",
 					localField: "unique_id",
 					foreignField: "campaignId",
 					as: "reports",
@@ -247,7 +247,7 @@ export const getCampaignListFilter = async (req, res, next) => {
 			},
 			{
 				$lookup: {
-					from: "campaignreports", // Reports collection
+					from: "chats", // Reports collection
 					localField: "unique_id",
 					foreignField: "campaignId",
 					as: "reports",

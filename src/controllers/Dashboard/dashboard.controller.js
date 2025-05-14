@@ -136,7 +136,7 @@ export const getFilters = async (req, res) => {
 			},
 			{
 				$lookup: {
-					from: "campaignreports",
+					from: "chats",
 					let: { campaignId: "$unique_id" },
 					pipeline: [
 						{

@@ -73,12 +73,12 @@ export const processTempStatuses = async () => {
 					update: { $set: updateFields },
 				},
 			});
-			bulkReportOps.push({
-				updateOne: {
-					filter: { messageId: temp.messageId },
-					update: { $set: updateFields },
-				},
-			});
+			// bulkReportOps.push({
+			// 	updateOne: {
+			// 		filter: { messageId: temp.messageId },
+			// 		update: { $set: updateFields },
+			// 	},
+			// });
 
 			processedIds.push(temp._id);
 		}

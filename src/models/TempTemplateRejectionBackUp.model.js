@@ -10,6 +10,6 @@ const tempTemplateRejectionSchema = new mongoose.Schema({
 });
 
 export default mongoose.model(
-	"TempTemplateRejection",
+	"TempTemplateRejectionBackUp",
 	tempTemplateRejectionSchema,
 );

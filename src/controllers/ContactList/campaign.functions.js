@@ -98,8 +98,8 @@ export async function sendMessages(
 					fileName: mediaPreview.fileName,
 				};
 			}
-			const report = new Report(reportData);
-			await report.save();
+			// const report = new Report(reportData);
+			// await report.save();
 
 			reportData.components = components;
 			reportData.templateId = campaign.templateId;

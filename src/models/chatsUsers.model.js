@@ -10,8 +10,9 @@ const ChatsUsersSchema = new mongoose.Schema(
 		nameContactRelation: [{ name: String, contactListId: String }],
 		wa_id: { type: String, required: true, index: true },
 		campaignId: { type: String, default: "" },
-		agent: [],
-		supportAgent: [],
+		campaignName: { type: String, default: "" },
+		agent: { type: Array, default: [] },
+		supportAgent: { type: Array, default: [] },
 		createdAt: {
 			type: Number,
 			default: () => Date.now(),
@@ -27,6 +28,7 @@ const ChatsUsersSchema = new mongoose.Schema(
 		lastReceive: { type: Number, default: () => Date.now(), index: true },
 		messageStatus: { type: String, default: "" },
 		status: { type: Number, default: 1 },
+		replyStatus: { type: Number, default: 0 },
 	},
 	{
 		timestamps: false,

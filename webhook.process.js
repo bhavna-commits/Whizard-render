@@ -147,7 +147,7 @@ export const processTempMessages = async () => {
 			},
 			{
 				$group: {
-					_id: "$useradmin",
+					_id: "$phoneNumberId",
 					doc: { $first: "$$ROOT" },
 				},
 			},
@@ -155,7 +155,7 @@ export const processTempMessages = async () => {
 
 		for (const entry of campaignDocs) {
 			const camp = entry.doc;
-			campaignMap[camp.useradmin] = {
+			campaignMap[camp.phoneNumberId] = {
 				campaignId: camp.unique_id,
 				campaignName: camp.name,
 			};

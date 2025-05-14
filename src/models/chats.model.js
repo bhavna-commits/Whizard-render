@@ -12,6 +12,7 @@ const ChatsSchema = new mongoose.Schema(
 			required: true,
 			index: true,
 		},
+		campaignName: String,
 		templateId: {
 			type: String,
 			ref: "template",
@@ -56,7 +57,7 @@ const ChatsSchema = new mongoose.Schema(
 		},
 		templatename: { type: String, default: "" },
 		media_type: { type: String, default: "" },
-		agent: [],
+		agent: { type: Array, default: [] },
 	},
 	{
 		timestamps: false,
