@@ -42,14 +42,14 @@ export const getCampaignList = async (req, res, next) => {
 
 		let matchQuery = {
 			useradmin: userId,
-			deleted: { $ne: true }, // Adjust based on your campaign schema
+			deleted: { $ne: true },
 		};
 
 		if (status === "scheduled") {
 			matchQuery["status"] = {
 				$in: ["SCHEDULED", "IN_QUEUE", "PENDING"],
 			};
-		} else if (status === "all" || !status) {
+		} else if (status === "all" || status === "Sort by") {
 			delete matchQuery["status"];
 		} else {
 			matchQuery["status"] = {
@@ -67,8 +67,8 @@ export const getCampaignList = async (req, res, next) => {
 				endDate.setHours(23, 59, 59, 999);
 				endDate.setTime(endDate.getTime() + 1000 * 60 * 60 * 24);
 
-				// console.log(startDate.getTime());
-				// console.log(endDate.getTime());
+				console.log(startDate.getTime());
+				console.log(endDate.getTime());
 
 				matchQuery["createdAt"] = {
 					$gte: startDate.getTime(),

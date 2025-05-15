@@ -883,15 +883,15 @@ export const getFilteredContacts = async (req, res, next) => {
 		};
 		// Loop through each filter
 		filters.forEach((filter) => {
-			if (filter.field === "subscribe_date" && filter.value) {
+			if (filter.field === "usertimestmp" && filter.value) {
 				matchStage.$and = matchStage.$and || [];
 				const [startDate, endDate] = filter.value?.split(" to ") || [];
 
 				// helper to get local‑midnight timestamp
 				function toLocalMidnightTs(dateStr) {
 					const [y, m, d] = dateStr.split("-").map(Number);
-					// new Date(year, monthIndex, day) is local 00:00
-					return new Date(y, m - 1, d + 1).getTime();
+					// Midnight in local time for the next day
+					return new Date(y, m - 1, d).getTime();
 				}
 
 				if (!startDate) {
@@ -903,20 +903,20 @@ export const getFilteredContacts = async (req, res, next) => {
 				}
 
 				const convertedStartDate = toLocalMidnightTs(startDate);
-				let convertedEndDate = Infinity;
+				let convertedEndDate;
 
 				if (endDate) {
-					convertedEndDate = toLocalMidnightTs(endDate);
+					convertedEndDate =
+						toLocalMidnightTs(endDate) + 24 * 60 * 60 * 1000;;
+				} else {
+					convertedEndDate = convertedStartDate + 24 * 60 * 60 * 1000;
 				}
 
 				console.log(
 					"Converted Start Date (local ms):",
 					convertedStartDate,
 				);
-				console.log(
-					"Converted End Date   (local ms):",
-					convertedEndDate,
-				);
+				console.log("Converted End Date (local ms):", convertedEndDate);
 
 				// Apply filter for subscribe_date (handle case where endDate may not be provided)
 				matchStage.$and.push({

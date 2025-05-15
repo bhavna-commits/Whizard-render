@@ -47,15 +47,19 @@ async function applyFilters() {
 	const search = document.getElementById("searchInput").value;
 	const phoneNumberId = document.getElementById("phoneNumbers").value;
 
-	// Combine the time range
-	const timeFrame = `${timeStart} to ${timeEnd}`;
+	console.log(statusFilter);
+
+	let timeFrame = "";
+	if (timeStart) timeFrame = `${timeStart} to ${timeEnd}`;
 
 	const spinner = document.getElementById("loadingSpinner");
 	spinner.classList.remove("hidden");
 
-	location.href = `/reports/campaign-list?timeFrame=${encodeURIComponent(
-		timeFrame,
-	)}&status=${statusFilter}&search=${search}&phoneNumberId=${phoneNumberId}`;
+	if (timeFrame) {
+		location.href = `/reports/campaign-list?timeFrame=${timeFrame}&status=${statusFilter}&search=${search}&phoneNumberId=${phoneNumberId}`;
+	} else {
+		location.href = `/reports/campaign-list?status=${statusFilter}&search=${search}&phoneNumberId=${phoneNumberId}`;
+	}
 }
 
 let debounceTimer; // Declare debounce timer variable

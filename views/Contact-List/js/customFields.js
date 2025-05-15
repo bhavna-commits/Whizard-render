@@ -11,30 +11,36 @@ document.addEventListener("DOMContentLoaded", function () {
 			};
 
 			try {
-				const response = await fetch("/api/contact-list/custom-fields", {
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
+				const response = await fetch(
+					"/api/contact-list/custom-fields",
+					{
+						method: "POST",
+						headers: {
+							"Content-Type": "application/json",
+						},
+						body: JSON.stringify(formData),
 					},
-					body: JSON.stringify(formData),
-				});
+				);
 
 				if (response.ok) {
 					window.location.reload();
 				} else {
 					const data = await response.json();
-					toast("error",data.message || "Error adding custom field");
+					toast("error", data.message || "Error adding custom field");
 				}
 			} catch (error) {
 				console.error("Error:", error);
-				toast("error","Error adding custom field");
+				toast("error", "Error adding custom field");
 			}
 		});
 	}
 });
 
 async function deleteField(fieldId) {
-	if (!confirm("Are you sure you want to delete this field?")) {
+	const confirm = await toastConfirm(
+		"Are you sure you want to delete this field?",
+	);
+	if (!confirm) {
 		return;
 	}
 
@@ -50,10 +56,10 @@ async function deleteField(fieldId) {
 			window.location.reload();
 		} else {
 			const data = await response.json();
-			toast("error",data.message || "Error deleting custom field");
+			toast("error", data.message || "Error deleting custom field");
 		}
 	} catch (error) {
 		console.error("Error:", error);
-		toast("error","Error deleting custom field");
+		toast("error", "Error deleting custom field");
 	}
 }

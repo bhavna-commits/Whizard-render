@@ -36,7 +36,7 @@ function applyFilters() {
 	// Collect the basic filter (dateInterval)
 	if (dateInterval) {
 		filters.push({
-			field: "subscribe_date",
+			field: "usertimestmp",
 			value: dateInterval,
 			condition: "has",
 		});

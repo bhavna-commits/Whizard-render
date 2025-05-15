@@ -1,7 +1,7 @@
 import { Schema, model } from "mongoose";
 
 const customFieldsSchema = new Schema(
-	{
+	{	
 		unique_id: { type: String, required: true, index: true },
 		customid: { type: String, required: true, index: true },
 		clname: { type: String, required: true, index: true },

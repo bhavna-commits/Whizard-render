@@ -65,6 +65,7 @@ export const previewContactList = async (req, res, next) => {
 		const requiredColumns = ["Name", "Number"];
 		const customFields = await CustomField.find({
 			customid: req.session?.user?.id || req.session?.addedUser?.owner,
+			status: 1,
 		});
 		const contactList = await ContactList.findOne({
 			useradmin: req.session?.user?.id || req.session?.addedUser?.owner,
@@ -297,12 +298,14 @@ export const sampleCSV = async (req, res) => {
 		const userDir = path.join(__dirname, "..", "..", "..", "CSV", userId);
 		const userCSVPath = path.join(userDir, "sample.csv");
 
-		// Check if the user's specific CSV file exists
+		const fields = await CustomField.find({ customid: userId, status: 1 });
+		let fieldNames = fields.map((c) => c.clname);
+		fieldNames = ["Name", "Number", ...fieldNames];
+
 		let filePath;
 		if (fs.existsSync(userCSVPath)) {
 			filePath = userCSVPath;
 		} else {
-			// Fallback to the default sample.csv if user-specific file doesn't exist
 			filePath = path.join(
 				__dirname,
 				"..",
@@ -312,6 +315,18 @@ export const sampleCSV = async (req, res) => {
 				"sample.csv",
 			);
 		}
+
+		// Read the CSV file content
+		const csvContent = fs.readFileSync(filePath, "utf8");
+		const rows = csvContent.split("\n");
+
+		// Replace the first row (headers) with fieldNames
+		if (rows.length > 0) {
+			rows[0] = fieldNames.join(",");
+		}
+
+		// Join the rows back into a single CSV string
+		const modifiedCSV = rows.join("\n");
 
 		// Set response headers for CSV download
 		res.setHeader("Content-Type", "text/csv");
@@ -323,15 +338,8 @@ export const sampleCSV = async (req, res) => {
 		res.setHeader("Pragma", "no-cache");
 		res.setHeader("Expires", "0");
 
-		// Send the file for download
-		res.download(filePath, "sample.csv", (err) => {
-			if (err) {
-				console.error(err);
-				res.status(500).send({
-					message: err.message,
-				});
-			}
-		});
+		// Send the modified CSV content
+		res.send(modifiedCSV);
 	} catch (error) {
 		console.error(error);
 		res.status(500).send({
@@ -748,7 +756,14 @@ export const getContactList = async (req, res) => {
 		const id = req.session?.user?.id || req.session?.addedUser?.owner;
 		const addedUserId = req.session?.addedUser?.id;
 
+		const user = await User.findOne({ unique_id: id });
+
+		const FB_PHONE_ID = user.FB_PHONE_NUMBERS.find(
+			(n) => n.selected,
+		).phone_number_id;
+
 		const query = {
+			FB_PHONE_ID,
 			useradmin: id,
 			contact_status: { $ne: 0 },
 		};
@@ -784,6 +799,7 @@ export const getCampaignContacts = async (req, res) => {
 export const searchContactLists = async (req, res, next) => {
 	const { query } = req.query;
 	const userId = req.session?.user?.id || req.session?.addedUser?.owner;
+	const addedUserId = req.session?.addedUser?.id;
 	const page = parseInt(req.query.page) || 1;
 	const limit = 6;
 	const skip = (page - 1) * limit;
@@ -792,17 +808,22 @@ export const searchContactLists = async (req, res, next) => {
 	if (!isNumber(page)) return next();
 
 	try {
-		// Trim spaces and escape regex special characters
+		const user = await User.findOne({ unique_id: userId });
+
+		const FB_PHONE_ID = user.FB_PHONE_NUMBERS.find(
+			(n) => n.selected,
+		).phone_number_id;
+
 		const trimmedQuery = query.trim();
 		const escapeRegex = (text) =>
 			text.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
 
 		let escapedQuery = escapeRegex(trimmedQuery);
 
-		// Replace spaces with .*, so "john doe" becomes "john.*doe"
 		escapedQuery = escapedQuery.replace(/\s+/g, ".*");
 
 		const matchStage = {
+			FB_PHONE_ID,
 			useradmin: userId,
 			contact_status: { $ne: 0 },
 		};
@@ -814,13 +835,17 @@ export const searchContactLists = async (req, res, next) => {
 			};
 		}
 
+		if (addedUserId) {
+			matchStage.agent = addedUserId;
+		}
+
 		const result = await ContactList.aggregate([
 			{
 				// Match the documents where useradmin matches the userId and contact_status is not 0
 				$match: matchStage,
 			},
 			{
-				$sort: { adddate: -1 },
+				$sort: { createdAt: -1 },
 			},
 			{
 				// Use $facet to return both paginated results and total count
