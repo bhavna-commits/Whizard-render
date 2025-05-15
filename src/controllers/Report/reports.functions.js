@@ -1052,14 +1052,21 @@ agenda.define("process campaign", async (job) => {
 });
 
 agenda.define("process reports campaign", async (job) => {
-	const { newCampaign, user, unique_id, phone_number, addedUserId } =
-		job.attrs.data;
+	const {
+		newCampaign,
+		user,
+		unique_id,
+		contactList,
+		phone_number,
+		addedUserId,
+	} = job.attrs.data;
 	console.log("here");
 	try {
 		await sendMessagesReports(
 			newCampaign,
 			user,
 			unique_id,
+			contactList,
 			phone_number,
 			addedUserId,
 		);

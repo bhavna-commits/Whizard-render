@@ -473,7 +473,7 @@ export const createContact = async (req, res, next) => {
 			masterExtra: newContactData,
 			agent: [agentToAssign],
 			usertimestmp: Date.now(),
-		};			  
+		};
 
 		const newContact = await Contacts.create(contact);
 
@@ -610,6 +610,8 @@ export const createCampaign = async (req, res, next) => {
 		});
 
 		if (!schedule) {
+			newCampaign.status = "SCHEDULED";
+
 			let time = Date.now() + 2 * 60 * 1000;
 			let reportTime = new Date(time);
 

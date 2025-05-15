@@ -140,7 +140,7 @@ export async function getUserIdFromToken(token) {
 	const newToken = generateTokenFromHash(
 		tokenRecord.baseHash,
 		newTimestampStr,
-	);
+	);	
 	// Update the token record's expiration.
 	tokenRecord.expiresAt = Date.now() + TOKEN_LIFETIME;
 	await tokenRecord.save();
