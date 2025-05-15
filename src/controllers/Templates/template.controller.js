@@ -34,10 +34,14 @@ export const createTemplate = async (req, res, next) => {
 			templateData;
 		const id = req.session?.user?.id || req.session?.addedUser?.owner;
 
-		// if (!isObject(templateData)) return next();
+		const user = await User.findOne({ unique_id: id });
+		const FB_PHONE_ID = user?.FB_PHONE_NUMBERS?.find(
+			(n) => n.selected,
+		)?.phone_number_id;
 
 		// Check if a template with the same name exists for the user
 		const exists = await Template.findOne({
+			FB_PHONE_ID,
 			useradmin: id,
 			name,
 			deleted: false,
@@ -52,6 +56,7 @@ export const createTemplate = async (req, res, next) => {
 
 		// Save template to DB
 		const savedTemplate = await saveTemplateToDatabase(
+			FB_PHONE_ID,
 			req,
 			templateData,
 			dynamicVariables,
@@ -59,7 +64,7 @@ export const createTemplate = async (req, res, next) => {
 			id,
 			url,
 		);
-		
+
 		await ActivityLogs.create({
 			useradmin: id,
 			unique_id: generateUniqueId(),
@@ -87,13 +92,19 @@ export const getList = async (req, res, next) => {
 	try {
 		const id = req.session?.user?.id || req.session?.addedUser?.owner;
 		const page = parseInt(req.query.page) || 1;
-		const { category, search, language } = req.query; // Language is added
+		const { category, search, language } = req.query; 
 		const limit = 6;
 		const skip = (page - 1) * limit;
 
 		if (!isString(category, search, language)) return next();
 
+		// const user = await User.findOne({ unique_id: id });
+		// const FB_PHONE_ID = user?.FB_PHONE_NUMBERS?.find(
+		// 	(n) => n.selected,
+		// )?.phone_number_id;
+
 		const match = {
+			// FB_PHONE_ID,
 			useradmin: id,
 			deleted: { $ne: true },
 		};

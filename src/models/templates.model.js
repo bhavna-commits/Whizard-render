@@ -4,6 +4,7 @@ const Schema = mongoose.Schema;
 
 const templateSchema = new Schema(
 	{
+		FB_PHONE_ID: { type: String, required: true, index: true },
 		name: { type: String, required: true, index: true },
 		language: {
 			code: { type: String, default: "en_US" },
@@ -12,7 +13,6 @@ const templateSchema = new Schema(
 		category: { type: String, required: true, index: true },
 		components: [],
 
-		// ← NEW: per‑button click counts
 		buttonClicks: {
 			type: Map,
 			of: Number,

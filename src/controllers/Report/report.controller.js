@@ -548,6 +548,18 @@ export const createCampaign = async (req, res, next) => {
 			newCampaign.scheduledAt = Number(schedule) * 1000;
 			newCampaign.status = "SCHEDULED";
 
+			let time = Number(schedule) * 1000;
+			let reportTime = new Date(time);
+
+			agenda.schedule(reportTime, "process reports campaign", {
+				newCampaign,
+				user,
+				unique_id: generateUniqueId(),
+				contactList,
+				phone_number,
+				addedUserId,
+			});
+
 			await sendCampaignScheduledEmail(
 				user.email,
 				name,

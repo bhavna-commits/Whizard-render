@@ -158,6 +158,7 @@ export const uploadMediaResumable = async (accessToken, appId, filePath) => {
 };
 
 export const saveTemplateToDatabase = async (
+	FB_PHONE_ID,
 	req,
 	templateData,
 	dynamicVariables,
@@ -170,6 +171,7 @@ export const saveTemplateToDatabase = async (
 
 		// Create the new template object
 		const newTemplate = new Template({
+			FB_PHONE_ID,
 			name: templateData.templateName,
 			category: templateData.category,
 			components,
