@@ -513,7 +513,7 @@ export const createCampaign = async (req, res, next) => {
 		let message = "Campaign created successfully";
 
 		if (!schedule) {
-			newCampaign.status = "SCHEDULED";
+			newCampaign.status = "SENT";
 
 			let time = Date.now() + 2 * 60 * 1000;
 			let reportTime = new Date(time);
