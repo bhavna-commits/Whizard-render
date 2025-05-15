@@ -76,10 +76,17 @@
 			
 			<h3 class="text-xl font-semibold text-gray-900 mb-2">No contact list yet</h3>
 			<p class="text-gray-600 mb-6">Start adding contacts by clicking on "Create new Contact list"</p>
+			<% if (access?.contactList?.addContactListCSV) { %>
 			<button onclick="document.getElementById('create-List').click()" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black">
 				<i class="fa-solid fa-plus pr-2"></i>
 				Create new Contact list
 			</button>
+			<% } else { %>
+			<button title="You don't have permissions to access this" class="inline-flex items-center px-4 py-2 border border-transparent text-sm  cursor-not-allowed font-medium rounded-md text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black" disabled>
+				<i class="fa-solid fa-plus pr-2"></i>
+				Create new Contact list
+			</button>
+			<% } %>
 		</div>
 	</div>
 	<% } %>
