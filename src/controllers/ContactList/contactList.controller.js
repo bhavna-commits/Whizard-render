@@ -755,6 +755,7 @@ export const getContactList = async (req, res) => {
 	try {
 		const id = req.session?.user?.id || req.session?.addedUser?.owner;
 		const addedUserId = req.session?.addedUser?.id;
+		const permissionsId = req.session?.addedUser?.permissions;
 
 		const user = await User.findOne({ unique_id: id });
 
@@ -768,10 +769,19 @@ export const getContactList = async (req, res) => {
 			contact_status: { $ne: 0 },
 		};
 
-		if (addedUserId) query.agent = addedUserId;
+		if (permissionsId) {
+			let access = await Permissions.findOne({ unique_id: permissionsId });
+
+			if (!access?.contactList?.allList) {
+				// Only match if the agent field contains the added user's ID
+				if (addedUserId) {
+					query.agent = addedUserId;
+				}
+			}
+		}
 
 		const contactLists = await ContactList.find(query).sort({
-			adddate: -1,
+			createdAt: -1,
 		});
 
 		res.json(contactLists);
