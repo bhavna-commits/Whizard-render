@@ -351,6 +351,8 @@ router.post("/webhook", async (req, res) => {
 						audio,
 					} = messageEvent;
 
+					if (type === "unsupported") continue;
+
 					// Determine mediaUrl if the message contains a file
 					let mediaId = "";
 					if (type === "image" && image?.id) {

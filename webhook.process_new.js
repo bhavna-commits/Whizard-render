@@ -181,14 +181,15 @@ export const processTempMessages = async () => {
 						keyst = 2;
 						console.log("hjkl");
 						lastmessagetime = temp["timestamp"];
-						lastmessage = temp["text"]["body"];
+						lastmessage = temp["text"] || temp["text"]["body"];
 					}
 				}
 
 				if (keyst === 1) {
 					// console.log("herer");
 					lastmessagetime = temp["timestamp"];
-					lastmessage = temp["text"]["body"];
+					console.log(temp["text"]);
+					lastmessage = temp["text"]["body"] || temp["text"];
 					lastreplay = temp["timestamp"];
 
 					if (!(keydatawithnumber in allreplay)) {
@@ -423,24 +424,43 @@ export const processTempTemplateRejections = async () => {
 };
 
 export const processAllTempEvents = async () => {
-	await connectDB();
-	const db = mongoose.connection.db;
-	TempStatus = db.collection("tempstatuses");
-	TempStatusBackUp = db.collection("tempstatusebackups");
-	User = db.collection("users");
-	TempMessage = db.collection("tempmessages");
-	TempMessageBackUp = db.collection("tempmessagebackups");
-	Chat = db.collection("chats");
-	ChatsUsers = db.collection("chatsusers");
-	AddedUser = db.collection("addedusers");
-	TempTemplateRejection = db.collection("temptemplaterejections");
-	TempTemplateRejectionBackUp = db.collection("temptemplaterejectionbackups");
-	Template = db.collection("templates");
-	await processTempMessages();
-	await processTempTemplateRejections();
-	await processTempStatuses();
+	try {
+		await connectDB();
+		const db = mongoose.connection.db;
+
+		// Initialize collections
+		TempStatus = db.collection("tempstatuses");
+		TempStatusBackUp = db.collection("tempstatusebackups");
+		User = db.collection("users");
+		TempMessage = db.collection("tempmessages");
+		TempMessageBackUp = db.collection("tempmessagebackups");
+		Chat = db.collection("chats");
+		ChatsUsers = db.collection("chatsusers");
+		AddedUser = db.collection("addedusers");
+		TempTemplateRejection = db.collection("temptemplaterejections");
+		TempTemplateRejectionBackUp = db.collection(
+			"temptemplaterejectionbackups",
+		);
+		Template = db.collection("templates");
+
+		// Process all events
+		await processTempMessages();
+		await processTempTemplateRejections();
+		await processTempStatuses();
+
+		console.log("All processing complete");
+	} catch (error) {
+		console.error("Error in processAllTempEvents:", error);
+	} finally {
+		process.exit(0);
+	}
 };
 
 if (process.argv[1] === __filename) {
-	processAllTempEvents();
+	processAllTempEvents()
+		.then(() => console.log("Script execution finished"))
+		.catch((err) => {
+			console.error("Script execution failed:", err);
+			process.exit(1);
+		});
 }

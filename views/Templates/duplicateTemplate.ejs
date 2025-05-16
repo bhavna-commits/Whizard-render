@@ -501,6 +501,8 @@
 			
 			const dataTransfer = new DataTransfer();
 			dataTransfer.items.add(file);
+
+			console.log(dataTransfer.files);
 			
 			const fileInput = document.getElementById("file-upload");
 			fileInput.files = dataTransfer.files;
