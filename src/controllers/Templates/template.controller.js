@@ -92,7 +92,7 @@ export const getList = async (req, res, next) => {
 	try {
 		const id = req.session?.user?.id || req.session?.addedUser?.owner;
 		const page = parseInt(req.query.page) || 1;
-		const { category, search, language } = req.query; 
+		const { category, search, language } = req.query;
 		const limit = 6;
 		const skip = (page - 1) * limit;
 
@@ -309,14 +309,15 @@ export const getEditTemplate = async (req, res, next) => {
 			(component) =>
 				component.type === "HEADER" &&
 				(component.format === "IMAGE" ||
-					component.format == "DOCUMENT"),
+					component.format === "DOCUMENT" ||
+					component.format === "VIDEO"),
 		);
 
 		let mediaFileName = null;
 		// Assuming you have the file path stored in your template
 		if (headerComponent && headerComponent.example?.header_url) {
 			const mediaFileUrl = headerComponent.example.header_url;
-			console.log(mediaFileUrl);
+			// console.log(mediaFileUrl);
 			mediaFileName = mediaFileUrl.split("/").pop();
 			// Assuming you store the file path on your server
 			const mediaFilePath = path.join(
