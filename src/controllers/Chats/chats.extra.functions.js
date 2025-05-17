@@ -59,7 +59,7 @@ export const fetchAndFormatReports = async (
 		}
 	}
 
-	
+
 	// If a search term is provided, add $or for contactName / wa_id
 	if (searchTerm) {
 		query.$or = [
@@ -83,12 +83,12 @@ export const fetchAndFormatReports = async (
 		const isRecent =
 			chat.lastReceive && now - chat.lastReceive < 24 * 3600_000;
 		return {
-			lastmessage: chat.lastMessage || "No recent reply",
+			lastmessage: chat?.lastMessage || "No recent reply",
 			wa_id: chat.wa_id,
-			status: isRecent ? 0 : 1, // 0 = new/recent, 1 = older
+			status: isRecent ? 0 : 1,
 			name: chat.contactName.toString(),
-			usertimestmp: chat.updatedAt,
-			campaignId: chat.campaignId || "",
+			usertimestmp: chat.lastReceive || chat.lastSend,
+			campaignId: chat?.campaignId || "",
 			is_read: chat.status === "READ",
 		};
 	});
