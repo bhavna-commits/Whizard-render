@@ -187,7 +187,7 @@ export const processTempMessages = async () => {
 
 				if (keyst === 1) {
 					// console.log("herer");
-					lastmessagetime = temp["timestamp"];
+					// lastmessagetime = temp["timestamp"];
 					// console.log(temp["text"]);
 					lastmessage = temp?.text?.body || temp["text"];
 					lastreplay = temp["timestamp"];
@@ -250,10 +250,6 @@ export const processTempMessages = async () => {
 							leftexit = 1;
 							if (finalkey in allreplay) {
 								const message_Id = allreplay[finalkey];
-								// console.log({
-								// 	messageId: message_Id,
-								// 	FB_PHONE_ID: FB_PHONE_ID,
-								// });
 
 								bulkOpsChat.push({
 									updateOne: {
@@ -294,9 +290,16 @@ export const processTempMessages = async () => {
 					// console.log(finalupdaterow);
 					let updateleft = {
 						lastMessage: finalupdaterow.lastmessage,
-						lastReceive: finalupdaterow.lastreplay,
 						lastSend: finalupdaterow.lastmessagetime,
 					};
+
+					const existingLastReceive = urow?.lastReceive || 0;
+					const newLastReplay = finalupdaterow.lastreplay || 0;
+
+					if (newLastReplay > 0 || existingLastReceive === 0) {
+						updateleft.lastReceive = newLastReplay;
+					}
+					
 					if (leftexit == 1) {
 						updateleft["replyStatus"] = 1;
 					}

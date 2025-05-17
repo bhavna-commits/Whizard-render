@@ -377,7 +377,16 @@ router.post("/webhook", async (req, res) => {
 							image?.caption ||
 							video?.caption ||
 							document?.caption ||
-							audio?.caption,
+							audio?.caption ||
+							(type === "image"
+								? "image"
+								: type === "video"
+								? "video"
+								: type === "document"
+								? "document"
+								: type === "audio"
+								? "audio"
+								: ""),
 						mediaId,
 						fbPhoneId,
 						status: "receive",
