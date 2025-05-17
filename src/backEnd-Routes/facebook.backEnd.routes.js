@@ -365,6 +365,8 @@ router.post("/webhook", async (req, res) => {
 						mediaId = audio.id;
 					}
 
+					console.log(text);
+
 					const getMessageText = () => {
 						if (text) return text;
 						if (image?.caption) return image.caption;
@@ -382,6 +384,8 @@ router.post("/webhook", async (req, res) => {
 								return "";
 						}
 					};
+
+					console.log(getMessageText());
 
 					await TempMessage.create({
 						name,
