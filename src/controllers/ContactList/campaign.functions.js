@@ -123,38 +123,37 @@ export async function sendMessages(
 
 export function replaceDynamicVariables(template, variables, contact) {
 	try {
-		// console.log("variables :", variables);
 		const messageComponents = [];
-		variables = new Map(Object.entries(variables));
-		// Process dynamic variables in Header
-		// console.log(variables);
+
+		// 🛡️ Ensure variables is a Map if it's not already
+		if (variables && typeof variables.get !== "function") {
+			variables = new Map(Object.entries(variables));
+		}
+
+		// 💥 HEADER processing
 		const headerComponent = template.components.find(
 			(c) => c.type === "HEADER",
 		);
+
 		if (headerComponent) {
-			let headerParameters = [];
-			// Handle media components based on their format (Image, Video, Document)
+			const headerParameters = [];
+
+			const link = headerComponent?.example?.header_url || "";
+
 			if (headerComponent.format === "IMAGE") {
-				console.log(headerComponent.example.header_url);
 				headerParameters.push({
 					type: "image",
-					image: {
-						link: headerComponent.example.header_url || "",
-					},
+					image: { link },
 				});
 			} else if (headerComponent.format === "VIDEO") {
 				headerParameters.push({
 					type: "video",
-					video: {
-						link: headerComponent.example.header_url || "",
-					},
+					video: { link },
 				});
 			} else if (headerComponent.format === "DOCUMENT") {
 				headerParameters.push({
 					type: "document",
-					document: {
-						link: headerComponent.example.header_url || "",
-					},
+					document: { link },
 				});
 			}
 
@@ -166,34 +165,37 @@ export function replaceDynamicVariables(template, variables, contact) {
 			}
 		}
 
-		// Process dynamic variables in Body
+		// 🧠 BODY variable replacements
 		const bodyComponent = template.components.find(
 			(c) => c.type === "BODY",
 		);
-		if (bodyComponent && template.dynamicVariables.body.length > 0) {
-			let bodyParameters = [];
+
+		if (bodyComponent && template.dynamicVariables?.body?.length > 0) {
+			const bodyParameters = [];
 
 			template.dynamicVariables.body.forEach((bodyVar) => {
-				let key = Object.keys(bodyVar)[0];
-				// console.log(variables.get(key));
+				const key = Object.keys(bodyVar)[0];
+				const mappedKey = variables?.get?.(key);
 
-				if (variables.get(key) == "Name") {
+				if (mappedKey === "Name") {
 					bodyParameters.push({
 						type: "text",
-						text: contact.Name || "",
+						text: contact?.Name || "",
 					});
-				} else if (variables.get(key)) {
+				} else if (mappedKey) {
 					bodyParameters.push({
 						type: "text",
-						text: contact.masterExtra[variables.get(key)] || "",
+						text: contact?.masterExtra?.[mappedKey] || "",
 					});
 				}
 			});
 
-			messageComponents.push({
-				type: "body",
-				parameters: bodyParameters,
-			});
+			if (bodyParameters.length > 0) {
+				messageComponents.push({
+					type: "body",
+					parameters: bodyParameters,
+				});
+			}
 		}
 
 		return messageComponents;
@@ -202,6 +204,7 @@ export function replaceDynamicVariables(template, variables, contact) {
 		throw new Error(`Error replacing dynamic variables: ${error.message}`);
 	}
 }
+
 
 export async function sendMessageThroughWhatsApp(
 	user,

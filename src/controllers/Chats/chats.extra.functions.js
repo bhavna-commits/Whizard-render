@@ -59,6 +59,7 @@ export const fetchAndFormatReports = async (
 		}
 	}
 
+	
 	// If a search term is provided, add $or for contactName / wa_id
 	if (searchTerm) {
 		query.$or = [
