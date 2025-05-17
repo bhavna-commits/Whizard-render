@@ -331,9 +331,7 @@ export const getSingleChat = async (req, res) => {
 export const searchUsers = async (req, res) => {
 	try {
 		// Token check — expecting full request, not just token string
-		const oldToken = checkToken(
-			req.body?.token || req.headers?.authorization,
-		);
+		const oldToken = checkToken(req);
 		const { userId, token, permission, agentId, tokenType } =
 			await getUserIdFromToken(oldToken);
 
