@@ -491,7 +491,7 @@ export const sendMessages = async (req, res) => {
 			from: to,
 			timestamp: Date.now(),
 			type: mediatype || "text",
-			text: mediatype === "text" ? { body: messageText } : mediatype,
+			text: messageText ? { body: messageText } : mediatype,
 			mediaId: mediaId || "",
 			fbPhoneId: from,
 			status: "sent",
