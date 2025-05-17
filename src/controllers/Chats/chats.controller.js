@@ -236,19 +236,26 @@ export const getRefreshToken = async (req, res) => {
  * @returns {void}
  */
 
-export const getSingleChat = async (req) => {
+export const getSingleChat = async (req, res) => {
 	try {
-		const oldToken = checkToken(req?.token);
+		const oldToken = checkToken(req);
 		const { userId, token } = await getUserIdFromToken(oldToken);
 
-		const wa_id = req?.wa_id;
-		const FB_PHONE_ID = req?.FB_PHONE_ID;
-		const skip = parseInt(req?.skip, 10) || 0;
+		const wa_id = req.body?.wa_id;
+		const FB_PHONE_ID = req.body?.FB_PHONE_ID;
+		const skip = parseInt(req.body?.skip, 10) || 0;
 		const limit = 10;
 
-		if (!wa_id) {
-			return { message: "All values not provided", success: false };
+		// Input validation 🧪
+		if (!wa_id || !FB_PHONE_ID) {
+			return res.status(400).json({
+				message: "All values not provided",
+				success: false,
+			});
 		}
+
+		if (!isString(wa_id) || !isString(FB_PHONE_ID)) throw "Invalid Input";
+		if (!isNumber(skip)) throw "Invalid Input";
 
 		const reports = await Report.find({
 			FB_PHONE_ID,
@@ -258,16 +265,21 @@ export const getSingleChat = async (req) => {
 			.skip(skip)
 			.limit(limit);
 
-		if (!reports || reports.length == 0) {
-			return { chats: [], success: true };
+		if (!reports?.length) {
+			return res.status(200).json({
+				chats: [],
+				success: true,
+			});
 		}
 
-		let formattedChats = [];
+		const formattedChats = [];
+
 		for (const reportItem of reports) {
 			let chatsForReport = "";
+
 			if (
-				reportItem?.type == "Template" ||
-				reportItem?.type == "Campaign"
+				reportItem?.type === "Template" ||
+				reportItem?.type === "Campaign"
 			) {
 				chatsForReport = buildCommonChatFields(reportItem, wa_id, {
 					components: reportItem?.components,
@@ -276,23 +288,30 @@ export const getSingleChat = async (req) => {
 			} else {
 				if (reportItem?.media_type) {
 					chatsForReport = processMediaReport(reportItem, wa_id);
-				} else if (reportItem.text) {
+				} else if (reportItem?.text) {
 					chatsForReport = processTextReport(reportItem, wa_id);
 				}
 			}
-			formattedChats.push(chatsForReport);
+
+			if (chatsForReport) {
+				formattedChats.push(chatsForReport);
+			}
 		}
 
-		return {
+		return res.status(200).json({
 			success: true,
-			chats: formattedChats.filter((item) => item !== "").reverse(),
+			chats: formattedChats.reverse(),
 			token,
-		};
+		});
 	} catch (error) {
 		console.error("Error in getSingleChat:", error);
-		return { success: false, message: error.message || error };
+		return res.status(500).json({
+			message: error.message || error,
+			success: false,
+		});
 	}
 };
+
 /**
  * Searches for users by name or phone number using the provided search term.
  *
@@ -306,43 +325,48 @@ export const getSingleChat = async (req) => {
  * @returns {void}
  */
 
-export const searchUsers = async (req) => {
+export const searchUsers = async (req, res) => {
 	try {
-		const oldToken = checkToken(req?.token);
-		const { userId, token, permission, agentId } = await getUserIdFromToken(
-			oldToken,
+		// Token check — expecting full request, not just token string
+		const oldToken = checkToken(
+			req.body?.token || req.headers?.authorization,
 		);
+		const { userId, token, permission, agentId, tokenType } =
+			await getUserIdFromToken(oldToken);
 
-		const search = req?.search;
-		const phoneNumberId = req?.phoneNumberId;
+		const { search, phoneNumberId } = req.body || {};
 
-		if (!search) {
-			return {
-				message: "Search term not provided",
+		// 🕵️‍♀️ Validate search input
+		if (!search || !isString(search)) {
+			return res.status(400).json({
+				message: "Invalid or missing search term",
 				success: false,
-			};
+			});
 		}
-
-		if (!isString(search)) throw "Invalid Input";
 
 		const formattedReports = await fetchAndFormatReports(
 			userId,
 			agentId,
 			permission?.allChats,
 			phoneNumberId,
-			0,
+			tokenType,
 			search,
 		);
 
-		return { msg: formattedReports, success: true, token };
+		return res.status(200).json({
+			msg: formattedReports,
+			success: true,
+			token,
+		});
 	} catch (error) {
 		console.error("Error in searchUsers:", error);
-		return {
-			message: error.message || error,
+		return res.status(500).json({
+			message: error.message || String(error),
 			success: false,
-		};
+		});
 	}
 };
+
 /**
  * Sends messages (text or media) based on the provided payload.
  *
