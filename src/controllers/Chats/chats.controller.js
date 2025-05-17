@@ -74,10 +74,13 @@ export const getSetToken = async (req, res) => {
 		let accessData;
 		let type;
 		if (permissions) {
-			if (permissions === "") {
-
+			if (permissions === "UnAssignedChats") {
+				type = "support";
 			}
-			accessData = await Permissions.findOne({ unique_id: permissions });
+			accessData = await Permissions.findOne({
+				unique_id: permissions,
+			});
+
 			if (!accessData?.chats?.chat && !accessData?.chats?.allChats)
 				return res.render("errors/notAllowed");
 			permissionValue = accessData?.chats;
@@ -86,12 +89,12 @@ export const getSetToken = async (req, res) => {
 		}
 
 		// create or update token record
-		const token = await createTokenRecord(
+		const { token, agentId } = await createTokenRecord(
 			ownerId,
 			permissionValue,
 			added,
 			name,
-			type
+			type,
 		);
 
 		if (user.WhatsAppConnectStatus === "Pending") {
@@ -104,6 +107,7 @@ export const getSetToken = async (req, res) => {
 				phoneNumberId: "null",
 				phoneNumberName: "null",
 				phoneNumber: "null",
+				agentId,
 			});
 		}
 
@@ -111,6 +115,7 @@ export const getSetToken = async (req, res) => {
 		const phone = user.FB_PHONE_NUMBERS.find((f) => f.selected);
 		if (!phone) return res.render("errors/chatsError");
 
+		// console.log(token, agentId);
 		// render with correct details
 		res.render("Chats/chats", {
 			token,
@@ -121,6 +126,7 @@ export const getSetToken = async (req, res) => {
 			phoneNumberId: phone.phone_number_id,
 			phoneNumberName: phone.friendly_name,
 			phoneNumber: phone.number,
+			agentId,
 		});
 	} catch (error) {
 		console.error("Error in getSetToken:", error);
@@ -173,7 +179,6 @@ export const getSetToken = async (req, res) => {
 // 		// 	wa_id: "917982959619",
 // 		// 	agent: { $size: 0 }, // ← this does the trick
 // 		// });
-
 
 // 		// console.log(formattedReports);
 
@@ -344,6 +349,7 @@ export const getSingleChat = async (req) => {
 		const { userId, token } = await getUserIdFromToken(oldToken);
 
 		const wa_id = req?.wa_id;
+		const FB_PHONE_ID = req?.FB_PHONE_ID;
 		const skip = parseInt(req?.skip, 10) || 0;
 		const limit = 10;
 
@@ -352,7 +358,7 @@ export const getSingleChat = async (req) => {
 		}
 
 		const reports = await Report.find({
-			useradmin: userId,
+			FB_PHONE_ID,
 			recipientPhone: wa_id,
 		})
 			.sort({ updatedAt: -1 })
@@ -377,7 +383,7 @@ export const getSingleChat = async (req) => {
 			} else {
 				if (reportItem?.media_type) {
 					chatsForReport = processMediaReport(reportItem, wa_id);
-				} else if (reportItem.textSent || reportItem.replyContent) {
+				} else if (reportItem.text) {
 					chatsForReport = processTextReport(reportItem, wa_id);
 				}
 			}
@@ -729,11 +735,11 @@ export const sendMessages = async (req) => {
 			text: messageText,
 			media: { url, fileName, caption },
 			type: "Chat",
-			media_type: mediatype,
+			media_type: mediatype !== "text" ? mediatype : "",
 			agent: agentId,
 		};
 		const newChat = new Chats(d);
-		await temp.save();
+		// await temp.save();
 		await newChat.save();
 
 		await ActivityLogs.create({

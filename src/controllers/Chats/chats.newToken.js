@@ -140,7 +140,7 @@ export async function getUserIdFromToken(token) {
 	const newToken = generateTokenFromHash(
 		tokenRecord.baseHash,
 		newTimestampStr,
-	);	
+	);
 	// Update the token record's expiration.
 	tokenRecord.expiresAt = Date.now() + TOKEN_LIFETIME;
 	await tokenRecord.save();
@@ -153,10 +153,17 @@ export async function getUserIdFromToken(token) {
  * Creates or updates a token record for a given owner (userId) and agent (agentId).
  * If agentId not provided, assumes owner login (agentId === userId).
  */
-export async function createTokenRecord(userId, permission, addedUser, name, tokenType) {
+export async function createTokenRecord(
+	userId,
+	permission,
+	addedUser,
+	name,
+	tokenType,
+) {
 	// determine agentId (owner vs added user)
 	const agentId = addedUser?.id || userId;
 
+	console.log(tokenType);
 	// try to find existing record for this pair
 	let tokenRecord = await Token.findOne({ userId, agentId });
 	const now = Date.now();
@@ -168,7 +175,11 @@ export async function createTokenRecord(userId, permission, addedUser, name, tok
 			tokenRecord.permission = permission;
 			tokenRecord.name = name;
 			await tokenRecord.save();
-			return generateTokenFromHash(tokenRecord.baseHash, now.toString());
+			const token = generateTokenFromHash(
+				tokenRecord.baseHash,
+				now.toString(),
+			);
+			return { token, agentId };
 		}
 		// expired: regenerate entirely
 		const { baseHash, expiresAt, token } = generateToken();
@@ -176,8 +187,9 @@ export async function createTokenRecord(userId, permission, addedUser, name, tok
 		tokenRecord.expiresAt = expiresAt;
 		tokenRecord.permission = permission;
 		tokenRecord.name = name;
+		tokenRecord.tokenType = tokenType ? tokenType : "";
 		await tokenRecord.save();
-		return token;
+		return { token, agentId };
 	}
 
 	// no record yet: create a new one
@@ -195,7 +207,7 @@ export async function createTokenRecord(userId, permission, addedUser, name, tok
 		tokenType,
 	});
 	await tokenRecord.save();
-	return token;
+	return { token, agentId };
 }
 
 /**

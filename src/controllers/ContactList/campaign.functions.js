@@ -6,7 +6,7 @@ import Campaign from "../../models/campaign.model.js";
 import Report from "../../models/report.model.js";
 import Chat from "../../models/chats.model.js";
 import ChatsTemp from "../../models/chatsTemp.model.js";
-import TempMessageModel from "../../models/TempMessage.model.js";
+import TempMessage from "../../models/TempMessage.model.js";
 import chatsUsersModel from "../../models/chatsUsers.model.js";
 
 dotenv.config();
@@ -71,6 +71,18 @@ export async function sendMessages(
 			}
 
 			const mediaPreview = getMediaPreviewFromTemplate(template);
+
+			await TempMessage.create({
+				name: contact.Name,
+				wabaId: user.WABA_ID,
+				messageId: response.response.messages[0].id,
+				from: contact.wa_id,
+				timestamp: timestamp * 1000,
+				type: "text",
+				text: messageTemplate.slice(0, 20),
+				fbPhoneId: phone_number,
+				status: "sent",
+			});
 
 			let reportData = {
 				WABA_ID: user.WABA_ID,

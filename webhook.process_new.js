@@ -92,10 +92,10 @@ export const processTempStatuses = async () => {
 			await TempStatusBackUp.insertMany(messagesToBackup);
 		}
 
-		// if (processedIds.length) {
-		//   await TempStatus.deleteMany({ _id: { $in: processedIds } });
-		//   console.log(`🧹 Deleted ${processedIds.length} processed temp statuses`);
-		// }
+		if (processedIds.length) {
+		  await TempStatus.deleteMany({ _id: { $in: processedIds } });
+		  console.log(`🧹 Deleted ${processedIds.length} processed temp statuses`);
+		}
 
 		console.log("✔️ Bulk processed temp statuses complete.");
 	} catch (error) {
@@ -179,17 +179,17 @@ export const processTempMessages = async () => {
 					// keyst = 0;
 					if (temp["status"] === "sent") {
 						keyst = 2;
-						console.log("hjkl");
+						// console.log("hjkl");
 						lastmessagetime = temp["timestamp"];
-						lastmessage = temp["text"] || temp["text"]["body"];
+						lastmessage = temp?.text?.body || temp["text"];
 					}
 				}
 
 				if (keyst === 1) {
 					// console.log("herer");
 					lastmessagetime = temp["timestamp"];
-					console.log(temp["text"]);
-					lastmessage = temp["text"]["body"] || temp["text"];
+					// console.log(temp["text"]);
+					lastmessage = temp?.text?.body || temp["text"];
 					lastreplay = temp["timestamp"];
 
 					if (!(keydatawithnumber in allreplay)) {
@@ -245,15 +245,15 @@ export const processTempMessages = async () => {
 					// console.log(urow);
 					if (urow?.agent?.length > 0 || !urow?.agent) {
 						if (urow.replyStatus === 0) {
-							console.log(allreplay);
+							// console.log(allreplay);
 
 							leftexit = 1;
 							if (finalkey in allreplay) {
 								const message_Id = allreplay[finalkey];
-								console.log({
-									messageId: message_Id,
-									FB_PHONE_ID: FB_PHONE_ID,
-								});
+								// console.log({
+								// 	messageId: message_Id,
+								// 	FB_PHONE_ID: FB_PHONE_ID,
+								// });
 
 								bulkOpsChat.push({
 									updateOne: {
@@ -353,7 +353,7 @@ export const processTempMessages = async () => {
 		}
 
 		if (bulkOpsChat.length > 0) {
-			console.log("HHHHHHHHHHHHHH");
+			// console.log("HHHHHHHHHHHHHH");
 			await Chat.bulkWrite(bulkOpsChat);
 		}
 
@@ -369,12 +369,12 @@ export const processTempMessages = async () => {
 			);
 		}
 		const processedIds = tempMessages.map((m) => m._id);
-		if (processedIds.length) {
-			await TempMessage.deleteMany({ _id: { $in: processedIds } });
-			console.log(
-				`🧹 Deleted ${processedIds.length} processed temp messages`,
-			);
-		}
+		// if (processedIds.length) {
+		// 	await TempMessage.deleteMany({ _id: { $in: processedIds } });
+		// 	console.log(
+		// 		`🧹 Deleted ${processedIds.length} processed temp messages`,
+		// 	);
+		// }
 	} catch (e) {
 		console.error("Error in processTempMessages:", e);
 	}

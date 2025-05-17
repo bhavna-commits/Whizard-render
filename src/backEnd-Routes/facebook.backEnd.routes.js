@@ -399,8 +399,8 @@ router.post("/webhook", async (req, res) => {
 						media:
 							type !== "text"
 								? {
-										url: mediaId,
-										fileName: mediaId,
+										url: `?mediaId=${mediaId}&phoneId=${fbPhoneId}`,
+										fileName: `?mediaId=${mediaId}&phoneId=${fbPhoneId}`,
 										caption: text || "",
 								  }
 								: {},

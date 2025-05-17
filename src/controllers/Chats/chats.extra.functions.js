@@ -43,14 +43,20 @@ export const fetchAndFormatReports = async (
 	agentId,
 	permissionAllChats,
 	phoneNumberId,
-	skip = 0,
+	tokenType,
 	searchTerm = "",
+	skip = 0,
 	limit = 10,
 ) => {
+	// console.log(tokenType);
 	// Build base query
 	const query = { FB_PHONE_ID: phoneNumberId, useradmin: userId };
 	if (!permissionAllChats) {
-		query.agent = agentId;
+		if (tokenType === "support") {
+			query.supportAgent = agentId;
+		} else {
+			query.agent = agentId;
+		}
 	}
 
 	// If a search term is provided, add $or for contactName / wa_id
@@ -62,6 +68,7 @@ export const fetchAndFormatReports = async (
 	}
 
 	// Pull raw chat docs
+	// console.log(query);
 	const chats = await ChatsUsers.find(query)
 		.sort({ updatedAt: -1 })
 		.skip(skip)
@@ -75,7 +82,7 @@ export const fetchAndFormatReports = async (
 		const isRecent =
 			chat.lastReceive && now - chat.lastReceive < 24 * 3600_000;
 		return {
-			lastmessage: chat.lastMessage ||  "No recent reply",
+			lastmessage: chat.lastMessage || "No recent reply",
 			wa_id: chat.wa_id,
 			status: isRecent ? 0 : 1, // 0 = new/recent, 1 = older
 			name: chat.contactName.toString(),
@@ -247,7 +254,7 @@ export const buildCommonChatFields = (reportItem, wa_id, overrides = {}) => {
 		from: wa_id,
 		text: "",
 		timestamp: reportItem.updatedAt,
-		type: "text",
+		type: "",
 		recive: reportItem.status.toLowerCase(),
 		status: reportItem.status.toLowerCase(),
 		components: [],
@@ -290,7 +297,7 @@ export const processMediaReport = (reportItem, wa_id) => {
 
 export const processTextReport = (reportItem, wa_id) => {
 	// Use textSent if available; otherwise replyContent.
-	const text = reportItem.textSent || reportItem.replyContent || "";
+	const text = reportItem.text ? reportItem.text : "";
 	return buildCommonChatFields(reportItem, wa_id, { text });
 };
 
