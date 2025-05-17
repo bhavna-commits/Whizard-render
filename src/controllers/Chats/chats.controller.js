@@ -151,13 +151,16 @@ export const getSetToken = async (req, res) => {
 export const getUsers = async (req, res) => {
 	try {
 		const oldToken = checkToken(req);
-		const { userId, token, permission, agentId, tokenType } = await getUserIdFromToken(oldToken);
+		const { userId, token, permission, agentId, tokenType } =
+			await getUserIdFromToken(oldToken);
 
 		const phoneNumberId = req.body?.phoneNumberId;
 		const skip = parseInt(req.body?.skip, 10) || 0;
 
 		if (!phoneNumberId) {
-			return res.status(400).json({ message: "Phone number ID not provided" });
+			return res
+				.status(400)
+				.json({ message: "Phone number ID not provided" });
 		}
 
 		// still using your XSS-safe validators 👇
@@ -246,7 +249,6 @@ export const getSingleChat = async (req, res) => {
 		const skip = parseInt(req.body?.skip, 10) || 0;
 		const limit = 10;
 
-		// Input validation 🧪
 		if (!wa_id || !FB_PHONE_ID) {
 			return res.status(400).json({
 				message: "All values not provided",
@@ -383,9 +385,9 @@ export const searchUsers = async (req, res) => {
 
 export const sendMessages = async (req, res) => {
 	try {
-		const { messages, fileByteCode, fileName, token: Token } = req.body;
+		const { messages, fileByteCode, fileName } = req.body;
 
-		const oldToken = checkToken(Token);
+		const oldToken = checkToken(req);
 		const { userId, token, name, agentId } = await getUserIdFromToken(
 			oldToken,
 		);
