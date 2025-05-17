@@ -308,8 +308,7 @@ export async function sendMessagesReports(
 				from: contact.wa_id,
 				timestamp: Date.now(),
 				type: "text",
-				text: { body: messageTemplate.slice(0, 11) },
-				mediaId: "",
+				text: { body: messageTemplate.slice(0, 20) },
 				fbPhoneId: phone_number,
 				status: "sent",
 			};
