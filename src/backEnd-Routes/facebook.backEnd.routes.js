@@ -365,6 +365,24 @@ router.post("/webhook", async (req, res) => {
 						mediaId = audio.id;
 					}
 
+					const getMessageText = () => {
+						if (text) return text;
+						if (image?.caption) return image.caption;
+						if (video?.caption) return video.caption;
+						if (document?.caption) return document.caption;
+						if (audio?.caption) return audio.caption;
+
+						switch (type) {
+							case "image":
+							case "video":
+							case "document":
+							case "audio":
+								return type;
+							default:
+								return "";
+						}
+					};
+
 					await TempMessage.create({
 						name,
 						wabaId,
@@ -372,21 +390,7 @@ router.post("/webhook", async (req, res) => {
 						from: senderPhone,
 						timestamp: timestamp * 1000,
 						type,
-						text:
-							text ||
-							image?.caption ||
-							video?.caption ||
-							document?.caption ||
-							audio?.caption ||
-							(type === "image"
-								? "image"
-								: type === "video"
-								? "video"
-								: type === "document"
-								? "document"
-								: type === "audio"
-								? "audio"
-								: ""),
+						text: getMessageText(),
 						mediaId,
 						fbPhoneId,
 						status: "receive",

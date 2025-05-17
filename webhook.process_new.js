@@ -93,8 +93,10 @@ export const processTempStatuses = async () => {
 		}
 
 		if (processedIds.length) {
-		  await TempStatus.deleteMany({ _id: { $in: processedIds } });
-		  console.log(`🧹 Deleted ${processedIds.length} processed temp statuses`);
+			await TempStatus.deleteMany({ _id: { $in: processedIds } });
+			console.log(
+				`🧹 Deleted ${processedIds.length} processed temp statuses`,
+			);
 		}
 
 		console.log("✔️ Bulk processed temp statuses complete.");
@@ -176,19 +178,14 @@ export const processTempMessages = async () => {
 				let lastreplay = 0;
 
 				if ("status" in temp) {
-					// keyst = 0;
 					if (temp["status"] === "sent") {
 						keyst = 2;
-						// console.log("hjkl");
 						lastmessagetime = temp["timestamp"];
 						lastmessage = temp?.text?.body || temp["text"];
 					}
 				}
 
 				if (keyst === 1) {
-					// console.log("herer");
-					// lastmessagetime = temp["timestamp"];
-					// console.log(temp["text"]);
 					lastmessage = temp?.text?.body || temp["text"];
 					lastreplay = temp["timestamp"];
 
@@ -217,8 +214,6 @@ export const processTempMessages = async () => {
 			}
 		}
 
-		// console.log("messagedata :", messagedata);
-
 		let bulkOps = [];
 		let bulkOpsChat = [];
 
@@ -242,11 +237,9 @@ export const processTempMessages = async () => {
 					const FB_PHONE_ID = urow.FB_PHONE_ID;
 					const useradmin = urow.useradmin;
 					let leftexit = 0;
-					// console.log(urow);
+
 					if (urow?.agent?.length > 0 || !urow?.agent) {
 						if (urow.replyStatus === 0) {
-							// console.log(allreplay);
-
 							leftexit = 1;
 							if (finalkey in allreplay) {
 								const message_Id = allreplay[finalkey];
@@ -269,7 +262,7 @@ export const processTempMessages = async () => {
 							}
 						}
 						const message_IdAll = allmessgaeids[FB_PHONE_ID];
-						// console.log(message_IdAll, "HHHHHHHHHH");
+
 						if (message_IdAll) {
 							bulkOpsChat.push({
 								updateMany: {
@@ -287,7 +280,6 @@ export const processTempMessages = async () => {
 						}
 					}
 
-					// console.log(finalupdaterow);
 					let updateleft = {
 						lastMessage: finalupdaterow.lastmessage,
 						lastSend: finalupdaterow.lastmessagetime,
@@ -299,7 +291,7 @@ export const processTempMessages = async () => {
 					if (newLastReplay > 0 || existingLastReceive === 0) {
 						updateleft.lastReceive = newLastReplay;
 					}
-					
+
 					if (leftexit == 1) {
 						updateleft["replyStatus"] = 1;
 					}
@@ -356,7 +348,6 @@ export const processTempMessages = async () => {
 		}
 
 		if (bulkOpsChat.length > 0) {
-			// console.log("HHHHHHHHHHHHHH");
 			await Chat.bulkWrite(bulkOpsChat);
 		}
 
