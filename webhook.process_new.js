@@ -369,12 +369,12 @@ export const processTempMessages = async () => {
 			);
 		}
 		const processedIds = tempMessages.map((m) => m._id);
-		// if (processedIds.length) {
-		// 	await TempMessage.deleteMany({ _id: { $in: processedIds } });
-		// 	console.log(
-		// 		`🧹 Deleted ${processedIds.length} processed temp messages`,
-		// 	);
-		// }
+		if (processedIds.length) {
+			await TempMessage.deleteMany({ _id: { $in: processedIds } });
+			console.log(
+				`🧹 Deleted ${processedIds.length} processed temp messages`,
+			);
+		}
 	} catch (e) {
 		console.error("Error in processTempMessages:", e);
 	}

@@ -296,7 +296,6 @@ export const processMediaReport = (reportItem, wa_id) => {
 };
 
 export const processTextReport = (reportItem, wa_id) => {
-	// Use textSent if available; otherwise replyContent.
 	const text = reportItem.text ? reportItem.text : "";
 	return buildCommonChatFields(reportItem, wa_id, { text });
 };
