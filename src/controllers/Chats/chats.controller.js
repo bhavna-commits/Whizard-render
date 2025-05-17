@@ -428,12 +428,6 @@ export const sendMessages = async (req, res) => {
 		} = messages;
 
 		const campaign = await Campaign.findOne({ unique_id: campaignId });
-		if (!campaign) {
-			return res.status(404).json({
-				message: "Campaign not found",
-				success: false,
-			});
-		}
 
 		let mediaId = "";
 		let payload;
@@ -476,8 +470,8 @@ export const sendMessages = async (req, res) => {
 			FB_PHONE_ID: from,
 			useradmin: user.unique_id,
 			unique_id: generateUniqueId(),
-			campaignName: campaign.name,
-			campaignId: campaign.unique_id,
+			campaignName: campaign?.name || "-",
+			campaignId: campaign?.unique_id || "-",
 			contactName,
 			recipientPhone: to,
 			status: "SENT",
