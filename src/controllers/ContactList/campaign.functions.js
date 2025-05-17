@@ -8,6 +8,7 @@ import Chat from "../../models/chats.model.js";
 import ChatsTemp from "../../models/chatsTemp.model.js";
 import TempMessage from "../../models/TempMessage.model.js";
 import chatsUsersModel from "../../models/chatsUsers.model.js";
+import { generateUniqueId } from "../../utils/otpGenerator.js";
 
 dotenv.config();
 
@@ -114,7 +115,6 @@ export async function sendMessages(
 			const chat = new Chat(reportData);
 			await chat.save();
 		}
-
 	} catch (error) {
 		console.error("Error sending messages:", error.message);
 		throw new Error(`${error.message}`);
@@ -204,7 +204,6 @@ export function replaceDynamicVariables(template, variables, contact) {
 		throw new Error(`Error replacing dynamic variables: ${error.message}`);
 	}
 }
-
 
 export async function sendMessageThroughWhatsApp(
 	user,
@@ -456,18 +455,16 @@ export async function sendTestMessage(
 	contactListId,
 	test,
 	phone_number,
+	sendCampaignMessage,
+	addedUserId,
 ) {
 	try {
-		// Find the template by unique_id
-		const template = await Template.findOne({
-			unique_id: templateId,
-		});
+		const template = await Template.findOne({ unique_id: templateId });
 
 		if (!template) {
 			throw new Error(`Template with ID ${templateId} not found`);
 		}
 
-		// Find contacts by contactListId
 		const contactList = await Contacts.find({
 			contactId: contactListId,
 			wa_id: test,
@@ -480,14 +477,13 @@ export async function sendTestMessage(
 			);
 		}
 
-		// Loop through each contact in the contact list
 		const contact = contactList[0];
 
-		if (typeof variables === "object" && !Array.isArray(variables)) {
+		// 🧠 Safely convert to Map only if not already
+		if (variables && typeof variables.get !== "function") {
 			variables = new Map(Object.entries(variables));
 		}
 
-		// Replace dynamic variables in the template with contact-specific data
 		const personalizedMessage = replaceDynamicVariables(
 			template,
 			variables,
@@ -521,6 +517,51 @@ export async function sendTestMessage(
 			);
 		}
 
+		if (sendCampaignMessage) {
+			const mediaPreview = getMediaPreviewFromTemplate(template); // ✅ you were missing this!
+
+			await TempMessage.create({
+				name: contact.Name,
+				wabaId: user.WABA_ID,
+				messageId: response.response.messages[0].id,
+				from: contact.wa_id,
+				timestamp: Date.now(),
+				type: "text",
+				text: messageTemplate.slice(0, 20),
+				fbPhoneId: phone_number,
+				status: "sent",
+			});
+
+			const reportData = {
+				WABA_ID: user.WABA_ID,
+				FB_PHONE_ID: phone_number,
+				useradmin: user.unique_id,
+				unique_id: generateUniqueId(),
+				campaignName: "-", // test messages don't have a campaign
+				campaignId: "-",
+				contactName: contact.Name,
+				recipientPhone: contact.wa_id,
+				status: response.status,
+				messageId: response.response.messages[0].id,
+				messageTemplate,
+				components,
+				templateId: templateId,
+				templatename: template.name,
+				agent: addedUserId || user.unique_id,
+				type: "Campaign",
+			};
+
+			if (mediaPreview) {
+				reportData.media = {
+					url: mediaPreview.url,
+					fileName: mediaPreview.fileName,
+				};
+			}
+
+			const chat = new Chat(reportData);
+			await chat.save();
+		}
+
 		return {
 			messageTemplate,
 			data: response.response,
@@ -528,7 +569,7 @@ export async function sendTestMessage(
 			templatename: template.name,
 		};
 	} catch (error) {
-		console.error("Error sending messages:", error.message || error);
-		throw error.message || error;
+		console.error("Error sending test message:", error.message || error);
+		throw new Error(error.message || error);
 	}
 }

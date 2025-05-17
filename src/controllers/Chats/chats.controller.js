@@ -40,6 +40,7 @@ import { sendTestMessage } from "../ContactList/campaign.functions.js";
 import ChatsTemp from "../../models/chatsTemp.model.js";
 import AddedUser from "../../models/addedUser.model.js";
 import Chats from "../../models/chats.model.js";
+import TempMessageModel from "../../models/TempMessage.model.js";
 
 dotenv.config();
 
@@ -662,7 +663,7 @@ export const sendTemplate = async (req, res) => {
 		variables =
 			typeof variables === "string" ? JSON.parse(variables) : variables;
 
-		const { userId, addedUser } = await getUserIdFromToken(oldToken);
+		const { userId, agentId, name } = await getUserIdFromToken(oldToken);
 
 		let user = await User.findOne({ unique_id: userId });
 
@@ -674,62 +675,16 @@ export const sendTemplate = async (req, res) => {
 			throw "No phone number selected.";
 		}
 
-		const { data, messageTemplate, components, templatename } =
-			await sendTestMessage(
-				user,
-				templateId,
-				variables,
-				contactListId,
-				contactList[0]?.recipientPhone,
-				phone_number,
-			);
-
-		let campaign = await Campaign.findOne({ contactListId }).sort({
-			createdAt: -1,
-		});
-
-		// const report = new Report({
-		// 	WABA_ID: user.WABA_ID,
-		// 	FB_PHONE_ID: phone_number,
-		// 	useradmin: user.unique_id,
-		// 	unique_id: generateUniqueId(),
-		// 	campaignName: campaign.name,
-		// 	campaignId: campaign.unique_id,
-		// 	contactName: contactList[0]?.contactName,
-		// 	recipientPhone: contactList[0]?.recipientPhone,
-		// 	status: "SENT",
-		// 	messageId: data.messages[0].id,
-		// 	messageTemplate,
-		// 	templateId,
-		// 	components,
-		// 	templatename,
-		// 	type: "Template",
-		// });
-
-		// await report.save();
-
-		const temp = new ChatsTemp({
-			WABA_ID: user.WABA_ID,
-			FB_PHONE_ID: phone_number,
-			useradmin: user.unique_id,
-			unique_id: generateUniqueId(),
-			campaignName: campaign.name,
-			campaignId: campaign.unique_id,
-			contactName: contactList[0]?.contactName,
-			recipientPhone: contactList[0]?.recipientPhone,
-			status: "SENT",
-			messageId: data.messages[0].id,
-			messageTemplate,
+		await sendTestMessage(
+			user,
 			templateId,
-			components,
-			templatename,
-			type: "Template",
-			agent: addedUser.id,
-		});
-
-		await temp.save();
-
-		const name = addedUser?.name ? addedUser.name : user.name;
+			variables,
+			contactListId,
+			contactList[0]?.recipientPhone,
+			phone_number,
+			true,
+			agentId,
+		);
 
 		await ActivityLogs.create({
 			useradmin: userId,
