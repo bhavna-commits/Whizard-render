@@ -497,7 +497,7 @@ export const sendMessages = async (req, res) => {
 			status: "sent",
 		};
 
-		await TempMessage.create(tempMsg);
+		await TempMessageModel.create(tempMsg);
 		await Report.create(report);
 
 		await ActivityLogs.create({
