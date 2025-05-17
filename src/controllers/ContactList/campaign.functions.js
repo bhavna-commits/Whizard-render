@@ -77,7 +77,7 @@ export async function sendMessages(
 				wabaId: user.WABA_ID,
 				messageId: response.response.messages[0].id,
 				from: contact.wa_id,
-				timestamp: timestamp * 1000,
+				timestamp: Date.now(),
 				type: "text",
 				text: messageTemplate.slice(0, 20),
 				fbPhoneId: phone_number,
