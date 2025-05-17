@@ -426,7 +426,7 @@ export const sendMessages = async (req, res) => {
 			name: contactName,
 		} = messages;
 
-		console.log(mediatype);
+		console.log(mediatype, "kkkkkkkkkkkkkk");
 
 		const campaign = await Campaign.findOne({ unique_id: campaignId });
 
