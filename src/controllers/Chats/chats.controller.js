@@ -242,7 +242,7 @@ export const getSingleChat = async (req, res) => {
 		const { userId, token } = await getUserIdFromToken(oldToken);
 
 		const wa_id = req.body?.wa_id;
-		const FB_PHONE_ID = req.body?.FB_PHONE_ID;
+		const FB_PHONE_ID = req.body?.phoneNumberId;
 		const skip = parseInt(req.body?.skip, 10) || 0;
 		const limit = 10;
 
