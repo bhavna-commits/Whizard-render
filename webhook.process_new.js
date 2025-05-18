@@ -259,6 +259,7 @@ export const processTempMessages = async () => {
 												campaignId: urow.campaignId,
 												campaignName: urow.campaignName,
 												useradmin: useradmin,
+												type: "Campaign",
 											},
 										},
 									},

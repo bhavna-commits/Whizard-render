@@ -101,14 +101,30 @@ export const getCampaignList = async (req, res, next) => {
 			{
 				$lookup: {
 					from: "chats",
-					localField: "unique_id",
-					foreignField: "campaignId",
+					let: { campaignId: "$unique_id" },
+					pipeline: [
+						{
+							$match: {
+								$expr: {
+									$and: [
+										{
+											$eq: [
+												"$campaignId",
+												"$$campaignId",
+											],
+										},
+										{ $eq: ["$type", "Campaign"] },
+									],
+								},
+							},
+						},
+					],
 					as: "reports",
 				},
 			},
 			{
 				$addFields: {
-					total: { $size: "$reports" }, // Total number of reports
+					total: { $size: "$reports" },
 
 					sent: {
 						$size: {
@@ -248,14 +264,30 @@ export const getCampaignListFilter = async (req, res, next) => {
 			{
 				$lookup: {
 					from: "chats",
-					localField: "unique_id",
-					foreignField: "campaignId",
+					let: { campaignId: "$unique_id" },
+					pipeline: [
+						{
+							$match: {
+								$expr: {
+									$and: [
+										{
+											$eq: [
+												"$campaignId",
+												"$$campaignId",
+											],
+										},
+										{ $eq: ["$type", "Campaign"] },
+									],
+								},
+							},
+						},
+					],
 					as: "reports",
 				},
 			},
 			{
 				$addFields: {
-					total: { $size: "$reports" }, // Total number of reports
+					total: { $size: "$reports" },
 
 					sent: {
 						$size: {

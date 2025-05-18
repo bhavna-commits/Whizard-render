@@ -59,6 +59,7 @@ export const overview = async (id, userId, page, limit, skip) =>
 											"$$campaignUseradmin",
 										],
 									},
+									{ $eq: ["$type", "Campaign"] },
 								],
 							},
 						},
@@ -462,6 +463,7 @@ export const getSentReportsById = async (req, res, next) => {
 										{
 											$ne: ["$status", "FAILED"],
 										},
+										{ $eq: ["$type", "Campaign"] },
 									],
 								},
 							},
@@ -577,6 +579,7 @@ export const getDeliveredReportsById = async (req, res, next) => {
 										},
 										{ $ne: ["$status", "FAILED"] },
 										{ $ne: ["$status", "SENT"] },
+										{ $eq: ["$type", "Campaign"] },
 									],
 								},
 							},
@@ -698,6 +701,7 @@ export const getReadReportsById = async (req, res, next) => {
 												["READ", "REPLIED"],
 											],
 										},
+										{ $eq: ["$type", "Campaign"] },
 									],
 								},
 							},
@@ -743,6 +747,8 @@ export const getReadReportsById = async (req, res, next) => {
 				}
 			});
 		});
+
+		console.log(paginatedResults[0].reports);
 
 		const permissions = req.session?.addedUser?.permissions;
 		if (permissions) {
@@ -816,6 +822,7 @@ export const getRepliesReportsById = async (req, res, next) => {
 											],
 										},
 										{ $eq: ["$status", "REPLIED"] },
+										{ $eq: ["$type", "Campaign"] },
 									],
 								},
 							},
@@ -932,6 +939,7 @@ export const getFailedReportsById = async (req, res, next) => {
 											],
 										},
 										{ $eq: ["$status", "FAILED"] },
+										{ $eq: ["$type", "Campaign"] },
 									],
 								},
 							},

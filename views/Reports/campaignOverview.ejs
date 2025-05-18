@@ -151,8 +151,8 @@
 							<tbody>
 								<% campaigns.forEach(report => { %>
 								<tr class="hover:bg-gray-100 cursor-pointer border text-gray-700">
-									<td class="border-l border-t border-b rounded-lg py-4 border-gray-200 text-sm ">
-										<%= new Date(report.updatedAt).toLocaleDateString() %>
+									<td class="border-l border-t border-b rounded-lg py-4 border-gray-200 text-sm date-cell" data-date="<%= report.updatedAt %>">
+										
 									</td>
 									<td class="border-t border-b border-gray-200">
 										<div class="inline-flex justify-center items-center h-fit w-fit px-2 py-1 rounded-full " style=" 
@@ -275,6 +275,25 @@
 			}
 		}
 	</script>
+
+<script>
+	document.querySelectorAll('.date-cell').forEach((el) => {
+		const rawDate = el.getAttribute('data-date');
+		if (rawDate) {
+			const date = new Date(Number(rawDate));
+			const formatted = date.toLocaleDateString('en-GB', {
+				day: '2-digit',
+				month: 'short',
+				year: 'numeric',
+				hour: '2-digit',
+				minute: '2-digit',
+				hour12: true,
+			}).replace(',', ' at ');
+			el.textContent = formatted;
+		}
+	});
+</script>
+  
 	<script src="/toast.js"></script>
 	<script src="/menu.js"></script>
 	

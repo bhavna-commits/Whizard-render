@@ -158,12 +158,13 @@
                 					%>
 										<%= maskedPhone %>
 									</td>
-									<td class="border-t border-b border-gray-200">
-										<%= new Date(report.timestamp * 1000 || report.updatedAt).toLocaleDateString() %>
+									<td class="border-t border-b border-gray-200 date-cell" data-date="<%= report.updatedAt %>">
+										
 									</td>
-									<td class="border-t border-b border-gray-200">
-										<%= new Date(report.timestamp * 1000 || report.createdAt).toLocaleDateString() %>
+									<td class="border-t border-b border-gray-200 date-cell" data-date="<%= report.createdAt %>">
+										
 									</td>
+									
 									<td class="border-t border-b border-gray-200">
 										<%= report.status.charAt(0).toUpperCase() + report.status.slice(1).toLowerCase() %>
 									</td>
@@ -207,6 +208,24 @@
 			}
 		}
 	</script> -->
+	<script>
+		document.querySelectorAll('.date-cell').forEach((el) => {
+			const rawDate = el.getAttribute('data-date');
+			if (rawDate) {
+				const date = new Date(Number(rawDate));
+				const formatted = date.toLocaleDateString('en-GB', {
+					day: '2-digit',
+					month: 'short',
+					year: 'numeric',
+					hour: '2-digit',
+					minute: '2-digit',
+					hour12: true,
+				}).replace(',', ' at ');
+				el.textContent = formatted;
+			}
+		});
+	</script>
+	
 	<script src="/reports/js/campaignSentBroadcast.js"></script>
 	<script src="/toast.js"></script>
 	<script src="/menu.js"></script>

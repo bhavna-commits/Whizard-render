@@ -317,8 +317,8 @@ function sendsocket(
 
 			//console.log(bptId2)
 			console.log(data2);
-			// io.emit(bptId, data1);
-			// io.emit(bptId2, data2);
+			io.emit(bptId, data1);
+			io.emit(bptId2, data2);
 		}
 	}
 }
@@ -512,6 +512,8 @@ router.post("/webhook", async (req, res) => {
 								fbPhoneId,
 							);
 						}
+
+						console.log(this);
 					} catch (err) {
 						console.error("Error adding agent in chats:", err);
 					}
