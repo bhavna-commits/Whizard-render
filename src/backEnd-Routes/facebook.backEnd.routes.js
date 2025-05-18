@@ -287,7 +287,7 @@ function sendsocket(
 
 			let data1 = {
 				filter_data: {},
-				msg: text.body,
+				msg: text?.body || text,
 				timestamp: timestamp,
 				status: "replied",
 				username: name,
@@ -313,7 +313,7 @@ function sendsocket(
 
 			let bptId2 = "MainRefresh_initial-users_" + agentslist[i];
 			//console.log(bptId)
-			console.log(data1)
+			console.log(data1);
 
 			//console.log(bptId2)
 			console.log(data2);
