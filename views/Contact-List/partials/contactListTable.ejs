@@ -11,7 +11,7 @@
 					<td class="">Actions</td>
 				</tr>
 				<% contacts.forEach((contact, index) => { %>
-				<tr class="hover:bg-gray-100 cursor-pointer border" onclick="window.location.href='/contact-list/overview/<%= contact.contactId %>?listId=<%= contact.contactId %>&listName=<%= contact.contalistName %>'">
+				<tr class="hover:bg-gray-100 group cursor-pointer border" onclick="window.location.href='/contact-list/overview/<%= contact.contactId %>?listId=<%= contact.contactId %>&listName=<%= contact.contalistName %>'">
 					<td class="border-l border-t border-b rounded-lg py-4 border-gray-200 text-sm text-gray-500">
 						<%= (page - 1) * 6 + (index + 1) %>
 					</td>
@@ -21,14 +21,10 @@
 					<td class="text-gray-500 border-t border-b border-gray-200">
 						<%= contact.participantCount %>
 					</td>
-					<td class="text-gray-500 border-t border-b border-gray-200">
-						<%= new Date(contact.createdAt).toLocaleString('en-GB', {
-							year: 'numeric',
-							month: 'short',
-							day: '2-digit'
-						}) %>
+					<td class="text-gray-500 border-t border-b border-gray-200 date-cell" data-date="<%= contact.createdAt %>">
+					
 					</td>
-					<td class="border-r border-t border-b rounded-lg border-gray-200">
+					<td class="border-r border-t border-b rounded-lg border-gray-200 group-hover:bg-gray-100">
 						<!-- Edit Button -->
 						<% if (access?.contactList?.sendBroadcast && whatsAppStatus == "Live") { %>
 						<button aria-label="Edit contact" title="Send Broadcast" class="text-gray-600 hover:text-blue-600 px-3 border-r" onclick="event.stopPropagation(); location.href='/contact-list/createCampaign/?listId=<%= contact.contactId %>&listName=<%= contact.contalistName %>'">
@@ -119,3 +115,17 @@
 		</div>
 	</div>
 </div>
+<script>
+	document.querySelectorAll('.date-cell').forEach((el) => {
+		const rawDate = el.getAttribute('data-date');
+		if (rawDate) {
+			const date = new Date(Number(rawDate));
+			const formatted = date.toLocaleString('en-GB', {
+				year: 'numeric',
+				month: 'short',
+				day: '2-digit'
+			});
+			el.textContent = formatted;
+		}
+	});
+</script>

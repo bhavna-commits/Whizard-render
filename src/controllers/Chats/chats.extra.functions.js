@@ -95,7 +95,6 @@ export const fetchAndFormatReports = async (
 		};
 	});
 
-	// Already sorted by updatedAt descending; can return directly
 	return formatted;
 };
 

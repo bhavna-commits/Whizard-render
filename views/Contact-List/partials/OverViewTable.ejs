@@ -29,12 +29,8 @@
 					XXXXX-XXX<%= contact?.wa_id?.slice(-2) %>
 					<% console.log(contact?.wa_id) %>
 				</td>
-				<td class="text-gray-500 border-t border-b border-gray-200">
-					<%= new Date(contact.usertimestmp).toLocaleString('en-GB', {
-							year: 'numeric',
-							month: 'short',
-							day: '2-digit'
-						}) %>
+				<td class="text-gray-500 border-t border-b border-gray-200 date-cell" data-date="<%= contact.usertimestmp %>">
+
 				</td>
 				<% if (contact.masterExtra) { %>
 				<% Object.entries(contact.masterExtra).forEach(function([key, value]) { %>
@@ -164,4 +160,18 @@
 		);
 		deleteModal.hide();
 	}
+</script>
+<script>
+	document.querySelectorAll('.date-cell').forEach((el) => {
+		const rawDate = el.getAttribute('data-date');
+		if (rawDate) {
+			const date = new Date(Number(rawDate));
+			const formatted = date.toLocaleString('en-GB', {
+				year: 'numeric',
+				month: 'short',
+				day: '2-digit'
+			});
+			el.textContent = formatted;
+		}
+	});
 </script>

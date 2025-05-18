@@ -87,7 +87,7 @@
 		console.log(deleteLoader);
 		// Helper function to format date in "29 Aug-2024 at 02:05 AM" format
 		function formatTimestamp (timestamp) {
-			const date = new Date(timestamp);
+			const date = new Date(Number(timestamp));
 			const options = {
 				day: '2-digit',
 				month: 'short',
