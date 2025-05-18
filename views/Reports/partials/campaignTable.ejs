@@ -34,12 +34,12 @@
 					
 					<td class="border-t border-b border-gray-200 ">
 						<p class="inline-flex justify-center items-center h-fit w-fit px-2 py-1 rounded 
-						<% if (campaign.status === "SCHEDULED" || campaign.status === "IN_QUEUE") { %>
+						<% if (campaign.status === "SCHEDULED" || campaign.status === "IN_QUEUE" || campaign.status === "PENDING") { %>
 							bg-[#FFF0E5] text-[#FF6A00]
 						<% } else { %>
 							bg-[#EBE5FF] text-[#5526FF]
 						<% } %>">
-							<% if (campaign.status === "SCHEDULED" || campaign.status === "IN_QUEUE") { %>
+							<% if (campaign.status === "SCHEDULED" || campaign.status === "IN_QUEUE" || campaign.status === "PENDING") { %>
 							Scheduled
 							<% } else { %>
 							Broadcast

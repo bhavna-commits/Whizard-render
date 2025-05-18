@@ -49,7 +49,7 @@ export const getCampaignList = async (req, res, next) => {
 			matchQuery["status"] = {
 				$in: ["SCHEDULED", "IN_QUEUE", "PENDING"],
 			};
-		} else if (status === "all" || status === "Sort by") {
+		} else if (status === "all" || !status) {
 			delete matchQuery["status"];
 		} else {
 			matchQuery["status"] = {
@@ -87,11 +87,13 @@ export const getCampaignList = async (req, res, next) => {
 			matchQuery.phoneNumberId = selectedNumber.phone_number_id;
 		}
 
-		if (phoneNumberId && phoneNumberId != "All") {
+		if (phoneNumberId && phoneNumberId !== "All") {
 			matchQuery.phoneNumberId = phoneNumberId;
-		} else if (phoneNumberId == "All") {
+		} else if (phoneNumberId === "All") {
 			delete matchQuery.phoneNumberId;
 		}
+
+		// console.log(matchQuery);
 
 		// Fetch campaigns created by the user
 		const campaigns = await Campaign.aggregate([

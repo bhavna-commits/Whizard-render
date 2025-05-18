@@ -1,6 +1,7 @@
 import ejs from "ejs";
 import path from "path";
 import dotenv from "dotenv";
+import ct from "countries-and-timezones";
 import nodemailer from "nodemailer";
 import { overview } from "../../controllers/Report/reports.functions.js";
 import User from "../../models/user.model.js";
@@ -22,7 +23,7 @@ const __dirname = path.resolve();
 
 export const sendCampaignReportEmail = async (campaignId, userId) => {
 	try {
-		console.log(campaignId, userId);
+		// console.log(campaignId, userId);
 		let campaignName;
 		const user = await User.findOne({ unique_id: userId });
 		const country = user.country;
@@ -43,6 +44,7 @@ export const sendCampaignReportEmail = async (campaignId, userId) => {
 
 		paginatedResults.forEach((campaign) => {
 			campaignName = campaign.name;
+
 			campaign.reports.forEach((report) => {
 				const status = report.status.toLowerCase();
 				switch (status) {
@@ -70,6 +72,34 @@ export const sendCampaignReportEmail = async (campaignId, userId) => {
 						report.statusBgColor = "rgba(128, 128, 128, 0.2)";
 						report.statusTextColor = "rgba(128, 128, 128, 1)";
 				}
+
+				// Format send time (fallback to UTC)
+				let formattedTime;
+				try {
+					const timezone =
+						ct.getCountry(countryCode)?.timezones?.[0] || "UTC";
+					const dateInTZ = new Date(
+						new Date(report.updatedAt).toLocaleString("en-US", {
+							timeZone: timezone,
+						}),
+					);
+					formattedTime = dateInTZ
+						.toLocaleString("en-GB", {
+							day: "2-digit",
+							month: "short",
+							year: "numeric",
+							hour: "2-digit",
+							minute: "2-digit",
+							hour12: true,
+						})
+						.replace(",", " at");
+				} catch {
+					formattedTime = new Date(report.updatedAt).toLocaleString(
+						"en-GB",
+					);
+				}
+
+				report.formattedSendTime = formattedTime;
 			});
 		});
 
@@ -101,7 +131,7 @@ export const sendCampaignReportEmail = async (campaignId, userId) => {
 		// Configure email options
 		const mailOptions = {
 			from: process.env.EMAIL_USER,
-			to: user.email,
+			to: user.email, //"dharmesh@viralpitch.co", //
 			subject: `Campaign Report - ${campaignName} (${campaignId})`,
 			html,
 			attachments: [
@@ -130,23 +160,47 @@ export const sendCampaignScheduledEmail = async (
 	try {
 		const user = await User.findOne({ email: userEmail });
 		const country = user.country;
-		const countryCode = countries.find((c) => c.name === country).code;
+		const countryCode = countries.find((c) => c.name === country)?.code;
+
+		if (!countryCode) {
+			throw new Error(`Invalid or missing country code for ${country}`);
+		}
+
+		// Get the first timezone for the country
+		const tzInfo = ct.getCountry(countryCode);
+		const timezone = tzInfo?.timezones?.[0] || "UTC";
+
+		// Convert and format scheduledTime using native JS
+		const dateInTargetTZ = new Date(
+			new Date(scheduledTime).toLocaleString("en-US", {
+				timeZone: timezone,
+			}),
+		);
+
+		const formattedScheduledTime = dateInTargetTZ
+			.toLocaleString("en-GB", {
+				day: "2-digit",
+				month: "short",
+				year: "numeric",
+				hour: "2-digit",
+				minute: "2-digit",
+				hour12: true,
+			})
+			.replace(",", " at");
 
 		const templatePath = path.join(
 			__dirname,
 			"views/emails/campaignScheduled.ejs",
 		);
 
-		// Render EJS template
 		const html = await ejs.renderFile(templatePath, {
-			countryCode,
 			campaignName,
-			scheduledTime: new Date(scheduledTime).toLocaleString(),
+			formattedScheduledTime,
 		});
 
 		const mailOptions = {
 			from: process.env.EMAIL_USER,
-			to: userEmail,
+			to: userEmail, //"dharmesh@viralpitch.co",
 			subject: `Campaign Scheduled: ${campaignName}`,
 			html,
 			attachments: [
