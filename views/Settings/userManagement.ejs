@@ -128,11 +128,7 @@
 								<td class="p-4 text-center"><%= index + 1 %></td>
 								<td class="p-4 text-center"><%= user.name %></td>
 								<td class="p-4 text-center"><%= user.email %></td>
-								<% if (access?.settings?.userManagement?.editPermission) { %>
-								<td class="p-4 text-center hover:cursor-pointer" onclick="location.href= '/settings/user-management/permissions?id=<%= user.roleId %>'" title="click here to edit role"><%= user.roleName %></td>
-								<% } else { %>
-								<td class="p-4 text-center hover:cursor-not-allowed" title="You don't have permissions to access this"><%= user.roleName %></td>
-								<% } %>
+								<td class="p-4 text-center "><%= user.roleName %></td>
 								<td class="p-4 text-center">
 									<% if (user.status === 'Active') { %>
 									<span class="text-orange-500 bg-orange-100 p-2 rounded"><%= user.status %></span>
