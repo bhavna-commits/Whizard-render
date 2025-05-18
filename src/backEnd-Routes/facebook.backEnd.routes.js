@@ -277,7 +277,7 @@ function sendsocket(
 			let bptId = "new-message_idal_com_" + userno + agentslist[i];
 			console.log(bptId);
 
-			let lastmessage = text.body;
+			let lastmessage = text?.body || text;
 			if ((type = "text")) {
 				type = "";
 			}
