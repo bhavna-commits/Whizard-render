@@ -82,10 +82,18 @@
 			
 			<h3 class="text-xl font-semibold text-gray-900 mb-2">No campaigns yet</h3>
 			<p class="text-gray-600 mb-6">Start creating Campaigns by clicking on "Create new Campaign"</p>
+			
+			<%  if (whatsAppStatus === "Pending")  { %>
+			<button title="Connect with whatsApp Business API to send message" class="inline-flex items-center px-4 py-2 border border-transparent text-sm hover:cursor-not-allowed font-medium rounded-md text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black">
+				<i class="fa-solid fa-plus pr-2"></i>
+				Create new Campaign
+			</button>
+			<% } else { %>
 			<button onclick="location.href = '/contact-list/createCampaign' " class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black">
 				<i class="fa-solid fa-plus pr-2"></i>
 				Create new Campaign
 			</button>
+			<% } %>
 		</div>
 	</div>
 	<% } %>

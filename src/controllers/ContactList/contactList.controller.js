@@ -661,16 +661,19 @@ export const getList = async (req, res) => {
 
 		const user = await User.findOne({ unique_id: userId });
 
-		const FB_PHONE_ID = user.FB_PHONE_NUMBERS.find(
+		const FB_PHONE_ID = user?.FB_PHONE_NUMBERS?.find(
 			(n) => n.selected,
-		).phone_number_id;
+		)?.phone_number_id;
 
 		let access = null;
 		let matchQuery = {
-			FB_PHONE_ID,
 			useradmin: userId,
 			contact_status: { $ne: 0 },
 		};
+
+		if (FB_PHONE_ID) {
+			matchQuery.FB_PHONE_ID = FB_PHONE_ID;
+		}
 
 		if (permissionsId) {
 			access = await Permissions.findOne({ unique_id: permissionsId });
@@ -770,7 +773,9 @@ export const getContactList = async (req, res) => {
 		};
 
 		if (permissionsId) {
-			let access = await Permissions.findOne({ unique_id: permissionsId });
+			let access = await Permissions.findOne({
+				unique_id: permissionsId,
+			});
 
 			if (!access?.contactList?.allList) {
 				// Only match if the agent field contains the added user's ID

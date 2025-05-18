@@ -22,7 +22,7 @@
 						<%= contact.participantCount %>
 					</td>
 					<td class="text-gray-500 border-t border-b border-gray-200 date-cell" data-date="<%= contact.createdAt %>">
-					
+						
 					</td>
 					<td class="border-r border-t border-b rounded-lg border-gray-200 group-hover:bg-gray-100">
 						<!-- Edit Button -->
@@ -72,8 +72,14 @@
 			
 			<h3 class="text-xl font-semibold text-gray-900 mb-2">No contact list yet</h3>
 			<p class="text-gray-600 mb-6">Start adding contacts by clicking on "Create new Contact list"</p>
-			<% if (access?.contactList?.addContactListCSV) { %>
+			
+			<% if (access?.contactList?.addContactListCSV && whatsAppStatus === "Live") { %>
 			<button onclick="document.getElementById('create-List').click()" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black">
+				<i class="fa-solid fa-plus pr-2"></i>
+				Create new Contact list
+			</button>
+			<% } else if (whatsAppStatus === "Pending")  { %>
+			<button title="Connect with whatsApp Business API to create list" class="inline-flex items-center px-4 py-2 border border-transparent text-sm  hover:cursor-not-allowed font-medium rounded-md text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black" disabled>
 				<i class="fa-solid fa-plus pr-2"></i>
 				Create new Contact list
 			</button>

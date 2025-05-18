@@ -477,8 +477,8 @@ input[type="number"] {
 
 .right-section {
 	background-color: white;
-	padding-top: 60px;
-	padding-bottom: 60px;
+	/* padding-top: 60px;
+	padding-bottom: 60px; */
 	min-width: 40%;
 	max-width: 40%;
 	display: flex;
