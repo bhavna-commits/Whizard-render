@@ -110,7 +110,7 @@
 			const tz = (info && info.timezones && info.timezones[0]) ||
 				Intl.DateTimeFormat().resolvedOptions().timeZone;
 			
-			// c) format in en-GB style with that zone
+			console.log(info, tz)
 			const d = new Date(iso);
 			el.textContent = d.toLocaleDateString('en-GB', {
 				day: '2-digit',
@@ -121,6 +121,8 @@
 				hour12: true,
 				timeZone: tz
 			}).replace(',', ' at ');
+
+			console.log(el.textContent);
 		});
 	</script>
 	

@@ -42,18 +42,19 @@
 	<script src="https://cdn.jsdelivr.net/gh/manuelmhtr/countries-and-timezones@latest/dist/index.min.js"></script>
 	
 	<script>
-		// 2) Once loaded, format every .scheduled-time element
-		document.querySelectorAll('.scheduled-time').forEach(el => {
+		// 2) Once the lib is ready, walk all .date-cell elements
+		document.querySelectorAll('.date-cell').forEach(el => {
+			// a) read the raw ISO timestamp and country code
 			const iso = el.dataset.iso;
-			const code = el.dataset.countryCode; // e.g. "IN", "US", "BR"
+			const code = el.dataset.countryCode;
 			if (!iso || !code) return;
 			
-			// Lookup that country’s primary IANA zone
+			// b) lookup the country’s IANA zone list, pick the first entry
 			const info = ct.getCountry(code);
 			const tz = (info && info.timezones && info.timezones[0]) ||
 				Intl.DateTimeFormat().resolvedOptions().timeZone;
 			
-			// Format in en-GB + local zone
+			console.log(info, tz)
 			const d = new Date(iso);
 			el.textContent = d.toLocaleDateString('en-GB', {
 				day: '2-digit',
@@ -64,6 +65,8 @@
 				hour12: true,
 				timeZone: tz
 			}).replace(',', ' at ');
+			
+			console.log(el.textContent);
 		});
 	</script>
 	
