@@ -278,14 +278,14 @@ function sendsocket(
 			console.log(bptId);
 
 			let lastmessage = text?.body || text;
-			if ((type = "text")) {
+			if (type === "text") {
 				type = "";
 			}
 			if (type) {
 				lastmessage = type;
 			}
 
-			let data1 = {	
+			let data1 = {
 				filter_data: {},
 				msg: text?.body || text,
 				timestamp: timestamp,
