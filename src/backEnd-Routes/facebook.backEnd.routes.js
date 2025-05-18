@@ -261,7 +261,67 @@ router.post("/auth_code", async (req, res) => {
 // 	}
 // });
 
-let agents = [];
+function sendsocket(
+	agentslist,
+	userno,
+	text,
+	timestamp,
+	name,
+	mediaId,
+	type,
+	fbPhoneId,
+) {
+	console.log(agentslist);
+	if (agentslist.length > 0) {
+		for (var i = 0; i < agentslist.length; i++) {
+			let bptId = "new-message_idal_com_" + userno + agentslist[i];
+			console.log(bptId);
+
+			let lastmessage = text.body;
+			if ((type = "text")) {
+				type = "";
+			}
+			if (type) {
+				lastmessage = type;
+			}
+
+			let data1 = {
+				filter_data: {},
+				msg: text.body,
+				timestamp: timestamp,
+				status: "replied",
+				username: name,
+				wa_id: userno,
+				media_message: mediaId,
+				media_type: type,
+			};
+
+			let data2 = {
+				filter_data: {},
+				sent: 1,
+				lastmessage: lastmessage,
+				wa_id: userno,
+				status: 0,
+				username: name,
+				name: name,
+				keyId: fbPhoneId,
+				usertimestmp: timestamp,
+				is_read: false,
+				media_message: mediaId,
+				media_type: type,
+			};
+
+			let bptId2 = "MainRefresh_initial-users_" + agentslist[i];
+			//console.log(bptId)
+			console.log(data1)
+
+			//console.log(bptId2)
+			console.log(data2);
+			// io.emit(bptId, data1);
+			// io.emit(bptId2, data2);
+		}
+	}
+}
 
 router.post("/webhook", async (req, res) => {
 	try {
@@ -296,12 +356,10 @@ router.post("/webhook", async (req, res) => {
 						timestamp: timestamp * 1000,
 						recipientPhone,
 						error: errors || [],
-						// rawData: statusEvent,
 					});
 					await tempStatus.save();
 				}
 
-				// Handle template rejections
 				if (
 					messagingEvent.event === "REJECTED" ||
 					messagingEvent.status === "REJECTED"
@@ -329,7 +387,6 @@ router.post("/webhook", async (req, res) => {
 						templateName,
 						templateLanguage,
 						rejectedReason,
-						// rawData: messagingEvent,
 					});
 					await tempRejection.save();
 				}
@@ -351,9 +408,6 @@ router.post("/webhook", async (req, res) => {
 						audio,
 					} = messageEvent;
 
-					if (type === "unsupported") continue;
-
-					// Determine mediaUrl if the message contains a file
 					let mediaId = "";
 					if (type === "image" && image?.id) {
 						mediaId = image.id;
@@ -365,62 +419,62 @@ router.post("/webhook", async (req, res) => {
 						mediaId = audio.id;
 					}
 
-						const getMessageText = () => {
-							if (text) return text;
-							if (image?.caption) return image.caption;
-							if (video?.caption) return video.caption;
-							if (document?.caption) return document.caption;
-							if (audio?.caption) return audio.caption;
+					const getMessageText = () => {
+						if (text) return text;
+						if (image?.caption) return image.caption;
+						if (video?.caption) return video.caption;
+						if (document?.caption) return document.caption;
+						if (audio?.caption) return audio.caption;
 
-							switch (type) {
-								case "image":
-								case "video":
-								case "document":
-								case "audio":
-									return type;
-								default:
-									return "";
-							}
-						};
+						switch (type) {
+							case "image":
+							case "video":
+							case "document":
+							case "audio":
+								return type;
+							default:
+								return "";
+						}
+					};
 
-						await TempMessage.create({
-							name,
-							wabaId,
-							messageId,
-							from: senderPhone,
-							timestamp: timestamp * 1000,
-							type,
-							text: getMessageText(),
-							mediaId,
-							fbPhoneId,
-							status: "receive",
-						});
+					await TempMessage.create({
+						name,
+						wabaId,
+						messageId,
+						from: senderPhone,
+						timestamp: timestamp * 1000,
+						type,
+						text: getMessageText(),
+						mediaId,
+						fbPhoneId,
+						status: "receive",
+					});
 
-						const replyChat = {
-							WABA_ID: wabaId,
-							FB_PHONE_ID: fbPhoneId,
-							useradmin: "-",
-							unique_id: "-",
-							campaignId: "-",
-							templateId: "-",
-							contactName: name,
-							recipientPhone: senderPhone,
-							status: "REPLIED",
-							updatedAt: timestamp * 1000,
-							messageId,
-							text: type === "text" ? text?.body : text,
-							media:
-								type !== "text"
-									? {
-											url: `/api/chats/get-media?mediaId=${mediaId}&phoneId=${fbPhoneId}`,
-											fileName: `/api/chats/get-media?mediaId=${mediaId}&phoneId=${fbPhoneId}`,
-											caption: text || "",
-									}
-									: {},
+					const replyChat = {
+						WABA_ID: wabaId,
+						FB_PHONE_ID: fbPhoneId,
+						useradmin: "-",
+						unique_id: "-",
+						campaignId: "-",
+						templateId: "-",
+						contactName: name,
+						recipientPhone: senderPhone,
+						status: "REPLIED",
+						updatedAt: timestamp * 1000,
+						messageId,
+						text: type === "text" ? text?.body : text,
+						media:
+							type !== "text"
+								? {
+										url: `/api/chats/get-media?mediaId=${mediaId}&phoneId=${fbPhoneId}`,
+										fileName: `/api/chats/get-media?mediaId=${mediaId}&phoneId=${fbPhoneId}`,
+										caption: text || "",
+								  }
+								: {},
 
-							type: "Chat",
-							media_type: type !== "text" ? type : "",
-						};
+						type: "Chat",
+						media_type: type !== "text" ? type : "",
+					};
 
 					await Chats.create(replyChat);
 
@@ -430,9 +484,36 @@ router.post("/webhook", async (req, res) => {
 							wa_id: senderPhone,
 						});
 
-						agents = c.agent;
+						let agents = c?.agent || [];
+						let supportagents = c?.supportAgent || [];
+						let finalagents = [];
 
-						console.log("🔍 Agents:", agents);
+						if (agents.length > 0 || supportagents.length > 0) {
+							finalagents = [...agents, ...supportagents];
+						} else {
+							const agentUser = await AddedUser.find({
+								roleId: "UnAssignedChats",
+								FB_PHONE_ID: fbPhoneId,
+							});
+
+							finalagents = agentUser.map(
+								(agent) => agent.unique_id,
+							);
+						}
+						if (finalagents) {
+							sendsocket(
+								finalagents,
+								senderPhone,
+								text,
+								timestamp * 1000,
+								name,
+								mediaId,
+								type,
+								fbPhoneId,
+							);
+						}
+
+						console.log("🔍 Agents:", agents, "support :", support);
 					} catch (err) {
 						console.error("Error adding agent in chats:", err);
 					}
