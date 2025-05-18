@@ -128,7 +128,7 @@ export const sendCampaignScheduledEmail = async (
 	scheduledTime,
 ) => {
 	try {
-		const user = await User.findOne({ unique_id: userId });
+		const user = await User.findOne({ email: userEmail });
 		const country = user.country;
 		const countryCode = countries.find((c) => c.name === country).code;
 
