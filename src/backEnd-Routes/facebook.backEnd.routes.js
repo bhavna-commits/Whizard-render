@@ -285,7 +285,7 @@ function sendsocket(
 				lastmessage = type;
 			}
 
-			let data1 = {
+			let data1 = {	
 				filter_data: {},
 				msg: text?.body || text,
 				timestamp: timestamp,
@@ -512,8 +512,6 @@ router.post("/webhook", async (req, res) => {
 								fbPhoneId,
 							);
 						}
-
-						console.log("🔍 Agents:", agents, "support :", support);
 					} catch (err) {
 						console.error("Error adding agent in chats:", err);
 					}
