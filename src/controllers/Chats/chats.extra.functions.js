@@ -59,7 +59,6 @@ export const fetchAndFormatReports = async (
 		}
 	}
 
-
 	// If a search term is provided, add $or for contactName / wa_id
 	if (searchTerm) {
 		query.$or = [
@@ -87,7 +86,10 @@ export const fetchAndFormatReports = async (
 			wa_id: chat.wa_id,
 			status: isRecent ? 0 : 1,
 			name: chat.contactName.toString(),
-			usertimestmp: chat.lastReceive || chat.lastSend,
+			usertimestmp:
+				chat.messageStatus === "REPLIED"
+					? chat.lastReceive
+					: chat.lastSend,
 			campaignId: chat?.campaignId || "",
 			is_read: chat.status === "READ",
 		};

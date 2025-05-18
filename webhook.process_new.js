@@ -176,18 +176,21 @@ export const processTempMessages = async () => {
 				let lastmessage = "";
 				let lastmessagetime = 0;
 				let lastreplay = 0;
+				let messageStatus = "";
 
 				if ("status" in temp) {
 					if (temp["status"] === "sent") {
 						keyst = 2;
 						lastmessagetime = temp["timestamp"];
 						lastmessage = temp?.text?.body || temp["text"];
+						messageStatus = "SENT";
 					}
 				}
 
 				if (keyst === 1) {
 					lastmessage = temp?.text?.body || temp["text"];
 					lastreplay = temp["timestamp"];
+					messageStatus = "REPLIED";
 
 					if (!(keydatawithnumber in allreplay)) {
 						allreplay[keydatawithnumber] = temp["messageId"];
@@ -205,6 +208,7 @@ export const processTempMessages = async () => {
 					lastmessagetime: lastmessagetime,
 					lastmessage: lastmessage,
 					lastreplay: lastreplay,
+					messageStatus,
 				};
 			} catch (e) {
 				console.error(
@@ -283,6 +287,7 @@ export const processTempMessages = async () => {
 					let updateleft = {
 						lastMessage: finalupdaterow.lastmessage,
 						lastSend: finalupdaterow.lastmessagetime,
+						messageStatus: finalupdaterow.messageStatus,
 					};
 
 					const existingLastReceive = urow?.lastReceive || 0;
