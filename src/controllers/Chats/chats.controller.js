@@ -426,8 +426,6 @@ export const sendMessages = async (req, res) => {
 			name: contactName,
 		} = messages;
 
-		console.log(mediatype, "kkkkkkkkkkkkkk");
-
 		const campaign = await Campaign.findOne({ unique_id: campaignId });
 
 		let mediaId = "";
@@ -480,7 +478,7 @@ export const sendMessages = async (req, res) => {
 			text: messageText,
 			media: { url, fileName, caption },
 			type: "Chat",
-			media_type: mediatype,
+			media_type: mediatype !== "text" ? mediatype : "",
 			agent: agentId,
 		};
 

@@ -365,66 +365,62 @@ router.post("/webhook", async (req, res) => {
 						mediaId = audio.id;
 					}
 
-					console.log(text);
+						const getMessageText = () => {
+							if (text) return text;
+							if (image?.caption) return image.caption;
+							if (video?.caption) return video.caption;
+							if (document?.caption) return document.caption;
+							if (audio?.caption) return audio.caption;
 
-					const getMessageText = () => {
-						if (text) return text;
-						if (image?.caption) return image.caption;
-						if (video?.caption) return video.caption;
-						if (document?.caption) return document.caption;
-						if (audio?.caption) return audio.caption;
+							switch (type) {
+								case "image":
+								case "video":
+								case "document":
+								case "audio":
+									return type;
+								default:
+									return "";
+							}
+						};
 
-						switch (type) {
-							case "image":
-							case "video":
-							case "document":
-							case "audio":
-								return type;
-							default:
-								return "";
-						}
-					};
+						await TempMessage.create({
+							name,
+							wabaId,
+							messageId,
+							from: senderPhone,
+							timestamp: timestamp * 1000,
+							type,
+							text: getMessageText(),
+							mediaId,
+							fbPhoneId,
+							status: "receive",
+						});
 
-					console.log(getMessageText());
+						const replyChat = {
+							WABA_ID: wabaId,
+							FB_PHONE_ID: fbPhoneId,
+							useradmin: "-",
+							unique_id: "-",
+							campaignId: "-",
+							templateId: "-",
+							contactName: name,
+							recipientPhone: senderPhone,
+							status: "REPLIED",
+							updatedAt: timestamp * 1000,
+							messageId,
+							text: type === "text" ? text?.body : text,
+							media:
+								type !== "text"
+									? {
+											url: `/api/chats/get-media?mediaId=${mediaId}&phoneId=${fbPhoneId}`,
+											fileName: `/api/chats/get-media?mediaId=${mediaId}&phoneId=${fbPhoneId}`,
+											caption: text || "",
+									}
+									: {},
 
-					await TempMessage.create({
-						name,
-						wabaId,
-						messageId,
-						from: senderPhone,
-						timestamp: timestamp * 1000,
-						type,
-						text: getMessageText(),
-						mediaId,
-						fbPhoneId,
-						status: "receive",
-					});
-
-					const replyChat = {
-						WABA_ID: wabaId,
-						FB_PHONE_ID: fbPhoneId,
-						useradmin: "-",
-						unique_id: "-",
-						campaignId: "-",
-						templateId: "-",
-						contactName: name,
-						recipientPhone: senderPhone,
-						status: "REPLIED",
-						updatedAt: timestamp * 1000,
-						messageId,
-						text: type === "text" ? text?.body : text,
-						media:
-							type !== "text"
-								? {
-										url: `/api/chats/get-media?mediaId=${mediaId}&phoneId=${fbPhoneId}`,
-										fileName: `/api/chats/get-media?mediaId=${mediaId}&phoneId=${fbPhoneId}`,
-										caption: text || "",
-								  }
-								: {},
-
-						type: "Chat",
-						media_type: type !== "text" ? type : "",
-					};
+							type: "Chat",
+							media_type: type !== "text" ? type : "",
+						};
 
 					await Chats.create(replyChat);
 
