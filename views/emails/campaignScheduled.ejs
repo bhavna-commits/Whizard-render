@@ -21,8 +21,7 @@
 			<div style="background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin: 20px 0;">
 				<p style="margin: 0; color: #333;">
 					Scheduled Time:<br>
-					<strong style="font-size: 18px; color: #4a90e2;">
-						<%= scheduledTime %>
+					<strong class="scheduled-time" data-iso="<%= new Date(scheduledTime).toISOString() %>" data-country-code="<%= countryCode %>" style="font-size: 18px; color: #4a90e2;">
 					</strong>
 				</p>
 			</div>
@@ -39,6 +38,35 @@
 			</p>
 		</div>
 	</div>
+	<!-- 1) Load countries-and-timezones via CDN -->
+	<script src="https://cdn.jsdelivr.net/gh/manuelmhtr/countries-and-timezones@latest/dist/index.min.js"></script>
+	
+	<script>
+		// 2) Once loaded, format every .scheduled-time element
+		document.querySelectorAll('.scheduled-time').forEach(el => {
+			const iso = el.dataset.iso;
+			const code = el.dataset.countryCode; // e.g. "IN", "US", "BR"
+			if (!iso || !code) return;
+			
+			// Lookup that country’s primary IANA zone
+			const info = ct.getCountry(code);
+			const tz = (info && info.timezones && info.timezones[0]) ||
+				Intl.DateTimeFormat().resolvedOptions().timeZone;
+			
+			// Format in en-GB + local zone
+			const d = new Date(iso);
+			el.textContent = d.toLocaleDateString('en-GB', {
+				day: '2-digit',
+				month: 'short',
+				year: 'numeric',
+				hour: '2-digit',
+				minute: '2-digit',
+				hour12: true,
+				timeZone: tz
+			}).replace(',', ' at ');
+		});
+	</script>
+	
 </body>
 
 </html>

@@ -1,9 +1,10 @@
 import ejs from "ejs";
 import path from "path";
-import { overview } from "../../controllers/Report/reports.functions.js";
-import User from "../../models/user.model.js";
 import dotenv from "dotenv";
 import nodemailer from "nodemailer";
+import { overview } from "../../controllers/Report/reports.functions.js";
+import User from "../../models/user.model.js";
+import { countries } from "../../utils/dropDown.js";
 
 dotenv.config();
 
@@ -24,6 +25,8 @@ export const sendCampaignReportEmail = async (campaignId, userId) => {
 		console.log(campaignId, userId);
 		let campaignName;
 		const user = await User.findOne({ unique_id: userId });
+		const country = user.country;
+		const countryCode = countries.find((c) => c.name === country).code;
 		if (!user?.email) throw "User email not found";
 
 		// Fetch campaign report data
@@ -72,6 +75,7 @@ export const sendCampaignReportEmail = async (campaignId, userId) => {
 
 		// Prepare EJS data
 		const ejsData = {
+			countryCode,
 			campaigns: paginatedResults[0]?.reports || [],
 			totalMessages: paginatedResults[0]?.totalMessages || 0,
 			messagesSent: paginatedResults[0]?.messagesSent || 0,
@@ -124,6 +128,10 @@ export const sendCampaignScheduledEmail = async (
 	scheduledTime,
 ) => {
 	try {
+		const user = await User.findOne({ unique_id: userId });
+		const country = user.country;
+		const countryCode = countries.find((c) => c.name === country).code;
+
 		const templatePath = path.join(
 			__dirname,
 			"views/emails/campaignScheduled.ejs",
@@ -131,6 +139,7 @@ export const sendCampaignScheduledEmail = async (
 
 		// Render EJS template
 		const html = await ejs.renderFile(templatePath, {
+			countryCode,
 			campaignName,
 			scheduledTime: new Date(scheduledTime).toLocaleString(),
 		});
