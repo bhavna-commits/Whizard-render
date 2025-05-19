@@ -28,7 +28,6 @@ export const getDashboard = async (req, res) => {
 		// Fetch updated phone numbers
 		// user = await getPhoneNumbers(user);
 
-		
 		const permissions = req.session?.addedUser?.permissions;
 		const renderData = {
 			help,
@@ -596,7 +595,7 @@ const getPhoneNumbers = async (user) => {
 			{
 				method: "GET",
 				headers: {
-					Authorization: `Bearer ${user.FB_ACCESS_TOKEN}`, // Add your Facebook Graph API access token
+					Authorization: `Bearer ${user.FB_ACCESS_TOKEN}`,
 				},
 			},
 		);
@@ -647,7 +646,6 @@ const getPhoneNumbers = async (user) => {
 							existingNumber.phone_number_id,
 					);
 
-					// Preserve the `selected` field of existing numbers
 					return updatedNumber
 						? {
 								...updatedNumber,
@@ -669,6 +667,18 @@ const getPhoneNumbers = async (user) => {
 
 			// Append new numbers to the list
 			user.FB_PHONE_NUMBERS.push(...newPhoneNumbers);
+
+			const hasSelected = user.FB_PHONE_NUMBERS.some(
+				(num) => num.selected === true,
+			);
+			if (!hasSelected) {
+				const firstVerified = user.FB_PHONE_NUMBERS.find(
+					(num) => num.verified,
+				);
+				if (firstVerified) {
+					firstVerified.selected = true;
+				}
+			}
 
 			// Save the updated user document
 			await user.save();
