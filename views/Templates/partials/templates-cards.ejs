@@ -19,7 +19,7 @@
 						<source src="<%= component.example?.header_url?.split("/").slice(3).join("/") %>" type="video/mp4">
 						Your browser does not support the video tag.
 					</video>
-					<% } else if (component.format === 'DOCUMENT' && component.example?.header_url) { %>
+					<% } else if (component.format === 'DOCUMENT' && component.example?.header_url) { console.log(component.example?.header_url?.split("/").slice(3).join("/") ) %>
 					<iframe src="<%= component.example?.header_url?.split("/").slice(3).join("/") %>" class="max-w-full h-auto object-contain"></iframe>
 					<% } %>
 					<% } %>
