@@ -1,4 +1,3 @@
-// Helper function to get quarter dates
 function getQuarterDates() {
 	const now = new Date();
 	const quarter = Math.floor(now.getMonth() / 3);
@@ -6,11 +5,9 @@ function getQuarterDates() {
 	return [startQuarter, now];
 }
 
-// Initialize Flatpickr with simpler configuration
 let fpInstance;
 let dataForCSV = [];
 
-// Initialize date picker after DOM content is loaded
 function initializeDatePicker() {
 	fpInstance = flatpickr("#dateRange", {
 		mode: "range",
@@ -21,7 +18,6 @@ function initializeDatePicker() {
 			let startDate = selectedDates[0];
 			let endDate = selectedDates[1];
 
-			// If no dates are selected, use default quarter dates
 			if (!startDate || !endDate) {
 				const [defaultStartDate, defaultEndDate] = getQuarterDates();
 				startDate = defaultStartDate;
@@ -41,7 +37,6 @@ async function fetchAnalytics(startDate, endDate) {
 	const chargesLoading = document.getElementById("chargesLoading");
 
 	try {
-		// Show loaders
 		analyticsLoading.classList.remove("hidden");
 		chargesLoading.classList.remove("hidden");
 
@@ -51,7 +46,6 @@ async function fetchAnalytics(startDate, endDate) {
 			return null;
 		}
 
-		// Convert to Unix timestamps
 		const startUnix = Math.floor(startDate.getTime() / 1000);
 		const endUnix = Math.floor(endDate.getTime() / 1000) + 86400;
 
@@ -59,14 +53,12 @@ async function fetchAnalytics(startDate, endDate) {
 			params: { start: startUnix, end: endUnix },
 		});
 
-		// Process the fetched data
 		return processAnalyticsData(response.data, startDate, endDate);
 	} catch (error) {
 		console.error("Error fetching analytics:", error.response.data.error);
 		toast("error", error.response.data.error);
 		return null;
 	} finally {
-		// Hide loaders regardless of success/failure
 		analyticsLoading.classList.add("hidden");
 		chargesLoading.classList.add("hidden");
 	}
@@ -95,7 +87,6 @@ function processAnalyticsData(rawData, startDate, endDate) {
 		},
 	};
 
-	// Generate every date between startDate and endDate
 	let currentDate = new Date(startDate);
 	const finalEndDate = new Date(endDate);
 
@@ -122,30 +113,24 @@ function processAnalyticsData(rawData, startDate, endDate) {
 			},
 		});
 
-		// Move to the next day
 		currentDate.setDate(currentDate.getDate() + 1);
 	}
 
-	// Process rawData to update timeseriesMap with real data
 	rawData.forEach((point) => {
 		if (!point || typeof point.start !== "number") {
 			return;
 		}
 
-		// Create date in UTC
 		const utcDate = new Date(point.start * 1000);
 
-		// Add one whole day (24 hours) to UTC
 		const oneDayInMilliseconds = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 		const newDate = new Date(utcDate.getTime() + oneDayInMilliseconds);
 
-		// Create a dateKey for the map
 		const dateKey = newDate.toLocaleDateString("en", {
 			month: "short",
 			day: "numeric",
 		});
 
-		// Only update data for the date within the selected range
 		if (timeseriesMap.has(dateKey)) {
 			const category = (point.conversation_category || "").toLowerCase();
 			if (summaryData[category]) {
@@ -160,7 +145,6 @@ function processAnalyticsData(rawData, startDate, endDate) {
 		}
 	});
 
-	// Convert the map to an array and return sorted timeseriesData
 	timeseriesData = Array.from(timeseriesMap.values()).sort((a, b) => {
 		const dateA = new Date(a.date);
 		const dateB = new Date(b.date);
@@ -181,14 +165,12 @@ function updateUI(data) {
 		return;
 	}
 
-	// Update total counts and costs
 	document.getElementById("totalCount").textContent =
 		data.summaryData.total.count || 0;
 	document.getElementById("totalCost").textContent = `₹${(
 		data.summaryData.total.cost || 0
 	).toFixed(2)}`;
 
-	// Update category counts
 	document.getElementById("marketingCount").textContent =
 		data.summaryData.marketing.count || 0;
 	document.getElementById("utilityCount").textContent =
@@ -196,7 +178,6 @@ function updateUI(data) {
 	document.getElementById("authCount").textContent =
 		data.summaryData.authentication.count || 0;
 
-	// Update category costs
 	document.getElementById("marketingCost").textContent = `₹${(
 		data.summaryData.marketing.cost || 0
 	).toFixed(2)}`;
@@ -212,7 +193,6 @@ function updateUI(data) {
 }
 
 function createCSV() {
-	// Define CSV headers
 	const headers = [
 		"Date",
 		"Marketing Count",
@@ -223,7 +203,6 @@ function createCSV() {
 		"Authentication Cost",
 	];
 
-	// Convert data to CSV rows
 	const csvRows = dataForCSV.map((row) => [
 		row.date,
 		row.marketing.count,
@@ -234,29 +213,24 @@ function createCSV() {
 		row.authentication.cost,
 	]);
 
-	// Add headers to the beginning of the array
 	csvRows.unshift(headers);
 
-	// Convert to CSV string
 	const csv = csvRows
 		.map((row) =>
 			row
 				.map((cell) => {
-					// Handle numbers and strings appropriately
 					if (typeof cell === "number") {
 						return cell.toString();
 					}
-					// Wrap strings in quotes and escape existing quotes
+
 					return `"${cell.toString().replace(/"/g, '""')}"`;
 				})
 				.join(","),
 		)
 		.join("\n");
 
-	// Create CSV Blob
 	const csvFile = new Blob([csv], { type: "text/csv" });
 
-	// Create a link element and trigger the download
 	const downloadLink = document.createElement("a");
 	const today = new Date();
 	downloadLink.download = `timeseries_data_${

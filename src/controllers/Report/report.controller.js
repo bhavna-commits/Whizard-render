@@ -639,7 +639,7 @@ export const getCostReport = async (req, res) => {
 
 		if (!user || !WABA_ID || !graph) {
 			return res.status(400).json({
-				error: "User does not have required credentials",
+				error: "WhatsApp Business Account not connected",
 			});
 		}
 
