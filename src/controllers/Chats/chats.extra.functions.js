@@ -84,7 +84,7 @@ export const fetchAndFormatReports = async (
 		return {
 			lastmessage: chat?.lastMessage || "No recent reply",
 			wa_id: chat.wa_id,
-			status: 0, // isRecent ? 0 : 1
+			status: isRecent ? 0 : 1,
 			name: chat.contactName.toString(),
 			usertimestmp:
 				chat.messageStatus === "REPLIED"

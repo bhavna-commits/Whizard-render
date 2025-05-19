@@ -238,6 +238,8 @@ export const createList = async (req, res, next) => {
 								contactListId: contactList.contactId,
 							},
 						},
+						messageStatus: "SENT",
+						lastSend: Date.now(),
 					},
 					upsert: true,
 				},
@@ -704,7 +706,7 @@ export const getList = async (req, res) => {
 
 		const aggregationPipeline = [
 			{ $match: matchQuery },
-			{ $sort: { adddate: -1 } },
+			{ $sort: { createdAt: -1 } },
 			{
 				$facet: {
 					paginatedResults: [{ $skip: skip }, { $limit: limit }],

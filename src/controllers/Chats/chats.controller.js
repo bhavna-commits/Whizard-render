@@ -164,7 +164,6 @@ export const getUsers = async (req, res) => {
 				.json({ message: "Phone number ID not provided" });
 		}
 
-		// still using your XSS-safe validators 👇
 		if (!isString(phoneNumberId)) throw "Invalid Input";
 		if (!isNumber(skip)) throw "Invalid Input";
 
