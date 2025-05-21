@@ -294,6 +294,9 @@ router.post("/webhook", async (req, res) => {
 						});
 
 						let agents = c?.agent || [];
+
+						console.log(agents);
+						
 						let supportagents = c?.supportAgent || [];
 						let finalagents = [];
 
