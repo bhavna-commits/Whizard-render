@@ -506,12 +506,16 @@ export const createContact = async (req, res, next) => {
 						contactListId: contactId,
 					},
 				},
+				$set: {
+					messageStatus: "SENT",
+					lastSend: Date.now(),
+				},
 			};
 
 			await ChatsUsers.updateOne(updateQuery, updateData, {
 				upsert: true,
 			});
-		}
+		}		
 
 		res.status(201).json({ success: true, contact: newContact });
 	} catch (error) {

@@ -215,6 +215,7 @@ router.post("/webhook", async (req, res) => {
 						video,
 						document,
 						audio,
+						sticker,
 					} = messageEvent;
 
 					let mediaId = "";
@@ -226,6 +227,8 @@ router.post("/webhook", async (req, res) => {
 						mediaId = document.id;
 					} else if (type === "audio" && audio?.id) {
 						mediaId = audio.id;
+					} else if (type === "sticker" && sticker?.id) {
+						mediaId = sticker.id;
 					}
 
 					const getMessageText = () => {
@@ -240,6 +243,7 @@ router.post("/webhook", async (req, res) => {
 							case "video":
 							case "document":
 							case "audio":
+							case "sticker":
 								return type;
 							default:
 								return "";
@@ -276,7 +280,10 @@ router.post("/webhook", async (req, res) => {
 							type !== "text"
 								? {
 										url: `/api/chats/get-media?mediaId=${mediaId}&phoneId=${fbPhoneId}`,
-										fileName: `/api/chats/get-media?mediaId=${mediaId}&phoneId=${fbPhoneId}`,
+										fileName:
+											type === "document"
+												? document?.filename
+												: "",
 										caption: text || "",
 								  }
 								: {},
@@ -296,7 +303,7 @@ router.post("/webhook", async (req, res) => {
 						let agents = c?.agent || [];
 
 						console.log(agents);
-						
+
 						let supportagents = c?.supportAgent || [];
 						let finalagents = [];
 
@@ -312,20 +319,20 @@ router.post("/webhook", async (req, res) => {
 								(agent) => agent.unique_id,
 							);
 						}
-						if (finalagents) {
+
+						if (finalagents.length > 0) {
 							sendsocket(
 								finalagents,
 								senderPhone,
 								text,
 								timestamp * 1000,
-								name,
+								c?.contactName?.toString() || name,
 								mediaId,
 								type,
 								fbPhoneId,
+								document,
 							);
 						}
-
-						console.log(this);
 					} catch (err) {
 						console.error("Error adding agent in chats:", err);
 					}
@@ -363,7 +370,6 @@ function sendsocket(
 			if (type) {
 				lastmessage = type;
 			}
-
 			let data1 = {
 				filter_data: {},
 				msg: lastmessage,
@@ -371,7 +377,16 @@ function sendsocket(
 				status: "replied",
 				username: name,
 				wa_id: userno,
-				media_message: lastmessage,
+				media_message: type
+					? {
+							link:
+								`/api/chats/get-media?mediaId=${mediaId}&phoneId=${fbPhoneId}` ||
+								"",
+							filename:
+								type === "document" ? document?.filename : "",
+							caption: lastmessage || "",
+					  }
+					: { link: "", caption: "" },
 				media_type: type,
 			};
 
@@ -391,6 +406,8 @@ function sendsocket(
 							link:
 								`/api/chats/get-media?mediaId=${mediaId}&phoneId=${fbPhoneId}` ||
 								"",
+							filename:
+								type === "document" ? document?.filename : "",
 							caption: lastmessage || "",
 					  }
 					: { link: "", caption: "" },
@@ -403,8 +420,8 @@ function sendsocket(
 
 			//console.log(bptId2)
 			console.log(data2);
-			io.emit(bptId, data1);
-			io.emit(bptId2, data2);
+			// io.emit(bptId, data1);
+			// io.emit(bptId2, data2);
 		}
 	}
 }

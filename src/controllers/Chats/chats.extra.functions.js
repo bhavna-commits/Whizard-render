@@ -291,9 +291,13 @@ export const processTemplateReport = async (reportItem, wa_id, text) => {
 
 export const processMediaReport = (reportItem, wa_id) => {
 	// Use media values from the report.
-	const { url, caption } = reportItem.media;
+	const { url, caption, fileName } = reportItem.media;
 	return buildCommonChatFields(reportItem, wa_id, {
-		media_message: { link: url || "", caption: caption || "" },
+		media_message: {
+			link: url || "",
+			filename: fileName,
+			caption: caption || "",
+		},
 	});
 };
 
