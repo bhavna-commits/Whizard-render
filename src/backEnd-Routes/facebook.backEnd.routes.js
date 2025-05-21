@@ -368,9 +368,7 @@ function sendsocket(
 				status: "replied",
 				username: name,
 				wa_id: userno,
-				media_message:
-					`/api/chats/get-media?mediaId=${mediaId}&phoneId=${fbPhoneId}` ||
-					"",
+				media_message: lastmessage,
 				media_type: type,
 			};
 
@@ -385,12 +383,14 @@ function sendsocket(
 				keyId: fbPhoneId,
 				usertimestmp: timestamp,
 				is_read: false,
-				media_message: {
-					link:
-						`/api/chats/get-media?mediaId=${mediaId}&phoneId=${fbPhoneId}` ||
-						"",
-					caption: lastmessage || "",
-				},
+				media_message: type
+					? {
+							link:
+								`/api/chats/get-media?mediaId=${mediaId}&phoneId=${fbPhoneId}` ||
+								"",
+							caption: lastmessage || "",
+					  }
+					: { link: "", caption: "" },
 				media_type: type,
 			};
 
