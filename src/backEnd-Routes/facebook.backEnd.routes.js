@@ -353,7 +353,7 @@ function sendsocket(
 			let bptId = "new-message_idal_com_" + userno + agentslist[i];
 			console.log(bptId);
 
-			let lastmessage = text?.body || text;
+			let lastmessage = text?.body || text || "";
 			if (type === "text") {
 				type = "";
 			}
@@ -363,12 +363,14 @@ function sendsocket(
 
 			let data1 = {
 				filter_data: {},
-				msg: text?.body || text,
+				msg: lastmessage,
 				timestamp: timestamp,
 				status: "replied",
 				username: name,
 				wa_id: userno,
-				media_message: mediaId,
+				media_message:
+					`/api/chats/get-media?mediaId=${mediaId}&phoneId=${fbPhoneId}` ||
+					"",
 				media_type: type,
 			};
 
@@ -383,18 +385,23 @@ function sendsocket(
 				keyId: fbPhoneId,
 				usertimestmp: timestamp,
 				is_read: false,
-				media_message: mediaId,
+				media_message: {
+					link:
+						`/api/chats/get-media?mediaId=${mediaId}&phoneId=${fbPhoneId}` ||
+						"",
+					caption: lastmessage || "",
+				},
 				media_type: type,
 			};
 
 			let bptId2 = "MainRefresh_initial-users_" + agentslist[i];
-			// //console.log(bptId)
-			// console.log(data1);
+			//console.log(bptId)
+			console.log(data1);
 
-			// //console.log(bptId2)
-			// console.log(data2);
-			// io.emit(bptId, data1);
-			// io.emit(bptId2, data2);
+			//console.log(bptId2)
+			console.log(data2);
+			io.emit(bptId, data1);
+			io.emit(bptId2, data2);
 		}
 	}
 }
