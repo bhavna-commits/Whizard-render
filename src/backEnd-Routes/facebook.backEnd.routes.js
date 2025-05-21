@@ -356,6 +356,7 @@ function sendsocket(
 	mediaId,
 	type,
 	fbPhoneId,
+	document,
 ) {
 	console.log(agentslist);
 	if (agentslist.length > 0) {
@@ -370,6 +371,7 @@ function sendsocket(
 			if (type) {
 				lastmessage = type;
 			}
+
 			let data1 = {
 				filter_data: {},
 				msg: lastmessage,
