@@ -8,6 +8,7 @@ import ChatsTemp from "../../models/chatsTemp.model.js";
 import ChatsUsers from "../../models/chatsUsers.model.js";
 import { processAllTempEvents } from "../../../webhook.process.js";
 import { updateContacts } from "../../../contactsUpdate cron.js";
+import { parseAxiosError } from "../../utils/axiosErrorHelper.js";
 
 dotenv.config();
 
@@ -20,27 +21,30 @@ export const uploadMedia = async (
 ) => {
 	const url = `https://graph.facebook.com/${process.env.FB_GRAPH_VERSION}/${phoneNumberId}/media`;
 	const formData = new FormData();
+	const mimeType = getMimeType(fileName);
 
-	// Get MIME type from file extension
-	const mimeType = getMimeType(fileName); // Implement proper MIME type detection
-
-	// Append file stream from provided file path
 	formData.append("file", fs.createReadStream(filePath), {
 		filename: fileName,
 		contentType: mimeType,
 	});
-
 	formData.append("type", mediaType);
 	formData.append("messaging_product", "whatsapp");
 
-	const response = await axios.post(url, formData, {
-		headers: {
-			...formData.getHeaders(),
-			Authorization: `Bearer ${accessToken}`,
-		},
-	});
-
-	return response.data.id;
+	try {
+		const response = await axios.post(url, formData, {
+			headers: {
+				...formData.getHeaders(),
+				Authorization: `Bearer ${accessToken}`,
+			},
+			timeout: 30000, // 30s timeout
+			maxBodyLength: Infinity,
+			maxContentLength: Infinity,
+		});
+		return response.data.id;
+	} catch (err) {
+		const { type, message } = parseAxiosError(err);
+		throw new Error(`uploadMedia failed [${type}]: ${message}`);
+	}
 };
 
 export const getMediaUrl = async (accessToken, mediaId) => {
@@ -76,7 +80,6 @@ export const getMediaUrl = async (accessToken, mediaId) => {
 
 export const sendMessage = async (accessToken, phoneNumberId, payload) => {
 	const url = `https://graph.facebook.com/${process.env.FB_GRAPH_VERSION}/${phoneNumberId}/messages`;
-
 	try {
 		const res = await fetch(url, {
 			method: "POST",
@@ -85,32 +88,25 @@ export const sendMessage = async (accessToken, phoneNumberId, payload) => {
 				"Content-Type": "application/json",
 			},
 			body: JSON.stringify(payload),
+			timeout: 30000, // if your fetch lib supports timeout
 		});
-
-		// Fetch API doesn't reject on HTTP errors like 4xx or 5xx
-		// if (!res.ok) {
-		// 	throw new Error(`HTTP error! status: ${res.status}`);
-		// }
-
 		const data = await res.json();
-
-		if (data.error) {
-			throw (
-				data?.error?.error_user_msg ||
-				data?.error?.error_user_title ||
-				data?.error?.message
-			);
+		if (!res.ok || data.error) {
+			const errMsg =
+				data.error?.error_user_msg ||
+				data.error?.error_user_title ||
+				data.error?.message ||
+				`HTTP ${res.status}`;
+			throw new Error(`APIError: ${errMsg}`);
 		}
-		console.log(data);
 		return data;
-	} catch (error) {
-		console.error("Error sending message:", error);
+	} catch (err) {
+		// If it's an AxiosError, parse it, otherwise use its message
+		let message = err.message;
+		if (err.name === "AxiosError") {
+			const parsed = parseAxiosError(err);
+			message = `${parsed.type}: ${parsed.message}`;
+		}
+		throw new Error(`sendMessage failed: ${message}`);
 	}
 };
-
-// cron.schedule("* * * * *", async () => {
-// 	await processAllTempEvents();
-// 	// 	await updateContacts();
-// });
-
-// console.log(cron)

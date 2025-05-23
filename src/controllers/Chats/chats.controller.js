@@ -383,7 +383,7 @@ export const searchUsers = async (req, res) => {
 
 export const sendMessages = async (req, res) => {
 	try {
-		const { messages, fileByteCode, fileName } = req.body;
+		const { messages } = req.body;
 
 		const oldToken = checkToken(req);
 		const { userId, token, name, agentId } = await getUserIdFromToken(
@@ -400,21 +400,6 @@ export const sendMessages = async (req, res) => {
 		const user = await User.findOne({ unique_id: userId });
 		const accessToken = user.FB_ACCESS_TOKEN;
 
-		const mediaMessages = ["image", "video", "document"].includes(
-			messages.mediatype,
-		);
-
-		let tempFilePath = "";
-		let url = "";
-
-		if (mediaMessages && fileByteCode) {
-			const tempDir = path.join(__dirname, "uploads", userId);
-			tempFilePath = path.join(tempDir, fileName);
-			url = `/uploads/${userId}/${fileName}`;
-			fs.mkdirSync(tempDir, { recursive: true });
-			fs.writeFileSync(tempFilePath, Buffer.from(fileByteCode, "base64"));
-		}
-
 		const {
 			from,
 			to,
@@ -423,45 +408,36 @@ export const sendMessages = async (req, res) => {
 			caption,
 			campaignId,
 			name: contactName,
+			mediaId,
+			fileName, 
 		} = messages;
 
 		const campaign = await Campaign.findOne({ unique_id: campaignId });
 
-		let mediaId = "";
 		let payload;
 
 		switch (mediatype) {
 			case "image":
+				if (!mediaId) throw "Missing mediaId for image message";
+				payload = createImagePayload(to, mediaId, caption);
+				break;
 			case "video":
+				if (!mediaId) throw "Missing mediaId for video message";
+				payload = createVideoPayload(to, mediaId, caption);
+				break;
 			case "document":
-				if (!tempFilePath) throw "Missing media file for media message";
-
-				mediaId = await uploadMedia(
-					accessToken,
-					from,
-					tempFilePath,
-					mediatype,
-					fileName,
-				);
-
-				if (mediatype === "image") {
-					payload = createImagePayload(to, mediaId, caption);
-				} else if (mediatype === "video") {
-					payload = createVideoPayload(to, mediaId, caption);
-				} else {
-					payload = createDocumentPayload(
-						to,
-						mediaId,
-						fileName,
-						caption,
-					);
-				}
+				if (!mediaId || !fileName)
+					throw "Missing mediaId or fileName for document";
+				payload = createDocumentPayload(to, mediaId, fileName, caption);
 				break;
 			default:
 				payload = createTextPayload(to, messageText);
 		}
 
 		const data = await sendMessage(accessToken, from, payload);
+
+		// Optional: URL used for reports or download — frontend should send this too if needed
+		const mediaUrl = messages.url || "";
 
 		const report = {
 			WABA_ID: user.WABA_ID,
@@ -475,7 +451,7 @@ export const sendMessages = async (req, res) => {
 			status: "SENT",
 			messageId: data.messages?.[0]?.id,
 			text: messageText,
-			media: { url, fileName, caption },
+			media: { url: mediaUrl, fileName, caption },
 			type: "Chat",
 			media_type: mediatype !== "text" ? mediatype : "",
 			agent: agentId,
@@ -508,7 +484,7 @@ export const sendMessages = async (req, res) => {
 		return res.status(200).json({
 			message: "Message sent successfully",
 			success: true,
-			url,
+			url: mediaUrl,
 			caption,
 			token,
 		});
@@ -520,6 +496,7 @@ export const sendMessages = async (req, res) => {
 		});
 	}
 };
+
 
 /**
  * Renders the send template view for a specific contact.
@@ -770,5 +747,62 @@ export const getMedia = async (req, res) => {
 		return res.redirect(
 			"https://whizardapi.com/wp-content/uploads/thegem-logos/logo_08af4735e93afc82f50321cd58f0d703_2x.png",
 		);
+	}
+};
+
+/**
+ * API to upload media to WhatsApp via Facebook Graph.
+ * Expects multipart/form-data with fields:
+ * - file (the media file)
+ * - phoneNumberId (FB phone ID)
+ * - mediaType (image, video, document)
+ *
+ * Returns the uploaded media ID from Facebook.
+ */
+
+export const uploadMediaAPI = async (req, res) => {
+	try {
+		const { phoneNumberId, mediaType } = req.body;
+		const file = req.file;
+
+		if (!phoneNumberId || !mediaType || !file) {
+			return res.status(400).json({
+				success: false,
+				message: "phoneNumberId, mediaType, and file are required",
+			});
+		}
+
+		// Find user and token
+		const user = await User.findOne({
+			"FB_PHONE_NUMBERS.phone_number_id": phoneNumberId,
+		});
+
+		if (!user || !user.FB_ACCESS_TOKEN) {
+			return res.status(403).json({
+				success: false,
+				message: "User or access token not found",
+			});
+		}
+
+		// Reuse existing upload function
+		const mediaId = await uploadMedia(
+			user.FB_ACCESS_TOKEN,
+			phoneNumberId,
+			file.path,
+			mediaType,
+			file.originalname,
+		);
+
+		fs.unlink(file.path, (err) => {
+			if (err) console.error("Failed to delete temp file:", err);
+		});
+
+		return res.status(200).json({
+			success: true,
+			url: `/api/chats/get-media?mediaId=${mediaId}&phoneId=${phoneNumberId}`,
+		});
+	} catch (err) {
+		console.error("Upload Media Error:", err);
+		return res.status(500).json({ success: false, message: err });
 	}
 };
