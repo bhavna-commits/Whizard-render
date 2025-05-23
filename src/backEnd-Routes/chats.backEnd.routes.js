@@ -13,6 +13,7 @@ import {
 	getSingleTemplate,
 	sendTemplate,
 	getMedia,
+	uploadMediaAPI,
 } from "../controllers/Chats/chats.controller.js";
 import { getCampaignTemplates } from "../controllers/Templates/template.controller.js";
 import { trackSanitationFailures } from "../middleWares/sanitiseInput.js";
@@ -55,6 +56,8 @@ router.post(
 	sendMessages,
 	trackSanitationFailures,
 );
+
+router.post("/post-media", uploadMediaAPI, trackSanitationFailures);
 
 router.get("/get-media", getMedia, trackSanitationFailures);
 
