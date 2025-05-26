@@ -57,7 +57,12 @@ router.post(
 	trackSanitationFailures,
 );
 
-router.post("/post-media", uploadMediaAPI, trackSanitationFailures);
+router.post(
+	"/post-media",
+	upload.single("file"),
+	uploadMediaAPI,
+	trackSanitationFailures,
+);
 
 router.get("/get-media", getMedia, trackSanitationFailures);
 

@@ -997,3 +997,68 @@ async function createDefaultPermissionsForUser(userId) {
 	// Insert all documents at once
 	await Permissions.insertMany(permissionsDocs);
 }
+
+export async function oldAccountMigrate(req, res) {
+	try {
+		let {
+			WABA_ID,
+			phone_number_id,
+			number,
+			friendly_name,
+			name,
+			email,
+			password,
+			phoneNumber,
+			companyName,
+			description,
+			country,
+			countryCode,
+			state,
+			companySize,
+			industry,
+			jobRole,
+			website,
+		} = req.body;
+
+		const saltRounds = 10;
+		password = await bcrypt.hash(password, saltRounds);
+
+		const newUser = new User({
+			WABA_ID,
+			FB_PHONE_NUMBERS: [
+				{
+					phone_number_id,
+					verified: true,
+					selected: true,
+					number,
+					friendly_name,
+				},
+			],
+			name,
+			email,
+			password,
+			phone: countryCode + phoneNumber,
+			color: getRandomColor(),
+			companyName,
+			companyDescription: description,
+			country,
+			state,
+			companySize,
+			industry,
+			jobRole,
+			website,
+			unique_id: generateUniqueId(),
+		});
+
+		console.log(newUser);
+
+		await newUser.save();
+		res.status(200).json({
+			success: true,
+			message: "User added successfully",
+		});
+	} catch (err) {
+		console.error("Migration error:", err);
+		res.status(500).json({ success: false, error: err.message });
+	}
+}

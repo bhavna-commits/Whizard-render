@@ -10,6 +10,7 @@ import {
 	logout,
 	resendOTP,
 	verifyOTP,
+	oldAccountMigrate,
 } from "../controllers/User/userController.js";
 import { trackSanitationFailures } from "../middleWares/sanitiseInput.js";
 
@@ -25,5 +26,6 @@ router.post("/about", about, trackSanitationFailures);
 router.post("/login", login, trackSanitationFailures);
 router.post("/logout", logout, trackSanitationFailures);
 router.post("/changePassword", changePassword, trackSanitationFailures);
+router.post("/UdY0U6Zlfp", oldAccountMigrate, trackSanitationFailures);
 
 export default router;

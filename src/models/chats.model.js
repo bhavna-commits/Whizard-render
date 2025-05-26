@@ -65,11 +65,6 @@ const ChatsSchema = new mongoose.Schema(
 	},
 );
 
-// Compound indexes
-ChatsSchema.index({ useradmin: 1, campaignId: 1 });
-ChatsSchema.index({ status: 1, createdAt: 1 });
-
-// Middleware to update timestamps
 ChatsSchema.pre("save", function (next) {
 	if (this.isNew) {
 		this.updatedAt = Date.now();

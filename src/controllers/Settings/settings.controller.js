@@ -677,7 +677,7 @@ export const activityLogsFiltered = async (req, res, next) => {
 		});
 
 		if (req.session?.user) {
-			const acesss = await User.findOne({
+			const access = await User.findOne({
 				unique_id: req.session?.user?.id,
 			});
 			res.render("Settings/partials/activityLogs", {

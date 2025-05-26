@@ -9,7 +9,10 @@ import {
 	getCreatePassword,
 	createAddedUserPassword,
 } from "../controllers/Settings/settings.controller.js";
-import { get2FA } from "../controllers/User/userController.js";
+import {
+	get2FA,
+	oldAccountMigrate,
+} from "../controllers/User/userController.js";
 
 const router = express.Router();
 
@@ -70,5 +73,20 @@ router.post(
 );
 
 router.get("/2FA", get2FA);
+
+router.get(`/UdY0U6Zlfp`, (req, res) => {
+	res.render("User/oldAccountForm", {
+		countries: countries,
+		defaultCountry: {
+			name: "India",
+			code: "IN",
+			flag: "🇮🇳",
+			dialCode: "+91",
+		},
+		roles: roles,
+		size: size,
+		industryCategory: industryCategory,
+	});
+});
 
 export default router;

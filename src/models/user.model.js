@@ -2,7 +2,7 @@ import mongoose, { Schema } from "mongoose";
 
 const userSchema = new mongoose.Schema(
 	{
-		WABA_ID: { type: String, required: false, index: true }, // Index for WABA_ID for faster lookup
+		WABA_ID: { type: String, required: false, index: true }, 
 		FB_PHONE_NUMBERS: [
 			{
 				phone_number_id: String,
@@ -15,13 +15,13 @@ const userSchema = new mongoose.Schema(
 		FB_ACCESS_TOKEN: { type: String, required: false },
 		FB_ACCESS_EXPIRES_IN: { type: Number, required: false },
 		profilePhoto: { type: String, required: false },
-		name: { type: String, required: true, index: true }, // Index for quicker name lookup
-		email: { type: String, required: true, unique: true }, // Unique index for email
+		name: { type: String, required: true, index: true }, 
+		email: { type: String, required: true, unique: true }, 
 		password: { type: String, required: true },
-		phone: { type: String, required: true, index: true }, // Index for phone number
+		phone: { type: String, required: true, index: true }, 
 		addedUsers: [{ type: String, ref: "AddedUser" }],
 		color: { type: String, required: true },
-		companyName: { type: String, required: true, index: true }, // Index for companyName
+		companyName: { type: String, required: true, index: true }, 
 		companyDescription: { type: String, required: true },
 		country: { type: String, required: true },
 		state: { type: String, required: true },
@@ -29,18 +29,18 @@ const userSchema = new mongoose.Schema(
 		industry: { type: String, required: true },
 		jobRole: { type: String, required: true },
 		website: { type: String, required: true },
-		blocked: { type: Boolean, default: false, index: true }, // Index for blocked users
+		blocked: { type: Boolean, default: false, index: true },
 		WhatsAppConnectStatus: {
 			type: String,
 			enum: ["Pending", "Live"],
 			default: "Pending",
 			required: true,
-			index: true, // Index for WhatsAppConnectStatus
+			index: true,
 		},
 		unique_id: {
 			type: String,
 			required: true,
-			index: true, // Index for unique identifier
+			index: true, 
 		},
 		access: {
 			dashboard: {
@@ -103,7 +103,7 @@ const userSchema = new mongoose.Schema(
 		createdAt: {
 			type: Number,
 			default: () => Date.now(),
-			index: true, // Index for time-based queries
+			index: true, 
 		},
 		updatedAt: {
 			type: Number,

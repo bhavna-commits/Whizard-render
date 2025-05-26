@@ -409,7 +409,7 @@ export const sendMessages = async (req, res) => {
 			campaignId,
 			name: contactName,
 			mediaId,
-			fileName, 
+			fileName,
 		} = messages;
 
 		const campaign = await Campaign.findOne({ unique_id: campaignId });
@@ -436,7 +436,6 @@ export const sendMessages = async (req, res) => {
 
 		const data = await sendMessage(accessToken, from, payload);
 
-		// Optional: URL used for reports or download — frontend should send this too if needed
 		const mediaUrl = messages.url || "";
 
 		const report = {
@@ -496,7 +495,6 @@ export const sendMessages = async (req, res) => {
 		});
 	}
 };
-
 
 /**
  * Renders the send template view for a specific contact.
@@ -762,17 +760,18 @@ export const getMedia = async (req, res) => {
 
 export const uploadMediaAPI = async (req, res) => {
 	try {
-		const { phoneNumberId, mediaType } = req.body;
-		const file = req.file;
+		const { phoneNumberId, mediaType, fileName } = req.body;
 
-		if (!phoneNumberId || !mediaType || !file) {
+		const uploadedFile = req.file;
+
+		if (!phoneNumberId || !mediaType || !uploadedFile || !fileName) {
 			return res.status(400).json({
 				success: false,
-				message: "phoneNumberId, mediaType, and file are required",
+				message:
+					"phoneNumberId, mediaType, file, and fileName are required",
 			});
 		}
 
-		// Find user and token
 		const user = await User.findOne({
 			"FB_PHONE_NUMBERS.phone_number_id": phoneNumberId,
 		});
@@ -784,25 +783,35 @@ export const uploadMediaAPI = async (req, res) => {
 			});
 		}
 
-		// Reuse existing upload function
+		const tempDir = path.join(__dirname, "uploads", phoneNumberId);
+		fs.mkdirSync(tempDir, { recursive: true });
+
+		const uniqueFileName = `${Date.now()}-${fileName}`;
+		const tempFilePath = path.join(tempDir, uniqueFileName);
+
+		fs.writeFileSync(tempFilePath, uploadedFile.buffer);
+
 		const mediaId = await uploadMedia(
 			user.FB_ACCESS_TOKEN,
 			phoneNumberId,
-			file.path,
+			tempFilePath,
 			mediaType,
-			file.originalname,
+			uniqueFileName,
 		);
 
-		fs.unlink(file.path, (err) => {
+		fs.unlink(tempFilePath, (err) => {
 			if (err) console.error("Failed to delete temp file:", err);
 		});
 
 		return res.status(200).json({
 			success: true,
 			url: `/api/chats/get-media?mediaId=${mediaId}&phoneId=${phoneNumberId}`,
+			mediaId,
 		});
 	} catch (err) {
 		console.error("Upload Media Error:", err);
-		return res.status(500).json({ success: false, message: err });
+		return res
+			.status(500)
+			.json({ success: false, message: err.message || err });
 	}
 };
