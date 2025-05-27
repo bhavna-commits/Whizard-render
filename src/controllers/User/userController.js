@@ -1054,7 +1054,7 @@ export async function oldAccountMigrate(req, res) {
 		// 🛡️ Check for existing phone_number_id in any user
 		const phoneIds = parsedPhones.map((p) => p.phone_number_id);
 		const existingPhoneIdUser = await User.findOne({
-			"FB_PHONE_NUMBERS.phone_number_id": { $in: phoneIds },
+			"FB_PHONE_NUMBERS.phone_number_id": phoneIds,
 		});
 
 		if (existingPhoneIdUser) {
