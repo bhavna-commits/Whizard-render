@@ -2,7 +2,7 @@ import mongoose, { Schema } from "mongoose";
 
 const userSchema = new mongoose.Schema(
 	{
-		WABA_ID: { type: String, required: false, index: true }, 
+		WABA_ID: { type: String, required: true, index: true, unique: true }, 
 		FB_PHONE_NUMBERS: [
 			{
 				phone_number_id: String,

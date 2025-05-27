@@ -1002,9 +1002,8 @@ export async function oldAccountMigrate(req, res) {
 	try {
 		let {
 			WABA_ID,
-			phone_number_id,
-			number,
-			friendly_name,
+			FB_PHONE_NUMBERS,
+			FB_ACCESS_TOKEN,
 			name,
 			email,
 			password,
@@ -1020,24 +1019,64 @@ export async function oldAccountMigrate(req, res) {
 			website,
 		} = req.body;
 
+		// ✅ Parse phone numbers safely
+		let parsedPhones;
+		try {
+			parsedPhones = JSON.parse(FB_PHONE_NUMBERS);
+			if (!Array.isArray(parsedPhones))
+				throw new Error("Invalid phone number data");
+		} catch (e) {
+			return res.status(400).json({
+				success: false,
+				error: "Invalid FB_PHONE_NUMBERS format.",
+			});
+		}
+
+		// 🛡️ Check for existing user by email
+		const existingEmail = await User.findOne({ email });
+		if (existingEmail) {
+			return res.status(409).json({
+				success: false,
+				error: "Email is already registered.",
+			});
+		}
+
+		// 🛡️ Check for existing user by phone
+		const fullPhone = countryCode + phoneNumber;
+		const existingPhone = await User.findOne({ phone: fullPhone });
+		if (existingPhone) {
+			return res.status(409).json({
+				success: false,
+				error: "Phone number is already registered.",
+			});
+		}
+
+		// 🛡️ Check for existing phone_number_id in any user
+		const phoneIds = parsedPhones.map((p) => p.phone_number_id);
+		const existingPhoneIdUser = await User.findOne({
+			"FB_PHONE_NUMBERS.phone_number_id": { $in: phoneIds },
+		});
+
+		if (existingPhoneIdUser) {
+			return res.status(409).json({
+				success: false,
+				error: "One or more phone_number_id values already exist.",
+			});
+		}
+
+		// 🔐 Hash password
 		const saltRounds = 10;
 		password = await bcrypt.hash(password, saltRounds);
 
+		// ✅ Create new user
 		const newUser = new User({
 			WABA_ID,
-			FB_PHONE_NUMBERS: [
-				{
-					phone_number_id,
-					verified: true,
-					selected: true,
-					number,
-					friendly_name,
-				},
-			],
+			FB_PHONE_NUMBERS: parsedPhones,
+			FB_ACCESS_TOKEN,
 			name,
 			email,
 			password,
-			phone: countryCode + phoneNumber,
+			phone: fullPhone,
 			color: getRandomColor(),
 			companyName,
 			companyDescription: description,
@@ -1048,17 +1087,21 @@ export async function oldAccountMigrate(req, res) {
 			jobRole,
 			website,
 			unique_id: generateUniqueId(),
+			WhatsAppConnectStatus: "Live",
 		});
 
-		console.log(newUser);
-
 		await newUser.save();
-		res.status(200).json({
+
+		return res.status(200).json({
 			success: true,
 			message: "User added successfully",
 		});
 	} catch (err) {
 		console.error("Migration error:", err);
-		res.status(500).json({ success: false, error: err.message });
+		return res.status(500).json({
+			success: false,
+			error: "Internal Server Error",
+			message: err.message || err,
+		});
 	}
 }

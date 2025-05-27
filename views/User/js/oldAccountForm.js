@@ -125,11 +125,40 @@ document.addEventListener("DOMContentLoaded", function () {
 		}
 	});
 
+	document
+		.getElementById("addFbPhoneGroup")
+		.addEventListener("click", function () {
+			const container = document.getElementById("fbPhoneContainer");
+			const groups = container.querySelectorAll(".fbPhoneGroup");
+			const lastGroup = groups[groups.length - 1];
+			const clone = lastGroup.cloneNode(true);
+
+			// Clear the values
+			clone
+				.querySelectorAll("input")
+				.forEach((input) => (input.value = ""));
+
+			// Show the remove button
+			clone
+				.querySelector(".removeFbPhoneGroup")
+				.classList.remove("hidden");
+
+			container.appendChild(clone);
+		});
+
+	document
+		.getElementById("fbPhoneContainer")
+		.addEventListener("click", function (e) {
+			if (e.target.classList.contains("removeFbPhoneGroup")) {
+				e.target.closest(".fbPhoneGroup").remove();
+			}
+		});
+
 	const countrySelectorButton2 = document.getElementById(
 		"countrySelectorButton2",
 	);
 	const countryDropdown2 = document.getElementById("countryDropdown2");
-	const countryOptions2 = document.querySelectorAll(".country-option");
+	const countryOptions2 = document.querySelectorAll(".country-option2");
 	const countrySearchInput = document.getElementById("countrySearch2");
 	const selectedFlag2 = document.getElementById("selectedFlag2");
 	const stateInput = document.getElementById("stateInput");
@@ -170,13 +199,32 @@ document.addEventListener("DOMContentLoaded", function () {
             Submitting ...
         `;
 
+		const phoneGroups = document.querySelectorAll(".fbPhoneGroup");
+		const result = [];
+
+		phoneGroups.forEach((group, index) => {
+			const data = {};
+			group.querySelectorAll("[data-field]").forEach((input) => {
+				const field = input.getAttribute("data-field");
+				data[field] = input.value.trim();
+			});
+
+			data.verified = true;
+			data.selected = index === 0;
+
+			result.push(data);
+		});
+
+		// Inject JSON string into hidden input
+		document.getElementById("FB_PHONE_NUMBERS_JSON").value =
+			JSON.stringify(result);
+
 		// Collect form data
 		const formData = {
 			WABA_ID: document.getElementById("WABA").value,
-			phone_number_id:
-				document.getElementById("FB_PHONE_NUMBER_ID").value,
-			number: document.getElementById("FB_PHONE_NUMBER").value,
-			friendly_name: document.getElementById("FB_PHONE_NAME").value,
+			FB_PHONE_NUMBERS: document.getElementById("FB_PHONE_NUMBERS_JSON")
+				.value,
+			FB_ACCESS_TOKEN: document.getElementById("token").value,
 			name: document.getElementById("name").value,
 			email: document.getElementById("email").value,
 			password: document.getElementById("confirmPassword").value,
@@ -219,6 +267,9 @@ document.addEventListener("DOMContentLoaded", function () {
 			// If the result is successful, redirect to the homepage or next page
 			if (result.success) {
 				toast("success", result.message);
+				setTimeout(() => {
+					location.reload();
+				}, 1000);
 			}
 		} catch (error) {
 			console.log(error);
@@ -236,6 +287,29 @@ document.addEventListener("DOMContentLoaded", function () {
 
 	countrySelectorButton2.addEventListener("click", function () {
 		countryDropdown2.classList.toggle("hidden");
+	});
+
+	// Search functionality
+	countrySearchInput.addEventListener("input", function () {
+		const searchValue = this.value.toLowerCase();
+
+		countryOptions2.forEach((option) => {
+			const countryName = option
+				.querySelector(".country-name")
+				.textContent.toLowerCase();
+			const dialCode = option
+				.querySelector(".country-flag")
+				.textContent.toLowerCase();
+
+			if (
+				countryName.includes(searchValue) ||
+				dialCode.includes(searchValue)
+			) {
+				option.style.display = "flex";
+			} else {
+				option.style.display = "none";
+			}
+		});
 	});
 
 	countryOptions2.forEach((option) => {
@@ -259,7 +333,7 @@ document.addEventListener("DOMContentLoaded", function () {
 				(country) => country.name === countryName,
 			);
 
-			console.log(selectedCountry);
+			// console.log(selectedCountry);
 			// Handle state input based on whether the country has states
 			if (
 				selectedCountry &&
