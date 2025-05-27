@@ -1028,7 +1028,7 @@ export async function oldAccountMigrate(req, res) {
 		} catch (e) {
 			return res.status(400).json({
 				success: false,
-				error: "Invalid FB_PHONE_NUMBERS format.",
+				message: "Invalid FB_PHONE_NUMBERS format.",
 			});
 		}
 
@@ -1037,7 +1037,7 @@ export async function oldAccountMigrate(req, res) {
 		if (existingEmail) {
 			return res.status(409).json({
 				success: false,
-				error: "Email is already registered.",
+				message: "Email is already registered.",
 			});
 		}
 
@@ -1047,7 +1047,7 @@ export async function oldAccountMigrate(req, res) {
 		if (existingPhone) {
 			return res.status(409).json({
 				success: false,
-				error: "Phone number is already registered.",
+				message: "Phone number is already registered.",
 			});
 		}
 
@@ -1060,7 +1060,7 @@ export async function oldAccountMigrate(req, res) {
 		if (existingPhoneIdUser) {
 			return res.status(409).json({
 				success: false,
-				error: "One or more phone_number_id values already exist.",
+				message: "One or more phone_number_id values already exist.",
 			});
 		}
 
