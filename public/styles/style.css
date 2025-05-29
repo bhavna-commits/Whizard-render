@@ -1,8 +1,6 @@
 /* Base styles for all screens */
 * {
 	box-sizing: border-box;
-	margin: 0;
-	padding: 0;
 	font-family: "Figtree", sans-serif;
 	font-size: 15px;
 	-webkit-font-smoothing: antialiased;
@@ -10,12 +8,6 @@
 	-webkit-text-size-adjust: none;
 	-ms-text-size-adjust: none;
 }
-
-/* @media screen and (max-width: 1536px) {
-	* {
-		font-size: 15px;
-	}
-} */
 
 @media (max-width: 1440px) {
 	* {
@@ -95,7 +87,6 @@ select {
 	position: relative;
 	display: inline-block;
 	width: 100%;
-
 }
 
 /* Custom dropdown arrow */
@@ -211,6 +202,9 @@ input[type="number"] {
 
 .report-card a,
 .report-card button {
+	display: flex;
+	flex-direction: row !important;
+	align-items: center;
 	padding: 0.7rem 0.8rem;
 	text-decoration: none;
 	color: rgba(101, 101, 101, 1);

@@ -1,22 +1,7 @@
-import dotenv from "dotenv";
-import nodemailer from "nodemailer";
+import { sendMail } from "./emailService.js";
 
-dotenv.config();
-
-const transporter = nodemailer.createTransport({
-	host: "smtp.gmail.com",
-	port: 465,
-	secure: true,
-	auth: {
-		user: process.env.EMAIL_USER,
-		pass: process.env.EMAIL_PASSWORD,
-	},
-});
-
-// Function to send verification email
 export const sendVerificationEmail = async (userEmail, otp) => {
 	const mailOptions = {
-		from: process.env.EMAIL_USER,
 		to: userEmail,
 		subject: "Email Verification for Whizard",
 		html: `
@@ -55,11 +40,5 @@ export const sendVerificationEmail = async (userEmail, otp) => {
 		],
 	};
 
-	try {
-		const info = await transporter.sendMail(mailOptions);
-		console.log("Verification email sent: ", info.response);
-	} catch (error) {
-		console.error("Error sending verification email:", error);
-		throw error;
-	}
+	await sendMail(mailOptions);
 };

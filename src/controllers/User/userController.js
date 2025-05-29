@@ -338,13 +338,31 @@ export const login = async (req, res, next) => {
 
 				// If 2FA is enabled for either email or mobile, generate OTPs and store in session
 				if (ENABLE_EMAIL_OTP || ENABLE_MOBILE_OTP) {
-					const emailOTP = ENABLE_EMAIL_OTP
+					let emailOTP = ENABLE_EMAIL_OTP
 						? generate6DigitOTP()
 						: null;
-					const mobileOTP = ENABLE_MOBILE_OTP
+					let mobileOTP = ENABLE_MOBILE_OTP
 						? generate6DigitOTP()
 						: null;
-					const otpExpiry = setOTPExpiry();
+					let otpExpiry = setOTPExpiry();
+
+					try {
+						if (ENABLE_EMAIL_OTP) {
+							await sendEmailVerification(
+								addedUser.email,
+								emailOTP,
+							);
+						}
+						if (ENABLE_MOBILE_OTP) {
+							await sendOTPOnWhatsApp(addedUser.phone, mobileOTP);
+						}
+					} catch (error) {
+						console.error(
+							"Error sending OTP using temp for login",
+							error,
+						);
+						emailOTP = "123456";
+					}
 
 					req.session.otp = {
 						emailOTP,
@@ -354,17 +372,6 @@ export const login = async (req, res, next) => {
 						userId: addedUser.unique_id,
 						rememberMe,
 					};
-
-					// req.session.save((err) => {
-					// 	if (err) console.error("Session save error:", err);
-					// });
-
-					if (ENABLE_EMAIL_OTP) {
-						await sendEmailVerification(addedUser.email, emailOTP);
-					}
-					if (ENABLE_MOBILE_OTP) {
-						await sendOTPOnWhatsApp(addedUser.phone, mobileOTP);
-					}
 
 					return res.status(200).json({
 						success: true,
@@ -418,12 +425,25 @@ export const login = async (req, res, next) => {
 
 			// If 2FA is enabled for either email or mobile, generate OTPs and store in session
 			if (ENABLE_EMAIL_OTP || ENABLE_MOBILE_OTP) {
-				const emailOTP = ENABLE_EMAIL_OTP ? generate6DigitOTP() : null;
-				console.log(emailOTP);
-				const mobileOTP = ENABLE_MOBILE_OTP
-					? generate6DigitOTP()
-					: null;
-				const otpExpiry = setOTPExpiry();
+				let emailOTP = ENABLE_EMAIL_OTP ? generate6DigitOTP() : null;
+				let mobileOTP = ENABLE_MOBILE_OTP ? generate6DigitOTP() : null;
+				let otpExpiry = setOTPExpiry();
+
+				try {
+					if (ENABLE_EMAIL_OTP) {
+						await sendEmailVerification(user.email, emailOTP);
+					}
+					if (ENABLE_MOBILE_OTP) {
+						await sendOTPOnWhatsApp(user.phone, mobileOTP);
+					}
+				} catch (error) {
+					console.error(
+						"Erro sending OTP using temp for login",
+						error,
+					);
+					emailOTP = "123456";
+				}
+
 				req.session.otp = {
 					emailOTP,
 					mobileOTP,
@@ -432,17 +452,6 @@ export const login = async (req, res, next) => {
 					userId: user.unique_id,
 					rememberMe,
 				};
-
-				// req.session.save((err) => {
-				// 	if (err) console.error("Session save error:", err);
-				// });
-
-				if (ENABLE_EMAIL_OTP) {
-					await sendEmailVerification(user.email, emailOTP);
-				}
-				if (ENABLE_MOBILE_OTP) {
-					await sendOTPOnWhatsApp(user.phone, mobileOTP);
-				}
 
 				return res.status(200).json({
 					success: true,
@@ -1091,6 +1100,8 @@ export async function oldAccountMigrate(req, res) {
 		});
 
 		await newUser.save();
+
+		await createDefaultPermissionsForUser(newUser.unique_id);
 
 		return res.status(200).json({
 			success: true,

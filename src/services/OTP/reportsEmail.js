@@ -1,23 +1,10 @@
 import ejs from "ejs";
 import path from "path";
-import dotenv from "dotenv";
 import ct from "countries-and-timezones";
-import nodemailer from "nodemailer";
 import { overview } from "../../controllers/Report/reports.functions.js";
 import User from "../../models/user.model.js";
 import { countries } from "../../utils/dropDown.js";
-
-dotenv.config();
-
-const transporter = nodemailer.createTransport({
-	host: "smtp.gmail.com",
-	port: 465,
-	secure: true,
-	auth: {
-		user: process.env.EMAIL_USER,
-		pass: process.env.EMAIL_PASSWORD,
-	},
-});
+import { sendMail } from "./emailService.js";
 
 const __dirname = path.resolve();
 
@@ -130,7 +117,6 @@ export const sendCampaignReportEmail = async (campaignId, userId) => {
 
 		// Configure email options
 		const mailOptions = {
-			from: process.env.EMAIL_USER,
 			to: user.email, //"dharmesh@viralpitch.co", //
 			subject: `Campaign Report - ${campaignName} (${campaignId})`,
 			html,
@@ -144,7 +130,7 @@ export const sendCampaignReportEmail = async (campaignId, userId) => {
 		};
 
 		// Send email
-		await transporter.sendMail(mailOptions);
+		await sendMail(mailOptions);
 		console.log(`Report email sent for campaign ${campaignId}`);
 	} catch (error) {
 		console.error("Error sending report email:", error);
@@ -199,8 +185,7 @@ export const sendCampaignScheduledEmail = async (
 		});
 
 		const mailOptions = {
-			from: process.env.EMAIL_USER,
-			to: userEmail, //"dharmesh@viralpitch.co",
+			to: userEmail, //"dharmesh@viralpitch.co", //
 			subject: `Campaign Scheduled: ${campaignName}`,
 			html,
 			attachments: [
@@ -212,7 +197,7 @@ export const sendCampaignScheduledEmail = async (
 			],
 		};
 
-		await transporter.sendMail(mailOptions);
+		await sendMail(mailOptions);
 		console.log("Scheduled confirmation email sent to:", userEmail);
 	} catch (error) {
 		console.error("Error sending scheduled confirmation email:", error);

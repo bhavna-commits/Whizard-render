@@ -1,21 +1,7 @@
-import dotenv from "dotenv";
-import nodemailer from "nodemailer";
-
-dotenv.config();
-
-const transporter = nodemailer.createTransport({
-	host: "smtp.gmail.com",
-	port: 465,
-	secure: true,
-	auth: {
-		user: process.env.EMAIL_USER,
-		pass: process.env.EMAIL_PASSWORD,
-	},
-});
+import { sendMail } from "./emailService.js";
 
 export default async function sendAddUserMail(name, invitationLink, email) {
 	const mailOptions = {
-		from: process.env.EMAIL_USER,
 		to: email,
 		subject: "Invitation to Join Whizard",
 		html: `
@@ -44,5 +30,5 @@ export default async function sendAddUserMail(name, invitationLink, email) {
 		],
 	};
 
-	await transporter.sendMail(mailOptions);
+	await sendMail(mailOptions);
 }
