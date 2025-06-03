@@ -15,8 +15,8 @@ const sessionMiddleware = session({
 	store: MongoStore.create({
 		client: mongoose.connection.getClient(),
 		mongoUrl: process.env.MONGO_URI,
-		ttl: maxAge / 1000,
 		collectionName: "sessions",
+		autoRemove: "native", // optional but good for cleanup
 	}),
 	cookie: {
 		maxAge,

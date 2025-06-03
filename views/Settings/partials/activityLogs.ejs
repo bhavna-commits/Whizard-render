@@ -49,9 +49,7 @@ const yesterday = formatDate(yesterdayDate);
 				<div class="flex justify-between w-full space-x-7">
 					<div>
 						<p class="font-bold"><%= log.name %></p>
-						<p class="text-sm text-gray-500">
-							<%= new Date(log.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) %>
-						</p>
+						<p class="text-sm text-gray-500 log-time" data-date="<%= log.createdAt %>"></p>						
 					</div>
 					<span class="<%= log.actions.toLowerCase() %> 
 						bg-<%= log.actions.toLowerCase() === 'send' ? 'orange-100' : 
@@ -84,3 +82,18 @@ const yesterday = formatDate(yesterdayDate);
 
 <% }); %>
 <% } %>
+
+<script>
+	document.querySelectorAll('.log-time').forEach((el) => {
+		const isoDate = el.getAttribute('data-date');
+		if (isoDate) {
+			const date = new Date(Number(isoDate));
+			const formatted = date.toLocaleTimeString('en-GB', {
+				hour: '2-digit',
+				minute: '2-digit',
+				hour12: true,
+			});
+			el.textContent = formatted;
+		}
+	});
+</script>

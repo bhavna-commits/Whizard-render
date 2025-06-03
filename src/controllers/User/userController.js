@@ -641,8 +641,10 @@ export const verifyOTP = async (req, res, next) => {
 			};
 		}
 		req.session.cookie.maxAge = otpData.rememberMe
-			? 30 * 24 * 60 * 60 * 1000
+			? 7 * 24 * 60 * 60 * 1000
 			: 3 * 60 * 60 * 1000;
+
+		req.session.touch();
 
 		delete req.session.otp;
 

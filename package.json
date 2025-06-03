@@ -16,6 +16,7 @@
 	"author": "Dharmesh",
 	"license": "ISC",
 	"dependencies": {
+		"@sendgrid/mail": "^8.1.5",
 		"agenda": "^5.0.0",
 		"axios": "^1.7.9",
 		"bcrypt": "^5.1.1",

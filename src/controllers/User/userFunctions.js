@@ -14,7 +14,7 @@ export const sendEmailVerification = async (email, token) => {
 	try {
 		await sendVerificationEmail(email, token);
 	} catch (error) {
-		throw "Failed to send verification email";
+		throw error;
 	}
 };
 
@@ -22,7 +22,7 @@ export const sendOTPOnWhatsApp = async (email, token) => {
 	try {
 		await sendVerificationEmail(email, token);
 	} catch (error) {
-		throw "Failed to send verification email";
+		throw error;
 	}
 };
 
