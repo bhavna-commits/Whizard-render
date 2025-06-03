@@ -640,6 +640,7 @@ export const verifyOTP = async (req, res, next) => {
 				whatsAppStatus: user.WhatsAppConnectStatus,
 			};
 		}
+		
 		req.session.cookie.maxAge = otpData.rememberMe
 			? 7 * 24 * 60 * 60 * 1000
 			: 3 * 60 * 60 * 1000;
@@ -653,7 +654,7 @@ export const verifyOTP = async (req, res, next) => {
 			message: "OTP verified successfully. Login completed.",
 		});
 	} catch (error) {
-		console.log("error logging in :", error);
+		console.error("error logging in :", error);
 		return res.status(500).json({
 			success: false,
 			message: "Error verifying OTP",
