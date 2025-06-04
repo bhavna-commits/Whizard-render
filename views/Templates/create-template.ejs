@@ -85,8 +85,8 @@
 	<div class="layout-container">
 		<%- include("../commonJS/sidebar")  %>
 		
-		<div class="flex bg-slate-50 flex-grow w-full max-h-full overflow-auto">
-			<div class="bg-white px-3 ml-1 py-3 min-w-[22rem] flex-shrink">
+		<div class="flex flex-grow w-full overflow-auto items-stretch">
+			<div class=" px-3 py-3 min-w-[22rem] flex-shrink min-h-full h-fit">
 				<div class="title logo w-full">
 					<h4 class="page-title font-bold text-xl text-center">
 						Add template
@@ -213,7 +213,7 @@
 				</form>
 			</div>
 			
-			<div class=" mx-2 px-1 bg-white flex-grow min-w-[30rem] ">
+			<div class="border-l-[0.5rem] border-r-[0.5rem] border-[#f9f9fa] px-3 flex-grow min-w-[30rem] min-h-full h-fit">
 				<div class="p-2">
 					<div class="d-flex w-full justify-content-between align-items-center logo">
 						<div class="title ">
@@ -309,8 +309,7 @@
 									<button class="py-1 px-2 rounded-lg" onclick="formatText('strikethrough', this)">
 										<i class="fa fa-strikethrough text-sm"></i>
 									</button>
-									<button class="text-sm py-1 px-2 rounded-lg" onclick="addBrackets()">
-									
+									<button class="text-sm py-1 px-2 rounded-lg" onclick="addBrackets()">									
 										{{}}
 									</button>
 									
@@ -418,7 +417,7 @@
 					</div>
 				</div>
 			</div>
-			<div class="px-1 bg-white min-w-[25rem] max-w-[25rem]">
+			<div class="pr-1  min-w-[25rem] max-w-[25rem] min-h-full h-fit">
 				<div class="p-3">
 					<div class="title logo w-full">
 						<h4 class="page-title text-xl font-bold text-center">

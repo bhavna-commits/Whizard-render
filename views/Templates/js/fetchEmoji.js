@@ -1,16 +1,22 @@
 // Function to open and fetch emojis
-async function openEmojis() {
+let savedRange = null;
+
+function openEmojis() {
 	const emojiContainer = document.getElementById("emojiContainer");
 	const emojiList = document.getElementById("emojiList");
 
-	// Toggle the emoji container visibility
+	// Save the selection
+	const selection = window.getSelection();
+	if (selection.rangeCount > 0) {
+		savedRange = selection.getRangeAt(0).cloneRange();
+	}
+
+	// Toggle visibility
 	if (emojiContainer.classList.contains("hidden")) {
 		emojiContainer.classList.remove("hidden");
-		// console.log(emojiContainer.classList.contains("hidden"));
-		// Fetch emojis from the API
+
 		if (emojiList.children.length === 0) {
-			const emojis = await fetchEmojis();
-			displayEmojis(emojis);
+			fetchEmojis().then(displayEmojis);
 		}
 	} else {
 		emojiContainer.classList.add("hidden");
@@ -60,43 +66,23 @@ function displayEmojis(emojis) {
 
 function insertEmojiAtCursor(emoji) {
 	const bodyInput = document.getElementById("bodyInput");
-	bodyInput.focus(); // Focus on the contenteditable div
+	bodyInput.focus();
+
+	if (!savedRange) return;
 
 	const selection = window.getSelection();
+	selection.removeAllRanges();
+	selection.addRange(savedRange); // Restore where the user left off
 
-	// Ensure there is a valid selection
-	if (!selection.rangeCount) return;
+	// Insert emoji
+	const emojiNode = document.createTextNode(emoji);
+	savedRange.insertNode(emojiNode);
 
-	const range = selection.getRangeAt(0);
-
-	// If selection is collapsed (no text selected, just a cursor)
-	if (range.collapsed) {
-		const emojiNode = document.createTextNode(emoji); // Create emoji text node
-
-		// Insert the emoji at the current position (cursor)
-		range.insertNode(emojiNode);
-
-		// Move the cursor right after the emoji
-		range.setStartAfter(emojiNode);
-		range.setEndAfter(emojiNode);
-
-		// Update the selection to reflect the new range
-		selection.removeAllRanges();
-		selection.addRange(range);
-	} else {
-		// Handle the case where text is selected (to replace selected text with emoji)
-		range.deleteContents(); // Delete the selected content
-		const emojiNode = document.createTextNode(emoji); // Create emoji text node
-		range.insertNode(emojiNode); // Insert the emoji at the selection position
-
-		// Move the cursor after the inserted emoji
-		range.setStartAfter(emojiNode);
-		range.setEndAfter(emojiNode);
-
-		// Update the selection to reflect the new range
-		selection.removeAllRanges();
-		selection.addRange(range);
-	}
+	// Move caret after emoji
+	savedRange.setStartAfter(emojiNode);
+	savedRange.setEndAfter(emojiNode);
+	selection.removeAllRanges();
+	selection.addRange(savedRange);
 }
 
 // Search input for filtering emojis
