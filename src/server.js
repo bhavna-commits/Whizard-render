@@ -1,5 +1,7 @@
 import dotenv from "dotenv";
 dotenv.config();
+import cluster from "cluster";
+import os from "os";
 import app from "./routes.app.js";
 import { connectDB } from "./config/db.js";
 import { Server } from "socket.io";
@@ -39,58 +41,68 @@ process.on("SIGTERM", async () => {
 	process.exit(0);
 });
 
-const httpsServer = https.createServer(app);
+const PORT = process.env.PORT || 5001;
 
-const io = new Server(httpsServer, {
-	cors: { origin: "*" },
-});
+if (cluster.isPrimary) {
+	const cpuCount = os.cpus().length;
+	console.log(
+		`Primary process ${process.pid} is running. Forking ${cpuCount} workers...`,
+	);
 
-io.on("connection", (socket) => {
-	console.log("User connected:", socket.id);
+	// Fork a worker for each CPU
+	for (let i = 0; i < cpuCount; i++) {
+		cluster.fork();
+	}
 
-	socket.on("initial-users_idal_com", async (data) => {
-		console.log(data);
-		let res = {};
-		try {
-			if (data["type"] === "send-message") {
-				console.log(data);
-				try {
-					res = await sendMessages(data);
-				} catch (e) {
-					console.log(e);
+	cluster.on("exit", (worker, code) => {
+		console.log(
+			`Worker ${worker.process.pid} died (code: ${code}). Spawning a new one.`,
+		);
+		cluster.fork();
+	});
+} else {
+	// Each worker runs the Express server
+	const workerServer = https.createServer(app);
+	workerServer.listen(PORT, () => {
+		console.log(`Worker ${process.pid} listening on port ${PORT}`);
+	});
+
+	const io = new Server(workerServer, {
+		cors: { origin: "*" },
+	});
+
+	io.on("connection", (socket) => {
+		console.log("User connected:", socket.id);
+
+		socket.on("initial-users_idal_com", async (data) => {
+			let res = {};
+			try {
+				switch (data.type) {
+					case "send-message":
+						res = await sendMessages(data);
+						break;
+					case "getUsers":
+						res = await getUsers(data);
+						break;
+					case "getSingleChat":
+						res = await getSingleChat(data);
+						break;
+					case "searchUsers":
+						res = await searchUsers(data);
+						break;
 				}
-			} else if (data["type"] === "getUsers") {
-				try {
-					res = await getUsers(data);
-				} catch (e) {
-					console.log(e);
-				}
-			} else if (data["type"] === "getSingleChat") {
-				try {
-					res = await getSingleChat(data);
-				} catch (e) {
-					console.log(e);
-				}
-			} else if (data["type"] === "searchUsers") {
-				try {
-					res = await searchUsers(data);
-				} catch (e) {
-					console.log(e);
-				}
+				socket.emit(data.emitnode, res);
+			} catch (e) {
+				console.log("Error handling socket event:", e);
 			}
-			socket.emit(data["emitnode"], res);
-		} catch (e) {
-			console.log(e);
-		}
+		});
 
 		socket.on("disconnect", () => {
 			console.log("User disconnected:", socket.id);
 		});
 	});
-});
+}
 
-const PORT = process.env.PORT || 5001;
-
-httpsServer.listen(PORT, "0.0.0.0", () => {
-	console.log(`Server running securely on http://localhost:${PORT}`);
-});
+// httpsServer.listen(PORT, "0.0.0.0", () => {
+// 	console.log(`Server running securely on http://localhost:${PORT}`);
+// });
