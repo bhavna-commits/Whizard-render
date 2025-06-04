@@ -14,7 +14,22 @@ import {
 	getSingleChat,
 } from "./controllers/Chats/chats.controller.js";
 
+// import fs from "fs";
+// import path from "path";
+
+// const __dirname = path.resolve();
+
+// const privateKey = fs.readFileSync(path.join(__dirname, "certs", "private-key-no-passphrase.pem"), "utf8");
+// const certificate = fs.readFileSync(path.join(__dirname, "certs", "certificate.pem"), "utf8");
+
+// const credentials = { key: privateKey, cert: certificate };
+
+// const server = https.createServer(credentials, app); 
+
+
 const PORT = process.env.PORT || 5001;
+
+const isRender = Boolean(process.env.RENDER);
 
 const startWorkerServer = () => {
 	const server = http.createServer(app);
@@ -73,7 +88,7 @@ const init = async () => {
 		process.exit(0);
 	});
 
-	if (cluster.isPrimary) {
+	if (!isRender && cluster.isPrimary) {
 		const cpuCount = os.cpus().length;
 		console.log(
 			`Primary process ${process.pid} is running. Forking ${cpuCount} workers...`,
