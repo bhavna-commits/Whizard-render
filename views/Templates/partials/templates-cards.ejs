@@ -19,7 +19,7 @@
 						<source src="<%= component.example?.header_url?.split("/").slice(3).join("/") %>" type="video/mp4">
 						Your browser does not support the video tag.
 					</video>
-					<% } else if (component.format === 'DOCUMENT' && component.example?.header_url) { console.log(component.example?.header_url?.split("/").slice(3).join("/") ) %>
+					<% } else if (component.format === 'DOCUMENT' && component.example?.header_url) { %>
 					<iframe src="<%= component.example?.header_url?.split("/").slice(3).join("/") %>" class="max-w-full h-auto object-contain"></iframe>
 					<% } %>
 					<% } %>
@@ -43,15 +43,14 @@
 					<% if (component.type === 'BUTTONS') { %>
 					<% component.buttons.forEach(button => { %>
 					<% if (button.type == "PHONE_NUMBER") { %>
-					<button class="w-full border-b border-gray-300 py-2" id="callBtn" draggable="true" onclick="window.location.href='tel:<%= button.phone_number %>'" style="color: #6A67FF;">
+					<button class="w-full border-b hover:cursor-default border-gray-300 py-2" id="callBtn" style="color: #6A67FF;">
 						<i class="fa fa-phone mx-2"></i><%= button.text %>
 					</button>
 					<% } else { %>
-					<button class="w-full border-b border-gray-300 py-2" id="websiteBtn" draggable="true" onclick="window.open('<%= button.url %>', '_blank')" style="color: #6A67FF;">
+					<button class="w-full border-b hover:cursor-default border-gray-300 py-2" id="websiteBtn" style="color: #6A67FF;">
 						<i class="fa fa-external-link mx-2"></i><%= button.text %>
 					</button>
 					<% } %>
-					
 					<% }); %>
 					<% } %>
 					<% }); %>

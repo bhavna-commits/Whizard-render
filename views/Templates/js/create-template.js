@@ -249,7 +249,7 @@ function validateFileSize(fileSize, mediaType) {
 removeFileIcon?.addEventListener("click", (e) => {
 	e.stopPropagation();
 	fileUpload.value = "";
-	uploadText.textContent = defaultText;
+	// uploadText.textContent = defaultText;
 	removeFileIcon.classList.add("hidden");
 });
 

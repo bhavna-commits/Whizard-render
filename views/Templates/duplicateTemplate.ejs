@@ -260,7 +260,7 @@
 					<div id="mediaInputContainer" class="hidden w-full h-10 mt-2">
 						<!-- Media Type Selection -->
 						
-						<div class="select-wrapper w-48  mr-5">
+						<div class="select-wrapper w-48 mr-5">
 							<select id="mediaType" class="w-full pl-2 cursor-pointer rounded-md border border-gray-300 bg-white py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 ">
 								<option value="image">Image</option>
 								<option value="video">Video</option>
@@ -271,7 +271,7 @@
 						
 						<!-- File Upload -->
 						<label id="uploadLabel" for="file-upload" class="px-3 h-full cursor-pointer rounded-md border border-gray-300 text-gray-400 focus-within:outline-none focus-within:ring-2 focus-within:ring-blue-500 focus-within:ring-offset-2 hover:bg-gray-100 flex items-center justify-between">
-							<span id="uploadText" class="h-fit w-full text-sm">Choose from .jpg or .png</span>
+							<span id="uploadText" class="h-fit w-full text-sm">Choose from .jpg, .png or .webp</span>
 							<input id="file-upload" name="file-upload" type="file" class="sr-only" />
 							<svg id="removeFile" xmlns="http://www.w3.org/2000/svg" class="hidden h-5 w-5 text-gray-500 cursor-pointer hover:text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
 								<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -345,7 +345,7 @@
 					
 					
 					<!-- Buttons -->
-					<div class="form-group mt-2 mb-32 overflow-y-auto">
+					<div class="form-group mt-2 mb-32">
 						<h6 class="font-semibold text-lg pb-2">
 							Buttons
 							<span class="text-gray-400 small text-sm">(optional)</span>
@@ -504,18 +504,25 @@
 			const dataTransfer = new DataTransfer();
 			dataTransfer.items.add(file);
 			
-			console.log(dataTransfer.files);
-			
 			const fileInput = document.getElementById("file-upload");
 			fileInput.files = dataTransfer.files;
 			
-			const mediaType = mimeType.split("/")[0]; // 'image', 'video', 'application'
+			const mediaType = mimeType.split("/")[0];
 			if (mediaType === "image" || mediaType === "video" || mimeType === "application/pdf") {
 				document.getElementById("mediaTypeDropdown").value = "media";
 				document.getElementById("mediaType").value = mediaType;
 				document.getElementById("mediaTypeDropdown").dispatchEvent(new Event("change"));
 			}
 			
+			if (mediaType === "image") {
+				document.getElementById("uploadText")?.textContent = "Choose from .jpg, .png or .webp";
+			} else if (mediaType === "video") {
+				document.getElementById("uploadText")?.textContent = "Choose from .mp4, .avi or .webm";
+			} else if (mediaType === "application/pdf") {
+				document.getElementById("uploadText")?.textContent = "Choose from .pdf, .doc, .docx, .txt";
+			} else {
+				document.getElementById("uploadText")?.textContent = "Choose from .gpx, .kml";
+			}
 		}
 		
 		// console.log(JSON.stringify(data));
