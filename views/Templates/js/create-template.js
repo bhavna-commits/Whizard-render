@@ -1,5 +1,6 @@
 document
-	.getElementById("bodyInput")?.addEventListener("keypress", function (event) {
+	.getElementById("bodyInput")
+	?.addEventListener("keypress", function (event) {
 		if (event.key === "Enter") {
 			document.execCommand("formatBlock", false, "p");
 			document.execCommand("fontSize", false, "2");
@@ -22,7 +23,8 @@ document.addEventListener("click", function (event) {
 });
 
 document
-	.getElementById("mediaTypeDropdown")?.addEventListener("change", function (e) {
+	.getElementById("mediaTypeDropdown")
+	?.addEventListener("change", function (e) {
 		const selectedValue = e.target.value;
 		const previewHeader = document.getElementById("previewHeader");
 		const previewHead = document.getElementById("previewHead");
@@ -207,7 +209,7 @@ fileUpload?.addEventListener("change", (e) => {
 				errorMessage = `File size exceeds the limit for ${mediaType}. Maximum allowed size is ${maxSize}.`;
 			}
 
-			toast("info",errorMessage);
+			toast("info", errorMessage);
 			fileUpload.value = "";
 			uploadText.textContent = defaultText;
 		}
@@ -283,7 +285,7 @@ document.getElementById("footerInput")?.addEventListener("input", function () {
 
 document
 	.getElementById("bodyInput")
-	.addEventListener("keydown", function (event) {
+	?.addEventListener("keydown", function (event) {
 		const bodyInput = this;
 
 		if (event.key === "Enter") {
@@ -321,7 +323,7 @@ let callBtnCount = 0;
 
 document.getElementById("addWebsiteBtn").addEventListener("click", function () {
 	if (websiteBtnCount >= 1) {
-		toast("info","You can only add 1 website button.");
+		toast("info", "You can only add 1 website button.");
 		return;
 	}
 
@@ -352,7 +354,7 @@ document.getElementById("addWebsiteBtn").addEventListener("click", function () {
 
 document.getElementById("addCallBtn").addEventListener("click", function () {
 	if (callBtnCount >= 1) {
-		toast("info","You can only add 1 call button.");
+		toast("info", "You can only add 1 call button.");
 		return;
 	}
 
@@ -441,19 +443,16 @@ function generatePreviewWebsite() {
 	let label = document.getElementById("websiteBtnLabel").value || "Visit Now";
 	let url = document.getElementById("websiteUrl").value || "#";
 
-	let preview = `
-        <button class="btn" id="websiteBtn" draggable="true" onclick="window.open('${url}', '_blank')" style="color: #6A67FF;">
-            <i class="fa fa-external-link mx-2"></i>${label}
-        </button>
-    `;
+	document.querySelectorAll(".websiteBtn").forEach((btn) => btn.remove());
 
-	let existingBtn = document.getElementById("websiteBtn");
-	if (existingBtn) {
-		existingBtn.outerHTML = preview;
-	} else {
-		document.getElementById("previewButtons").innerHTML += preview;
-		document.getElementById("previewButton").innerHTML += preview;
-	}
+	let preview = `
+  <button class="btn websiteBtn" draggable="true" onclick="window.open('${url}', '_blank')" style="color: #6A67FF;">
+    <i class="fa fa-external-link mx-2"></i>${label}
+  </button>
+`;
+
+	document.getElementById("previewButtons").innerHTML += preview;
+	document.getElementById("previewButton").innerHTML += preview;
 
 	makeButtonsDraggable();
 }
@@ -462,19 +461,18 @@ function generatePreviewCall() {
 	let label = document.getElementById("callBtnLabel").value || "Call Now";
 	let phone = document.getElementById("phoneNumber").value || "#";
 
-	let preview = `
-        <button class="btn" id="callBtn" draggable="true" onclick="window.location.href='tel:${phone}'" style="color: #6A67FF;">
-            <i class="fa fa-phone mx-2"></i>${label}
-        </button>
-    `;
+	// Remove all previous call buttons
+	document.querySelectorAll(".callBtn").forEach((btn) => btn.remove());
 
-	let existingBtn = document.getElementById("callBtn");
-	if (existingBtn) {
-		existingBtn.outerHTML = preview;
-	} else {
-		document.getElementById("previewButtons").innerHTML += preview;
-		document.getElementById("previewButton").innerHTML += preview;
-	}
+	let preview = `
+		<button class="btn callBtn" draggable="true" onclick="window.location.href='tel:${phone}'" style="color: #6A67FF;">
+			<i class="fa fa-phone mx-2"></i>${label}
+		</button>
+	`;
+
+	// Append to both preview containers
+	document.getElementById("previewButtons").innerHTML += preview;
+	document.getElementById("previewButton").innerHTML += preview;
 
 	makeButtonsDraggable();
 }

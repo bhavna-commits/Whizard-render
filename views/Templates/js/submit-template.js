@@ -378,4 +378,3 @@ function collectTemplateData() {
 
 	return templateData;
 }
-

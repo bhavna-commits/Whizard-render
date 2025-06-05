@@ -665,7 +665,7 @@ export const getList = async (req, res) => {
 
 		const FB_PHONE_ID = user?.FB_PHONE_NUMBERS?.find(
 			(n) => n.selected,
-		)?.phone_number_id;
+		);
 
 		let access = null;
 		let matchQuery = {
@@ -673,8 +673,8 @@ export const getList = async (req, res) => {
 			contact_status: { $ne: 0 },
 		};
 
-		if (FB_PHONE_ID) {
-			matchQuery.FB_PHONE_ID = FB_PHONE_ID;
+		if (FB_PHONE_ID?.phone_number_id) {
+			matchQuery.FB_PHONE_ID = FB_PHONE_ID?.phone_number_id;
 		}
 
 		if (permissionsId) {
@@ -699,6 +699,7 @@ export const getList = async (req, res) => {
 						name: userSession?.addedUser?.name,
 						color: userSession?.addedUser?.color,
 						whatsAppStatus: userSession?.addedUser?.whatsAppStatus,
+						FB_PHONE_ID,
 					});
 				}
 			}
@@ -743,6 +744,7 @@ export const getList = async (req, res) => {
 			whatsAppStatus: isAddedUser
 				? userSession.addedUser?.whatsAppStatus
 				: userSession.user?.whatsAppStatus,
+			FB_PHONE_ID,
 		};
 
 		const hasPermission = access?.contactList?.type ?? true;
