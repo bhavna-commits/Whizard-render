@@ -639,11 +639,11 @@ export const sendTemplate = async (req, res) => {
 
 		let user = await User.findOne({ unique_id: userId });
 
-		const phone_number = user.FB_PHONE_NUMBERS.find(
+		const fb_phone_number = user.FB_PHONE_NUMBERS.find(
 			(n) => n.selected == true,
 		)?.phone_number_id;
 
-		if (!phone_number) {
+		if (!fb_phone_number) {
 			throw "No phone number selected.";
 		}
 
@@ -653,9 +653,9 @@ export const sendTemplate = async (req, res) => {
 			variables,
 			contactListId,
 			contactList[0]?.recipientPhone,
-			phone_number,
-			true,
+			fb_phone_number,
 			agentId,
+			true,
 		);
 
 		await ActivityLogs.create({

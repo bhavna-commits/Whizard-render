@@ -522,6 +522,7 @@ class TemplateManager {
 
 	// Helper function to reset button state after form submission
 }
+
 $(document).ready(() => {
 	new TemplateManager();
 
@@ -645,6 +646,7 @@ $(document).ready(() => {
 		allowInput: true,
 	});
 });
+
 function resetButton(button, loader, buttonText) {
 	button.disabled = false;
 	loader.classList.add("hidden");

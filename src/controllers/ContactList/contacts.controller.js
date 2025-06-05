@@ -574,6 +574,7 @@ export const createCampaign = async (req, res, next) => {
 					contactListId,
 					test,
 					phone_number,
+					addedUserId,
 				);
 				await ActivityLogs.create({
 					useradmin: id,

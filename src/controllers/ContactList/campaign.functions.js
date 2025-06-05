@@ -453,33 +453,31 @@ export async function sendTestMessage(
 	templateId,
 	variables,
 	contactListId,
-	test,
-	phone_number,
-	sendCampaignMessage,
+	phoneNumber,
+	fb_phone_number,
 	addedUserId,
+	sendCampaignMessage,
 ) {
 	try {
 		const template = await Template.findOne({ unique_id: templateId });
 
 		if (!template) {
-			throw new Error(`Template with ID ${templateId} not found`);
+			throw `Template with ID ${templateId} not found`;
 		}
 
-		const contactList = await Contacts.find({
+		const contact = await Contacts.findOne({
 			contactId: contactListId,
-			wa_id: test,
 			subscribe: 1,
 		});
 
-		if (contactList.length === 0) {
-			throw new Error(
-				`No contacts found for contact list ID ${contactListId}`,
-			);
+		if (!sendCampaignMessage) {
+			contact.wa_id = phoneNumber;
+		}
+		
+		if (!contact) {
+			throw `No contacts found for contact list ID ${contactListId}`;
 		}
 
-		const contact = contactList[0];
-
-		// 🧠 Safely convert to Map only if not already
 		if (variables && typeof variables.get !== "function") {
 			variables = new Map(Object.entries(variables));
 		}
@@ -493,9 +491,9 @@ export async function sendTestMessage(
 		const response = await sendMessageThroughWhatsApp(
 			user,
 			template,
-			test,
+			phoneNumber,
 			personalizedMessage,
-			phone_number,
+			fb_phone_number,
 		);
 
 		const messageTemplate = generatePreviewMessage(
@@ -509,12 +507,7 @@ export async function sendTestMessage(
 		);
 
 		if (response.status === "FAILED") {
-			console.error(
-				`Failed to send message to ${test}: ${response.response}`,
-			);
-			throw new Error(
-				`Failed to send message to ${test}: ${response.response}`,
-			);
+			throw `Failed to send message to ${phoneNumber}: ${response.response}`;
 		}
 
 		if (sendCampaignMessage) {
@@ -528,13 +521,13 @@ export async function sendTestMessage(
 				timestamp: Date.now(),
 				type: "text",
 				text: messageTemplate.slice(0, 20),
-				fbPhoneId: phone_number,
+				fbPhoneId: fb_phone_number,
 				status: "sent",
 			});
 
 			const reportData = {
 				WABA_ID: user.WABA_ID,
-				FB_PHONE_ID: phone_number,
+				FB_PHONE_ID: fb_phone_number,
 				useradmin: user.unique_id,
 				unique_id: generateUniqueId(),
 				campaignName: "-", // test messages don't have a campaign
@@ -570,6 +563,6 @@ export async function sendTestMessage(
 		};
 	} catch (error) {
 		console.error("Error sending test message:", error.message || error);
-		throw new Error(error.message || error);
+		throw error.message || error;
 	}
 }
