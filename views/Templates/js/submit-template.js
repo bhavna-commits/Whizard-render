@@ -239,73 +239,61 @@ function validateCurlyBraces(text) {
 function collectTemplateData() {
 	const templateData = {};
 
-	// Helper function to display error messages
-	function showError(message) {
-		toast("info", message);
-		return false;
-	}
-
 	if (selectedLanguageCode === null) {
 		toast("info", "Please select a language before proceeding.");
-		return false;
+		return null;
 	}
 
-	// Validate template name
 	const templateNameInput = document.querySelector(
 		'input[placeholder="Give new template a name"]',
 	);
 	if (!templateNameInput || !templateNameInput.value.trim()) {
-		return showError("Please provide a valid template name.");
+		toast("info", "Please provide a valid template name.");
+		return null;
 	}
 
-	// Check that the template name contains no spaces, hyphens, or underscores
 	const templateName = templateNameInput.value.trim();
 	if (/[^a-z0-9_]/.test(templateName)) {
-		return showError(
+		toast(
+			"info",
 			"Template name must be lowercase and cannot contain spaces, hyphens, or special characters (except underscores).",
 		);
+		return null;
 	}
-
 	templateData.templateName = templateName;
 
-	// Validate category selection
 	const categoryText = document
 		.getElementById("categoryButton")
 		.textContent.trim();
 	if (categoryText === "Choose category") {
-		return showError("Please select a valid category.");
+		toast("info", "Please select a valid category.");
+		return null;
 	}
 	templateData.category = categoryText;
 
-	// Validate body input
 	const bodyInput = document.getElementById("bodyInput").innerText.trim();
 	if (!bodyInput) {
-		return showError("Body content cannot be empty.");
+		toast("info", "Body content cannot be empty.");
+		return null;
 	}
 	templateData.body = bodyInput;
 
-	// Validate footer input
 	const footerInput = document.getElementById("footerInput");
 	if (footerInput.value.trim()) {
 		templateData.footer = footerInput.value.trim();
 	}
 
-	// Validate buttons
 	const buttonElements = document.getElementById("buttonOptions").children;
 	templateData.buttons = Array.from(buttonElements)
-		.filter((btn) => btn.style.display !== "none") // Ignore buttons with display: none
+		.filter((btn) => btn.style.display !== "none")
 		.map((btn, index) => {
 			let buttonData = { text: "", type: "" };
-
-			// Check for 'Visit Now' (Website) button
 			let websiteText = btn
 				.querySelector('input[placeholder="Visit Now"]')
 				?.value?.trim();
 			let websiteUrl = btn
 				.querySelector('input[placeholder="example.com"]')
 				?.value?.trim();
-
-			// Check for 'Call Now' (Phone Call) button
 			let callText = btn
 				.querySelector('input[placeholder="Call Now"]')
 				?.value?.trim();
@@ -313,14 +301,13 @@ function collectTemplateData() {
 				.querySelector('input[placeholder="9999999999"]')
 				?.value?.trim();
 
-			// If website fields exist, handle 'Visit Now' button validation
 			if (websiteText || websiteUrl) {
-				buttonData.text = websiteText || "Visit Now"; // Default to 'Visit Now' if text is empty
+				buttonData.text = websiteText || "Visit Now";
 				buttonData.type = "URL";
 
-				// Validate URL
 				if (!websiteUrl || !websiteUrl.startsWith("https://")) {
-					showError(
+					toast(
+						"info",
 						`Button ${
 							index + 1
 						}: A valid URL is required for 'Visit Now' button.`,
@@ -330,14 +317,13 @@ function collectTemplateData() {
 				buttonData.url = websiteUrl;
 			}
 
-			// If phone fields exist, handle 'Call Now' button validation
 			if (callText || phoneNumber) {
-				buttonData.text = callText || "Call Now"; // Default to 'Call Now' if text is empty
+				buttonData.text = callText || "Call Now";
 				buttonData.type = "PHONE_NUMBER";
 
-				// Validate Phone Number
 				if (!phoneNumber) {
-					showError(
+					toast(
+						"info",
 						`Button ${
 							index + 1
 						}: Phone number is required for 'Call Now' button.`,
@@ -347,53 +333,49 @@ function collectTemplateData() {
 				buttonData.phone_number = phoneNumber;
 			}
 
-			// If neither website nor phone data exists, alert and return null
 			if (!buttonData.url && !buttonData.phone_number) {
-				showError(
+				toast(
+					"info",
 					`Button ${index + 1}: URL or Phone number is required.`,
 				);
 				return null;
 			}
 
 			return buttonData;
-		})
-		.filter((buttonData) => buttonData !== null); // Filter out any null entries caused by validation errors
+		});
 
-	// Check if any button validation failed
-	if (templateData.buttons.includes(null)) {
-		return false; // Stop submission if any button is invalid
-	}
+	if (templateData.buttons.includes(null)) return null;
 
-	// Validate header input based on type
 	const headerTypeDropdown = document.getElementById("mediaTypeDropdown");
 	if (!headerTypeDropdown) {
-		return showError("Header type is missing.");
+		toast("info", "Header type is missing.");
+		return null;
 	}
 
 	const headerType = headerTypeDropdown.value;
 	templateData.header = { type: headerType, content: null };
 
-	// Skip header validation if the type is "none"
 	if (headerType === "none") {
 		templateData.header.content = null;
 	} else if (headerType === "text") {
 		const headerText = document.getElementById("headerInput").value.trim();
 		if (!headerText) {
-			return showError("Header content cannot be empty for text type.");
+			toast("info", "Header content cannot be empty for text type.");
+			return null;
 		}
 		templateData.header.content = headerText;
 	} else if (headerType === "media") {
-		// Validate media header
 		const fileInput = document.getElementById("file-upload");
 		if (!fileInput || !fileInput.files.length) {
-			return showError("Please upload a media file for the header.");
+			toast("info", "Please upload a media file for the header.");
+			return null;
 		}
-
 		templateData.header.content = fileInput.files[0];
-		// console.log(templateData.header.content);
 	} else {
-		return showError("Invalid header type selected.");
+		toast("info", "Invalid header type selected.");
+		return null;
 	}
 
 	return templateData;
 }
+

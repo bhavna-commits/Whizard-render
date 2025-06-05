@@ -10,25 +10,18 @@ function openModal() {
 		templateData.templateName;
 	createVariableInputs(variables);
 
-	// Add event listeners
 	const previewForm = document.getElementById("previewForm");
 	previewForm.addEventListener("input", handleInputChange);
 
-	// Initial preview update
 	updatePreview();
-
-	// console.error("Error initializing preview:", error);
-	// alert(error.message);
 }
-// Function to close the modal
+
 function closeModal() {
 	document.getElementById("customModal").classList.add("hidden");
 }
 
-// Attach close button event
 document.getElementById("modalCloseBtn").addEventListener("click", closeModal);
 
-// Template preview functionality
 let originalTemplateData = {};
 
 function initializePreview(templateData) {
@@ -113,14 +106,3 @@ function updatePreview() {
 		}
 	});
 }
-
-// function replaceVariableWithSpan(templatePart, variable, value) {
-// 	if (!templatePart) return "";
-
-// 	// Preserve existing values
-// 	const regex = new RegExp(`{{\\s*${variable}\\s*}}`, "g");
-// 	const spanTemplate = <input class="bg-transparent" id="${variable}" value="${value}" />;
-
-// 	// Replace only the specific variable while preserving others
-// 	return templatePart.replace(regex, spanTemplate);
-// }
