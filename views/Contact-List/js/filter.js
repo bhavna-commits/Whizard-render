@@ -63,21 +63,17 @@ function applyFilters() {
 		}
 	});
 
-	// You can send these filters to the backend using fetch
-	console.log("Filters Applied: ", filters);
 	const id = location.pathname.split("/").pop();
-	console.log(id);
-	// Make fetch request to apply the filters
+
 	fetch(`/api/contact-list/overview/${id}`, {
 		method: "POST",
 		headers: {
 			"Content-Type": "application/json",
 		},
-		body: JSON.stringify({ filters }), // Send filters as part of the request body
+		body: JSON.stringify({ filters }),
 	})
 		.then((response) => response.text())
 		.then((data) => {
-			// Replace existing contact list with filtered results
 			const contactListContainer = document.getElementById("contactList");
 			contactListContainer.innerHTML = data;
 			formatDateCells();
@@ -90,6 +86,9 @@ function applyFilters() {
 }
 
 function clearFilters() {
+
+	location.reload();
+
 	const filterIcon = document.querySelector(".filter-icon");
 	const filterIconFilled = document.querySelector(".filter-icon-filled");
 
@@ -105,10 +104,39 @@ function clearFilters() {
 	document.getElementById("attributeSelect").value = "Name";
 	document.getElementById("conditionSelect").value = "has";
 	document.getElementById("attributeValue").value = "";
+
 	const filterContainer = document.querySelector(".filter-container");
 	while (filterContainer.firstChild) {
 		filterContainer.removeChild(filterContainer.firstChild);
 	}
+	const filterRows = document.querySelectorAll(".filter-row");
+	filterRows.forEach((row) => {
+		const attribute = row.querySelector("#attributeSelect").value;
+		const condition = row.querySelector("#conditionSelect").value;
+		const value = row.querySelector("#attributeValue").value;
+		if (attribute && value) {
+			filters.push({ field: attribute, value, condition });
+		}
+	});
+
+	const id = location.pathname.split("/").pop();
+
+	fetch(`/api/contact-list/overview/${id}`, {
+		method: "POST",
+		headers: {
+			"Content-Type": "application/json",
+		},
+		body: JSON.stringify({ filters }),
+	})
+		.then((response) => response.text())
+		.then((data) => {
+			const contactListContainer = document.getElementById("contactList");
+			contactListContainer.innerHTML = data;
+			formatDateCells();
+		})
+		.catch((error) => {
+			console.error("Error fetching contacts with filters: ", error);
+		});
 }
 
 function addFilter() {
