@@ -404,24 +404,38 @@
 			const applyFilterBtn = document.getElementById('applyFilterBtn');
 			const clearFilterBtn = document.getElementById('clearFilterBtn');
 			const filterText = document.getElementById('filter-text');
+			const filterIcon = document.querySelector(".filter-icon");
+			const filterIconFilled = document.querySelector(".filter-icon-filled");
+
 			let queryParams = new URLSearchParams(location.search);
 			
 			// Only set textContent if the query parameter exists
 			if (queryParams.has('category')) {
 				categorySelect.value = queryParams.get('category');
+				filterText.textContent = "Filtered";
+				filterIconFilled.classList.remove("hidden");
+				filterIcon.classList.add("hidden");
 			}
 			
 			if (queryParams.has('language')) {
 				languageSelect.value = queryParams.get('language');
+				filterText.textContent = "Filtered";
+				filterIconFilled.classList.remove("hidden");
+				filterIcon.classList.add("hidden");
 			}
 			
 			if (queryParams.has('search')) {
 				searchInput.value = queryParams.get('search');
+				filterText.textContent = "Filtered";
+				filterIconFilled.classList.remove("hidden");
+				filterIcon.classList.add("hidden");
 			}
 			
 			// Function to apply the filter
 			function applyFilter () {
-				
+				filterText.textContent = "Filtered";
+				filterIconFilled.classList.remove("hidden");
+				filterIcon.classList.add("hidden");
 
 				const searchValue = searchInput ? searchInput.value.trim() : '';
 				const selectedLanguage = languageSelect ? languageSelect.options[languageSelect.selectedIndex]?.value : '';
@@ -440,6 +454,9 @@
 			
 			// Function to clear the filter
 			function clearFilter () {
+				filterText.textContent = "Filter";
+				filterIconFilled.classList.add("hidden");
+				filterIcon.classList.remove("hidden");
 				// Clear the inputs and dropdowns
 				if (searchInput) searchInput.value = '';
 				if (languageSelect) languageSelect.selectedIndex = 0;
