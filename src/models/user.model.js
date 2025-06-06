@@ -2,7 +2,7 @@ import mongoose, { Schema } from "mongoose";
 
 const userSchema = new mongoose.Schema(
 	{
-		WABA_ID: { type: String, required: true, index: true, unique: true }, 
+		WABA_ID: { type: String, required: true, index: true, unique: true },
 		FB_PHONE_NUMBERS: [
 			{
 				phone_number_id: String,
@@ -15,13 +15,14 @@ const userSchema = new mongoose.Schema(
 		FB_ACCESS_TOKEN: { type: String, required: false },
 		FB_ACCESS_EXPIRES_IN: { type: Number, required: false },
 		profilePhoto: { type: String, required: false },
-		name: { type: String, required: true, index: true }, 
-		email: { type: String, required: true, unique: true }, 
+		name: { type: String, required: true, index: true },
+		email: { type: String, required: true, unique: true },
 		password: { type: String, required: true },
-		phone: { type: String, required: true, index: true }, 
+		deleted: { type: Boolean, default: false, index: true },
+		phone: { type: String, required: true, index: true },
 		addedUsers: [{ type: String, ref: "AddedUser" }],
 		color: { type: String, required: true },
-		companyName: { type: String, required: true, index: true }, 
+		companyName: { type: String, required: true, index: true },
 		companyDescription: { type: String, required: true },
 		country: { type: String, required: true },
 		state: { type: String, required: true },
@@ -40,7 +41,7 @@ const userSchema = new mongoose.Schema(
 		unique_id: {
 			type: String,
 			required: true,
-			index: true, 
+			index: true,
 		},
 		access: {
 			dashboard: {
@@ -103,7 +104,7 @@ const userSchema = new mongoose.Schema(
 		createdAt: {
 			type: Number,
 			default: () => Date.now(),
-			index: true, 
+			index: true,
 		},
 		updatedAt: {
 			type: Number,

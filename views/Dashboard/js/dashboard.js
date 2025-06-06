@@ -38,9 +38,7 @@ function hideLoader() {
 }
 
 function sendDataToBackend() {
-	console.log(waba_id, phone_number_id, fbAccessToken);
 	if (waba_id && phone_number_id && fbAccessToken) {
-		// Show the loader before starting the API call
 		showLoader();
 
 		fetch("/api/facebook/auth_code", {
@@ -56,12 +54,11 @@ function sendDataToBackend() {
 		})
 			.then((response) => response.json())
 			.then((data) => {
-				// Hide the loader once the response is received
 				hideLoader();
 				if (data.success) {
 					openSet2FAPin(phone_number_id);
 				} else {
-					toast("error",data.error);
+					toast("error", data.error);
 				}
 			})
 			.catch((error) => {

@@ -158,8 +158,7 @@
 		);
 		deleteModal.hide();
 	}
-</script>
-<script>
+	
 	document.querySelectorAll('.date-cell').forEach((el) => {
 		const rawDate = el.getAttribute('data-date');
 		if (rawDate) {
@@ -167,7 +166,7 @@
 			const formatted = date.toLocaleString('en-GB', {
 				year: 'numeric',
 				month: 'short',
-				day: '2-digit'
+				day: '2-digit',
 			});
 			el.textContent = formatted;
 		}

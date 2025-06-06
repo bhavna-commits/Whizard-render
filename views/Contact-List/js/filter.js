@@ -42,6 +42,16 @@ function applyFilters() {
 		});
 	}
 
+	// Change button appearance to show filtered state
+	const filterIcon = document.querySelector(".filter-icon");
+	const filterIconFilled = document.querySelector(".filter-icon-filled");
+
+	filterIcon.classList.add("hidden");
+	filterIconFilled.classList.remove("hidden");
+
+	// Update the text to "Filtered"
+	document.getElementById("filter-text").textContent = "Filtered";
+
 	// Collect dynamic filters
 	const filterRows = document.querySelectorAll(".filter-row");
 	filterRows.forEach((row) => {
@@ -69,20 +79,31 @@ function applyFilters() {
 		.then((data) => {
 			// Replace existing contact list with filtered results
 			const contactListContainer = document.getElementById("contactList");
-			contactListContainer.innerHTML = data; // Clear existing list
+			contactListContainer.innerHTML = data;
+			formatDateCells();
 		})
 		.catch((error) => {
 			console.error("Error fetching contacts with filters: ", error);
 		});
 
-	// Close the modal after applying filters
 	closeFilterModal();
 }
 
 function clearFilters() {
-	document.getElementById("dateInterval").value = "";
-	document.getElementById("attributeSelect").value = "";
-	document.getElementById("conditionSelect").value = "";
+	const filterIcon = document.querySelector(".filter-icon");
+	const filterIconFilled = document.querySelector(".filter-icon-filled");
+
+	filterIcon.classList.remove("hidden");
+	filterIconFilled.classList.add("hidden");
+
+	document.getElementById("filter-text").textContent = "Filters";
+
+	document.getElementById("dateText").textContent = "Choose date";
+	document.getElementById("clearDate").classList.add("hidden");
+	datePicker.clear();
+
+	document.getElementById("attributeSelect").value = "Name";
+	document.getElementById("conditionSelect").value = "has";
 	document.getElementById("attributeValue").value = "";
 	const filterContainer = document.querySelector(".filter-container");
 	while (filterContainer.firstChild) {
@@ -91,49 +112,103 @@ function clearFilters() {
 }
 
 function addFilter() {
-	const id = location.pathname.split("/").pop(); // Extract any necessary ID
-	fetch(`/contact-list/get-overview-filter/${id}`) // Fetch the rendered options from server
+	const id = location.pathname.split("/").pop();
+	fetch(`/contact-list/get-overview-filter/${id}`)
 		.then((response) => response.text())
 		.then((html) => {
 			const filterRow = document.createElement("div");
 			filterRow.classList.add("filter-row");
 
-			// Insert rendered HTML into filterRow, which contains the dynamic EJS
 			filterRow.innerHTML = `
-				<div class="flex items-center pt-2 space-x-2 relative">
-					<select placeholder="" id="attributeSelect" class="w-fit px-2 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-						${html} <!-- This HTML comes from server-rendered EJS -->
-					</select>
-					<select id="conditionSelect" class="w-fit px-2 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-						<option value="has">has</option>
-						<option value="does not">does not</option>
-					</select>
-					<input type="text" id="attributeValue" placeholder="Attribute value" class="w-fit px-2 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-				</div>
-			`;
+		  <div class="flex items-center pt-2 space-x-2 relative w-full">
+			<select placeholder="" id="attributeSelect" class="w-fit px-2 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+			  ${html}
+			</select>
+			<select id="conditionSelect" class="w-fit px-2 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+			  <option value="has">has</option>
+			  <option value="does not">does not</option>
+			</select>
+			<input type="text" id="attributeValue" placeholder="Attribute value" class="w-fit px-2 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+			<span class="remove-filter cursor-pointer text-3xl text-gray-400 hover:text-red-500 ml-2 select-none">&times;</span>
+		  </div>
+		`;
 
-			// Append the new filter row to the .filter-container
 			document.querySelector(".filter-container").appendChild(filterRow);
+
+			const removeBtn = filterRow.querySelector(".remove-filter");
+			removeBtn.addEventListener("click", () => {
+				filterRow.remove();
+			});
 		})
 		.catch((error) => {
 			console.error("Error fetching filter options:", error);
 		});
 }
 
-// Initialize flatpickr on a button with id #dateIntervalButton
-flatpickr("#dateInterval", {
-	mode: "range", // Range selection
-	dateFormat: "Y-m-d", // Date format
-	maxDate: "today", // Set max date to today
+function formatDateCells() {
+	document.querySelectorAll(".date-cell").forEach((el) => {
+		const rawDate = el.getAttribute("data-date");
+		if (rawDate) {
+			const date = new Date(Number(rawDate));
+			const formatted = date.toLocaleString("en-GB", {
+				year: "numeric",
+				month: "short",
+				day: "2-digit",
+			});
+			el.textContent = formatted;
+		}
+	});
+}
+
+const dateText = document.getElementById("dateText");
+const clearDate = document.getElementById("clearDate");
+
+clearDate.addEventListener("click", (e) => {
+	e.stopPropagation();
+	datePicker.clear();
+	dateText.textContent = "Choose date";
+	clearDate.classList.add("hidden");
+});
+
+const datePicker = flatpickr("#dateInterval", {
+	mode: "range",
+	dateFormat: "Y-m-d",
+	maxDate: "today",
 	onChange: function (selectedDates, dateStr) {
-		// When the date is selected, update the button text
-		const dateButton = document.getElementById("dateInterval");
+		const dateText = document.getElementById("dateText");
+		const clearDate = document.getElementById("clearDate");
 
 		if (selectedDates.length === 2) {
-			// Check if a range (two dates) is selected
-			dateButton.textContent = dateStr; // Update button text with the selected range
+			dateText.textContent = dateStr;
+			clearDate.classList.remove("hidden");
 		} else if (selectedDates.length === 1) {
-			dateButton.textContent = `Start: ${dateStr}`; // For single date in range mode
+			dateText.textContent = `Start: ${dateStr}`;
+			clearDate.classList.remove("hidden");
 		}
 	},
+});
+
+document.getElementById("datePickerTrigger").addEventListener("click", () => {
+	const calendar = document.querySelector(".flatpickr-calendar");
+	const anchor = document.getElementById("dateText");
+
+	datePicker.open();
+
+	setTimeout(() => {
+		const rect = anchor.getBoundingClientRect();
+		calendar.style.position = "absolute";
+		calendar.style.top = `${rect.bottom + window.scrollY}px`;
+		calendar.style.left = `${rect.left + window.scrollX}px`;
+		calendar.style.zIndex = "9999";
+	}, 0);
+});
+
+document.addEventListener("click", (e) => {
+	const calendar = document.querySelector(".flatpickr-calendar");
+	if (
+		!document.getElementById("dateText").contains(e.target) &&
+		!calendar.contains(e.target)
+	) {
+		datePicker.close();
+	}
 });

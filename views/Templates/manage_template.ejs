@@ -143,10 +143,15 @@
 				<div class="flex justify-end items-center">
 					<div id="show-modal" class="px-4 filter cursor-pointer flex text-gray-500 hover:text-gray-700 items-center" onclick="openModal()">
 						<!-- <i class="fa fa-filter" ></i> -->
-						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-5 w-5">
+						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-5 w-5 filter-icon">
 							<path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M3 4h18L14 11v7l-4 2v-9L3 4z" />
 						</svg>
-						<span class="ml-1">Filter</span>
+
+						<svg viewBox="0 0 26 24" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 filter-icon-filled hidden">
+							<path d="M25.825 1.19128C25.6711 0.835671 25.416 0.533152 25.0915 0.321351C24.7671 0.109549 24.3875 -0.00218948 24 3.25058e-05H2C1.61291 0.000795205 1.23436 0.11387 0.910279 0.325541C0.586193 0.537211 0.330496 0.83838 0.174206 1.19251C0.0179169 1.54664 -0.032248 1.93852 0.0297971 2.3206C0.0918421 2.70268 0.263431 3.05855 0.523747 3.34503L0.533747 3.35628L9 12.3963V22C8.99991 22.362 9.09807 22.7172 9.28399 23.0278C9.46992 23.3384 9.73664 23.5927 10.0557 23.7636C10.3748 23.9345 10.7343 24.0155 11.0959 23.9982C11.4574 23.9808 11.8075 23.8657 12.1087 23.665L16.1087 20.9975C16.383 20.8149 16.6078 20.5673 16.7633 20.2769C16.9188 19.9864 17.0001 19.662 17 19.3325V12.3963L25.4675 3.35628L25.4775 3.34503C25.7406 3.05986 25.9138 2.70352 25.9756 2.32049C26.0374 1.93747 25.985 1.54472 25.825 1.19128Z" fill="currentColor" />
+						</svg>
+
+						<span id="filter-text" class="ml-1">Filter</span>
 					</div>
 					<% if (access?.templates?.createTemplate && whatsAppStatus === "Live") { %>
 					<button type="button" class="flex items-center bg-blue-500 text-white px-4 py-2 rounded" onclick="getStatus()">
@@ -398,6 +403,7 @@
 			const categorySelect = document.querySelector('select[name="category"]');
 			const applyFilterBtn = document.getElementById('applyFilterBtn');
 			const clearFilterBtn = document.getElementById('clearFilterBtn');
+			const filterText = document.getElementById('filter-text');
 			let queryParams = new URLSearchParams(location.search);
 			
 			// Only set textContent if the query parameter exists
@@ -415,12 +421,12 @@
 			
 			// Function to apply the filter
 			function applyFilter () {
-				// Get the values from inputs and dropdowns
+				
+
 				const searchValue = searchInput ? searchInput.value.trim() : '';
 				const selectedLanguage = languageSelect ? languageSelect.options[languageSelect.selectedIndex]?.value : '';
 				const selectedCategory = categorySelect ? categorySelect.options[categorySelect.selectedIndex]?.value : '';
 				
-				// Update query params in the URL
 				if (searchValue) {
 					queryParams.set('search', searchValue)
 				} else {
@@ -429,9 +435,6 @@
 				if (selectedLanguage && selectedLanguage !== "Language") queryParams.set('language', selectedLanguage);
 				if (selectedCategory && selectedCategory !== "Category") queryParams.set('category', selectedCategory);
 				
-				// Implement your filtering logic here (e.g., fetching filtered data from the server)
-				console.log("Applied filters: ", searchValue, selectedLanguage, selectedCategory);
-				// Apply the new URL with query params
 				location.href = `${window.location.pathname}?${queryParams.toString()}`;
 			}
 			
@@ -466,60 +469,7 @@
 					closeModal();
 				}
 			});
-			
-			// // Handling File Input
-			// const fileInput = document.getElementById("file-input");
-			// const fileList = document.getElementById("file-list");
-			
-			// fileInput.addEventListener("change", function () {
-			// 	const files = fileInput.files;
-			
-			// 	for (const file of files) {
-			// 		const fileItem = document.createElement("div");
-			// 		fileItem.classList.add("file-item");
-			
-			// 		const fileStatus = document.createElement("div");
-			// 		fileStatus.classList.add("file-status");
-			
-			// 		const fileName = document.createElement("span");
-			// 		fileName.textContent = file.name;
-			// 		fileName.classList.add("status-uploading");
-			
-			// 		const loader = document.createElement("div");
-			// 		loader.classList.add("circular-loader");
-			
-			// 		const statusText = document.createElement("span");
-			// 		statusText.textContent = "Uploading...";
-			// 		statusText.classList.add("status-uploading");
-			
-			// 		const removeButton = document.createElement("span");
-			// 		removeButton.textContent = "✖";
-			// 		removeButton.classList.add("remove-file");
-			// 		removeButton.onclick = () => fileItem.remove();
-			
-			// 		fileStatus.appendChild(loader);
-			// 		fileStatus.appendChild(fileName);
-			// 		fileStatus.appendChild(statusText);
-			// 		fileItem.appendChild(fileStatus);
-			// 		fileItem.appendChild(removeButton);
-			// 		fileList.appendChild(fileItem);
-			
-			// 		setTimeout(() => {
-			// 			loader.remove();
-			// 			statusText.textContent = "Uploaded";
-			// 			statusText.classList.remove("status-uploading");
-			// 			statusText.classList.add("status-uploaded");
-			
-			// 			const uploadedIcon = document.createElement("div");
-			// 			uploadedIcon.classList.add("uploaded-icon");
-			// 			uploadedIcon.textContent = "✔";
-			
-			// 			fileStatus.prepend(uploadedIcon);
-			// 		}, 2000);
-			// 	}
-			// });
-			
-			// Example: Refresh Facebook Templates
+
 			async function getStatus () {
 				const icon = document.querySelector(".fa-sync");
 				try {
@@ -536,6 +486,8 @@
 					icon.classList.remove("animate-spin");
 				}
 			}
+
+
 		</script>
 		
 	</div>

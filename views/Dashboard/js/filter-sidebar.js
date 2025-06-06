@@ -1,16 +1,27 @@
 const urlt = new URL(window.location.href);
 
-
-
 const startDate1 = urlt.searchParams.get("startDate");
 const endDate1 = urlt.searchParams.get("endDate");
+
+const span = document.getElementById("showDateFilter");
+
 if (startDate1 && endDate1) {
-	const span = document.getElementById("showDateFilter");
-	span.textContent = `${startDate1} to ${endDate1}`;
+	span.innerHTML = `${startDate1} to ${endDate1}&nbsp;&nbsp;&nbsp;|<span id="clearDateFilter" style="cursor:pointer;color:red;font-weight:bold; margin-left: 0.75rem; padding-right: 0.5rem;">✕</span>`;
+
 	const startLocal = parseLocalMidnight(startDate1);
 	const endLocal = parseLocalMidnight(endDate1);
 	costReport(startLocal, endLocal);
+
+	document.getElementById("clearDateFilter").addEventListener("click", (e) => {
+		e.stopPropagation();
+		const url = new URL(window.location.href);
+		url.searchParams.delete("startDate");
+		url.searchParams.delete("endDate");
+		url.searchParams.delete("page"); 
+		window.location.href = url.toString();
+	});
 } else {
+	span.textContent = "Choose the interval";
 	costReport();
 }
 
@@ -19,7 +30,6 @@ flatpickr("#filterDate", {
 	dateFormat: "Y-m-d",
 	maxDate: "today",
 	onChange: function (selectedDates, dateStr, instance) {
-		// Only proceed when both start and end dates are selected
 		if (selectedDates.length === 2) {
 			let [startDate, endDate] = dateStr.split("to");
 
@@ -33,11 +43,8 @@ flatpickr("#filterDate", {
 				url.searchParams.set("endDate", startDate);
 			}
 
-			// Update the URL with the selected dates
-
 			url.searchParams.set("startDate", startDate);
 
-			// Redirect to updated URL after both dates are selected
 			window.location.href = url.toString();
 		}
 	},

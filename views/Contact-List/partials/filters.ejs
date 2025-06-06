@@ -5,37 +5,40 @@
 		<h3 class="text-lg font-semibold mb-4">Apply Filters</h3>
 		
 		<!-- Filters Form -->
-		<div class="mb-4">
+		<div class="mb-4 relative">
 			<label for="dateInterval" class="block text-gray-400">Choose date range</label>
-			<button type="button" id="dateInterval" class="mt-1 w-full px-4 py-2 border border-gray-300 text-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-left flex items-center"><img src="svg/calendar.svg" alt="calendar" class="pr-2"> Choose date</button>
+			<div id="datePickerTrigger" class="mt-1 w-full px-4 py-2 border border-gray-300 text-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-left flex items-center justify-between cursor-pointer">
+				<span class="flex items-center ">
+					<img src="svg/calendar.svg" alt="calendar" class="pr-2 " />
+					<span id="dateText" class="pt-[0.1rem]">Choose date</span>
+				</span>
+				<span id="clearDate" class="text-gray-400 hover:text-red-500 px-2 hidden cursor-pointer text-2xl leading-none">&times;</span>
+				<input type="text" id="dateInterval" class="hidden" />
+			</div>
 		</div>
 		<div class="flex items-end">
 			<div class="mb-4 filter-row">
 				<label for="attributeSelect" class="block text-gray-400">Attributes</label>
 				<div class="flex items-center space-x-2 relative">
-					<div class="select-wrapper">
-						<select id="attributeSelect" class="w-fit px-2 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-							<option value="Name">Name</option>
-							<option value="Number">Number</option>
-							<% if (contacts[0]?.masterExtra) { %>
-							<% Object.keys(contacts[0].masterExtra).forEach(function(key) { %>
-							<option value="<%= key %>"><%= key %></option>
-							<% }); %>
-							<% } %>
-						</select>
-					</div>
-					<div class="select-wrapper">
-						<select id="conditionSelect" class="w-fit px-2 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-							<option value="has">has</option>
-							<option value="does not">does not</option>
-						</select>
-					</div>
+					
+					<select id="attributeSelect" class="w-fit px-2 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+						<option value="Name">Name</option>
+						<option value="Number">Number</option>
+						<% if (contacts[0]?.masterExtra) { %>
+						<% Object.keys(contacts[0].masterExtra).forEach(function(key) { %>
+						<option value="<%= key %>"><%= key %></option>
+						<% }); %>
+						<% } %>
+					</select>
+					
+					<select id="conditionSelect" class="w-fit px-2 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+						<option value="has">has</option>
+						<option value="does not">does not</option>
+					</select>
+					
 					<input type="text" id="attributeValue" placeholder="Attribute value" class="w-fit px-2 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
 				</div>
-				<div class="filter-container">
-					<!-- Dynamically added filters will go here -->
-				</div>
-				<!-- Add new filters -->
+				<div class="filter-container"></div>
 				
 			</div>
 			

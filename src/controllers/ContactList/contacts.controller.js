@@ -26,7 +26,6 @@ import {
 import { sendCampaignScheduledEmail } from "../../services/OTP/reportsEmail.js";
 import ContactsTemp from "../../models/contactsTemp.model.js";
 import chatsUsersModel from "../../models/chatsUsers.model.js";
-import { group } from "console";
 
 export const __filename = fileURLToPath(import.meta.url);
 export const __dirname = path.dirname(__filename);

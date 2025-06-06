@@ -1,27 +1,34 @@
 // migration.js
 import mongoose from "mongoose";
 import dotenv from "dotenv";
-import chatsUsersModel from "./src/models/chatsUsers.model.js";
+import userModel from "./src/models/user.model.js";
 
 dotenv.config();
 
-async function flattenAgentField() {
+async function run() {
 	try {
 		await mongoose.connect(process.env.MONGO_URI);
 		console.log("✅ Connected to MongoDB via Mongoose");
 
-		const results = await chatsUsersModel
-			.find()
-			.sort({ updatedAt: -1 })
-			.limit(5); // Optional: don't crash your console 😅
+		const results = await userModel.findOneAndUpdate(
+			{ email: "dharmesh@viralpitch.co" },
+			{
+				WABA_ID: "-",
+				WhatsAppConnectStatus: "Pending",
+				FB_PHONE_NUMBERS: [],
+				FB_ACCESS_TOKEN: "-",
+			},
+			{ new: true },
+		);
 
-		console.log(`🛠️ Flattened 'agent' arrays in ${results} documents`);
+		console.log(results);
 	} catch (err) {
 		console.error("🔥 Error during migration:", err);
 	} finally {
 		await mongoose.disconnect();
 		console.log("👋 Disconnected from MongoDB");
+		process.exit(0);
 	}
 }
 
-flattenAgentField();
+run();

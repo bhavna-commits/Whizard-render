@@ -102,7 +102,7 @@ router.post("/auth_code", async (req, res) => {
 			},
 			{ new: true },
 		);
-
+		
 		// Update session
 		if (req.session?.user) {
 			req.session.user.whatsAppStatus = "Live";
@@ -110,7 +110,6 @@ router.post("/auth_code", async (req, res) => {
 			req.session.addedUser.whatsAppStatus = "Live";
 		}
 
-		// Schedule a refresh ~50 days from now (to avoid expiry)
 		if (expires_in) {
 			const runAt = new Date(Date.now() + 50 * 24 * 60 * 60 * 1000);
 			scheduleRefresh(runAt, () =>
