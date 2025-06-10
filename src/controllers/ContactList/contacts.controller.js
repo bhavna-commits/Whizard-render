@@ -916,11 +916,11 @@ export const getFilteredContacts = async (req, res, next) => {
 					convertedEndDate = convertedStartDate + 24 * 60 * 60 * 1000;
 				}
 
-				console.log(
-					"Converted Start Date (local ms):",
-					convertedStartDate,
-				);
-				console.log("Converted End Date (local ms):", convertedEndDate);
+				// console.log(
+				// 	"Converted Start Date (local ms):",
+				// 	convertedStartDate,
+				// );
+				// console.log("Converted End Date (local ms):", convertedEndDate);
 
 				// Apply filter for subscribe_date (handle case where endDate may not be provided)
 				matchStage.$and.push({
@@ -971,7 +971,7 @@ export const getFilteredContacts = async (req, res, next) => {
 				}
 			}
 		});
-		console.log(JSON.stringify(matchStage));
+
 		// Aggregation pipeline to apply filters and paginate
 		const aggregation = [
 			{ $match: matchStage },
@@ -984,7 +984,7 @@ export const getFilteredContacts = async (req, res, next) => {
 		];
 
 		const result = await Contacts.aggregate(aggregation);
-		console.log(result);
+		// console.log(result);
 		const contactLists = result[0].paginatedResults;
 		const totalContacts =
 			result[0].totalContacts.length > 0
@@ -992,7 +992,7 @@ export const getFilteredContacts = async (req, res, next) => {
 				: 0;
 
 		const totalPages = Math.ceil(totalContacts / limit);
-		console.log(contactLists);
+		// console.log(contactLists);
 
 		const permissions = req.session?.addedUser?.permissions;
 		if (permissions) {

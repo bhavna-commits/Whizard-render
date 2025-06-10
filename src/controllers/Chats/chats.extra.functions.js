@@ -78,22 +78,24 @@ export const fetchAndFormatReports = async (
 	if (!chats.length) return [];
 
 	const now = Date.now();
-	const formatted = chats.map((chat) => {
-		const isRecent =
-			chat.lastReceive && now - chat.lastReceive < 24 * 3600_000;
-		return {
-			lastmessage: chat?.lastMessage || "No recent reply",
-			wa_id: chat.wa_id,
-			status: isRecent ? 0 : 1,
-			name: chat.contactName.toString(),
-			usertimestmp:
-				chat.messageStatus === "REPLIED"
-					? chat.lastReceive
-					: chat.lastSend,
-			campaignId: chat?.campaignId || "",
-			is_read: chat.status === "READ",
-		};
-	});
+	const formatted = chats
+		.map((chat) => {
+			const isRecent =
+				chat.lastReceive && now - chat.lastReceive < 24 * 3600_000;
+			return {
+				lastmessage: chat?.lastMessage || "No recent reply",
+				wa_id: chat.wa_id,
+				status: isRecent ? 0 : 1,
+				name: chat.contactName.toString(),
+				usertimestmp:
+					chat.messageStatus === "REPLIED"
+						? chat.lastReceive
+						: chat.lastSend,
+				campaignId: chat?.campaignId || "",
+				is_read: chat.status === "READ",
+			};
+		})
+		.sort((a, b) => b.usertimestmp - a.usertimestmp);
 
 	return formatted;
 };
