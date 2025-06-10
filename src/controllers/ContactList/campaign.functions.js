@@ -80,7 +80,7 @@ export async function sendMessages(
 				from: contact.wa_id,
 				timestamp: Date.now(),
 				type: "text",
-				text: messageTemplate.slice(0, 20),
+				text: messageTemplate,
 				fbPhoneId: phone_number,
 				status: "sent",
 			});
@@ -473,7 +473,7 @@ export async function sendTestMessage(
 		if (!sendCampaignMessage) {
 			contact.wa_id = phoneNumber;
 		}
-		
+
 		if (!contact) {
 			throw `No contacts found for contact list ID ${contactListId}`;
 		}
@@ -511,7 +511,7 @@ export async function sendTestMessage(
 		}
 
 		if (sendCampaignMessage) {
-			const mediaPreview = getMediaPreviewFromTemplate(template); // ✅ you were missing this!
+			const mediaPreview = getMediaPreviewFromTemplate(template); 
 
 			await TempMessage.create({
 				name: contact.Name,
@@ -520,7 +520,7 @@ export async function sendTestMessage(
 				from: contact.wa_id,
 				timestamp: Date.now(),
 				type: "text",
-				text: messageTemplate.slice(0, 20),
+				text: messageTemplate,
 				fbPhoneId: fb_phone_number,
 				status: "sent",
 			});
@@ -530,7 +530,7 @@ export async function sendTestMessage(
 				FB_PHONE_ID: fb_phone_number,
 				useradmin: user.unique_id,
 				unique_id: generateUniqueId(),
-				campaignName: "-", // test messages don't have a campaign
+				campaignName: "-", 
 				campaignId: "-",
 				contactName: contact.Name,
 				recipientPhone: contact.wa_id,

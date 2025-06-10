@@ -102,7 +102,7 @@ router.post("/auth_code", async (req, res) => {
 			},
 			{ new: true },
 		);
-		
+
 		// Update session
 		if (req.session?.user) {
 			req.session.user.whatsAppStatus = "Live";
@@ -216,6 +216,8 @@ router.post("/webhook", async (req, res) => {
 						audio,
 						sticker,
 					} = messageEvent;
+
+					if (type === "unsupported") continue;
 
 					let mediaId = "";
 					if (type === "image" && image?.id) {

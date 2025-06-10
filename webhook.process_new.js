@@ -117,7 +117,7 @@ export const processTempMessages = async () => {
 
 		for (const agent of agentUser) {
 			const admin = agent.useradmin;
-			const uniqueId = agent.unique_id;
+			const uniqueId = agent?.unique_id;
 
 			if (allAgent.hasOwnProperty(admin)) {
 				allAgent[admin].push(uniqueId);
@@ -131,10 +131,11 @@ export const processTempMessages = async () => {
 		let wabaAgent = {};
 
 		for (const wabarow of WabaUser) {
-			const wabaID = wabarow.WABA_ID;
+			const wabaID = wabarow?.WABA_ID;
+
 			wabaAgent[wabaID] = {
-				unique_id: wabarow.unique_id,
-				WABA_ID: wabarow.WABA_ID,
+				unique_id: wabarow?.unique_id,
+				WABA_ID: wabarow?.WABA_ID,
 			};
 		}
 
@@ -145,17 +146,17 @@ export const processTempMessages = async () => {
 
 		for (const temp of tempMessages) {
 			try {
-				const from = temp["from"];
-				const fbPhoneId = temp["fbPhoneId"];
-				const wabaId = temp["wabaId"];
-				const wabaUserAdmin = wabaAgent[wabaId]["unique_id"];
+				const from = temp?.from;
+				const fbPhoneId = temp?.fbPhoneId;
+				const wabaId = temp?.wabaId;
+				const wabaUserAdmin = wabaAgent[wabaId]?.unique_id;
 
 				const keydata = from + "_" + fbPhoneId + "_" + wabaUserAdmin;
 				const wabaKay = fbPhoneId + "_" + wabaUserAdmin;
 				const keydatawithnumber = keydata;
 
 				if (wabaKay in finaldata) {
-					const numberdata = finaldata[wabaKay]["number"];
+					const numberdata = finaldata[wabaKay]?.number;
 					if (!numberdata.includes(from)) {
 						numberdata.push(from);
 					}
@@ -181,25 +182,25 @@ export const processTempMessages = async () => {
 				if ("status" in temp) {
 					if (temp["status"] === "sent") {
 						keyst = 2;
-						lastmessagetime = temp["timestamp"];
-						lastmessage = temp?.text?.body || temp["text"];
+						lastmessagetime = temp?.timestamp;
+						lastmessage = temp?.text?.body || temp?.text;
 						messageStatus = "SENT";
 					}
 				}
 
 				if (keyst === 1) {
-					lastmessage = temp?.text?.body || temp["text"];
-					lastreplay = temp["timestamp"];
+					lastmessage = temp?.text?.body || temp?.text;
+					lastreplay = temp?.timestamp;
 					messageStatus = "REPLIED";
 
 					if (!(keydatawithnumber in allreplay)) {
-						allreplay[keydatawithnumber] = temp["messageId"];
+						allreplay[keydatawithnumber] = temp?.messageId;
 					}
 
 					if (fbPhoneId in allmessgaeids) {
-						allmessgaeids[fbPhoneId].push(temp["messageId"]);
+						allmessgaeids[fbPhoneId].push(temp?.messageId);
 					} else {
-						allmessgaeids[fbPhoneId] = [temp["messageId"]];
+						allmessgaeids[fbPhoneId] = [temp?.messageId];
 					}
 				}
 
@@ -289,6 +290,7 @@ export const processTempMessages = async () => {
 						lastMessage: finalupdaterow.lastmessage,
 						lastSend: finalupdaterow.lastmessagetime,
 						messageStatus: finalupdaterow.messageStatus,
+						updatedAt: finalupdaterow.lastmessagetime,
 					};
 
 					const existingLastReceive = urow?.lastReceive || 0;
@@ -296,6 +298,7 @@ export const processTempMessages = async () => {
 
 					if (newLastReplay > 0 || existingLastReceive === 0) {
 						updateleft.lastReceive = newLastReplay;
+						updateleft.updatedAt = newLastReplay;
 					}
 
 					if (leftexit == 1) {
@@ -324,11 +327,11 @@ export const processTempMessages = async () => {
 		for (const remaininsert in messagedata) {
 			const inrow = messagedata[remaininsert];
 			const mdata = inrow["data"];
-			const uadmin = wabaAgent[mdata["wabaId"]]["unique_id"];
+			const uadmin = wabaAgent[mdata["wabaId"]]?.unique_id;
 			const name = [mdata["name"]];
-			let mstatus = "SENT";
-			if (mdata["status"] === "received") {
-				mstatus = "REPLIED";
+			let mstatus = "REPLIED";
+			if (mdata["status"] === "sent") {
+				mstatus = "SENT";
 			}
 			const supportagent = allAgent[uadmin] || [];
 
@@ -342,6 +345,14 @@ export const processTempMessages = async () => {
 				lastMessage: inrow.lastmessage,
 				lastReceive: inrow.lastreplay,
 				lastSend: inrow.lastmessagetime,
+				createdAt:
+					inrow.lastmessagetime > 0
+						? inrow.lastmessagetime
+						: inrow.lastreplay,
+				updatedAt:
+					inrow.lastmessagetime > 0
+						? inrow.lastmessagetime
+						: inrow.lastreplay,
 			});
 		}
 
@@ -358,18 +369,16 @@ export const processTempMessages = async () => {
 		}
 
 		if (tempMessages.length) {
-			const messagesToBackup = tempMessages.map((msg) => {
-				const { _id, ...rest } = msg;
-				return rest;
-			});
-
-			await TempMessageBackUp.insertMany(messagesToBackup);
-			console.log(
-				`✅ Backed up ${messagesToBackup.length} temp messages`,
-			);
+			try {
+				await TempMessageBackUp.insertMany(tempMessages, {
+					ordered: false,
+				});
+			} catch (err) {
+				console.warn("Some duplicate messages were skipped");
+			}
 		}
-		const processedIds = tempMessages.map((m) => m._id);
-		if (processedIds.length) {
+		const processedIds = tempMessages?.map((m) => m?._id);
+		if (processedIds?.length) {
 			await TempMessage.deleteMany({ _id: { $in: processedIds } });
 			console.log(
 				`🧹 Deleted ${processedIds.length} processed temp messages`,

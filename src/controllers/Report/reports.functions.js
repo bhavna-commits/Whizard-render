@@ -309,7 +309,7 @@ export async function sendMessagesReports(
 				from: contact.wa_id,
 				timestamp: Date.now(),
 				type: "text",
-				text: { body: messageTemplate.slice(0, 20) },
+				text: { body: messageTemplate },
 				fbPhoneId: phone_number,
 				status: "sent",
 			};
