@@ -10,21 +10,21 @@ function openFilterModal() {
 	modalContent.classList.add("scale-100");
 }
 
-function closeFilterModal(event = null) {
-	// Close the modal if clicking on the backdrop or the close button
+function closeFilterModal(event = null, shouldReset = false) {
 	if (event === null || event.target.id === "filterModal") {
 		const modal = document.getElementById("filterModal");
-		// modal.classList.add("hidden");
 		modal.classList.remove("opacity-100", "bg-opacity-50");
 		modal.classList.add("opacity-0", "bg-opacity-0", "pointer-events-none");
 
 		const modalContent = modal.querySelector("div");
 		modalContent.classList.remove("scale-100");
 		modalContent.classList.add("scale-95");
-		// Remove all dynamically added filter rows
-		const filterContainer = document.querySelector(".filter-container");
-		while (filterContainer.firstChild) {
-			filterContainer.removeChild(filterContainer.firstChild);
+
+		if (shouldReset) {
+			const filterContainer = document.querySelector(".filter-container");
+			while (filterContainer.firstChild) {
+				filterContainer.removeChild(filterContainer.firstChild);
+			}
 		}
 	}
 }
@@ -82,69 +82,34 @@ function applyFilters() {
 			console.error("Error fetching contacts with filters: ", error);
 		});
 
-	closeFilterModal();
+	closeFilterModal(null, false);
 }
 
 function clearFilters() {
 	location.reload();
-
-	const filterIcon = document.querySelector(".filter-icon");
-	const filterIconFilled = document.querySelector(".filter-icon-filled");
-
-	filterIcon.classList.remove("hidden");
-	filterIconFilled.classList.add("hidden");
-
-	document.getElementById("filter-text").textContent = "Filters";
-
-	document.getElementById("dateText").textContent = "Choose date";
-	document.getElementById("clearDate").classList.add("hidden");
-	datePicker.clear();
-
-	document.getElementById("attributeSelect").value = "Name";
-	document.getElementById("conditionSelect").value = "has";
-	document.getElementById("attributeValue").value = "";
-
-	const filterContainer = document.querySelector(".filter-container");
-	while (filterContainer.firstChild) {
-		filterContainer.removeChild(filterContainer.firstChild);
-	}
-	const filterRows = document.querySelectorAll(".filter-row");
-	filterRows.forEach((row) => {
-		const attribute = row.querySelector("#attributeSelect").value;
-		const condition = row.querySelector("#conditionSelect").value;
-		const value = row.querySelector("#attributeValue").value;
-		if (attribute && value) {
-			filters.push({ field: attribute, value, condition });
-		}
-	});
-
-	const id = location.pathname.split("/").pop();
-
-	fetch(`/api/contact-list/overview/${id}`, {
-		method: "POST",
-		headers: {
-			"Content-Type": "application/json",
-		},
-		body: JSON.stringify({ filters }),
-	})
-		.then((response) => response.text())
-		.then((data) => {
-			const contactListContainer = document.getElementById("contactList");
-			contactListContainer.innerHTML = data;
-			formatDateCells();
-		})
-		.catch((error) => {
-			console.error("Error fetching contacts with filters: ", error);
-		});
 }
 
 function updateRemoveButtonsVisibility() {
-	const allRemoveBtns = document.querySelectorAll(".remove-filter");
-	if (allRemoveBtns.length <= 1) {
+	const allFilterRows = document.querySelectorAll(
+		".filter-container .filter-row",
+	);
+	const allRemoveBtns = document.querySelectorAll(
+		".filter-container .remove-filter",
+	);
+
+	if (allFilterRows.length <= 1) {
 		allRemoveBtns.forEach((btn) => btn.classList.add("hidden"));
 	} else {
 		allRemoveBtns.forEach((btn) => btn.classList.remove("hidden"));
 	}
+}
+
+function attachRemoveHandler(removeBtn) {
+	removeBtn.addEventListener("click", () => {
+		const row = removeBtn.closest(".filter-row");
+		row.remove();
+		updateRemoveButtonsVisibility();
+	});
 }
 
 function addFilter() {
@@ -172,12 +137,9 @@ function addFilter() {
 			document.querySelector(".filter-container").appendChild(filterRow);
 
 			const removeBtn = filterRow.querySelector(".remove-filter");
-			removeBtn.addEventListener("click", () => {
-				filterRow.remove();
-				updateRemoveButtonsVisibility();
-			});
+			attachRemoveHandler(removeBtn);
 
-			updateRemoveButtonsVisibility(); // 🔁 Recalculate after adding new one
+			updateRemoveButtonsVisibility();
 		})
 		.catch((error) => {
 			console.error("Error fetching filter options:", error);
@@ -201,18 +163,6 @@ function formatDateCells() {
 
 const dateText = document.getElementById("dateText");
 const clearDate = document.getElementById("clearDate");
-
-const initialRemove = document.querySelector(".remove-filter");
-
-if (initialRemove) {
-	initialRemove.addEventListener("click", () => {
-		const row = initialRemove.closest(".filter-row");
-		row.remove();
-		updateRemoveButtonsVisibility();
-	});
-}
-
-updateRemoveButtonsVisibility();
 
 clearDate.addEventListener("click", (e) => {
 	e.stopPropagation();
@@ -263,3 +213,11 @@ document.addEventListener("click", (e) => {
 		datePicker.close();
 	}
 });
+
+const initialRemove = document.querySelector(
+	".filter-container .remove-filter",
+);
+
+if (initialRemove) attachRemoveHandler(initialRemove);
+
+updateRemoveButtonsVisibility();
