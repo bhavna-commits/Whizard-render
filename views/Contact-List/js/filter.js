@@ -86,7 +86,6 @@ function applyFilters() {
 }
 
 function clearFilters() {
-
 	location.reload();
 
 	const filterIcon = document.querySelector(".filter-icon");
@@ -139,6 +138,15 @@ function clearFilters() {
 		});
 }
 
+function updateRemoveButtonsVisibility() {
+	const allRemoveBtns = document.querySelectorAll(".remove-filter");
+	if (allRemoveBtns.length <= 1) {
+		allRemoveBtns.forEach((btn) => btn.classList.add("hidden"));
+	} else {
+		allRemoveBtns.forEach((btn) => btn.classList.remove("hidden"));
+	}
+}
+
 function addFilter() {
 	const id = location.pathname.split("/").pop();
 	fetch(`/contact-list/get-overview-filter/${id}`)
@@ -148,25 +156,28 @@ function addFilter() {
 			filterRow.classList.add("filter-row");
 
 			filterRow.innerHTML = `
-		  <div class="flex items-center pt-2 space-x-2 relative w-full">
-			<select placeholder="" id="attributeSelect" class="w-fit px-2 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-			  ${html}
-			</select>
-			<select id="conditionSelect" class="w-fit px-2 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-			  <option value="has">has</option>
-			  <option value="does not">does not</option>
-			</select>
-			<input type="text" id="attributeValue" placeholder="Attribute value" class="w-fit px-2 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-			<span class="remove-filter cursor-pointer text-3xl text-gray-400 hover:text-red-500 ml-2 select-none">&times;</span>
-		  </div>
-		`;
+				<div class="flex items-center pt-2 space-x-2 relative w-full">
+					<select id="attributeSelect" class="w-fit px-2 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+						${html}
+					</select>
+					<select id="conditionSelect" class="w-fit px-2 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+						<option value="has">has</option>
+						<option value="does not">does not</option>
+					</select>
+					<input type="text" id="attributeValue" placeholder="Attribute value" class="w-fit px-2 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+					<span class="remove-filter cursor-pointer text-3xl text-gray-400 hover:text-red-500 ml-2 select-none">&times;</span>
+				</div>
+			`;
 
 			document.querySelector(".filter-container").appendChild(filterRow);
 
 			const removeBtn = filterRow.querySelector(".remove-filter");
 			removeBtn.addEventListener("click", () => {
 				filterRow.remove();
+				updateRemoveButtonsVisibility();
 			});
+
+			updateRemoveButtonsVisibility(); // 🔁 Recalculate after adding new one
 		})
 		.catch((error) => {
 			console.error("Error fetching filter options:", error);
@@ -190,6 +201,18 @@ function formatDateCells() {
 
 const dateText = document.getElementById("dateText");
 const clearDate = document.getElementById("clearDate");
+
+const initialRemove = document.querySelector(".remove-filter");
+
+if (initialRemove) {
+	initialRemove.addEventListener("click", () => {
+		const row = initialRemove.closest(".filter-row");
+		row.remove();
+		updateRemoveButtonsVisibility();
+	});
+}
+
+updateRemoveButtonsVisibility();
 
 clearDate.addEventListener("click", (e) => {
 	e.stopPropagation();
