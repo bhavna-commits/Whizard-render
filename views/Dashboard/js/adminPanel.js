@@ -1,6 +1,7 @@
 async function toggleUserStatus(toggleElement) {
 	const userId = toggleElement.dataset.userId;
 	const isActive = toggleElement.dataset.status === "active";
+	document.body.classList.add("cursor-wait");
 
 	try {
 		const res = await fetch(`/api/dashboard/${userId}/toggleStatus`, {
@@ -8,15 +9,13 @@ async function toggleUserStatus(toggleElement) {
 			headers: {
 				"Content-Type": "application/json",
 			},
-			body: JSON.stringify({
-				blocked: isActive,
-			}),
+			body: JSON.stringify({ blocked: isActive }),
 		});
 
 		if (!res.ok) throw new Error("Status update failed");
 
 		const newStatus = !isActive;
-		toggleElement.dataset.status = newStatus ? "Active" : "In-Active";
+		toggleElement.dataset.status = newStatus ? "active" : "inactive";
 
 		const knob = toggleElement.querySelector(".knob");
 		const bg = toggleElement.querySelector(".bg-toggle");
@@ -29,16 +28,18 @@ async function toggleUserStatus(toggleElement) {
 		bg.classList.toggle("bg-green-500", newStatus);
 		bg.classList.toggle("bg-gray-300", !newStatus);
 
-		label.textContent = newStatus ? "active" : "inactive";
+		label.textContent = newStatus ? "Active" : "In-Active";
 		label.classList.toggle("text-green-600", newStatus);
 		label.classList.toggle("text-gray-500", !newStatus);
 	} catch (err) {
 		console.error(err);
-		toast("error", err);
+		toast("error", err.message);
+	} finally {
+		document.body.classList.remove("cursor-wait");
 	}
 }
 
-async function resetAccount(id) {
+async function resetAccount(event, id) {
 	const btn = event.target;
 	const originalHTML = btn.innerHTML;
 
@@ -63,10 +64,13 @@ async function resetAccount(id) {
 		const data = await res.json();
 
 		if (data.success) {
-			toast("success","Account reset successfully!");
-			location.reload(); 
+			toast("success", "Account reset successfully!");
+
+			setTimeout(() => {
+				location.reload();
+			}, 500);
 		} else {
-			toast("error","Reset failed: " + data.message);
+			toast("error", "Reset failed: " + data.message);
 		}
 	} catch (err) {
 		console.error("Reset error:", err);
@@ -76,4 +80,4 @@ async function resetAccount(id) {
 		btn.disabled = false;
 		btn.classList.remove("opacity-50", "cursor-wait");
 	}
-} 
+}
