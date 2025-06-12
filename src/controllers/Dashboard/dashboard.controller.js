@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import User from "../../models/user.model.js";
 import Campaign from "../../models/campaign.model.js";
 import Report from "../../models/report.model.js";
@@ -912,6 +913,8 @@ export const adminPanel = async (req, res) => {
 
 export const toggleStatus = async (req, res) => {
 	try {
+		const Session = mongoose.connection.collection("sessions");
+
 		const { id } = req.params;
 
 		const user = await User.findOne({ unique_id: id });
@@ -920,11 +923,22 @@ export const toggleStatus = async (req, res) => {
 			return res.status(404).json({ message: "User not found" });
 		}
 
+		const newBlockedStatus = !user.blocked;
+
 		const updated = await User.findOneAndUpdate(
 			{ unique_id: id },
-			{ blocked: !user.blocked },
+			{ blocked: newBlockedStatus },
 			{ new: true },
 		);
+
+		if (newBlockedStatus) {
+			await Session.deleteMany({
+				$or: [
+					{ session: { $regex: `"id":"${id}"` } },
+					{ session: { $regex: `"userId":"${id}"` } },
+				],
+			});
+		}
 
 		res.json({ success: true, blocked: updated.blocked });
 	} catch (err) {

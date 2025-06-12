@@ -151,140 +151,6 @@ export const verifyEmail = async (req, res, next) => {
 	}
 };
 
-// old login controller
-
-// export const login = async (req, res, next) => {
-// 	const { email, password, rememberMe } = req.body;
-
-// 	if (!email || !password)
-// 		return res.json({
-// 			success: false,
-// 			message: "Invalid input: Please check entered values",
-// 		});
-
-// 	if (!isString(email, password)) return next();
-
-// 	// if (!isValidEmail(email))
-// 	// 	return res.status(401).json({
-// 	// 		success: false,
-// 	// 		message:
-// 	// 			"Email is not in the valid format or is not a corporate email",
-// 	// 	});
-
-// 	if (!validatePassword(password))
-// 		return res.status(401).json({
-// 			success: false,
-// 			message: "Password is not in the valid format.",
-// 		});
-
-// 	try {
-// 		const user = await User.findOne({ email });
-
-// 		if (!user) {
-// 			const addedUser = await AddedUser.findOne({
-// 				email,
-// 				deleted: false,
-// 			}).sort({ createdAt: -1 });
-// 			// console.log(addedUser);
-// 			if (addedUser) {
-// 				if (addedUser.blocked) {
-// 					return res
-// 						.status(403)
-// 						.json({ message: "Account is blocked." });
-// 				}
-
-// 				if (!addedUser.password) {
-// 					return res.status(403).json({
-// 						message:
-// 							"Account is In-Active. Please setup Password through the invitation link",
-// 					});
-// 				}
-
-// 				// console.log("here : login");
-// 				const isMatch = bcrypt.compare(password, addedUser.password);
-// 				// console.log("here: passed");
-
-// 				if (!isMatch) {
-// 					await incrementLoginAttempts(addedUser);
-// 					return res
-// 						.status(400)
-// 						.json({ message: "Invalid credentials" });
-// 				}
-
-// 				await addedUser.save();
-
-// 				const data = await User.findOne({
-// 					unique_id: addedUser.useradmin,
-// 				});
-// 				// console.log(addedUser);
-// 				req.session.addedUser = {
-// 					id: addedUser.unique_id,
-// 					name: addedUser.name,
-// 					photo: addedUser?.photo,
-// 					color: addedUser.color,
-// 					permissions: addedUser.roleId,
-// 					owner: addedUser.useradmin,
-// 					whatsAppStatus: data.WhatsAppConnectStatus,
-// 				};
-
-// 				if (rememberMe) {
-// 					req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000; // 30 days
-// 				} else {
-// 					req.session.cookie.maxAge = 3 * 60 * 60 * 1000; // 3 hours
-// 				}
-
-// 				return res.status(200).json({
-// 					message: "Login successful",
-// 				});
-// 			}
-
-// 			return res.status(400).json({ message: "User not found" });
-// 		} else {
-// 			if (user.blocked) {
-// 				return res.status(403).json({ message: "Account is blocked." });
-// 			}
-
-// 			const now = Date.now();
-// 			if (user.lockUntil && user.lockUntil > now) {
-// 				return res.status(429).json({
-// 					message: `Account locked. Please try again later.`,
-// 				});
-// 			}
-
-// 			const isMatch = await bcrypt.compare(password, user.password);
-
-// 			if (!isMatch) {
-// 				await incrementLoginAttempts(user);
-// 				return res.status(400).json({ message: "Invalid credentials" });
-// 			}
-
-// 			await user.save();
-
-// 			// await createDefaultPermissionsForUser(user.unique_id);
-
-// 			req.session.user = {
-// 				id: user.unique_id,
-// 				name: user.name,
-// 				color: user.color,
-// 				photo: user.profilePhoto,
-// 				whatsAppStatus: user.WhatsAppConnectStatus,
-// 			};
-
-// 			if (rememberMe) {
-// 				req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000; // 30 days
-// 			} else {
-// 				req.session.cookie.maxAge = 3 * 60 * 60 * 1000; // 3 hours
-// 			}
-
-// 			return res.status(200).json({
-// 				message: "Login successful",
-// 			});
-// 		}
-// 	} catch (error) {
-// 		return res.status(500).json({ message: "Error logging in", error });
-// 	}
-// };
-
 export const login = async (req, res, next) => {
 	const { email, password, rememberMe } = req.body;
 
@@ -330,11 +196,12 @@ export const login = async (req, res, next) => {
 				);
 				if (!isMatch) {
 					await incrementLoginAttempts(addedUser);
+					await addedUser.save();
 					return res
 						.status(400)
 						.json({ message: "Invalid credentials" });
 				}
-				await addedUser.save();
+				
 
 				// If 2FA is enabled for either email or mobile, generate OTPs and store in session
 				if (ENABLE_EMAIL_OTP || ENABLE_MOBILE_OTP) {
@@ -417,11 +284,12 @@ export const login = async (req, res, next) => {
 			const isMatch = await bcrypt.compare(password, user.password);
 			if (!isMatch) {
 				await incrementLoginAttempts(user);
+				await user.save();
 				return res
 					.status(400)
 					.json({ message: "Invalid credentials", success: false });
 			}
-			await user.save();
+			
 
 			// If 2FA is enabled for either email or mobile, generate OTPs and store in session
 			if (ENABLE_EMAIL_OTP || ENABLE_MOBILE_OTP) {
