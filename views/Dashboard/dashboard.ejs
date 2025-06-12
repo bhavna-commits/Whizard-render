@@ -135,6 +135,9 @@
 						<div class="watchDemo flex items-center"><img src="svg/demo.svg" alt="Demo" class="pr-2 "> Watch Demo
 						</div>
 					</div>
+					<% if (admin) { %>
+					<button type="button" class="flex items-center border p-2 rounded-md" onclick="location.href='/admin-panel'"><img src="svg/adminPanelClicked.svg" alt="" class="pr-2">Admin Panel</button>
+					<% } %>
 				</div>
 				
 				<%- include("partials/FB-PhoneNumbers") %>

@@ -109,6 +109,16 @@
 			</a>
 			<% } %>
 		</li>
+		
+		<!-- Admin Panel -->
+		<%# if (admin) { %>
+		<!-- <li>
+			<a href="/settings" class="admin-link">
+				<span class="icon"><img loading="lazy" src="svg/adminPanel.svg" /></span>
+				Settings
+			</a>
+		</li> -->
+		<%# } %>
 	</ul>
 	
 	<div class="user-profile text-white flex justify-center items-center text-center">
@@ -177,6 +187,11 @@
 				linkClass: '.chats-link',
 				iconNormal: 'svg/chats.svg',
 				iconClicked: 'svg/chatsClicked.svg'
+			},
+			admin: {
+				linkClass: '.admin-link',
+				iconNormal: 'svg/adminPanel.svg',
+				iconClicked: 'svg/adminPanelClicked.svg'
 			}
 		};
 		

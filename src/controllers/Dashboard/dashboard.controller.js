@@ -53,6 +53,7 @@ export const getDashboard = async (req, res) => {
 			photo: req.session?.addedUser?.photo || req.session?.user?.photo,
 			name: req.session?.addedUser?.name || req.session?.user?.name,
 			color: req.session?.addedUser?.color || req.session?.user?.color,
+			admin: req.session?.user?.id === "db2426e80f",
 		};
 
 		// Handle permissions and render the appropriate view
@@ -864,5 +865,100 @@ const handleFacebookError = (response, data) => {
 			data.error.message ||
 			"Unknown error"
 		}`;
+	}
+};
+
+export const adminPanel = async (req, res) => {
+	try {
+		let users = await User.find(
+			{ unique_id: { $ne: "db2426e80f" } },
+			"WABA_ID email name blocked unique_id",
+		).lean();
+
+		const campaignOwners = await Campaign.aggregate([
+			{
+				$group: {
+					_id: "$useradmin",
+				},
+			},
+		]);
+
+		const ownerSet = new Set(campaignOwners.map((o) => o._id));
+
+		users = users.map((user) => ({
+			...user,
+			campaign: ownerSet.has(user.unique_id),
+		}));
+
+		const renderData = {
+			users,
+			photo: req.session?.user?.photo,
+			name: req.session?.user?.name,
+			color: req.session?.user?.color,
+		};
+
+		const access = await User.findOne({
+			unique_id: req.session?.user?.id,
+		});
+
+		renderData.access = access.access;
+
+		res.render("Dashboard/adminPanel", renderData);
+	} catch (error) {
+		console.error("Error getting Admin panel :", error);
+		res.render("errors/serverError");
+	}
+};
+
+export const toggleStatus = async (req, res) => {
+	try {
+		const { id } = req.params;
+
+		const user = await User.findOne({ unique_id: id });
+
+		if (!user) {
+			return res.status(404).json({ message: "User not found" });
+		}
+
+		const updated = await User.findOneAndUpdate(
+			{ unique_id: id },
+			{ blocked: !user.blocked },
+			{ new: true },
+		);
+
+		res.json({ success: true, blocked: updated.blocked });
+	} catch (err) {
+		console.error("toggleStatus error:", err);
+		res.status(500).json({ success: false, message: err });
+	}
+};
+
+export const resetUserAccount = async (req, res) => {
+	try {
+		const { id } = req.params;
+
+		const updatedUser = await User.findOneAndUpdate(
+			{ unique_id: id },
+			{
+				$set: {
+					WABA_ID: "-",
+					WhatsAppConnectStatus: "Pending",
+					FB_PHONE_NUMBERS: [],
+					FB_ACCESS_TOKEN: "-",
+				},
+			},
+			{ new: true },
+		);
+
+		if (!updatedUser) {
+			return res
+				.status(404)
+				.json({ success: false, message: "User not found" });
+		}
+
+		res.json({ success: true, user: updatedUser });
+	} catch (error) {
+		console.error("Reset user error:", error);
+		res.status(500).json({ success: false, message: error });
 	}
 };

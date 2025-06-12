@@ -1,9 +1,13 @@
 import express from "express";
-import { checkSession } from "../middleWares/checkSession.js";
+import {
+	checkSession,
+	checkAdminSession,
+} from "../middleWares/checkSession.js";
 import { countries, roles, size, industryCategory } from "../utils/dropDown.js";
 import {
 	getDashboard,
 	getFilters,
+	adminPanel,
 } from "../controllers/Dashboard/dashboard.controller.js";
 import {
 	getCreatePassword,
@@ -88,5 +92,7 @@ router.get(`/UdY0U6Zlfp`, (req, res) => {
 		industryCategory: industryCategory,
 	});
 });
+
+router.get(`/admin-panel`, checkSession, checkAdminSession, adminPanel);
 
 export default router;

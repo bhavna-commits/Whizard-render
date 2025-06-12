@@ -1,6 +1,5 @@
 export const checkSession = (req, res, next) => {
 	if (req.session?.user && req.session?.addedUser) {
-		
 		// If both user and addedUser are present, destroy the session to ensure one user at a time
 		req.session.destroy((err) => {
 			if (err) {
@@ -16,5 +15,13 @@ export const checkSession = (req, res, next) => {
 	} else {
 		// Redirect to login if neither is found
 		res.redirect("/login");
+	}
+};
+
+export const checkAdminSession = (req, res, next) => {
+	if (req.session?.user?.id === "db2426e80f") {
+		next();
+	} else {
+		res.redirect("/");
 	}
 };
