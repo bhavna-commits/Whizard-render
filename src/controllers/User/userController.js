@@ -48,8 +48,8 @@ export const generateOTP = async (req, res, next) => {
 				success: false,
 				message: "Password is not in the valid format.",
 			});
-		const user = await User.findOne({ email });
-		console.log(user);
+		const user = await User.findOne({ email, deleted: false });
+
 		if (user) {
 			return res
 				.status(409)
@@ -57,7 +57,7 @@ export const generateOTP = async (req, res, next) => {
 		}
 
 		const phone = `${countryCode}${phoneNumber}`;
-		const mobileExists = await User.findOne({ phone });
+		const mobileExists = await User.findOne({ phone, deleted: false });
 
 		if (mobileExists) {
 			return res.status(409).json({
@@ -113,8 +113,6 @@ export const verifyEmail = async (req, res, next) => {
 	try {
 		const tempUser = req.session?.tempUser;
 
-		console.log(tempUser);
-
 		if (!tempUser) {
 			return res.status(400).json({
 				success: false,
@@ -167,7 +165,7 @@ export const login = async (req, res, next) => {
 			.json({ message: "Password is not in the valid format." });
 
 	try {
-		const user = await User.findOne({ email });
+		const user = await User.findOne({ email, deleted: false });
 		if (!user) {
 			// If no user found in the primary collection, check the AddedUser model.
 			const addedUser = await AddedUser.findOne({
@@ -201,7 +199,6 @@ export const login = async (req, res, next) => {
 						.status(400)
 						.json({ message: "Invalid credentials" });
 				}
-				
 
 				// If 2FA is enabled for either email or mobile, generate OTPs and store in session
 				if (ENABLE_EMAIL_OTP || ENABLE_MOBILE_OTP) {
@@ -289,7 +286,6 @@ export const login = async (req, res, next) => {
 					.status(400)
 					.json({ message: "Invalid credentials", success: false });
 			}
-			
 
 			// If 2FA is enabled for either email or mobile, generate OTPs and store in session
 			if (ENABLE_EMAIL_OTP || ENABLE_MOBILE_OTP) {
@@ -508,7 +504,7 @@ export const verifyOTP = async (req, res, next) => {
 				whatsAppStatus: user.WhatsAppConnectStatus,
 			};
 		}
-		
+
 		req.session.cookie.maxAge = otpData.rememberMe
 			? 7 * 24 * 60 * 60 * 1000
 			: 3 * 60 * 60 * 1000;
@@ -628,7 +624,7 @@ export const resetPassword = async (req, res) => {
 
 	try {
 		// Check if the email exists in the User collection
-		let user = await User.findOne({ email });
+		let user = await User.findOne({ email, deleted: false });
 
 		// If not found in the User collection, check the AddedUser collection
 		if (!user) {
@@ -689,7 +685,7 @@ export const changePassword = async (req, res, next) => {
 
 	try {
 		// Find the user by email in the User collection first
-		let user = await User.findOne({ email });
+		let user = await User.findOne({ email, deleted: false });
 
 		// If not found in the User collection, check the AddedUser collection
 		if (!user) {
@@ -775,7 +771,7 @@ export const about = async (req, res, next) => {
 			req.session.tempUser;
 
 		// Check if user already exists
-		const userExists = await User.findOne({ email });
+		const userExists = await User.findOne({ email, deleted: false });
 		if (userExists) {
 			return res.status(409).json({
 				success: false,
@@ -913,7 +909,7 @@ export async function oldAccountMigrate(req, res) {
 		}
 
 		// 🛡️ Check for existing user by email
-		const existingEmail = await User.findOne({ email });
+		const existingEmail = await User.findOne({ email, deleted: false });
 		if (existingEmail) {
 			return res.status(409).json({
 				success: false,

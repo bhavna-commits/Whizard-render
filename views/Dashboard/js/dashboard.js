@@ -86,7 +86,7 @@ window.addEventListener("message", (event) => {
 			// sendDataToBackend();
 		}
 	} catch (error) {
-		console.log("message event catch: ", event.data);
+		console.error("message event catch: ", event.data);
 	}
 });
 
@@ -94,7 +94,6 @@ window.addEventListener("message", (event) => {
 const fbLoginCallback = (response) => {
 	if (response.authResponse) {
 		fbAccessToken = response.authResponse.code; // Assign to global variable
-		console.log("Access Token received:", fbAccessToken);
 		sendDataToBackend(); // Check if we can send after receiving token
 	}
 };

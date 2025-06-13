@@ -109,7 +109,6 @@ otpInput.forEach((input, index) => {
 	input.addEventListener("input", (event) => {
 		// Remove any non-digit characters
 		input.value = input.value.replace(/\D/g, "");
-		console.log();
 		// Move to the next input if one digit is entered
 		if (input.value.length == 1 && index < otpInput.length - 1) {
 			otpInput[index + 1].focus();
@@ -144,7 +143,6 @@ otpInputs.forEach((input, index) => {
 	input.addEventListener("input", (event) => {
 		// Remove any non-digit characters
 		input.value = input.value.replace(/\D/g, "");
-		console.log();
 		// Move to the next input if one digit is entered
 		if (input.value.length == 1 && index < otpInputs.length - 1) {
 			otpInputs[index + 1].focus();
@@ -577,9 +575,9 @@ async function verifyPhoneNumber(event) {
 	event.preventDefault();
 
 	const otpInputs = [...document.querySelectorAll(".otp-verify")];
-	console.log(otpInputs);
+
 	const codeInput = otpInputs.map((input) => input.value).join("");
-	console.log(codeInput);
+
 	const phoneNumberInput = document.getElementById("hiddenPhoneNumber").value;
 
 	const buttonLoader = event.target.querySelector(".buttonLoader");

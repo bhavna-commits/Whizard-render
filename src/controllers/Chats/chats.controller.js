@@ -67,7 +67,7 @@ export const getSetToken = async (req, res) => {
 		const name = added?.name || req.session?.user?.name;
 
 		// fetch user record
-		const user = await User.findOne({ unique_id: ownerId });
+		const user = await User.findOne({ unique_id: ownerId }).lean();
 		if (!user) return res.render("errors/chatsError");
 
 		// resolve permissionValue
@@ -397,7 +397,7 @@ export const sendMessages = async (req, res) => {
 			});
 		}
 
-		const user = await User.findOne({ unique_id: userId });
+		const user = await User.findOne({ unique_id: userId }).lean();
 		const accessToken = user.FB_ACCESS_TOKEN;
 
 		const {

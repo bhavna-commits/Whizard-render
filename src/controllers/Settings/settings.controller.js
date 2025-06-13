@@ -792,7 +792,7 @@ export const sendUserInvitation = async (req, res, next) => {
 				.json({ success: false, message: "Email already in use" });
 		}
 
-		exists = await User.findOne({ email });
+		exists = await User.findOne({ email, deleted: false });
 		if (exists) {
 			return res
 				.status(409)
@@ -814,8 +814,6 @@ export const sendUserInvitation = async (req, res, next) => {
 						"Facebook Phone Number not selected or doesn't exist",
 				});
 		}
-
-		console.log(roleId, roleName);
 
 		const newUser = new AddedUser({
 			FB_PHONE_ID,

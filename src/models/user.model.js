@@ -2,7 +2,13 @@ import mongoose, { Schema } from "mongoose";
 
 const userSchema = new mongoose.Schema(
 	{
-		WABA_ID: { type: String, required: true, index: true, unique: true, default:"-" },
+		WABA_ID: {
+			type: String,
+			required: true,
+			index: true,
+			unique: true,
+			default: "-",
+		},
 		FB_PHONE_NUMBERS: [
 			{
 				phone_number_id: String,
@@ -16,10 +22,10 @@ const userSchema = new mongoose.Schema(
 		FB_ACCESS_EXPIRES_IN: { type: Number, required: false },
 		profilePhoto: { type: String, required: false },
 		name: { type: String, required: true, index: true },
-		email: { type: String, required: true, unique: true },
+		email: { type: String, required: true },
 		password: { type: String, required: true },
 		deleted: { type: Boolean, default: false, index: true },
-		phone: { type: String, required: true, index: true },
+		phone: { type: String, required: true },
 		addedUsers: [{ type: String, ref: "AddedUser" }],
 		color: { type: String, required: true },
 		companyName: { type: String, required: true, index: true },

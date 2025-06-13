@@ -32,3 +32,4 @@ export default async function sendAddUserMail(name, invitationLink, email) {
 
 	await sendMail(mailOptions);
 }
+

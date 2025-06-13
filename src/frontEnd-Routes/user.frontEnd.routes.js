@@ -7,8 +7,10 @@ import { countries, roles, size, industryCategory } from "../utils/dropDown.js";
 import {
 	getDashboard,
 	getFilters,
-	adminPanel,
 } from "../controllers/Dashboard/dashboard.controller.js";
+
+import { adminPanel } from "../controllers/Dashboard/adminPanel.controller.js";
+
 import {
 	getCreatePassword,
 	createAddedUserPassword,

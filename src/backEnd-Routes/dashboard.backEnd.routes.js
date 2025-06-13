@@ -7,9 +7,15 @@ import {
 	sendOtpController,
 	set2FAPin,
 	refreshPhoneNumbers,
+} from "../controllers/Dashboard/dashboard.controller.js";
+
+import {
 	toggleStatus,
 	resetUserAccount,
-} from "../controllers/Dashboard/dashboard.controller.js";
+	deleteAccountEmail,
+	verifyDeleteOTP,
+} from "../controllers/Dashboard/adminPanel.controller.js";
+
 import { trackSanitationFailures } from "../middleWares/sanitiseInput.js";
 
 const router = express.Router();
@@ -31,5 +37,9 @@ router.get("/refresh-phone-numbers", refreshPhoneNumbers);
 router.post("/:id/toggleStatus", toggleStatus);
 
 router.post("/:id/reset", resetUserAccount);
+
+router.post("/:id/delete-email", deleteAccountEmail);
+
+router.post("/:id/verify-delete", verifyDeleteOTP);
 
 export default router;
