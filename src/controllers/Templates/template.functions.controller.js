@@ -169,7 +169,6 @@ export const saveTemplateToDatabase = async (
 	try {
 		const components = createComponents(templateData, dynamicVariables);
 
-		// Create the new template object
 		const newTemplate = new Template({
 			FB_PHONE_ID,
 			name: templateData.templateName,
@@ -183,7 +182,6 @@ export const saveTemplateToDatabase = async (
 
 		let headerComponent;
 
-		// Check if there is a file uploaded and update the corresponding header component with the file URL
 		if (req.file) {
 			let filePath = path.join(
 				__dirname,
@@ -206,7 +204,6 @@ export const saveTemplateToDatabase = async (
 
 			if (headerComponent) {
 				let fileUrl = `${url}/uploads/${id}/${req.file?.filename}`;
-				// Depending on the header format, update the header_url with the file path
 				if (headerComponent.format === "IMAGE") {
 					headerComponent.example.header_handle = [filePath];
 					headerComponent.example.header_url = fileUrl;
@@ -221,18 +218,15 @@ export const saveTemplateToDatabase = async (
 			}
 		}
 
-		// Submit template to Facebook
 		const data = await submitTemplateToFacebook(newTemplate, id);
 
 		if (data && data.id) {
-			// Save the Facebook template ID (fb_id)
 			newTemplate.template_id = data.id;
 		}
 
 		if (req.file) {
 			if (headerComponent) {
 				let fileUrl = `${url}/uploads/${id}/${req.file?.filename}`;
-				// Depending on the header format, update the header_url with the file path
 				if (headerComponent.format === "IMAGE") {
 					console.log("img");
 					headerComponent.example.header_url = fileUrl;
@@ -258,11 +252,9 @@ export async function submitTemplateToFacebook(savedTemplate, id) {
 	try {
 		let user = await User.findOne({ unique_id: id });
 
-		const plainTemplate = savedTemplate.toObject(); // Convert Mongoose document to plain object
+		const plainTemplate = savedTemplate.toObject();
 
-		// Clean up components by removing unwanted properties (like _id, $__parent, etc.) and also remove header_url from example
 		plainTemplate.components = plainTemplate.components.map((component) => {
-			// Destructure and remove unwanted Mongoose properties
 			const {
 				_id,
 				$__parent,
@@ -273,7 +265,6 @@ export async function submitTemplateToFacebook(savedTemplate, id) {
 				...cleanComponent
 			} = component;
 
-			// Remove header_url from the example if it exists
 			if (cleanComponent.example && cleanComponent.example.header_url) {
 				delete cleanComponent.example.header_url;
 			}
@@ -281,15 +272,20 @@ export async function submitTemplateToFacebook(savedTemplate, id) {
 			return cleanComponent;
 		});
 
-		console.log(JSON.stringify(plainTemplate.components));
-		// Continue with the request data preparation
 		const requestData = {
 			name: plainTemplate.name,
 			language: plainTemplate.language.code,
-			allow_category_change: true,
 			category: plainTemplate.category.toUpperCase(),
 			components: plainTemplate.components,
 		};
+
+		if (plainTemplate?.validityPeriod) {
+			requestData.message_send_ttl_seconds = Number(
+				plainTemplate?.validityPeriod,
+			);
+		}
+
+		console.log(requestData);
 
 		const response = await axios.post(
 			`https://graph.facebook.com/${process.env.FB_GRAPH_VERSION}/${user.WABA_ID}/message_templates`,
@@ -302,11 +298,9 @@ export async function submitTemplateToFacebook(savedTemplate, id) {
 			},
 		);
 
-		// If the response is successful, return the response data
 		return response.data;
 	} catch (error) {
 		// console.log(error.response.data.error);
-		// Handle different error types
 		if (error.response) {
 			throw (
 				"Error from Meta: " +
@@ -316,11 +310,9 @@ export async function submitTemplateToFacebook(savedTemplate, id) {
 				"Unknown error from Facebook"
 			);
 		} else if (error.request) {
-			// Request was made but no response received
 			console.error("No response received from Facebook:", error.request);
 			throw new Error("No response received from Facebook");
 		} else {
-			// Something else went wrong
 			console.error("Error with the request:", error.message);
 			throw new Error("Error with the request: " + error.message);
 		}
@@ -534,4 +526,46 @@ export function createComponents(templateData, dynamicVariables) {
 		});
 	}
 	return components;
+}
+
+export async function saveAuthTemplate(
+	dynamicVariables,
+	FB_PHONE_ID,
+	name,
+	language,
+	category,
+	components,
+	useradmin,
+	validityPeriod,
+) {
+	try {
+		const newTemplate = new Template({
+			FB_PHONE_ID,
+			name,
+			category,
+			components,
+			unique_id: generateUniqueId(),
+			useradmin,
+			language,
+			dynamicVariables,
+			validityPeriod,
+		});
+
+		const data = await submitTemplateToFacebook(newTemplate, useradmin);
+		if (data?.id) {
+			newTemplate.template_id = data.id;
+			if (data.status === "APPROVED") {
+				newTemplate.status = "Approved";
+			} else if (data.status === "REJECTED") {
+				newTemplate.status = "Rejected";
+			}
+			return newTemplate;
+		} else {
+			console.error("❌ Failed to submit template to Facebook:", data);
+			throw data;
+		}
+	} catch (err) {
+		console.error("🚨 Error submitting auth template:", err);
+		throw err;
+	}
 }

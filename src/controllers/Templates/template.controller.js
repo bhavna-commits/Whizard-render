@@ -14,6 +14,7 @@ import {
 	createComponents,
 	uploadAndRetrieveMediaURL,
 	uploadMediaResumable,
+	saveAuthTemplate,
 } from "./template.functions.controller.js";
 import { generateUniqueId } from "../../utils/otpGenerator.js";
 import { languages, languagesCode } from "../../utils/dropDown.js";
@@ -30,8 +31,16 @@ const __dirname = path.resolve();
 export const createTemplate = async (req, res, next) => {
 	try {
 		const templateData = JSON.parse(req.body.templateData);
-		const { dynamicVariables, name, selectedLanguageCode, url } =
-			templateData;
+		const {
+			dynamicVariables,
+			templateName,
+			selectedLanguageCode,
+			url,
+			category,
+			components,
+			validityPeriod,
+		} = templateData;
+
 		const id = req.session?.user?.id || req.session?.addedUser?.owner;
 
 		const user = await User.findOne({ unique_id: id });
@@ -39,11 +48,10 @@ export const createTemplate = async (req, res, next) => {
 			(n) => n.selected,
 		)?.phone_number_id;
 
-		// Check if a template with the same name exists for the user
 		const exists = await Template.findOne({
 			FB_PHONE_ID,
 			useradmin: id,
-			name,
+			name: templateName,
 			deleted: false,
 		});
 
@@ -54,16 +62,29 @@ export const createTemplate = async (req, res, next) => {
 			});
 		}
 
-		// Save template to DB
-		const savedTemplate = await saveTemplateToDatabase(
-			FB_PHONE_ID,
-			req,
-			templateData,
-			dynamicVariables,
-			selectedLanguageCode,
-			id,
-			url,
-		);
+		let savedTemplate;
+		if (category === "Authentication") {
+			savedTemplate = await saveAuthTemplate(
+				dynamicVariables,
+				FB_PHONE_ID,
+				templateName,
+				selectedLanguageCode,
+				category,
+				components,
+				id,
+				validityPeriod,
+			);
+		} else {
+			savedTemplate = await saveTemplateToDatabase(
+				FB_PHONE_ID,
+				req,
+				templateData,
+				dynamicVariables,
+				selectedLanguageCode,
+				id,
+				url,
+			);
+		}
 
 		await ActivityLogs.create({
 			useradmin: id,
@@ -193,7 +214,7 @@ export const getDuplicateTemplate = async (req, res, next) => {
 			});
 
 		if (!isString(templateId)) return next();
-		// Find the template by its ID
+
 		const originalTemplate = await Template.findById(templateId);
 		if (!originalTemplate) {
 			return res
@@ -211,12 +232,12 @@ export const getDuplicateTemplate = async (req, res, next) => {
 		);
 
 		let mediaFileName = null;
-		// Assuming you have the file path stored in your template
+
 		if (headerComponent && headerComponent.example?.header_url) {
 			const mediaFileUrl = headerComponent.example.header_url;
 			console.log(mediaFileUrl);
 			mediaFileName = mediaFileUrl.split("/").pop();
-			// Assuming you store the file path on your server
+
 			const mediaFilePath = path.join(
 				__dirname,
 				"uploads",
@@ -224,16 +245,13 @@ export const getDuplicateTemplate = async (req, res, next) => {
 				mediaFileName,
 			);
 
-			// Check if the file exists
 			if (fs.existsSync(mediaFilePath)) {
-				// Read the file and convert it into a buffer or base64 format
 				mediaFileData = fs.readFileSync(mediaFilePath);
 			} else {
 				throw "Media file not found";
 			}
 		}
 
-		// Permissions check (unchanged)
 		const permissions = req.session?.addedUser?.permissions;
 		if (permissions) {
 			const access = await Permissions.findOne({

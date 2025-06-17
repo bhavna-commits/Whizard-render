@@ -629,3 +629,110 @@ function hideMessage() {
 		messageBox.textContent = "";
 	}
 }
+
+function selectCategory(category) {
+	const categoryButton = document.getElementById("categoryButton");
+
+	categoryButton.textContent = category;
+
+	document.getElementById("categoryDropdown").classList.add("hidden");
+
+	if (category === "Authentication") {
+		document.getElementById("setupBody").classList.add("hidden");
+		document
+			.getElementById("authenticationBody")
+			.classList.remove("hidden");
+		document.getElementById(
+			"previewBody",
+		).textContent = `{{1}} is your verification code.`;
+		document.getElementById(
+			"previewBod",
+		).textContent = `{{1}} is your verification code.`;
+		document.getElementById("previewButtons").textContent = "";
+		document.getElementById("previewHeader").innerHTML = "";
+		document.getElementById("previewHead").innerHTML = "";
+		document.getElementById("previewButton").textContent = "";
+	} else {
+		document.getElementById("setupBody").classList.remove("hidden");
+		document.getElementById("authenticationBody").classList.add("hidden");
+		document.getElementById("previewAuthCopyCode").classList.add("hidden");
+		document.getElementById("previewAuthAutofill").classList.add("hidden");
+	}
+}
+
+document
+	.getElementById("categoryButton")
+	.addEventListener("click", function () {
+		const dropdown = document.getElementById("categoryDropdown");
+		dropdown.classList.toggle("hidden");
+		// Manage aria-expanded attribute for accessibility
+		const isExpanded = dropdown.classList.contains("hidden")
+			? "false"
+			: "true";
+		this.setAttribute("aria-expanded", isExpanded);
+	});
+
+// Close dropdown when clicking outside
+document.addEventListener("click", function (event) {
+	const categoryButton = document.getElementById("categoryButton");
+	const dropdown = document.getElementById("categoryDropdown");
+	if (
+		!categoryButton.contains(event.target) &&
+		!dropdown.contains(event.target)
+	) {
+		dropdown.classList.add("hidden");
+		categoryButton.setAttribute("aria-expanded", "false");
+	}
+});
+
+const setupBody = document.getElementById("setupBody");
+const authBody = document.getElementById("authenticationBody");
+const scrollBtn = document.getElementById("scrollDownBtn");
+
+function isScrollable(el) {
+	return el.scrollHeight > el.clientHeight;
+}
+
+function isAtBottom(el) {
+	return el.scrollTop + el.clientHeight >= el.scrollHeight - 1;
+}
+
+function checkScrollBtn() {
+	const active = [setupBody, authBody].find(
+		(el) => isScrollable(el) && !isAtBottom(el),
+	);
+	if (active) {
+		scrollBtn.classList.remove("hidden");
+		scrollBtn.dataset.target = active.id; // tag the active one
+	} else {
+		scrollBtn.classList.add("hidden");
+		scrollBtn.removeAttribute("data-target");
+	}
+}
+
+function scrollToBottom() {
+	const targetId = scrollBtn.dataset.target;
+	if (!targetId) return;
+
+	const target = document.getElementById(targetId);
+	if (target) {
+		target.scrollTo({
+			top: target.scrollHeight,
+			behavior: "smooth",
+		});
+	}
+}
+
+// Observe scroll + mutations
+[setupBody, authBody].forEach((el) => {
+	el.addEventListener("scroll", checkScrollBtn);
+	new MutationObserver(checkScrollBtn).observe(el, {
+		childList: true,
+		subtree: true,
+	});
+});
+
+// Also check on resize and load
+window.addEventListener("resize", checkScrollBtn);
+window.addEventListener("load", checkScrollBtn);
+

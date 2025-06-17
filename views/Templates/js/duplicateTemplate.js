@@ -1,3 +1,219 @@
+function hydrateAuthOptions(components) {
+	let otp_type;
+	components.forEach((component) => {
+		if (
+			component.type?.toLowerCase() === "body" &&
+			component.add_security_recommendation === true
+		) {
+			const checkbox = document.querySelector(
+				'input[name="addSecurityCheckbox"]',
+			);
+			if (checkbox && !checkbox.checked) {
+				checkbox.checked = true;
+				toggleCustomCheck(checkbox);
+			}
+		}
+
+		if (
+			component.type?.toLowerCase() === "footer" &&
+			typeof component.code_expiration_minutes === "number"
+		) {
+			const checkbox = document.querySelector(
+				'input[name="otpCheckbox"]',
+			);
+			if (checkbox && !checkbox.checked) {
+				checkbox.checked = true;
+				toggleCustomCheck(checkbox);
+			}
+
+			const otpInput = document.getElementById("otpExpiration");
+			const otpDiv = document.getElementById("otpDiv");
+
+			if (otpInput && otpDiv) {
+				otpInput.value = component.code_expiration_minutes;
+				otpDiv.classList.remove("hidden");
+			}
+		}
+
+		if (component.type?.toLowerCase() === "buttons") {
+			const buttonData = component.buttons?.[0];
+
+			if (buttonData) {
+				const copyInput = document.querySelector(
+					'input[data-type="copycode"]',
+				);
+				if (copyInput && buttonData.text) {
+					copyInput.value = buttonData.text;
+					handlePackageInput(copyInput);
+				}
+
+				if (buttonData.autofill_text) {
+					const autoInput = document.querySelector(
+						'input[data-type="autofill"]',
+					);
+					const autoFillWrapper =
+						document.getElementById("auto-fill-view");
+
+					if (autoInput) {
+						autoInput.value = buttonData.autofill_text;
+						handlePackageInput(autoInput);
+					}
+					if (autoFillWrapper) {
+						autoFillWrapper.classList.remove("hidden");
+					}
+				}
+			}
+		}
+
+		if (component.type?.toLowerCase() === "buttons") {
+			otp_type = component.buttons?.[0]?.otp_type?.toLowerCase();
+		}
+
+		if (otp_type) {
+			const radio = document.querySelector(
+				`input[name="codeDelivery"][value="${otp_type}"]`,
+			);
+			if (radio) {
+				radio.checked = true;
+			}
+		}
+	});
+}
+
+function renderPreviewFromDynamicVars(dynamicVariables = {}) {
+	const { body = [], footer = [], buttons = [] } = dynamicVariables;
+
+	// Body
+	const previewBody = document.getElementById("previewBody");
+	previewBody.innerHTML = body?.[0]?.text || "";
+
+	// Footer
+	const previewFooter = document.getElementById("previewFooter");
+	previewFooter.innerHTML = footer?.[0]?.text || "";
+	previewBody.classList.remove("hidden");
+
+	// Buttons
+	const previewButtons = document.getElementById("previewButtons");
+	const autofillBtn = document.getElementById("previewAuthAutofill");
+	const copyBtnWrapper = document.getElementById("previewAuthCopyCode");
+	const copyBtnText = document.getElementById("previewAuthCopyCodeSpan");
+
+	const btnData = buttons?.[0] || {};
+
+	if (btnData.auto) {
+		autofillBtn.classList.remove("hidden");
+		autofillBtn.textContent = btnData.auto;
+	} else {
+		autofillBtn.classList.add("hidden");
+	}
+
+	if (btnData.copy) {
+		copyBtnWrapper.classList.remove("hidden");
+		copyBtnText.textContent = btnData.copy;
+	} else {
+		copyBtnWrapper.classList.add("hidden");
+	}
+}
+
+function renderValidatePeriod(validityPeriodValue) {
+	const timeSelect = document.getElementById("validityPeriod");
+	const toggle = document.getElementById("customValidityToggle");
+
+	if (!timeSelect || !validityPeriodValue || !toggle) return;
+
+	toggle.checked = true;
+
+	const event = new Event("change", { bubbles: true });
+	toggle.dispatchEvent(event);
+
+	timeSelect.value = String(validityPeriodValue);
+}
+
+window.addEventListener("DOMContentLoaded", () => {
+	if (data.category === "Authentication") {
+		selectCategory("Authentication");
+		hydrateAuthOptions(data?.components);
+		renderPreviewFromDynamicVars(data?.dynamicVariables);
+		renderValidatePeriod(data?.validityPeriod);
+	}
+});
+
+if (mediaFileData && mediaFileName) {
+	const byteString = atob(mediaFileData);
+	const byteArray = new Uint8Array(byteString.length);
+	for (let i = 0; i < byteString.length; i++) {
+		byteArray[i] = byteString.charCodeAt(i);
+	}
+
+	// Get file extension from the filename
+	const extension = mediaFileName.split(".").pop().toLowerCase();
+
+	const extensionTypes = {
+		image: ["jpg", "jpeg", "png", "gif", "webp"],
+		video: ["mp4", "mov", "avi", "webm"],
+		document: ["pdf", "txt", "doc", "docx", "xls", "xlsx", "csv"],
+	};
+
+	const mimeTypes = {
+		jpg: "image/jpeg",
+		jpeg: "image/jpeg",
+		png: "image/png",
+		gif: "image/gif",
+		webp: "image/webp",
+		pdf: "application/pdf",
+		txt: "text/plain",
+		mp3: "audio/mpeg",
+		mp4: "video/mp4",
+		json: "application/json",
+		csv: "text/csv",
+		doc: "application/msword",
+		docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+		xls: "application/vnd.ms-excel",
+		xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+	};
+
+	const mimeType = mimeTypes[extension] || "application/octet-stream";
+
+	let mediaType = null;
+	for (const [type, exts] of Object.entries(extensionTypes)) {
+		if (exts.includes(extension)) {
+			mediaType = type;
+			break;
+		}
+	}
+
+	const file = new File([byteArray], mediaFileName, {
+		type: mimeType,
+	});
+
+	const dataTransfer = new DataTransfer();
+	dataTransfer.items.add(file);
+
+	const fileInput = document.getElementById("file-upload");
+	fileInput.files = dataTransfer.files;
+
+	if (mediaType) {
+		document.getElementById("mediaTypeDropdown").value = "media";
+		document.getElementById("mediaType").value = mediaType;
+		document
+			.getElementById("mediaTypeDropdown")
+			.dispatchEvent(new Event("change"));
+	}
+
+	const uploadText = document.getElementById("uploadText");
+
+	if (mediaType === "image") {
+		uploadText.textContent = "Choose from .jpg, .png, .gif, .webp";
+	} else if (mediaType === "video") {
+		uploadText.textContent = "Choose from .mp4, .mov, .avi, .webm";
+	} else if (mediaType === "document") {
+		uploadText.textContent =
+			"Choose from .pdf, .doc, .docx, .xls, .xlsx, .txt, .csv";
+	} else {
+		uploadText.textContent = "Unsupported file type. Try again maybe? 🤷‍♂️";
+	}
+}
+
 const url = location.href.split("/")[4];
 
 if (url == "edit") {
@@ -140,7 +356,7 @@ if (buttons) {
 				element.url;
 
 			websiteBtnCount++;
-		} else {
+		} else if (element.type == "PHONE_NUMBER") {
 			document.getElementById("callForm").style.display = "block";
 			generatePrevCall(element.text, element.phone_number);
 

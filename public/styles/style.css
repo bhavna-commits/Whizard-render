@@ -50,6 +50,21 @@ body {
 	height: 0.7rem;
 }
 
+*::-webkit-scrollbar {
+	width: 0.7rem;
+	height: 0.7rem;
+}
+
+#setupBody::-webkit-scrollbar {
+	width: 0rem;
+	height: 0rem;
+}
+
+#authenticationBody::-webkit-scrollbar {
+	width: 0rem;
+	height: 0rem;
+}
+
 *::-webkit-scrollbar-track {
 	background: transparent;
 }

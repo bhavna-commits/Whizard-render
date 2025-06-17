@@ -11,6 +11,8 @@ async function submit() {
 	if (!validateInputs()) {
 		return; // Prevent submission if inputs are invalid
 	}
+	let response;
+
 	const submitButton = document.getElementById("submitTemplate");
 	const originalText = submitButton.innerHTML;
 
@@ -23,6 +25,68 @@ async function submit() {
 		const templateData = collectTemplateData();
 		// console.log(templateData);
 		if (!templateData) return;
+
+		if (templateData.category === "Authentication") {
+			try {
+				const buttonComponent = templateData.components.find(
+					(comp) => comp.type?.toUpperCase() === "BUTTONS",
+				);
+
+				const firstButton = buttonComponent?.buttons?.[0] || {};
+
+				const dynamicVariables = {
+					body: [
+						{
+							text: document.getElementById("previewBody")
+								.innerHTML,
+						},
+					],
+					footer: [
+						{
+							text: document.getElementById("previewFooter")
+								.innerHTML,
+						},
+					],
+					buttons: [
+						{
+							auto: templateData.supportedApps
+								? firstButton.autofill_text || "Autofill"
+								: "",
+							copy: firstButton.text || "Copy code",
+						},
+					],
+				};
+
+				const formData = new FormData();
+				formData.append(
+					"templateData",
+					JSON.stringify({
+						...templateData,
+						dynamicVariables,
+					}),
+				);
+
+				response = await fetch("/api/templates/createTemplate", {
+					method: "POST",
+					body: formData,
+				});
+
+				const res = await response.json();
+
+				if (res.success) {
+					location.href = "/template";
+				} else {
+					toast("error", res.message);
+				}
+			} catch (error) {
+				toast("error", error.message || error);
+				console.log(error);
+			} finally {
+				submitButton.innerHTML = originalText;
+				submitButton.disabled = false;
+			}
+			return;
+		}
 
 		let headerValidation = { isValid: true, error: null, numbers: [] };
 
@@ -99,8 +163,6 @@ async function submit() {
 			formData.append("headerFile", templateData.header.content);
 		}
 
-		let response;
-
 		const editURL = location.href.split("/")[4];
 
 		if (editURL === "edit") {
@@ -122,7 +184,7 @@ async function submit() {
 		} else {
 			response = await fetch("/api/templates/createTemplate", {
 				method: "POST",
-				body: formData, // Send FormData directly
+				body: formData,
 			});
 		}
 
@@ -265,10 +327,11 @@ function collectTemplateData() {
 	const categoryText = document
 		.getElementById("categoryButton")
 		.textContent.trim();
-	if (categoryText === "Choose category") {
-		toast("info", "Please select a valid category.");
-		return null;
+
+	if (categoryText === "Authentication") {
+		return collectAuthData(templateData);
 	}
+
 	templateData.category = categoryText;
 
 	const bodyInput = document.getElementById("bodyInput").innerText.trim();
@@ -375,6 +438,87 @@ function collectTemplateData() {
 		toast("info", "Invalid header type selected.");
 		return null;
 	}
+
+	return templateData;
+}
+
+function collectAuthData(templateData) {
+	const otpType = document.querySelector(
+		'input[name="codeDelivery"]:checked',
+	)?.value;
+	const addSecurity = document.querySelector(
+		'input[name="addSecurityCheckbox"]',
+	)?.checked;
+	const addOtpExpiry = document.querySelector(
+		'input[name="otpCheckbox"]',
+	)?.checked;
+	const otpExpiration = parseInt(
+		document.querySelector("#otpExpiration")?.value || 0,
+	);
+	const copyText =
+		document.querySelector('input[data-type="copycode"]')?.value || "";
+	const autofillText =
+		document.querySelector('input[data-type="autofill"]')?.value || "";
+	const isAutoFill = otpType === "zero_tap" || otpType === "one_tap";
+
+	const toggle = document.getElementById("customValidityToggle");
+	const messageValidationDropdown = document.getElementById("validityPeriod");
+	let validityPeriod;
+	if (toggle.checked) {
+		validityPeriod = messageValidationDropdown.value;
+	}
+	const supportedApps = [];
+	document.querySelectorAll(".app-row").forEach((row) => {
+		const packageName = row.querySelector(".package-name")?.value;
+		const sigHash = row.querySelector(".signature-hash")?.value;
+		if (packageName && sigHash) {
+			supportedApps.push({
+				package_name: packageName,
+				signature_hash: sigHash,
+			});
+		}
+	});
+
+	templateData.validityPeriod = validityPeriod;
+	templateData.category = "Authentication";
+	templateData.components = [];
+
+	const bodyComponent = { type: "BODY" };
+
+	if (addSecurity) bodyComponent.add_security_recommendation = true;
+
+	templateData.components.push(bodyComponent);
+
+	if (addOtpExpiry && otpExpiration > 0 && otpExpiration <= 90) {
+		templateData.components.push({
+			type: "FOOTER",
+			code_expiration_minutes: otpExpiration,
+		});
+	}
+
+	const buttonComponent = {
+		type: "BUTTONS",
+		buttons: [
+			{
+				type: "otp",
+				otp_type: otpType,
+			},
+		],
+	};
+
+	if (isAutoFill) {
+		buttonComponent.buttons[0].supported_apps = supportedApps;
+	}
+
+	if (otpType === "zero_tap") {
+		buttonComponent.buttons[0].zero_tap_terms_accepted = true;
+	}
+
+	if (copyText.trim()) buttonComponent.buttons[0].text = copyText.trim();
+	if (autofillText.trim() && isAutoFill)
+		buttonComponent.buttons[0].autofill_text = autofillText.trim();
+
+	templateData.components.push(buttonComponent);
 
 	return templateData;
 }

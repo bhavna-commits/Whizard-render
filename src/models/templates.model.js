@@ -12,13 +12,7 @@ const templateSchema = new Schema(
 		},
 		category: { type: String, required: true, index: true },
 		components: [],
-
-		buttonClicks: {
-			type: Map,
-			of: Number,
-			default: {},
-		},
-
+		validityPeriod: String,
 		status: {
 			type: String,
 			enum: ["Approved", "Rejected", "Pending"],
