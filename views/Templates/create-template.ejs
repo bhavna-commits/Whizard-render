@@ -362,7 +362,7 @@
 							<h2 class="font-semibold text-lg pb-2 pt-1 ">Code delivery setup</h2>
 							<p class="text-gray-400 text-sm leading-relaxed">
 								Choose how customers send the code from WhatsApp to your app. Edits to this section won’t require review or count towards edit limits.
-								Learn <a href="#" class="text-blue-400 underline text-sm">how to send authentication message templates</a>.
+								Learn <a href="https://developers.facebook.com/docs/whatsapp/business-management-api/authentication-templates" class="text-blue-400 underline text-sm">how to send authentication message templates</a>.
 							</p>
 						</div>
 						
@@ -389,7 +389,14 @@
 							<label class="flex items-start space-x-3 cursor-pointer">
 								<input type="radio" name="codeDelivery" value="one_tap" class="mt-1 accent-blue-600" />
 								<div>
-									<p class="font-semibold">One-tap auto-fill</p>
+									<h3 class="font-semibold flex items-center">One-tap auto-fill
+										<div class="pl-2 tooltip-container">
+											<span class="info-icon-small">i</span>
+											<div class="tooltip">
+												Auto-fill only works when your customer requests a code from the same device that has their WhatsApp account.<br><br>If autofill isn&apos;t possible, a copy code message will be sent.
+											</div>
+										</div>
+									</h3>
 									<p class="text-sm text-gray-400 leading-relaxed">
 										The code sends to your app when customers tap the button. A copy code message will be sent if auto-fill isn’t possible.
 									</p>
@@ -400,7 +407,14 @@
 							<label class="flex items-start space-x-3 cursor-pointer">
 								<input type="radio" name="codeDelivery" value="copy_code" class="mt-1 accent-blue-600" checked />
 								<div>
-									<p class="font-semibold">Copy code</p>
+									<h3 class="font-semibold flex items-center">Copy code
+										<div class="pl-2 tooltip-container">
+											<span class="info-icon-small">i</span>
+											<div class="tooltip">
+												Customers tap button to copy the code and then paste it in your app themselves.<br><br>Copy code works best for customers who request the code on a device that does not have their whatsApp account.
+											</div>
+										</div>
+									</h3>
 									<p class="text-sm text-gray-400 leading-relaxed">
 										Basic authentication with quick setup. Your customers copy and paste the code into your app.
 									</p>
@@ -507,7 +521,7 @@
 									<div class="tooltip-container">
 										<span class="info-icon">i</span>
 										<div class="tooltip">
-											The message validity period can expire if your customer's WhatsApp account is unreachable. You can check webhook for message delivery status after the validity period has passed.
+											The message validity period can expire if your customer's WhatsApp account is unreachable. <br><br> You can check webhook for message delivery status after the validity period has passed.
 										</div>
 									</div>
 									
@@ -544,13 +558,13 @@
 									<div class="tooltip-container">
 										<span class="info-icon">i</span>
 										<div class="tooltip">
-											Make sure that you have a backup delivery method for your authentication message in case your customer's WhatsApp account is unreachable. You should only set a low validity period if you have automatic fallback delivery methods in place.
+											Make sure that you have a backup delivery method for your authentication message in case your customer's WhatsApp account is unreachable. <br><br> You should only set a low validity period if you have automatic fallback delivery methods in place.
 										</div>
 									</div>
 								</div>
 								<div class="relative">
 									<select id="validityPeriod" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white appearance-none">
-										<option value="30">30 seconds</option>
+										<option selected value="30">30 seconds</option>
 										<option value="60">1 minute</option>
 										<option value="120">2 minutes</option>
 										<option value="180">3 minutes</option>
