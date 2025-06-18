@@ -152,7 +152,9 @@ addAppBtn.addEventListener("click", () => {
 
 setInterval(validateRows, 500);
 
+
 // ..................................Content..........................................
+
 
 const securityPreview = document.createElement("span");
 const dupSecurity = securityPreview.cloneNode();
@@ -190,6 +192,23 @@ function toggleCustomCheck(el) {
 		}
 	}
 }
+
+const deliveryRadios = document.querySelectorAll('input[name="codeDelivery"]');
+const link = document.getElementById("deliveryLink");
+const container = document.getElementById("deliveryInfo");
+
+deliveryRadios.forEach((radio) => {
+	radio.addEventListener("change", () => {
+		if (radio.checked && radio.value === "zero_tap") {
+			container.innerHTML = `ℹ️ Make sure your app meets the eligibility criteria for zero-tap autofill. 
+				<a href="https://developers.facebook.com/docs/whatsapp/business-management-api/authentication-templates/zero-tap-authentication-templates" target="_blank" class="underline text-sm">View Zero-Tap Requirements</a>`;
+		} else {
+			container.innerHTML = `ℹ️ Only add different builds of the same app (not totally different apps). 
+				<a href="https://developers.facebook.com/docs/whatsapp/business-management-api/authentication-templates/autofill-button-authentication-templates#eligibility-check" target="_blank" class="underline text-sm">Learn more</a>`;
+		}
+	});
+});
+
 
 // ..................................otp validation...........................................
 
