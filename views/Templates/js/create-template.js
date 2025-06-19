@@ -723,7 +723,6 @@ function scrollToBottom() {
 	}
 }
 
-// Observe scroll + mutations
 [setupBody, authBody].forEach((el) => {
 	el.addEventListener("scroll", checkScrollBtn);
 	new MutationObserver(checkScrollBtn).observe(el, {

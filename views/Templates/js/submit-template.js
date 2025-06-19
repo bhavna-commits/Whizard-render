@@ -468,9 +468,9 @@ function collectAuthData(templateData) {
 		validityPeriod = messageValidationDropdown.value;
 	}
 	const supportedApps = [];
-	document.querySelectorAll(".app-row").forEach((row) => {
-		const packageName = row.querySelector(".package-name")?.value;
-		const sigHash = row.querySelector(".signature-hash")?.value;
+	document.querySelectorAll("#appRows > div").forEach((row) => {
+		const packageName = row.querySelector(".package")?.value;
+		const sigHash = row.querySelector(".hash")?.value;
 		if (packageName && sigHash) {
 			supportedApps.push({
 				package_name: packageName,
@@ -478,6 +478,8 @@ function collectAuthData(templateData) {
 			});
 		}
 	});
+
+	console.log(supportedApps);
 
 	templateData.validityPeriod = validityPeriod;
 	templateData.category = "Authentication";

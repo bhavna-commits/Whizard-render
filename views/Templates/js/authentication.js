@@ -4,7 +4,9 @@ const previewFooter = document.getElementById("previewFooter");
 const previewFoot = document.getElementById("previewFoot");
 const authDiv = document.getElementById("authenticationBody");
 
+
 // ............................Code Delivery Setup...........................................
+
 
 const radios = document.querySelectorAll('input[name="codeDelivery"]');
 const appSetup = document.getElementById("appSetup");
@@ -212,6 +214,7 @@ deliveryRadios.forEach((radio) => {
 
 // ..................................otp validation...........................................
 
+
 const otpInput = document.getElementById("otpExpiration");
 const otpError = document.getElementById("otpError");
 const otpWrapper = document.getElementById("otpInputWrapper");
@@ -251,7 +254,9 @@ otpInput.addEventListener("input", (e) => {
 	}
 });
 
+
 // ..................................Buttons..............................................
+
 
 function handlePackageInput(input) {
 	const charCount = input.value.length;
@@ -267,7 +272,9 @@ function handlePackageInput(input) {
 	}
 }
 
+
 // ..................... Message Validation .............................
+
 
 const toggle = document.getElementById("customValidityToggle");
 const section = document.getElementById("messageValidityPeriod");
@@ -280,7 +287,9 @@ toggle.addEventListener("change", () => {
 	}
 });
 
+
 // ...............................tooltip.....................................
+
 
 document.querySelectorAll(".tooltip-container").forEach((container) => {
 	const tooltip = container.querySelector(".tooltip");

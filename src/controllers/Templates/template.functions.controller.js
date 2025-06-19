@@ -285,6 +285,8 @@ export async function submitTemplateToFacebook(savedTemplate, id) {
 			);
 		}
 
+		console.log(JSON.stringify(requestData));
+
 		const response = await axios.post(
 			`https://graph.facebook.com/${process.env.FB_GRAPH_VERSION}/${user.WABA_ID}/message_templates`,
 			requestData,
