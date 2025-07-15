@@ -112,7 +112,7 @@ Example CURL usage:
 
 *********************************
 
-curl -X POST https://<your-domain>/api/public/send-auth-template-otp \
+curl -X POST https://console.whizardapi.com/api/public/send-auth-template-otp \
   -H "Content-Type: application/json" \
   -H "x-api-key: your-secret-api-key" \
   -d '{

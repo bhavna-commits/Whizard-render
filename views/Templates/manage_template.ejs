@@ -79,15 +79,15 @@
 				</nav>
 				<div class="flex items-center space-x-3">
 					<% if (access?.templates?.createTemplate && whatsAppStatus === "Live") { %>
-					<% if (authTemplateToken)  { %>
-					<button id="copy-token-btn" class="p-2 px-3 flex items-center rounded-lg border text-gray-600 hover:bg-gray-50">
+					<!-- <% if (authTemplateToken)  { %>
+					<button class="p-2 px-3 flex items-center rounded-lg border text-gray-600 hover:bg-gray-50">
 						<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 256 256" class="mr-2">
 							<path d="M216,32H88a8,8,0,0,0-8,8V80H40a8,8,0,0,0-8,8V216a8,8,0,0,0,8,8H168a8,8,0,0,0,8-8V176h40a8,8,0,0,0,8-8V40A8,8,0,0,0,216,32ZM160,208H48V96H160Zm48-48H176V88a8,8,0,0,0-8-8H96V48H208Z"></path>
 						</svg>
 						<input type="text" id="auth-token-input" value="<%= authTemplateToken %>" hidden />
 						Copy Authentication Token
 					</button>
-					<% } %>
+					<% } %> -->
 					<button class="bg-black p-2 px-3 flex items-center rounded-lg text-white  " onclick="document.location='create-template'">
 						<img src="svg/plus.svg" class="pr-2" alt="plus">
 						Create new template
@@ -191,8 +191,6 @@
 				<div id="list-view" class="block">
 					<%- include('partials/templates-table') %>
 				</div>
-				
-				
 			</div>
 			<!-- Grid View -->
 			<% if (!(page === 1 && list.length < 6)) { %>
@@ -316,14 +314,23 @@
 			
 			// Copy to clipboard 
 			
-			document.getElementById('copy-token-btn').addEventListener('click', () => {
-				const input = document.getElementById('auth-token-input');
-				navigator.clipboard.writeText(input.value).then(() => {
-					toast("success", 'Token copied to clipboard');
+			function copyCurl (el) {
+				const templateName = el.dataset.name
+				const token = el.dataset.token
+				const curl = `curl -X POST https://console.whizardapi.com/api/public/send-auth-template-otp \\
+			-H "Content-Type: application/json" \\
+			-H "x-api-key: ${token}" \\
+			-d '{
+			"to": "<country-code phone-number || e.g: 917986407867>",
+			"templateName": "${templateName}"
+			}'`
+				
+				navigator.clipboard.writeText(curl).then(() => {
+					toast("success", "cURL copied to clipboard")
 				}).catch(() => {
-					toast("error", 'Failed to copy token');
-				});
-			});
+					toast("error", "Failed to copy cURL")
+				})
+			}
 		</script>
 		
 		<div id="filter-modal" class="modal bg-slate-500/50">
