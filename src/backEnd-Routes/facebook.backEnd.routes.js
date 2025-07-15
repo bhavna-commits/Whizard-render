@@ -1,6 +1,6 @@
 import express from "express";
 import dotenv from "dotenv";
-import cron from "node-cron";
+import { agenda } from "../config/db.js";
 import Chats from "../models/chats.model.js";
 import Report from "../models/report.model.js";
 import User from "../models/user.model.js";
@@ -87,22 +87,26 @@ router.post("/auth_code", async (req, res) => {
 
 		// Save to DB
 		const userId = req.session?.user?.id || req.session?.addedUser?.owner;
-		await User.findOneAndUpdate(
-			{ unique_id: userId },
-			{
-				WABA_ID: waba_id,
-				FB_ACCESS_TOKEN: newAccessToken,
-				WhatsAppConnectStatus: "Live",
-				$push: {
-					FB_PHONE_NUMBERS: {
-						phone_number_id,
-						selected: true,
-					},
+		const updateData = {
+			WABA_ID: waba_id,
+			FB_ACCESS_TOKEN: newAccessToken,
+			WhatsAppConnectStatus: "Live",
+			$push: {
+				FB_PHONE_NUMBERS: {
+					phone_number_id,
+					selected: true,
 				},
 			},
-			{ new: true },
-		);
+		};
 
+		if (expires_in) {
+			updateData.FB_ACCESS_EXPIRES_IN = expires_in;
+		}
+
+		await User.findOneAndUpdate({ unique_id: userId }, updateData, {
+			new: true,
+		});
+		
 		// Update session
 		if (req.session?.user) {
 			req.session.user.whatsAppStatus = "Live";
@@ -111,13 +115,16 @@ router.post("/auth_code", async (req, res) => {
 		}
 
 		if (expires_in) {
-			const runAt = new Date(Date.now() + 50 * 24 * 60 * 60 * 1000);
-			scheduleRefresh(runAt, () =>
-				refreshBusinessToken(userId, waba_id, newAccessToken),
-			);
+			const runAt = new Date(Date.now() + (expires_in - 86400) * 1000); // 1 day early
+
+			await agenda.schedule(runAt, "refresh fb token", {
+				userId,
+				wabaId: waba_id,
+				token: newAccessToken,
+			});
 
 			console.log(
-				`Scheduled refresh job on ${refreshDate.toUTCString()}`,
+				`Agenda: Scheduled FB token refresh for ${userId} at ${runAt.toUTCString()}`,
 			);
 		}
 
@@ -432,16 +439,28 @@ function sendsocket(
 async function scheduleAllRefreshJobs() {
 	const now = new Date();
 	const users = await User.find({ nextRefreshAt: { $lte: now } });
-	users.forEach((user) => {
-		scheduleRefresh(
-			user.unique_id,
-			user.WABA_ID,
-			user.FB_ACCESS_TOKEN,
-			user.nextRefreshAt,
+
+	for (const user of users) {
+		await agenda
+			.create("refresh fb token", {
+				userId: user.unique_id,
+				wabaId: user.WABA_ID,
+				token: user.FB_ACCESS_TOKEN,
+			})
+			.unique({ "data.userId": user.unique_id })
+			.schedule(user.nextRefreshAt)
+			.save();
+
+		console.log(
+			`📅 Agenda: Ensured refresh for ${
+				user.unique_id
+			} at ${user.nextRefreshAt.toUTCString()}`,
 		);
-	});
+	}
+	
 }
 
 scheduleAllRefreshJobs();
+
 
 export default router;

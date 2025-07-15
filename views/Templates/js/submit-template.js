@@ -479,8 +479,6 @@ function collectAuthData(templateData) {
 		}
 	});
 
-	console.log(supportedApps);
-
 	templateData.validityPeriod = validityPeriod;
 	templateData.category = "Authentication";
 	templateData.components = [];

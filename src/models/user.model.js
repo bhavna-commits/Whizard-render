@@ -125,6 +125,7 @@ const userSchema = new mongoose.Schema(
 			default: 0,
 		},
 		nextRefreshAt: { type: Schema.Types.Mixed },
+		authTemplateToken: String,
 	},
 	{ timestamps: false, strict: false },
 );

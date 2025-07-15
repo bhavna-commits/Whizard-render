@@ -16,7 +16,10 @@ import {
 	uploadMediaResumable,
 	saveAuthTemplate,
 } from "./template.functions.controller.js";
-import { generateUniqueId } from "../../utils/otpGenerator.js";
+import {
+	generateUniqueId,
+	generateAuthTemplateToken,
+} from "../../utils/otpGenerator.js";
 import { languages, languagesCode } from "../../utils/dropDown.js";
 import {
 	isNumber,
@@ -64,6 +67,10 @@ export const createTemplate = async (req, res, next) => {
 
 		let savedTemplate;
 		if (category === "Authentication") {
+			if (!user?.authTemplateToken) {
+				user.authTemplateToken = generateAuthTemplateToken();
+				await user.save();
+			}
 			savedTemplate = await saveAuthTemplate(
 				dynamicVariables,
 				FB_PHONE_ID,
@@ -163,40 +170,38 @@ export const getList = async (req, res, next) => {
 		const totalCount = result[0]?.totalCount[0]?.total || 0;
 		const totalPages = Math.ceil(totalCount / limit);
 
-		const permissions = req.session?.addedUser?.permissions;
-		if (permissions) {
-			const access = await Permissions.findOne({
-				unique_id: permissions,
-			});
-			if (access?.templates?.type) {
-				res.render("Templates/manage_template", {
-					access,
-					list: templates,
-					page,
-					totalPages,
-					color: req.session?.addedUser?.color,
-					photo: req.session?.addedUser?.photo,
-					name: req.session?.addedUser?.name,
-					whatsAppStatus: req.session?.addedUser?.whatsAppStatus,
-					languagesCode,
-				});
-			} else {
-				res.render("errors/notAllowed");
+		const sessionUser = req.session?.addedUser || req.session?.user;
+		const permissionsId = sessionUser?.permissions;
+		const userColor = sessionUser?.color;
+		const userPhoto = sessionUser?.photo;
+		const userName = sessionUser?.name;
+		const whatsAppStatus = sessionUser?.whatsAppStatus;
+		const user = await User.findOne({ unique_id: id });
+		let access;
+
+		if (permissionsId) {
+			access = await Permissions.findOne({ unique_id: permissionsId });
+
+			if (!access?.templates?.type) {
+				return res.render("errors/notAllowed");
 			}
 		} else {
-			const access = await User.findOne({ unique_id: id });
-			res.render("Templates/manage_template", {
-				access: access.access,
-				list: templates,
-				page,
-				totalPages,
-				color: req.session.user.color,
-				photo: req.session.user?.photo,
-				name: req.session.user.name,
-				whatsAppStatus: req.session?.user?.whatsAppStatus,
-				languagesCode,
-			});
+			access = user?.access;
 		}
+
+		res.render("Templates/manage_template", {
+			authTemplateToken: user?.authTemplateToken,
+			access,
+			list: templates,
+			page,
+			totalPages,
+			color: userColor,
+			photo: userPhoto,
+			name: userName,
+			whatsAppStatus,
+			languagesCode,
+		});
+
 	} catch (error) {
 		console.log(error);
 		res.render("errors/serverError");

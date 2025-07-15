@@ -1,3 +1,13 @@
 .env
 /node_modules
 .vercel
+.gitignore
+
+authTemplateTest.html
+vercel.json
+webhook.process.js
+webhook.process1.js
+socketServer.js
+/certs
+.vscode
+

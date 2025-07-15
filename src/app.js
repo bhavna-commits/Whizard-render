@@ -4,6 +4,13 @@ import corsMiddleware from "./middleWares/cors.js";
 
 const app = express();
 
+app.use((req, res, next) => {
+	res.setHeader("X-Content-Type-Options", "nosniff");
+	res.setHeader("X-Frame-Options", "DENY");
+	res.setHeader("X-XSS-Protection", "1; mode=block");
+	next();
+});
+
 app.use(express.json({ limit: "100mb" }));
 app.use(express.urlencoded({ limit: "100mb", extended: true }));
 app.use(corsMiddleware);

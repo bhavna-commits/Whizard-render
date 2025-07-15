@@ -9,6 +9,7 @@ import {
 } from "../controllers/Templates/template.controller.js";
 import { trackSanitationFailures } from "../middleWares/sanitiseInput.js";
 
+
 const router = express.Router();
 
 router.get("/template", getList, trackSanitationFailures);
@@ -34,5 +35,7 @@ router.get(
 );
 
 router.get("/templates/edit/:id", getEditTemplate, trackSanitationFailures);
+
+
 
 export default router;

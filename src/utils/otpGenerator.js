@@ -11,7 +11,7 @@ export const setOTPExpiry = () => {
 export function validatePassword(password) {
 	const passwordRegex =
 		/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-	
+
 	return passwordRegex.test(password);
 }
 
@@ -34,6 +34,9 @@ export function isValidEmail(email) {
 export const generateUniqueId = () => {
 	return crypto.randomBytes(5).toString("hex").slice(0, 10);
 };
+
+export const generateAuthTemplateToken = () =>
+	crypto.randomBytes(32).toString("hex");
 
 export function convertDateFormat(date) {
 	// Regex to match mm/dd/yyyy format

@@ -1,5 +1,6 @@
 import User from "../../models/user.model.js";
 import cron from "node-cron";
+import { agenda } from "../../config/db.js";
 
 export async function refreshBusinessToken(userId, wabaId, oldToken) {
 	await withRetry(async () => {
@@ -44,7 +45,6 @@ export async function withRetry(fn, retries = 5, delayMs = 1000) {
 }
 
 
-
 /**
  * Schedule a one‑off job at a given Date.
  * @param {Date} runAt    When to fire the job
@@ -55,7 +55,7 @@ export function scheduleRefresh(runAt, job, tz = "UTC") {
 	const minute = runAt.getUTCMinutes();
 	const hour = runAt.getUTCHours();
 	const day = runAt.getUTCDate();
-	const month = runAt.getUTCMonth() + 1; // cron months are 1–12
+	const month = runAt.getUTCMonth() + 1;
 
 	// e.g. '30 14 5 6 *' runs at 14:30 UTC on June 5th
 	const cronExpr = `${minute} ${hour} ${day} ${month} *`;
@@ -66,3 +66,7 @@ export function scheduleRefresh(runAt, job, tz = "UTC") {
 	});
 }
 
+agenda.define("refresh fb token", async (job) => {
+	const { userId, wabaId, token } = job.attrs.data;
+	await refreshBusinessToken(userId, wabaId, token);
+});
