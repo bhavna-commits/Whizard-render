@@ -114,33 +114,38 @@ export const getContacts = async (req, res, next) => {
 		const filters = req.body.filters || [];
 
 		// Start with the basic match stage
-		const matchStage = {
-			contactId: id,
-			subscribe: 1,
-		};
+		// Create AND conditions with static match too
+		const andConditions = [{ contactId: id }, { subscribe: 1 }];
 
-		// Add dynamic filters to the match stage
 		filters.forEach((filter) => {
 			if (filter.field === "subscribe_date" && filter.value) {
-				const [startDate, endDate] = filter.value.split(" to "); // Assuming date range format is "startDate to endDate"
-				matchStage.subscribe_date = {
-					$gte: new Date(startDate).getTime(),
-					$lte: new Date(endDate).getTime(),
-				};
+				const [startDate, endDate] = filter.value.split(" to ");
+				andConditions.push({
+					subscribe_date: {
+						$gte: new Date(startDate).getTime(),
+						$lte: new Date(endDate).getTime(),
+					},
+				});
 			} else {
-				// Apply dynamic filters (other fields like Name, Number, masterExtra fields)
 				if (filter.condition === "has") {
-					matchStage[filter.field] = {
-						$regex: filter.value,
-						$options: "imsx",
-					};
+					andConditions.push({
+						[filter.field]: {
+							$regex: filter.value,
+							$options: "imsx",
+						},
+					});
 				} else if (filter.condition === "does not") {
-					matchStage[filter.field] = {
-						$not: { $regex: filter.value, $options: "imsx" },
-					};
+					andConditions.push({
+						[filter.field]: {
+							$not: { $regex: filter.value, $options: "imsx" },
+						},
+					});
 				}
 			}
 		});
+
+		// Final match stage: ONLY $and
+		const matchStage = { $and: andConditions };
 
 		// Aggregation pipeline to apply filters and paginate
 		const aggregation = [

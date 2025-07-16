@@ -476,8 +476,8 @@ export const updateAccountDetails = async (req, res, next) => {
 		await ActivityLogs.create({
 			useradmin: req.session?.user?.id || req.session?.addedUser?.owner,
 			unique_id: generateUniqueId(),
-			name: req.session.user.name
-				? req.session.user.name
+			name: req.session?.user?.name
+				? req.session?.user?.name
 				: req.session.addedUser.name,
 			actions: "Update",
 			details: `Updated their account details`,
@@ -684,7 +684,7 @@ export const activityLogsFiltered = async (req, res, next) => {
 				access: access.access,
 				logs,
 				photo: req.session.user?.photo,
-				name: req.session.user.name,
+				name: req.session.user?.name,
 			});
 		} else {
 			const access = await Permissions.findOne({
@@ -693,8 +693,8 @@ export const activityLogsFiltered = async (req, res, next) => {
 			res.render("Settings/partials/activityLogs", {
 				access,
 				logs,
-				photo: req.session.user?.photo,
-				name: req.session.user.name,
+				photo: req.session.addedUser?.photo,
+				name: req.session.addedUser.name,
 			});
 		}
 	} catch (err) {
@@ -845,9 +845,9 @@ export const sendUserInvitation = async (req, res, next) => {
 		await ActivityLogs.create({
 			useradmin: req.session?.user?.id || req.session?.addedUser?.owner,
 			unique_id: generateUniqueId(),
-			name: req.session.user.name
-				? req.session.user.name
-				: req.session.addedUser.name,
+			name: req.session?.user?.name
+				? req.session?.user?.name
+				: req.session?.addedUser?.name,
 			actions: "Send",
 			details: `Sent an invitation link to join the account`,
 		});

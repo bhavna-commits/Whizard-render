@@ -537,7 +537,7 @@ export const deleteCustomField = async (req, res, next) => {
 
 			// Call the function to delete the field from the CSV
 			await updateCSVOnFieldDelete(
-				req.session.user.id,
+				req.session?.user?.id || req.session?.addedUser?.owner,
 				fieldNameToDelete,
 			);
 			// console.log(req.session.user.name);
@@ -663,9 +663,7 @@ export const getList = async (req, res) => {
 
 		const user = await User.findOne({ unique_id: userId });
 
-		const FB_PHONE_ID = user?.FB_PHONE_NUMBERS?.find(
-			(n) => n.selected,
-		);
+		const FB_PHONE_ID = user?.FB_PHONE_NUMBERS?.find((n) => n.selected);
 
 		let access = null;
 		let matchQuery = {
@@ -854,8 +852,14 @@ export const searchContactLists = async (req, res, next) => {
 			};
 		}
 
-		if (addedUserId) {
-			matchStage.agent = addedUserId;
+		let access;
+		const permissions = req.session?.addedUser?.permissions;
+		if (permissions) {
+			access = await Permissions.findOne({
+				unique_id: permissions,
+			});
+
+			if (!access.contactList.allList) matchStage.agent = addedUserId;
 		}
 
 		const result = await ContactList.aggregate([
@@ -885,11 +889,7 @@ export const searchContactLists = async (req, res, next) => {
 		// Calculate total pages
 		const totalPages = Math.ceil(totalCount / limit);
 
-		const permissions = req.session?.addedUser?.permissions;
 		if (permissions) {
-			const access = await Permissions.findOne({
-				unique_id: permissions,
-			});
 			if (access.contactList.type) {
 				res.render("Contact-List/partials/contactListTable", {
 					access,

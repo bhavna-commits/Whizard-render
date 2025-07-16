@@ -780,6 +780,7 @@ export const getCampaignTemplates = async (req, res) => {
 			useradmin: id,
 			status: "Approved",
 			deleted: false,
+			category: { $ne: "Authentication" },
 		}).sort({ createdAt: -1 });
 		// console.log(updatedTemplates);
 		res.json({

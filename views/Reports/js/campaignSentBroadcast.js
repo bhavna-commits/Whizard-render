@@ -100,10 +100,9 @@ const uploadCSV = document.getElementById("exportCSV");
 uploadCSV.addEventListener("click", function () {
 	const table = document.querySelector("table");
 
-	// Initialize an empty array to store rows
 	let csv = [];
 
-	// Get table headers, skipping the first checkbox column
+	// Get table headers (excluding checkbox column)
 	const headers = [];
 	table.querySelectorAll("thead td:not(:first-child)").forEach((header) => {
 		headers.push(header.textContent.trim());
@@ -113,33 +112,48 @@ uploadCSV.addEventListener("click", function () {
 	// Get table rows
 	table.querySelectorAll("tbody tr").forEach((row) => {
 		const cells = [];
-		row.querySelectorAll("td").forEach((cell, index) => {
-			// Exclude checkboxes and handle contact differently
-			if (index !== 0) {
-				// Skip the first checkbox column
-				if (index === 2) {
-					// Contact column: get the real phone number from the aria-label
-					const phoneNumber = cell.textContent.trim();
-					cells.push(phoneNumber);
-				} else if (index === 6) {
-					// Message Template column: get the full message text
-					const messageText = cell
-						.querySelector("#messageText")
-						.textContent.replaceAll("\n", "")
+		const tds = row.querySelectorAll("td");
+
+		tds.forEach((cell, index) => {
+			if (index === 0) return; // Skip checkbox column
+
+			let value = "";
+
+			// Phone number (masked)
+			if (index === 2) {
+				value = cell.textContent.trim();
+			}
+			// Message Template (strip read more/read less)
+			else if (index === 7) {
+				const messageEl = cell.querySelector(".messageText");
+				if (messageEl) {
+					value = messageEl.textContent
+						.replace(/Read more|Read less/g, "")
+						.replace(/\n/g, "")
 						.trim();
-					cells.push(messageText);
-				} else {
-					cells.push(cell.textContent.trim());
 				}
 			}
+			// All other cells
+			else {
+				value = cell.textContent
+					.replace(/Read more|Read less/g, "")
+					.replace(/\n/g, "")
+					.trim();
+			}
+
+			// Escape for CSV (wrap in quotes and escape internal quotes)
+			const safeValue = `"${value.replace(/"/g, '""')}"`;
+			cells.push(safeValue);
 		});
-		csv.push(cells.join(","));
+
+		// Only add row if it has data (skip blank/thank-you rows)
+		if (cells.some((cell) => cell.replace(/"/g, "").trim() !== "")) {
+			csv.push(cells.join(","));
+		}
 	});
 
-	// Create CSV Blob
 	const csvFile = new Blob([csv.join("\n")], { type: "text/csv" });
 
-	// Create a link element and trigger the download
 	const downloadLink = document.createElement("a");
 	downloadLink.download = "campaign_reports.csv";
 	downloadLink.href = window.URL.createObjectURL(csvFile);
@@ -150,22 +164,18 @@ uploadCSV.addEventListener("click", function () {
 	document.body.removeChild(downloadLink);
 });
 
+
 function toggleReadMore(event) {
-	// Get the clicked button
 	const readMoreBtn = event.target;
+	const messageText = readMoreBtn.closest("td").querySelector(".messageText");
+	if (!messageText) return; // Guard against null
 
-	// Find the closest parent 'td' element and search for the messageText span within that 'td'
-	const messageText = readMoreBtn.closest("td").querySelector("#messageText");
-
-	// Toggle the class to show or hide the full text
 	messageText.classList.toggle("whitespace-normal");
 	messageText.classList.toggle("whitespace-nowrap");
 	messageText.classList.toggle("overflow-hidden");
 
-	// Change the button text to "Read less" or "Read more"
-	if (messageText.classList.contains("whitespace-normal")) {
-		readMoreBtn.innerText = "Read less";
-	} else {
-		readMoreBtn.innerText = "Read more";
-	}
+	readMoreBtn.innerText = messageText.classList.contains("whitespace-normal")
+		? "Read less"
+		: "Read more";
 }
+

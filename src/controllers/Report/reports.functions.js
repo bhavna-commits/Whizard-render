@@ -1,5 +1,4 @@
 import dotenv from "dotenv";
-import cron from "node-cron";
 import {
 	replaceDynamicVariables,
 	sendMessageThroughWhatsApp,
@@ -9,17 +8,13 @@ import {
 } from "../ContactList/campaign.functions.js";
 import {
 	sendCampaignReportEmail,
-	sendCampaignScheduledEmail,
 } from "../../services/OTP/reportsEmail.js";
 import { agenda } from "../../config/db.js";
 import Template from "../../models/templates.model.js";
-import Contacts from "../../models/contacts.model.js";
 import Permissions from "../../models/permissions.model.js";
 import Campaign from "../../models/campaign.model.js";
-import Report from "../../models/report.model.js";
 import User from "../../models/user.model.js";
 import Chat from "../../models/chats.model.js";
-import { generateUniqueId } from "../../utils/otpGenerator.js";
 import { sendMessages } from "../ContactList/campaign.functions.js";
 import { isString, isNumber } from "../../middleWares/sanitiseInput.js";
 import TempMessageModel from "../../models/TempMessage.model.js";
@@ -286,15 +281,11 @@ export async function sendMessagesReports(
 			};
 
 			if (mediaPreview) {
-				// If media exists, store media details instead of the messageTemplate preview.
 				reportData.media = {
 					url: mediaPreview.url,
 					fileName: mediaPreview.fileName,
 				};
 			}
-
-			// const report = new Report(reportData);
-			// await report.save();
 
 			reportData.components = components;
 			reportData.templateId = campaign.templateId;
@@ -316,14 +307,8 @@ export async function sendMessagesReports(
 
 			await TempMessageModel.create(reportData2);
 			const chat = new Chat(reportData);
-			// await ChatsTemp.create(reportData);
 			await chat.save();
 		}
-
-		// Update the campaign status to 'SENT' after messages are sent
-		campaign.status = "SENT";
-		await campaign.save();
-		// await chat.save();
 	} catch (error) {
 		console.error("Error sending messages:", error.message);
 		throw new Error(`${error.message}`);
@@ -1101,20 +1086,3 @@ agenda.define("send campaign report email", async (job) => {
 	const { campaignId, userId } = job.attrs.data;
 	await sendCampaignReportEmail(campaignId, userId);
 });
-
-// cron.schedule("* * * * *", async () => {
-// 	try {
-// 		const now = Date.now();
-
-// 		const scheduledCampaigns = await Campaign.find({
-// 			scheduledAt: { $lte: now },
-// 			status: "SCHEDULED",
-// 		});
-
-// 		for (let campaign of scheduledCampaigns) {
-// 			await scheduleCampaign(campaign);
-// 		}
-// 	} catch (error) {
-// 		console.error("Error checking scheduled campaigns:", error);
-// 	}
-// });

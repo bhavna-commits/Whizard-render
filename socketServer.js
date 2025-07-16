@@ -88,6 +88,87 @@ io.on("connection", (socket) => {
 let agents = [];
 let support = "";
 
+function sendsocket(
+	agentslist,
+	userno,
+	text,
+	timestamp,
+	name,
+	mediaId,
+	type,
+	fbPhoneId,
+	document,
+) {
+	console.log(agentslist);
+	if (agentslist.length > 0) {
+		for (var i = 0; i < agentslist.length; i++) {
+			let bptId = "new-message_idal_com_" + userno + agentslist[i];
+			console.log(bptId);
+
+			let lastmessage = text?.body || text || "";
+			if (type === "text") {
+				type = "";
+			}
+			if (type) {
+				lastmessage = type;
+			}
+
+			let data1 = {
+				filter_data: {},
+				msg: lastmessage,
+				timestamp: timestamp,
+				status: "replied",
+				username: name,
+				wa_id: userno,
+				media_message: type
+					? {
+							link:
+								`/api/chats/get-media?mediaId=${mediaId}&phoneId=${fbPhoneId}` ||
+								"",
+							filename:
+								type === "document" ? document?.filename : "",
+							caption: lastmessage || "",
+					  }
+					: { link: "", caption: "" },
+				media_type: type,
+			};
+
+			let data2 = {
+				filter_data: {},
+				sent: 1,
+				lastmessage: lastmessage,
+				wa_id: userno,
+				status: 0,
+				username: name,
+				name: name,
+				keyId: fbPhoneId,
+				usertimestmp: timestamp,
+				is_read: false,
+				media_message: type
+					? {
+							link:
+								`/api/chats/get-media?mediaId=${mediaId}&phoneId=${fbPhoneId}` ||
+								"",
+							filename:
+								type === "document" ? document?.filename : "",
+							caption: lastmessage || "",
+					  }
+					: { link: "", caption: "" },
+				media_type: type,
+			};
+
+			let bptId2 = "MainRefresh_initial-users_" + agentslist[i];
+			//console.log(bptId)
+			console.log(data1);
+
+			//console.log(bptId2)
+			console.log(data2);
+			io.emit(bptId, data1);
+			io.emit(bptId2, data2);
+		}
+	}
+}
+
 app.post("/webhook", async (req, res) => {
 	try {
 		const { entry } = req.body;
