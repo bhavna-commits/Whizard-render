@@ -71,32 +71,31 @@ export const fetchAndFormatReports = async (
 	// console.log(query);
 	const chats = await ChatsUsers.find(query)
 		.sort({ updatedAt: -1 })
-		.skip(skip)
-		.limit(limit)
+		// .skip(skip)
+		// .limit(limit)
 		.lean();
 
 	if (!chats.length) return [];
 
 	const now = Date.now();
-	const formatted = chats
-		.map((chat) => {
-			const isRecent =
-				chat.lastReceive && now - chat.lastReceive < 24 * 3600_000;
-			return {
-				lastmessage: chat?.lastMessage || "No recent reply",
-				wa_id: chat.wa_id,
-				status: isRecent ? 0 : 1,
-				name: chat.contactName.toString(),
-				usertimestmp:
-					chat.messageStatus === "REPLIED"
-						? chat.lastReceive
-						: chat.lastSend,
-				campaignId: chat?.campaignId || "",
-				is_read: chat.status === "READ",
-			};
-		})
-		.sort((a, b) => b.usertimestmp - a.usertimestmp);
-
+	const formatted = chats.map((chat) => {
+		const isRecent =
+			chat.lastReceive && now - chat.lastReceive < 24 * 3600_000;
+		return {
+			lastmessage: chat?.lastMessage || "No recent reply",
+			wa_id: chat.wa_id,
+			status: isRecent ? 0 : 1,
+			name: chat.contactName.toString(),
+			usertimestmp:
+				chat.messageStatus === "REPLIED"
+					? chat.lastReceive
+					: chat.lastSend,
+			campaignId: chat?.campaignId || "",
+			is_read: chat.status === "READ",
+		};
+	});
+	// .sort((a, b) => b.usertimestmp - a.usertimestmp);
+	console.log(JSON.stringify(formatted, _, 2));
 	return formatted;
 };
 
