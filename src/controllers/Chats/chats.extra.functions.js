@@ -71,8 +71,8 @@ export const fetchAndFormatReports = async (
 	// console.log(query);
 	const chats = await ChatsUsers.find(query)
 		.sort({ updatedAt: -1 })
-		// .skip(skip)
-		// .limit(limit)
+		.skip(skip)
+		.limit(limit)
 		.lean();
 
 	if (!chats.length) return [];
@@ -95,7 +95,6 @@ export const fetchAndFormatReports = async (
 		};
 	});
 	// .sort((a, b) => b.usertimestmp - a.usertimestmp);
-	console.log(JSON.stringify(formatted, null, 2));
 	return formatted;
 };
 
