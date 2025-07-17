@@ -95,7 +95,7 @@ export const fetchAndFormatReports = async (
 		};
 	});
 	// .sort((a, b) => b.usertimestmp - a.usertimestmp);
-	console.log(JSON.stringify(formatted, _, 2));
+	console.log(JSON.stringify(formatted, null, 2));
 	return formatted;
 };
 
