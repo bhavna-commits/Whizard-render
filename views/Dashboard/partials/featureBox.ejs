@@ -1,0 +1,25 @@
+<%
+	const {
+		title = 'No Title',
+		desc = '',
+		href = '#',
+		btnText = 'Go',
+		disabled = false,
+		reason = ''
+	} = typeof locals !== 'undefined' ? locals : {};
+%>
+
+<div class="feature-box">
+	<h3 class="feature-title"><%= title %></h3>
+	<p class="feature-description"><%= desc %></p>
+	
+	<% if (disabled) { %>
+	<button type="button" class="feature-button hover:cursor-not-allowed" disabled title="<%= reason %>">
+		<%= btnText %>
+	</button>
+	<% } else { %>
+	<button type="button" class="feature-button" onclick="location.href='<%= href %>'">
+		<%= btnText %>
+	</button>
+	<% } %>
+</div>

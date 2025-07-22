@@ -10,6 +10,8 @@ import {
 	deleteCustomField,
 	searchContactLists,
 	previewContactList,
+	duplicateList,
+	downloadListCSV,
 } from "../controllers/ContactList/contactList.controller.js";
 import {
 	updateContact,
@@ -18,17 +20,21 @@ import {
 	createContact,
 	createCampaign,
 	getFilteredContacts,
+	
 } from "../controllers/ContactList/contacts.controller.js";
 import { trackSanitationFailures } from "../middleWares/sanitiseInput.js";
+import { multerMiddle } from "../config/multerMiddleware.js";
 
 const router = express.Router();
 const upload = multer();
 
 router.post("/create-list", createList, trackSanitationFailures);
 
-router.post("/previewContactList", previewContactList, trackSanitationFailures);
+router.post("/duplicate-list", duplicateList, trackSanitationFailures);
 
-// router.put("/editList/:id", editList);
+router.get("/download/:listId", downloadListCSV, trackSanitationFailures);
+
+router.post("/previewContactList", previewContactList, trackSanitationFailures);
 
 router.delete("/deleteList/:id", deleteList, trackSanitationFailures);
 
@@ -66,11 +72,9 @@ router.delete("/custom-fields/:id", deleteCustomField, trackSanitationFailures);
 
 router.get("/search", searchContactLists, trackSanitationFailures);
 
-// router.post("/create-contact", createContact);
-
 router.post(
 	"/create-campaign",
-	upload.none(),
+	multerMiddle,
 	createCampaign,
 	trackSanitationFailures,
 );

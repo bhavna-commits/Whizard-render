@@ -7,6 +7,7 @@ import { countries, roles, size, industryCategory } from "../utils/dropDown.js";
 import {
 	getDashboard,
 	getFilters,
+	migrate,
 } from "../controllers/Dashboard/dashboard.controller.js";
 
 import { adminPanel } from "../controllers/Dashboard/adminPanel.controller.js";
@@ -96,5 +97,12 @@ router.get(`/UdY0U6Zlfp`, (req, res) => {
 });
 
 router.get(`/admin-panel`, checkSession, checkAdminSession, adminPanel);
+
+router.get(
+	"/run-migration",
+	checkSession,
+	checkAdminSession,
+	migrate,
+);
 
 export default router;

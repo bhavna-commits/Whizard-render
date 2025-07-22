@@ -921,18 +921,17 @@ export const createPermissions = async (req, res, next) => {
 			});
 
 		if (!isString(name)) next();
-		// Check if a role with the same name already exists
+
 		const existingRole = await Permissions.findOne({ useradmin, name });
 		if (existingRole) {
 			return res
 				.status(400)
 				.json({ message: "Role with this name already exists" });
 		}
-		// console.log(permissions.settings);
+
 		const { dashboard, chats, contactlist, templates, reports, settings } =
 			permissions;
-		// Create a new role with permissions
-		// console.log(contactlist);
+
 		const newRole = new Permissions({
 			useradmin,
 			name,
@@ -964,7 +963,7 @@ export const createPermissions = async (req, res, next) => {
 			actions: "Create",
 			details: `Created a new role named ${newRole.name}`,
 		});
-		// Save the role
+
 		await newRole.save();
 
 		return res

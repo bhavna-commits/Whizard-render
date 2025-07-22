@@ -18,6 +18,7 @@ import { DEFAULT_PERMISSIONS } from "../../utils/defaultPermissions.js";
 import { isString } from "../../middleWares/sanitiseInput.js";
 import { incrementLoginAttempts } from "../../middleWares/rateLimiter.js";
 import Login from "../../models/login.model.js";
+import runMigration from "../../utils/migration.js";
 
 // 2FA settings: if you later set one of these to false the corresponding OTP verification is disabled
 const ENABLE_EMAIL_OTP = Boolean(process.env.EMAIL_OTP_LOGIN);
@@ -56,6 +57,14 @@ export const generateOTP = async (req, res, next) => {
 				.json({ success: false, message: "Email already exists" });
 		}
 
+		const addedUser = await AddedUser.findOne({ email, deleted: false });
+
+		if (addedUser) {
+			return res
+				.status(409)
+				.json({ success: false, message: "Email already exists" });
+		}
+
 		const phone = `${countryCode}${phoneNumber}`;
 		const mobileExists = await User.findOne({ phone, deleted: false });
 
@@ -76,8 +85,10 @@ export const generateOTP = async (req, res, next) => {
 			phoneNumber,
 			countryCode,
 			otp,
-			otpExpiry, // Store expiration time
+			otpExpiry,
 		};
+
+		console.log(otp);
 
 		await sendEmailVerification(email, otp);
 
@@ -727,6 +738,7 @@ export const about = async (req, res, next) => {
 		}
 
 		const {
+			skip,
 			name: companyName,
 			description,
 			state,
@@ -736,6 +748,64 @@ export const about = async (req, res, next) => {
 			jobRole,
 			website,
 		} = req.body;
+
+		if (skip) {
+			const { name, email, password, phoneNumber, countryCode } =
+				req.session.tempUser;
+
+			// Check if user already exists
+			const userExists = await User.findOne({ email, deleted: false });
+			if (userExists) {
+				return res.status(409).json({
+					success: false,
+					message: "User with this email already exists.",
+				});
+			}
+			const addedUser = await AddedUser.findOne({
+				email,
+				deleted: false,
+			});
+
+			if (addedUser) {
+				return res.status(409).json({
+					success: false,
+					message: "User with this email already exists.",
+				});
+			}
+
+			// Encrypt the password using bcrypt
+			const saltRounds = 10;
+			const hashedPassword = await bcrypt.hash(password, saltRounds);
+			const phone = `${countryCode}${phoneNumber}`;
+			const unique_id = generateUniqueId();
+			const color = getRandomColor();
+			const newUser = new User({
+				name,
+				email,
+				password: hashedPassword,
+				phone,
+				unique_id,
+				color,
+			});
+
+			// console.log(newUser);
+			// Update session with the newly created user data to keep them logged in
+			req.session.user = {
+				id: newUser.unique_id,
+				name: newUser.name,
+				color,
+				whatsAppStatus: newUser.WhatsAppConnectStatus,
+			};
+
+			await newUser.save();
+
+			await createDefaultPermissionsForUser(newUser.unique_id);
+
+			return res.status(201).json({
+				success: true,
+				message: "User created and logged in successfully.",
+			});
+		}
 
 		if (
 			!companyName ||
@@ -773,6 +843,14 @@ export const about = async (req, res, next) => {
 		// Check if user already exists
 		const userExists = await User.findOne({ email, deleted: false });
 		if (userExists) {
+			return res.status(409).json({
+				success: false,
+				message: "User with this email already exists.",
+			});
+		}
+		const addedUser = await AddedUser.findOne({ email, deleted: false });
+
+		if (addedUser) {
 			return res.status(409).json({
 				success: false,
 				message: "User with this email already exists.",
@@ -818,20 +896,12 @@ export const about = async (req, res, next) => {
 		res.status(201).json({
 			success: true,
 			message: "User created and logged in successfully.",
-			user: {
-				name: newUser.name,
-				email: newUser.email,
-				companyName: newUser.companyName,
-				industry: newUser.industry,
-				unique_id: newUser.unique_id,
-			},
 		});
 	} catch (error) {
-		console.error("Error creating user:", error.message);
+		console.error("Error creating user:", error?.message || error);
 		res.status(500).json({
 			success: false,
-			message: "Error creating user.",
-			error: error.message,
+			message: error?.message || error,
 		});
 	}
 };

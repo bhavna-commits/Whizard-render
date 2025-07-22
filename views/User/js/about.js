@@ -8,11 +8,57 @@ document.addEventListener("DOMContentLoaded", function () {
 	const selectedFlag = document.getElementById("selectedFlag");
 	const stateInput = document.getElementById("stateInput");
 	const stateDropdown = document.getElementById("stateDropdown");
+	const skipBtn = document.getElementById("skipBtn");
 	const form = document.getElementById("signUpForm");
 
 	let selectedCountry = null;
 
-	// Previous country selector code remains the same...
+	skipBtn.addEventListener("click", async function () {
+		this.disabled = true;
+		this.innerHTML = `
+            <svg class="animate-spin -ml-1 mr-3 h-5 w-5 inline-block text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Submitting ...
+        `;
+
+		const formData = {
+			skip: true,
+		};
+
+		try {
+			const response = await fetch("/api/users/about", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify(formData),
+			});
+
+			const result = await response.json();
+
+			if (!response.ok) {
+				const errorMsg =
+					result.message ||
+					"Error saving information, please check the details";
+				console.log(errorMsg);
+				throw new Error(errorMsg);
+			}
+
+			if (result.success) {
+				location.href = "/";
+			}
+		} catch (error) {
+			console.log(error);
+			toast("error", error);
+			// errorMessage.classList.remove("hidden");
+			// errorMessage.textContent = error;
+		} finally {
+			this.disabled = false;
+			this.innerHTML = "Submit";
+		}
+	});
 
 	form.addEventListener("submit", async function (e) {
 		e.preventDefault();
@@ -47,7 +93,6 @@ document.addEventListener("DOMContentLoaded", function () {
 		};
 
 		try {
-			console.log("hrere");
 			const response = await fetch("/api/users/about", {
 				method: "POST",
 				headers: {
@@ -75,7 +120,7 @@ document.addEventListener("DOMContentLoaded", function () {
 		} catch (error) {
 			console.log(error);
 			errorMessage.classList.remove("hidden");
-			errorMessage.textContent = error.message; // Display the error message
+			errorMessage.textContent = error; // Display the error message
 		} finally {
 			// Re-enable the submit button and restore the original text
 			submitBtn.disabled = false;

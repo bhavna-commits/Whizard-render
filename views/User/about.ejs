@@ -57,14 +57,14 @@
 
 <body>
 	<%- include("../commonJS/loader") %>
-	<div class="flex">
+	<div class="layout-container">
 		<!-- Left Section -->
 		
 		<%- include("common/leftSide")  %>
 		
 		<!-- Right Section - Sign Up Form -->
-		<div class="flex-shrink right-section">
-			<div class="d-flex justify-content-center align-items-center vh-100 border-0">
+		<div class="flex-shrink right-section justify-center p-5">
+			<div class="d-flex justify-content-center align-items-center border-0">
 				<div class="w-[75%]">
 					<h2 class="text-4xl font-medium text-center mb-2">Tell us about yourself</h2>
 					<h2 class="text-gray-500 text-center mb-4">
@@ -157,8 +157,8 @@
 										<% roles.forEach(function(role) { %>
 										<option value="<%= role %>"><%= role %></option>
 										<% }); %>
-									</select></div>
-								
+									</select>
+								</div>								
 							</div>
 							
 							<div>
@@ -170,8 +170,12 @@
 						<button type="submit" class="bg-black w-100 mt-4 rounded-[.6rem] text-white p-2 h-10" id="submitBtn">
 							Complete Sign Up
 						</button>
-						<div id="errorMessage" class="hidden"></div>
+						
 					</form>
+					<button type="button" class=" w-100 mt-3 rounded-[.6rem] text-gray-700 form-control hover:bg-gray-50 p-2 h-10" id="skipBtn">
+						Skip
+					</button>
+					<div id="errorMessage" class="hidden"></div>
 				</div>
 			</div>
 		</div>

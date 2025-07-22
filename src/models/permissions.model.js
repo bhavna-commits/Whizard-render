@@ -30,6 +30,7 @@ const permissionSchema = new Schema(
 			deleteList: { type: Boolean, default: false },
 			sendBroadcast: { type: Boolean, default: false },
 			allList: { type: Boolean, default: false },
+			downloadList: { type: Boolean, default: false },
 		},
 		templates: {
 			type: { type: Boolean, default: false },

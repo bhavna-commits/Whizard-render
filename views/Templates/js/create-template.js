@@ -283,6 +283,73 @@ document.getElementById("footerInput")?.addEventListener("input", function () {
 		footerInput.length + "/60";
 });
 
+function setupCharCount(inputId, countSelector, maxLength = 60) {
+	const input = document.getElementById(inputId);
+	if (!input) return;
+
+	const counter = document.querySelector(countSelector);
+	if (!counter) return;
+
+	input.addEventListener("input", function () {
+		const value = this.value;
+		counter.textContent = `${value.length}/${maxLength}`;
+	});
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+	setupCharCount("headerInput", ".header-count", 60);
+	setupCharCount("callBtnLabel", ".call-count", 25);
+	setupCharCount("websiteBtnLabel", ".web-count", 25);
+
+	const countrySelectorButton = document.getElementById(
+		"countrySelectorButton",
+	);
+	const countryDropdown = document.getElementById("countryDropdown");
+	const countryOptions = document.querySelectorAll(".country-option");
+	const countrySearch = document.getElementById("countrySearch");
+	// Toggle country dropdown
+	countrySelectorButton.addEventListener("click", function (e) {
+		e.preventDefault();
+		countryDropdown.classList.toggle("hidden");
+	});
+
+	// Handle country selection
+	countryOptions.forEach((option) => {
+		option.addEventListener("click", function () {
+			const flag = this.querySelector(".country-flag").textContent;
+			const dialCode =
+				this.querySelector(".country-dial-code").textContent;
+
+			selectedFlag.textContent = flag;
+			selectedDialCode.value = dialCode;
+			countryDropdown.classList.add("hidden");
+		});
+	});
+
+	// Search functionality
+	countrySearch.addEventListener("input", function () {
+		const searchValue = this.value.toLowerCase();
+
+		countryOptions.forEach((option) => {
+			const countryName = option
+				.querySelector(".country-name")
+				.textContent.toLowerCase();
+			const dialCode = option
+				.querySelector(".country-dial-code")
+				.textContent.toLowerCase();
+
+			if (
+				countryName.includes(searchValue) ||
+				dialCode.includes(searchValue)
+			) {
+				option.style.display = "flex";
+			} else {
+				option.style.display = "none";
+			}
+		});
+	});
+});
+
 document
 	.getElementById("bodyInput")
 	?.addEventListener("keydown", function (event) {
@@ -443,13 +510,15 @@ function generatePreviewWebsite() {
 	let label = document.getElementById("websiteBtnLabel").value || "Visit Now";
 	let url = document.getElementById("websiteUrl").value || "#";
 
+	if (label.length > 25) return;
+
 	document.querySelectorAll(".websiteBtn").forEach((btn) => btn.remove());
 
 	let preview = `
-  <button class="btn websiteBtn" draggable="true" onclick="window.open('${url}', '_blank')" style="color: #6A67FF;">
-    <i class="fa fa-external-link mx-2"></i>${label}
-  </button>
-`;
+	  <button class="btn websiteBtn" draggable="true" onclick="window.open('${url}', '_blank')" style="color: #6A67FF;">
+	    <i class="fa fa-external-link mx-2"></i>${label}
+	  </button>
+	`;
 
 	document.getElementById("previewButtons").innerHTML += preview;
 	document.getElementById("previewButton").innerHTML += preview;
@@ -461,7 +530,8 @@ function generatePreviewCall() {
 	let label = document.getElementById("callBtnLabel").value || "Call Now";
 	let phone = document.getElementById("phoneNumber").value || "#";
 
-	// Remove all previous call buttons
+	if (label.length > 25) return;
+
 	document.querySelectorAll(".callBtn").forEach((btn) => btn.remove());
 
 	let preview = `
@@ -470,7 +540,6 @@ function generatePreviewCall() {
 		</button>
 	`;
 
-	// Append to both preview containers
 	document.getElementById("previewButtons").innerHTML += preview;
 	document.getElementById("previewButton").innerHTML += preview;
 
@@ -594,9 +663,9 @@ document.getElementById("phoneNumber").addEventListener("input", function (e) {
 	phoneInput.value = value;
 
 	// Check if the phone number is less than 12 digits
-	if (value.length < 12 && value.length > 0) {
+	if (value.length < 8 && value.length > 0) {
 		showMessage(
-			'Phone number must be at least 12 digits long, including the country code (without the "+").',
+			'Phone number must be at least 8 digits long.',
 		);
 	} else {
 		hideMessage();
@@ -734,4 +803,3 @@ function scrollToBottom() {
 // Also check on resize and load
 window.addEventListener("resize", checkScrollBtn);
 window.addEventListener("load", checkScrollBtn);
-

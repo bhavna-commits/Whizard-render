@@ -206,6 +206,8 @@ export async function sendMessagesReports(
 	contactList,
 	phone_number,
 	addedUserId,
+	url,
+	fileName,
 ) {
 	try {
 		// Find the template by unique_id
@@ -225,8 +227,27 @@ export async function sendMessagesReports(
 			);
 		}
 
-		let chat;
-		let chatsTemp;
+		const headerComponent = template.components.find(
+			(c) => c.type === "HEADER",
+		);
+
+		if (fileName) {
+			if (headerComponent) {
+				let fileUrl = `${url}/uploads/${user.unique_id}/${fileName}`;
+				if (headerComponent.format === "IMAGE") {
+					console.log("img");
+					headerComponent.example.header_url = fileUrl;
+				} else if (headerComponent.format === "VIDEO") {
+					console.log("vid");
+					headerComponent.example.header_url = fileUrl;
+					console.log(headerComponent.example.header_url);
+				} else if (headerComponent.format === "DOCUMENT") {
+					console.log("doc");
+					headerComponent.example.header_url = fileUrl;
+				}
+			}
+		}
+
 		// Loop through each contact in the contact list
 		for (let contact of contactList) {
 			// Replace dynamic variables in the template with contact-specific data
@@ -1010,7 +1031,7 @@ export const getFailedReportsById = async (req, res, next) => {
 };
 
 agenda.define("process campaign", async (job) => {
-	const { newCampaign, user, unique_id, phone_number, addedUserId } =
+	const { newCampaign, user, unique_id, phone_number, addedUserId, url, fileName } =
 		job.attrs.data;
 
 	console.log("Sending Campaign");
@@ -1021,6 +1042,8 @@ agenda.define("process campaign", async (job) => {
 			unique_id,
 			phone_number,
 			addedUserId,
+			url,
+			fileName,
 		);
 
 		await Campaign.updateOne(
@@ -1051,6 +1074,8 @@ agenda.define("process reports campaign", async (job) => {
 		contactList,
 		phone_number,
 		addedUserId,
+		url,
+		fileName,
 	} = job.attrs.data;
 	console.log("here");
 	try {
@@ -1061,6 +1086,8 @@ agenda.define("process reports campaign", async (job) => {
 			contactList,
 			phone_number,
 			addedUserId,
+			url,
+			fileName,
 		);
 
 		await Campaign.findOneAndUpdate(

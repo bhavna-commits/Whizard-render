@@ -339,11 +339,16 @@ function toggleErrorDetails(type) {
 	icon.classList.toggle("rotate-180");
 }
 
-// Re-upload logic
-// reUpload.addEventListener("click", function () {
-// 	fileUploadSection.classList.remove("hidden");
-// 	previewSection.classList.add("hidden");
-// });
+function showLoader(action = "Processing") {
+	const loader = document.getElementById("actionLoader");
+	const loaderText = document.getElementById("loaderText");
+	loaderText.textContent = action;
+	loader.classList.remove("hidden");
+}
+
+function hideLoader() {
+	document.getElementById("actionLoader").classList.add("hidden");
+}
 
 // Handle template download
 function getSampleCSV() {
@@ -416,3 +421,86 @@ searchInput.addEventListener("input", function () {
 		}
 	}, 300); // 300ms delay after typing stops
 });
+
+async function duplicateList(listId, listName) {
+	showLoader("Duplicating");
+
+	try {
+		const response = await fetch("/api/contact-list/duplicate-list", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({ listId, listName }),
+		});
+
+		const result = await response.json();
+
+		if (!response.ok || !result.success) {
+			throw new Error(result.message || "Failed to duplicate list");
+		}
+
+		toast("success", `List "${listName}" duplicated successfully`);
+		location.reload();
+	} catch (err) {
+		console.error("Duplication failed:", err);
+		toast("error", err.message || err);
+	} finally {
+		hideLoader();
+	}
+}
+
+async function downloadContactList(contactId, listName) {
+	try {
+		showLoader("Preparing CSV...");
+
+		const response = await fetch(`/api/contact-list/download/${contactId}`);
+
+		if (!response.ok) {
+			throw new Error("Failed to fetch contact list");
+		}
+
+		const data = await response.json();
+		if (!data.success) {
+			throw new Error(data.message || "No data to download");
+		}
+
+		// Convert to CSV
+		const contacts = data.contacts;
+		if (!contacts.length) throw new Error("Empty contact list");
+
+		const headers = ["Name", "Number", "Created At", ...data.dynamicFields];
+		const rows = contacts.map((c) => {
+			const base = [
+				c.Name || "",
+				c.wa_id || "",
+				new Date(c.usertimestmp).toLocaleString(),
+			];
+			const extras = data.dynamicFields.map(
+				(key) => c.masterExtra?.[key] || "",
+			);
+			return [...base, ...extras];
+		});
+
+		const csvContent = [
+			headers.join(","),
+			...rows.map((r) => r.map((val) => `"${val}"`).join(",")),
+		].join("\n");
+
+		// Trigger download
+		const blob = new Blob([csvContent], { type: "text/csv" });
+		const url = URL.createObjectURL(blob);
+		const a = document.createElement("a");
+		a.href = url;
+		a.download = `${listName}-contacts.csv`;
+		a.click();
+		URL.revokeObjectURL(url);
+
+		hideLoader();
+		toast("success", "Download started");
+	} catch (err) {
+		console.error("Download error:", err);
+		hideLoader();
+		toast("error", err.message || err);
+	}
+}

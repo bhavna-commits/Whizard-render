@@ -96,7 +96,6 @@ class Preview {
 	}
 
 	update(template) {
-		console.log(template);
 		if (!template) {
 			this.container.innerHTML =
 				'<p class="text-center text-gray-500">Select a template to preview</p>';
@@ -111,8 +110,38 @@ class Preview {
 		let footerContent = "";
 		let buttonContent = "";
 
+		let uploadSection = "";
+
 		// Filter components for header, body, footer, and buttons
 		components.forEach((component) => {
+			if (
+				component.type === "HEADER" &&
+				["IMAGE", "VIDEO", "DOCUMENT"].includes(component.format)
+			) {
+				const fileUrl = component.example?.header_url
+					?.split("/")
+					.slice(3)
+					.join("/");
+
+				// Create dynamic label & accept types based on format
+				let acceptType = "";
+				let formatLabel = component.format.toLowerCase();
+				if (formatLabel === "image") acceptType = "image/*";
+				else if (formatLabel === "video") acceptType = "video/*";
+				else acceptType = ".pdf,.doc,.docx";
+
+				uploadSection = `
+			<div class="my-4">
+				<div class="flex items-center gap-8">
+					<button class="px-3 py-1 border text-gray-700 rounded sample-btn" data-file="/${fileUrl}">Use Sample ${formatLabel}</button>
+					<div class="upload-label px-3 py-1 bg-black text-white rounded cursor-pointer">
+						Upload New ${formatLabel}
+					</div>
+					<input type="file" class="hidden upload-input" accept="${acceptType}" data-format="${component.format}" />
+				</div>
+			</div>
+		`;
+			}
 			if (component.type === "HEADER") {
 				if (component.format === "IMAGE") {
 					// Handle image format
@@ -179,22 +208,94 @@ class Preview {
 				});
 			}
 		});
-		// console.log("button", buttonContent);
+
+		//  Preview creation
+
 		this.container.innerHTML = `
-        ${
-			headerContent
-				? `<div class="font-semibold text-lg">${headerContent}</div>`
-				: ""
-		}
-        <p class="text-lg py-2">${bodyContent.replace(/\n/g, "<br>")}</p>
-        <p class="text-base text-gray-500 py-1">${footerContent.replace(
+		${uploadSection}
+		<div class="font-semibold text-lg uploaded-preview">
+			${headerContent}
+		</div>
+		<p class="text-lg py-2">${bodyContent.replace(/\n/g, "<br>")}</p>
+		<p class="text-base text-gray-500 py-1">${footerContent.replace(
 			/\n/g,
 			"<br>",
 		)}</p>
-        <div>
-            ${buttonContent}
-        </div>
-    `;
+		<div>${buttonContent}</div>
+	`;
+
+		// Upload new options
+
+		const fileInput = this.container.querySelector(".upload-input");
+		const sampleBtn = this.container.querySelector(".sample-btn");
+		const previewDiv = this.container.querySelector(".uploaded-preview");
+
+		const uploadTrigger = this.container.querySelector(".upload-label");
+		const uploadInput = this.container.querySelector(".upload-input");
+
+		uploadTrigger.addEventListener("click", () => {
+			uploadInput.click();
+		});
+
+		if (fileInput) {
+			fileInput.addEventListener("change", (e) => {
+				const file = e.target.files[0];
+				const format = e.target.dataset.format;
+
+				if (!file || !format) return;
+
+				const reader = new FileReader();
+
+				reader.onload = function (event) {
+					let previewHTML = "";
+					const fileURL = event.target.result;
+
+					if (format === "IMAGE") {
+						previewHTML = `<img src="${fileURL}" class="custom-card-img max-h-96" />`;
+					} else if (format === "VIDEO") {
+						previewHTML = `
+							<video controls class="custom-card-img">
+								<source src="${fileURL}" type="${file.type}">
+								Your browser does not support the video tag.
+							</video>
+						`;
+					} else if (format === "DOCUMENT") {
+						previewHTML = `<iframe src="${fileURL}" class="w-full h-[500px]"></iframe>`;
+					}
+
+					previewDiv.innerHTML = previewHTML;
+				};
+
+				reader.readAsDataURL(file); // Triggers reader.onload
+			});
+		}
+
+		if (sampleBtn) {
+			sampleBtn.addEventListener("click", (e) => {
+				const filePath = e.target.dataset.file;
+				const format = fileInput?.dataset.format;
+				let previewHTML = "";
+
+				fileInput.value = "";
+
+				if (format === "IMAGE") {
+					previewHTML = `<img src="${filePath}" class="custom-card-img max-h-96" />`;
+				} else if (format === "VIDEO") {
+					const fileExtension = filePath.split(".").pop();
+					previewHTML = `
+						<video controls class="custom-card-img">
+							<source src="${filePath}" type="video/${fileExtension}">
+							Your browser does not support the video tag.
+						</video>
+					`;
+				} else if (format === "DOCUMENT") {
+					previewHTML = `<iframe src="${filePath}" class="w-full h-[500px]"></iframe>`;
+				}
+
+				previewDiv.innerHTML = previewHTML;
+			});
+		}
+		
 	}
 }
 
@@ -393,6 +494,15 @@ class TemplateManager {
 		formData.append("templateId", this.templateSelect.val());
 		formData.append("contactListId", this.recipientSelect.val());
 		formData.append("name", document.getElementById("campaign-name").value);
+		formData.append("url", `https://${location.hostname}`);
+
+		const fileInput = this.campaignForm.querySelector(
+			'.upload-input[type="file"]',
+		);
+		if (fileInput?.files?.length > 0) {
+			const uploadedFile = fileInput.files[0];
+			formData.append("headerFile", uploadedFile);
+		}
 
 		if (actionType === "schedule") {
 			// Check if scheduling or sending immediately

@@ -5,7 +5,7 @@ import mongoose from "mongoose";
 
 dotenv.config();
 
-const maxAge = 30 * 24 * 60 * 60 * 1000;
+const maxAge = 60 * 60 * 1000;
 const isProd = Boolean(process.env.PROD);
 
 const sessionMiddleware = session({
@@ -16,7 +16,7 @@ const sessionMiddleware = session({
 		client: mongoose.connection.getClient(),
 		mongoUrl: process.env.MONGO_URI,
 		collectionName: "sessions",
-		autoRemove: "native",
+		autoRemove: "native", // optional but good for cleanup
 	}),
 	cookie: {
 		maxAge,

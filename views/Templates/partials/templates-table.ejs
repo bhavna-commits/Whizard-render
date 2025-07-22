@@ -67,11 +67,11 @@
 						<% } %>
 						<% if (access?.templates?.duplicateTemplate) { %>
 						<button type="button" class="text-gray-500 hover:text-gray-700 px-2 border-r" onclick="duplicateTemplate('<%= list._id %>')">
-							<img src="svg/duplicate.svg" alt="duplicate">
+							<img src="svg/duplicateLight.svg" alt="duplicate">
 						</button>
 						<% } else { %>
 						<button type="button" class="text-gray-500 hover:cursor-not-allowed px-2 border-r" title="You don't have permissions to access this" disabled>
-							<img src="svg/duplicate.svg" alt="duplicate">
+							<img src="svg/duplicateLight.svg" alt="duplicate">
 						</button>
 						<% } %>
 						<% if (access?.templates?.deleteTemplate) { %>
@@ -96,7 +96,6 @@
 	
 	<script>
 		const deleteLoader = document.getElementById("deleteLoader");
-		console.log(deleteLoader);
 		// Helper function to format date in "29 Aug-2024 at 02:05 AM" format
 		function formatTimestamp (timestamp) {
 			const date = new Date(Number(timestamp));

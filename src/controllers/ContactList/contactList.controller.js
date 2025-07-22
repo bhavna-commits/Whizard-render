@@ -256,6 +256,103 @@ export const createList = async (req, res, next) => {
 	}
 };
 
+export const duplicateList = async (req, res) => {
+	try {
+		const userId = req.session?.user?.id || req.session?.addedUser?.owner;
+		const addedUserId = req.session?.addedUser?.id;
+		const { listId } = req.body;
+
+		const originalList = await ContactList.findOne({
+			contactId: listId,
+			contact_status: 1,
+		});
+		if (!originalList) {
+			return res.status(404).send("Original contact list not found.");
+		}
+
+		const contacts = await Contacts.find({
+			contactId: listId,
+			subscribe: 1,
+		});
+
+		const newContactId = generateUniqueId();
+		const duplicateName = `${originalList.contalistName} Copy`;
+
+		const originalData = originalList.toObject();
+		delete originalData._id;
+
+		const newList = new ContactList({
+			...originalData,
+			contactId: newContactId,
+			contalistName: duplicateName,
+			createdAt: new Date(),
+			agent: [addedUserId || userId],
+		});
+
+		const newContacts = contacts.map((contact) => {
+			const { Name, wa_id, masterExtra } = contact;
+			return new Contacts({
+				FB_PHONE_ID: contact.FB_PHONE_ID,
+				Name,
+				wa_id,
+				usertimestmp: Date.now(),
+				masterExtra,
+				contactId: newContactId,
+				useradmin: userId,
+				agent: [addedUserId || userId],
+			});
+		});
+
+		await newList.save();
+		await Contacts.insertMany(newContacts);
+
+		await ActivityLogs.create({
+			useradmin: userId,
+			unique_id: generateUniqueId(),
+			name: req.session?.user?.name || req.session?.addedUser?.name,
+			actions: "Create",
+			details: `Duplicated contact list: ${originalList.contalistName}`,
+		});
+
+		res.status(201).json({
+			success: true,
+			message: "Contact list duplicated successfully",
+		});
+	} catch (err) {
+		console.error("Error duplicating list:", err);
+		res.status(500).json({
+			success: false,
+			message: "Error duplicating contact list",
+		});
+	}
+};
+
+export const downloadListCSV = async (req, res) => {
+	try {
+		const { listId } = req.params;
+
+		const contacts = await Contacts.find({ contactId: listId, subscribe: 1 }).lean();
+
+		if (!contacts.length) {
+			return res.json({ success: false, message: "No contacts found" });
+		}
+
+		const dynamicFields = Object.keys(contacts[0]?.masterExtra || {});
+
+		const result = contacts.map((c) => ({
+			Name: c.Name,
+			wa_id: c.wa_id,
+			usertimestmp: c.usertimestmp,
+			masterExtra: c.masterExtra || {},
+		}));
+
+		res.json({ success: true, contacts: result, dynamicFields });
+	} catch (err) {
+		console.error("CSV Download error:", err);
+		res.status(500).json({ success: false, message: "Server error" });
+	}
+};
+
 export const deleteList = async (req, res, next) => {
 	try {
 		const { id } = req.params;

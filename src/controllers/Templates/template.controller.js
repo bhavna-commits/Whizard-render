@@ -20,7 +20,7 @@ import {
 	generateUniqueId,
 	generateAuthTemplateToken,
 } from "../../utils/otpGenerator.js";
-import { languages, languagesCode } from "../../utils/dropDown.js";
+import { languages, languagesCode, countries } from "../../utils/dropDown.js";
 import {
 	isNumber,
 	isObject,
@@ -30,6 +30,43 @@ import {
 dotenv.config();
 
 const __dirname = path.resolve();
+
+export const getCreateTemplate = async (req, res) => {
+	const { addedUser, user } = req.session || {};
+	const isAddedUser = Boolean(addedUser?.permissions);
+	const sessionUser = isAddedUser ? addedUser : user;
+
+	if (!sessionUser?.whatsAppStatus) {
+		return res.render("errors/notAllowed");
+	}
+
+	let access = null;
+
+	if (isAddedUser) {
+		access = await Permissions.findOne({
+			unique_id: addedUser.permissions,
+		});
+		if (!access?.templates?.createTemplate) {
+			return res.render("errors/notAllowed");
+		}
+	} else {
+		const userDoc = await User.findOne({ unique_id: user?.id });
+		access = userDoc?.access;
+	}
+
+	res.render("Templates/create-template", {
+		access,
+		templateData: [],
+		name: sessionUser.name,
+		photo: sessionUser.photo,
+		color: sessionUser.color,
+		whatsAppStatus: sessionUser.whatsAppStatus,
+		languagesCode,
+		mediaFileData: null,
+		mediaFileName: null,
+		countries,
+	});
+};
 
 export const createTemplate = async (req, res, next) => {
 	try {
@@ -793,47 +830,5 @@ export const getCampaignTemplates = async (req, res) => {
 			success: false,
 			error: error.message,
 		});
-	}
-};
-
-export const getCreateTemplate = async (req, res) => {
-	let mediaFileData = null;
-	let mediaFileName = null;
-	const permissions = req.session?.addedUser?.permissions;
-	if (permissions) {
-		const access = await Permissions.findOne({ unique_id: permissions });
-		if (
-			access.templates.createTemplate &&
-			req.session?.addedUser?.whatsAppStatus
-		) {
-			res.render("Templates/create-template", {
-				access,
-				templateData: [],
-				name: req.session?.addedUser?.name,
-				photo: req.session?.addedUser?.photo,
-				color: req.session?.addedUser?.color,
-				whatsAppStatus: req.session?.addedUser?.whatsAppStatus,
-				languagesCode,
-				mediaFileData,
-				mediaFileName,
-			});
-		} else {
-			res.render("errors/notAllowed");
-		}
-	} else if (req.session?.user?.whatsAppStatus) {
-		const access = await User.findOne({ unique_id: req.session?.user?.id });
-		res.render("Templates/create-template", {
-			access: access.access,
-			templateData: [],
-			name: req.session?.user?.name,
-			photo: req.session?.user?.photo,
-			color: req.session?.user?.color,
-			whatsAppStatus: req.session?.user?.whatsAppStatus,
-			languagesCode,
-			mediaFileData,
-			mediaFileName,
-		});
-	} else {
-		res.render("errors/notAllowed");
 	}
 };

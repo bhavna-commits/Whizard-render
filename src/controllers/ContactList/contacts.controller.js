@@ -533,7 +533,7 @@ export const createContact = async (req, res, next) => {
 
 export const createCampaign = async (req, res, next) => {
 	try {
-		let { templateId, contactListId, variables, schedule, name, test } =
+		let { templateId, contactListId, variables, schedule, name, test, url } =
 			req.body;
 
 		if (!templateId || !contactListId) {
@@ -579,6 +579,8 @@ export const createCampaign = async (req, res, next) => {
 					test,
 					phone_number,
 					addedUserId,
+					url,
+					req.file?.filename
 				);
 				await ActivityLogs.create({
 					useradmin: id,
@@ -630,6 +632,8 @@ export const createCampaign = async (req, res, next) => {
 				unique_id: generateUniqueId(),
 				phone_number,
 				addedUserId,
+				url,
+				fileName: req.file?.filename,
 			});
 
 			await ActivityLogs.create({
@@ -656,6 +660,8 @@ export const createCampaign = async (req, res, next) => {
 				unique_id: generateUniqueId(),
 				phone_number,
 				addedUserId,
+				url,
+				fileName: req.file?.filename
 			});
 
 			await sendCampaignScheduledEmail(

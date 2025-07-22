@@ -98,6 +98,9 @@ export const getSetToken = async (req, res) => {
 			type,
 		);
 
+		const iframeBaseURL =
+			process.env.CHAT_IFRAME_URL || "https://whizard-chat.web.app";
+
 		if (user.WhatsAppConnectStatus === "Pending") {
 			return res.render("Chats/chats", {
 				token,
@@ -109,6 +112,7 @@ export const getSetToken = async (req, res) => {
 				phoneNumberName: "null",
 				phoneNumber: "null",
 				agentId,
+				iframeBaseURL,
 			});
 		}
 
@@ -128,6 +132,7 @@ export const getSetToken = async (req, res) => {
 			phoneNumberName: phone.friendly_name,
 			phoneNumber: phone.number,
 			agentId,
+			iframeBaseURL,
 		});
 	} catch (error) {
 		console.error("Error in getSetToken:", error);

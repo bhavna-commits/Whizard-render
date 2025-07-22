@@ -97,7 +97,7 @@ export const sendAuthTemplateOTP = async (req, res) => {
             throw data.error;
         };
 
-		res.json({ success: true, data });
+		res.json({ success: true, data, otp });
     } catch (err) {
         console.log(err.message);
 		res.status(502).json({

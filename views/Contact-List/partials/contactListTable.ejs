@@ -25,6 +25,7 @@
 						
 					</td>
 					<td class="border-r border-t border-b rounded-lg border-gray-200 group-hover:bg-gray-100">
+
 						<!-- Edit Button -->
 						<% if (access?.contactList?.sendBroadcast && whatsAppStatus == "Live") { %>
 						<button aria-label="Edit contact" title="Send Broadcast" class="text-gray-600 hover:text-blue-600 px-3 border-r" onclick="event.stopPropagation(); location.href='/contact-list/createCampaign/?listId=<%= contact.contactId %>&listName=<%= contact.contalistName %>'">
@@ -43,8 +44,36 @@
 							<img src="svg/broadcast.svg" alt="broadcast" />
 						</button>
 						<% } %>
-						<% if (access?.contactList?.deleteList) { %>
+
+						<!-- Duplicate List  -->
+						
+						<button aria-label="Duplicate List" title="Duplicate List" class="text-gray-600 hover:text-blue-600 px-3 border-r" onclick="event.stopPropagation(); duplicateList('<%= contact.contactId %>', '<%= contact.contalistName %>')">
+							<img src="svg/duplicate.svg" alt="duplicate" />
+						</button>
+
+						<!-- Download List -->
+
+						<% if (access?.contactList?.downloadList && whatsAppStatus === "Live") { %>
+							<button aria-label="Download List" title="Download List" class="text-gray-600 hover:text-blue-600 px-3 border-r" onclick="event.stopPropagation(); downloadContactList('<%= contact.contactId %>', '<%= contact.contalistName %>')">
+								<img src="svg/download.svg" class="w-4 h-4" alt="download" />
+							</button>
+						<% } else if (whatsAppStatus === "Pending")  { %>
+						<button class="text-gray-600 hover:cursor-not-allowed px-3 border-r" title="Connect with whatsApp Business API to send message" disabled>
+							<img src="svg/download.svg" class="w-4 h-4" alt="download" />
+						</button>
+						<% } else if (access?.contactList?.downloadList) { %>
+							<button aria-label="Download List" title="Download List" class="text-gray-600 hover:text-blue-600 px-3 border-r" onclick="event.stopPropagation(); downloadContactList('<%= contact.contactId %>', '<%= contact.contalistName %>')">
+								<img src="svg/download.svg" class="w-4 h-4" alt="download" />
+							</button>
+						<% } else { %>
+						<button class="text-gray-600 hover:cursor-not-allowed px-3 border-r" title="You don't have permissions to access this" disabled>
+							<img src="svg/download.svg" class="w-4 h-4" alt="download" />
+						</button>
+						<% } %>
+
 						<!-- Delete Button -->
+
+						<% if (access?.contactList?.deleteList) { %>					
 						<button aria-label="Delete contact" title="Delete List" class="text-gray-600 hover:text-red-600 px-2" onclick="event.stopPropagation(); openDeleteModal('<%= contact.contactId %>', '<%= contact.contalistName %>');">
 							<img src="svg/bin contact list.svg" alt="">
 						</button>

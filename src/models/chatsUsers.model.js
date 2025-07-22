@@ -20,6 +20,7 @@ const ChatsUsersSchema = new mongoose.Schema(
 		updatedAt: {
 			type: Number,
 			default: () => Date.now(),
+			index: true,
 		},
 		lastMessage: { type: String, default: "" },
 		lastSend: { type: Number, default: 0, index: true },

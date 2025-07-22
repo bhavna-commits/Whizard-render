@@ -13,20 +13,17 @@ import {
 import { isString } from "../../middleWares/sanitiseInput.js";
 import { countries, help } from "../../utils/dropDown.js";
 import chatsModel from "../../models/chats.model.js";
+import runMigration, { doMigration } from "../../utils/migration.js";  
 
 dotenv.config();
 
 export const getDashboard = async (req, res) => {
 	try {
 		const id = req.session?.user?.id || req.session?.addedUser?.owner;
-		// console.log(req.session?.addedUser);
-		// Get user details
-		let user = await User.findOne({ unique_id: id });
-		// Fetch dashboard data using the helper function
-		const dashboardData = await fetchDashboardData(id, req.query);
 
-		// Fetch updated phone numbers
-		// user = await getPhoneNumbers(user);
+		let user = await User.findOne({ unique_id: id });
+
+		const dashboardData = await fetchDashboardData(id, req.query);
 
 		const permissions = req.session?.addedUser?.permissions;
 		const renderData = {
@@ -54,9 +51,9 @@ export const getDashboard = async (req, res) => {
 			name: req.session?.addedUser?.name || req.session?.user?.name,
 			color: req.session?.addedUser?.color || req.session?.user?.color,
 			admin: req.session?.user?.id === "db2426e80f",
+			doMigration: doMigration(),
 		};
 
-		// Handle permissions and render the appropriate view
 		if (permissions) {
 			const access = await Permissions.findOne({
 				unique_id: permissions,
@@ -868,3 +865,12 @@ const handleFacebookError = (response, data) => {
 	}
 };
 
+export async function migrate(req, res) {
+	try {
+		await runMigration();
+		res.json({ success: true, message: "Migration successful" });
+	} catch (err) {
+		console.error(err);
+		res.status(500).json({ success: false, message: "Migration failed" });
+	}
+}

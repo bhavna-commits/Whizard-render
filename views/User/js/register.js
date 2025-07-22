@@ -141,7 +141,7 @@ document.addEventListener("DOMContentLoaded", function () {
 		submitBtn.innerHTML = `<div class="loading-spinner"></div>`;
 
 		// Get user input and check email validity
-    const emailInput = document.getElementById("email");
+    	const emailInput = document.getElementById("email");
 		if (!emailInput) return toast("error", "no email input found");
 		try {
 			const emailWarning = document.getElementById("emailWarning");

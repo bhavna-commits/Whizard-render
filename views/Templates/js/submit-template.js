@@ -360,10 +360,13 @@ function collectTemplateData() {
 			let callText = btn
 				.querySelector('input[placeholder="Call Now"]')
 				?.value?.trim();
-			let phoneNumber = btn
-				.querySelector('input[placeholder="9999999999"]')
-				?.value?.trim();
-
+			let phoneNumber =
+				btn
+					.querySelector("#selectedDialCode")
+					?.value?.replace("+", "") +
+				btn
+					.querySelector('input[placeholder="9999999999"]')
+					?.value?.trim();
 			if (websiteText || websiteUrl) {
 				buttonData.text = websiteText || "Visit Now";
 				buttonData.type = "URL";

@@ -7,6 +7,7 @@ import {
 	sendOtpController,
 	set2FAPin,
 	refreshPhoneNumbers,
+	migrate,
 } from "../controllers/Dashboard/dashboard.controller.js";
 
 import {
@@ -14,9 +15,12 @@ import {
 	resetUserAccount,
 	deleteAccountEmail,
 	verifyDeleteOTP,
+	changeSuperAdminEmail,
+	verifySuperAdminEmailOTP,
 } from "../controllers/Dashboard/adminPanel.controller.js";
 
 import { trackSanitationFailures } from "../middleWares/sanitiseInput.js";
+import { checkAdminSession } from "../middleWares/checkSession.js";
 
 const router = express.Router();
 
@@ -38,7 +42,15 @@ router.post("/:id/toggleStatus", toggleStatus);
 
 router.post("/:id/reset", resetUserAccount);
 
-router.post("/:id/delete-email", deleteAccountEmail);
+router.post("/:id/delete-email", checkAdminSession, deleteAccountEmail);
+
+router.post("/change-superadmin-email-otp", checkAdminSession, changeSuperAdminEmail);
+
+router.post(
+	"/verify-superadmin-email",
+	checkAdminSession,
+	verifySuperAdminEmailOTP,
+);
 
 router.post("/:id/verify-delete", verifyDeleteOTP);
 

@@ -138,6 +138,11 @@
 					<% if (admin) { %>
 					<button type="button" class="flex items-center border p-2 rounded-md" onclick="location.href='/admin-panel'"><img src="svg/adminPanelClicked.svg" alt="" class="pr-2">Admin Panel</button>
 					<% } %>
+					<% if (admin && doMigration) { %>
+					<button type="button" id="runMigrationBtn" class="flex items-center border p-2 rounded-md">
+						Run Migration
+					</button>
+					<% } %>
 				</div>
 				
 				<%- include("partials/FB-PhoneNumbers") %>
@@ -160,22 +165,6 @@
 				</div>
 			</div>
 			
-			
-			
-			
-			<!-- <div class='bg-white shadow-md rounded-lg p-6 text-center'>
-			 	<h1 class='text-2xl font-bold mb-4'>Current Window Width</h1>
-			 	<p id='width' class='text-xl text-blue-500'></p>
-			 </div>
-			 <script>
-			 	function updateWidth () {
-			 		const widthDisplay = document.getElementById('width');
-			 		widthDisplay.textContent = window.innerWidth;
-			 	}
-			 	
-			 	window.addEventListener('resize', updateWidth);
-			 	window.addEventListener('load', updateWidth);
-			 </script> -->
 			<!-- Statistics Cards -->
 			<div class="grid-container pt-4">
 				<div class="">
@@ -290,69 +279,56 @@
 			<div class="">
 				<!-- Quick Actions Section -->
 				<h2 class="section-title">Quick Actions</h2>
-				<% if (access?.dashboard?.quickActions) { %>
 				<div class="grid-container">
-					<% if (status !== "Pending") { %>
-					<div class="feature-box">
-						<h3 class="feature-title">Broadcast Messages</h3>
-						<p class="feature-description">Quickly send personalized updates or promotions to your audience at scale.</p>
-						<button type="button" onclick="location.href = '/contact-list/createCampaign'" class="feature-button">Send Now</button>
-					</div>
-					<% } else { %>
-					<div class="feature-box">
-						<h3 class="feature-title">Broadcast Messages</h3>
-						<p class="feature-description">Quickly send personalized updates or promotions to your audience at scale.</p>
-						<button type="button" title="You don't have permissions to access this" class="feature-button hover:cursor-not-allowed" disabled>Send Now</button>
-					</div>
-					<% } %>
-					<% if (access?.templates?.createTemplate) { %>
-					<div class="feature-box">
-						<h3 class="feature-title">Create Template</h3>
-						<p class="feature-description">Design message templates for WhatsApp approval to streamline your communication.</p>
-						<button type="button" onclick="location.href = '/create-template'" class="feature-button">Create Now</button>
-					</div>
-					<% } else { %>
-					<div class="feature-box">
-						<h3 class="feature-title">Create Template</h3>
-						<p class="feature-description">Design message templates for WhatsApp approval to streamline your communication.</p>
-						<button type="button" title="You don't have permissions to access this" class="feature-button hover:cursor-not-allowed" disabled>Create Now</button>
-					</div>
-					<% } %>
-					<% if (access?.contactList?.type) { %>
-					<div class="feature-box">
-						<h3 class="feature-title">Import Contacts</h3>
-						<p class="feature-description">Upload your contact database</p>
-						<button type="button" onclick="location.href = '/contact-list'" class="feature-button">Import</button>
-					</div>
-					<% } else { %>
-					<div class="feature-box">
-						<h3 class="feature-title">Import Contacts</h3>
-						<p class="feature-description">Upload your contact database</p>
-						<button type="button" title="You don't have permissions to access this" class="feature-button hover:cursor-not-allowed" disabled>Import</button>
-					</div>
-					<% } %>
-				</div>
-				<% } else { %>
-				<div class="grid-container">
-					<div class="feature-box">
-						<h3 class="feature-title">Broadcast Messages</h3>
-						<p class="feature-description">Quickly send personalized updates or promotions to your audience at scale.</p>
-						<button type="button" title="You don't have permissions to access this" class="feature-button hover:cursor-not-allowed" disabled>Send Now</button>
-					</div>
+					<% const isPending = status === "Pending"; %>
+					<% const isQuickActionsAllowed = access?.dashboard?.quickActions; %>
 					
-					<div class="feature-box">
-						<h3 class="feature-title">Create Template</h3>
-						<p class="feature-description">Design message templates for WhatsApp approval to streamline your communication.</p>
-						<button type="button" title="You don't have permissions to access this" class="feature-button hover:cursor-not-allowed" disabled>Create Now</button>
-					</div>
+					<%- include('partials/featureBox', {
+						title: 'Broadcast Messages',
+						desc: 'Quickly send personalized updates or promotions to your audience at scale.',
+						btnText: 'Send Now',
+						href: '/contact-list/createCampaign',
+						disabled: !isQuickActionsAllowed || isPending || !access?.contactList?.sendBroadcast,
+						reason: !isQuickActionsAllowed
+							? "You don't have permissions to access this"
+							: isPending
+							? "Connect with WhatsApp Business API to send message"
+							: !access?.contactList?.sendBroadcast
+							? "You don't have permissions to access this"
+							: ""
+					}) %>
 					
-					<div class="feature-box">
-						<h3 class="feature-title">Import Contacts</h3>
-						<p class="feature-description">Upload your contact database</p>
-						<button type="button" title="You don't have permissions to access this" class="feature-button hover:cursor-not-allowed" disabled>Import</button>
-					</div>
-				</div>
-				<% } %>
+					<%- include('partials/featureBox', {
+						title: 'Create Template',
+						desc: 'Design message templates for WhatsApp approval to streamline your communication.',
+						btnText: 'Create Now',
+						href: '/create-template',
+						disabled: !isQuickActionsAllowed || isPending || !access?.templates?.createTemplate,
+						reason: !isQuickActionsAllowed
+							? "You don't have permissions to access this"
+							: isPending
+							? "Connect with WhatsApp Business API to send message"
+							: !access?.templates?.createTemplate
+							? "You don't have permissions to access this"
+							: ""
+					}) %>
+					
+					<%- include('partials/featureBox', {
+						title: 'Import Contacts',
+						desc: 'Upload your contact database',
+						btnText: 'Import',
+						href: '/contact-list',
+						disabled: !isQuickActionsAllowed || isPending || !access?.contactList?.type,
+						reason: !isQuickActionsAllowed
+							? "You don't have permissions to access this"
+							: isPending
+							? "Connect with WhatsApp Business API to send message"
+							: !access?.contactList?.type
+							? "You don't have permissions to access this"
+							: ""
+					}) %>
+				</div>				
+				
 				<!-- Platform Features Section -->
 				<h2 class="section-title">Platform Features</h2>
 				<div class="grid-container">

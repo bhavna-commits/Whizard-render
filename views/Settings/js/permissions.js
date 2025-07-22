@@ -22,6 +22,7 @@ const permissionState = {
 		sendBroadcast: false,
 		customField: false,
 		allList: false,
+		downloadList: false,
 	},
 	templates: {
 		type: false,

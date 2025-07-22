@@ -18,6 +18,8 @@ export async function sendMessages(
 	unique_id,
 	phone_number,
 	addedUserId,
+	url,
+	fileName
 ) {
 	try {
 		const template = await Template.findOne({
@@ -35,6 +37,27 @@ export async function sendMessages(
 
 		if (contactList.length === 0) {
 			throw `No contacts found for contact list ID ${campaign.contactListId}`;
+		}
+
+		const headerComponent = template.components.find(
+			(c) => c.type === "HEADER",
+		);
+
+		if (fileName) {
+			if (headerComponent) {
+				let fileUrl = `${url}/uploads/${user.unique_id}/${fileName}`;
+				if (headerComponent.format === "IMAGE") {
+					console.log("img");
+					headerComponent.example.header_url = fileUrl;
+				} else if (headerComponent.format === "VIDEO") {
+					console.log("vid");
+					headerComponent.example.header_url = fileUrl;
+					console.log(headerComponent.example.header_url);
+				} else if (headerComponent.format === "DOCUMENT") {
+					console.log("doc");
+					headerComponent.example.header_url = fileUrl;
+				}
+			}
 		}
 
 		for (let contact of contactList) {
@@ -457,12 +480,35 @@ export async function sendTestMessage(
 	fb_phone_number,
 	addedUserId,
 	sendCampaignMessage,
+	url,
+	fileName
 ) {
 	try {
 		const template = await Template.findOne({ unique_id: templateId });
 
 		if (!template) {
 			throw `Template with ID ${templateId} not found`;
+		}
+
+		const headerComponent = template.components.find(
+			(c) => c.type === "HEADER",
+		);
+
+		if (fileName) {
+			if (headerComponent) {
+				let fileUrl = `${url}/uploads/${user.unique_id}/${fileName}`;
+				if (headerComponent.format === "IMAGE") {
+					console.log("img");
+					headerComponent.example.header_url = fileUrl;
+				} else if (headerComponent.format === "VIDEO") {
+					console.log("vid");
+					headerComponent.example.header_url = fileUrl;
+					console.log(headerComponent.example.header_url);
+				} else if (headerComponent.format === "DOCUMENT") {
+					console.log("doc");
+					headerComponent.example.header_url = fileUrl;
+				}
+			}
 		}
 
 		const contact = await Contacts.findOne({
