@@ -478,21 +478,30 @@ export const verifyNumber = async (req, res, next) => {
 export const selectPhoneNumber = async (req, res) => {
 	try {
 		const { phoneNumberId } = req.body;
+		const addedUser = req.session?.addedUser;
 		const userId = req.session?.user?.id || req.session?.addedUser?.owner;
 
-		const resetResult = await User.updateOne(
-			{ unique_id: userId },
-			{ $set: { "FB_PHONE_NUMBERS.$[].selected": false } },
-		);
+		if (addedUser) {
+			const selectResult = await User.findOne({ unique_id: userId });
+			const newNumber = selectResult.FB_PHONE_NUMBERS.find(
+				(i) => i.phone_number_id === phoneNumberId,
+			);
+			addedUser.selectedFBNumber = newNumber;
+			await req.session.touch();
+		} else {
+			const resetResult = await User.updateOne(
+				{ unique_id: userId },
+				{ $set: { "FB_PHONE_NUMBERS.$[].selected": false } },
+			);
 
-		const selectResult = await User.updateOne(
-			{
-				unique_id: userId,
-				"FB_PHONE_NUMBERS.phone_number_id": phoneNumberId,
-			},
-			{ $set: { "FB_PHONE_NUMBERS.$.selected": true } },
-		);
-
+			const selectResult = await User.updateOne(
+				{
+					unique_id: userId,
+					"FB_PHONE_NUMBERS.phone_number_id": phoneNumberId,
+				},
+				{ $set: { "FB_PHONE_NUMBERS.$.selected": true } },
+			);
+		}
 		res.json({ success: true, message: "Number selected successfully" });
 	} catch (error) {
 		console.log("error selecting number :", error);

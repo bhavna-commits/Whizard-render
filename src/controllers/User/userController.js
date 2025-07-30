@@ -523,7 +523,7 @@ export const verifyOTP = async (req, res, next) => {
 			? 7 * 24 * 60 * 60 * 1000
 			: 3 * 60 * 60 * 1000;
 
-		req.session.touch();
+		await req.session.touch();
 
 		delete req.session.otp;
 
