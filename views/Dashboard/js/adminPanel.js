@@ -72,6 +72,54 @@ async function toggleUserStatus(toggleElement) {
 	}
 }
 
+async function togglePaymentStatus(toggleElement) {
+	const userId = toggleElement.dataset.userId;
+	const currentStatus = toggleElement.dataset.status === "Internal";
+	const newStatus = currentStatus ? "External" : "Internal"; // flip the status
+
+	document.body.classList.add("cursor-wait");
+
+	try {
+		const res = await fetch(
+			`/api/dashboard/${userId}/toggle-payment-card`,
+			{
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({ status: newStatus }),
+			},
+		);
+
+		if (!res.ok) throw new Error("Status update failed");
+
+		// Update the toggle visually
+		toggleElement.dataset.status = newStatus;
+
+		const knob = toggleElement.querySelector(".knob");
+		const bg = toggleElement.querySelector(".bg-toggle");
+		const label =
+			toggleElement.parentElement.querySelector(".status-label");
+
+		const isInternal = newStatus === "Internal";
+
+		knob.classList.toggle("translate-x-6", isInternal);
+		knob.classList.toggle("translate-x-0", !isInternal);
+
+		bg.classList.toggle("bg-black", isInternal);
+		bg.classList.toggle("bg-gray-300", !isInternal);
+
+		label.textContent = isInternal ? "Internal" : "External";
+		label.classList.toggle("text-black", isInternal);
+		label.classList.toggle("text-gray-500", !isInternal);
+	} catch (err) {
+		console.error(err);
+		toast("error", err.message);
+	} finally {
+		document.body.classList.remove("cursor-wait");
+	}
+}
+
 async function resetAccount(event, id) {
 	const btn = event.target;
 	const originalHTML = btn.innerHTML;
@@ -185,9 +233,7 @@ otpInputsDelete.forEach((input, index) => {
 });
 
 function checkOTPInputsAdmin(i, b) {
-	const allFilled = Array.from(i).every(
-		(input) => input.value.length === 1,
-	);
+	const allFilled = Array.from(i).every((input) => input.value.length === 1);
 	const btn = document.getElementById(b);
 	if (btn) {
 		btn.disabled = !allFilled;
@@ -305,6 +351,7 @@ setupTogglePassword(
 	"visibleConfirmPassword",
 	"notVisibleConfirmPassword",
 );
+
 setupTogglePassword(
 	"toggleConfirmPassword",
 	"confirmPassword",
@@ -477,6 +524,58 @@ async function verifyEmailOTP(event) {
 	} catch (err) {
 		console.error("OTP Verification Error:", err);
 		toast("error", "Error verifying OTP.");
+	} finally {
+		btn.disabled = false;
+		loader.classList.add("hidden");
+		btnText.classList.remove("hidden");
+	}
+}
+
+async function changeSuperAdminToken(event) {
+	event.preventDefault();
+
+	const form = event.target;
+	const btn = form.querySelector('button[type="submit"]');
+	const loader = btn.querySelector(".buttonLoader");
+	const btnText = btn.querySelector(".buttonText");
+	const tokenInput = form.querySelector('input[name="token"]');
+
+	if (!tokenInput) {
+		toast("error", "Token input not found.");
+		return;
+	}
+
+	const token = tokenInput.value.trim();
+
+	if (!token) {
+		toast("error", "Please enter a token.");
+		return;
+	}
+
+	btn.disabled = true;
+	loader.classList.remove("hidden");
+	btnText.classList.add("hidden");
+
+	try {
+		const res = await fetch(`/api/dashboard/renew-admin-token`, {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ token }),
+		});
+
+		const data = await res.json();
+
+		if (data.success) {
+			toast("success", data.message);
+			setTimeout(() => {
+				location.href = "/";
+			}, 300);
+		} else {
+			toast("error", data.message || "Something went wrong.");
+		}
+	} catch (err) {
+		console.error("Token change error:", err);
+		toast("error", "Something went wrong.");
 	} finally {
 		btn.disabled = false;
 		loader.classList.add("hidden");

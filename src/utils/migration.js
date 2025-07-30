@@ -7,24 +7,20 @@ let migrationPending = true;
 
 //...................................................................
 
-
 export default async function runMigration() {
 	try {
 		const users = await User.find();
 		for (const user of users) {
-			if (!user.access?.contactList) user.access.contactList = {};
-			user.access.contactList.allList = true;
-			user.access.contactList.downloadList = true;
+			user.access.settings.whatsAppAccountDetails = true;
 			await user.save();
 		}
 
 		const permissions = await Permissions.find();
 		for (const permission of permissions) {
-			if (!permission.contactList) permission.contactList = {};
-			if (permission.contactList.allList === undefined)
-				permission.contactList.allList = false;
-			if (permission.contactList.downloadList === undefined)
-				permission.contactList.downloadList = false;
+			if (!permission.settings?.whatsAppAccountDetails)
+				permission.settings.whatsAppAccountDetails = false;
+			if (!permission.settings?.whatsAppAccountDetails)
+				permission.settings.whatsAppAccountDetails = false;
 			await permission.save();
 		}
 

@@ -1,0 +1,52 @@
+<div class="fixed inset-0 flex items-center justify-center transition-opacity duration-300 ease-out opacity-0 hidden z-50" id="addNumberModal">
+	<!-- Background overlay with blur -->
+	<div class="absolute inset-0 bg-gray-900 bg-opacity-50  transition-opacity duration-300 ease-out" onclick="closeAddNumber(event)"></div>
+	
+	<!-- Modal content -->
+	<div id="modalContent" class="relative bg-white rounded-lg shadow-lg w-96 p-6 transition-opacity duration-300 ease-out opacity-100 scale-100">
+		<!-- Close Button -->
+		<button onclick="closeAddNumber(event)" class="absolute top-1 right-2 text-gray-500 hover:text-gray-700 text-3xl p-3">&times;</button>
+		
+		<!-- Verify Number Form -->
+		<div id="verifyNumberForm" class="hidden">
+			<h2 class="text-xl font-semibold mb-6">Verify OTP</h2>
+			<div id="verifyNewNumberError" class="mb-4 p-3 hidden bg-red-100 text-red-700 rounded"></div>
+			<form onsubmit="verifyDeleteOTP(event)">
+				<input type="hidden" name="userId" id="otpUserId" />
+				<div class="mb-4">
+					<label class="block text-[#959595] mb-2">Enter the 6-digit OTP sent to the user</label>
+					<div class="flex gap-2 justify-center">
+						<% for(let i = 0; i < 6; i++) { %>
+						<input type="text" class="otp-verify-delete otp-input border text-center w-10 h-10 text-xl rounded" maxlength="1" required />
+						<% } %>
+					</div>
+				</div>
+				<!-- Verify Button -->
+				<button type="submit" id="verifyDeleteButton" class="bg-gray-400 flex justify-center items-center text-white px-4 py-2 rounded w-full cursor-not-allowed relative" disabled>
+					<span class="buttonText">Verify & Delete</span>
+					<div class="buttonLoader hidden loader border-t-white border-4 border-black rounded-full w-6 h-6 animate-spin"></div>
+				</button>
+			</form>
+		</div>
+		
+		<div id="verifyEmailForm" class="hidden">
+			<h2 class="text-xl font-semibold mb-6">Verify OTP</h2>
+			<div id="verifyEmailError" class="mb-4 p-3 hidden bg-red-100 text-red-700 rounded"></div>
+			<form onsubmit="verifyEmailOTP(event)">
+				<div class="mb-4">
+					<label class="block text-[#959595] mb-2">Enter the 6-digit OTP sent to the user</label>
+					<div class="flex gap-2 justify-center">
+						<% for(let i = 0; i < 6; i++) { %>
+						<input type="text" class="otp-verify-email otp-input border text-center w-10 h-10 text-xl rounded" maxlength="1" required />
+						<% } %>
+					</div>
+				</div>
+				<!-- Verify Button -->
+				<button type="submit" id="verifyEmailButton" class="bg-gray-400 flex justify-center items-center text-white px-4 py-2 rounded w-full cursor-not-allowed relative" disabled>
+					<span class="buttonText">Verify & Change</span>
+					<div class="buttonLoader hidden loader border-t-white border-4 border-black rounded-full w-6 h-6 animate-spin"></div>
+				</button>
+			</form>
+		</div>
+	</div>
+</div>

@@ -571,6 +571,7 @@ async function fetchAnalytics(startDate, endDate) {
 		if (!res.ok) {
 			const err = await res.json().catch(() => ({}));
 			console.error("Fetch error:", err.error || res.statusText);
+			text.innerHTML = 0;
 			toast("error", err.error || "Failed to fetch analytics");
 			return null;
 		}

@@ -46,13 +46,8 @@ body {
 }
 
 *::-webkit-scrollbar {
-	width: 0.7rem;
-	height: 0.7rem;
-}
-
-*::-webkit-scrollbar {
-	width: 0.7rem;
-	height: 0.7rem;
+	width: 0.5rem;
+	height: 0.5rem;
 }
 
 #setupBody::-webkit-scrollbar {
@@ -87,6 +82,25 @@ body {
 .loading-image {
 	/* width: 12rem; */
 	height: 5rem;
+}
+
+.loading-spinner {
+	border: 3px solid rgba(0, 0, 0, 0.1);
+	border-left-color: #fff;
+	border-radius: 50%;
+	width: 16px;
+	height: 16px;
+	animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+	0% {
+		transform: rotate(0deg);
+	}
+	
+	100% {
+		transform: rotate(360deg);
+	}
 }
 
 select {
@@ -1012,4 +1026,56 @@ input {
 		padding: 0.8rem;
 		font-size: 0.9rem;
 	}
+}
+
+.help-modal {
+	position: absolute;
+	bottom: 8rem;
+	left: 8rem;
+	visibility: hidden;
+	opacity: 0;
+	transform: scale(0.8);
+	transform-origin: bottom left;
+	transition: all 0.3s ease-in-out;
+	width: 32rem;
+	box-shadow: 0 0 1rem 0 rgb(197, 197, 197);
+	z-index: 50;
+}
+
+.help-modal.active {
+	visibility: visible;
+	opacity: 1;
+	transform: scale(1);
+}
+
+#helpBtn {
+	transition: transform 0.3s ease-in-out;
+}
+
+#helpBtn.active {
+	transform: rotate(45deg);
+}
+
+.circle-number {
+	width: 2rem;
+	height: 2rem;
+	margin: 0rem 0.5rem 0 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 50%;
+	/* color: white; */
+	background-color: #fce9e9;
+	/* font-size: larger; */
+	border: 1px solid #e02424;
+}
+
+.scroll {
+	scrollbar-gutter: stable;
+	padding-right: 1rem;
+}
+
+.scroll::-webkit-scrollbar {
+	width: 0.5rem;
+	/* height: 0.2rem; */
 }

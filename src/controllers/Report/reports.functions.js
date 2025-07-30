@@ -18,6 +18,7 @@ import Chat from "../../models/chats.model.js";
 import { sendMessages } from "../ContactList/campaign.functions.js";
 import { isString, isNumber } from "../../middleWares/sanitiseInput.js";
 import TempMessageModel from "../../models/TempMessage.model.js";
+import { help } from "../../utils/dropDown.js";
 
 dotenv.config();
 
@@ -399,6 +400,7 @@ export const getCampaignOverview = async (req, res, next) => {
 					photo: req.session?.addedUser?.photo,
 					name: req.session?.addedUser?.name,
 					color: req.session?.addedUser?.color,
+					help,
 				});
 			} else {
 				res.render("errors/notAllowed");
@@ -427,11 +429,12 @@ export const getCampaignOverview = async (req, res, next) => {
 				photo: req.session?.user?.photo,
 				name: req.session?.user?.name,
 				color: req.session?.user?.color,
+				help,
 			});
 		}
 	} catch (err) {
 		console.error(err);
-		res.status(500).send("Server Error");
+		res.render("errors/serverError");
 	}
 };
 
@@ -527,6 +530,7 @@ export const getSentReportsById = async (req, res, next) => {
 					photo: req.session?.addedUser?.photo,
 					name: req.session?.addedUser?.name,
 					color: req.session?.addedUser?.color,
+					help,
 				});
 			} else {
 				res.render("errors/notAllowed");
@@ -544,6 +548,7 @@ export const getSentReportsById = async (req, res, next) => {
 				photo: req.session?.user?.photo,
 				name: req.session?.user?.name,
 				color: req.session?.user?.color,
+				help,
 			});
 		}
 	} catch (err) {
@@ -645,6 +650,7 @@ export const getDeliveredReportsById = async (req, res, next) => {
 					photo: req.session?.addedUser?.photo,
 					name: req.session?.addedUser?.name,
 					color: req.session?.addedUser?.color,
+					help,
 				});
 			} else {
 				res.render("errors/notAllowed");
@@ -662,6 +668,7 @@ export const getDeliveredReportsById = async (req, res, next) => {
 				photo: req.session?.user?.photo,
 				name: req.session?.user?.name,
 				color: req.session?.user?.color,
+				help,
 			});
 		}
 	} catch (err) {
@@ -771,6 +778,7 @@ export const getReadReportsById = async (req, res, next) => {
 					photo: req.session?.addedUser?.photo,
 					name: req.session?.addedUser?.name,
 					color: req.session?.addedUser?.color,
+					help,
 				});
 			} else {
 				res.render("errors/notAllowed");
@@ -788,6 +796,7 @@ export const getReadReportsById = async (req, res, next) => {
 				photo: req.session?.user?.photo,
 				name: req.session?.user?.name,
 				color: req.session?.user?.color,
+				help,
 			});
 		}
 	} catch (err) {
@@ -888,6 +897,7 @@ export const getRepliesReportsById = async (req, res, next) => {
 					photo: req.session?.addedUser?.photo,
 					name: req.session?.addedUser?.name,
 					color: req.session?.addedUser?.color,
+					help,
 				});
 			} else {
 				res.render("errors/notAllowed");
@@ -905,6 +915,7 @@ export const getRepliesReportsById = async (req, res, next) => {
 				photo: req.session?.user?.photo,
 				name: req.session?.user?.name,
 				color: req.session?.user?.color,
+				help,
 			});
 		}
 	} catch (err) {
@@ -1005,6 +1016,7 @@ export const getFailedReportsById = async (req, res, next) => {
 					photo: req.session?.addedUser?.photo,
 					name: req.session?.addedUser?.name,
 					color: req.session?.addedUser?.color,
+					help,
 				});
 			} else {
 				res.render("errors/notAllowed");
@@ -1022,6 +1034,7 @@ export const getFailedReportsById = async (req, res, next) => {
 				photo: req.session?.user?.photo,
 				name: req.session?.user?.name,
 				color: req.session?.user?.color,
+				help,
 			});
 		}
 	} catch (err) {

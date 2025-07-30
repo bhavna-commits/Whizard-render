@@ -20,7 +20,12 @@ import {
 	generateUniqueId,
 	generateAuthTemplateToken,
 } from "../../utils/otpGenerator.js";
-import { languages, languagesCode, countries } from "../../utils/dropDown.js";
+import {
+	languages,
+	languagesCode,
+	countries,
+	help,
+} from "../../utils/dropDown.js";
 import {
 	isNumber,
 	isObject,
@@ -65,6 +70,7 @@ export const getCreateTemplate = async (req, res) => {
 		mediaFileData: null,
 		mediaFileName: null,
 		countries,
+		help,
 	});
 };
 
@@ -84,12 +90,11 @@ export const createTemplate = async (req, res, next) => {
 		const id = req.session?.user?.id || req.session?.addedUser?.owner;
 
 		const user = await User.findOne({ unique_id: id });
-		const FB_PHONE_ID = user?.FB_PHONE_NUMBERS?.find(
-			(n) => n.selected,
-		)?.phone_number_id;
+		const FB_PHONE_ID =
+			req.session?.addedUser?.selectedFBNumber?.phone_number_id ||
+			user?.FB_PHONE_NUMBERS?.find((n) => n.selected)?.phone_number_id;
 
 		const exists = await Template.findOne({
-			FB_PHONE_ID,
 			useradmin: id,
 			name: templateName,
 			deleted: false,
@@ -163,13 +168,7 @@ export const getList = async (req, res, next) => {
 
 		if (!isString(category, search, language)) return next();
 
-		// const user = await User.findOne({ unique_id: id });
-		// const FB_PHONE_ID = user?.FB_PHONE_NUMBERS?.find(
-		// 	(n) => n.selected,
-		// )?.phone_number_id;
-
 		const match = {
-			// FB_PHONE_ID,
 			useradmin: id,
 			deleted: { $ne: true },
 		};
@@ -237,8 +236,8 @@ export const getList = async (req, res, next) => {
 			name: userName,
 			whatsAppStatus,
 			languagesCode,
+			help,
 		});
-
 	} catch (error) {
 		console.log(error);
 		res.render("errors/serverError");
@@ -294,51 +293,53 @@ export const getDuplicateTemplate = async (req, res, next) => {
 			}
 		}
 
-		const permissions = req.session?.addedUser?.permissions;
-		if (permissions) {
-			const access = await Permissions.findOne({
-				unique_id: permissions,
+		let access;
+		const isAddedUser = req.session?.addedUser;
+		const isMainUser = req.session?.user;
+
+		const renderData = {
+			templateData: originalTemplate,
+			languagesCode,
+			mediaFileData: mediaFileData
+				? mediaFileData.toString("base64")
+				: null,
+			mediaFileName,
+			countries,
+			help,
+		};
+
+		if (isAddedUser?.permissions) {
+			access = await Permissions.findOne({
+				unique_id: isAddedUser.permissions,
 			});
+
 			if (
-				access.templates.duplicateTemplate &&
-				req.session?.addedUser?.whatsAppStatus
+				access?.templates?.duplicateTemplate &&
+				isAddedUser.whatsAppStatus
 			) {
-				res.status(200).render("Templates/duplicateTemplate", {
+				return res.status(200).render("Templates/duplicateTemplate", {
+					...renderData,
 					access,
-					templateData: originalTemplate,
-					name: req.session?.addedUser?.name,
-					photo: req.session?.addedUser?.photo,
-					color: req.session?.addedUser?.color,
-					languagesCode,
-					whatsAppStatus: req.session?.addedUser?.whatsAppStatus,
-					mediaFileData: mediaFileData
-						? mediaFileData.toString("base64")
-						: null,
-					mediaFileName,
+					name: isAddedUser.name,
+					photo: isAddedUser.photo,
+					color: isAddedUser.color,
+					whatsAppStatus: isAddedUser.whatsAppStatus,
 				});
-			} else {
-				res.render("errors/notAllowed");
 			}
-		} else if (req.session?.user?.whatsAppStatus) {
-			const access = await User.findOne({
-				unique_id: req.session?.user?.id,
+		} else if (isMainUser?.whatsAppStatus) {
+			const userData = await User.findOne({ unique_id: isMainUser.id });
+
+			return res.render("Templates/duplicateTemplate", {
+				...renderData,
+				access: userData?.access,
+				name: isMainUser.name,
+				photo: isMainUser.photo,
+				color: isMainUser.color,
+				whatsAppStatus: userData?.whatsAppStatus,
 			});
-			res.render("Templates/duplicateTemplate", {
-				access: access.access,
-				templateData: originalTemplate,
-				name: req.session?.user?.name,
-				photo: req.session?.user?.photo,
-				color: req.session?.user?.color,
-				languagesCode,
-				whatsAppStatus: access.whatsAppStatus,
-				mediaFileData: mediaFileData
-					? mediaFileData.toString("base64")
-					: null, // Send file data as base64
-				mediaFileName,
-			});
-		} else {
-			res.render("errors/notAllowed");
 		}
+
+		res.render("errors/notAllowed");
 	} catch (error) {
 		console.error(error);
 		res.status(500).render("errors/serverError");
@@ -396,52 +397,50 @@ export const getEditTemplate = async (req, res, next) => {
 			}
 		}
 
-		// Permissions check (unchanged)
-		const permissions = req.session?.addedUser?.permissions;
-		if (permissions) {
-			const access = await Permissions.findOne({
-				unique_id: permissions,
+		let access;
+		const isAddedUser = req.session?.addedUser;
+		const isMainUser = req.session?.user;
+
+		const renderData = {
+			templateData: originalTemplate,
+			languagesCode,
+			mediaFileData: mediaFileData
+				? mediaFileData.toString("base64")
+				: null,
+			mediaFileName,
+			countries,
+			help,
+		};
+
+		if (isAddedUser?.permissions) {
+			access = await Permissions.findOne({
+				unique_id: isAddedUser.permissions,
 			});
-			if (
-				access.templates.editTemplate &&
-				req.session?.addedUser?.whatsAppStatus
-			) {
-				res.status(200).render("Templates/duplicateTemplate", {
+
+			if (access?.templates?.editTemplate && isAddedUser.whatsAppStatus) {
+				return res.status(200).render("Templates/duplicateTemplate", {
+					...renderData,
 					access,
-					templateData: originalTemplate,
-					name: req.session?.addedUser?.name,
-					photo: req.session?.addedUser?.photo,
-					color: req.session?.addedUser?.color,
-					languagesCode,
-					whatsAppStatus: req.session?.addedUser?.whatsAppStatus,
-					mediaFileData: mediaFileData
-						? mediaFileData.toString("base64")
-						: null,
-					mediaFileName,
+					name: isAddedUser.name,
+					photo: isAddedUser.photo,
+					color: isAddedUser.color,
+					whatsAppStatus: isAddedUser.whatsAppStatus,
 				});
-			} else {
-				res.render("errors/notAllowed");
 			}
-		} else if (req.session?.user?.whatsAppStatus) {
-			const access = await User.findOne({
-				unique_id: req.session?.user?.id,
+		} else if (isMainUser?.whatsAppStatus) {
+			const userData = await User.findOne({ unique_id: isMainUser.id });
+
+			return res.render("Templates/duplicateTemplate", {
+				...renderData,
+				access: userData?.access,
+				name: isMainUser.name,
+				photo: isMainUser.photo,
+				color: isMainUser.color,
+				whatsAppStatus: userData?.whatsAppStatus,
 			});
-			res.render("Templates/duplicateTemplate", {
-				access: access.access,
-				templateData: originalTemplate,
-				name: req.session?.user?.name,
-				photo: req.session?.user?.photo,
-				color: req.session?.user?.color,
-				languagesCode,
-				whatsAppStatus: access.whatsAppStatus,
-				mediaFileData: mediaFileData
-					? mediaFileData.toString("base64")
-					: null, // Send file data as base64
-				mediaFileName,
-			});
-		} else {
-			res.render("errors/notAllowed");
 		}
+
+		res.render("errors/notAllowed");
 	} catch (error) {
 		console.error(error);
 		res.status(500).render("errors/serverError");

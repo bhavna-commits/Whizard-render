@@ -23,6 +23,7 @@ export const DEFAULT_PERMISSIONS = {
 			deleteList: false,
 			sendBroadcast: true,
 			allList: false,
+			downloadList: false,
 		},
 		templates: {
 			type: true,
@@ -56,6 +57,7 @@ export const DEFAULT_PERMISSIONS = {
 				add: false,
 				view: false,
 			},
+			whatsAppAccountDetails: false,
 		},
 	},
 	admin: {
@@ -81,6 +83,7 @@ export const DEFAULT_PERMISSIONS = {
 			deleteList: false,
 			sendBroadcast: true,
 			allList: false,
+			downloadList: false,
 		},
 		templates: {
 			type: true,
@@ -114,6 +117,7 @@ export const DEFAULT_PERMISSIONS = {
 				add: false,
 				view: false,
 			},
+			whatsAppAccountDetails: false,
 		},
 	},
 	owner: {
@@ -139,6 +143,7 @@ export const DEFAULT_PERMISSIONS = {
 			deleteList: true,
 			sendBroadcast: true,
 			allList: true,
+			downloadList: true,
 		},
 		templates: {
 			type: true,
@@ -172,6 +177,7 @@ export const DEFAULT_PERMISSIONS = {
 				add: true,
 				view: true,
 			},
+			whatsAppAccountDetails: true,
 		},
 	},
 	unAssignedChats: {
@@ -197,6 +203,7 @@ export const DEFAULT_PERMISSIONS = {
 			deleteList: false,
 			sendBroadcast: false,
 			allList: false,
+			downloadList: false,
 		},
 		templates: {
 			type: false,
@@ -230,6 +237,7 @@ export const DEFAULT_PERMISSIONS = {
 				add: false,
 				view: false,
 			},
+			whatsAppAccountDetails: false,
 		},
 	},
 };

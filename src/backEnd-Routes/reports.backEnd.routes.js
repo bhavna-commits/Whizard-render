@@ -6,8 +6,8 @@ import {
 	createCampaign,
 } from "../controllers/Report/report.controller.js";
 import { trackSanitationFailures } from "../middleWares/sanitiseInput.js";
+import { multerMiddle } from "../config/multerMiddleware.js";
 
-const upload = multer();
 const router = express.Router();
 
 // Route to get campaign reports
@@ -17,7 +17,7 @@ router.post("/create-broadcast", createCampaignData, trackSanitationFailures);
 
 router.post(
 	"/broadcast",
-	upload.none(),
+	multerMiddle,
 	createCampaign,
 	trackSanitationFailures,
 );

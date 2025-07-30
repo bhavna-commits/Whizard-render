@@ -64,35 +64,72 @@ document
 // Function to open delete modal
 // Open Delete Modal
 function openDeleteModal(contactId, contactName) {
-	console.log(contactId, contactName); // For debugging
+	let url = location.pathname;
+	url = url
+		.split("/")
+		.filter((i) => i)
+		.pop();
 
-	// Use our custom toastConfirm (Tailwind-based) instead of Bootstrap's modal
-	toastConfirm(
-		`Are you sure you want to delete contact ${contactName}?`,
-	).then((confirmation) => {
-		if (confirmation) {
-			// If the user confirmed "Delete"
-			fetch(`/api/contact-list/deleteList/${contactId}`, {
-				method: "DELETE",
-			})
-				.then((response) => response.json())
-				.then((data) => {
-					if (data.success) {
-						toast(
-							"success",
-							`Contact ${contactName} deleted successfully`,
-						);
-						window.location.reload(); // Reload the page
-					} else {
-						toast("error", data.message);
-					}
+	if (url === "archive") {
+		toastConfirm(
+			`Are you sure you want to un-archive list ${contactName}?`,
+			"Un-archive",
+		).then((confirmation) => {
+			if (confirmation) {
+				fetch(`/api/contact-list/deleteList/${contactId}`, {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({ archive: false }),
 				})
-				.catch((error) => {
-					console.error("Error:", error);
-					toast("error", error);
-				});
-		}
-		// If the user clicked "Cancel" or outside the modal, do nothing
-	});
+					.then((response) => response.json())
+					.then((data) => {
+						if (data.success) {
+							toast(
+								"success",
+								`Contact ${contactName} un-archived successfully`,
+							);
+							window.location.reload();
+						} else {
+							toast("error", data.message);
+						}
+					})
+					.catch((error) => {
+						console.error("Error:", error);
+						toast("error", error);
+					});
+			}
+			// If the user clicked "Cancel" or outside the modal, do nothing
+		});
+	} else {
+		toastConfirm(
+			`Are you sure you want to archive list ${contactName}?`,
+			"Archive",
+		).then((confirmation) => {
+			if (confirmation) {
+				// If the user confirmed "Delete"
+				fetch(`/api/contact-list/deleteList/${contactId}`, {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({ archive: true }),
+				})
+					.then((response) => response.json())
+					.then((data) => {
+						if (data.success) {
+							toast(
+								"success",
+								`Contact ${contactName} archived successfully`,
+							);
+							window.location.reload();
+						} else {
+							toast("error", data.message);
+						}
+					})
+					.catch((error) => {
+						console.error("Error:", error);
+						toast("error", error);
+					});
+			}
+			// If the user clicked "Cancel" or outside the modal, do nothing
+		});
+	}
 }
-

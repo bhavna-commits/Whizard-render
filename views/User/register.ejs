@@ -35,26 +35,7 @@
 	<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" />
 	<script src="https://cdn.tailwindcss.com"></script>
 	<link rel="stylesheet" href="/styles/countrySelector.css" />
-	<style>
-		.loading-spinner {
-			border: 3px solid rgba(0, 0, 0, 0.1);
-			border-left-color: #fff;
-			border-radius: 50%;
-			width: 16px;
-			height: 16px;
-			animation: spin 1s linear infinite;
-		}
-		
-		@keyframes spin {
-			0% {
-				transform: rotate(0deg);
-			}
-			
-			100% {
-				transform: rotate(360deg);
-			}
-		}
-		
+	<style>		
 		#errorMessage {
 			color: red;
 			margin-top: 10px;
@@ -108,10 +89,10 @@
 										<span id="selectedFlag" class="">🇮🇳</span>&nbsp;
 										<input type="text" name="countryCode" class="cursor-pointer" id="selectedDialCode" value="+91" readonly>
 									</button>
-									<input type="tel" id="phone" name="phoneNumber" class="w-full" placeholder="Enter WhatsApp number" minlength="10" maxlength="12" required />
+									<input type="tel" id="phone" name="phoneNumber" class="w-full" placeholder="Enter WhatsApp number" minlength="8" maxlength="15" required />
 								</div>
 							</div>
-							<small id="phone-error" class="text-danger pt-2" style="display: none;">Please enter a valid phone number (numbers only, 10 to 12 digits).</small>
+							<small id="phone-error" class="text-danger pt-2" style="display: none;">Please enter a valid phone number (numbers only, 8 to 15 digits).</small>
 						</div>
 						<div class="mb-4">
 							<label for="password" class="form-label text-gray-700">Password</label>

@@ -23,6 +23,7 @@ import {
 import { generateUniqueId } from "../../utils/otpGenerator.js";
 import { agenda } from "../../config/db.js";
 import { sendCampaignScheduledEmail } from "../../services/OTP/reportsEmail.js";
+import { help } from "../../utils/dropDown.js";
 // import { user.FB_ACCESS_TOKEN } from "../../backEnd-Routes/facebook.backEnd.routes.js";
 
 dotenv.config();
@@ -77,7 +78,7 @@ export const getCampaignList = async (req, res, next) => {
 			}
 		}
 
-		let phoneNumbers = await User.findOne({ unique_id: userId });
+		let phoneNumbers = await User.findOne({ unique_id: userId, deleted: false });
 
 		phoneNumbers = phoneNumbers.FB_PHONE_NUMBERS;
 
@@ -88,7 +89,9 @@ export const getCampaignList = async (req, res, next) => {
 		}
 
 		if (phoneNumberId && phoneNumberId !== "All") {
-			matchQuery.phoneNumberId = phoneNumberId;
+			matchQuery.phoneNumberId =
+				req.session?.addedUser?.selectedFBNumber?.phone_number_id ||
+				phoneNumberId;
 		} else if (phoneNumberId === "All") {
 			delete matchQuery.phoneNumberId;
 		}
@@ -210,6 +213,7 @@ export const getCampaignList = async (req, res, next) => {
 					color: req.session?.addedUser?.color,
 					whatsAppStatus: req.session?.addedUser?.whatsAppStatus,
 					phoneNumbers,
+					help,
 				});
 			} else {
 				res.render("errors/notAllowed");
@@ -226,6 +230,7 @@ export const getCampaignList = async (req, res, next) => {
 				color: req.session?.user?.color,
 				whatsAppStatus: req.session?.user?.whatsAppStatus,
 				phoneNumbers,
+				help,
 			});
 		}
 	} catch (err) {
@@ -371,6 +376,7 @@ export const getCampaignListFilter = async (req, res, next) => {
 					photo: req.session.addedUser?.photo,
 					name: req.session.addedUser.name,
 					color: req.session.addedUser.color,
+					help,
 				});
 			} else {
 				res.render("errors/notAllowed");
@@ -385,6 +391,7 @@ export const getCampaignListFilter = async (req, res, next) => {
 				photo: req.session.user?.photo,
 				name: req.session.user.name,
 				color: req.session.user.color,
+				help,
 			});
 		}
 	} catch (err) {
@@ -435,6 +442,7 @@ export const getSendBroadcast = async (req, res, next) => {
 					photo: req.session?.addedUser?.photo,
 					color: req.session?.addedUser?.color,
 					data,
+					help,
 				});
 			} else {
 				res.render("errors/notAllowed");
@@ -449,6 +457,7 @@ export const getSendBroadcast = async (req, res, next) => {
 				photo: req.session?.user?.photo,
 				color: req.session?.user?.color,
 				data,
+				help,
 			});
 		} else {
 			const access = await User.findOne({
@@ -461,6 +470,7 @@ export const getSendBroadcast = async (req, res, next) => {
 				photo: req.session?.user?.photo,
 				color: req.session?.user?.color,
 				data,
+				help,
 			});
 			// res.render("errors/notAllowed");
 		}
@@ -483,7 +493,6 @@ export const createCampaignData = async (req, res, next) => {
 
 export const createCampaign = async (req, res, next) => {
 	try {
-		// console.log(req.body);
 		let {
 			templateId,
 			contactListId,
@@ -491,6 +500,7 @@ export const createCampaign = async (req, res, next) => {
 			schedule,
 			name,
 			contactList,
+			url,
 		} = req.body;
 
 		if (!templateId || !contactListId || !name) {
@@ -510,11 +520,12 @@ export const createCampaign = async (req, res, next) => {
 
 		const addedUserId = req.session?.addedUser?.id;
 
-		let user = await User.findOne({ unique_id: id });
+		let user = await User.findOne({ unique_id: id, deleted: false });
 
-		const phone_number = user.FB_PHONE_NUMBERS.find(
-			(n) => n.selected == true,
-		).phone_number_id;
+		const phone_number =
+			req.session?.addedUser?.selectedFBNumber?.phone_number_id ||
+			user.FB_PHONE_NUMBERS.find((n) => n.selected == true)
+				.phone_number_id;
 
 		if (!phone_number) {
 			throw new Error("No phone number selected.");
@@ -559,6 +570,8 @@ export const createCampaign = async (req, res, next) => {
 				contactList,
 				phone_number,
 				addedUserId,
+				url,
+				fileName: req?.file?.filename,
 			});
 
 			time = Date.now() + 15 * 60 * 1000;
@@ -594,6 +607,8 @@ export const createCampaign = async (req, res, next) => {
 				contactList,
 				phone_number,
 				addedUserId,
+				url,
+				fileName: req?.file?.filename,
 			});
 
 			await sendCampaignScheduledEmail(
@@ -630,9 +645,8 @@ export const createCampaign = async (req, res, next) => {
 
 export const getCostReport = async (req, res) => {
 	try {
-		console.log("here");
 		const userId = req.session?.user?.id || req.session?.addedUser?.owner;
-		const user = await User.findOne({ unique_id: userId });
+		const user = await User.findOne({ unique_id: userId, deleted: false });
 
 		const WABA_ID = user.WABA_ID;
 		const graph = process.env.FB_GRAPH_VERSION;
@@ -648,20 +662,12 @@ export const getCostReport = async (req, res) => {
 		req.query.start = JSON.parse(req.query.start);
 		req.query.end = JSON.parse(req.query.end);
 
-		console.log(
-			typeof req.query.start,
-			req.query.start,
-			typeof req.query.end,
-			req.query.end,
-		);
-		// Get timestamps from query parameters
 		const start =
 			req.query.start ||
-			Math.floor(Date.now() / 1000) - 90 * 24 * 60 * 60; // Default 90 days ago
+			Math.floor(Date.now() / 1000) - 90 * 24 * 60 * 60;
 		const end = req.query.end || Math.floor(Date.now() / 1000);
 		const categories = ["MARKETING", "UTILITY", "AUTHENTICATION"];
 
-		// Meta API Endpoint for conversation analytics
 		const apiURL =
 			`https://graph.facebook.com/${graph}/${WABA_ID}?fields=conversation_analytics` +
 			`.start(${start})` +
@@ -679,7 +685,7 @@ export const getCostReport = async (req, res) => {
 		});
 
 		const data = await response.json();
-		// console.log(data);
+
 		if (!response.ok) {
 			console.error(
 				"Error fetching conversation analytics:",
@@ -695,14 +701,16 @@ export const getCostReport = async (req, res) => {
 		// Process the data into a more usable format
 		const data_points = [];
 
+		const internal = user.paymentCard === "Internal";
+
 		if (data.conversation_analytics?.data?.[0]?.data_points) {
-			// Group data points by date and category
 			const groupedData = new Map();
 
 			data.conversation_analytics.data[0].data_points.forEach((point) => {
 				const date = new Date(point.start * 1000)
 					.toISOString()
 					.split("T")[0];
+
 				if (!groupedData.has(date)) {
 					groupedData.set(date, {
 						MARKETING: { conversations: 0, cost: 0 },
@@ -712,48 +720,34 @@ export const getCostReport = async (req, res) => {
 				}
 
 				const category = point.conversation_category;
-				const categoryData = groupedData.get(date)[category] || {
+				const current = groupedData.get(date)[category] || {
 					conversations: 0,
 					cost: 0,
 				};
-				categoryData.conversations += point.conversation || 0;
-				categoryData.cost += point.cost || 0;
-				groupedData.get(date)[category] = categoryData;
+
+				current.conversations += point.conversation || 0;
+				current.cost += point.cost || 0;
+
+				groupedData.get(date)[category] = current;
 			});
 
-			// Convert grouped data back to array format
 			for (const [date, categoryData] of groupedData) {
 				for (const category of categories) {
+					const baseCost = categoryData[category].cost;
+					const adjustedCost = internal ? baseCost * 1.1 : baseCost;
+
 					data_points.push({
 						start: new Date(date).getTime() / 1000,
-						end: new Date(date).getTime() / 1000 + 86400, // Add 24 hours
+						end: new Date(date).getTime() / 1000 + 86400,
 						conversation_category: category,
 						conversation: categoryData[category].conversations,
-						cost: categoryData[category].cost,
+						cost: adjustedCost,
 					});
 				}
 			}
 		}
 
 		return res.json(data_points);
-		// console.log(data_points);
-		// Check permissions and render response
-		const permissions = req.session?.addedUser?.permissions;
-		if (permissions) {
-			const access = await Permissions.findOne({
-				unique_id: permissions,
-			});
-
-			if (access.reports?.costReports) {
-				return res.json(data_points);
-			} else {
-				return res.status(403).json({ error: "Not allowed" });
-			}
-		} else {
-			const access = await User.findOne({
-				unique_id: req.session?.user?.id,
-			});
-		}
 	} catch (error) {
 		console.error("Error fetching cost report :", error);
 		return res.status(500).json({ error: "Internal server error" });
@@ -762,6 +756,9 @@ export const getCostReport = async (req, res) => {
 
 export const renderGetCostReport = async (req, res) => {
 	try {
+		const userId = req.session?.user?.id || req.session?.addedUser?.owner;
+		const user = await User.findOne({ unique_id: userId, deleted: false });
+		const currency = user?.currency;
 		const permissions = req.session?.addedUser?.permissions;
 		if (permissions) {
 			const access = await Permissions.findOne({
@@ -776,6 +773,8 @@ export const renderGetCostReport = async (req, res) => {
 					name: req.session?.addedUser?.name,
 					photo: req.session?.addedUser?.photo,
 					color: req.session?.addedUser?.color,
+					help,
+					currency,
 				});
 			} else {
 				res.render("errors/notAllowed");
@@ -789,6 +788,8 @@ export const renderGetCostReport = async (req, res) => {
 				name: req.session?.user?.name,
 				photo: req.session?.user?.photo,
 				color: req.session?.user?.color,
+				help,
+				currency,
 			});
 		} else {
 			const access = await User.findOne({
@@ -800,6 +801,8 @@ export const renderGetCostReport = async (req, res) => {
 				name: req.session?.user?.name,
 				photo: req.session?.user?.photo,
 				color: req.session?.user?.color,
+				help,
+				currency,
 			});
 			// res.render("errors/notAllowed");
 		}

@@ -22,14 +22,14 @@ export async function refreshBusinessToken(userId, wabaId, oldToken) {
 				FB_ACCESS_EXPIRES_IN: data.expires_in,
 				nextRefreshAt: new Date(
 					Date.now() + (data.expires_in - 86400) * 1000,
-				), // refresh 1 day early
+				), 
 			},
 		);
 
 		console.log(`Refreshed token for WABA ${wabaId}`);
 	}).catch((err) => {
 		console.error(`Token refresh failed for user ${userId}:`, err.message);
-		// e.g., sendSlackAlert(`FB token refresh failed: ${err.message}`);
+		throw err;
 	});
 }
 

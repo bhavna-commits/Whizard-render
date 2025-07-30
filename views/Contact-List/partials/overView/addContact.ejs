@@ -1,0 +1,212 @@
+<!-- Edit Contact Sidebar -->
+<!-- Overlay for the sidebar -->
+<div class="overlay" id="overlay" onclick="closeAddContact()"></div>
+
+<!-- Sidebar structure for adding new contact -->
+<div class="filter-sidebar overflow-scroll" id="addContactSidebar">
+	<div class="filter-header">
+		<h2>Add New Contact</h2>
+		<button class="close-btn" onclick="closeAddContact()">&times;</button>
+	</div>
+	
+	<div class="filter-section">
+		<form id="addContactForm" class=" space-y-4">
+			<div class="form-group">
+				<label for="contactName">Name</label>
+				<input type="text" id="contactName" name="Name" class="date-input" placeholder="Enter name" required>
+			</div>
+			
+			<div class="input-group focus:outline-none" id="countrySelector">
+				<label for="contactNumber">Phone Number</label>
+				
+				<div class="country-dropdown hidden" id="countryDropdown">
+					<div class="search-container focus:outline-none">
+						<input type="text" id="countrySearch" placeholder="Search country or code...">
+					</div>
+					<div class="countries-list">
+						<% countries.forEach(function(country) { %>
+						<button type="button" class="country-option focus:outline-none">
+							<span class="country-flag"><%= country.flag %></span>
+							<span class="country-name"><%= country.name %></span>
+							<span class="country-dial-code"><%= country.dialCode %></span>
+						</button>
+						<% }); %>
+					</div>
+				</div>
+				<div class="date-input flex items-center">
+					<button type="button" class="w-16 flex items-center" id="countrySelectorButton">
+						<span id="selectedFlag" class="">🇮🇳</span>&nbsp;
+						<input type="text" name="countryCode" class="cursor-pointer border-0" id="selectedDialCode" value="+91" readonly>
+					</button>
+					<input type="tel" id="phone" name="wa_id" class="w-full border-0" placeholder="Enter WhatsApp number" minlength="8" maxlength="15" pattern="[0-9]{8,15}" required />
+					
+				</div>
+				<small id="phone-error" class="error-message text-red-500" style="display: none;"></small>
+			</div>
+			
+			<% if (contacts[0]?.masterExtra) { %>
+			<% Object.keys(contacts[0].masterExtra).forEach(function(key) { %>
+			<div class="form-group">
+				<label for="<%= key %>"><%= key %></label>
+				<input type="text" id="<%= key %>" name="<%= key %>" class="date-input" placeholder="<%= key %>" required />
+			</div>
+			<% }); %>
+			<% } %>
+			
+			<button type="submit" class="apply-btn">Add Contact</button>
+		</form>
+	</div>
+</div>
+
+<script>
+	const countrySelectorButton = document.getElementById("countrySelectorButton");
+	const countryDropdown = document.getElementById("countryDropdown");
+	const countryOptions = document.querySelectorAll(".country-option");
+	const countrySearch = document.getElementById("countrySearch");
+	const selectedFlag = document.getElementById("selectedFlag");
+	const selectedDialCode = document.getElementById("selectedDialCode");
+	
+	// Toggle country dropdown
+	countrySelectorButton.addEventListener("click", function (e) {
+		e.preventDefault();
+		// console.log("here");
+		countryDropdown.classList.toggle("hidden");
+	});
+	
+	// Handle country selection
+	countryOptions.forEach((option) => {
+		option.addEventListener("click", function () {
+			const flag = this.querySelector(".country-flag").textContent;
+			const dialCode = this.querySelector(".country-dial-code").textContent;
+			
+			selectedFlag.textContent = flag;
+			selectedDialCode.value = dialCode;
+			countryDropdown.classList.add("hidden");
+		});
+	});
+	
+	// Search functionality
+	countrySearch.addEventListener("input", function () {
+		const searchValue = this.value.toLowerCase();
+		
+		countryOptions.forEach((option) => {
+			const countryName = option
+				.querySelector(".country-name")
+				.textContent.toLowerCase();
+			const dialCode = option
+				.querySelector(".country-dial-code")
+				.textContent.toLowerCase();
+			
+			if (countryName.includes(searchValue) || dialCode.includes(searchValue)) {
+				option.style.display = "flex";
+			} else {
+				option.style.display = "none";
+			}
+		});
+	});
+	
+	// Close dropdown when clicking outside
+	document.addEventListener("click", function (e) {
+		if (
+			!countrySelectorButton.contains(e.target) &&
+			!countryDropdown.contains(e.target)
+		) {
+			countryDropdown.classList.add("hidden");
+		}
+	});
+	document
+		.getElementById("addContactForm")
+		.addEventListener("submit", function (event) {
+			event.preventDefault(); // Prevent default form submission
+			
+			
+			
+			// Collect the form data
+			const formData = new FormData(this);
+			
+			// Extract contactId from the URL
+			const contactId = window.location.pathname.split("/").pop();
+			
+			// Append contactId to formData
+			formData.append("contactId", contactId);
+			
+			const saveButton = this.querySelector("button[type='submit']");
+			const originalButtonText = saveButton.innerHTML;
+			saveButton.disabled = true; // Disable button to prevent double submission
+			saveButton.innerHTML =
+				'<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving...';
+			
+			// Perform the POST request to add the new contact
+			fetch(`/api/contact-list/contacts/create-contact`, {
+					method: "POST",
+					body: formData,
+				})
+				.then((response) => response.json())
+				.then((data) => {
+					if (data.success) {
+						console.log(data.contact);
+						location.reload();
+					} else {
+						saveButton.innerHTML = originalButtonText;
+						saveButton.disabled = false;
+						
+						// Remove any existing error message
+						const existingErrorMessage = saveButton.parentNode.querySelector(".text-danger");
+						if (existingErrorMessage) {
+							existingErrorMessage.remove();
+						}
+						
+						const errorMessage = document.createElement("div");
+						errorMessage.className = "text-danger mt-2";
+						errorMessage.innerText = "Error updating contact: " + data.message;
+						saveButton.parentNode.appendChild(errorMessage);
+						
+					}
+				})
+				.catch((err) => {
+					saveButton.innerHTML = originalButtonText;
+					saveButton.disabled = false;
+					
+					// Remove any existing error message
+					const existingErrorMessage = saveButton.parentNode.querySelector(".text-danger");
+					if (existingErrorMessage) {
+						existingErrorMessage.remove();
+					}
+					
+					const errorMessage = document.createElement("div");
+					errorMessage.className = "text-danger mt-2";
+					errorMessage.innerText = "An error occurred. Please try again.";
+					saveButton.parentNode.appendChild(errorMessage);
+				});
+		});
+	
+	const phoneInput = document.getElementById('phone');
+	const phoneError = document.getElementById('phone-error');
+	
+	phoneInput.addEventListener('input', function () {
+		const phoneValue = phoneInput.value;
+		
+		// Regex to check for numbers only
+		const phonePattern = /^[0-9]{0,15}$/;
+		
+		if (!phonePattern.test(phoneValue)) {
+			phoneError.textContent = "Only numbers are allowed.";
+			phoneError.style.display = "block";
+			phoneInput.setCustomValidity("Invalid phone number.");
+		} else if (phoneValue.length
+			
+			<
+			8) {
+			phoneError.textContent = "Phone number must be at least 8 digits.";
+			phoneError.style.display = "block";
+			phoneInput.setCustomValidity("Phone number too short.");
+		} else if (phoneValue.length > 15) {
+			phoneError.textContent = "Phone number must not exceed 15 digits.";
+			phoneError.style.display = "block";
+			phoneInput.setCustomValidity("Phone number too long.");
+		} else {
+			phoneError.style.display = "none";
+			phoneInput.setCustomValidity(""); // Clear any custom validity
+		}
+	});
+</script>

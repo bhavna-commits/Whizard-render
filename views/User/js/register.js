@@ -7,8 +7,8 @@ document.addEventListener("DOMContentLoaded", function () {
 	const countrySearch = document.getElementById("countrySearch");
 	const selectedFlag = document.getElementById("selectedFlag");
 	const selectedDialCode = document.getElementById("selectedDialCode");
-	const successMessage = document.getElementById("successMessage"); // Make sure it's defined
-	const errorMessage = document.getElementById("errorMessage"); // Similarly for error
+	const successMessage = document.getElementById("successMessage");
+	const errorMessage = document.getElementById("errorMessage");
 
 	const phoneInput = document.getElementById("phone");
 	const phoneError = document.getElementById("phone-error");
@@ -23,7 +23,7 @@ document.addEventListener("DOMContentLoaded", function () {
 		phoneInput.value = cleanedPhoneValue;
 
 		// Validate phone length
-		if (cleanedPhoneValue.length < 10 || cleanedPhoneValue.length > 12) {
+		if (cleanedPhoneValue.length < 8 || cleanedPhoneValue.length > 15) {
 			phoneError.style.display = "block";
 		} else {
 			phoneError.style.display = "none";

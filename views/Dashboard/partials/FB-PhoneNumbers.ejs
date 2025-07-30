@@ -2,29 +2,27 @@
 	<div id="dropdown" class="relative inline-block min-w-56">
 		<!-- Button to show selected phone number or "Select phone number" -->
 		<% if (access?.dashboard?.addPhoneNumber) { %>
-		<button id="dropdownButton" class="bg-white border shadow-sm text-[#959595] border-gray-300 rounded-md w-full p-2 text-left flex items-center justify-between">
-			<span id="selectedOption" class="">
+		<button id="dropdownButton" class="bg-white border border-gray-300 rounded-md w-full p-2 text-left flex items-center justify-between">
+			<span id="selectedOption">
 				<% 
-          // Find the selected phone number and display it
-          const selectedNumber = user.FB_PHONE_NUMBERS.find(number => number.selected === true);
-        //   console.log(selectedNumber);
-        %>
+				  const selectedNumber = addedUser?.selectedFBNumber 
+					|| user?.FB_PHONE_NUMBERS.find(number => number.selected);
+				%>
 				<%= selectedNumber ? (selectedNumber.friendly_name || selectedNumber.phone_number_id) : "Select phone number" %>
-			</span>
+			</span>			  
 			<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
 				<path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
 			</svg>
 		</button>
 		<% } else { %>
-		<button disabled class="bg-white border shadow-sm text-[#959595] border-gray-300 rounded-md w-full p-2 text-left flex items-center justify-between hover:cursor-not-allowed" title="You don't have permissions to access this">
-			<span id="selectedOption" class="">
+		<button disabled class="bg-white border border-gray-300 rounded-md w-full p-2 text-left flex items-center justify-between hover:cursor-not-allowed" title="You don't have permissions to access this">
+			<span id="selectedOption">
 				<% 
-          // Find the selected phone number and display it
-          const selectedNumber = user.FB_PHONE_NUMBERS.find(number => number.selected === true);
-        //   console.log(selectedNumber);
-        %>
+				  const selectedNumber = addedUser?.selectedFBNumber 
+					|| user?.FB_PHONE_NUMBERS.find(number => number.selected);
+				%>
 				<%= selectedNumber ? (selectedNumber.friendly_name || selectedNumber.phone_number_id) : "Select phone number" %>
-			</span>
+			</span>			  
 			<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
 				<path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
 			</svg>
@@ -85,10 +83,10 @@
 				<!-- Name Field -->
 				<div class="mb-4">
 					<label class="block text-gray-500 mb-2">WhatsApp business display name </label>
-                    <div class="text-sm text-gray-400 mb-2">Your display name should match your business name and adhere to WhatsApp Business display name guidelines. <a href="https://www.facebook.com/business/help/757569725593362" class="text-blue-500 text-sm">Learn more</a></div>
+					<div class="text-sm text-gray-400 mb-2">Your display name should match your business name and adhere to WhatsApp Business display name guidelines. <a href="https://www.facebook.com/business/help/757569725593362" class="text-blue-500 text-sm">Learn more</a></div>
 					<input type="text" name="name" id="name" class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter phone number's name" required>
 				</div>
-			
+				
 				<div class="mb-4">
 					<label class="block text-gray-500 mb-2">Phone Number</label>
 					<div class="relative">

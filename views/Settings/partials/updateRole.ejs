@@ -4,24 +4,35 @@
 		<div class="mt-3 space-y-5">
 			<h3 class="text-2xl font-semibold leading-6 text-center text-gray-900">Update User Role</h3>
 			<div class="mt-2">
-				<form id="updateRoleForm">
-					<div class="mb-4">
+				<form id="updateRoleForm" class="space-y-4">
+					<div class="">
 						<label class="block text-gray-500 mb-2">User Name</label>
-						<input type="text" id="userNameUpdate" name="userNameUpdate" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-500 leading-tight focus:outline-none focus:shadow-outline" disabled>
+						<input type="text" id="userNameUpdate" name="userNameUpdate" required class="appearance-none border rounded w-full py-2 px-3 text-gray-500 leading-tight focus:outline-none focus:shadow-outline" disabled>
 					</div>
-					<div class="mb-4">
+					<div class="">
 						<label class="block text-gray-500 mb-2">Email</label>
-						<input type="email" id="userEmailUpdate" name="userEmailUpdate" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-500 leading-tight focus:outline-none focus:shadow-outline" disabled>
+						<input type="email" id="userEmailUpdate" name="userEmailUpdate" required class="appearance-none border rounded w-full py-2 px-3 text-gray-500 leading-tight focus:outline-none focus:shadow-outline" disabled>
 					</div>
-					<div class="mb-4">
+					<div class="">
 						<label class="block text-gray-500 mb-2">Role</label>
 						<div class="select-wrapper">
-							<select id="userRoleUpdate" name="userRoleUpdate" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-500 leading-tight focus:outline-none focus:shadow-outline">
+							<select id="userRoleUpdate" name="userRoleUpdate" required class="appearance-none border rounded w-full py-2 px-3 text-gray-500 leading-tight focus:outline-none focus:shadow-outline">
 								<option disabled selected>Select role</option>
 								<% permissions.forEach(function(permission) { %>
 								<option value="<%= permission.unique_id %>"><%= permission.name %></option>
 								<% }); %>
 								<option value="UnAssignedChats">Unassigned Chats Support</option>
+							</select>
+						</div>
+					</div>
+					<div class="">
+						<label class="block text-gray-500 mb-2">Assign WhatsApp Account</label>
+						<div class="select-wrapper">
+							<select id="updateWhatsAppNumber" name="updateWhatsAppNumber" required class=" appearance-none w-full py-2 px-3 text-gray-500 focus:outline-none focus:shadow-outline">
+								<option disabled selected>Select Account</option>
+								<% whatsAppNumbers.forEach(function(permission) { %>
+								<option value='<%= JSON.stringify(permission) %>'><%= permission.friendly_name %></option>
+								<% }); %>
 							</select>
 						</div>
 					</div>
@@ -45,8 +56,6 @@
 
 <script>
 	function updateRole (email, userId, name, id) {
-		// const userId = document.querySelectorAll('tr')[index + 1].dataset.id;
-		// console.log(userId);
 		document.getElementById(id).classList.add("hidden");
 		document.getElementById('userNameUpdate').value = name;
 		document.getElementById('userEmailUpdate').value = email;
@@ -55,57 +64,75 @@
 		const modal = document.getElementById('updateRoleModal');
 		const modalContent = document.getElementById('modalContent');
 		
-		modal.classList.remove('hidden'); // Make modal background visible
+		modal.classList.remove('hidden');
 		setTimeout(() => {
-			// Add classes for showing modal with transitions after a slight delay
 			modalContent.classList.remove('opacity-0', 'scale-95');
-		}, 10); // Delay for transition to apply
+		}, 10);
 		
 		// Handle form submission
 		const form = document.getElementById('updateRoleForm');
 		form.onsubmit = function (event) {
 			event.preventDefault();
 			
-			const selectElement = document.getElementById('userRoleUpdate');
-			const newRoleId = selectElement.value;
-			const newRoleName = selectElement.options[selectElement.selectedIndex].textContent;
+			const roleSelect = document.getElementById('userRoleUpdate');
+			const selectedRoleValue = roleSelect.value;
+			const selectedRoleText = roleSelect.options[roleSelect.selectedIndex].textContent;
 			
-			if (newRoleName) {
-				fetch('/api/settings/updateUserManagement', {
-						method: 'POST',
-						headers: {
-							'Content-Type': 'application/json',
-						},
-						body: JSON.stringify({
-							action: 'updateRole',
-							userId,
-							newRoleId,
-							newRoleName
-						}),
-					})
-					.then(response => response.json())
-					.then(data => {
-						if (data.success) {
-							toast("success", `User role updated to ${newRoleName}`);
-							location.reload(); // Reload the page to reflect the updated role
-						} else {
-							toast("error", 'Failed to update role');
-						}
-					})
-					.catch(error => {
-						console.error('Error:', error);
-						toast("error", 'An error occurred while updating role');
-					});
-			} else {
-				toast("info", 'Please select a role');
+			const accountSelect = document.getElementById("updateWhatsAppNumber");
+			const selectedAccountValue = accountSelect.value;
+			const selectedAccountText = accountSelect.options[accountSelect.selectedIndex].textContent;
+
+			let selectedFBNumber;
+			try {
+				selectedFBNumber = JSON.parse(selectedAccountValue);
+			} catch (err) {
+				toast("error", "Invalid WhatsApp account selection");
+				return;
 			}
+
+			if (roleSelect.selectedIndex === 0 || selectedRoleText === "Select role") {
+				toast("error", "Please select a valid role");
+				return;
+			}
+			
+			if (accountSelect.selectedIndex === 0 || selectedAccountText === "Select Account") {
+				toast("error", "Please assign a WhatsApp account");
+				return;
+			}
+			
+			fetch('/api/settings/updateUserManagement', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify({
+						action: 'updateRole',
+						userId,
+						newRoleId: selectedRoleValue,
+						newRoleName: selectedRoleText,
+						selectedFBNumber,
+					}),
+				})
+				.then(response => response.json())
+				.then(data => {
+					if (data.success) {
+						toast("success", `User role updated to ${selectedRoleText}`);
+						location.reload();
+					} else {
+						toast("error", 'Failed to update role');
+					}
+				})
+				.catch(error => {
+					console.error('Error:', error);
+					toast("error", 'An error occurred while updating role');
+				});
 		};
 	}
 	
 	function closeUpdate () {
 		const modal = document.getElementById('updateRoleModal');
 		const modalContent = document.getElementById('modalContent');
-		modalContent.classList.add('opacity-0', 'scale-95'); // Add classes for hiding modal
+		modalContent.classList.add('opacity-0', 'scale-95');
 		modal.classList.add('hidden');
 	}
 </script>

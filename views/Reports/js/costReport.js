@@ -95,7 +95,6 @@ function processAnalyticsData(rawData, startDate, endDate) {
 			month: "short",
 			day: "numeric",
 		});
-		// console.log(dateKey);
 
 		timeseriesMap.set(dateKey, {
 			date: dateKey,
@@ -123,7 +122,7 @@ function processAnalyticsData(rawData, startDate, endDate) {
 
 		const utcDate = new Date(point.start * 1000);
 
-		const oneDayInMilliseconds = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+		const oneDayInMilliseconds = 24 * 60 * 60 * 1000;
 		const newDate = new Date(utcDate.getTime() + oneDayInMilliseconds);
 
 		const dateKey = newDate.toLocaleDateString("en", {
@@ -167,7 +166,7 @@ function updateUI(data) {
 
 	document.getElementById("totalCount").textContent =
 		data.summaryData.total.count || 0;
-	document.getElementById("totalCost").textContent = `₹${(
+	document.getElementById("totalCost").textContent = `${(
 		data.summaryData.total.cost || 0
 	).toFixed(2)}`;
 
@@ -178,13 +177,13 @@ function updateUI(data) {
 	document.getElementById("authCount").textContent =
 		data.summaryData.authentication.count || 0;
 
-	document.getElementById("marketingCost").textContent = `₹${(
+	document.getElementById("marketingCost").textContent = `${(
 		data.summaryData.marketing.cost || 0
 	).toFixed(2)}`;
-	document.getElementById("utilityCost").textContent = `₹${(
+	document.getElementById("utilityCost").textContent = `${(
 		data.summaryData.utility.cost || 0
 	).toFixed(2)}`;
-	document.getElementById("authCost").textContent = `₹${(
+	document.getElementById("authCost").textContent = `${(
 		data.summaryData.authentication.cost || 0
 	).toFixed(2)}`;
 

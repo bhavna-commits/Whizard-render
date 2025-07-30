@@ -297,7 +297,7 @@ class Preview {
 		}
 		
 	}
-}
+} 
 
 class TemplateManager {
 	constructor() {

@@ -39,10 +39,10 @@
 	<!-- Font Awesome link -->
 </head>
 
+
 <body class="">
-	<!-- Loader HTML -->
-	<%- include("../commonJS/loader") %>
 	
+	<%- include("../commonJS/loader") %>
 	<div class="layout-container">
 		<%- include("../commonJS/sidebar")  %>
 		
@@ -147,488 +147,533 @@
 					</script>
 				</form>
 			</div>
-			
-			<div class="border-l-[0.5rem] border-r-[0.5rem] border-[#f9f9fa] px-3 flex-grow min-w-[30rem] min-h-full h-fit">
+			<div class="border-l-[0.5rem] border-r-[0.5rem] border-[#f9f9fa] px-3 flex-grow min-w-[30rem] min-h-full h-fit p-2">
 				
-				<div class="p-2">
-					<div class="d-flex w-full justify-content-between align-items-center logo">
-						<div class="title ">
-							<h4 class="page-title text-xl font-bold">
-								Setup Template
-							</h4>
-						</div>
-						<!-- Submit Button -->
-						<div class="text-end">
-							<button type="button" class="btn btn-primary py-2 text-sm" onclick="openModal()">
-								Preview
-							</button>
-						</div>
+				
+				<div class="d-flex w-full justify-content-between align-items-center logo">
+					<div class="title ">
+						<h4 class="page-title text-xl font-bold">
+							Setup Template
+						</h4>
 					</div>
-					<div id="setupBody" class="relative overflow-auto max-h-[85vh] ">
-						<div class="setup-template">
-							<!-- Header -->
-							<div class="d-flex align-items-end justify-content-between">
-								<div class="header-text w-full">
-									<h6 class="font-semibold text-lg pb-2">
-										Header
-										<span class="text-gray-400 font-normal">(Optional)</span>
-									</h6>
-								</div>
-								<div class="header-dropdown form-group text-gray-400">
-									<div class="select-wrapper   mt-4">
-										<select id="mediaTypeDropdown" class="cursor-pointer py-2 pl-2 w-full rounded-md border border-gray-300 bg-white  text-sm focus:border-blue-200 focus:outline-none focus:ring-1 focus:ring-blue-200">
-											<option class="text-sm" value="none">
-												None
-											</option>
-											<option class="text-sm" value="text">
-												Text
-											</option>
-											<option class="text-sm" value="media">
-												Media
-											</option>
-										</select>
-									</div>
-								</div>
-							</div>
-						</div>
-						
-						<div id="noneInputContainer" class="text-sm form-group text-gray-400 leading-relaxed">
-							Add a title or choose which type of media
-							you&apos;ll use for this header.
-						</div>
-						<div id="headerInputContainer" class="hidden form-group">
-							<label class="text-sm text-gray-400 pb-2">Add a title.</label>
-							<input type="text" class="form-control border-0" id="headerInput" placeholder="Enter header title" />
-						</div>
-						
-						<div id="mediaInputContainer" class="hidden w-full h-10 mt-2">
-							<!-- Media Type Selection -->
-							<div class="select-wrapper w-48  mr-5">
-								<select id="mediaType" class="w-full pl-2 cursor-pointer rounded-md border border-gray-300 bg-white py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 ">
-									<option value="image">Image</option>
-									<option value="video">Video</option>
-									<option value="document">Document</option>
-									<!-- <option value="location">Location</option> -->
-								</select>
-							</div>
-							<!-- File Upload -->
-							<label id="uploadLabel" for="file-upload" class="px-3 h-full cursor-pointer rounded-md border border-gray-300 text-gray-400 focus-within:outline-none focus-within:ring-2 focus-within:ring-blue-500 focus-within:ring-offset-2 hover:bg-gray-100 flex items-center justify-between">
-								<span id="uploadText" class="h-fit w-full text-sm">Choose from .jpg or .png</span>
-								<input id="file-upload" name="file-upload" type="file" class="sr-only" />
-								<svg id="removeFile" xmlns="http://www.w3.org/2000/svg" class="hidden h-5 w-5 text-gray-500 cursor-pointer hover:text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-									<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-								</svg>
-							</label>
-						</div>
-						
-						<!-- Body -->
-						<div class="form-group">
-							<h6 class="font-semibold text-lg pb-2 pt-1 ">
-								Body
-							</h6>
-							<label class="  pb-2 text-gray-400 text-sm form-group leading-relaxed" style="font-family: 'Figtree', sans-serif;">Enter the text for your message in the language
-								that you&apos;ve selected. Add {{1}}, {{2}}, {{3}}
-								(Curly Braceses and numbers) to add Dynamic
-								values</label>
-							<div class="border rounded shadow-sm relative z-0">
-								<div class="px-2 h-fit d-flex align-items-center justify-content-between" role="toolbar">
-									<div id="toolbar" class="relative flex text-gray-400">
-										<button class="py-1 px-2 rounded-lg" onclick="formatText('bold', this)">
-											<i class="fa fa-bold text-sm"></i>
-										</button>
-										<button class="py-1 px-2 rounded-lg" onclick="formatText('italic', this)">
-											<i class="fa fa-italic text-sm"></i>
-										</button>
-										<button class="py-1 px-2 rounded-lg" onclick="formatText('underline', this)">
-											<i class="fa fa-underline text-sm"></i>
-										</button>
-										<button class="py-1 px-2 rounded-lg" onclick="formatText('strikethrough', this)">
-											<i class="fa fa-strikethrough text-sm"></i>
-										</button>
-										<button class="text-sm py-1 px-2 rounded-lg" onclick="addBrackets()">
-										
-											{{}}
-										</button>
-										
-										<!-- Emoji button -->
-										<button id="emojiBtn" onclick="openEmojis()" class="rounded text-sm py-1 px-2 ">
-											😊
-										</button>
-									</div>
-									<div id="emojiContainer" class="hidden absolute top-full left-0 bg-white p-4 rounded shadow-lg w-[480px] h-52 overflow-y-auto z-50">
-										<input id="emojiSearch" type="text" placeholder="Search for emojis..." class=" border shadow-md focus:shadow-lg rounded p-2 mb-3 w-full" />
-										<div id="emojiList" class="grid grid-cols-6 gap-2"></div>
-									</div>
-									
-									<div class="count mt-[-6px]">
-										<small class="text-gray-400 text-sm" id="charCount">0/1024</small>
-									</div>
-								</div>
-								<!-- <textarea id="bodyInput" class="w-full h-full px-2 text-sm" placeholder="Enter body here" contenteditable="true" maxlength="1024" cols="1"></textarea> -->
-								
-								<div id="bodyInput" class="focus:outline-none p-2 text-sm" contenteditable="true" maxlength="1024" style="min-height: 50px; height: auto"></div>
-							</div>
-							
-							
-							<!-- Footer -->
-							<div class="form-group mt-3">
-								<h6 class="font-semibold text-lg pb-2">Footer</h6>
-								<label class=" text-gray-400 pb-2 text-sm leading-relaxed">Add a short line of text to bottom of your
-									message template, if you add the marketing
-									opt-out button, the associated footer will be
-									shown here by default.</label>
-								<div class="border rounded shadow-sm d-flex align-items-center justify-content-between p-2">
-									<textarea class="border-0 w-full text-sm bg-transparent focus:outline-none outline-none focus-within:outline-none" maxlength="60" rows="1" id="footerInput" placeholder="Enter footer text"></textarea>
-									<div class="count">
-										<small class="text-gray-400 footer-count float-end">0/60</small>
-									</div>
-								</div>
-							</div>
-							
-							<!-- Buttons -->
-							<div class="form-group mt-2 mb-32">
+					<!-- Submit Button -->
+					<div class="text-end">
+						<button type="button" class="bg-black text-white rounded-lg p-2 text-sm" onclick="openModal()">
+							Preview
+						</button>
+					</div>
+				</div>
+				<div id="setupBody" class="relative overflow-auto max-h-[85vh] ">
+					<div class="setup-template">
+						<!-- Header -->
+						<div class="d-flex align-items-end justify-content-between">
+							<div class="header-text w-full">
 								<h6 class="font-semibold text-lg pb-2">
-									Buttons
-									<span class="text-secondary small text-sm">(optional)</span>
+									Header
+									<span class="text-gray-400 font-normal">(Optional)</span>
 								</h6>
-								<label class="font-medium text-secondary pb-2 text-sm leading-relaxed">Create buttons that let customers respond to
-									your message or take action.
-								</label>
-								<!-- Button Dropdown -->
-								<div class="w-fit mt-4">
-									<div class="relative w-full">
-										<!-- Button to toggle dropdown -->
-										<button id="addButtonDropdown" class="text-sm w-fit h-fit bg-transparent border border-gray-300 rounded px-4 py-2 cursor-pointer text-left text-black focus:outline-none" type="button">
-											+ Add a button
-										</button>
-										
-										<!-- Dropdown with options -->
-										<div id="buttonDropdown" class="hidden absolute bg-white border border-gray-200 rounded mt-2 py-2 shadow-lg w-full z-50">
-											<div class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer" id="addWebsiteBtn">Visit Website</div>
-											<div class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer" id="addCallBtn">Call Phone Number</div>
+							</div>
+							<div class="header-dropdown form-group text-gray-400">
+								<div class="select-wrapper   mt-4">
+									<select id="mediaTypeDropdown" class="cursor-pointer py-2 pl-2 w-full rounded-md border border-gray-300 bg-white  text-sm focus:border-blue-200 focus:outline-none focus:ring-1 focus:ring-blue-200">
+										<option class="text-sm" value="none">
+											None
+										</option>
+										<option class="text-sm" value="text">
+											Text
+										</option>
+										<option class="text-sm" value="media">
+											Media
+										</option>
+									</select>
+								</div>
+							</div>
+						</div>
+					</div>
+					
+					<div id="noneInputContainer" class="text-sm form-group text-gray-400 leading-relaxed">
+						Add a title or choose which type of media
+						you&apos;ll use for this header.
+					</div>
+					<div id="headerInputContainer" class="hidden form-group">
+						<label class="text-sm text-gray-400 pb-2">Add a title.</label>
+						<div class="form-control flex rounded-lg border">
+							<input type="text" class="border-0 grow" id="headerInput" maxlength="60" placeholder="Enter header title" />
+							<div class="count shrink">
+								<small class="text-gray-400 header-count float-end">0/60</small>
+							</div>
+						</div>
+						
+					</div>
+					
+					<div id="mediaInputContainer" class="hidden w-full h-10 mt-2">
+						<!-- Media Type Selection -->
+						<div class="select-wrapper w-48  mr-5">
+							<select id="mediaType" class="w-full pl-2 cursor-pointer rounded-md border border-gray-300 bg-white py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 ">
+								<option value="image">Image</option>
+								<option value="video">Video</option>
+								<option value="document">Document</option>
+								<!-- <option value="location">Location</option> -->
+							</select>
+						</div>
+						<!-- File Upload -->
+						<label id="uploadLabel" for="file-upload" class="px-3 h-full cursor-pointer rounded-md border border-gray-300 text-gray-400 focus-within:outline-none focus-within:ring-2 focus-within:ring-blue-500 focus-within:ring-offset-2 hover:bg-gray-100 flex items-center justify-between">
+							<span id="uploadText" class="h-fit w-full text-sm">Choose from .jpg or .png</span>
+							<input id="file-upload" name="file-upload" type="file" class="sr-only" />
+							<svg id="removeFile" xmlns="http://www.w3.org/2000/svg" class="hidden h-5 w-5 text-gray-500 cursor-pointer hover:text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+								<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+							</svg>
+						</label>
+					</div>
+					
+					<!-- Body -->
+					<div class="form-group">
+						<h6 class="font-semibold text-lg pb-2 pt-1 ">
+							Body
+						</h6>
+						<label class="  pb-2 text-gray-400 text-sm form-group leading-relaxed" style="font-family: 'Figtree', sans-serif;">Enter the text for your message in the language
+							that you&apos;ve selected. Add {{1}}, {{2}}, {{3}}
+							(Curly Braceses and numbers) to add Dynamic
+							values</label>
+						<div class="border rounded relative z-0">
+							<div class="px-2 h-fit d-flex align-items-center justify-content-between" role="toolbar">
+								<div id="toolbar" class="relative flex text-gray-400">
+									<button class="py-1 px-2 rounded-lg" onclick="formatText('bold', this)">
+										<i class="fa fa-bold text-sm"></i>
+									</button>
+									<button class="py-1 px-2 rounded-lg" onclick="formatText('italic', this)">
+										<i class="fa fa-italic text-sm"></i>
+									</button>
+									<button class="py-1 px-2 rounded-lg" onclick="formatText('underline', this)">
+										<i class="fa fa-underline text-sm"></i>
+									</button>
+									<button class="py-1 px-2 rounded-lg" onclick="formatText('strikethrough', this)">
+										<i class="fa fa-strikethrough text-sm"></i>
+									</button>
+									<button class="text-sm py-1 px-2 rounded-lg" onclick="addBrackets()">
+									
+										{{}}
+									</button>
+									
+									<!-- Emoji button -->
+									<button id="emojiBtn" onclick="openEmojis()" class="rounded text-sm py-1 px-2 ">
+										😊
+									</button>
+								</div>
+								<div id="emojiContainer" class="hidden absolute top-full left-0 bg-white p-4 rounded w-[480px] h-52 overflow-y-auto z-50">
+									<input id="emojiSearch" type="text" placeholder="Search for emojis..." class=" border rounded p-2 mb-3 w-full" />
+									<div id="emojiList" class="grid grid-cols-6 gap-2"></div>
+								</div>
+								
+								<div class="count mt-[-6px]">
+									<small class="text-gray-400 text-sm" id="charCount">0/1024</small>
+								</div>
+							</div>
+							<!-- <textarea id="bodyInput" class="w-full h-full px-2 text-sm" placeholder="Enter body here" contenteditable="true" maxlength="1024" cols="1" rows="3"></textarea> -->
+							
+							<div id="bodyInput" class="focus:outline-none p-2 text-sm" contenteditable="true" maxlength="1024" style="min-height: 50px; height: auto"></div>
+						</div>
+						
+						
+						<!-- Footer -->
+						<div class="form-group mt-3">
+							<h6 class="font-semibold text-lg pb-2">Footer</h6>
+							<label class=" text-gray-400 pb-2 text-sm leading-relaxed">Add a short line of text to bottom of your
+								message template, if you add the marketing
+								opt-out button, the associated footer will be
+								shown here by default.</label>
+							<div class="border rounded d-flex align-items-center justify-content-between p-2">
+								<input class="border-0 w-full text-sm bg-transparent focus:outline-none outline-none focus-within:outline-none" maxlength="60" id="footerInput" placeholder="Enter footer text" />
+								<div class="count">
+									<small class="text-gray-400 footer-count float-end">0/60</small>
+								</div>
+							</div>
+						</div>
+						
+						<!-- Buttons -->
+						<div class="form-group mt-2 min-h-[12rem]">
+							<h6 class="font-semibold text-lg pb-2">
+								Buttons
+								<span class="text-secondary small text-sm">(optional)</span>
+							</h6>
+							<label class="font-medium text-secondary pb-2 text-sm leading-relaxed">Create buttons that let customers respond to
+								your message or take action.
+							</label>
+							<!-- Button Dropdown -->
+							<div class="relative w-fit ">
+								<!-- Button to toggle dropdown -->
+								<button id="addButtonDropdown" class="text-sm w-fit h-fit bg-transparent border border-gray-300 rounded px-8 py-2 cursor-pointer text-left text-black focus:outline-none" type="button">
+									+ Add a button
+								</button>
+								
+								<!-- Dropdown with options -->
+								<div id="buttonDropdown" class="hidden absolute bg-white border border-gray-200 rounded mt-2 p-1 shadow-sm w-full z-50">
+									<div class="block rounded px-2 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer" id="addWebsiteBtn">Visit Website</div>
+									<div class="block rounded px-2 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer" id="addCallBtn">Call Phone Number</div>
+								</div>
+							</div>
+							<div id="buttonOptions" class="space-y-3">
+								<!-- Hidden Website Button Form -->
+								<div id="websiteForm" class="border rounded shadow-sm action-card mt-3 draggable" style="display: none;" draggable="true">
+									<div class="d-flex justify-evenly items-center">
+										<div class="drag-handle flex justify-center items-center">::</div>
+										<div class="row w-100 gap-4">
+											<div class="">
+												<label>Button label</label>
+												<div class="form-control flex rounded-lg border">
+													<input type="text" class="border-0 grow " id="websiteBtnLabel" placeholder="Visit Now" maxlength="25" />
+													<div class="count shrink">
+														<small class="text-gray-400 web-count float-end">0/25</small>
+													</div>
+												</div>
+											</div>
+											<div class="">
+												<label>Website URL</label>
+												<input type="url" class="form-control" id="websiteUrl" placeholder="example.com" />
+											</div>
+										</div>
+										<div class="flex justify-center items-center close-icon">
+											<span class="remove-btn text-2xl" id="closeWebsite">&times;</span>
 										</div>
 									</div>
 								</div>
-								<div id="buttonOptions" class="space-y-3">
-									<!-- Hidden Website Button Form -->
-									<div id="websiteForm" class="border rounded shadow-sm action-card mt-3 draggable" style="display: none;" draggable="true">
-										<div class="d-flex justify-evenly items-center">
-											<div class="drag-handle">::</div>
-											<div class="row w-100">
-												<div class="col-4">
-													<label>Button label</label>
-													<input type="text" class="form-control" id="websiteBtnLabel" placeholder="Visit Now">
-												</div>
-												<div class="col-4">
-													<label>Website URL</label>
-													<input type="url" class="form-control" id="websiteUrl" placeholder="example.com">
+								
+								<!-- Hidden Call Button Form -->
+								<div id="callForm" class="border rounded shadow-sm action-card mt-3 draggable" style="display: none;" draggable="true">
+									<div class="d-flex justify-evenly items-center">
+										<div class="drag-handle flex justify-center items-center">::</div>
+										<div class="row w-100 gap-4">
+											<div class="">
+												<label>Button label</label>
+												
+												<div class="form-control flex rounded-lg border">
+													<input type="text" class="border-0 grow" id="callBtnLabel" placeholder="Visit Now" maxlength="25" />
+													<div class="count shrink">
+														<small class="text-gray-400 call-count float-end">0/25</small>
+													</div>
 												</div>
 											</div>
-											<div class="col-1 close-icon">
-												<span class="remove-btn" id="closeWebsite">&times;</span>
+											<div class="">
+												<label>Phone Number</label>
+												<div class="input-group">
+													<div class="flex items-center focus:outline-none" id="countrySelector">
+														
+														<div class="country-dropdown hidden " id="countryDropdown">
+															<div class="search-container focus:outline-none">
+																<input type="text" id="countrySearch" placeholder="Search country or code...">
+															</div>
+															<div class="countries-list">
+																<% countries.forEach(function(country) { %>
+																<button type="button" class="country-option focus:outline-none">
+																	<span class="country-flag"><%= country.flag %></span>
+																	<span class="country-name"><%= country.name %></span>
+																	<span class="country-dial-code"><%= country.dialCode %></span>
+																</button>
+																<% }); %>
+															</div>
+														</div>
+													</div>
+													<div class="form-control flex items-center">
+														<button type="button" class="w-16 flex items-center" id="countrySelectorButton">
+															<span id="selectedFlag" class="">🇮🇳</span>&nbsp;
+															<input type="text" name="countryCode" class="cursor-pointer" id="selectedDialCode" value="+91" readonly>
+														</button>
+														<input type="tel" class="border-0 max-w-[7rem]" id="phoneNumber" minlength="8" maxlength="15" placeholder="9999999999" />
+													</div>
+												</div>
 											</div>
 										</div>
-									</div>
-									
-									<!-- Hidden Call Button Form -->
-									<div id="callForm" class="border rounded shadow-sm action-card mt-3 draggable" style="display: none;" draggable="true">
-										<div class="d-flex justify-evenly items-center">
-											<div class="drag-handle">::</div>
-											<div class="row w-100">
-												<div class="col-4">
-													<label>Button label</label>
-													<input type="text" class="form-control" id="callBtnLabel" placeholder="Call Now">
-												</div>
-												<div class="col-4">
-													<label>Phone Number</label>
-													<input type="tel" class="form-control" id="phoneNumber" minlength="12" maxlength="15" placeholder="9999999999">
-												</div>
-											</div>
-											<div class="col-1 close-icon">
-												<span class="remove-btn" id="closeCall">&times;</span>
-											</div>
+										<div class="flex justify-center items-center close-icon">
+											<span class="remove-btn text-2xl" id="closeCall">&times;</span>
 										</div>
 									</div>
 								</div>
 							</div>
 						</div>
 					</div>
-					<div id="authenticationBody" class="relative hidden overflow-auto max-h-[85vh] form-group">
-						<div class="py-3">
-							<h2 class="font-semibold text-lg pb-2 pt-1 ">Code delivery setup</h2>
-							<p class="text-gray-400 text-sm leading-relaxed">
-								Choose how customers send the code from WhatsApp to your app. Edits to this section won’t require review or count towards edit limits.
-								Learn <a href="https://developers.facebook.com/docs/whatsapp/business-management-api/authentication-templates" class="text-blue-400 underline text-sm">how to send authentication message templates</a>.
-							</p>
-						</div>
-						
-						<div class="space-y-4">
-							<!-- Zero-tap auto-fill -->
-							<label class="flex items-start space-x-3 cursor-pointer">
-								<input type="radio" name="codeDelivery" value="zero_tap" class="mt-1 accent-blue-600" />
-								<div>
-									<h3 class="font-semibold flex items-center">Zero-tap auto-fill
-										<div class="pl-2 tooltip-container">
-											<span class="info-icon-small">i</span>
-											<div class="tooltip">
-												Auto-fill only works when your customer requests a code from the same device that has their WhatsApp account.<br><br>If autofill isn&apos;t possible, a copy code message will be sent.
-											</div>
-										</div>
-									</h3>
-									<p class="text-sm text-gray-400 leading-relaxed">
-										This is recommended as the easiest option for your customers. Zero-tap will automatically send code without requiring your customer to tap a button. An auto-fill or copy code message will be sent if zero-tap and auto-fill aren’t possible.
-									</p>
-								</div>
-							</label>
-							
-							<!-- One-tap auto-fill -->
-							<label class="flex items-start space-x-3 cursor-pointer">
-								<input type="radio" name="codeDelivery" value="one_tap" class="mt-1 accent-blue-600" />
-								<div>
-									<h3 class="font-semibold flex items-center">One-tap auto-fill
-										<div class="pl-2 tooltip-container">
-											<span class="info-icon-small">i</span>
-											<div class="tooltip">
-												Auto-fill only works when your customer requests a code from the same device that has their WhatsApp account.<br><br>If autofill isn&apos;t possible, a copy code message will be sent.
-											</div>
-										</div>
-									</h3>
-									<p class="text-sm text-gray-400 leading-relaxed">
-										The code sends to your app when customers tap the button. A copy code message will be sent if auto-fill isn’t possible.
-									</p>
-								</div>
-							</label>
-							
-							<!-- Copy code -->
-							<label class="flex items-start space-x-3 cursor-pointer">
-								<input type="radio" name="codeDelivery" value="copy_code" class="mt-1 accent-blue-600" checked />
-								<div>
-									<h3 class="font-semibold flex items-center">Copy code
-										<div class="pl-2 tooltip-container">
-											<span class="info-icon-small">i</span>
-											<div class="tooltip">
-												Customers tap button to copy the code and then paste it in your app themselves.<br><br>Copy code works best for customers who request the code on a device that does not have their whatsApp account.
-											</div>
-										</div>
-									</h3>
-									<p class="text-sm text-gray-400 leading-relaxed">
-										Basic authentication with quick setup. Your customers copy and paste the code into your app.
-									</p>
-								</div>
-							</label>
-						</div>						
-						
-						<div class="mt-6 space-y-2">
-							<h2 class="text-lg font-semibold">Content</h2>
-							<p class="text-sm text-gray-400 leading-relaxed">
-								Content for authentication message templates can’t be edited. You can add additional content from the options below.
-							</p>
-							
-							<!-- 1st Checkbox -->
-							<label class="flex items-start cursor-pointer gap-2 text-gray-600">
-								<input type="checkbox" class="hidden custom-check" name="addSecurityCheckbox" onchange="toggleCustomCheck(this)" />
-								<div class="custom-box h-7 w-7 rounded flex items-center justify-center" style="border: 1px solid #9ca3af;">
-									<svg class="custom-tick w-5 h-5 text-black hidden pointer-events-none" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
-										<path d="M5 13l4 4L19 7" />
-									</svg>
-								</div>
-								<span class="text-sm pt-1">Add security recommendation</span>
-							</label>
-							
-							<!-- 2nd Checkbox -->
-							<label class="flex items-center cursor-pointer gap-2 text-gray-600">
-								<input type="checkbox" class="hidden custom-check" name="otpCheckbox" onchange="toggleCustomCheck(this)" />
-								<div class="custom-box h-7 w-7 rounded flex items-center justify-center" style="border: 1px solid #9ca3af;">
-									<svg class="custom-tick w-5 h-5 text-black hidden pointer-events-none" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
-										<path d="M5 13l4 4L19 7" />
-									</svg>
-								</div>
-								<span class="text-sm pt-1 leading-relaxed">
-									Add expiry time for the code
-									<p class="text-xs text-gray-400 leading-relaxed">After the code has expired, the auto-fill button will be disabled.</p>
-								</span>
-							</label>
-							<div id="otpDiv" class="hidden px-6 py-3 rounded-xl mt-3 border bg-gray-50 space-y-3">
-								<p class="font-semibold text-gray-500">Expires in</p>
-								
-								<!-- Wrapper that captures clicks -->
-								<div id="otpInputWrapper" class="focus-within:border-blue-600 focus-within:border-2 border border-gray-300 rounded w-32 text-gray-400 p-2 cursor-pointer">
-									<input type="number" name="otpExpiration" id="otpExpiration" min="0" max="90" class="outline-none bg-transparent text-black pl-2" placeholder="0" /> minute
-								</div>
-								
-								<!-- Error Message -->
-								<p id="otpError" class="text-red-500 text-sm hidden">⚠️ Enter a valid number between 0 to 90 minutes.</p>
-							</div>
-						</div>
-						
-						<div class="mt-6 space-y-2">
-							<h2 class="text-lg font-semibold">Buttons</h2>
-							<p class="text-sm text-gray-400 leading-relaxed">
-								You can customise the button text for both auto-fill and copy code. Even when zer-tap is turned on, Buttons are still needed for the backup code delivery method.
-							</p>
-							<div class="flex items-center w-full gap-4">
-								<!-- Auto-fill -->
-								<div class="flex flex-col space-y-2 w-full hidden" id="auto-fill-view">
-									<p class="font-semibold text-gray-500 text-sm">Auto-fill</p>
-									<div class="flex items-center grow shrink border border-gray-300 rounded p-2 text-sm">
-										<input type="text" placeholder="Auto-fill" maxlength="25" class="package grow" data-type="autofill" oninput="handlePackageInput(this)" />
-										<p class="text-xs text-right text-gray-400 shrink">0/25</p>
-									</div>
-								</div>
-								
-								<!-- Copy code -->
-								<div class="flex flex-col space-y-2 w-full">
-									<p class="font-semibold text-gray-500 text-sm">Copy code</p>
-									<div class="flex items-center grow shrink border border-gray-300 rounded p-2 text-sm">
-										<input type="text" placeholder="Copy code" maxlength="25" class="package grow" data-type="copycode" oninput="handlePackageInput(this)" />
-										<p class="text-xs text-right text-gray-400 shrink">0/25</p>
-									</div>
-								</div>
-							</div>
-							
-							
-						</div>
-						
-						<div id="appSetup" class="transition-all duration-300 ease-in-out max-h-0 overflow-hidden">
-							<div class="mt-6 space-y-2 ">
-								<h2 class="text-lg font-semibold">App setup</h2>
-								<p class="text-sm text-gray-500">You can add up to 5 apps.</p>
-								
-								<div id="appRows" class="space-y-4"></div>
-								
-								<div class="text-red-600 space-y-1" id="validationErrors">
-									<!-- Errors will be injected here -->
-								</div>
-								
-								<div id="deliveryInfo" class="text-blue-800 text-sm p-3 rounded-md mt-4 border border-blue-200 leading-relaxed">
-									ℹ️ Only add different builds of the same app (not totally different apps).
-									<a id="deliveryLink" href="https://developers.facebook.com/docs/whatsapp/business-management-api/authentication-templates/autofill-button-authentication-templates#eligibility-check" class="underline text-sm" target="_blank">Learn more</a>
-								</div>								
-								
-								<button id="addAppBtn" class="mt-4 px-4 py-2 text-sm text-blue-600 border border-blue-500 rounded hover:bg-blue-50 transition">Add another app</button>
-							</div>
-						</div>
-
-						<div class="mt-6">
-							<!-- Header Section -->
-							<div class="mb-6">
-								<div class="flex items-center mb-2">
-									<h2 class="text-lg font-semibold text-gray-900 mr-2">Message validity period</h2>
-									<div class="tooltip-container">
-										<span class="info-icon">i</span>
+				</div>
+				<div id="authenticationBody" class="relative hidden overflow-auto max-h-[85vh] form-group">
+					<div class="py-3">
+						<h2 class="font-semibold text-lg pb-2 pt-1 ">Code delivery setup</h2>
+						<p class="text-gray-400 text-sm leading-relaxed">
+							Choose how customers send the code from WhatsApp to your app. Edits to this section won’t require review or count towards edit limits.
+							Learn <a href="https://developers.facebook.com/docs/whatsapp/business-management-api/authentication-templates" class="text-blue-400 underline text-sm">how to send authentication message templates</a>.
+						</p>
+					</div>
+					
+					<div class="space-y-4">
+						<!-- Zero-tap auto-fill -->
+						<label class="flex items-start space-x-3 cursor-pointer">
+							<input type="radio" name="codeDelivery" value="zero_tap" class="mt-1 accent-blue-600" />
+							<div>
+								<h3 class="font-semibold flex items-center">Zero-tap auto-fill
+									<div class="pl-2 tooltip-container">
+										<span class="info-icon-small">i</span>
 										<div class="tooltip">
-											The message validity period can expire if your customer's WhatsApp account is unreachable. <br><br> You can check webhook for message delivery status after the validity period has passed.
+											Auto-fill only works when your customer requests a code from the same device that has their WhatsApp account.<br><br>If autofill isn&apos;t possible, a copy code message will be sent.
 										</div>
 									</div>
-									
-								</div>
-								<p class="text-gray-400 text-sm leading-relaxed">
-									It's recommended to set a custom validity period that your authentication message must be delivered by before it expires. If a message is not delivered within this time frame, you will not be charged and your customer will not see the message.
+								</h3>
+								<p class="text-sm text-gray-400 leading-relaxed">
+									This is recommended as the easiest option for your customers. Zero-tap will automatically send code without requiring your customer to tap a button. An auto-fill or copy code message will be sent if zero-tap and auto-fill aren’t possible.
 								</p>
 							</div>
-							
-							<!-- Toggle Section -->
-							<div class="mb-6">
-								<div class="flex items-center justify-between mb-4">
-									<div class="flex-1">
-										<h3 class="text-base font-medium text-gray-900 mb-1 ">
-											Set custom validity period for your message
-										</h3>
-										<p class="text-sm text-gray-600 leading-relaxed">
-											If you don't set a custom validity period, the standard 10 minutes WhatsApp message validity period will be applied.
-										</p>
+						</label>
+						
+						<!-- One-tap auto-fill -->
+						<label class="flex items-start space-x-3 cursor-pointer">
+							<input type="radio" name="codeDelivery" value="one_tap" class="mt-1 accent-blue-600" />
+							<div>
+								<h3 class="font-semibold flex items-center">One-tap auto-fill
+									<div class="pl-2 tooltip-container">
+										<span class="info-icon-small">i</span>
+										<div class="tooltip">
+											Auto-fill only works when your customer requests a code from the same device that has their WhatsApp account.<br><br>If autofill isn&apos;t possible, a copy code message will be sent.
+										</div>
 									</div>
-									<label class="toggle-switch ml-4">
-										<input type="checkbox" id="customValidityToggle">
-										<span class="slider"></span>
-									</label>
+								</h3>
+								<p class="text-sm text-gray-400 leading-relaxed">
+									The code sends to your app when customers tap the button. A copy code message will be sent if auto-fill isn’t possible.
+								</p>
+							</div>
+						</label>
+						
+						<!-- Copy code -->
+						<label class="flex items-start space-x-3 cursor-pointer">
+							<input type="radio" name="codeDelivery" value="copy_code" class="mt-1 accent-blue-600" checked />
+							<div>
+								<h3 class="font-semibold flex items-center">Copy code
+									<div class="pl-2 tooltip-container">
+										<span class="info-icon-small">i</span>
+										<div class="tooltip">
+											Customers tap button to copy the code and then paste it in your app themselves.<br><br>Copy code works best for customers who request the code on a device that does not have their whatsApp account.
+										</div>
+									</div>
+								</h3>
+								<p class="text-sm text-gray-400 leading-relaxed">
+									Basic authentication with quick setup. Your customers copy and paste the code into your app.
+								</p>
+							</div>
+						</label>
+					</div>
+					
+					
+					
+					<div class="mt-6 space-y-2">
+						<h2 class="text-lg font-semibold">Content</h2>
+						<p class="text-sm text-gray-400 leading-relaxed">
+							Content for authentication message templates can’t be edited. You can add additional content from the options below.
+						</p>
+						
+						<!-- 1st Checkbox -->
+						<label class="flex items-start cursor-pointer gap-2 text-gray-600">
+							<input type="checkbox" class="hidden custom-check" name="addSecurityCheckbox" onchange="toggleCustomCheck(this)" />
+							<div class="custom-box h-7 w-7 rounded flex items-center justify-center" style="border: 1px solid #9ca3af;">
+								<svg class="custom-tick w-5 h-5 text-black hidden pointer-events-none" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+									<path d="M5 13l4 4L19 7" />
+								</svg>
+							</div>
+							<span class="text-sm pt-1">Add security recommendation</span>
+						</label>
+						
+						<!-- 2nd Checkbox -->
+						<label class="flex items-center cursor-pointer gap-2 text-gray-600">
+							<input type="checkbox" class="hidden custom-check" name="otpCheckbox" onchange="toggleCustomCheck(this)" />
+							<div class="custom-box h-7 w-7 rounded flex items-center justify-center" style="border: 1px solid #9ca3af;">
+								<svg class="custom-tick w-5 h-5 text-black hidden pointer-events-none" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+									<path d="M5 13l4 4L19 7" />
+								</svg>
+							</div>
+							<span class="text-sm pt-1 leading-relaxed">
+								Add expiry time for the code
+								<p class="text-xs text-gray-400 leading-relaxed">After the code has expired, the auto-fill button will be disabled.</p>
+							</span>
+						</label>
+						<div id="otpDiv" class="hidden px-6 py-3 rounded-xl mt-3 border bg-gray-50 space-y-3">
+							<p class="font-semibold text-gray-500">Expires in</p>
+							
+							<!-- Wrapper that captures clicks -->
+							<div id="otpInputWrapper" class="focus-within:border-blue-600 focus-within:border-2 border border-gray-300 rounded w-32 text-gray-400 p-2 cursor-pointer">
+								<input type="number" name="otpExpiration" id="otpExpiration" min="0" max="90" class="outline-none bg-transparent text-black pl-2" placeholder="0" /> minute
+							</div>
+							
+							<!-- Error Message -->
+							<p id="otpError" class="text-red-500 text-sm hidden">⚠️ Enter a valid number between 0 to 90 minutes.</p>
+						</div>
+					</div>
+					
+					<div class="mt-6 space-y-2">
+						<h2 class="text-lg font-semibold">Buttons</h2>
+						<p class="text-sm text-gray-400 leading-relaxed">
+							You can customise the button text for both auto-fill and copy code. Even when zer-tap is turned on, Buttons are still needed for the backup code delivery method.
+						</p>
+						<div class="flex items-center w-full gap-4">
+							<!-- Auto-fill -->
+							<div class="flex flex-col space-y-2 w-full hidden" id="auto-fill-view">
+								<p class="font-semibold text-gray-500 text-sm">Auto-fill</p>
+								<div class="flex items-center grow shrink border border-gray-300 rounded p-2 text-sm">
+									<input type="text" placeholder="Auto-fill" maxlength="25" class="package grow" data-type="autofill" oninput="handlePackageInput(this)" />
+									<p class="text-xs text-right text-gray-400 shrink">0/25</p>
 								</div>
 							</div>
 							
-							<!-- Dropdown Section -->
-							<div id="messageValidityPeriod" class="mb-6 hidden">
-								<div class="flex items-center mb-3">
-									<div class="text-base font-medium text-gray-900 mr-2">
-										Validity period
-									</div>
-									<div class="tooltip-container">
-										<span class="info-icon">i</span>
-										<div class="tooltip">
-											Make sure that you have a backup delivery method for your authentication message in case your customer's WhatsApp account is unreachable. <br><br> You should only set a low validity period if you have automatic fallback delivery methods in place.
-										</div>
+							<!-- Copy code -->
+							<div class="flex flex-col space-y-2 w-full">
+								<p class="font-semibold text-gray-500 text-sm">Copy code</p>
+								<div class="flex items-center grow shrink border border-gray-300 rounded p-2 text-sm">
+									<input type="text" placeholder="Copy code" maxlength="25" class="package grow" data-type="copycode" oninput="handlePackageInput(this)" />
+									<p class="text-xs text-right text-gray-400 shrink">0/25</p>
+								</div>
+							</div>
+						</div>
+						
+						
+					</div>
+					
+					<div id="appSetup" class="transition-all duration-300 ease-in-out max-h-0 overflow-hidden">
+						<div class="mt-6 space-y-2 ">
+							<h2 class="text-lg font-semibold">App setup</h2>
+							<p class="text-sm text-gray-500">You can add up to 5 apps.</p>
+							
+							<div id="appRows" class="space-y-4"></div>
+							
+							<div class="text-red-600 space-y-1" id="validationErrors">
+								<!-- Errors will be injected here -->
+							</div>
+							
+							<div id="deliveryInfo" class="text-blue-800 text-sm p-3 rounded-md mt-4 border border-blue-200 leading-relaxed">
+								ℹ️ Only add different builds of the same app (not totally different apps).
+								<a id="deliveryLink" href="https://developers.facebook.com/docs/whatsapp/business-management-api/authentication-templates/autofill-button-authentication-templates#eligibility-check" class="underline text-sm" target="_blank">Learn more</a>
+							</div>
+							
+							<button id="addAppBtn" class="mt-4 px-4 py-2 text-sm text-blue-600 border border-blue-500 rounded hover:bg-blue-50 transition">Add another app</button>
+						</div>
+					</div>
+					
+					<div class="mt-6">
+						<!-- Header Section -->
+						<div class="mb-6">
+							<div class="flex items-center mb-2">
+								<h2 class="text-lg font-semibold text-gray-900 mr-2">Message validity period</h2>
+								<div class="tooltip-container">
+									<span class="info-icon">i</span>
+									<div class="tooltip">
+										The message validity period can expire if your customer's WhatsApp account is unreachable. <br><br> You can check webhook for message delivery status after the validity period has passed.
 									</div>
 								</div>
-								<div class="relative">
-									<select id="validityPeriod" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white appearance-none">
-										<option selected value="30">30 seconds</option>
-										<option value="60">1 minute</option>
-										<option value="120">2 minutes</option>
-										<option value="180">3 minutes</option>
-										<option value="300">5 minutes</option>
-										<option value="600">10 minutes</option>
-										<option value="900">15 minutes</option>
-									</select>
-									<div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-										<svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+								
+							</div>
+							<p class="text-gray-400 text-sm leading-relaxed">
+								It's recommended to set a custom validity period that your authentication message must be delivered by before it expires. If a message is not delivered within this time frame, you will not be charged and your customer will not see the message.
+							</p>
+						</div>
+						
+						<!-- Toggle Section -->
+						<div class="mb-6">
+							<div class="flex items-center justify-between mb-4">
+								<div class="flex-1">
+									<h3 class="text-base font-medium text-gray-900 mb-1 ">
+										Set custom validity period for your message
+									</h3>
+									<p class="text-sm text-gray-600 leading-relaxed">
+										If you don't set a custom validity period, the standard 10 minutes WhatsApp message validity period will be applied.
+									</p>
+								</div>
+								<label class="toggle-switch ml-4">
+									<input type="checkbox" id="customValidityToggle">
+									<span class="slider"></span>
+								</label>
+							</div>
+						</div>
+						
+						<!-- Dropdown Section -->
+						<div id="messageValidityPeriod" class="mb-6 hidden">
+							<div class="flex items-center mb-3">
+								<div class="text-base font-medium text-gray-900 mr-2">
+									Validity period
+								</div>
+								<div class="tooltip-container">
+									<span class="info-icon">i</span>
+									<div class="tooltip">
+										Make sure that you have a backup delivery method for your authentication message in case your customer's WhatsApp account is unreachable. <br><br> You should only set a low validity period if you have automatic fallback delivery methods in place.
+									</div>
+								</div>
+							</div>
+							<div class="relative">
+								<select id="validityPeriod" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white appearance-none">
+									<option selected value="30">30 seconds</option>
+									<option value="60">1 minute</option>
+									<option value="120">2 minutes</option>
+									<option value="180">3 minutes</option>
+									<option value="300">5 minutes</option>
+									<option value="600">10 minutes</option>
+									<option value="900">15 minutes</option>
+								</select>
+								<div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+									<svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+									</svg>
+								</div>
+							</div>
+							<!-- Warning Message -->
+							<div class="bg-orange-50 border border-orange-200 rounded-md p-4 mt-3">
+								<div class="flex">
+									<div class="flex-shrink-0">
+										<svg class="h-5 w-5 text-orange-400" viewBox="0 0 20 20" fill="currentColor">
+											<path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
 										</svg>
 									</div>
-								</div>
-								<!-- Warning Message -->
-								<div class="bg-orange-50 border border-orange-200 rounded-md p-4 mt-3">
-									<div class="flex">
-										<div class="flex-shrink-0">
-											<svg class="h-5 w-5 text-orange-400" viewBox="0 0 20 20" fill="currentColor">
-												<path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
-											</svg>
-										</div>
-										<div class="ml-3">
-											<p class="text-sm text-orange-800 leading-relaxed">
-												It's recommended to set a validity period that is equal to or less than your code expiry time to ensure that the code is still usable when users get the message.
-											</p>
-										</div>
+									<div class="ml-3">
+										<p class="text-sm text-orange-800 leading-relaxed">
+											It's recommended to set a validity period that is equal to or less than your code expiry time to ensure that the code is still usable when users get the message.
+										</p>
 									</div>
 								</div>
 							</div>
-							
 						</div>
 						
 					</div>
+					
 				</div>
+				
 			</div>
-		</div>
-		<div class="pr-1 min-w-[25rem] max-w-[25rem] min-h-full h-fit">
-			<div class="p-3">
-				<div class="title logo w-full">
-					<h4 class="page-title text-xl font-bold text-center">
-						Template Preview
-					</h4>
-				</div>
-				<!-- Preview Section -->
-				<div class="py-3 px-2 mt-3" id="previewContainer">
-					<div id="previewHeader" class="text-lg font-semibold"></div>
-					<p id="previewBody" class="text-base"></p>
-					<div class="text-sm text-gray-500 py-2" id="previewFooter"></div>
-					<div class="py-2" id="previewButtons"></div>
-					<div class="py-2 border-t text-center w-full hidden  text-blue-600" id="previewAuthAutofill">Autofill</div>
-					<div class="py-2 border-t flex items-center justify-center w-full hidden" id="previewAuthCopyCode">
-						<svg xmlns="http://www.w3.org/2000/svg" fill="#2563eb" viewBox="0 0 256 256" class="w-5 h-5 ">
-							<path d="M216,32H88a8,8,0,0,0-8,8V80H40a8,8,0,0,0-8,8V216a8,8,0,0,0,8,8H168a8,8,0,0,0,8-8V176h40a8,8,0,0,0,8-8V40A8,8,0,0,0,216,32ZM160,208H48V96H160Zm48-48H176V88a8,8,0,0,0-8-8H96V48H208Z"></path>
-						</svg>
-						<span id="previewAuthCopyCodeSpan" class="pl-2 text-blue-600">Copy code</span>
+			<div class="pr-1 min-w-[25rem] max-w-[25rem] min-h-full h-fit">
+				<div class="p-3">
+					<div class="title logo w-full">
+						<h4 class="page-title text-xl font-bold text-center">
+							Template Preview
+						</h4>
+					</div>
+					<!-- Preview Section -->
+					<div class="py-3 px-2 mt-3 previewContainerWrap">
+						<div id="previewContainer">
+							<div id="previewHeader" class="text-lg px-2 font-semibold"></div>
+							<p id="previewBody" class="text-base px-2"></p>
+							<div class="text-sm text-gray-500 px-2" id="previewFooter"></div>
+							<div class="" id="previewButtons"></div>
+							<div class=" border-t text-center w-full hidden  text-blue-600" id="previewAuthAutofill">Autofill</div>
+							<div class=" border-t flex items-center justify-center w-full hidden" id="previewAuthCopyCode">
+								<svg xmlns="http://www.w3.org/2000/svg" fill="#2563eb" viewBox="0 0 256 256" class="w-5 h-5 ">
+									<path d="M216,32H88a8,8,0,0,0-8,8V80H40a8,8,0,0,0-8,8V216a8,8,0,0,0,8,8H168a8,8,0,0,0,8-8V176h40a8,8,0,0,0,8-8V40A8,8,0,0,0,216,32ZM160,208H48V96H160Zm48-48H176V88a8,8,0,0,0-8-8H96V48H208Z"></path>
+								</svg>
+								
+								<span id="previewAuthCopyCodeSpan" class="pl-2 text-blue-600">Copy code</span>
+							</div>
+						</div>
 					</div>
 				</div>
 			</div>
 		</div>
+		
 		<button id="scrollDownBtn" class="hidden fixed bottom-4 left-1/2 -translate-x-1/2 bg-white shadow-md border border-gray-300 rounded-full p-2 hover:bg-gray-100 transition z-50" onclick="scrollToBottom()" aria-label="Scroll to bottom">
 			<svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
 			</svg>
 		</button>
+		
 	</div>
 	
 	<%- include("partials/template-preview-modal") %>
-	
 	<script src="/menu.js"></script>
 	<script src=" assets/plugins/pace/pace.min.js" type="text/javascript"></script>
 	<script src="assets/plugins/liga.js" type="text/javascript"></script>

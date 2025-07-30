@@ -33,193 +33,32 @@
 		
 		<!-- Main Content -->
 		<div class="w-full relative flex flex-col items-center px-4 overflow-hidden">
-			<h1 class="logo mb-4 w-full text-3xl">Admin Panel</h1>
-			<!-- Toggle Buttons -->
-			<div class="flex mb-6 self-start p-1 rounded-lg border">
-				<button onclick="showTab('table')" id="tableTabBtn" class=" text-gray-800 px-4 py-2 rounded-lg font-medium">User Table</button>
-				<!-- <div class="border border-gray-600"></div> -->
-				<button onclick="showTab('form')" id="formTabBtn" class=" text-white px-4 py-2 rounded-lg font-medium">Change Email</button>
-			</div>
-			<div id="usersTab" class="tab container mx-auto overflow-y-auto overflow-x-hidden h-[77vh]">
-				
-				<!-- Form View -->
-				<div id="formTab" class="tab-view hidden w-full">
-					<div class="max-w-xl mx-auto bg-white p-6 rounded-xl shadow-md">
-						<h2 class="text-2xl font-semibold text-gray-800 mb-4">Change Super Admin Email</h2>
-						<form class="sign-in-form" onsubmit="changeSuperAdminEmail(event)">
-							<div class="form-group">
-								<label class="p-text" for="email">Email</label>
-								<input type="email" class="form-control focus:ring-0 placeholder:text-gray-400" id="email" name="email" placeholder="Enter email address" required>
-								<p id="emailWarning" class="text-red-500 text-sm hidden mt-2">Only company emails are accepted.</p>
-							</div>
-							
-							<div class="form-group">
-								<label class="p-text" for="password">Password</label>
-								<div class="input-group form-control">
-									<input type="password" class="w-[93%] placeholder:text-gray-400" id="password" name="password" placeholder="Enter password" required />
-									<span id="togglePassword">
-										<span id="visibleConfirmPassword" style="cursor: pointer; width: fit-content;">
-											<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="18px" fill="#9ca3af">
-												<path d="m644-428-58-58q9-47-27-88t-93-32l-58-58q17-8 34.5-12t37.5-4q75 0 127.5 52.5T660-500q0 20-4 37.5T644-428Zm128 126-58-56q38-29 67.5-63.5T832-500q-50-101-143.5-160.5T480-720q-29 0-57 4t-55 12l-62-62q41-17 84-25.5t90-8.5q151 0 269 83.5T920-500q-23 59-60.5 109.5T772-302Zm20 246L624-222q-35 11-70.5 16.5T480-200q-151 0-269-83.5T40-500q21-53 53-98.5t73-81.5L56-792l56-56 736 736-56 56ZM222-624q-29 26-53 57t-53 67q50 101 143.5 160.5T480-280q20 0 39-2.5t39-5.5l-36-38q-11 3-21 4.5t-21 1.5q-75 0-127.5-52.5T300-500q0-11 1.5-21t4.5-21l-84-82Zm319 93Zm-151 75Z" />
-											</svg>
-										</span>
-										
-										<span id="notVisibleConfirmPassword" class="hidden" style="cursor: pointer; width: fit-content;">
-											<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="18px" fill="#9ca3af">
-												<path d="M480-320q75 0 127.5-52.5T660-500q0-75-52.5-127.5T480-680q-75 0-127.5 52.5T300-500q0 75 52.5 127.5T480-320Zm0-72q-45 0-76.5-31.5T372-500q0-45 31.5-76.5T480-608q45 0 76.5 31.5T588-500q0 45-31.5 76.5T480-392Zm0 192q-146 0-266-81.5T40-500q54-137 174-218.5T480-800q146 0 266 81.5T920-500q-54 137-174 218.5T480-200Zm0-300Zm0 220q113 0 207.5-59.5T832-500q-50-101-144.5-160.5T480-720q-113 0-207.5 59.5T128-500q50 101 144.5 160.5T480-280Z" />
-											</svg>
-										</span>
-									</span>
-								</div>
-								<small id="passwordError" class="text-danger pt-2" style="display: none;"></small>
-							</div>
-							
-							<div class="form-group">
-								<label class="p-text" for="confirmPassword">Confirm Password</label>
-								<div class="input-group form-control">
-									<input type="password" class="w-[93%] placeholder:text-gray-400" id="confirmPassword" name="confirmPassword" placeholder="Confirm password" required />
-									<span id="toggleConfirmPassword">
-										<span id="visibleConfirmIcon" style="cursor: pointer; width: fit-content;">
-											<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="18px" fill="#9ca3af">
-												<path d="m644-428-58-58q9-47-27-88t-93-32l-58-58q17-8 34.5-12t37.5-4q75 0 127.5 52.5T660-500q0 20-4 37.5T644-428Zm128 126-58-56q38-29 67.5-63.5T832-500q-50-101-143.5-160.5T480-720q-29 0-57 4t-55 12l-62-62q41-17 84-25.5t90-8.5q151 0 269 83.5T920-500q-23 59-60.5 109.5T772-302Zm20 246L624-222q-35 11-70.5 16.5T480-200q-151 0-269-83.5T40-500q21-53 53-98.5t73-81.5L56-792l56-56 736 736-56 56ZM222-624q-29 26-53 57t-53 67q50 101 143.5 160.5T480-280q20 0 39-2.5t39-5.5l-36-38q-11 3-21 4.5t-21 1.5q-75 0-127.5-52.5T300-500q0-11 1.5-21t4.5-21l-84-82Zm319 93Zm-151 75Z" />
-											</svg>
-										</span>
-										<span id="notVisibleConfirmIcon" class="hidden" style="cursor: pointer; width: fit-content;">
-											<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="18px" fill="#9ca3af">
-												<path d="M480-320q75 0 127.5-52.5T660-500q0-75-52.5-127.5T480-680q-75 0-127.5 52.5T300-500q0 75 52.5 127.5T480-320Zm0-72q-45 0-76.5-31.5T372-500q0-45 31.5-76.5T480-608q45 0 76.5 31.5T588-500q0 45-31.5 76.5T480-392Zm0 192q-146 0-266-81.5T40-500q54-137 174-218.5T480-800q146 0 266 81.5T920-500q-54 137-174 218.5T480-200Zm0-300Zm0 220q113 0 207.5-59.5T832-500q-50-101-144.5-160.5T480-720q-113 0-207.5 59.5T128-500q50 101 144.5 160.5T480-280Z" />
-											</svg>
-										</span>
-									</span>
-								</div>
-								<small id="confirmPasswordError" class="text-danger pt-2" style="display: none;"></small>
-							</div>
-							
-							<button type="submit" class="bg-black w-full text-white rounded-[.6rem] p-2 h-10">
-								<span class="buttonText">Submit</span>								
-								<svg class="buttonLoader hidden animate-spin h-5 w-5 text-gray-600 inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-									<circle class="opacity-25" cx="12" cy="12" r="10" stroke="white" stroke-width="4"></circle>
-									<path class="opacity-75" fill="white" d="M4 12a8 8 0 018-8v8z"></path>
-								</svg>
-							</button>
-						</form>
-					</div>
+			<div class="logo w-full flex justify-between items-center" style="padding: 0% !important;">
+				<h1 class=" text-3xl font-medium h-fit">Admin Panel</h1>
+				<% if (doMigration) { %>
+				<button type="button" id="runMigrationBtn" class="flex items-center border p-2 rounded-md">
+					Run Migration
+				</button>
+				<% } %>
+				<!-- Toggle Buttons -->
+				<div class="flex self-start p-1 my-2">
+					<button onclick="showTab('table')" id="tableTabBtn" class=" text-gray-800 px-4 py-2 rounded-lg font-medium">User Table</button>
+					<!-- <div class="border border-gray-600"></div> -->
+					<button onclick="showTab('form')" id="formTabBtn" class=" text-white px-4 py-2 rounded-lg font-medium">Change Email/Token</button>
 				</div>
+			</div>
+			
+			<div id="usersTab" class="tab container">				
+				<!-- Form View -->
+				<%- include("partials/adminPanel/adminEmailChange") %>
 				
 				<!-- Table View -->
-				<div id="tableTab" class="tab-view">
-					<% if (users.length > 0) { %>
-					<table class=" w-full text-left border-collapse">
-						<thead class="font-thin">
-							<tr class="text-gray-500 font-normal">
-								<!-- <td class="p-4 text-center">Sno.</td> -->
-								<td class="p-4 text-center">User Name</td>
-								<td class="p-4 text-center">Email</td>
-								<td class="p-4 text-center">WABA</td>
-								<td class="p-4 text-center">Status</td>
-								<td class="p-4 text-center">Actions</td>
-								<td class="p-4 text-center">Delete</td>
-							</tr>
-						</thead>
-						<tbody>
-							<%# console.log(access?.settings?.userManagement?.editPermission) %>
-							<% users.forEach((user, index) => { %>
-							<tr class="text-gray-900">
-								<!-- <td class="p-4 text-center"><%= index + 1 %></td> -->
-								<td class="p-4 text-center"><%= user.name %></td>
-								<td class="p-4 text-center"><%= user.email %></td>
-								<td class="p-4 text-center "><%= user.WABA_ID %></td>
-								<td class="p-4 text-center">
-									<div class="flex justify-center items-center">
-										<% const isActive = !user.blocked; %>
-										<div class="relative inline-flex items-center cursor-pointer select-none transition duration-300 ease-in-out" data-user-id="<%= user.unique_id %>" data-status="<%= isActive ? 'active' : 'inactive' %>" onclick="toggleUserStatus(this)">
-											<div class="w-12 h-6 rounded-full transition-colors duration-300 ease-in-out bg-toggle <%= isActive ? 'bg-green-500' : 'bg-gray-300' %>"></div>
-											<div class="absolute left-0 top-0 w-6 h-6 bg-white border rounded-full shadow transform transition-transform duration-300 ease-in-out knob <%= isActive ? 'translate-x-6' : 'translate-x-0' %>"></div>
-										</div>
-										<span class="ml-3 text-sm font-medium status-label <%= isActive ? 'text-green-600' : 'text-gray-500' %>">
-											<%= isActive ? 'Active' : 'In-Active' %>
-										</span>
-									</div>
-								</td>
-								<td class="text-center">
-									<button type="button" class="text-gray-500 border px-4 py-2 rounded-2xl font-bold hover:text-gray-900 focus:outline-none <%= user.campaign ? "hover:cursor-not-allowed" : '' %>" onclick="resetAccount(event,'<%= user.unique_id %>')" title="<%= user.campaign ? 'Cannot reset account because broadcast is already sent ' : '' %>" <%= user.campaign ? 'disabled ' : '' %>>
-										Reset
-									</button>
-								</td>
-								<td class="text-center">
-									<button type="button" class="text-gray-500 border px-4 py-2 rounded-2xl font-bold hover:text-gray-900 focus:outline-none " onclick="deleteAccountEmail(event,'<%= user.unique_id %>')">
-										Delete
-									</button>
-								</td>
-							</tr>
-							<% }) %>
-						</tbody>
-					</table>
-					<% } else { %>
-					<!-- Empty state -->
-					<div class="flex flex-col items-center justify-center min-h-[400px]  rounded-lg mt-4">
-						<div class="text-center">
-							<img src="https://img.freepik.com/free-vector/hands-holding-tablet-with-forefinger-clicking-start-button-new-application-launch-flat-illustration_74855-20595.jpg?ga=GA1.1.131490893.1732525963&semt=ais_hybrid" alt="No contacts" class="w-48 h-48 mx-auto mb-4">
-							<h3 class="text-xl font-semibold text-gray-900 mb-2">No members yet</h3>
-						</div>
-					</div>
-					<% } %>
-				</div>
+				<%- include("partials/adminPanel/adminTable") %>
 			</div>
 		</div>
 	</div>
 	<!-- Modal Structure -->
-	<div class="fixed inset-0 flex items-center justify-center transition-opacity duration-300 ease-out opacity-0 hidden z-50" id="addNumberModal">
-		<!-- Background overlay with blur -->
-		<div class="absolute inset-0 bg-gray-900 bg-opacity-50  transition-opacity duration-300 ease-out" onclick="closeAddNumber(event)"></div>
-		
-		<!-- Modal content -->
-		<div id="modalContent" class="relative bg-white rounded-lg shadow-lg w-96 p-6 transition-opacity duration-300 ease-out opacity-100 scale-100">
-			<!-- Close Button -->
-			<button onclick="closeAddNumber(event)" class="absolute top-1 right-2 text-gray-500 hover:text-gray-700 text-3xl p-3">&times;</button>
-			
-			<!-- Verify Number Form -->
-			<div id="verifyNumberForm" class="hidden">
-				<h2 class="text-xl font-semibold mb-6">Verify OTP</h2>
-				<div id="verifyNewNumberError" class="mb-4 p-3 hidden bg-red-100 text-red-700 rounded"></div>
-				<form onsubmit="verifyDeleteOTP(event)">
-					<input type="hidden" name="userId" id="otpUserId" />
-					<div class="mb-4">
-						<label class="block text-[#959595] mb-2">Enter the 6-digit OTP sent to the user</label>
-						<div class="flex gap-2 justify-center">
-							<% for(let i = 0; i < 6; i++) { %>
-							<input type="text" class="otp-verify-delete otp-input border text-center w-10 h-10 text-xl rounded" maxlength="1" required />
-							<% } %>
-						</div>
-					</div>
-					<!-- Verify Button -->
-					<button type="submit" id="verifyDeleteButton" class="bg-gray-400 flex justify-center items-center text-white px-4 py-2 rounded w-full cursor-not-allowed relative" disabled>
-						<span class="buttonText">Verify & Delete</span>
-						<div class="buttonLoader hidden loader border-t-white border-4 border-black rounded-full w-6 h-6 animate-spin"></div>
-					</button>
-				</form>
-			</div>
-			
-			<div id="verifyEmailForm" class="hidden">
-				<h2 class="text-xl font-semibold mb-6">Verify OTP</h2>
-				<div id="verifyEmailError" class="mb-4 p-3 hidden bg-red-100 text-red-700 rounded"></div>
-				<form onsubmit="verifyEmailOTP(event)">
-					<div class="mb-4">
-						<label class="block text-[#959595] mb-2">Enter the 6-digit OTP sent to the user</label>
-						<div class="flex gap-2 justify-center">
-							<% for(let i = 0; i < 6; i++) { %>
-							<input type="text" class="otp-verify-email otp-input border text-center w-10 h-10 text-xl rounded" maxlength="1" required />
-							<% } %>
-						</div>
-					</div>
-					<!-- Verify Button -->
-					<button type="submit" id="verifyEmailButton" class="bg-gray-400 flex justify-center items-center text-white px-4 py-2 rounded w-full cursor-not-allowed relative" disabled>
-						<span class="buttonText">Verify & Change</span>
-						<div class="buttonLoader hidden loader border-t-white border-4 border-black rounded-full w-6 h-6 animate-spin"></div>
-					</button>
-				</form>
-			</div>
-		</div>
-	</div>
+	<%- include("partials/adminPanel/adminOTPModal") %>
 	<script src="/toast.js"></script>
 	<script src="/menu.js"></script>
 	<script src="/Dashboard/js/adminPanel.js"></script>

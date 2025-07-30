@@ -13,7 +13,6 @@ import {
 import { isString } from "../../middleWares/sanitiseInput.js";
 import { countries, help } from "../../utils/dropDown.js";
 import chatsModel from "../../models/chats.model.js";
-import runMigration, { doMigration } from "../../utils/migration.js";  
 
 dotenv.config();
 
@@ -21,19 +20,35 @@ export const getDashboard = async (req, res) => {
 	try {
 		const id = req.session?.user?.id || req.session?.addedUser?.owner;
 
-		let user = await User.findOne({ unique_id: id });
+		let user = await User.findOne({ unique_id: id, deleted: false });
 
-		const dashboardData = await fetchDashboardData(id, req.query);
+		const addedUser = req.session?.addedUser;
+
+		let selectedNumber;
+		if (addedUser) {
+			selectedNumber = addedUser?.selectedFBNumber?.phone_number_id;
+		} else {
+			selectedNumber = user.FB_PHONE_NUMBERS.find(
+				(n) => n.selected,
+			).phone_number_id;
+		}
+
+		const dashboardData = await fetchDashboardData(
+			id,
+			req.query,
+			selectedNumber,
+		);
 
 		const permissions = req.session?.addedUser?.permissions;
 		const renderData = {
 			help,
 			countries,
+			addedUser,
 			user,
 			config: process.env.CONFIG_ID,
 			app: process.env.FB_APP_ID,
 			graph: process.env.FB_GRAPH_VERSION,
-			status: user.WhatsAppConnectStatus,
+			status: user?.WhatsAppConnectStatus,
 			secret: process.env.FB_APP_SECRET,
 			totalMessages: dashboardData.campaignStats.totalMessages,
 			messagesSent: dashboardData.campaignStats.messagesSent,
@@ -51,7 +66,6 @@ export const getDashboard = async (req, res) => {
 			name: req.session?.addedUser?.name || req.session?.user?.name,
 			color: req.session?.addedUser?.color || req.session?.user?.color,
 			admin: req.session?.user?.id === "db2426e80f",
-			doMigration: doMigration(),
 		};
 
 		if (permissions) {
@@ -68,7 +82,7 @@ export const getDashboard = async (req, res) => {
 			const access = await User.findOne({
 				unique_id: req.session?.user?.id,
 			});
-			renderData.access = access.access;
+			renderData.access = access?.access;
 			res.render("Dashboard/dashboard", renderData);
 		}
 	} catch (error) {
@@ -693,7 +707,7 @@ const getPhoneNumbers = async (user) => {
 	}
 };
 
-const fetchDashboardData = async (userId, query) => {
+const fetchDashboardData = async (userId, query, FB_PHONE_ID) => {
 	const { startDate, endDate } = query;
 	try {
 		// Convert startDate and endDate to timestamps
@@ -703,7 +717,7 @@ const fetchDashboardData = async (userId, query) => {
 			: null;
 
 		// Build the filter for the query
-		const filter = { useradmin: userId, deleted: false };
+		const filter = { useradmin: userId, deleted: false, FB_PHONE_ID };
 
 		if (startTimestamp && endTimestamp) {
 			filter.createdAt = { $gte: startTimestamp, $lte: endTimestamp };
@@ -864,13 +878,3 @@ const handleFacebookError = (response, data) => {
 		}`;
 	}
 };
-
-export async function migrate(req, res) {
-	try {
-		await runMigration();
-		res.json({ success: true, message: "Migration successful" });
-	} catch (err) {
-		console.error(err);
-		res.status(500).json({ success: false, message: "Migration failed" });
-	}
-}

@@ -1,7 +1,7 @@
 import path from "path";
 import bcrypt from "bcrypt";
 import mongoose from "mongoose";
-import { isString } from "../../middleWares/sanitiseInput.js";
+import { isObject, isString } from "../../middleWares/sanitiseInput.js";
 import {
 	generateUniqueId,
 	validatePassword,
@@ -17,10 +17,14 @@ import {
 	size,
 	industryCategory,
 	roles,
+	help,
+	verticalCategories,
 } from "../../utils/dropDown.js";
 import sendAddUserMail from "../../services/OTP/addingUserService.js";
 import dotenv from "dotenv";
 import { getRandomColor } from "../User/userFunctions.js";
+import { changeNumberDP } from "../../services/facebook/fetch.functions.facebook.js";
+import { uploadMediaResumable } from "../Templates/template.functions.controller.js";
 
 dotenv.config();
 
@@ -31,12 +35,13 @@ export const home = async (req, res) => {
 			const access = await Permissions.findOne({
 				unique_id: permissions,
 			});
-			if (access.settings.type) {
+			if (access?.settings.type) {
 				res.render("Settings/home", {
 					access,
 					photo: req.session?.addedUser?.photo,
 					name: req.session?.addedUser?.name,
 					color: req.session?.user?.color,
+					help,
 				});
 			} else {
 				res.render("errors/notAllowed");
@@ -50,6 +55,7 @@ export const home = async (req, res) => {
 				photo: req.session?.user?.photo,
 				name: req.session?.user?.name,
 				color: req.session?.user?.color,
+				help,
 			});
 		}
 	} catch (err) {
@@ -64,7 +70,7 @@ export const profile = async (req, res) => {
 		let user;
 		if (req.session?.user?.id) {
 			id = req.session?.user?.id;
-			user = await User.findOne({ unique_id: id });
+			user = await User.findOne({ unique_id: id, deleted: false });
 			if (!user) {
 				return res.status(404).json({ message: "User not found" });
 			}
@@ -75,6 +81,7 @@ export const profile = async (req, res) => {
 				photo: req.session?.user?.photo,
 				name: req.session?.user?.name,
 				color: req.session?.user?.color,
+				help,
 			});
 		} else {
 			id = req.session?.addedUser?.id;
@@ -92,6 +99,7 @@ export const profile = async (req, res) => {
 				photo: req.session.addedUser?.photo,
 				name: req.session.addedUser?.name,
 				color: req.session.addedUser?.color,
+				help,
 			});
 		}
 	} catch (error) {
@@ -373,28 +381,31 @@ export const accountDetails = async (req, res) => {
 		const id = req.session?.user?.id || req.session?.addedUser?.owner;
 		let user;
 
-		user = await User.findOne({ unique_id: id });
+		user = await User.findOne({ unique_id: id, deleted: false });
 
 		if (!user) {
 			return res.status(404).json({ message: "User not found" });
 		}
+
+		const numbersPhoto =
+			req.session?.addedUser?.selectedFBNumber?.dp ||
+			user?.FB_PHONE_NUMBERS.find((n) => n.selected)?.dp;
 
 		const permissions = req.session?.addedUser?.permissions;
 		if (permissions) {
 			const access = await Permissions.findOne({
 				unique_id: permissions,
 			});
-			if (access.settings.type) {
+			if (access?.settings?.whatsAppAccountDetails) {
 				res.render("Settings/accountDetails", {
 					access,
 					user,
-					countries,
-					industryCategory,
-					size,
-					roles,
 					photo: req.session.addedUser?.photo,
 					name: req.session.addedUser.name,
 					color: req.session.addedUser.color,
+					help,
+					numbersPhoto,
+					verticalCategories,
 				});
 			} else {
 				res.render("errors/notAllowed");
@@ -406,13 +417,12 @@ export const accountDetails = async (req, res) => {
 			res.render("Settings/accountDetails", {
 				access: access.access,
 				user,
-				countries,
-				industryCategory,
-				size,
-				roles,
 				photo: req.session.user?.photo,
 				name: req.session.user.name,
 				color: req.session.user.color,
+				help,
+				numbersPhoto,
+				verticalCategories,
 			});
 		}
 	} catch (error) {
@@ -426,59 +436,107 @@ export const updateAccountDetails = async (req, res, next) => {
 		const {
 			name: companyName,
 			description,
-			state,
-			country,
-			companySize,
-			industry,
-			jobRole,
 			website,
+			email,
+			address,
+			about,
+			industry,
 		} = req.body;
-		// console.log(req.body);
 
 		if (
 			!isString(
 				companyName,
 				description,
-				state,
-				country,
-				companySize,
-				industry,
-				jobRole,
 				website,
+				email,
+				address,
+				about,
+				industry,
 			)
 		)
 			return next();
 
-		const updatedUser = await User.findOneAndUpdate(
-			{
-				unique_id:
-					req.session?.user?.id || req.session?.addedUser?.owner,
-			},
-			{
-				companyName,
-				companyDescription: description,
-				state,
-				country,
-				companySize,
-				industry,
-				jobRole,
-				website,
-			},
-			{ new: true },
-		);
+		const userId = req.session?.user?.id || req.session?.addedUser?.owner;
+		const updatedUser = await User.findOne({
+			unique_id: userId,
+			deleted: false,
+		});
 
 		if (!updatedUser) {
-			return res
-				.status(404)
-				.json({ success: false, message: "User not found" });
+			return res.status(404).json({
+				success: false,
+				message: "User not found",
+			});
 		}
 
+		const selectedNumberObj =
+			req.session?.addedUser?.selectedFBNumber ||
+			updatedUser.FB_PHONE_NUMBERS.find((i) => i.selected);
+
+		if (!selectedNumberObj) {
+			return res.status(400).json({
+				success: false,
+				message: "No selected phone number found",
+			});
+		}
+
+		const phoneNumberId = selectedNumberObj.phone_number_id;
+		const accessToken = updatedUser.FB_ACCESS_TOKEN;
+		let profilePictureHandle = null;
+
+		if (req.file?.path) {
+			const absolutePath = path.resolve(req.file.path);
+			profilePictureHandle = await uploadMediaResumable(
+				accessToken,
+				process.env.FB_APP_ID,
+				absolutePath,
+			);
+
+			// Save profile pic locally (for UI/reference)
+			selectedNumberObj.dp = path.join(
+				"uploads",
+				userId,
+				"phoneNumbers",
+				req.file.filename,
+			);
+		}
+
+		// Update WhatsApp Business Profile using Meta API
+		await changeNumberDP({
+			phoneNumberId,
+			token: accessToken,
+			about,
+			address,
+			description,
+			email,
+			vertical: industry,
+			websites: website ? [website] : undefined,
+			profilePictureHandle,
+		});
+
+		// Update fields in your own DB (only if not empty)
+		const updateFields = {
+			companyName,
+			companyDescription: description,
+			website,
+			displayAddress: address,
+			industry,
+			companyDisplayEmail: email,
+			displayAbout: about,
+		};
+
+		for (const [key, value] of Object.entries(updateFields)) {
+			if (typeof value === "string" && value.trim()) {
+				updatedUser[key] = value.trim();
+			}
+		}
+
+		await updatedUser.save();
+
 		await ActivityLogs.create({
-			useradmin: req.session?.user?.id || req.session?.addedUser?.owner,
+			useradmin: userId,
 			unique_id: generateUniqueId(),
-			name: req.session?.user?.name
-				? req.session?.user?.name
-				: req.session.addedUser.name,
+			name: req.session?.user?.name || req.session?.addedUser?.name,
 			actions: "Update",
 			details: `Updated their account details`,
 		});
@@ -486,13 +544,12 @@ export const updateAccountDetails = async (req, res, next) => {
 		res.status(200).json({
 			success: true,
 			message: "Account details updated successfully",
-			data: updatedUser,
 		});
 	} catch (error) {
 		console.error("Error updating account details:", error);
 		res.status(500).json({
 			success: false,
-			message: "Server error: " + error.message,
+			message: "Server error: " + error?.message || error,
 		});
 	}
 };
@@ -560,6 +617,7 @@ export const getActivityLogs = async (req, res) => {
 					photo: req.session?.addedUser?.photo,
 					name: req.session?.addedUser?.name,
 					color: req.session?.addedUser?.color,
+					help,
 				});
 			} else {
 				res.render("errors/notAllowed");
@@ -574,6 +632,7 @@ export const getActivityLogs = async (req, res) => {
 				photo: req.session.user?.photo,
 				name: req.session.user?.name,
 				color: req.session.user?.color,
+				help,
 			});
 		}
 	} catch (err) {
@@ -707,6 +766,10 @@ export const getUserManagement = async (req, res) => {
 	try {
 		const id = req.session?.user?.id || req.session?.addedUser?.owner;
 
+		const exist = await User.findOne({ unique_id: id, deleted: false });
+
+		const whatsAppNumbers = exist.FB_PHONE_NUMBERS;
+
 		let users = await AddedUser.find({ useradmin: id, deleted: false });
 		const permissions = await Permissions.find({
 			useradmin: id,
@@ -727,16 +790,17 @@ export const getUserManagement = async (req, res) => {
 					photo: req.session.addedUser?.photo,
 					name: req.session.addedUser.name,
 					color: req.session.addedUser.color,
+					help,
+					whatsAppNumbers,
 				});
 			} else {
 				res.render("errors/notAllowed");
 			}
 		} else {
-			const access = await User.findOne({ unique_id: id });
-			// console.log(access.access);
-			console.log(
-				access?.access?.settings?.userManagement?.editPermission,
-			);
+			const access = await User.findOne({
+				unique_id: id,
+				deleted: false,
+			});
 			res.render("Settings/userManagement", {
 				access: access.access,
 				users,
@@ -745,6 +809,8 @@ export const getUserManagement = async (req, res) => {
 				photo: req.session.user?.photo,
 				name: req.session.user.name,
 				color: req.session.user.color,
+				help,
+				whatsAppNumbers,
 			});
 		}
 	} catch (error) {
@@ -761,7 +827,7 @@ export const sendUserInvitation = async (req, res, next) => {
 	try {
 		const adminId = req?.session?.user?.id || req.session?.addedUser?.owner;
 
-		let { name, email, roleId, roleName, url } = req.body;
+		let { name, email, roleId, roleName, url, selectedFBNumber } = req.body;
 
 		if (!isString(name, email, roleId, roleName)) {
 			return next();
@@ -799,24 +865,7 @@ export const sendUserInvitation = async (req, res, next) => {
 				.json({ success: false, message: "Email already in use" });
 		}
 
-		exists = await User.findOne({ unique_id: adminId });
-
-		const FB_PHONE_ID = exists?.FB_PHONE_NUMBERS?.find(
-			(s) => s.selected,
-		)?.phone_number_id;
-
-		if (!FB_PHONE_ID) {
-			return res
-				.status(409)
-				.json({
-					success: false,
-					message:
-						"Facebook Phone Number not selected or doesn't exist",
-				});
-		}
-
 		const newUser = new AddedUser({
-			FB_PHONE_ID,
 			unique_id: generateUniqueId(),
 			name,
 			email,
@@ -824,6 +873,7 @@ export const sendUserInvitation = async (req, res, next) => {
 			roleName,
 			useradmin: adminId,
 			color: getRandomColor(),
+			selectedFBNumber,
 		});
 		console.log("user added");
 
@@ -886,6 +936,7 @@ export const getPermissions = async (req, res) => {
 					photo: req.session?.addedUser?.photo,
 					name: req.session?.addedUser?.name,
 					color: req.session?.addedUser?.color,
+					help,
 				});
 			} else {
 				res.render("errors/notAllowed");
@@ -899,6 +950,7 @@ export const getPermissions = async (req, res) => {
 				photo: req.session?.user?.photo,
 				name: req.session?.user.name,
 				color: req.session?.user.color,
+				help,
 			});
 		}
 	} catch (err) {
@@ -1084,10 +1136,10 @@ export const createAddedUserPassword = async (req, res, next) => {
 };
 
 export const updateUserManagement = async (req, res) => {
-	const { userId, action, status, newRoleId, newRoleName } = req.body;
+	let { userId, action, status, newRoleId, newRoleName, selectedFBNumber } =
+		req.body;
 
 	try {
-		// 0) Make sure mongoose is actually connected
 		if (mongoose.connection.readyState !== 1) {
 			console.error(
 				"🚨 Mongoose not connected:",
@@ -1098,7 +1150,6 @@ export const updateUserManagement = async (req, res) => {
 				.json({ success: false, message: "DB not ready" });
 		}
 
-		// 1) Grab the raw sessions collection
 		const sessionColl = mongoose.connection.db.collection("sessions");
 		console.log("👍 sessions collection name:", sessionColl.collectionName);
 
@@ -1121,16 +1172,16 @@ export const updateUserManagement = async (req, res) => {
 					.json({ success: true, message: "Status updated" });
 
 			case "updateRole":
-				// DB update
-
-				console.log(newRoleName, newRoleId);
 				user = await AddedUser.findOneAndUpdate(
 					{ unique_id: userId, deleted: false },
-					{ roleName: newRoleName, roleId: newRoleId },
+					{
+						roleName: newRoleName,
+						roleId: newRoleId,
+						selectedFBNumber,
+					},
 					{ new: true },
 				);
 				if (!user) {
-					// console.warn("⚠️ updateRole: no user found for", userId);
 					return res
 						.status(404)
 						.json({ success: false, message: "User not found" });
@@ -1148,7 +1199,6 @@ export const updateUserManagement = async (req, res) => {
 
 				const bulkOps = [];
 				allSessions.forEach((doc) => {
-					// console.log("→ checking session _id=", doc._id);
 					let sess;
 					try {
 						sess = JSON.parse(doc.session);
@@ -1161,10 +1211,6 @@ export const updateUserManagement = async (req, res) => {
 					}
 
 					if (sess.addedUser?.id === userId) {
-						// console.log(
-						// 	`   ✔ match! old perms=`,
-						// 	sess.addedUser.permissions,
-						// );
 						sess.addedUser.permissions = newRoleId;
 						bulkOps.push({
 							updateOne: {

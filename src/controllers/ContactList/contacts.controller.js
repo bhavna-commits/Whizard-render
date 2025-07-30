@@ -15,7 +15,7 @@ import {
 } from "../../utils/otpGenerator.js";
 import { agenda } from "../../config/db.js";
 import { sendMessages, sendTestMessage } from "./campaign.functions.js";
-import { countries } from "../../utils/dropDown.js";
+import { countries, help } from "../../utils/dropDown.js";
 import {
 	isNumber,
 	isString,
@@ -24,7 +24,6 @@ import {
 } from "../../middleWares/sanitiseInput.js";
 
 import { sendCampaignScheduledEmail } from "../../services/OTP/reportsEmail.js";
-import ContactsTemp from "../../models/contactsTemp.model.js";
 import chatsUsersModel from "../../models/chatsUsers.model.js";
 
 export const __filename = fileURLToPath(import.meta.url);
@@ -110,39 +109,10 @@ export const getContacts = async (req, res, next) => {
 
 		if (!isNumber(page)) return next();
 		if (!isString(id)) return next();
-		// Get filters from the request body
-		const filters = req.body.filters || [];
 
 		// Start with the basic match stage
 		// Create AND conditions with static match too
 		const andConditions = [{ contactId: id }, { subscribe: 1 }];
-
-		filters.forEach((filter) => {
-			if (filter.field === "subscribe_date" && filter.value) {
-				const [startDate, endDate] = filter.value.split(" to ");
-				andConditions.push({
-					subscribe_date: {
-						$gte: new Date(startDate).getTime(),
-						$lte: new Date(endDate).getTime(),
-					},
-				});
-			} else {
-				if (filter.condition === "has") {
-					andConditions.push({
-						[filter.field]: {
-							$regex: filter.value,
-							$options: "imsx",
-						},
-					});
-				} else if (filter.condition === "does not") {
-					andConditions.push({
-						[filter.field]: {
-							$not: { $regex: filter.value, $options: "imsx" },
-						},
-					});
-				}
-			}
-		});
 
 		// Final match stage: ONLY $and
 		const matchStage = { $and: andConditions };
@@ -168,25 +138,108 @@ export const getContacts = async (req, res, next) => {
 		const name = await ContactList.findOne({ contactId: id });
 		const totalPages = Math.ceil(totalContacts / limit);
 
+		let access;
+		const isAddedUser = req.session?.addedUser;
+		const isMainUser = req.session?.user;
+
+		const renderData = {
+			listName: name.contalistName,
+			contacts: contactLists,
+			countries,
+			page,
+			totalPages,
+			tags: [],
+			id,
+			help,
+		};
+
+		if (isAddedUser?.permissions) {
+			access = await Permissions.findOne({
+				unique_id: isAddedUser.permissions,
+			});
+
+			if (access?.contactList) {
+				return res.render("Contact-List/contactList-overview", {
+					...renderData,
+					access,
+					photo: isAddedUser.photo,
+					name: isAddedUser.name,
+					color: isAddedUser.color,
+					whatsAppStatus: isAddedUser.whatsAppStatus,
+				});
+			}
+
+			return res.render("errors/notAllowed");
+		}
+
+		access = await User.findOne({ unique_id: isMainUser?.id });
+
+		res.render("Contact-List/contactList-overview", {
+			...renderData,
+			access: access.access,
+			photo: isMainUser?.photo,
+			name: isMainUser?.name,
+			color: isMainUser?.color,
+			whatsAppStatus: isMainUser?.whatsAppStatus,
+		});
+	} catch (error) {
+		console.error(error);
+		res.render("errors/serverError");
+	}
+};
+
+export const getMoreContacts = async (req, res, next) => {
+	try {
+		const id = req.params.id;
+		if (!id) {
+			return res.status(401).json({
+				success: false,
+				message: "No id found",
+			});
+		}
+		const page = parseInt(req.query.page) || 1;
+		const limit = 6;
+		const skip = (page - 1) * limit;
+
+		if (!isNumber(page)) return next();
+		if (!isString(id)) return next();
+
+		const andConditions = [{ contactId: id }, { subscribe: 1 }];
+
+		const matchStage = { $and: andConditions };
+
+		const aggregation = [
+			{ $match: matchStage },
+			{
+				$facet: {
+					paginatedResults: [{ $skip: skip }, { $limit: limit }],
+					totalContacts: [{ $count: "totalContacts" }],
+				},
+			},
+		];
+
+		const result = await Contacts.aggregate(aggregation);
+		const contactLists = result[0].paginatedResults;
+		const totalContacts =
+			result[0].totalContacts.length > 0
+				? result[0].totalContacts[0].totalContacts
+				: 0;
+
+		const totalPages = Math.ceil(totalContacts / limit);
+
 		const permissions = req.session?.addedUser?.permissions;
 		if (permissions) {
 			const access = await Permissions.findOne({
 				unique_id: permissions,
 			});
 			if (access.contactList) {
-				res.render("Contact-List/contactList-overview", {
+				res.render("Contact-List/partials/overView/overViewTableRows", {
 					access,
-					listName: name.contalistName,
 					contacts: contactLists,
-					countries,
 					page,
 					totalPages,
 					tags: [],
 					id,
-					photo: req.session?.addedUser?.photo,
-					name: req.session?.addedUser?.name,
-					color: req.session?.addedUser?.color,
-					whatsAppStatus: req.session?.addedUser?.whatsAppStatus,
 				});
 			} else {
 				res.render("errors/notAllowed");
@@ -195,19 +248,13 @@ export const getContacts = async (req, res, next) => {
 			const access = await User.findOne({
 				unique_id: req.session?.user?.id,
 			});
-			res.render("Contact-List/contactList-overview", {
+			res.render("Contact-List/partials/overView/overViewTableRows", {
 				access: access.access,
-				listName: name.contalistName,
 				contacts: contactLists,
-				countries,
 				page,
 				totalPages,
 				tags: [],
 				id,
-				photo: req.session?.user?.photo,
-				name: req.session?.user.name,
-				color: req.session?.user.color,
-				whatsAppStatus: req.session?.user?.whatsAppStatus,
 			});
 		}
 	} catch (error) {
@@ -264,10 +311,10 @@ export const editContact = async (req, res, next) => {
 		const addedUserId = req.session?.addedUser?.id;
 		const agentToAssign = addedUserId || userId;
 
-		const user = await User.findOne({ unique_id: userId });
-		const keyId = user?.FB_PHONE_NUMBERS?.find(
-			(d) => d.selected,
-		)?.phone_number_id;
+		const user = await User.findOne({ unique_id: userId, deleted: false });
+		const keyId =
+			req.session?.addedUser?.selectedFBNumber?.phone_number_id ||
+			user?.FB_PHONE_NUMBERS?.find((d) => d.selected)?.phone_number_id;
 
 		const updateQuery = {
 			useradmin: userId,
@@ -431,7 +478,7 @@ export const createContact = async (req, res, next) => {
 
 		const userId = req.session?.user?.id || req.session?.addedUser?.owner;
 		const addedUserId = req.session?.addedUser?.id;
-		const user = await User.findOne({ unique_id: userId });
+		const user = await User.findOne({ unique_id: userId, deleted: false });
 
 		if (!user) {
 			return res.status(404).json({
@@ -440,9 +487,9 @@ export const createContact = async (req, res, next) => {
 			});
 		}
 
-		const keyId = user?.FB_PHONE_NUMBERS?.find(
-			(d) => d.selected,
-		)?.phone_number_id;
+		const keyId =
+			req.session?.addedUser?.selectedFBNumber?.phone_number_id ||
+			user?.FB_PHONE_NUMBERS?.find((d) => d.selected)?.phone_number_id;
 
 		if (!keyId) {
 			return res.status(400).json({
@@ -519,7 +566,7 @@ export const createContact = async (req, res, next) => {
 			await ChatsUsers.updateOne(updateQuery, updateData, {
 				upsert: true,
 			});
-		}		
+		}
 
 		res.status(201).json({ success: true, contact: newContact });
 	} catch (error) {
@@ -533,8 +580,15 @@ export const createContact = async (req, res, next) => {
 
 export const createCampaign = async (req, res, next) => {
 	try {
-		let { templateId, contactListId, variables, schedule, name, test, url } =
-			req.body;
+		let {
+			templateId,
+			contactListId,
+			variables,
+			schedule,
+			name,
+			test,
+			url,
+		} = req.body;
 
 		if (!templateId || !contactListId) {
 			return res.status(400).json({
@@ -556,11 +610,12 @@ export const createCampaign = async (req, res, next) => {
 
 		const addedUserId = req.session?.addedUser?.id;
 
-		let user = await User.findOne({ unique_id: id });
+		let user = await User.findOne({ unique_id: id, deleted: false });
 
-		const phone_number = user.FB_PHONE_NUMBERS.find(
-			(n) => n.selected == true,
-		).phone_number_id;
+		const phone_number =
+			req.session?.addedUser?.selectedFBNumber?.phone_number_id ||
+			user.FB_PHONE_NUMBERS.find((n) => n.selected == true)
+				.phone_number_id;
 
 		if (!phone_number) {
 			throw new Error("No phone number selected.");
@@ -580,7 +635,7 @@ export const createCampaign = async (req, res, next) => {
 					phone_number,
 					addedUserId,
 					url,
-					req.file?.filename
+					req.file?.filename,
 				);
 				await ActivityLogs.create({
 					useradmin: id,
@@ -633,7 +688,7 @@ export const createCampaign = async (req, res, next) => {
 				phone_number,
 				addedUserId,
 				url,
-				fileName: req.file?.filename,
+				fileName: req?.file?.filename,
 			});
 
 			await ActivityLogs.create({
@@ -661,7 +716,7 @@ export const createCampaign = async (req, res, next) => {
 				phone_number,
 				addedUserId,
 				url,
-				fileName: req.file?.filename
+				fileName: req.file?.filename,
 			});
 
 			await sendCampaignScheduledEmail(
@@ -751,133 +806,6 @@ export const createCampaign = async (req, res, next) => {
 	}
 };
 
-export const generateTableAndCheckFields = (
-	parsedData,
-	requiredColumns,
-	customFields,
-) => {
-	const actualColumns = Object.keys(parsedData[0]);
-	const customFieldNames = customFields?.map((field) => field.clname) || [];
-	const expectedColumns = [...requiredColumns, ...customFieldNames];
-
-	// Initialize error trackers
-	const errors = {
-		missingColumns: requiredColumns.filter(
-			(col) => !actualColumns.includes(col),
-		),
-		invalidColumns: actualColumns.filter(
-			(col) =>
-				!expectedColumns.includes(col) &&
-				col !== "Name" &&
-				col !== "Number",
-		),
-		emptyFields: [],
-		invalidNumbers: [],
-		duplicateNumbers: [],
-	};
-
-	// Track numbers for validation
-	const numbers = new Map();
-	const numberIndexes = new Map();
-
-	// Process data rows
-	parsedData.forEach((row, rowIndex) => {
-		// Check empty fields
-		actualColumns.forEach((col) => {
-			if (!row[col]?.trim()) {
-				errors.emptyFields.push({
-					row: rowIndex + 1,
-					column: col,
-					value: row[col],
-				});
-			}
-		});
-
-		// Number validation
-		const number = row.Number?.trim();
-		if (number) {
-			// Validate number format
-			if (!/^\d{12,}$/.test(number)) {
-				errors.invalidNumbers.push({
-					row: rowIndex + 1,
-					column: "Number",
-					value: number,
-				});
-			}
-
-			// Track duplicates
-			if (numbers.has(number)) {
-				errors.duplicateNumbers.push({
-					row: rowIndex + 1,
-					column: "Number",
-					value: number,
-				});
-				// Mark original occurrence as duplicate
-				const firstRow = numberIndexes.get(number);
-				if (firstRow) {
-					errors.duplicateNumbers.push({
-						row: firstRow,
-						column: "Number",
-						value: number,
-					});
-				}
-			} else {
-				numbers.set(number, true);
-				numberIndexes.set(number, rowIndex + 1);
-			}
-		}
-	});
-
-	// Generate HTML table with error highlighting
-	let tableHtml = "<table class='min-w-full table-auto'><thead><tr>";
-	tableHtml += "<th class='px-4 py-2 border'>#</th>";
-
-	// Generate headers with error highlighting
-	actualColumns.forEach((header) => {
-		const isMissing = errors.missingColumns.includes(header);
-		const isInvalid = errors.invalidColumns.includes(header);
-		const errorClass =
-			isMissing || isInvalid ? "border-red-500 bg-red-50" : "";
-		tableHtml += `<th class='px-4 py-2 border ${errorClass}'>${header}</th>`;
-	});
-	tableHtml += "</tr></thead><tbody>";
-
-	// Generate rows with error highlighting
-	parsedData.forEach((row, rowIndex) => {
-		tableHtml += "<tr>";
-		tableHtml += `<td class='px-4 py-2 border'>${rowIndex + 1}</td>`;
-
-		actualColumns.forEach((col) => {
-			const cellValue = row[col] || "";
-			const isError = [
-				errors.emptyFields.some(
-					(e) => e.row === rowIndex + 1 && e.column === col,
-				),
-				errors.invalidNumbers.some(
-					(e) => e.row === rowIndex + 1 && e.column === col,
-				),
-				errors.duplicateNumbers.some(
-					(e) => e.row === rowIndex + 1 && e.column === col,
-				),
-			].some(Boolean);
-
-			const errorClass = isError ? "border-red-500 bg-red-50" : "";
-			tableHtml += `<td class='px-4 py-2 border ${errorClass}'>${cellValue}</td>`;
-		});
-
-		tableHtml += "</tr>";
-	});
-
-	tableHtml += "</tbody></table>";
-
-	return {
-		tableHtml,
-		...errors,
-		invalidNumbers: errors.invalidNumbers,
-		duplicateNumbers: [...new Set(errors.duplicateNumbers)],
-	};
-};
-
 export const getFilteredContacts = async (req, res, next) => {
 	try {
 		const id = req.params?.id;
@@ -922,18 +850,11 @@ export const getFilteredContacts = async (req, res, next) => {
 
 				if (endDate) {
 					convertedEndDate =
-						toLocalMidnightTs(endDate) + 24 * 60 * 60 * 1000;;
+						toLocalMidnightTs(endDate) + 24 * 60 * 60 * 1000;
 				} else {
 					convertedEndDate = convertedStartDate + 24 * 60 * 60 * 1000;
 				}
 
-				// console.log(
-				// 	"Converted Start Date (local ms):",
-				// 	convertedStartDate,
-				// );
-				// console.log("Converted End Date (local ms):", convertedEndDate);
-
-				// Apply filter for subscribe_date (handle case where endDate may not be provided)
 				matchStage.$and.push({
 					[filter.field]: {
 						$gte: convertedStartDate,
@@ -1067,6 +988,7 @@ export const getCreateCampaign = async (req, res) => {
 				name: req.session?.addedUser?.name,
 				photo: req.session?.addedUser?.photo,
 				color: req.session?.addedUser?.color,
+				help,
 			});
 		} else {
 			res.render("errors/notAllowed");
@@ -1078,6 +1000,7 @@ export const getCreateCampaign = async (req, res) => {
 			name: req.session?.user?.name,
 			photo: req.session?.user?.photo,
 			color: req.session?.user?.color,
+			help,
 		});
 	} else {
 		res.render("errors/notAllowed");

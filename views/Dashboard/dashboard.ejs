@@ -70,8 +70,6 @@
 				customized results.
 			</p>
 			
-			<%- include("partials/help") %>
-			
 			<!-- Connect to WhatsApp -->
 			<!-- Loader overlay (hidden by default) -->
 			<div id="afterSignUpLoader" class="fixed inset-0 flex justify-center items-center bg-gray-500 bg-opacity-50 hidden">
@@ -138,11 +136,6 @@
 					<% if (admin) { %>
 					<button type="button" class="flex items-center border p-2 rounded-md" onclick="location.href='/admin-panel'"><img src="svg/adminPanelClicked.svg" alt="" class="pr-2">Admin Panel</button>
 					<% } %>
-					<% if (admin && doMigration) { %>
-					<button type="button" id="runMigrationBtn" class="flex items-center border p-2 rounded-md">
-						Run Migration
-					</button>
-					<% } %>
 				</div>
 				
 				<%- include("partials/FB-PhoneNumbers") %>
@@ -180,7 +173,7 @@
 								<div class="absolute inset-0 rounded-full icon-gradient-sent"></div>
 								<div class="absolute inset-8 rounded-full icon-gradient-sent"></div>
 							</div>
-							<img class="absolute bottom-3 right-3" src="svg/Vector.svg" alt="sent" />
+							<img class="absolute bottom-3 right-3 " src="svg/singleTick.svg" alt="sent" />
 						</div>
 						
 					</div>
@@ -263,14 +256,17 @@
 						<h5>Approximate Cost</h5>
 						
 						<div class="">
-							<h4 id="totalCost" class="">0</h4>
+							<span class="flex">
+								<span class="self-end pr-2 pb-1"><%= user?.currency %></span>
+								<h4 id="totalCost">0</h4>
+							</span>
 							<!-- <button type="button" onclick="viewFailed()" class="border rounded-2xl px-3 py-1 shadow-sm text-sm h-fit">
 								View user
 							</button> -->
-							<div class="absolute bottom-[-8rem] right-[-7rem] w-[200px] h-[200px]">
+							<!-- <div class="absolute bottom-[-8rem] right-[-7rem] w-[200px] h-[200px]">
 								<div class="absolute inset-0 rounded-full icon-gradient-doesntExist"></div>
 								<div class="absolute inset-8 rounded-full icon-gradient-doesntExist"></div>
-							</div>
+							</div> -->
 							<img class="absolute bottom-3 right-3" src="svg/User.svg" alt="sent" />
 						</div>
 					</div>
@@ -327,7 +323,7 @@
 							? "You don't have permissions to access this"
 							: ""
 					}) %>
-				</div>				
+				</div>
 				
 				<!-- Platform Features Section -->
 				<h2 class="section-title">Platform Features</h2>
@@ -396,52 +392,6 @@
 		const config_id = <%- JSON.stringify(config) %>;
 		const graph_v = <%- JSON.stringify(graph) %>;
 		const fbStatus = <%- JSON.stringify(status) %>;
-		
-		const helpBtn = document.getElementById('helpBtn');
-		const closeBtn = document.getElementById('closeBtn');
-		const helpModal = document.getElementById('helpModal');
-		// const modalBackdrop = document.getElementById('modalBackdrop');
-		
-		// Function to open help div
-		function openHelp () {
-			helpModal.classList.add('active');
-			// modalBackdrop.classList.add('active');
-			helpBtn.classList.add('active');
-		}
-		
-		// Function to close help div
-		function closeHelp () {
-			helpModal.classList.remove('active');
-			// modalBackdrop.classList.remove('active');
-			helpBtn.classList.remove('active');
-		}
-		
-		// Toggle help div when button is clicked
-		helpBtn.addEventListener('click', function (e) {
-			e.stopPropagation();
-			if (helpModal.classList.contains('active')) {
-				closeHelp();
-			} else {
-				openHelp();
-			}
-		});
-		
-		// Close when close button is clicked
-		closeBtn.addEventListener('click', closeHelp);
-		
-		// Close when clicking outside
-		document.addEventListener('click', function (e) {
-			if (helpModal.classList.contains('active') &&
-				!helpModal.contains(e.target) &&
-				e.target !== helpBtn) {
-				closeHelp();
-			}
-		});
-		
-		// Prevent closing when clicking inside the help div
-		helpModal.addEventListener('click', function (e) {
-			e.stopPropagation();
-		});
 	</script>
 	<script src="assets/plugins/pace/pace.min.js" type="text/javascript"></script>
 	<script src="https://kit.fontawesome.com/44e4e59292.js" crossorigin="anonymous"></script>

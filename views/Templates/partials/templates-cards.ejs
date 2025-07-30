@@ -7,25 +7,25 @@
 					
 					<% if (template.category === "Authentication") { %>
 					<% template.dynamicVariables.body.forEach((body) => { %>
-					<p class="custom-card-body-text py-2">
+					<p class="custom-card-body-text p-2">
 						<%- body?.text.replace(/\n/g, '<br>') %>
 					</p>
 					<% }) %>
 					
 					<% template.dynamicVariables.footer.forEach((footer) => { %>
-					<p class="custom-card-footer-text text-sm text-gray-500 py-2">
+					<p class="custom-card-footer-text text-sm text-gray-500 p-2">
 						<%- footer?.text?.replace(/\n/g, '<br>') %>
 					</p>
 					<% }) %>
 					
 					<% template.dynamicVariables.buttons.forEach((button) => { %>
 					<% if (button.auto) { %>
-					<button class="w-full border-b hover:cursor-default border-gray-300 py-2" style="color: #6A67FF;">
+					<button class="w-full border-t hover:cursor-default border-gray-300 py-2" style="color: #6A67FF;">
 						<%= button?.auto %>
 					</button>
 					<% } %>
 					<% if (button.copy) { %>
-					<button class="w-full border-b hover:cursor-default border-gray-300 py-2 flex items-center justify-center" style="color: #6A67FF;">
+					<button class="w-full border-t hover:cursor-default border-gray-300 py-2 flex items-center justify-center" style="color: #6A67FF;">
 						<svg xmlns="http://www.w3.org/2000/svg" fill="#2563eb" viewBox="0 0 256 256" class="w-7 pr-2">
 							<path d="M216,32H88a8,8,0,0,0-8,8V80H40a8,8,0,0,0-8,8V216a8,8,0,0,0,8,8H168a8,8,0,0,0,8-8V176h40a8,8,0,0,0,8-8V40A8,8,0,0,0,216,32ZM160,208H48V96H160Zm48-48H176V88a8,8,0,0,0-8-8H96V48H208Z"></path>
 						</svg>
@@ -58,11 +58,11 @@
 					<!-- BODY AND FOOTER COMPONENTS -->
 					
 					<% if (component?.type === 'BODY') { %>
-					<p class="custom-card-body-text py-2">
+					<p class="custom-card-body-text p-2">
 						<%- component?.text?.replace(/\n/g, '<br>') %>
 					</p>
 					<% } else if (component?.type === 'FOOTER') { %>
-					<p class="custom-card-footer-text text-sm text-gray-500 py-2">
+					<p class="custom-card-footer-text text-sm text-gray-500 p-2">
 						<%- component?.text?.replace(/\n/g, '<br>') %>
 					</p>
 					<% } %>
@@ -73,11 +73,11 @@
 					<% if (component?.type === 'BUTTONS') { %>
 					<% component?.buttons?.forEach(button => { %>
 					<% if (button.type == "PHONE_NUMBER") { %>
-					<button class="w-full border-b hover:cursor-default border-gray-300 py-2" id="callBtn" style="color: #6A67FF;">
+					<button class="w-full border-t hover:cursor-default border-gray-300 py-2" id="callBtn" style="color: #6A67FF;">
 						<i class="fa fa-phone mx-2"></i><%= button?.text %>
 					</button>
 					<% } else { %>
-					<button class="w-full border-b hover:cursor-default border-gray-300 py-2" id="websiteBtn" style="color: #6A67FF;">
+					<button class="w-full border-t hover:cursor-default border-gray-300 py-2" id="websiteBtn" style="color: #6A67FF;">
 						<i class="fa fa-external-link mx-2"></i><%= button?.text %>
 					</button>
 					<% } %>

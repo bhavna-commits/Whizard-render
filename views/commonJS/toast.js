@@ -51,12 +51,12 @@
 
 	// Global confirmation toast function
 	// Returns a promise that resolves to true (Yes) or false (No)
-	window.toastConfirm = function (message = "") {
+	window.toastConfirm = function (message = "", buttonText = "") {
 		return new Promise((resolve) => {
 			/* ========== CREATE OVERLAY ========== */
 			const overlay = document.createElement("div");
 			overlay.className =
-				"fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 transition-opacity duration-300";
+				"fixed inset-0 bg-black bg-opacity-50 flex items-center z-50 justify-center opacity-0 transition-opacity duration-300";
 			document.body.appendChild(overlay);
 
 			/* ========== CREATE MODAL WRAPPER ========== */
@@ -69,7 +69,8 @@
 
 			/* ========== MESSAGE ========== */
 			const modalMessage = document.createElement("h2");
-			modalMessage.className = "text-center text-xl font-medium text-gray-700 mb-6";
+			modalMessage.className =
+				"text-center text-xl font-medium text-gray-700 mb-6";
 			modalMessage.innerHTML = message;
 			modalWrapper.appendChild(modalMessage);
 
@@ -82,14 +83,14 @@
 			const cancelButton = document.createElement("button");
 			cancelButton.textContent = "Cancel";
 			cancelButton.className =
-				"bg-gray-200 text-gray-800 rounded px-5 py-2 hover:bg-gray-300 transition-colors";
+				"bg-gray-200 text-gray-800 rounded px-4 py-2 hover:bg-gray-300 transition-colors";
 			buttonContainer.appendChild(cancelButton);
 
 			/* ========== DELETE BUTTON ========== */
 			const deleteButton = document.createElement("button");
-			deleteButton.textContent = "Delete";
+			deleteButton.textContent = buttonText || "Delete";
 			deleteButton.className =
-				"bg-black text-white rounded px-5 py-2 hover:bg-gray-800 transition-colors";
+				"bg-black text-white rounded px-4 py-2 hover:bg-gray-800 transition-colors";
 			buttonContainer.appendChild(deleteButton);
 
 			/* ========== SHOW MODAL (Entrance) ========== */

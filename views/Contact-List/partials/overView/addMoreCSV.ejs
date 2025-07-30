@@ -1,0 +1,30 @@
+<div id="campaignModal" class="fixed inset-0 z-50 opacity-0 pointer-events-none transition-opacity duration-300 ease-in-out flex items-start justify-center">
+	<div class="fixed inset-0 bg-gray-500/75 backdrop-blur-sm"></div>
+	<div id="campaignModalDiv" class="relative bg-white w-[90%] max-w-3xl overflow-auto mx-auto mt-[5%] rounded-lg shadow-lg p-6 transform transition-transform duration-300 ease-in-out scale-95 max-h-[90vh] space-y-4">
+        <div class="flex justify-between items-center mb-6">
+        	<div></div>      	
+        	<span class="text-2xl text-gray-600 cursor-pointer hover:text-gray-800 close">&times;</span>
+        </div>
+        <div class="flex items-start space-x-3">
+        	<label class="flex items-center px-3 py-2 border border-gray-300 rounded-md cursor-pointer hover:bg-gray-50 text-gray-600">
+        		<input type="file" id="contactFile" accept=".csv,.xls,.xlsx" class="hidden">
+        		<img src="svg/upload.svg" alt="upload"> <span id="fileLabel" class="text-gray-400 pl-2">Choose File</span>
+        	</label>
+        	<button type="button" onclick="getSampleCSV()" class="flex items-center px-3 py-2 border-gray-300 rounded-md hover:bg-gray-50 text-gray-600">
+        		<img src="svg/download.svg" class="pr-2" alt="download"> Download Sample
+        	</button>
+        </div>
+        
+        <button id="previewButton" onclick="previewCSV()" class=" p-2 w-[20%] bg-black text-white rounded-md font-medium hover:bg-gray-800 transition-colors duration-200">
+        	Preview
+        </button>
+		<div id="previewSection" class="hidden overflow-scroll max-h-72">
+		</div>
+		<div class="" id="errorMessage"></div>
+		<div class="flex justify-end">
+			<button type="button" id="createList" class=" p-2 w-[20%] bg-black text-white rounded-md font-medium hover:bg-gray-800 transition-colors duration-200 hidden">
+				Submit
+			</button>
+		</div>
+	</div>
+</div>

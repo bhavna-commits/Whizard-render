@@ -41,6 +41,7 @@ import ChatsTemp from "../../models/chatsTemp.model.js";
 import AddedUser from "../../models/addedUser.model.js";
 import Chats from "../../models/chats.model.js";
 import TempMessageModel from "../../models/TempMessage.model.js";
+import { help } from "../../utils/dropDown.js";
 
 dotenv.config();
 
@@ -113,11 +114,14 @@ export const getSetToken = async (req, res) => {
 				phoneNumber: "null",
 				agentId,
 				iframeBaseURL,
+				help,
 			});
 		}
 
 		// pick phone number
-		const phone = user.FB_PHONE_NUMBERS.find((f) => f.selected);
+		const phone =
+			added?.selectedFBNumber ||
+			user.FB_PHONE_NUMBERS.find((f) => f.selected);
 		if (!phone) return res.render("errors/chatsError");
 
 		// console.log(token, agentId);
@@ -133,6 +137,7 @@ export const getSetToken = async (req, res) => {
 			phoneNumber: phone.number,
 			agentId,
 			iframeBaseURL,
+			help,
 		});
 	} catch (error) {
 		console.error("Error in getSetToken:", error);
@@ -162,6 +167,7 @@ export const getUsers = async (req, res) => {
 
 		const phoneNumberId = req.body?.phoneNumberId;
 		const skip = parseInt(req.body?.skip, 10) || 0;
+		const filter = req.body?.filter;
 
 		if (!phoneNumberId) {
 			return res
@@ -179,6 +185,7 @@ export const getUsers = async (req, res) => {
 			phoneNumberId,
 			tokenType,
 			"",
+			filter,
 			skip,
 		);
 
@@ -642,11 +649,16 @@ export const sendTemplate = async (req, res) => {
 
 		const { userId, agentId, name } = await getUserIdFromToken(oldToken);
 
-		let user = await User.findOne({ unique_id: userId });
+		let user = await User.findOne({ unique_id: userId, deleted: false });
+		let addedUser = await AddedUser.findOne({
+			unique_id: agentId,
+			deleted: false,
+		});
 
-		const fb_phone_number = user.FB_PHONE_NUMBERS.find(
-			(n) => n.selected == true,
-		)?.phone_number_id;
+		const fb_phone_number =
+			addedUser?.selectedFBNumber?.phone_number_id ||
+			user.FB_PHONE_NUMBERS.find((n) => n.selected == true)
+				?.phone_number_id;
 
 		if (!fb_phone_number) {
 			throw "No phone number selected.";

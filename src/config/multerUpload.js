@@ -41,6 +41,22 @@ const profileStorage = multer.diskStorage({
 	},
 });
 
+const phoneNumberStorage = multer.diskStorage({
+	destination: (req, file, cb) => {
+		const pathfile = path.join(
+			"uploads",
+			req.session?.user?.id || req.session?.addedUser?.owner,
+			"phoneNumbers",
+		);
+		
+		if (!fs.existsSync(pathfile)) {
+			fs.mkdirSync(pathfile, { recursive: true });
+		}
+
+		cb(null, pathfile);
+	}
+})
+
 // File filter for general files (images, videos, docs)
 const fileFilter = (req, file, cb) => {
 	const allowedTypes = [
@@ -104,4 +120,10 @@ const uploadProfilePicture = multer({
 	limits: { fileSize: 100 * 1024 }, // 2MB limit for profile pictures
 });
 
-export { upload, uploadProfilePicture };
+const uploadPhoneMumberPic = multer({
+	storage: phoneNumberStorage,
+	fileFilter: profileFileFilter,
+	limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
+});
+
+export { upload, uploadProfilePicture, uploadPhoneMumberPic };

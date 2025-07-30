@@ -45,6 +45,7 @@ export const fetchAndFormatReports = async (
 	phoneNumberId,
 	tokenType,
 	searchTerm = "",
+	filter = "",
 	skip = 0,
 	limit = 10,
 ) => {
@@ -65,6 +66,10 @@ export const fetchAndFormatReports = async (
 			{ contactName: { $regex: searchTerm, $options: "imsx" } },
 			{ wa_id: { $regex: searchTerm, $options: "imsx" } },
 		];
+	}
+
+	if (filter) {
+		query.status = filter;
 	}
 
 	// Pull raw chat docs

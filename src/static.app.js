@@ -8,6 +8,7 @@ app.use("/templates/edit/:id", express.static("public"));
 app.use("/api/chats", express.static("public"));
 app.use("/chats", express.static("public"));
 app.use("/contact-list", express.static("public"));
+app.use("/contact-list/archive", express.static("public"));
 app.use("/contact-list/overview", express.static("public"));
 app.use("/Contact-List/createCampaign", express.static("public"));
 app.use("/Contact-List/custom-field", express.static("public"));

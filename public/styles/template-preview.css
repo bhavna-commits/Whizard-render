@@ -14,18 +14,13 @@
 
 .iphone-screen {
 	position: absolute;
-	/* top: 1rem; */
 	left: 3.7rem;
 	width: 63%;
-	/* height: 95%; */
-	/* overflow: hidden; */
 	background-image: url(./BG.jpg);
 	background-size: cover;
 	background-position: center;
 	border-radius: 2rem;
 	overflow-y: scroll;
-
-	/* box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2); */
 }
 
 .iphone-screen::-webkit-scrollbar {
@@ -107,32 +102,48 @@ button.active {
 	max-height: 75vh;
 	width: 100%;
 	border-radius: 0.5rem;
-	overflow-y: scroll;
+	overflow-y: auto;
 	padding: 1rem 0.5rem;
 	display: flex;
 	flex-direction: column;
 	gap: 0.5rem;
 }
 
-#previewContainer {
+#previewContainer,
+#submitPreviewContainer {
 	position: relative;
 	background-color: #fff;
 	border-radius: 0rem 0.5rem 0.5rem 0.5rem;
-	/* padding: 1rem; */
-	width: 80;
+	width: 82%;
 	min-height: 5rem;
-	max-width: 80%;
+	max-width: 82%;
 	overflow-wrap: break-word;
 	word-break: break-word;
-	margin: 1rem;
+	margin-top: 1rem;
+	margin-left: 1rem;
 	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+	max-height: 100%;
+	display: block;
 }
 
 #previewContainer::before {
-	content: '';
+	content: "";
 	position: absolute;
-	top: -.4rem;
-	left: -.35rem;
+	top: -0.4rem;
+	left: -0.35rem;
+	width: 0;
+	height: 0;
+	transform: rotate(138.5deg);
+	border-top: 8px solid transparent;
+	border-bottom: 10px solid transparent;
+	border-right: 10px solid #fff;
+}
+
+#submitPreviewContainer::before {
+	content: "";
+	position: absolute;
+	top: -3%;
+	left: -1%;
 	width: 0;
 	height: 0;
 	transform: rotate(138.5deg);
@@ -154,7 +165,7 @@ button.active {
 	word-wrap: break-word;
 	word-break: break-word;
 	white-space: normal;
-	margin: .5rem 0;
+	margin-top: 0.5rem;
 }
 
 /* authentication */

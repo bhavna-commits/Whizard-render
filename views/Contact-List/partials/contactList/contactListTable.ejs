@@ -1,0 +1,140 @@
+<div class="">
+	<% if (contacts && contacts.length > 0) { %>
+	<div>
+		<table class="text-center min-w-full border-separate border-spacing-y-4">
+			<tbody>
+				<tr class="text-gray-500 ">
+					<td class="">Sno.</td>
+					<td class="text-left w-[20%]">Contact List Name</td>
+					<td class="w-[25%]">Number of Participants</td>
+					<td class="">Created At</td>
+					<td class="">Actions</td>
+				</tr>
+				<% contacts.forEach((contact, index) => { %>
+				<tr class="hover:bg-gray-100 group cursor-pointer border" onclick="window.location.href='/contact-list/overview/<%= contact.contactId %>?listId=<%= contact.contactId %>&listName=<%= contact.contalistName %>'">
+					<td class="border-l border-t border-b rounded-lg py-4 border-gray-200 text-sm text-gray-500">
+						<%= (page - 1) * 6 + (index + 1) %>
+					</td>
+					<td class="border-t border-b border-gray-200 text-left">
+						<%= contact.contalistName %>
+					</td>
+					<td class="text-gray-500 border-t border-b border-gray-200">
+						<%= contact.participantCount %>
+					</td>
+					<td class="text-gray-500 border-t border-b border-gray-200 date-cell" data-date="<%= contact.createdAt %>">
+						
+					</td>
+					<td class="border-r border-t border-b rounded-lg border-gray-200 group-hover:bg-gray-100">
+
+						<!-- Edit Button -->
+						<% if (access?.contactList?.sendBroadcast && whatsAppStatus == "Live") { %>
+						<button aria-label="Edit contact" title="Send Broadcast" class="text-gray-600 hover:text-blue-600 px-3 border-r" onclick="event.stopPropagation(); location.href='/contact-list/createCampaign/?listId=<%= contact.contactId %>&listName=<%= contact.contalistName %>'">
+							<img src="svg/broadcast.svg" alt="broadcast" />
+						</button>
+						<% } else if (whatsAppStatus == "Pending")  { %>
+						<button class="text-gray-600 hover:cursor-not-allowed px-3 border-r" title="Connect with whatsApp Business API to send message" disabled>
+							<img src="svg/broadcast.svg" alt="broadcast" />
+						</button>
+						<% } else if (access?.contactList?.sendBroadcast) { %>
+						<button aria-label="Edit contact" title="Connect with whatsApp Business API to send message" class="text-gray-600 hover:text-blue-600 px-3 border-r" onclick="event.stopPropagation(); location.href='/contact-list/createCampaign/?listId=<%= contact.contactId %>&listName=<%= contact.contalistName %>'">
+							<img src="svg/broadcast.svg" alt="broadcast" />
+						</button>
+						<% } else { %>
+						<button class="text-gray-600 hover:cursor-not-allowed px-3 border-r" title="You don't have permissions to access this" disabled>
+							<img src="svg/broadcast.svg" alt="broadcast" />
+						</button>
+						<% } %>
+
+						<!-- Duplicate List  -->
+						
+						<button aria-label="Duplicate List" title="Duplicate List" class="text-gray-600 hover:text-blue-600 px-3 border-r" onclick="event.stopPropagation(); duplicateList('<%= contact.contactId %>', '<%= contact.contalistName %>')">
+							<img src="svg/duplicate.svg" alt="duplicate" />
+						</button>
+
+						<!-- Download List -->
+
+						<% if (access?.contactList?.downloadList && whatsAppStatus === "Live") { %>
+							<button aria-label="Download List" title="Download List" class="text-gray-600 hover:text-blue-600 px-3 border-r" onclick="event.stopPropagation(); downloadContactList('<%= contact.contactId %>', '<%= contact.contalistName %>')">
+								<img src="svg/download.svg" class="w-4 h-4" alt="download" />
+							</button>
+						<% } else if (whatsAppStatus === "Pending")  { %>
+						<button class="text-gray-600 hover:cursor-not-allowed px-3 border-r" title="Connect with whatsApp Business API to send message" disabled>
+							<img src="svg/download.svg" class="w-4 h-4" alt="download" />
+						</button>
+						<% } else if (access?.contactList?.downloadList) { %>
+							<button aria-label="Download List" title="Download List" class="text-gray-600 hover:text-blue-600 px-3 border-r" onclick="event.stopPropagation(); downloadContactList('<%= contact.contactId %>', '<%= contact.contalistName %>')">
+								<img src="svg/download.svg" class="w-4 h-4" alt="download" />
+							</button>
+						<% } else { %>
+						<button class="text-gray-600 hover:cursor-not-allowed px-3 border-r" title="You don't have permissions to access this" disabled>
+							<img src="svg/download.svg" class="w-4 h-4" alt="download" />
+						</button>
+						<% } %>
+
+						<!-- Delete Button -->
+
+						<% if (access?.contactList?.deleteList) { %>					
+						<button aria-label="archive contact" title="Archive list" class="text-gray-600 hover:text-red-600 px-3" onclick="event.stopPropagation(); openDeleteModal('<%= contact.contactId %>', '<%= contact.contalistName %>');">
+							<img src="svg/bin contact list.svg" class="archiveSvg w-4 h-4" alt="archive">
+						</button>
+						<% } else { %>
+						<button class="text-gray-600 hover:cursor-not-allowed px-3" title="You don't have permissions to access this">
+							<img src="svg/bin contact list.svg" class="archiveSvg w-4 h-4" alt="archive">
+						</button>
+						<% } %>
+					</td>
+				</tr>
+				<% }); %>
+			</tbody>
+		</table>
+	</div>
+	<!-- Pagination -->
+	<% if (totalPages > 1) { %>
+	<%- include('../../../commonJS/pagination') %>
+	<% } %>
+	
+	<% } else { %>
+	<!-- Empty state -->
+	<div class="flex flex-col items-center justify-center min-h-[400px]  rounded-lg mt-4">
+		<div class="text-center">
+			<img src="https://img.freepik.com/free-vector/hands-holding-tablet-with-forefinger-clicking-start-button-new-application-launch-flat-illustration_74855-20595.jpg?ga=GA1.1.131490893.1732525963&semt=ais_hybrid" alt="No contacts" class="w-48 h-48 mx-auto mb-4">
+			
+			<h3 class="text-xl font-semibold text-gray-900 mb-2">No contact list yet</h3>
+			<p class="text-gray-600 mb-6">Start adding contacts by clicking on "Create new Contact list"</p>
+			
+			<% if (access?.contactList?.addContactListCSV && whatsAppStatus === "Live") { %>
+			<button onclick="document.getElementById('create-List').click()" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black">
+				<i class="fa-solid fa-plus pr-2"></i>
+				Create new Contact list
+			</button>
+			<% } else if (whatsAppStatus === "Pending")  { %>
+			<button title="Connect with whatsApp Business API to create list" class="inline-flex items-center px-4 py-2 border border-transparent text-sm  hover:cursor-not-allowed font-medium rounded-md text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black" disabled>
+				<i class="fa-solid fa-plus pr-2"></i>
+				Create new Contact list
+			</button>
+			<% } else { %>
+			<button title="You don't have permissions to access this" class="inline-flex items-center px-4 py-2 border border-transparent text-sm  cursor-not-allowed font-medium rounded-md text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black" disabled>
+				<i class="fa-solid fa-plus pr-2"></i>
+				Create new Contact list
+			</button>
+			<% } %>
+		</div>
+	</div>
+	<% } %>
+</div>
+<!-- Edit Modal Structure -->
+<script>
+	document.querySelectorAll('.date-cell').forEach((el) => {
+		const rawDate = el.getAttribute('data-date');
+		if (rawDate) {
+			const date = new Date(Number(rawDate));
+			const formatted = date.toLocaleString('en-GB', {
+				year: 'numeric',
+				month: 'short',
+				day: '2-digit'
+			});
+			el.textContent = formatted;
+		}
+	});
+</script>
+

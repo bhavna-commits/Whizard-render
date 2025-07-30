@@ -3,7 +3,7 @@ import {
 	apiKeyMiddleware,
 	rateLimitMiddleware,
 	sendAuthTemplateOTP,
-} from "../controllers/Templates/authentication.functions.js";
+} from "../controllers/Templates/authentication.controller.js";
 
 const router = express.Router();
 

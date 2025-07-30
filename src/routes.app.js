@@ -14,7 +14,7 @@ import chatsFrontEndRoutes from "./frontEnd-Routes/chats.frontEnd.routes.js";
 import chatsBackEndRoutes from "./backEnd-Routes/chats.backEnd.routes.js";
 import publicBackendRoutes from "./backEnd-Routes/public.backEnd.routes.js";
 
-import { checkSession } from "./middleWares/checkSession.js";
+import { checkSession, checkSessionApi } from "./middleWares/checkSession.js";
 import app from "./static.app.js";
 
 app.use("/api/facebook", faceBookBackEndRoute);
@@ -28,11 +28,11 @@ app.use("/chats", checkSession, chatsFrontEndRoutes);
 app.use("/reports", checkSession, reportsFrontEndRoute);
 app.use("/settings", checkSession, settingsFrontRoute);
 app.use("/contact-list", checkSession, contactFrontEndRoutes);
-app.use("/api/templates", checkSession, templatesRoutes);
-app.use("/api/contact-list", checkSession, contactListRoute);
-app.use("/api/settings", checkSession, settingsbackEndRoute);
-app.use("/api/reports", checkSession, reportsBackEndRoute);
-app.use("/api/dashboard", checkSession, dashboardBackEndRoutes);
+app.use("/api/templates", checkSessionApi, templatesRoutes);
+app.use("/api/contact-list", checkSessionApi, contactListRoute);
+app.use("/api/settings", checkSessionApi, settingsbackEndRoute);
+app.use("/api/reports", checkSessionApi, reportsBackEndRoute);
+app.use("/api/dashboard", checkSessionApi, dashboardBackEndRoutes);
 
 app.use((req, res) => {
 	res.status(404).render("errors/notFound");

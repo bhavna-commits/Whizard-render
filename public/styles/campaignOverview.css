@@ -7,7 +7,7 @@
 
 .stat-box {
 	background-color: #f3f4f6;
-	border-radius: .8rem;
+	border-radius: 0.8rem;
 	padding: 1rem;
 	text-align: center;
 	/* box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); */
@@ -27,7 +27,6 @@
 }
 
 .stat-box p {
-
 	font-size: 2.1rem;
 	color: #333;
 	font-weight: bold;
@@ -43,31 +42,31 @@
 }
 
 .stat-box:nth-child(1) {
-	background-color: #e9eef5; 
-	border: .11rem solid #006aff;
+	background-color: #f9fafb;
+	border: 0.11rem solid #a0aec0;
 }
 
 .stat-box:nth-child(2) {
-	background-color: rgba(244, 239, 251, 1);
-	border: .11rem solid rgba(137, 77, 212, 1);/* Light purple for Sent */
+	background-color: #eff5fb;
+	border: 0.11rem solid #3182ce; /* Light purple for Sent */
 }
 
 .stat-box:nth-child(3) {
-	background-color: rgba(255, 235, 255, 1); 
-	border: .11rem solid rgba(128, 0, 128, 1);/* Light pink for Delivered */
+	background-color: #f4fbf7;
+	border: 0.11rem solid #38a169; /* Light pink for Delivered */
 }
 
 .stat-box:nth-child(4) {
-	background-color: rgba(255, 255, 255, 1);
-	border: .11rem solid rgba(255, 136, 1, 1); /* Light orange for Read */
+	background-color: #fffaf5;
+	border: 0.11rem solid #ff8801; /* Light orange for Read */
 }
 
 .stat-box:nth-child(5) {
-	background-color: rgba(210, 249, 254, 1);
-	border: .11rem solid rgba(3, 126, 142, 1); /* Light cyan for Replies */
+	background-color: #f6fafe;
+	border: 0.11rem solid #4299e1; /* Light cyan for Replies */
 }
 
 .stat-box:nth-child(6) {
-	background-color: rgba(252, 237, 237, 1);
-	border: .11rem solid rgba(224, 36, 36, 1); /* Light cyan for Failed */
+	background-color: #fceded;
+	border: 0.11rem solid #e02424; /* Light cyan for Failed */
 }

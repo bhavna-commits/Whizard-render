@@ -64,6 +64,7 @@ const permissionSchema = new Schema(
 				add: { type: Boolean, default: false },
 				view: { type: Boolean, default: false },
 			},
+			whatsAppAccountDetails: { type: Boolean, default: false },
 		},
 		createdAt: { type: Number, default: () => Date.now() },
 		updatedAt: { type: Number, default: () => Date.now() },

@@ -1,0 +1,47 @@
+<!-- Table Rows -->
+<% contacts.forEach((contact, index) => { %>
+<tr data-wa_id="<%= contact?.wa_id %>" class="cursor-pointer border group hover:bg-gray-100 ">
+	<td class="border-l border-t border-b rounded-l py-8 min-w-6 min-h-6 border-gray-200 text-sm text-gray-400 checkboxBody relative">
+		<div class="absolute inset-0 flex items-center justify-center">
+			<div class="checkboxText block"><%= (page - 1) * 6 + (index + 1) %></div>
+			<input type="checkbox" class="checkbox max-h-4 max-w-4 absolute opacity-0 pointer-events-none transition-opacity duration-200" />
+		</div>
+	</td>
+	<td class="border-t border-b border-gray-200 ">
+		<p class="text-gray-500"><%= contact?.Name %></p>
+	</td>
+	<td class="text-gray-500 border-t border-b border-gray-200 " aria-label="<%= contact?.wa_id %>">
+		XXXXX-XXX<%= contact?.wa_id?.slice(-2) %>
+	</td>
+	<td class="text-gray-500 border-t border-b border-gray-200 date-cell" data-date="<%= contact.usertimestmp %>"></td>
+	
+	<% if (contact.masterExtra) { %>
+	<% Object.entries(contact.masterExtra).forEach(function([key, value]) { %>
+	<td class="text-gray-500 border-t border-b border-gray-200 ">
+		<%= value %>
+	</td>
+	<% }); %>
+	<% } %>
+	
+	<td class="sticky right-0 z-10 border-r border-t border-b rounded-r border-gray-200 backdrop-blur-sm">
+		<% if (access?.contactList?.editContactIndividual) { %>
+		<button onclick="openEditModal('<%= JSON.stringify(contact) %>')" aria-label="Edit contact" title="Edit contact" class="text-gray-600 hover:text-blue-600 px-3 border-r">
+			<img src="svg/editPen.svg" alt="edit">
+		</button>
+		<% } else { %>
+		<button title="You don't have permissions to access this" class="text-gray-400 hover:cursor-not-allowed px-3 border-r">
+			<img src="svg/editPen.svg" alt="edit">
+		</button>
+		<% } %>
+		<% if (access?.contactList?.deleteContactIndividual) { %>
+		<button onclick="openDeleteModal('<%= contact._id %>','<%= contact.Name %>' )" title="Delete Contact" class="text-gray-600 hover:text-red-600 px-2">
+			<img src="svg/bin contact list.svg" alt="bin">
+		</button>
+		<% } else { %>
+		<button title="You don't have permissions to access this" class="text-gray-400 hover:cursor-not-allowed px-2">
+			<img src="svg/bin contact list.svg" alt="bin">
+		</button>
+		<% } %>
+	</td>
+</tr>
+<% }); %>

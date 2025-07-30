@@ -630,7 +630,7 @@ async function selectPhoneNumber(event) {
 	event.preventDefault(); // Prevent default form submission
 	const phoneNumberId = event.target.phoneNumberId.value;
 	const buttonLoader = event.target.querySelector(".buttonLoader");
-	const buttonText = event.target.querySelector(".buttonText");
+	const buttonText = event.target.querySelector(".buttonText"); 
 
 	try {
 		// Show loader and hide button text

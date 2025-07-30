@@ -22,6 +22,17 @@ export const checkAdminSession = (req, res, next) => {
 	if (req.session?.user?.id === "db2426e80f") {
 		next();
 	} else {
-		res.redirect("/");
+		res.status(403).json({ success: false, message: "Forbidden access" });
+	}
+};
+
+export const checkSessionApi = (req, res, next) => {
+	if (req.session?.user || req.session?.addedUser) {
+		next();
+	} else {
+		res.status(401).json({
+			success: false,
+			message: "Logged out, refresh the page",
+		});
 	}
 };

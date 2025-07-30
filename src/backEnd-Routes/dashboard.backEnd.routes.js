@@ -7,7 +7,6 @@ import {
 	sendOtpController,
 	set2FAPin,
 	refreshPhoneNumbers,
-	migrate,
 } from "../controllers/Dashboard/dashboard.controller.js";
 
 import {
@@ -17,6 +16,9 @@ import {
 	verifyDeleteOTP,
 	changeSuperAdminEmail,
 	verifySuperAdminEmailOTP,
+	togglePaymentStatus,
+	renewAdminToken,
+	migrate,
 } from "../controllers/Dashboard/adminPanel.controller.js";
 
 import { trackSanitationFailures } from "../middleWares/sanitiseInput.js";
@@ -38,13 +40,17 @@ router.post("/set-2FA-pin", set2FAPin);
 
 router.get("/refresh-phone-numbers", refreshPhoneNumbers);
 
-router.post("/:id/toggleStatus", toggleStatus);
+router.post("/:id/toggleStatus", checkAdminSession, toggleStatus);
 
-router.post("/:id/reset", resetUserAccount);
+router.post("/:id/reset", checkAdminSession, resetUserAccount);
 
 router.post("/:id/delete-email", checkAdminSession, deleteAccountEmail);
 
-router.post("/change-superadmin-email-otp", checkAdminSession, changeSuperAdminEmail);
+router.post(
+	"/change-superadmin-email-otp",
+	checkAdminSession,
+	changeSuperAdminEmail,
+);
 
 router.post(
 	"/verify-superadmin-email",
@@ -52,6 +58,12 @@ router.post(
 	verifySuperAdminEmailOTP,
 );
 
-router.post("/:id/verify-delete", verifyDeleteOTP);
+router.post("/:id/verify-delete", checkAdminSession, verifyDeleteOTP);
+
+router.post("/:id/toggle-payment-card", checkAdminSession, togglePaymentStatus);
+
+router.get("/run-migration", checkAdminSession, migrate);
+
+router.post("/renew-admin-token", checkAdminSession, renewAdminToken);
 
 export default router;

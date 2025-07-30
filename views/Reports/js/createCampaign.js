@@ -96,7 +96,6 @@ class Preview {
 	}
 
 	update(template) {
-		console.log(template);
 		if (!template) {
 			this.container.innerHTML =
 				'<p class="text-center text-gray-500">Select a template to preview</p>';
@@ -111,8 +110,38 @@ class Preview {
 		let footerContent = "";
 		let buttonContent = "";
 
+		let uploadSection = "";
+
 		// Filter components for header, body, footer, and buttons
 		components.forEach((component) => {
+			if (
+				component.type === "HEADER" &&
+				["IMAGE", "VIDEO", "DOCUMENT"].includes(component.format)
+			) {
+				const fileUrl = component.example?.header_url
+					?.split("/")
+					.slice(3)
+					.join("/");
+
+				// Create dynamic label & accept types based on format
+				let acceptType = "";
+				let formatLabel = component.format.toLowerCase();
+				if (formatLabel === "image") acceptType = "image/*";
+				else if (formatLabel === "video") acceptType = "video/*";
+				else acceptType = ".pdf,.doc,.docx";
+
+				uploadSection = `
+			<div class="my-4">
+				<div class="flex items-center gap-8">
+					<button class="px-3 py-1 border text-gray-700 rounded sample-btn" data-file="/${fileUrl}">Use Sample ${formatLabel}</button>
+					<div class="upload-label px-3 py-1 bg-black text-white rounded cursor-pointer">
+						Upload New ${formatLabel}
+					</div>
+					<input type="file" class="hidden upload-input" accept="${acceptType}" data-format="${component.format}" />
+				</div>
+			</div>
+		`;
+			}
 			if (component.type === "HEADER") {
 				if (component.format === "IMAGE") {
 					// Handle image format
@@ -135,7 +164,7 @@ class Preview {
 						.toLowerCase();
 					headerContent = `
                     <video controls class="custom-card-img">
-                        <source src="/${fileUrl}" type="video/${fileExtension}" />
+                        <source src="/${fileUrl}" type="video/${fileExtension}">
                         Your browser does not support the video tag.
                     </video>
                 `;
@@ -179,22 +208,93 @@ class Preview {
 				});
 			}
 		});
-		// console.log("button", buttonContent);
+
+		//  Preview creation
+
 		this.container.innerHTML = `
-        ${
-			headerContent
-				? `<div class="font-semibold text-lg">${headerContent}</div>`
-				: ""
-		}
-        <p class="text-lg py-2">${bodyContent.replace(/\n/g, "<br>")}</p>
-        <p class="text-base text-gray-500 py-1">${footerContent.replace(
+		${uploadSection}
+		<div class="font-semibold text-lg uploaded-preview">
+			${headerContent}
+		</div>
+		<p class="text-lg py-2">${bodyContent.replace(/\n/g, "<br>")}</p>
+		<p class="text-base text-gray-500 py-1">${footerContent.replace(
 			/\n/g,
 			"<br>",
 		)}</p>
-        <div>
-            ${buttonContent}
-        </div>
-    `;
+		<div>${buttonContent}</div>
+	`;
+
+		// Upload new options
+
+		const fileInput = this.container.querySelector(".upload-input");
+		const sampleBtn = this.container.querySelector(".sample-btn");
+		const previewDiv = this.container.querySelector(".uploaded-preview");
+
+		const uploadTrigger = this.container.querySelector(".upload-label");
+		const uploadInput = this.container.querySelector(".upload-input");
+
+		uploadTrigger.addEventListener("click", () => {
+			uploadInput.click();
+		});
+
+		if (fileInput) {
+			fileInput.addEventListener("change", (e) => {
+				const file = e.target.files[0];
+				const format = e.target.dataset.format;
+
+				if (!file || !format) return;
+
+				const reader = new FileReader();
+
+				reader.onload = function (event) {
+					let previewHTML = "";
+					const fileURL = event.target.result;
+
+					if (format === "IMAGE") {
+						previewHTML = `<img src="${fileURL}" class="custom-card-img max-h-96" />`;
+					} else if (format === "VIDEO") {
+						previewHTML = `
+							<video controls class="custom-card-img">
+								<source src="${fileURL}" type="${file.type}">
+								Your browser does not support the video tag.
+							</video>
+						`;
+					} else if (format === "DOCUMENT") {
+						previewHTML = `<iframe src="${fileURL}" class="w-full h-[500px]"></iframe>`;
+					}
+
+					previewDiv.innerHTML = previewHTML;
+				};
+
+				reader.readAsDataURL(file); // Triggers reader.onload
+			});
+		}
+
+		if (sampleBtn) {
+			sampleBtn.addEventListener("click", (e) => {
+				const filePath = e.target.dataset.file;
+				const format = fileInput?.dataset.format;
+				let previewHTML = "";
+
+				fileInput.value = "";
+
+				if (format === "IMAGE") {
+					previewHTML = `<img src="${filePath}" class="custom-card-img max-h-96" />`;
+				} else if (format === "VIDEO") {
+					const fileExtension = filePath.split(".").pop();
+					previewHTML = `
+						<video controls class="custom-card-img">
+							<source src="${filePath}" type="video/${fileExtension}">
+							Your browser does not support the video tag.
+						</video>
+					`;
+				} else if (format === "DOCUMENT") {
+					previewHTML = `<iframe src="${filePath}" class="w-full h-[500px]"></iframe>`;
+				}
+
+				previewDiv.innerHTML = previewHTML;
+			});
+		}
 	}
 }
 
@@ -351,21 +451,11 @@ class TemplateManager {
 		const loader = button.querySelector(".loader-submit");
 		const buttonText = button.querySelector(".button-text");
 
-		// Disable the button and show the loader
 		button.disabled = true;
 		loader.classList.remove("hidden");
 		buttonText.classList.add("hidden");
 
-		// Create form data
-		const formData = {
-			templateId: this.templateSelect.val(),
-			contactListId: contactListId,
-			name: document.getElementById("campaign-name").value,
-			contactList: contactLists,
-		};
-
-		console.log(formData);
-
+		// FORM DATA FOR TESTING
 		const testFormData = new FormData(this.campaignForm);
 		testFormData.append("templateId", this.templateSelect.val());
 		testFormData.append("contactListId", contactListId);
@@ -374,31 +464,30 @@ class TemplateManager {
 			document.getElementById("campaign-name").value,
 		);
 		testFormData.append("contactList", contactLists);
+		testFormData.append("url", `https://${location.hostname}`);
 
-		// Check if scheduling or sending immediately
+		// FORM DATA FOR ACTUAL BROADCAST
+		const formData = new FormData();
+		formData.append("templateId", this.templateSelect.val());
+		formData.append("contactListId", contactListId);
+		formData.append("name", document.getElementById("campaign-name").value);
+		formData.append("contactList", contactLists);
+
+		const fileInput = this.campaignForm.querySelector(
+			'.upload-input[type="file"]',
+		);
+		if (fileInput?.files?.length > 0) {
+			const uploadedFile = fileInput.files[0];
+			formData.append("headerFile", uploadedFile);
+			testFormData.append("headerFile", uploadedFile);
+		}
+
+		// Handle schedule logic
 		if (actionType === "schedule") {
 			const selectedDate = document.getElementById("datePicker").value;
 			const selectedTime = document.getElementById("timePicker").value;
 
-			// Make sure the user selected a valid date and time for scheduling
-			if (selectedDate && selectedTime) {
-				const convertedDateString =
-					this.convertDateFormat(selectedDate);
-				const dateTimeString = `${convertedDateString} ${selectedTime}`;
-				const dateTime = new Date(dateTimeString);
-				console.log(dateTime);
-				if (!isNaN(dateTime.getTime())) {
-					const unixTimestamp = Math.floor(dateTime.getTime() / 1000);
-					formData.schedule = unixTimestamp;
-				} else {
-					toast(
-						"info",
-						"Invalid date or time. Please check your selection.",
-					);
-					resetButton(button, loader, buttonText);
-					return;
-				}
-			} else {
+			if (!selectedDate || !selectedTime) {
 				toast(
 					"info",
 					"Please select both date and time for scheduling.",
@@ -406,16 +495,29 @@ class TemplateManager {
 				resetButton(button, loader, buttonText);
 				return;
 			}
+
+			const convertedDateString = this.convertDateFormat(selectedDate);
+			const dateTime = new Date(`${convertedDateString} ${selectedTime}`);
+			if (isNaN(dateTime.getTime())) {
+				toast(
+					"info",
+					"Invalid date or time. Please check your selection.",
+				);
+				resetButton(button, loader, buttonText);
+				return;
+			}
+
+			const unixTimestamp = Math.floor(dateTime.getTime() / 1000);
+			formData.append("schedule", unixTimestamp);
+			testFormData.append("schedule", unixTimestamp);
 			testFormData.append("test", null);
 		} else if (actionType === "sendNow") {
-			// If "Send Now" is clicked, make sure schedule is null
-			formData.schedule = null;
-			testFormData.append("schedule", null);
+			formData.append("schedule", "");
+			testFormData.append("schedule", "");
 			testFormData.append("test", null);
 		}
 
-		// Add selected attributes to form data
-		// Validate attribute selects
+		// Validate attributes
 		let isValid = true;
 		const selectedAttributes = {};
 
@@ -424,37 +526,35 @@ class TemplateManager {
 			?.each(function () {
 				const variable = $(this).data("variable");
 				const value = $(this).val();
-				if (value === null || value === "Select a value") {
+				if (!value || value === "Select a value") {
 					isValid = false;
 					toast(
 						"info",
 						`Please select a value for variable: {${variable}}`,
 					);
 					resetButton(button, loader, buttonText);
-					return false; // Exit early if invalid
+					return false;
 				}
 				selectedAttributes[variable] = value;
 			});
 
-		if (!isValid) {
-			return;
-		}
+		if (!isValid) return;
 
 		if (Object.keys(selectedAttributes).length > 0) {
-			formData.variables = selectedAttributes;
+			formData.append("variables", JSON.stringify(selectedAttributes));
 			testFormData.append(
 				"variables",
 				JSON.stringify(selectedAttributes),
 			);
 		}
 
+		// TEST MODE
 		if (actionType === "test") {
-			testFormData.append("schedule", null);
-			testFormData.append(
+			testFormData.set(
 				"test",
 				document.getElementById("testNumber").value,
 			);
-			// Submit the form
+
 			try {
 				const response = await fetch(
 					"/api/contact-list/create-campaign",
@@ -463,32 +563,30 @@ class TemplateManager {
 						body: testFormData,
 					},
 				);
-
 				const result = await response.json();
+
 				if (response.ok) {
 					toast("success", "Test campaign sent successfully!");
 				} else {
-					toast("success", result.message);
+					toast("error", result.message);
 				}
 			} catch (error) {
-				console.error("Error sending test campaign:", error);
-				toast("error", error);
+				console.error("Test campaign error:", error);
+				toast("error", error.message || "Test failed");
 			} finally {
 				resetButton(button, loader, buttonText);
 			}
 			return;
 		}
 
+		// REAL BROADCAST
 		try {
-			// formData.set("test", null);
 			const response = await fetch("/api/reports/broadcast", {
 				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify(formData),
+				body: formData,
 			});
 			const result = await response.json();
+
 			if (response.ok) {
 				toast("success", "Campaign created successfully!");
 				setTimeout(() => {
@@ -498,8 +596,8 @@ class TemplateManager {
 				toast("error", result.message);
 			}
 		} catch (error) {
-			console.error("Error submitting campaign:", error);
-			toast("error", error);
+			console.error("Broadcast campaign error:", error);
+			toast("error", error.message || "Broadcast failed");
 		} finally {
 			resetButton(button, loader, buttonText);
 		}

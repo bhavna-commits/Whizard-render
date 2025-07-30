@@ -21,6 +21,7 @@ window.fbAsyncInit = function () {
 let waba_id = null;
 let phone_number_id = null;
 let fbAccessToken = null;
+let business_id = null; 
 
 // Function to send data when all variables are available
 function showLoader() {
@@ -81,8 +82,9 @@ window.addEventListener("message", (event) => {
 		const data = JSON.parse(event.data);
 		if (data.type === "WA_EMBEDDED_SIGNUP") {
 			console.log("message event: ", data);
-			waba_id = data.data.waba_id;
-			phone_number_id = data.data.phone_number_id;
+			waba_id = data?.data.waba_id;
+			phone_number_id = data?.data.phone_number_id;
+			business_id = data?.business_id;  
 			// sendDataToBackend();
 		}
 	} catch (error) {

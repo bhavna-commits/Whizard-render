@@ -820,3 +820,28 @@ export const help = [
 			"What If the Facebook 'Start Verification' Button Is Greyed Out or Doesn’t Appear?",
 	},
 ];
+
+export const verticalCategories = {
+	ALCOHOL: "Alcoholic Beverages",
+	APPAREL: "Clothing and Apparel",
+	AUTO: "Automotive",
+	BEAUTY: "Beauty, Spa and Salon",
+	EDU: "Education",
+	ENTERTAIN: "Entertainment",
+	EVENT_PLAN: "Event Planning and Service",
+	FINANCE: "Finance and Banking",
+	GOVT: "Public Service",
+	GROCERY: "Food and Grocery",
+	HEALTH: "Medical and Health",
+	HOTEL: "Hotel and Lodging",
+	NONPROFIT: "Non-profit",
+	ONLINE_GAMBLING: "Online Gambling & Gaming",
+	OTC_DRUGS: "Over-the-Counter Drugs",
+	OTHER: "Other",
+	PHYSICAL_GAMBLING: "Non-Online Gambling & Gaming (E.g. Brick and mortar)",
+	PROF_SERVICES: "Professional Services",
+	RESTAURANT: "Restaurant",
+	RETAIL: "Shopping and Retail",
+	TRAVEL: "Travel and Transportation",
+};
+  

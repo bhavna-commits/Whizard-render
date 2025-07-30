@@ -16,6 +16,7 @@ const userSchema = new mongoose.Schema(
 				selected: { type: Boolean, default: false },
 				friendly_name: String,
 				number: String,
+				dp: String,
 			},
 		],
 		FB_ACCESS_TOKEN: { type: String, required: false },
@@ -30,11 +31,10 @@ const userSchema = new mongoose.Schema(
 		color: { type: String, required: true },
 		companyName: { type: String, required: false, index: false },
 		companyDescription: { type: String, required: false },
-		country: { type: String, required: false },
-		state: { type: String, required: false },
-		companySize: { type: String, required: false },
+		displayAbout: { type: String, required: false },
+		displayAddress: { type: String, required: false },
+		companyDisplayEmail: { type: String, required: false },
 		industry: { type: String, required: false },
-		jobRole: { type: String, required: false },
 		website: { type: String, required: false },
 		blocked: { type: Boolean, default: false, index: true },
 		WhatsAppConnectStatus: {
@@ -107,6 +107,7 @@ const userSchema = new mongoose.Schema(
 					add: { type: Boolean, default: true },
 					view: { type: Boolean, default: true },
 				},
+				whatsAppAccountDetails: { type: Boolean, default: true },
 			},
 		},
 		createdAt: {
@@ -128,6 +129,12 @@ const userSchema = new mongoose.Schema(
 		},
 		nextRefreshAt: { type: Schema.Types.Mixed },
 		authTemplateToken: String,
+		paymentCard: {
+			type: String,
+			enum: ["Internal", "External"],
+			default: "External",
+		},
+		currency: String,
 	},
 	{ timestamps: false, strict: false },
 );

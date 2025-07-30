@@ -15,7 +15,7 @@ import {
 import Permissions from "../../models/permissions.model.js";
 import CustomField from "../../models/customField.model.js";
 import User from "../../models/user.model.js";
-import { countries } from "../../utils/dropDown.js";
+import { countries, help } from "../../utils/dropDown.js";
 import ActivityLogs from "../../models/activityLogs.model.js";
 import dotenv from "dotenv";
 import { generateUniqueId } from "../../utils/otpGenerator.js";
@@ -24,10 +24,172 @@ import {
 	__filename,
 	csvFilePath,
 	updateCSVOnFieldDelete,
-	generateTableAndCheckFields,
 } from "./contacts.controller.js";
+import {
+	generateTableAndCheckFields,
+	buildContactDocs,
+	getDuplicateTableHTML,
+	filterDuplicates,
+	generateAdditionalTableAndCheckFields,
+} from "./contactList.functions.js";
 
 dotenv.config();
+
+export const getList = async (req, res) => {
+	try {
+		const { archive } = req;
+		const userSession = req.session;
+		const isAddedUser = !!userSession?.addedUser;
+		const userId = userSession?.user?.id || userSession?.addedUser?.owner;
+		const addedUserId = userSession?.addedUser?.id;
+		const permissionsId = userSession?.addedUser?.permissions;
+
+		const page = parseInt(req.query.page) || 1;
+		const limit = 6;
+		const skip = (page - 1) * limit;
+
+		if (!isNumber(page)) return res.render("errors/notFound");
+
+		const user = await User.findOne({ unique_id: userId, deleted: false });
+
+		const FB_PHONE_ID =
+			userSession?.addedUser?.selectedFBNumber ||
+			user?.FB_PHONE_NUMBERS?.find((n) => n.selected);
+
+		let access = null;
+		let matchQuery = {
+			useradmin: userId,
+			contact_status: archive ? 0 : 1,
+		};
+
+		if (FB_PHONE_ID?.phone_number_id) {
+			matchQuery.FB_PHONE_ID = FB_PHONE_ID?.phone_number_id;
+		}
+
+		if (permissionsId) {
+			access = await Permissions.findOne({ unique_id: permissionsId });
+
+			if (!access?.contactList?.allList) {
+				// Only match if the agent field contains the added user's ID
+				if (addedUserId) {
+					matchQuery.agent = { $in: [addedUserId] };
+				} else {
+					// No access and no agent ID? Return no results
+					return res.render("Contact-List/contact-list", {
+						access,
+						countries,
+						contacts: [],
+						page,
+						totalPages: 0,
+						headers: [],
+						data: [],
+						errors: [],
+						photo: userSession?.addedUser?.photo,
+						name: userSession?.addedUser?.name,
+						color: userSession?.addedUser?.color,
+						whatsAppStatus: userSession?.addedUser?.whatsAppStatus,
+						FB_PHONE_ID,
+						help,
+					});
+				}
+			}
+		}
+
+		const aggregationPipeline = [
+			{ $match: matchQuery },
+			{ $sort: { createdAt: -1 } },
+			{
+				$facet: {
+					paginatedResults: [{ $skip: skip }, { $limit: limit }],
+					totalCount: [{ $count: "total" }],
+				},
+			},
+		];
+
+		const result = await ContactList.aggregate(aggregationPipeline);
+
+		const contactLists = result[0]?.paginatedResults || [];
+		const totalCount = result[0]?.totalCount[0]?.total || 0;
+		const totalPages = Math.ceil(totalCount / limit);
+
+		const baseRenderData = {
+			access:
+				access ?? (await User.findOne({ unique_id: userId }))?.access,
+			countries,
+			contacts: contactLists,
+			page,
+			totalPages,
+			headers: [],
+			data: [],
+			errors: [],
+			photo: isAddedUser
+				? userSession.addedUser?.photo
+				: userSession.user?.photo,
+			name: isAddedUser
+				? userSession.addedUser?.name
+				: userSession.user?.name,
+			color: isAddedUser
+				? userSession.addedUser?.color
+				: userSession.user?.color,
+			whatsAppStatus: isAddedUser
+				? userSession.addedUser?.whatsAppStatus
+				: userSession.user?.whatsAppStatus,
+			FB_PHONE_ID,
+			help,
+		};
+
+		const hasPermission = access?.contactList?.type ?? true;
+
+		if (!hasPermission) return res.render("errors/notAllowed");
+
+		res.render("Contact-List/contact-list", baseRenderData);
+	} catch (error) {
+		console.error(error);
+		res.render("errors/serverError");
+	}
+};
+
+export const getContactList = async (req, res) => {
+	try {
+		const id = req.session?.user?.id || req.session?.addedUser?.owner;
+		const addedUserId = req.session?.addedUser?.id;
+		const permissionsId = req.session?.addedUser?.permissions;
+
+		const user = await User.findOne({ unique_id: id });
+
+		const FB_PHONE_ID = req.session?.addedUser?.selectedFBNumber?.phone_number_id || user.FB_PHONE_NUMBERS.find(
+			(n) => n.selected,
+		).phone_number_id;
+
+		const query = {
+			FB_PHONE_ID,
+			useradmin: id,
+			contact_status: { $ne: 0 },
+		};
+
+		if (permissionsId) {
+			let access = await Permissions.findOne({
+				unique_id: permissionsId,
+			});
+
+			if (!access?.contactList?.allList) {
+				// Only match if the agent field contains the added user's ID
+				if (addedUserId) {
+					query.agent = addedUserId;
+				}
+			}
+		}
+
+		const contactLists = await ContactList.find(query).sort({
+			createdAt: -1,
+		});
+
+		res.json(contactLists);
+	} catch (error) {
+		console.error(error);
+		res.render("errors/serverError");
+	}
+};
 
 export const previewContactList = async (req, res, next) => {
 	try {
@@ -81,11 +243,14 @@ export const previewContactList = async (req, res, next) => {
 			});
 		}
 
+		const customFieldNames =
+			customFields?.map((field) => field.clname) || [];
+
 		// Get validation results
 		const validationResult = generateTableAndCheckFields(
 			parsedData,
 			requiredColumns,
-			customFields,
+			customFieldNames,
 		);
 
 		// Return error response if there are issues
@@ -106,6 +271,96 @@ export const previewContactList = async (req, res, next) => {
 			parsedData,
 			listName,
 		};
+
+		return res.status(200).json({
+			success: true,
+			message: "Data preview successful.",
+			tableHtml: validationResult.tableHtml,
+		});
+	} catch (error) {
+		console.error(error);
+		return res.status(500).json({
+			success: false,
+			message: "An error occurred while validating the contact list.",
+		});
+	}
+};
+
+export const previewOverviewCSV = async (req, res, next) => {
+	try {
+		const { fileData, id } = req.body;
+
+		// Check for missing data
+		if (!fileData || !id) {
+			return res.status(400).json({
+				success: false,
+				message: "Required fields missing",
+			});
+		}
+
+		// Parse file data
+		let parsedData;
+		try {
+			parsedData = JSON.parse(fileData);
+		} catch (e) {
+			return res.status(400).json({
+				success: false,
+				message:
+					"Invalid file format. Please upload a valid JSON file.",
+			});
+		}
+
+		// Check if the parsed data contains contacts
+		if (!parsedData.length) {
+			return res.status(400).json({
+				success: false,
+				message: "No contacts found in the file.",
+			});
+		}
+
+		// Validate data
+		const requiredColumns = ["Name", "Number"];
+		const contactList = await Contacts.findOne({
+			useradmin: req.session?.user?.id || req.session?.addedUser?.owner,
+			contactId: id,
+			subscribe: 1,
+		});
+
+		if (!contactList) {
+			return res.status(400).json({
+				success: false,
+				message: "Contact list not found",
+			});
+		}
+
+		const masterExtra = Object.keys(contactList.masterExtra);
+
+		const validationResult = generateAdditionalTableAndCheckFields(
+			parsedData,
+			requiredColumns,
+			masterExtra,
+		);
+
+		// Return error response if there are issues
+		if (
+			validationResult.missingColumns?.length > 0 ||
+			validationResult.invalidColumns?.length > 0 ||
+			validationResult.emptyFields?.length > 0 ||
+			validationResult.invalidNumbers?.length > 0 ||
+			validationResult.duplicateNumbers?.length > 0
+		) {
+			return res.status(400).json({
+				success: false,
+				...validationResult,
+			});
+		}
+
+		req.session.csvOverviewData = {
+			parsedData,
+			id,
+		};
+
+		console.log(req.session.csvOverviewData);
 
 		return res.status(200).json({
 			success: true,
@@ -143,9 +398,10 @@ export const createList = async (req, res, next) => {
 			});
 		}
 
-		const keyId = user?.FB_PHONE_NUMBERS?.find(
-			(d) => d.selected === true,
-		)?.phone_number_id;
+		const keyId =
+			req.session?.addedUser?.selectedFBNumber?.phone_number_id ||
+			user?.FB_PHONE_NUMBERS?.find((d) => d.selected === true)
+				?.phone_number_id;
 
 		const participantCount = parsedData.length;
 		const agentToAssign = addedUserId || userId;
@@ -256,6 +512,128 @@ export const createList = async (req, res, next) => {
 	}
 };
 
+export const addMoreInList = async (req, res) => {
+	try {
+		const session = req.session;
+		if (!session.csvOverviewData) {
+			return res.status(400).json({
+				success: false,
+				message: "Session data missing or incomplete.",
+			});
+		}
+
+		const userId = session?.user?.id || session?.addedUser?.owner;
+		const addedUserId = session?.addedUser?.id;
+		const parsedData = session?.csvOverviewData?.parsedData;
+		const listId = session?.csvOverviewData?.id;
+
+		const user = await User.findOne({ unique_id: userId });
+		if (!user) {
+			return res
+				.status(404)
+				.json({ success: false, message: "User not found." });
+		}
+
+		const keyId =
+			req.session?.addedUser?.selectedFBNumber?.phone_number_id ||
+			user?.FB_PHONE_NUMBERS?.find((d) => d.selected)?.phone_number_id;
+		const agentToAssign = addedUserId || userId;
+
+		const contactList = await ContactList.findOne({ contactId: listId });
+		if (!contactList) {
+			return res
+				.status(404)
+				.json({ success: false, message: "Contact list not found." });
+		}
+
+		const existingNumbers = new Set(
+			(await Contacts.find({ contactId: listId }, "wa_id")).map(
+				(c) => c.wa_id,
+			),
+		);
+
+		const { newContacts, duplicateNumbers } = filterDuplicates(
+			parsedData,
+			existingNumbers,
+		);
+
+		if (duplicateNumbers.length > 0) {
+			const tableHtml = getDuplicateTableHTML(
+				duplicateNumbers,
+				Object.keys(parsedData[0]),
+			);
+			return res.json({
+				success: false,
+				duplicateNumbersInData: duplicateNumbers.map((d) => d.Number),
+				tableHtml,
+			});
+		}
+
+		await Contacts.insertMany(
+			buildContactDocs({
+				newContacts,
+				keyId,
+				userId,
+				agentToAssign,
+				contactList,
+			}),
+		);
+
+		await ActivityLogs.create({
+			useradmin: userId,
+			unique_id: generateUniqueId(),
+			name: session?.user?.name || session?.addedUser?.name,
+			actions: "Update",
+			details: `Added contacts to list: ${contactList.name}`,
+		});
+
+		if (session?.user) {
+			session.user.contactListCSV = null;
+			session.user.listName = null;
+		} else {
+			session.addedUser.contactListCSV = null;
+			session.addedUser.listName = null;
+		}
+
+		await contactList.save();
+
+		const ops = newContacts.map((c) => {
+			const { Number: wa_id, Name: name } = c;
+			return {
+				updateOne: {
+					filter: { useradmin: userId, wa_id, FB_PHONE_ID: keyId },
+					update: {
+						$addToSet: {
+							agent: agentToAssign,
+							contactName: name,
+							nameContactRelation: {
+								name,
+								contactListId: contactList.contactId,
+							},
+						},
+						messageStatus: "SENT",
+						lastSend: Date.now(),
+					},
+					upsert: true,
+				},
+			};
+		});
+
+		await ChatsUsers.bulkWrite(ops);
+
+		res.json({
+			success: true,
+			message: "Contacts added to the list successfully.",
+		});
+	} catch (error) {
+		console.error(error);
+		res.status(500).json({
+			success: false,
+			message: "Error adding contacts to the list.",
+		});
+	}
+};
+
 export const duplicateList = async (req, res) => {
 	try {
 		const userId = req.session?.user?.id || req.session?.addedUser?.owner;
@@ -331,7 +709,10 @@ export const downloadListCSV = async (req, res) => {
 	try {
 		const { listId } = req.params;
 
-		const contacts = await Contacts.find({ contactId: listId, subscribe: 1 }).lean();
+		const contacts = await Contacts.find({
+			contactId: listId,
+			subscribe: 1,
+		}).lean();
 
 		if (!contacts.length) {
 			return res.json({ success: false, message: "No contacts found" });
@@ -356,16 +737,18 @@ export const downloadListCSV = async (req, res) => {
 export const deleteList = async (req, res, next) => {
 	try {
 		const { id } = req.params;
+		const { archive } = req.body;
+
 		if (!isString(id)) return next();
+
 		const contactList = await ContactList.findOne({ contactId: id });
-		// console.log(contactList);
 		if (!contactList) {
 			return res
 				.status(404)
 				.json({ success: false, message: "Contact list not found" });
 		}
 
-		contactList.contact_status = 0;
+		contactList.contact_status = archive ? 0 : 1;
 		await contactList.save();
 
 		await ActivityLogs.create({
@@ -482,38 +865,45 @@ export const getCustomField = async (req, res, next) => {
 		// Calculate total pages
 		const totalPages = Math.ceil(totalCount / limit);
 
-		const permissions = req.session?.addedUser?.permissions;
-		if (permissions) {
-			const access = await Permissions.findOne({
-				unique_id: permissions,
+		let access;
+		const isAddedUser = req.session?.addedUser;
+		const isMainUser = req.session?.user;
+
+		const renderData = {
+			customFields: paginatedResults || [],
+			page: parseInt(skip) / parseInt(limit) + 1,
+			totalPages,
+			countries,
+			help,
+		};
+
+		if (isAddedUser?.permissions) {
+			access = await Permissions.findOne({
+				unique_id: isAddedUser.permissions,
 			});
-			if (access.contactList.customField) {
-				res.render("Contact-List/custom-field", {
+
+			if (access?.contactList?.customField) {
+				return res.render("Contact-List/custom-field", {
+					...renderData,
 					access,
-					customFields: paginatedResults || [],
-					page: parseInt(skip) / parseInt(limit) + 1,
-					totalPages,
-					countries,
-					photo: req.session?.addedUser?.photo,
-					name: req.session?.addedUser?.name,
-					color: req.session?.addedUser?.color,
+					photo: isAddedUser.photo,
+					name: isAddedUser.name,
+					color: isAddedUser.color,
 				});
-			} else {
-				res.render("errors/notAllowed");
 			}
-		} else {
-			const access = await User.findOne({ unique_id: userId });
-			res.render("Contact-List/custom-field", {
-				access: access.access,
-				customFields: paginatedResults || [],
-				page: parseInt(skip) / parseInt(limit) + 1,
-				totalPages,
-				countries,
-				photo: req.session.user?.photo,
-				name: req.session.user.name,
-				color: req.session.user.color,
-			});
+
+			return res.render("errors/notAllowed");
 		}
+
+		access = await User.findOne({ unique_id: userId });
+
+		res.render("Contact-List/custom-field", {
+			...renderData,
+			access: access.access,
+			photo: isMainUser?.photo,
+			name: isMainUser?.name,
+			color: isMainUser?.color,
+		});
 	} catch (error) {
 		console.error(error);
 		res.render("errors/serverError");
@@ -547,7 +937,7 @@ export const createCustomField = async (req, res, next) => {
 		// Check if we're adding a custom field of type "input"
 		if (fieldType === "input") {
 			// Read the user's CSV file
-			let csvData = [];
+			let csvOverviewData = [];
 			let headers = [];
 
 			const fileContent = fs.readFileSync(csvFilePath, "utf8");
@@ -744,157 +1134,6 @@ export const updateContactListName = async (req, res) => {
 	}
 };
 
-export const getList = async (req, res) => {
-	try {
-		const userSession = req.session;
-		const isAddedUser = !!userSession?.addedUser;
-		const userId = userSession?.user?.id || userSession?.addedUser?.owner;
-		const addedUserId = userSession?.addedUser?.id;
-		const permissionsId = userSession?.addedUser?.permissions;
-
-		const page = parseInt(req.query.page) || 1;
-		const limit = 6;
-		const skip = (page - 1) * limit;
-
-		if (!isNumber(page)) return res.render("errors/notFound");
-
-		const user = await User.findOne({ unique_id: userId });
-
-		const FB_PHONE_ID = user?.FB_PHONE_NUMBERS?.find((n) => n.selected);
-
-		let access = null;
-		let matchQuery = {
-			useradmin: userId,
-			contact_status: { $ne: 0 },
-		};
-
-		if (FB_PHONE_ID?.phone_number_id) {
-			matchQuery.FB_PHONE_ID = FB_PHONE_ID?.phone_number_id;
-		}
-
-		if (permissionsId) {
-			access = await Permissions.findOne({ unique_id: permissionsId });
-
-			if (!access?.contactList?.allList) {
-				// Only match if the agent field contains the added user's ID
-				if (addedUserId) {
-					matchQuery.agent = { $in: [addedUserId] };
-				} else {
-					// No access and no agent ID? Return no results
-					return res.render("Contact-List/contact-list", {
-						access,
-						countries,
-						contacts: [],
-						page,
-						totalPages: 0,
-						headers: [],
-						data: [],
-						errors: [],
-						photo: userSession?.addedUser?.photo,
-						name: userSession?.addedUser?.name,
-						color: userSession?.addedUser?.color,
-						whatsAppStatus: userSession?.addedUser?.whatsAppStatus,
-						FB_PHONE_ID,
-					});
-				}
-			}
-		}
-
-		const aggregationPipeline = [
-			{ $match: matchQuery },
-			{ $sort: { createdAt: -1 } },
-			{
-				$facet: {
-					paginatedResults: [{ $skip: skip }, { $limit: limit }],
-					totalCount: [{ $count: "total" }],
-				},
-			},
-		];
-
-		const result = await ContactList.aggregate(aggregationPipeline);
-
-		const contactLists = result[0]?.paginatedResults || [];
-		const totalCount = result[0]?.totalCount[0]?.total || 0;
-		const totalPages = Math.ceil(totalCount / limit);
-
-		const baseRenderData = {
-			access:
-				access ?? (await User.findOne({ unique_id: userId }))?.access,
-			countries,
-			contacts: contactLists,
-			page,
-			totalPages,
-			headers: [],
-			data: [],
-			errors: [],
-			photo: isAddedUser
-				? userSession.addedUser?.photo
-				: userSession.user?.photo,
-			name: isAddedUser
-				? userSession.addedUser?.name
-				: userSession.user?.name,
-			color: isAddedUser
-				? userSession.addedUser?.color
-				: userSession.user?.color,
-			whatsAppStatus: isAddedUser
-				? userSession.addedUser?.whatsAppStatus
-				: userSession.user?.whatsAppStatus,
-			FB_PHONE_ID,
-		};
-
-		const hasPermission = access?.contactList?.type ?? true;
-
-		if (!hasPermission) return res.render("errors/notAllowed");
-
-		res.render("Contact-List/contact-list", baseRenderData);
-	} catch (error) {
-		console.error(error);
-		res.render("errors/serverError");
-	}
-};
-
-export const getContactList = async (req, res) => {
-	try {
-		const id = req.session?.user?.id || req.session?.addedUser?.owner;
-		const addedUserId = req.session?.addedUser?.id;
-		const permissionsId = req.session?.addedUser?.permissions;
-
-		const user = await User.findOne({ unique_id: id });
-
-		const FB_PHONE_ID = user.FB_PHONE_NUMBERS.find(
-			(n) => n.selected,
-		).phone_number_id;
-
-		const query = {
-			FB_PHONE_ID,
-			useradmin: id,
-			contact_status: { $ne: 0 },
-		};
-
-		if (permissionsId) {
-			let access = await Permissions.findOne({
-				unique_id: permissionsId,
-			});
-
-			if (!access?.contactList?.allList) {
-				// Only match if the agent field contains the added user's ID
-				if (addedUserId) {
-					query.agent = addedUserId;
-				}
-			}
-		}
-
-		const contactLists = await ContactList.find(query).sort({
-			createdAt: -1,
-		});
-
-		res.json(contactLists);
-	} catch (error) {
-		console.error(error);
-		res.render("errors/serverError");
-	}
-};
-
 export const getCampaignContacts = async (req, res) => {
 	try {
 		const contacts = await Contacts.find({
@@ -924,9 +1163,9 @@ export const searchContactLists = async (req, res, next) => {
 	try {
 		const user = await User.findOne({ unique_id: userId });
 
-		const FB_PHONE_ID = user.FB_PHONE_NUMBERS.find(
-			(n) => n.selected,
-		).phone_number_id;
+		const FB_PHONE_ID =
+			req.session?.addedUser?.selectedFBNumber?.phone_number_id ||
+			user.FB_PHONE_NUMBERS.find((n) => n.selected).phone_number_id;
 
 		const trimmedQuery = query.trim();
 		const escapeRegex = (text) =>

@@ -1,13 +1,8 @@
 import axios from "axios";
 import dotenv from "dotenv";
 import FormData from "form-data";
-import cron from "node-cron";
 import fs from "fs";
 import { getMimeType } from "./chats.extra.functions.js";
-import ChatsTemp from "../../models/chatsTemp.model.js";
-import ChatsUsers from "../../models/chatsUsers.model.js";
-import { processAllTempEvents } from "../../../webhook.process.js";
-import { updateContacts } from "../../../contactsUpdate cron.js";
 import { parseAxiosError } from "../../utils/axiosErrorHelper.js";
 
 dotenv.config();
@@ -43,7 +38,7 @@ export const uploadMedia = async (
 		return response.data.id;
 	} catch (err) {
 		const { type, message } = parseAxiosError(err);
-		throw new Error(`uploadMedia failed [${type}]: ${message}`);
+		throw `uploadMedia failed [${type}]: ${message}`;
 	}
 };
 

@@ -18,7 +18,7 @@ import { DEFAULT_PERMISSIONS } from "../../utils/defaultPermissions.js";
 import { isString } from "../../middleWares/sanitiseInput.js";
 import { incrementLoginAttempts } from "../../middleWares/rateLimiter.js";
 import Login from "../../models/login.model.js";
-import runMigration from "../../utils/migration.js";
+import { fetchWabaInfo } from "../../services/facebook/fetch.functions.facebook.js";
 
 // 2FA settings: if you later set one of these to false the corresponding OTP verification is disabled
 const ENABLE_EMAIL_OTP = Boolean(process.env.EMAIL_OTP_LOGIN);
@@ -76,7 +76,7 @@ export const generateOTP = async (req, res, next) => {
 		}
 
 		const otp = generate6DigitOTP();
-		const otpExpiry = setOTPExpiry(); // Set the expiration time
+		const otpExpiry = setOTPExpiry();
 
 		req.session.tempUser = {
 			name,
@@ -176,15 +176,18 @@ export const login = async (req, res, next) => {
 			.json({ message: "Password is not in the valid format." });
 
 	try {
-		const user = await User.findOne({ email, deleted: false });
+		const user = await User.findOne({ email, deleted: false }).lean();
+
 		if (!user) {
 			// If no user found in the primary collection, check the AddedUser model.
 			const addedUser = await AddedUser.findOne({
 				email,
 				deleted: false,
-			}).sort({
-				createdAt: -1,
-			});
+			})
+				.sort({
+					createdAt: -1,
+				})
+				.lean();
 			if (addedUser) {
 				if (addedUser.blocked) {
 					return res
@@ -254,7 +257,8 @@ export const login = async (req, res, next) => {
 						requiresOTP: true,
 					});
 				} else {
-					// If 2FA is disabled, complete the login normally.
+					// If 2FA is disabled
+
 					req.session.addedUser = {
 						id: addedUser.unique_id,
 						name: addedUser.name,
@@ -267,6 +271,7 @@ export const login = async (req, res, next) => {
 								unique_id: addedUser.useradmin,
 							})
 						).WhatsAppConnectStatus,
+						selectedFBNumber: addedUser.selectedFBNumber,
 					};
 				}
 
@@ -280,6 +285,19 @@ export const login = async (req, res, next) => {
 				return res
 					.status(403)
 					.json({ message: "Account is blocked.", success: false });
+			}
+
+			if (!user?.currency) {
+				try {
+					const data = await fetchWabaInfo(
+						user.WABA_ID,
+						user.FB_ACCESS_TOKEN,
+					);
+					user.currency = data.currency;
+					await user.save();
+				} catch (error) {
+					console.error("Error fetching Currency :", error);
+				}
 			}
 
 			const now = Date.now();
@@ -448,24 +466,6 @@ export const verifyOTP = async (req, res, next) => {
 		if (otpData.userType === "user") {
 			user = await User.findOne({ unique_id: otpData.userId });
 
-			// keyId = user?.FB_PHONE_NUMBERS?.find(
-			// 	(d) => d.selected === true,
-			// )?.phone_number_id;
-
-			// const login = await Login.findOne({ id: otpData.userId });
-
-			// if (login) {
-			// 	(login.FB_PHONE_ID = keyId || ""), (login.time = Date.now());
-			// 	await login.save();
-			// } else {
-			// 	await Login.create({
-			// 		id: otpData.userId,
-			// 		FB_PHONE_ID: keyId || "",
-			// 		WABA_ID: user.WABA_ID,
-			// 		time: Date.now(),
-			// 	});
-			// }
-
 			req.session.user = {
 				id: user.unique_id,
 				name: user.name,
@@ -476,11 +476,13 @@ export const verifyOTP = async (req, res, next) => {
 		} else if (otpData.userType === "addedUser") {
 			const addedUser = await AddedUser.findOne({
 				unique_id: otpData.userId,
-			});
+			}).lean();
 
-			user = await User.findOne({ unique_id: addedUser.useradmin });
+			user = await User.findOne({
+				unique_id: addedUser.useradmin,
+			}).lean();
 
-			keyId = user.FB_PHONE_NUMBERS.find((s) => s.selected);
+			keyId = addedUser?.selectedFBNumber;
 
 			const login = await Login.findOne({ id: otpData.userId });
 
@@ -513,6 +515,7 @@ export const verifyOTP = async (req, res, next) => {
 				permissions: addedUser.roleId,
 				owner: addedUser.useradmin,
 				whatsAppStatus: user.WhatsAppConnectStatus,
+				selectedFBNumber: keyId,
 			};
 		}
 

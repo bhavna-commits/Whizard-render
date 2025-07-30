@@ -130,9 +130,9 @@
 							<tr class="text-gray-400">
 								<td class="py-4"><input type="checkbox" class="checkbox" /></td>
 								<td>Name</td>
-								<td class="py-4">Contact</td>
-								<td class="py-4">Delivered At</td>
+								<td class="py-4">Contact</td>							
 								<td class="py-4">Send At</td>
+								<td class="py-4">Failed At</td>
 								<td class="py-4">Error Code</td>
 								<td class="py-4">Error</td>
 								<td class="py-4">Message Sent</td>
@@ -154,12 +154,12 @@
                 					%>
 									<%= maskedPhone %>
 								</td>
-								<td class="border-t border-b border-gray-200 date-cell" data-date="<%= report.updatedAt %>">
-									
-								</td>
 								<td class="border-t border-b border-gray-200 date-cell" data-date="<%= report.createdAt %>">
 									
 								</td>
+								<td class="border-t border-b border-gray-200 date-cell" data-date="<%= report.updatedAt %>">
+									
+								</td>								
 								<td class="border-t border-b border-gray-200">
 									<%= report.failed?.code %>
 								</td>

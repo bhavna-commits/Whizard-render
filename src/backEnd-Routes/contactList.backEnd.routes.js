@@ -12,6 +12,8 @@ import {
 	previewContactList,
 	duplicateList,
 	downloadListCSV,
+	previewOverviewCSV,
+	addMoreInList,
 } from "../controllers/ContactList/contactList.controller.js";
 import {
 	updateContact,
@@ -20,7 +22,6 @@ import {
 	createContact,
 	createCampaign,
 	getFilteredContacts,
-	
 } from "../controllers/ContactList/contacts.controller.js";
 import { trackSanitationFailures } from "../middleWares/sanitiseInput.js";
 import { multerMiddle } from "../config/multerMiddleware.js";
@@ -36,7 +37,15 @@ router.get("/download/:listId", downloadListCSV, trackSanitationFailures);
 
 router.post("/previewContactList", previewContactList, trackSanitationFailures);
 
-router.delete("/deleteList/:id", deleteList, trackSanitationFailures);
+router.post(
+	"/preview-overview-csv",
+	previewOverviewCSV,
+	trackSanitationFailures,
+);
+
+router.get("/add-more-in-list", addMoreInList, trackSanitationFailures);
+
+router.post("/deleteList/:id", deleteList, trackSanitationFailures);
 
 router.put("/overview/:id", updateContact, trackSanitationFailures);
 

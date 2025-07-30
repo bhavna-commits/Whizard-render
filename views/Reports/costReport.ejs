@@ -115,7 +115,7 @@
 						<div class="bg-white rounded-lg border p-4">
 							<div class="flex items-center justify-between space-x-16 mb-4">
 								<h2 class="text-gray-500 ">Approximate Charges</h2>
-								<span class="text-gray-500 cost" id="totalCost">₹0.0</span>
+								<div><span class="text-gray-500 pr-1"><%= currency %></span><span class="text-gray-500 cost" id="totalCost">0.0</span></div>
 							</div>
 							<div class="space-y-4">
 								<div class="flex items-center justify-between space-x-16">
@@ -123,21 +123,21 @@
 										<span class="w-2 h-2 bg-orange-400 rounded-full mr-2"></span>
 										<span>Marketing</span>
 									</div>
-									<span class="text-gray-500 cost" id="marketingCost">₹0.0</span>
+									<div><span class="text-gray-500 pr-1"><%= currency %></span><span class="text-gray-500 cost" id="marketingCost">0.0</span></div>
 								</div>
 								<div class="flex items-center justify-between space-x-16">
 									<div class="flex items-center">
 										<span class="w-2 h-2 bg-purple-600 rounded-full mr-2"></span>
 										<span>Utility</span>
 									</div>
-									<span class="text-gray-500 cost" id="utilityCost">₹0.0</span>
+									<div><span class="text-gray-500 pr-1"><%= currency %></span><span class="text-gray-500 cost" id="utilityCost">0.0</span></div>
 								</div>
 								<div class="flex items-center justify-between space-x-16">
 									<div class="flex items-center">
 										<span class="w-2 h-2 bg-blue-400 rounded-full mr-2"></span>
 										<span>Authentication</span>
 									</div>
-									<span class="text-gray-500 cost" id="authCost">₹0.0</span>
+									<div><span class="text-gray-500 pr-1"><%= currency %></span><span class="text-gray-500 cost" id="authCost">0.0</span></div>
 								</div>
 							</div>
 						</div>

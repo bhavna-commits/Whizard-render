@@ -57,6 +57,7 @@ const permissionState = {
 			add: false,
 			view: false,
 		},
+		whatsAppAccountDetails: false,
 	},
 };
 

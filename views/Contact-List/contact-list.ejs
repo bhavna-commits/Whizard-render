@@ -49,8 +49,8 @@
 	<div id="actionLoader" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-400 bg-opacity-75 backdrop-blur-sm text-4xl hidden">
 		<span id="loaderText">Processing</span>
 		<div class="w-10 h-10 border-4 border-t-transparent border-black rounded-full animate-spin ml-4"></div>
-	</div>	
-
+	</div>
+	
 	<!-- Sidebar -->
 	<div class="layout-container">
 		<%- include("../commonJS/sidebar")  %>
@@ -80,7 +80,7 @@
 								<circle cx="12" cy="12" r="10"></circle>
 								<line x1="12" y1="16" x2="12" y2="12"></line>
 								<line x1="12" y1="8" x2="12.01" y2="8"></line>
-							</svg>						
+							</svg>
 						</i>
 						<div class="tooltip invisible opacity-0 w-64 bg-gray-900 text-white text-sm rounded-lg absolute z-10 p-4 -translate-x-1/2 left-1/2 mt-2 transition-opacity duration-300">
 							<!-- Arrow -->
@@ -107,11 +107,13 @@
 			<!-- START card -->
 			<div class="w-full pt-2">
 				<div class="flex w-full justify-between items-center px-2">
-					<div class="">
-						<h6 class="p-3 text-2xl">Contact List</h6>
+					<div class="border rounded p-1 ml-2 my-2">
+						<button class="active-list  text-white px-4 py-1 rounded font-medium bg-black" type="button" onclick="location.href='/contact-list'">Active List</button>
+						<button class="archive-list text-gray-800 px-4 py-1 rounded font-medium " type="button" onclick="location.href='/contact-list/archive'">Archive List</button>
 					</div>
 					
-					<div class="flex items-center justify-evenly">
+					<div class="flex items-center justify-evenly pr-1">
+						
 						<div class="border flex rounded-lg items-center py-2 px-2 w-72 mr-3">
 							<img src="svg/search.svg" alt="" class="px-2">
 							<input type="search" id="searchInput" placeholder="Search by contact list name" class="outline-none focus:outline-none w-full" />
@@ -150,20 +152,19 @@
 					</div>
 					<% if (access?.contactList?.addContactListCSV) { %>
 					<!-- Pop-Up Modal to create List -->
-					<%- include('partials/createList') %>
+					<%- include('partials/contactList/createList') %>
 					<% } %>
 				</div>
-				
 				<!-- Contact list table -->
 				<div class="flex justify-center w-full">
-					<div id="contactListTable" class="w-[95%]">
-						<%- include('partials/contactListTable') %>
+					<div id="contactListTable" class="w-full px-3">
+						<%- include('partials/contactList/contactListTable') %>
 					</div>
 				</div>
 			</div>
 			
 			<!-- Pop-Up Modal to Edit List -->
-			<%- include('partials/editContactList') %>
+			<%- include('partials/contactList/editContactList') %>
 			
 			
 		</div>
@@ -200,6 +201,41 @@
 	<!-- <script src="https://kit.fontawesome.com/44e4e59292.js" crossorigin="anonymous"></script> -->
 	<script src="/contact-list/js/createList.js"></script>
 	<script src="/contact-list/js/editContactList.js"></script>
+	<script>
+		let url = location.pathname;
+		url = url.split('/').filter(i => i).pop();
+		const archiveBtn = document.querySelector(".archive-list");
+		const activeBtn = document.querySelector(".active-list");
+		const svgs = document.querySelectorAll(".archiveSvg");
+		
+		if (url === 'archive') {
+			archiveBtn.classList.remove("text-gray-800");
+			archiveBtn.classList.add("text-white", "bg-black");
+			
+			activeBtn.classList.remove("text-white", "bg-black");
+			activeBtn.classList.add("text-gray-800");
+			
+			svgs.forEach(svg => {
+				svg.classList.remove("w-4", "h-4");
+				svg.classList.add("w-5", "h-5");
+				svg.setAttribute("src", "svg/archive.svg");
+				svg.setAttribute("alt", "Archive List");
+				svg.setAttribute("title", "Un-archive List");				
+			});
+		} else {
+			activeBtn.classList.remove("text-gray-800");
+			activeBtn.classList.add("text-white", "bg-black");
+			
+			archiveBtn.classList.remove("text-white", "bg-black");
+			archiveBtn.classList.add("text-gray-800");
+			
+			svgs.forEach(svg => {
+				svg.setAttribute("src", "svg/bin contact list.svg");
+				svg.setAttribute("alt", "Active List");
+				svg.setAttribute("title", "Archive List");
+			});
+		}
+	</script>
 	<script src="/toast.js"></script>
 	<script src="/menu.js"></script>
 	

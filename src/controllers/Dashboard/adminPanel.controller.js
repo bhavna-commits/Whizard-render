@@ -13,12 +13,15 @@ import {
 
 import sendDeleteAccountEmail from "../../services/OTP/deleteAccountEmail.js";
 import { sendVerificationEmail } from "../../services/OTP/emailOTPService.js";
+import { refreshBusinessToken } from "../../services/facebook/refreshToken.facebook.js";
+import runMigration, { doMigration } from "../../utils/migration.js";
+import { help } from "../../utils/dropDown.js";
 
 export const adminPanel = async (req, res) => {
 	try {
 		let users = await User.find(
 			{ unique_id: { $ne: "db2426e80f" }, deleted: false },
-			"WABA_ID email name blocked unique_id",
+			"WABA_ID email name blocked unique_id deleted paymentCard",
 		).lean();
 
 		const campaignOwners = await Campaign.aggregate([
@@ -41,6 +44,8 @@ export const adminPanel = async (req, res) => {
 			photo: req.session?.user?.photo,
 			name: req.session?.user?.name,
 			color: req.session?.user?.color,
+			doMigration: doMigration(),
+			help,
 		};
 
 		const access = await User.findOne(
@@ -208,7 +213,6 @@ export const changeSuperAdminEmail = async (req, res) => {
 			success: true,
 			message: "OTP sent to current email.",
 		});
-
 	} catch (err) {
 		console.error("changeSuperAdminEmail error:", err);
 		res.status(500).json({ success: false, message: err.toString() });
@@ -266,3 +270,60 @@ export const verifySuperAdminEmailOTP = async (req, res) => {
 		res.status(500).json({ success: false, message: err.toString() });
 	}
 };
+
+export const togglePaymentStatus = async (req, res) => {
+	try {
+		const { id } = req.params;
+		const { status } = req.body;
+
+		const user = await User.findOne({ unique_id: id });
+
+		if (!user) {
+			return res.status(404).json({ message: "User not found" });
+		}
+
+		await User.findOneAndUpdate(
+			{ unique_id: id },
+			{ paymentCard: status },
+			{ new: true },
+		);
+
+		res.json({ success: true, message: "Payment card type updated" });
+	} catch (err) {
+		console.error("togglePaymentStatus error:", err);
+		res.status(500).json({ success: false, message: err });
+	}
+};
+
+export const renewAdminToken = async (req, res) => {
+	try {
+		const id = req.session.user.id;
+		const { token } = req.body;
+		await User.findOneAndUpdate(
+			{ unique_id: id },
+			{
+				FB_ACCESS_TOKEN: token,
+				FB_ACCESS_EXPIRES_IN: 5184000,
+				nextRefreshAt: new Date(Date.now() + (5184000 - 86400) * 1000),
+			},
+		);
+		// await refreshBusinessToken(id, user.WABA_ID, token);
+		res.status(201).json({
+			success: true,
+			message: "Token refreshed successfully",
+		});
+	} catch (err) {
+		console.error("Error refreshing Admin Token :", err);
+		res.status(500).json({ success: false, message: err });
+	}
+};
+
+export async function migrate(req, res) {
+	try {
+		await runMigration();
+		res.json({ success: true, message: "Migration successful" });
+	} catch (err) {
+		console.error(err);
+		res.status(500).json({ success: false, message: "Migration failed" });
+	}
+}
