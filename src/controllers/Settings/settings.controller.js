@@ -387,9 +387,9 @@ export const accountDetails = async (req, res) => {
 			return res.status(404).json({ message: "User not found" });
 		}
 
-		const numbersPhoto =
-			req.session?.addedUser?.selectedFBNumber?.dp ||
-			user?.FB_PHONE_NUMBERS.find((n) => n.selected)?.dp;
+		const selectedNumber =
+			req.session?.addedUser?.selectedFBNumber ||
+			user?.FB_PHONE_NUMBERS.find((n) => n.selected);
 
 		const permissions = req.session?.addedUser?.permissions;
 		if (permissions) {
@@ -404,7 +404,7 @@ export const accountDetails = async (req, res) => {
 					name: req.session.addedUser.name,
 					color: req.session.addedUser.color,
 					help,
-					numbersPhoto,
+					selectedNumber,
 					verticalCategories,
 				});
 			} else {
@@ -421,7 +421,7 @@ export const accountDetails = async (req, res) => {
 				name: req.session.user.name,
 				color: req.session.user.color,
 				help,
-				numbersPhoto,
+				selectedNumber,
 				verticalCategories,
 			});
 		}
@@ -492,7 +492,7 @@ export const updateAccountDetails = async (req, res, next) => {
 				absolutePath,
 			);
 
-			// Save profile pic locally (for UI/reference)
+			// Save DP path locally
 			selectedNumberObj.dp = path.join(
 				"uploads",
 				userId,
@@ -514,11 +514,11 @@ export const updateAccountDetails = async (req, res, next) => {
 			profilePictureHandle,
 		});
 
-		// Update fields in your own DB (only if not empty)
+		// Update nested fields in FB_PHONE_NUMBERS
 		const updateFields = {
 			companyName,
 			companyDescription: description,
-			website,
+			website: website ? [website] : [],
 			displayAddress: address,
 			industry,
 			companyDisplayEmail: email,
@@ -527,7 +527,10 @@ export const updateAccountDetails = async (req, res, next) => {
 
 		for (const [key, value] of Object.entries(updateFields)) {
 			if (typeof value === "string" && value.trim()) {
-				updatedUser[key] = value.trim();
+				selectedNumberObj[key] = value.trim();
+			}
+			if (Array.isArray(value) && value.length) {
+				selectedNumberObj[key] = value;
 			}
 		}
 
@@ -549,7 +552,7 @@ export const updateAccountDetails = async (req, res, next) => {
 		console.error("Error updating account details:", error);
 		res.status(500).json({
 			success: false,
-			message: "Server error: " + error?.message || error,
+			message: "Server error: " + (error?.message || error),
 		});
 	}
 };

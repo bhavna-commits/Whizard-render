@@ -119,13 +119,13 @@
 							</div>
 							<div class="flex items-center w-3/5">
 								<div class="w-16 h-16 rounded-full bg-[<%= color %>] text-white flex items-center justify-center text-xl font-semibold mr-3 relative overflow-hidden">
-									<% if (numbersPhoto) { %>
+									<% if (selectedNumber?.dp) { %>
 									
-									<img id="profilePreview" src="/<%= numbersPhoto %>" class="w-full h-full object-cover block" />
+									<img id="profilePreview" src="/<%= selectedNumber?.dp %>" class="w-full h-full object-cover block" />
 									
 									<% } else { %>
 									
-									<span id="userInitial" class="block text-3xl"><%= user.name.charAt(0) + user.name.charAt(name.length - 1) %></span>
+									<span id="userInitial" class="block text-3xl"><%= selectedNumber?.friendly_name.charAt(0) + selectedNumber?.friendly_name.charAt(selectedNumber?.friendly_name.length - 1) %></span>
 									<% } %>
 									<img id="dpPreview" src="" class="w-full h-full absolute object-cover hidden" />
 								</div>
@@ -141,16 +141,16 @@
 						</div>
 						<div class="mb-4 flex justify-between items-center">
 							<label for="name" class="form-label text-[#191919]">Company Name</label>
-							<input type="text" class="form-control w-3/5 text-[#191919]" id="name" name="name" value="<%= user.companyName %>" placeholder="Enter your Company's Name" />
+							<input type="text" class="form-control w-3/5 text-[#191919]" id="name" name="name" value="<%= selectedNumber?.companyName %>" placeholder="Enter your Company's Name" />
 						</div>
 						<div class="mb-4 flex justify-between items-center">
 							<label for="website" class="form-label text-[#191919]">Display Email</label>
-							<input type="email" id="email" class="px-3 py-2 rounded-xl w-3/5 border outline-none form-control text-[#191919]" name="email" placeholder="contact@company.com" value="<%= user.companyDisplayEmail %>" />
+							<input type="email" id="email" class="px-3 py-2 rounded-xl w-3/5 border outline-none form-control text-[#191919]" name="email" placeholder="contact@company.com" value="<%= selectedNumber?.companyDisplayEmail %>" />
 						</div>
 						<div class="mb-4 flex justify-between items-start">
 							<label for="about" class="form-label text-[#191919]">About</label>
 							<div class="w-3/5 about block relative">
-								<textarea class="form-control w-full text-[#191919] " name="about" placeholder="Tell us a bit about your company..." rows="2" maxlength="139"><%= user.displayAbout %></textarea>
+								<textarea class="form-control w-full text-[#191919] " name="about" placeholder="Tell us a bit about your company..." rows="2" maxlength="139"><%= selectedNumber?.displayAbout %></textarea>
 								<div class="form-text text-gray-500 absolute right-2 bottom-0 mt-2 text-sm text-right wordCount">
 									0/139
 								</div>
@@ -159,7 +159,7 @@
 						<div class="mb-4 flex justify-between items-start">
 							<label for="description" class="form-label text-[#191919]">Description</label>
 							<div class="w-3/5 block relative">
-								<textarea class="form-control w-full text-[#191919] " name="description" placeholder="Brief about your company..." rows="2" maxlength="512"><%= user.companyDescription %></textarea>
+								<textarea class="form-control w-full text-[#191919] " name="description" placeholder="Brief about your company..." rows="2" maxlength="512"><%= selectedNumber?.companyDescription %></textarea>
 								<div class="form-text text-gray-500 mt-2 absolute right-2 bottom-0 text-sm text-right wordCount">
 									0/512
 								</div>
@@ -168,7 +168,7 @@
 						<div class="mb-4 flex justify-between items-start">
 							<label for="address" class="form-label text-[#191919]">Business Address</label>
 							<div class="w-3/5 block relative">
-								<textarea type="text" id="address" name="address" class="form-control text-[#191919]" placeholder="Enter your business address" value="<%= user.displayAddress || '' %>" rows="2" maxlength="256"><%= user.displayAddress %></textarea>
+								<textarea type="text" id="address" name="address" class="form-control text-[#191919]" placeholder="Enter your business address" value="<%= selectedNumber?.displayAddress || '' %>" rows="2" maxlength="256"><%= selectedNumber?.displayAddress %></textarea>
 								<div class="form-text text-gray-500 mt-2 absolute right-2 bottom-0 text-sm text-right wordCount">
 									0/256
 								</div>
@@ -180,7 +180,7 @@
 								<select id="industry" name="industry" class="form-control text-[#191919]">
 									<option value="">Select industry type</option>
 									<% for (const [key, label] of Object.entries(verticalCategories)) { %>
-									<option value="<%= key %>" <%= user.industry === key ? 'selected' : '' %>><%= label %></option>
+									<option value="<%= key %>" <%= selectedNumber?.industry === key ? 'selected' : '' %>><%= label %></option>
 									<% } %>
 								</select>
 							</div>
@@ -188,7 +188,7 @@
 						
 						<div class="mb-4 flex justify-between items-center">
 							<label for="website" class="form-label text-[#191919]">Website URL</label>
-							<input type="url" id="website" class="px-3 py-2 rounded-xl w-3/5 border outline-none form-control text-[#191919]" name="website" placeholder="https://example.com" value="<%= user.website %>" />
+							<input type="url" id="website" class="px-3 py-2 rounded-xl w-3/5 border outline-none form-control text-[#191919]" name="website" placeholder="https://example.com" value="<%= selectedNumber?.website[0] %>" />
 						</div>
 						
 						
