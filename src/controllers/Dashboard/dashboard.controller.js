@@ -1,15 +1,12 @@
 import User from "../../models/user.model.js";
 import Campaign from "../../models/campaign.model.js";
-import Report from "../../models/report.model.js";
 import ContactList from "../../models/contactList.model.js";
 import Permissions from "../../models/permissions.model.js";
 import dotenv from "dotenv";
-import Contacts from "../../models/contacts.model.js";
 import {
 	convertUTCToLocal,
 	oneDayInMilliSeconds,
 } from "../../utils/utilFunctions.js";
-// import { getFbAccessToken } from "../../backEnd-Routes/facebook.backEnd.routes.js";
 import { isString } from "../../middleWares/sanitiseInput.js";
 import { countries, help } from "../../utils/dropDown.js";
 import chatsModel from "../../models/chats.model.js";
@@ -479,33 +476,46 @@ export const selectPhoneNumber = async (req, res) => {
 	try {
 		const { phoneNumberId } = req.body;
 		const addedUser = req.session?.addedUser;
-		const userId = req.session?.user?.id || req.session?.addedUser?.owner;
+		const userId = req.session?.user?.id || addedUser?.owner;
+
+		const userDoc = await User.findOne({ unique_id: userId });
+		if (!userDoc) {
+			return res
+				.status(404)
+				.json({ success: false, message: "User not found" });
+		}
+
+		let found = false;
+
+		for (const number of userDoc.FB_PHONE_NUMBERS) {
+			if (number.phone_number_id === phoneNumberId) {
+				number.selected = true;
+				found = true;
+			} else {
+				number.selected = false;
+			}
+		}
+
+		if (!found) {
+			return res
+				.status(400)
+				.json({ success: false, message: "Phone number ID not found" });
+		}
+
+		await userDoc.save();
 
 		if (addedUser) {
-			const selectResult = await User.findOne({ unique_id: userId });
-			const newNumber = selectResult.FB_PHONE_NUMBERS.find(
-				(i) => i.phone_number_id === phoneNumberId,
+			const selectedNumber = userDoc.FB_PHONE_NUMBERS.find(
+				(n) => n.phone_number_id === phoneNumberId,
 			);
-			addedUser.selectedFBNumber = newNumber;
+			addedUser.selectedFBNumber = selectedNumber;
 			await req.session.touch();
-		} else {
-			const resetResult = await User.updateOne(
-				{ unique_id: userId },
-				{ $set: { "FB_PHONE_NUMBERS.$[].selected": false } },
-			);
-
-			const selectResult = await User.updateOne(
-				{
-					unique_id: userId,
-					"FB_PHONE_NUMBERS.phone_number_id": phoneNumberId,
-				},
-				{ $set: { "FB_PHONE_NUMBERS.$.selected": true } },
-			);
 		}
+
 		res.json({ success: true, message: "Number selected successfully" });
 	} catch (error) {
-		console.log("error selecting number :", error);
-		res.json({
+		console.error("Error selecting number:", error);
+		res.status(500).json({
 			success: false,
 			message: "Failed to select number. Please try again.",
 		});
@@ -663,16 +673,19 @@ const getPhoneNumbers = async (user) => {
 				(existingNumber) => {
 					const updatedNumber = phoneNumbers.find(
 						(newNumber) =>
-							newNumber.phone_number_id ==
+							newNumber.phone_number_id ===
 							existingNumber.phone_number_id,
 					);
 
-					return updatedNumber
-						? {
-								...updatedNumber,
-								selected: existingNumber.selected,
-						  }
-						: existingNumber;
+					if (updatedNumber) {
+						// Merge updated fields without wiping old ones
+						Object.assign(existingNumber, {
+							...updatedNumber,
+							selected: existingNumber.selected,
+						});
+					}
+
+					return existingNumber;
 				},
 			);
 
