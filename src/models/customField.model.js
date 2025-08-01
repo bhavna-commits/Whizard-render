@@ -22,6 +22,7 @@ const customFieldsSchema = new Schema(
 			index: true,
 		},
 		status: { type: Number, required: true, default: 1, index: true },
+		agentName: String,
 	},
 	{ timestamps: false, strict: false },
 );

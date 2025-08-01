@@ -413,6 +413,9 @@ export const createList = async (req, res, next) => {
 			participantCount,
 			contactId: generateUniqueId(),
 			agent: [agentToAssign],
+			agentName: req.session?.user?.name
+				? req.session?.user?.name
+				: req.session?.addedUser?.name,
 		};
 
 		// Create a new Contact List
@@ -970,6 +973,7 @@ export const createCustomField = async (req, res, next) => {
 			unique_id,
 			clname: fieldName,
 			cltype: fieldType,
+			agentName: req.session?.user?.name || req.session?.addedUser?.name,
 		});
 
 		await newField.save();

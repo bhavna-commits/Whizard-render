@@ -8,6 +8,7 @@
 					<td class="text-left w-[20%]">Contact List Name</td>
 					<td class="w-[25%]">Number of Participants</td>
 					<td class="">Created At</td>
+					<td class="">Created By</td>
 					<td class="">Actions</td>
 				</tr>
 				<% contacts.forEach((contact, index) => { %>
@@ -21,8 +22,9 @@
 					<td class="text-gray-500 border-t border-b border-gray-200">
 						<%= contact.participantCount %>
 					</td>
-					<td class="text-gray-500 border-t border-b border-gray-200 date-cell" data-date="<%= contact.createdAt %>">
-						
+					<td class="text-gray-500 border-t border-b border-gray-200 date-cell" data-date="<%= contact.createdAt %>"></td>
+					<td class="text-gray-500 border-t border-b border-gray-200">
+						<%= contact.agentName %>
 					</td>
 					<td class="border-r border-t border-b rounded-lg border-gray-200 group-hover:bg-gray-100">
 

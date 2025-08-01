@@ -122,6 +122,7 @@ export const createTemplate = async (req, res, next) => {
 				components,
 				id,
 				validityPeriod,
+				req.session?.user?.name || req.session?.addedUser?.name,
 			);
 		} else {
 			savedTemplate = await saveTemplateToDatabase(

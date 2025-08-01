@@ -178,6 +178,7 @@ export const saveTemplateToDatabase = async (
 			useradmin: id,
 			dynamicVariables,
 			language: selectedLanguageCode,
+			agentName: req.session?.user?.name || req.session?.addedUser?.name,
 		});
 
 		let headerComponent;
@@ -537,6 +538,7 @@ export async function saveAuthTemplate(
 	components,
 	useradmin,
 	validityPeriod,
+	agentName,
 ) {
 	try {
 		const newTemplate = new Template({
@@ -549,6 +551,7 @@ export async function saveAuthTemplate(
 			language,
 			dynamicVariables,
 			validityPeriod,
+			agentName,
 		});
 
 		const data = await submitTemplateToFacebook(newTemplate, useradmin);

@@ -27,7 +27,7 @@ export const getDashboard = async (req, res) => {
 		} else {
 			selectedNumber = user.FB_PHONE_NUMBERS.find(
 				(n) => n.selected,
-			).phone_number_id;
+			)?.phone_number_id;
 		}
 
 		const dashboardData = await fetchDashboardData(

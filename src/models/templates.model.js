@@ -28,6 +28,7 @@ const templateSchema = new Schema(
 		rejected_reason: String,
 		deleted: { type: Boolean, default: false, index: true },
 		logs: Schema.Types.Mixed,
+		agentName: String,
 	},
 	{ timestamps: false, strict: false },
 );

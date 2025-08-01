@@ -15,6 +15,7 @@ const contactListSchema = new Schema(
 		},
 		participantCount: { type: Number, required: true, index: true },
 		createdAt: { type: Number, default: () => Date.now(), index: true },
+		agentName: String,
 	},
 	{ timestamps: false, strict: false },
 );

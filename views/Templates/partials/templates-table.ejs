@@ -9,6 +9,7 @@
 					<td class=" ">Category</td>
 					<td class=" ">Language</td>
 					<td class=" ">Status</td>
+					<td class=" ">Created By</td>
 					<td class=" ">Actions</td>
 				</tr>
 				
@@ -31,7 +32,7 @@
 						</div>						
 					</td>
 					<td class="border-t border-b border-gray-200">
-						<span class="inline-block px-2 py-1 text-gray-500 rounded-full"><%= list.language.language %></span>
+						<span class="inline-block px-2 py-1 text-gray-500"><%= list.language.language %></span>
 					</td>
 					<td class="border-t border-b border-gray-200">
 						<% if (list.status === 'Rejected') { %>
@@ -48,7 +49,9 @@
 						</span>
 						<% } %>
 					</td>
-					
+					<td class="border-t border-b border-gray-200">
+						<span class="inline-block px-2 py-1 text-gray-500"><%= list.agentName %></span>
+					</td>
 					<td class="border-r border-t border-b rounded-lg border-gray-200">
 						<% if ( list.category === "Authentication") { %>
 						
