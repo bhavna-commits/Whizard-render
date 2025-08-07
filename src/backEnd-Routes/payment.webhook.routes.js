@@ -19,7 +19,11 @@ router.post(
 
 router.post(
 	"/stripe_webhook",
-	express.raw({ type: "application/json" }),
+	express.json({
+		verify: (req, res, buf) => {
+			req.rawBody = buf.toString();
+		},
+	}),
 	stripeWebhook,
 );
 
