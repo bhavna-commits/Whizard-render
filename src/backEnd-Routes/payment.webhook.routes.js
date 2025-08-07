@@ -1,0 +1,30 @@
+import express from "express";
+import {
+	razorpayWebhook,
+	stripeWebhook,
+	getRazorConfirm,
+} from "../controllers/Settings/payment.controller.js";
+
+const router = express.Router();
+
+router.post(
+	"/razorpay_webhook",
+	express.json({
+		verify: (req, res, buf) => {
+			req.rawBody = buf;
+		},
+	}),
+	razorpayWebhook,
+);
+
+router.post(
+	"/stripe_webhook",
+	express.json({
+		verify: (req, res, buf) => {
+			req.rawBody = buf;
+		},
+	}),
+	stripeWebhook,
+);
+
+export default router;

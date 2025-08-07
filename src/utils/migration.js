@@ -13,15 +13,17 @@ export default async function runMigration() {
 		const users = await User.find();
 		for (const user of users) {
 			user.access.settings.whatsAppAccountDetails = true;
+			user.access.settings.accountDetails = true;
+			user.access.settings.payment = true;
 			await user.save();
 		}
 
 		// 2. Update Permissions
 		const permissions = await Permissions.find();
 		for (const permission of permissions) {
-			if (!permission.settings?.whatsAppAccountDetails) {
-				permission.settings.whatsAppAccountDetails = false;
-			}
+			permission.settings.whatsAppAccountDetails = false;
+			permission.settings.accountDetails = false;
+			permission.settings.payment = false;
 			await permission.save();
 		}
 

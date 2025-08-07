@@ -13,11 +13,13 @@ import dashboardBackEndRoutes from "./backEnd-Routes/dashboard.backEnd.routes.js
 import chatsFrontEndRoutes from "./frontEnd-Routes/chats.frontEnd.routes.js";
 import chatsBackEndRoutes from "./backEnd-Routes/chats.backEnd.routes.js";
 import publicBackendRoutes from "./backEnd-Routes/public.backEnd.routes.js";
+import paymentWebhooksRoutes from "./backEnd-Routes/payment.webhook.routes.js"
 
 import { checkSession, checkSessionApi } from "./middleWares/checkSession.js";
 import app from "./static.app.js";
 
 app.use("/api/facebook", faceBookBackEndRoute);
+app.use("/payments", paymentWebhooksRoutes);
 app.use("/", userfrontEndRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/chats", chatsBackEndRoutes);

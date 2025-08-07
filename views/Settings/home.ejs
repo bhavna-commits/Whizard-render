@@ -79,8 +79,8 @@
 				<!-- END BREADCRUMB -->
 				
 			</div>
-			<div class="w-full h-[80%] flex justify-center items-center mt-3">
-				<div class="w-[60%] h-[60%] grid grid-cols-1 sm:grid-cols-2 gap-4">
+			<div class="w-full h-full flex justify-center items-center">
+				<div class="w-[60%] grid grid-cols-1 sm:grid-cols-2 gap-4">
 					<div onclick="location.href='/settings/profile'" class="border cursor-pointer text-slate-500 rounded-xl space-y-3 p-3 hover:bg-slate-100">
 						<i class="fa-solid fa-user text-black text-xl"></i>
 						<h2 class="text-2xl text-black">Profile</h2>
@@ -90,12 +90,25 @@
 					<div onclick="location.href='/settings/account-details'" class="border cursor-pointer rounded-xl text-slate-500 space-y-3 p-3 hover:bg-slate-100">
 						<i class="fas fa-info-circle text-black text-xl"></i>
 						<h2 class="text-2xl text-black">WhatsApp Account Details</h2>
-						<p>View and update business information and contact information.</p>
+						<p>View and update WhatsApp account information.</p>
 					</div>
 					<% } else { %>
 					<div title="You don't have permissions to access this" class="border hover:cursor-not-allowed rounded-xl text-slate-500 space-y-3 p-3 hover:bg-slate-100">
 						<i class="fas fa-info-circle text-black text-xl"></i>
 						<h2 class="text-2xl text-black">WhatsApp Account Details</h2>
+						<p>View and update WhatsApp account information.</p>
+					</div>
+					<% } %>
+					<% if (access?.settings?.accountDetails) { %>
+					<div onclick="location.href='/settings/account-details'" class="border cursor-pointer rounded-xl text-slate-500 space-y-3 p-3 hover:bg-slate-100">
+						<i class="fas fa-info-circle text-black text-xl"></i>
+						<h2 class="text-2xl text-black">Account Details</h2>
+						<p>View and update business information and contact information.</p>
+					</div>
+					<% } else { %>
+					<div title="You don't have permissions to access this" class="border hover:cursor-not-allowed rounded-xl text-slate-500 space-y-3 p-3 hover:bg-slate-100">
+						<i class="fas fa-info-circle text-black text-xl"></i>
+						<h2 class="text-2xl text-black">Account Details</h2>
 						<p>View and update business information and contact information.</p>
 					</div>
 					<% } %>
@@ -112,19 +125,7 @@
 						<p>Add, edit, remove users, and assign roles to manage team access and permissions effectively.</p>
 					</div>
 					<% } %>
-					<% if (access?.settings?.manageTags?.type) { %>
-					<!-- <div onclick="location.href='/settings/tags'" class="border cursor-pointer text-slate-500 rounded-xl space-y-3 p-3 hover:bg-slate-100">
-						<i class="fa-solid fa-tags text-black text-xl"></i>
-						<h2 class="text-2xl text-black">Tags</h2>
-						<p>Create, edit, and manage tags to organize and categorize data for better searchability and segmentation.</p>
-					</div> -->
-					<% } else { %>
-					<!-- <div title="You don't have permissions to access this" class="border cursor-pointer text-slate-500 rounded-xl space-y-3 p-3 hover:cursor-not-allowed">
-						<i class="fa-solid fa-tags text-black text-xl"></i>
-						<h2 class="text-2xl text-black">Tags</h2>
-						<p>Create, edit, and manage tags to organize and categorize data for better searchability and segmentation.</p>
-					</div> -->
-					<% } %>
+					
 					<% if (access?.settings?.activityLogs) { %>
 					<div onclick="location.href='/settings/activity-logs'" class="border cursor-pointer rounded-xl text-slate-500 space-y-3 p-3 hover:bg-slate-100">
 						<i class="fas fa-history text-black text-xl"></i>
@@ -136,6 +137,19 @@
 						<i class="fas fa-history text-black text-xl"></i>
 						<h2 class="text-2xl text-black">Activity Logs</h2>
 						<p>Track user activity and display a timeline of actions, including activity type, user details, and timestamps.</p>
+					</div>
+					<% } %>
+					<% if (access?.settings?.payment) { %>
+					<div onclick="location.href='/settings/payments'" class="border cursor-pointer rounded-xl text-slate-500 space-y-3 p-3 hover:bg-slate-100">
+						<img src="svg/coins.svg" alt="payment" class="text-black text-xl">
+						<h2 class="text-2xl text-black">Payments</h2>
+						<p>Make payments, check history, check balance and many more.</p>
+					</div>
+					<% } else { %>
+					<div title="You don't have permissions to access this" class="border rounded-xl text-slate-500 space-y-3 p-3 hover:cursor-not-allowed">
+						<img src="svg/coins.svg" alt="payment" class="text-black text-xl">
+						<h2 class="text-2xl text-black">Payments</h2>
+						<p>Make payments, check history, check balance and many more.</p>
 					</div>
 					<% } %>
 				</div>

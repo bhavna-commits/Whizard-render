@@ -58,6 +58,8 @@ export const DEFAULT_PERMISSIONS = {
 				view: false,
 			},
 			whatsAppAccountDetails: false,
+			accountDetails: false,
+			payment: false,
 		},
 	},
 	admin: {
@@ -118,6 +120,8 @@ export const DEFAULT_PERMISSIONS = {
 				view: false,
 			},
 			whatsAppAccountDetails: false,
+			accountDetails: false,
+			payment: false,
 		},
 	},
 	owner: {
@@ -178,6 +182,8 @@ export const DEFAULT_PERMISSIONS = {
 				view: true,
 			},
 			whatsAppAccountDetails: true,
+			accountDetails: true,
+			payment: true,
 		},
 	},
 	unAssignedChats: {
@@ -238,6 +244,8 @@ export const DEFAULT_PERMISSIONS = {
 				view: false,
 			},
 			whatsAppAccountDetails: false,
+			accountDetails: false,
+			payment: false,
 		},
 	},
 };

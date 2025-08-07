@@ -1,7 +1,7 @@
 <script>
 	// Get current URL without any page query parameter
-	const url = new URL(window.location.href);
-	// url.searchParams.delete('page'); // Removing the page param to append it later dynamically
+	const pageurl = new URL(window.location.href);
+	// pageurl.searchParams.delete('page'); // Removing the page param to append it later dynamically
 
 	// Navigate to the desired page number
 	function goToPage (page) {
@@ -13,8 +13,8 @@
 			alert("Page number should be at least 1.");
 			pageInput.value = <%= page %>;
 		} else {
-			url.searchParams.set('page', page);
-			window.location.href = url.toString();
+			pageurl.searchParams.set('page', page);
+			window.location.href = pageurl.toString();
 		}
 	}
 	

@@ -624,7 +624,6 @@ export const createCampaign = async (req, res, next) => {
 		let message = "Campaign created successfully";
 
 		if (test) {
-			// console.log("var :", typeof variables);
 			try {
 				await sendTestMessage(
 					user,
@@ -975,34 +974,41 @@ export const getOverviewFilter = async (req, res) => {
 };
 
 export const getCreateCampaign = async (req, res) => {
-	const permissions = req.session?.addedUser?.permissions;
-	if (permissions) {
-		const access = await Permissions.findOne({ unique_id: permissions });
-		if (
-			access.contactList.sendBroadcast &&
-			req.session?.addedUser?.whatsAppStatus
-		) {
-			// const access = Permissions.findOne({ unique_id: permissions });
-			res.render("Contact-List/createCampaign", {
-				access,
-				name: req.session?.addedUser?.name,
-				photo: req.session?.addedUser?.photo,
-				color: req.session?.addedUser?.color,
-				help,
-			});
-		} else {
-			res.render("errors/notAllowed");
-		}
-	} else if (req.session?.user?.whatsAppStatus === "Live") {
-		const access = await User.findOne({ unique_id: req.session?.user?.id });
-		res.render("Contact-List/createCampaign", {
-			access: access.access,
-			name: req.session?.user?.name,
-			photo: req.session?.user?.photo,
-			color: req.session?.user?.color,
-			help,
+	const sessionUser = req.session?.user;
+	const addedUser = req.session?.addedUser;
+	const ownerId = sessionUser?.id || addedUser?.owner;
+
+	const user = await User.findOne({ unique_id: ownerId });
+	let renderData = null;
+
+	if (addedUser?.permissions) {
+		const access = await Permissions.findOne({
+			unique_id: addedUser.permissions,
 		});
-	} else {
-		res.render("errors/notAllowed");
+
+		if (access?.contactList?.sendBroadcast && addedUser?.whatsAppStatus) {
+			renderData = {
+				access,
+				name: addedUser.name,
+				photo: addedUser.photo,
+				color: addedUser.color,
+				help,
+				message: user.payment?.messagesCount,
+				view: "Contact-List/createCampaign",
+			};
+		}
+	} else if (sessionUser?.whatsAppStatus === "Live") {
+		renderData = {
+			access: user.access,
+			name: sessionUser.name,
+			photo: sessionUser.photo,
+			color: sessionUser.color,
+			help,
+			message: user.payment?.messagesCount,
+			view: "Contact-List/createCampaign",
+		};
 	}
+
+	res.render(renderData?.view || "errors/notAllowed", renderData || {});
 };
+

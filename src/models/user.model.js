@@ -116,6 +116,8 @@ const userSchema = new mongoose.Schema(
 					view: { type: Boolean, default: true },
 				},
 				whatsAppAccountDetails: { type: Boolean, default: true },
+				accountDetails: { type: Boolean, default: true },
+				payment: { type: Boolean, default: true },
 			},
 		},
 		createdAt: {
@@ -143,6 +145,26 @@ const userSchema = new mongoose.Schema(
 			default: "External",
 		},
 		currency: String,
+		payment: {
+			plan: {
+				type: Schema.Types.Mixed,
+			},
+			totalMessages: {
+				type: Number,
+				default: 0,
+				required: true,
+			},
+			messagesCount: {
+				type: Number,
+				default: 0,
+				required: true,
+			},
+			previousMessagesCount: {
+				type: Number,
+				default: 0,
+				required: true,
+			},
+		},
 	},
 	{ timestamps: false, strict: false },
 );

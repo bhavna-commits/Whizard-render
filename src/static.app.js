@@ -14,6 +14,10 @@ app.use("/Contact-List/createCampaign", express.static("public"));
 app.use("/Contact-List/custom-field", express.static("public"));
 app.use("/Settings/profile", express.static("public"));
 app.use("/Settings/account-details", express.static("public"));
+app.use("/Settings/whatsapp-account-details", express.static("public"));
+app.use("/Settings/payments", express.static("public"));
+app.use("/Settings/confirm-stripe-payment", express.static("public"));
+app.use("/Settings/confirm-razorpay-payment", express.static("public"));
 app.use("/Settings/activity-logs", express.static("public"));
 app.use("/Settings/user-management", express.static("public"));
 app.use("/Reports/campaign-list/", express.static("public"));
@@ -40,7 +44,10 @@ app.use(
 	"/settings/js",
 	express.static(path.join(__dirname, "views/Settings/js")),
 );
-
+app.use(
+	"/payment/js",
+	express.static(path.join(__dirname, "views/Settings/payment/js")),
+);
 app.use(
 	"/reports/js",
 	express.static(path.join(__dirname, "views/Reports/js")),

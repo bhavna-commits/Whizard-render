@@ -6,9 +6,7 @@ import {
 	getMediaPreviewFromTemplate,
 	generatePreviewComponents,
 } from "../ContactList/campaign.functions.js";
-import {
-	sendCampaignReportEmail,
-} from "../../services/OTP/reportsEmail.js";
+import { sendCampaignReportEmail } from "../../services/OTP/reportsEmail.js";
 import { agenda } from "../../config/db.js";
 import Template from "../../models/templates.model.js";
 import Permissions from "../../models/permissions.model.js";
@@ -249,87 +247,99 @@ export async function sendMessagesReports(
 			}
 		}
 
+		const countUser = await User.findOne({ unique_id: user.unique_id });
+		let remainingCount = countUser?.payment?.messagesCount || 0;
+
+		if (contactList.length > remainingCount) {
+			throw new Error(
+				`Not enough credits. You have ${remainingCount} messages left, but you're trying to send ${contactList.length}.`,
+			);
+		}		
+
 		// Loop through each contact in the contact list
 		for (let contact of contactList) {
-			// Replace dynamic variables in the template with contact-specific data
-			// console.log(contact);
-			const personalizedMessage = replaceDynamicVariables(
-				template,
-				campaign.variables,
-				contact,
-			);
-			// console.log(personalizedMessage);
-			const response = await sendMessageThroughWhatsApp(
-				user,
-				template,
-				contact.wa_id,
-				personalizedMessage,
-				phone_number,
-			);
-
-			const messageTemplate = generatePreviewMessage(
-				template,
-				personalizedMessage,
-			);
-
-			if (response.status === "FAILED") {
-				console.error(
-					`Failed to send message to ${contact.wa_id}: ${response.response}`,
+			try {
+				const personalizedMessage = replaceDynamicVariables(
+					template,
+					campaign.variables,
+					contact,
 				);
-				throw new Error(
-					`Failed to send message to ${contact.wa_id}: ${response.response}`,
+				// console.log(personalizedMessage);
+				const response = await sendMessageThroughWhatsApp(
+					user,
+					template,
+					contact.wa_id,
+					personalizedMessage,
+					phone_number,
 				);
-			}
 
-			const mediaPreview = getMediaPreviewFromTemplate(template);
+				const messageTemplate = generatePreviewMessage(
+					template,
+					personalizedMessage,
+				);
 
-			const components = generatePreviewComponents(
-				template,
-				personalizedMessage,
-			);
+				if (response.status === "FAILED") {
+					console.error(
+						`Failed to send message to ${contact.wa_id}: ${response.response}`,
+					);
+					continue;
+				}
 
-			let reportData = {
-				WABA_ID: user.WABA_ID,
-				FB_PHONE_ID: phone_number,
-				useradmin: user.unique_id,
-				unique_id,
-				campaignName: campaign.name,
-				campaignId: campaign.unique_id,
-				contactName: contact.Name,
-				recipientPhone: contact.wa_id,
-				status: response.status,
-				messageId: response.response.messages[0].id,
-				messageTemplate,
-			};
+				const mediaPreview = getMediaPreviewFromTemplate(template);
 
-			if (mediaPreview) {
-				reportData.media = {
-					url: mediaPreview.url,
-					fileName: mediaPreview.fileName,
+				const components = generatePreviewComponents(
+					template,
+					personalizedMessage,
+				);
+
+				let reportData = {
+					WABA_ID: user.WABA_ID,
+					FB_PHONE_ID: phone_number,
+					useradmin: user.unique_id,
+					unique_id,
+					campaignName: campaign.name,
+					campaignId: campaign.unique_id,
+					contactName: contact.Name,
+					recipientPhone: contact.wa_id,
+					status: response.status,
+					messageId: response.response.messages[0].id,
+					messageTemplate,
 				};
+
+				if (mediaPreview) {
+					reportData.media = {
+						url: mediaPreview.url,
+						fileName: mediaPreview.fileName,
+					};
+				}
+
+				reportData.components = components;
+				reportData.templateId = campaign.templateId;
+				reportData.templatename = template.name;
+				reportData.agent = addedUserId ? addedUserId : user.unique_id;
+				reportData.type = "Campaign";
+
+				let reportData2 = {
+					name: contact.Name,
+					wabaId: user.WABA_ID,
+					messageId: response.response.messages[0].id,
+					from: contact.wa_id,
+					timestamp: Date.now(),
+					type: "text",
+					text: { body: messageTemplate },
+					fbPhoneId: phone_number,
+					status: "sent",
+				};
+
+				await TempMessageModel.create(reportData2);
+				const chat = new Chat(reportData);
+				await chat.save();
+
+				remainingCount -= 1;
+			} catch (error) {
+				console.error("Error sending messages:", error.message);
+				continue;
 			}
-
-			reportData.components = components;
-			reportData.templateId = campaign.templateId;
-			reportData.templatename = template.name;
-			reportData.agent = addedUserId ? addedUserId : user.unique_id;
-			reportData.type = "Campaign";
-
-			let reportData2 = {
-				name: contact.Name,
-				wabaId: user.WABA_ID,
-				messageId: response.response.messages[0].id,
-				from: contact.wa_id,
-				timestamp: Date.now(),
-				type: "text",
-				text: { body: messageTemplate },
-				fbPhoneId: phone_number,
-				status: "sent",
-			};
-
-			await TempMessageModel.create(reportData2);
-			const chat = new Chat(reportData);
-			await chat.save();
 		}
 	} catch (error) {
 		console.error("Error sending messages:", error.message);
@@ -1044,8 +1054,15 @@ export const getFailedReportsById = async (req, res, next) => {
 };
 
 agenda.define("process campaign", async (job) => {
-	const { newCampaign, user, unique_id, phone_number, addedUserId, url, fileName } =
-		job.attrs.data;
+	const {
+		newCampaign,
+		user,
+		unique_id,
+		phone_number,
+		addedUserId,
+		url,
+		fileName,
+	} = job.attrs.data;
 
 	console.log("Sending Campaign");
 	try {

@@ -130,8 +130,7 @@
 			<% } else { %>
 			<!-- Extract and display the initials -->
 			<div class="user-profile-name bg-[<%= color %>]" onclick="toggleDropdown()">
-				<% let initials = name.split(' ').map(n => n[0].toUpperCase()).join(''); %>
-				<%= initials %>
+				<%= name?.split(' ').map(n => n[0].toUpperCase()).join(''); %>
 			</div>
 			<% } %>
 			<div id="downMenu" class="account-menu hidden">

@@ -12,7 +12,9 @@ import {
 	updateUserManagement,
 	editPermissions,
 	deleteRole,
+	updatewhatsAppAccountDetails,
 } from "../controllers/Settings/settings.controller.js";
+import { getIntent } from "../controllers/Settings/payment.controller.js";
 import { trackSanitationFailures } from "../middleWares/sanitiseInput.js";
 
 const router = express.Router();
@@ -24,10 +26,11 @@ router.post(
 	trackSanitationFailures,
 );
 router.post("/update-password", updatePassword, trackSanitationFailures);
+router.post("/account-details", updateAccountDetails, trackSanitationFailures);
 router.post(
-	"/account-details",
+	"/whatsapp-account-details",
 	uploadPhoneMumberPicController,
-	updateAccountDetails,
+	updatewhatsAppAccountDetails,
 	trackSanitationFailures,
 );
 router.post(
@@ -52,6 +55,8 @@ router.post(
 	updateUserManagement,
 	trackSanitationFailures,
 );
+
+router.post("/create-payment-intent", getIntent, trackSanitationFailures);
 
 router.delete("/deleteRole", deleteRole);
 

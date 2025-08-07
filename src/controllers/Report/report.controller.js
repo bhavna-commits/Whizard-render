@@ -78,7 +78,10 @@ export const getCampaignList = async (req, res, next) => {
 			}
 		}
 
-		let phoneNumbers = await User.findOne({ unique_id: userId, deleted: false });
+		let phoneNumbers = await User.findOne({
+			unique_id: userId,
+			deleted: false,
+		});
 
 		phoneNumbers = phoneNumbers.FB_PHONE_NUMBERS;
 
@@ -421,11 +424,11 @@ export const getCampaignReports = async (req, res, next) => {
 };
 
 export const getSendBroadcast = async (req, res, next) => {
-	// console.log(req.body);
 	const data = req.session?.sendBroadcast;
-	// console.log(data);
+	const user = await User.findOne({
+		unique_id: req.session?.user?.id || req.session?.addedUser?.owner,
+	});
 	if (data) {
-		// delete req.session.tempData;
 		const permissions = req.session?.addedUser?.permissions;
 		if (permissions) {
 			const access = await Permissions.findOne({
@@ -435,7 +438,6 @@ export const getSendBroadcast = async (req, res, next) => {
 				access.contactList.sendBroadcast &&
 				req.session?.addedUser?.whatsAppStatus
 			) {
-				// const access = Permissions.findOne({ unique_id: permissions });
 				res.render("Reports/createCampaign", {
 					access,
 					name: req.session?.addedUser?.name,
@@ -443,36 +445,23 @@ export const getSendBroadcast = async (req, res, next) => {
 					color: req.session?.addedUser?.color,
 					data,
 					help,
+					message: user.payment?.messagesCount,
 				});
 			} else {
 				res.render("errors/notAllowed");
 			}
 		} else if (req.session?.user?.whatsAppStatus) {
-			const access = await User.findOne({
-				unique_id: req.session?.user?.id,
-			});
 			res.render("Reports/createCampaign", {
-				access: access.access,
+				access: user.access,
 				name: req.session?.user?.name,
 				photo: req.session?.user?.photo,
 				color: req.session?.user?.color,
 				data,
 				help,
+				message: user.payment?.messagesCount,
 			});
 		} else {
-			const access = await User.findOne({
-				unique_id: req.session?.user?.id,
-			});
-
-			res.render("Reports/createCampaign", {
-				access: access.access,
-				name: req.session?.user?.name,
-				photo: req.session?.user?.photo,
-				color: req.session?.user?.color,
-				data,
-				help,
-			});
-			// res.render("errors/notAllowed");
+			res.render("errors/notAllowed");
 		}
 	} else {
 		console.log("broadcast data not found");

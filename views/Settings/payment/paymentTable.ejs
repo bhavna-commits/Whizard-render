@@ -1,0 +1,78 @@
+<table class="text-center min-w-full border-separate border-spacing-y-4">
+	<tbody>
+		<tr class="text-gray-500 ">
+			<td class="">Sno.</td>
+            <td class="">Plan</td>
+            <td class="">Order ID</td>
+            <td class="">Transaction ID</td>
+            <td class="">Amount</td>
+			<td class="">Status</td>
+			<td class="">Created At</td>
+			<td class="">Created By</td>
+		</tr>
+		<% paymentTableData.forEach((contact, index) => { %>
+		<tr class="hover:bg-gray-100 group border">
+			<td class="border-l border-t border-b rounded-l-lg py-6 border-gray-200 text-sm text-gray-500">
+				<%= (page - 1) * 6 + (index + 1) %>
+			</td>
+            <td class="border-t border-b border-gray-200">
+            	<%= contact.plan %>
+            </td>
+            <td class="border-t border-b border-gray-200">
+            	<%= contact.orderId %>
+            </td>
+            <td class="border-t border-b border-gray-200">
+            	<%= contact.paymentId %>
+            </td>
+            <td class="border-t border-b border-gray-200">
+            	<span class="mr-1"><%= contact.currency %></span><%= contact.amount / 100 %>
+            </td>
+			
+			<td class="border-t border-b border-gray-200">
+				<% 
+                        let statusColor = "bg-gray-200 text-gray-700";
+                        let statusLabel = contact.status;
+                
+                        if (contact.status === "succeeded") {
+                            statusColor = "bg-green-100 text-green-700";
+                            statusLabel = "Paid";
+                        } else if (contact.status === "created") {
+                            statusColor = "bg-yellow-100 text-yellow-800";
+                            statusLabel = "Pending";
+                        } else if (contact.status === "failed") {
+                            statusColor = "bg-red-100 text-red-700";
+                            statusLabel = "Failed";
+                        }
+                    %>
+				<span class="inline-block px-3 py-1 font-medium rounded-full <%= statusColor %>">
+					<%= statusLabel %>
+				</span>
+			</td>
+			
+			<td class="text-gray-500 border-t border-b border-gray-200 date-cell" data-date="<%= contact.createdAt %>"></td>
+			<td class="text-gray-500 border-t border-b border-r rounded-r-lg border-gray-200">
+				<%= contact.agentName %>
+			</td>			
+		</tr>
+		<% }); %>
+	</tbody>
+</table>
+<!-- Pagination -->
+<% if (totalPages > 1) { %>
+<%- include('../../commonJS/pagination') %>
+<% } %>
+
+<script>
+	document.querySelectorAll('.date-cell').forEach((el) => {
+		const rawDate = el.getAttribute('data-date');
+		if (rawDate) {
+			const date = new Date(Number(rawDate));
+			const formatted = date.toLocaleString('en-GB', {
+				year: 'numeric',
+				month: 'short',
+				day: '2-digit'
+			});
+			el.textContent = formatted;
+		}
+	});
+</script>

@@ -58,6 +58,8 @@ const permissionState = {
 			view: false,
 		},
 		whatsAppAccountDetails: false,
+		accountDetails: false,
+		payment: false,
 	},
 };
 

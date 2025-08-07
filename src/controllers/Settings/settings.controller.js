@@ -40,7 +40,7 @@ export const home = async (req, res) => {
 					access,
 					photo: req.session?.addedUser?.photo,
 					name: req.session?.addedUser?.name,
-					color: req.session?.user?.color,
+					color: req.session?.addedUser?.color,
 					help,
 				});
 			} else {
@@ -381,6 +381,137 @@ export const accountDetails = async (req, res) => {
 		const id = req.session?.user?.id || req.session?.addedUser?.owner;
 		let user;
 
+		user = await User.findOne({ unique_id: id });
+
+		if (!user) {
+			return res.status(404).json({ message: "User not found" });
+		}
+
+		const permissions = req.session?.addedUser?.permissions;
+		if (permissions) {
+			const access = await Permissions.findOne({
+				unique_id: permissions,
+			});
+			if (access.settings.type) {
+				res.render("Settings/accountDetails", {
+					access,
+					user,
+					countries,
+					industryCategory,
+					size,
+					roles,
+					photo: req.session.addedUser?.photo,
+					name: req.session.addedUser.name,
+					color: req.session.addedUser.color,
+					help,
+				});
+			} else {
+				res.render("errors/notAllowed");
+			}
+		} else {
+			const id = req.session?.user?.id;
+			const access = await User.findOne({ unique_id: id });
+			// console.log(access.access);
+			res.render("Settings/accountDetails", {
+				access: access.access,
+				user,
+				countries,
+				industryCategory,
+				size,
+				roles,
+				photo: req.session.user?.photo,
+				name: req.session.user.name,
+				color: req.session.user.color,
+				help,
+			});
+		}
+	} catch (error) {
+		console.error(error);
+		res.render("errors/serverError");
+	}
+};
+
+export const updateAccountDetails = async (req, res, next) => {
+	try {
+		const {
+			name: companyName,
+			description,
+			state,
+			country,
+			companySize,
+			industry,
+			jobRole,
+			website,
+		} = req.body;
+		// console.log(req.body);
+
+		if (
+			!isString(
+				companyName,
+				description,
+				state,
+				country,
+				companySize,
+				industry,
+				jobRole,
+				website,
+			)
+		)
+			return next();
+
+		const updatedUser = await User.findOneAndUpdate(
+			{
+				unique_id:
+					req.session?.user?.id || req.session?.addedUser?.owner,
+			},
+			{
+				companyName,
+				companyDescription: description,
+				state,
+				country,
+				companySize,
+				industry,
+				jobRole,
+				website,
+			},
+			{ new: true },
+		);
+
+		if (!updatedUser) {
+			return res
+				.status(404)
+				.json({ success: false, message: "User not found" });
+		}
+
+		await ActivityLogs.create({
+			useradmin: req.session?.user?.id || req.session?.addedUser?.owner,
+			unique_id: generateUniqueId(),
+			name: req.session.user.name
+				? req.session.user.name
+				: req.session.addedUser.name,
+			actions: "Update",
+			details: `Updated their account details`,
+		});
+
+		res.status(200).json({
+			success: true,
+			message: "Account details updated successfully",
+			data: updatedUser,
+		});
+	} catch (error) {
+		console.error("Error updating account details:", error);
+		res.status(500).json({
+			success: false,
+			message: "Server error: " + error.message,
+		});
+	}
+};
+
+export const whatsAppAccountDetails = async (req, res) => {
+	try {
+		const id = req.session?.user?.id || req.session?.addedUser?.owner;
+		let user;
+
 		user = await User.findOne({ unique_id: id, deleted: false });
 
 		if (!user) {
@@ -431,7 +562,7 @@ export const accountDetails = async (req, res) => {
 	}
 };
 
-export const updateAccountDetails = async (req, res, next) => {
+export const updatewhatsAppAccountDetails = async (req, res, next) => {
 	try {
 		const {
 			name: companyName,

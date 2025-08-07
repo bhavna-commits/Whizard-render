@@ -2,12 +2,9 @@ import dotenv from "dotenv";
 import axios from "axios";
 import Template from "../../models/templates.model.js";
 import Contacts from "../../models/contacts.model.js";
-import Campaign from "../../models/campaign.model.js";
-import Report from "../../models/report.model.js";
 import Chat from "../../models/chats.model.js";
-import ChatsTemp from "../../models/chatsTemp.model.js";
 import TempMessage from "../../models/TempMessage.model.js";
-import chatsUsersModel from "../../models/chatsUsers.model.js";
+import User from "../../models/user.model.js";
 import { generateUniqueId } from "../../utils/otpGenerator.js";
 
 dotenv.config();
@@ -19,128 +16,134 @@ export async function sendMessages(
 	phone_number,
 	addedUserId,
 	url,
-	fileName
+	fileName,
 ) {
 	try {
 		const template = await Template.findOne({
 			unique_id: campaign.templateId,
 		});
-
-		if (!template) {
+		if (!template)
 			throw `Template with ID ${campaign.templateId} not found`;
-		}
 
 		const contactList = await Contacts.find({
 			contactId: campaign.contactListId,
 			subscribe: 1,
 		});
-
-		if (contactList.length === 0) {
-			throw `No contacts found for contact list ID ${campaign.contactListId}`;
-		}
+		if (contactList.length === 0)
+			throw `No contacts found for list ${campaign.contactListId}`;
 
 		const headerComponent = template.components.find(
 			(c) => c.type === "HEADER",
 		);
-
-		if (fileName) {
-			if (headerComponent) {
-				let fileUrl = `${url}/uploads/${user.unique_id}/${fileName}`;
-				if (headerComponent.format === "IMAGE") {
-					console.log("img");
-					headerComponent.example.header_url = fileUrl;
-				} else if (headerComponent.format === "VIDEO") {
-					console.log("vid");
-					headerComponent.example.header_url = fileUrl;
-					console.log(headerComponent.example.header_url);
-				} else if (headerComponent.format === "DOCUMENT") {
-					console.log("doc");
-					headerComponent.example.header_url = fileUrl;
-				}
-			}
+		if (fileName && headerComponent) {
+			let fileUrl = `${url}/uploads/${user.unique_id}/${fileName}`;
+			headerComponent.example.header_url = fileUrl;
 		}
+
+		const countUser = await User.findOne({ unique_id: user.unique_id });
+		let remainingCount = countUser?.payment?.messagesCount || 0;
+
+		if (contactList.length > remainingCount) {
+			throw new Error(
+				`Not enough credits. You have ${remainingCount} messages left, but you're trying to send ${contactList.length}.`,
+			);
+		}
+
+		const chatDocs = [];
+		const tempMsgOps = [];
 
 		for (let contact of contactList) {
-			const personalizedMessage = replaceDynamicVariables(
-				template,
-				campaign.variables,
-				contact,
-			);
+			try {
+				const personalizedMessage = replaceDynamicVariables(
+					template,
+					campaign.variables,
+					contact,
+				);
 
-			const response = await sendMessageThroughWhatsApp(
-				user,
-				template,
-				contact.wa_id,
-				personalizedMessage,
-				phone_number,
-			);
+				const response = await sendMessageThroughWhatsApp(
+					user,
+					template,
+					contact.wa_id,
+					personalizedMessage,
+					phone_number,
+				);
 
-			const messageTemplate = generatePreviewMessage(
-				template,
-				personalizedMessage,
-			);
+				if (response.status === "FAILED") {
+					console.error(
+						`Failed to send message to ${contact.wa_id}: ${response.response}`,
+					);
+					continue;
+				}
 
-			const components = generatePreviewComponents(
-				template,
-				personalizedMessage,
-			);
+				const messageTemplate = generatePreviewMessage(
+					template,
+					personalizedMessage,
+				);
+				const components = generatePreviewComponents(
+					template,
+					personalizedMessage,
+				);
+				const mediaPreview = getMediaPreviewFromTemplate(template);
 
-			if (response.status === "FAILED") {
+				tempMsgOps.push({
+					insertOne: {
+						document: {
+							name: contact.Name,
+							wabaId: user.WABA_ID,
+							messageId: response.response.messages[0].id,
+							from: contact.wa_id,
+							timestamp: Date.now(),
+							type: "text",
+							text: messageTemplate,
+							fbPhoneId: phone_number,
+							status: "sent",
+						},
+					},
+				});
+
+				chatDocs.push({
+					WABA_ID: user.WABA_ID,
+					FB_PHONE_ID: phone_number,
+					useradmin: user.unique_id,
+					unique_id,
+					campaignName: campaign.name,
+					campaignId: campaign.unique_id,
+					contactName: contact.Name,
+					recipientPhone: contact.wa_id,
+					status: response.status,
+					messageId: response.response.messages[0].id,
+					messageTemplate,
+					media: mediaPreview
+						? {
+								url: mediaPreview.url,
+								fileName: mediaPreview.fileName,
+						  }
+						: undefined,
+					components,
+					templateId: campaign.templateId,
+					templatename: template.name,
+					agent: addedUserId ? addedUserId : user.unique_id,
+					type: "Campaign",
+				});
+
+				remainingCount -= 1;
+			} catch (err) {
 				console.error(
-					`Failed to send message to ${contact.wa_id}: ${response.response}`,
+					`Error sending message to ${contact.wa_id}:`,
+					err.message || err,
 				);
-				throw new Error(
-					`Failed to send message to ${contact.wa_id}: ${response.response}`,
-				);
+				continue;
 			}
-
-			const mediaPreview = getMediaPreviewFromTemplate(template);
-
-			await TempMessage.create({
-				name: contact.Name,
-				wabaId: user.WABA_ID,
-				messageId: response.response.messages[0].id,
-				from: contact.wa_id,
-				timestamp: Date.now(),
-				type: "text",
-				text: messageTemplate,
-				fbPhoneId: phone_number,
-				status: "sent",
-			});
-
-			let reportData = {
-				WABA_ID: user.WABA_ID,
-				FB_PHONE_ID: phone_number,
-				useradmin: user.unique_id,
-				unique_id,
-				campaignName: campaign.name,
-				campaignId: campaign.unique_id,
-				contactName: contact.Name,
-				recipientPhone: contact.wa_id,
-				status: response.status,
-				messageId: response.response.messages[0].id,
-				messageTemplate,
-			};
-
-			if (mediaPreview) {
-				reportData.media = {
-					url: mediaPreview.url,
-					fileName: mediaPreview.fileName,
-				};
-			}
-
-			reportData.components = components;
-			reportData.templateId = campaign.templateId;
-			reportData.templatename = template.name;
-			reportData.agent = addedUserId ? addedUserId : user.unique_id;
-			reportData.type = "Campaign";
-
-			const chat = new Chat(reportData);
-			await chat.save();
 		}
+
+		if (chatDocs.length > 0) await Chat.insertMany(chatDocs);
+		if (tempMsgOps.length > 0) await TempMessage.bulkWrite(tempMsgOps);
+
+		countUser.payment.messagesCount = remainingCount;
+		await countUser.save();
 	} catch (error) {
-		console.error("Error sending messages:", error.message);
-		throw new Error(`${error.message}`);
+		console.error("Error sending messages:", error.message || error);
+		throw new Error(error.message || error);
 	}
 }
 
@@ -481,7 +484,7 @@ export async function sendTestMessage(
 	addedUserId,
 	sendCampaignMessage,
 	url,
-	fileName
+	fileName,
 ) {
 	try {
 		const template = await Template.findOne({ unique_id: templateId });
@@ -557,7 +560,7 @@ export async function sendTestMessage(
 		}
 
 		if (sendCampaignMessage) {
-			const mediaPreview = getMediaPreviewFromTemplate(template); 
+			const mediaPreview = getMediaPreviewFromTemplate(template);
 
 			await TempMessage.create({
 				name: contact.Name,
@@ -576,7 +579,7 @@ export async function sendTestMessage(
 				FB_PHONE_ID: fb_phone_number,
 				useradmin: user.unique_id,
 				unique_id: generateUniqueId(),
-				campaignName: "-", 
+				campaignName: "-",
 				campaignId: "-",
 				contactName: contact.Name,
 				recipientPhone: contact.wa_id,
@@ -600,6 +603,9 @@ export async function sendTestMessage(
 			const chat = new Chat(reportData);
 			await chat.save();
 		}
+
+		user.payment.messsagesCount -= 1;
+		await user.save();
 
 		return {
 			messageTemplate,
