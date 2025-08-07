@@ -497,6 +497,8 @@ export const stripeWebhook = async (req, res) => {
 	const sig = req.headers["stripe-signature"];
 	const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
+	const { stripe } = getCards();
+
 	let event;
 	try {
 		console.log("constructing event");
