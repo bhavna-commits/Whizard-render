@@ -499,14 +499,14 @@ export const stripeWebhook = async (req, res) => {
 
 	let event;
 	try {
-		console.log("contructing event");
-		event = await stripe.webhooks.constructEvent(
+		console.log("constructing event");
+		event = stripe.webhooks.constructEvent(
 			req.rawBody,
 			sig,
 			endpointSecret,
 		);
-	} catch {
-		console.error("Error contructing event");
+	} catch (err) {
+		console.error("Error constructing event", err.message);
 		return res.status(400).json("Invalid Stripe signature");
 	}
 
