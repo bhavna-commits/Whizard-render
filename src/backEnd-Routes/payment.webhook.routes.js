@@ -21,7 +21,7 @@ router.post(
 	"/stripe_webhook",
 	express.json({
 		verify: (req, res, buf) => {
-			req.rawBody = buf.toString();
+			req.rawBody = buf;
 		},
 	}),
 	stripeWebhook,
