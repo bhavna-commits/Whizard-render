@@ -500,7 +500,7 @@ export const stripeWebhook = async (req, res) => {
 	let event;
 	try {
 		console.log("contructing event");
-		event = stripe.webhooks.constructEvent(
+		event = await stripe.webhooks.constructEvent(
 			req.rawBody,
 			sig,
 			endpointSecret,
