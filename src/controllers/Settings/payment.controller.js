@@ -499,12 +499,14 @@ export const stripeWebhook = async (req, res) => {
 
 	let event;
 	try {
+		console.log("contructing event");
 		event = stripe.webhooks.constructEvent(
 			req.rawBody,
 			sig,
 			endpointSecret,
 		);
 	} catch {
+		console.error("Error contructing event");
 		return res.status(400).json("Invalid Stripe signature");
 	}
 
@@ -512,8 +514,10 @@ export const stripeWebhook = async (req, res) => {
 		const pi = event.data.object;
 		const payment = await Payment.findOne({ orderId: pi.metadata.orderId });
 
-		if (!payment)
-			return res.status(404).json({ error: "Payment not found" });
+		if (!payment) {
+			console.error("Payment not found");
+			return res.status(404).json("Payment not found");
+		}
 
 		const update = {
 			paymentId: pi.id,
