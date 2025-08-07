@@ -447,7 +447,7 @@ export const razorpayWebhook = async (req, res) => {
 
 			const user = await User.findOne({ unique_id: payment.useradmin });
 
-			if (user) {
+			if (user && update.status === "succeeded") {
 				const prevTotal = user.payment?.totalMessages || 0;
 				const newMessages = payment.messagesCount || 0;
 
@@ -481,10 +481,12 @@ export const razorpayWebhook = async (req, res) => {
 
 			await Payment.updateOne({ _id: payment._id }, update);
 
-			await User.findOneAndUpdate(
-				{ unique_id: payment.useradmin },
-				{ messagesCount: payment.messagesCount },
-			);
+			if (update.status === "succeeded") {
+				await User.findOneAndUpdate(
+					{ unique_id: payment.useradmin },
+					{ messagesCount: payment.messagesCount },
+				);
+			}
 		}
 
 		res.status(200).json({ status: "ok" });
@@ -502,11 +504,7 @@ export const stripeWebhook = async (req, res) => {
 	let event;
 	try {
 		console.log("constructing event");
-		event = stripe.webhooks.constructEvent(
-			req.rawBody,
-			sig,
-			endpointSecret,
-		);
+		event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
 	} catch (err) {
 		console.error("Error constructing event", err.message);
 		return res.status(400).json("Invalid Stripe signature");
@@ -538,7 +536,7 @@ export const stripeWebhook = async (req, res) => {
 		await Payment.updateOne({ _id: payment._id }, update);
 		const user = await User.findOne({ unique_id: payment.useradmin });
 
-		if (user) {
+		if (user && update.status === "succeeded") {
 			const prevTotal = user.payment?.totalMessages || 0;
 			const newMessages = payment.messagesCount || 0;
 
