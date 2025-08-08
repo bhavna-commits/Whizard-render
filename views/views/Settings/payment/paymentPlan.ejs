@@ -1,0 +1,118 @@
+<div class="w-full px-3 bg-white">
+	<div class="flex flex-col w-full items-center">
+		<div class="w-1/2 h-full flex justify-center box-content my-3 rounded-xl" id="right-side">
+			<div class="w-9/12">
+				<!-- Header -->
+				<div class="text-center my-16">
+					<h1 class="text-sm text-gray-600 mb-2">Register For Whizard WhatsApp Messages</h1>
+					<h2 id="titleHead" class="text-3xl font-bold text-gray-900 mb-2">5000 Messages For <span class=" mr-1 text-3xl"><%= plans[5000].currency %></span><%= plans[5000].amount %></h2>
+					<p class="text-gray-600">Exclusive Access To Whizard Messaging!</p>
+				</div>
+				
+				<!-- Plan Selection -->
+				<div class="space-y-4">
+					<!-- Weekday Fall Pass -->
+					<label class="radio-option block cursor-pointer">
+						<input type="radio" name="plan" value="weekday" class="sr-only">
+						<div class="option-content border-2 border-gray-200 rounded-xl p-6 hover:border-gray-300">
+							<div class="flex items-center justify-between">
+								<div class="flex items-center space-x-4">
+									<div class="check-indicator"></div>
+									<div>
+										<h3 class="text-lg font-semibold text-gray-900">3000 Messages</h3>
+										<p class="text-sm text-gray-600">Access for 24 hours messaging!</p>
+									</div>
+								</div>
+								<div class="text-right">
+									<div class="text-sm text-red-500 line-through"><span class="text-sm mr-1 text-gray-500"><%= plans[3000].currency %></span><%= plans[3000].amount * 2 %></div>
+									<div class="text-xl font-bold text-gray-900"><span class="text-sm mr-1 text-gray-500"><%= plans[3000].currency %></span><%= plans[3000].amount %></div>
+									<!-- <div class="text-sm text-gray-500">Sep to Jan</div> -->
+								</div>
+							</div>
+						</div>
+					</label>
+					
+					<!-- Unlimited Fall Pass (Most Popular) -->
+					<label class="radio-option block cursor-pointer">
+						<input type="radio" name="plan" value="unlimited" class="sr-only" checked>
+						<div class="option-content border-2 border-gray-200 rounded-xl p-6 hover:border-gray-300">
+							<div class="flex items-center justify-between">
+								<div class="flex items-center space-x-4">
+									<div class="check-indicator ">
+										<!-- <div class="absolute left-1.5 top-0.5 w-1.5 h-3 border-white border-r-2 border-b-2 transform rotate-45">
+
+                                        </div> -->
+									</div>
+									<div>
+										<div class="flex items-center space-x-2">
+											<h3 class="text-lg font-semibold text-gray-900">5000 Messages</h3>
+											<span class="bg-gray-800 text-white text-xs px-2 py-1 rounded">Most popular</span>
+										</div>
+										<p class="text-sm text-gray-600">Access for 24 hours messaging!</p>
+									</div>
+								</div>
+								<div class="text-right">
+									<div class="text-sm text-red-500 line-through"><span class="text-sm mr-1 text-gray-500"><%= plans[5000].currency %></span><%= plans[5000].amount * 2 %></div>
+									<div class="text-xl font-bold text-gray-900"><span class="text-sm mr-1 text-gray-500"><%= plans[5000].currency %></span><%= plans[5000].amount %></div>
+									<!-- <div class="text-sm text-gray-500">Sep to Jan</div> -->
+								</div>
+							</div>
+						</div>
+					</label>
+					
+					<!-- Extended Fall Pass -->
+					<label class="radio-option block cursor-pointer">
+						<input type="radio" name="plan" value="extended" class="sr-only">
+						<div class="option-content border-2 border-gray-200 rounded-xl p-6 hover:border-gray-300">
+							<div class="flex items-center justify-between">
+								<div class="flex items-center space-x-4">
+									<div class="check-indicator"></div>
+									<div>
+										<h3 class="text-lg font-semibold text-gray-900">10000 Messages</h3>
+										<p class="text-sm text-gray-600">Access for 24 hour messages!</p>
+									</div>
+								</div>
+								<div class="text-right">
+									<div class="text-sm text-red-500 line-through"><span class="text-sm mr-1 text-gray-500"><%= plans[10000].currency %></span><%= plans[10000].amount * 2 %></div>
+									<div class="text-xl font-bold text-gray-900"><span class="text-sm mr-1 text-gray-500"><%= plans[10000].currency %></span><%= plans[10000].amount %></div>
+									<!-- <div class="text-sm text-gray-500">Sep to Jan</div> -->
+								</div>
+							</div>
+						</div>
+					</label>
+				</div>
+			</div>
+		</div>
+		
+		<div class="w-1/2 flex justify-center">
+			<div class="space-y-4 pt-20" id="btn-wrap">
+				
+				<button type="button" class="bg-black rounded h-10 w-52 flex items-center justify-center" id="btn">
+					<div class="text-white loader-text">Continue with Payment</div>
+					<div class="loading-spinner hidden"></div>
+				</button>
+				
+			</div>
+			
+			<div id="stripe-section" class="hidden px-4 mt-10">
+				<!-- 👇 LOADER HERE -->
+				<!-- <div id="stripe-loader" class="flex justify-center items-center h-32">
+                    <div class="animate-spin rounded-full h-8 w-8 border-t-2 border-red-500"></div>
+                </div> -->
+				
+				<div class="mb-6 hidden" id="stripe-payment-box">
+					<button id="back-to-plans" class="text-red-600 text-sm mb-3">← Go back</button>
+					<h2 id="payment-plan-title" class="text-xl font-semibold text-gray-900">
+						You chose: 5000 Messages – <%= user.currency %> 500
+					</h2>
+				</div>
+				
+				<div id="card-wrapper" class="w-full hidden">
+					<label class="text-sm text-gray-500 mb-1 block">Card details</label>
+					<div id="card-element" class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-white"></div>
+					<div id="card-errors" class="text-xs text-red-500 mt-1"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

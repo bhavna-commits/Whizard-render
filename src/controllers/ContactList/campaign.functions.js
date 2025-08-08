@@ -11,7 +11,7 @@ dotenv.config();
 
 export async function sendMessages(
 	campaign,
-	user,
+	userData,
 	unique_id,
 	phone_number,
 	addedUserId,
@@ -21,7 +21,6 @@ export async function sendMessages(
 	template,
 ) {
 	try {
-		// Template & contacts are pre-fetched
 		if (!template)
 			throw new Error(
 				`Template with ID ${campaign.templateId} not found`,
@@ -31,16 +30,18 @@ export async function sendMessages(
 				`No contacts found for list ${campaign.contactListId}`,
 			);
 
-		// Handle header media if applicable
 		const headerComponent = template.components.find(
 			(c) => c.type === "HEADER",
 		);
 		if (fileName && headerComponent) {
-			headerComponent.example.header_url = `${url}/uploads/${user.unique_id}/${fileName}`;
+			headerComponent.example.header_url = `${url}/uploads/${userData.unique_id}/${fileName}`;
 		}
 
-		// Credits check
-		let remainingCount = user?.payment?.messagesCount || 0;
+		const user = await User.findOne({ unique_id: userData.unique_id });
+		let messagesCount = user?.payment?.messagesCount || 0;
+		const totalCount = user?.payment?.totalMessages || 0;
+		const remainingCount = totalCount - messagesCount;
+
 		if (contactList.length > remainingCount) {
 			throw new Error(
 				`Not enough credits. You have ${remainingCount} messages left, but you're trying to send ${contactList.length}.`,
@@ -50,7 +51,7 @@ export async function sendMessages(
 		const chatDocs = [];
 		const tempMsgOps = [];
 
-		for (let contact of contactList) {
+		for (const contact of contactList) {
 			try {
 				const personalizedMessage = replaceDynamicVariables(
 					template,
@@ -92,14 +93,14 @@ export async function sendMessages(
 							from: contact.wa_id,
 							timestamp: Date.now(),
 							type: "text",
-							text: messageTemplate,
+							text: { body: messageTemplate },
 							fbPhoneId: phone_number,
 							status: "sent",
 						},
 					},
 				});
 
-				chatDocs.push({
+				const chatDoc = {
 					WABA_ID: user.WABA_ID,
 					FB_PHONE_ID: phone_number,
 					useradmin: user.unique_id,
@@ -111,34 +112,34 @@ export async function sendMessages(
 					status: response.status,
 					messageId: response.response.messages[0].id,
 					messageTemplate,
-					media: mediaPreview
-						? {
-								url: mediaPreview.url,
-								fileName: mediaPreview.fileName,
-						  }
-						: undefined,
 					components,
 					templateId: campaign.templateId,
 					templatename: template.name,
 					agent: addedUserId || user.unique_id,
 					type: "Campaign",
-				});
+				};
 
-				remainingCount--;
+				if (mediaPreview)
+					chatDoc.media = {
+						url: mediaPreview.url,
+						fileName: mediaPreview.fileName,
+					};
+
+				chatDocs.push(chatDoc);
+
+				messagesCount++;
 			} catch (err) {
 				console.error(
 					`Error sending message to ${contact.wa_id}:`,
 					err.message || err,
 				);
-				continue;
 			}
 		}
 
 		if (chatDocs.length) await Chat.insertMany(chatDocs);
 		if (tempMsgOps.length) await TempMessage.bulkWrite(tempMsgOps);
 
-		// Update credits
-		user.payment.messagesCount = remainingCount;
+		user.payment.messagesCount = messagesCount;
 		await user.save();
 	} catch (error) {
 		console.error("Error sending messages:", error.message || error);

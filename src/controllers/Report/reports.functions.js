@@ -200,7 +200,7 @@ export const overview = async (id, userId, page, limit, skip) =>
 
 export async function sendMessagesReports(
 	campaign,
-	user,
+	userData,
 	unique_id,
 	contactList,
 	phone_number,
@@ -225,7 +225,7 @@ export async function sendMessagesReports(
 			(c) => c.type === "HEADER",
 		);
 		if (fileName && headerComponent) {
-			let fileUrl = `${url}/uploads/${user.unique_id}/${fileName}`;
+			const fileUrl = `${url}/uploads/${userData.unique_id}/${fileName}`;
 			if (
 				["IMAGE", "VIDEO", "DOCUMENT"].includes(headerComponent.format)
 			) {
@@ -233,16 +233,19 @@ export async function sendMessagesReports(
 			}
 		}
 
-		const countUser = await User.findOne({ unique_id: user.unique_id });
-		const remainingCount =
-			countUser?.payment?.totalMessages -
-			(countUser?.payment?.messagesCount || 0);
+		const user = await User.findOne({ unique_id: userData.unique_id });
+		let messagesCount = user?.payment?.messagesCount || 0;
+		const totalCount = user?.payment?.totalMessages || 0;
+		let remainingCount = totalCount - messagesCount;
 
 		if (contactList.length > remainingCount) {
 			throw new Error(
 				`Not enough credits. You have ${remainingCount} messages left, but you're trying to send ${contactList.length}.`,
 			);
 		}
+
+		const chatBulkOps = [];
+		const tempMsgBulkOps = [];
 
 		for (let contact of contactList) {
 			try {
@@ -276,7 +279,7 @@ export async function sendMessagesReports(
 					personalizedMessage,
 				);
 
-				let reportData = {
+				const reportData = {
 					WABA_ID: user.WABA_ID,
 					FB_PHONE_ID: phone_number,
 					useradmin: user.unique_id,
@@ -291,40 +294,57 @@ export async function sendMessagesReports(
 					components,
 					templateId: campaign.templateId,
 					templatename: template.name,
-					agent: addedUserId ? addedUserId : user.unique_id,
+					agent: addedUserId || user.unique_id,
 					type: "Campaign",
+					...(mediaPreview
+						? {
+								media: {
+									url: mediaPreview.url,
+									fileName: mediaPreview.fileName,
+								},
+						  }
+						: {}),
 				};
 
-				if (mediaPreview) {
-					reportData.media = {
-						url: mediaPreview.url,
-						fileName: mediaPreview.fileName,
-					};
-				}
-
-				let reportData2 = {
-					name: contact.Name,
-					wabaId: user.WABA_ID,
-					messageId: response.response.messages[0].id,
-					from: contact.wa_id,
-					timestamp: Date.now(),
-					type: "text",
-					text: { body: messageTemplate },
-					fbPhoneId: phone_number,
-					status: "sent",
+				const tempMsgData = {
+					insertOne: {
+						document: {
+							name: contact.Name,
+							wabaId: user.WABA_ID,
+							messageId: response.response.messages[0].id,
+							from: contact.wa_id,
+							timestamp: Date.now(),
+							type: "text",
+							text: { body: messageTemplate },
+							fbPhoneId: phone_number,
+							status: "sent",
+						},
+					},
 				};
 
-				await TempMessageModel.create(reportData2);
-				const chat = new Chat(reportData);
-				await chat.save();
+				tempMsgBulkOps.push(tempMsgData);
+				chatBulkOps.push({ insertOne: { document: reportData } });
+
+				remainingCount--;
 			} catch (error) {
-				console.error("Error sending messages:", error.message);
+				console.error(
+					"Error sending message to contact:",
+					contact.wa_id,
+					error.message,
+				);
 				continue;
 			}
 		}
+
+		if (chatBulkOps.length) await Chat.bulkWrite(chatBulkOps);
+		if (tempMsgBulkOps.length)
+			await TempMessageModel.bulkWrite(tempMsgBulkOps);
+
+		user.payment.messagesCount = totalCount - remainingCount;
+		await user.save();
 	} catch (error) {
 		console.error("Error sending messages:", error.message);
-		throw new Error(`${error.message}`);
+		throw new Error(error.message);
 	}
 }
 
@@ -1033,6 +1053,17 @@ export const getFailedReportsById = async (req, res, next) => {
 		res.render("errors/serverError");
 	}
 };
+
+export function safeParseJSON(str, fallback = null) {
+	if (typeof str !== "string") return fallback;
+	const trimmed = str.trim();
+	if (!trimmed) return fallback;
+	try {
+		return JSON.parse(trimmed);
+	} catch {
+		return fallback;
+	}
+}
 
 agenda.define("process campaign", async (job) => {
 	const {

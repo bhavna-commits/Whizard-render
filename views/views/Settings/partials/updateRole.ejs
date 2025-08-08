@@ -1,0 +1,138 @@
+<div id="updateRoleModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50" onclick="closeUpdate()">
+	<!-- Modal content container -->
+	<div id="modalContent" class="relative top-[20%] mx-auto p-7 border w-[600px] shadow-lg rounded-md bg-white transform transition-transform scale-95 opacity-0" onclick="event.stopPropagation()">
+		<div class="mt-3 space-y-5">
+			<h3 class="text-2xl font-semibold leading-6 text-center text-gray-900">Update User Role</h3>
+			<div class="mt-2">
+				<form id="updateRoleForm" class="space-y-4">
+					<div class="">
+						<label class="block text-gray-500 mb-2">User Name</label>
+						<input type="text" id="userNameUpdate" name="userNameUpdate" required class="appearance-none border rounded w-full py-2 px-3 text-gray-500 leading-tight focus:outline-none focus:shadow-outline" disabled>
+					</div>
+					<div class="">
+						<label class="block text-gray-500 mb-2">Email</label>
+						<input type="email" id="userEmailUpdate" name="userEmailUpdate" required class="appearance-none border rounded w-full py-2 px-3 text-gray-500 leading-tight focus:outline-none focus:shadow-outline" disabled>
+					</div>
+					<div class="">
+						<label class="block text-gray-500 mb-2">Role</label>
+						<div class="select-wrapper">
+							<select id="userRoleUpdate" name="userRoleUpdate" required class="appearance-none border rounded w-full py-2 px-3 text-gray-500 leading-tight focus:outline-none focus:shadow-outline">
+								<option disabled selected>Select role</option>
+								<% permissions.forEach(function(permission) { %>
+								<option value="<%= permission.unique_id %>"><%= permission.name %></option>
+								<% }); %>
+								<option value="UnAssignedChats">Unassigned Chats Support</option>
+							</select>
+						</div>
+					</div>
+					<div class="">
+						<label class="block text-gray-500 mb-2">Assign WhatsApp Account</label>
+						<div class="select-wrapper">
+							<select id="updateWhatsAppNumber" name="updateWhatsAppNumber" required class=" appearance-none w-full py-2 px-3 text-gray-500 focus:outline-none focus:shadow-outline">
+								<option disabled selected>Select Account</option>
+								<% whatsAppNumbers.forEach(function(permission) { %>
+								<option value='<%= JSON.stringify(permission) %>'><%= permission.friendly_name %></option>
+								<% }); %>
+							</select>
+						</div>
+					</div>
+					<div class="flex items-center justify-between mt-5">
+						<button type="submit" id="updateButton" class="bg-black hover:bg-gray-800 text-white py-2 px-4 rounded focus:outline-none focus:shadow-outline flex items-center justify-center">
+							<span id="buttonText">Change</span>
+							<svg id="spinner" class="hidden w-5 h-5 ml-2 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+								<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+								<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 1116 0A8 8 0 014 12z"></path>
+							</svg>
+						</button>
+						<button type="button" onclick="closeUpdate()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+							Cancel
+						</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script>
+	function updateRole (email, userId, name, id) {
+		document.getElementById(id).classList.add("hidden");
+		document.getElementById('userNameUpdate').value = name;
+		document.getElementById('userEmailUpdate').value = email;
+		
+		// Show the modal
+		const modal = document.getElementById('updateRoleModal');
+		const modalContent = document.getElementById('modalContent');
+		
+		modal.classList.remove('hidden');
+		setTimeout(() => {
+			modalContent.classList.remove('opacity-0', 'scale-95');
+		}, 10);
+		
+		// Handle form submission
+		const form = document.getElementById('updateRoleForm');
+		form.onsubmit = function (event) {
+			event.preventDefault();
+			
+			const roleSelect = document.getElementById('userRoleUpdate');
+			const selectedRoleValue = roleSelect.value;
+			const selectedRoleText = roleSelect.options[roleSelect.selectedIndex].textContent;
+			
+			const accountSelect = document.getElementById("updateWhatsAppNumber");
+			const selectedAccountValue = accountSelect.value;
+			const selectedAccountText = accountSelect.options[accountSelect.selectedIndex].textContent;
+
+			let selectedFBNumber;
+			try {
+				selectedFBNumber = JSON.parse(selectedAccountValue);
+			} catch (err) {
+				toast("error", "Invalid WhatsApp account selection");
+				return;
+			}
+
+			if (roleSelect.selectedIndex === 0 || selectedRoleText === "Select role") {
+				toast("error", "Please select a valid role");
+				return;
+			}
+			
+			if (accountSelect.selectedIndex === 0 || selectedAccountText === "Select Account") {
+				toast("error", "Please assign a WhatsApp account");
+				return;
+			}
+			
+			fetch('/api/settings/updateUserManagement', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify({
+						action: 'updateRole',
+						userId,
+						newRoleId: selectedRoleValue,
+						newRoleName: selectedRoleText,
+						selectedFBNumber,
+					}),
+				})
+				.then(response => response.json())
+				.then(data => {
+					if (data.success) {
+						toast("success", `User role updated to ${selectedRoleText}`);
+						location.reload();
+					} else {
+						toast("error", 'Failed to update role');
+					}
+				})
+				.catch(error => {
+					console.error('Error:', error);
+					toast("error", 'An error occurred while updating role');
+				});
+		};
+	}
+	
+	function closeUpdate () {
+		const modal = document.getElementById('updateRoleModal');
+		const modalContent = document.getElementById('modalContent');
+		modalContent.classList.add('opacity-0', 'scale-95');
+		modal.classList.add('hidden');
+	}
+</script>

@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+	<meta charset="UTF-8" />
+	<title>Reports - Campaign list</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<!-- <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css"> -->
+	<script src="https://kit.fontawesome.com/44e4e59292.js" crossorigin="anonymous"></script>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+	<link href="assets/plugins/pace/pace-theme-flash.css" rel="stylesheet" type="text/css" />
+	<link href="assets/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+	<link href="assets/plugins/jquery-scrollbar/jquery.scrollbar.css" rel="stylesheet" type="text/css" media="screen" />
+	<link href="assets/plugins/select2/css/select2.min.css" rel="stylesheet" type="text/css" media="screen" />
+	<!-- <link class="main-stylesheet" href="pages/css/themes/corporate.css" rel="stylesheet" type="text/css" /> -->
+	<!-- Please remove the file below for production: Contains demo classes -->
+	<!-- <link class="main-stylesheet" href="assets/css/style.css" rel="stylesheet" type="text/css" /> -->
+	<link rel="preconnect" href="https://fonts.googleapis.com" />
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+	<link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet" />
+	<!-- Flatpickr CSS CDN -->
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+	
+	<!-- Flatpickr JS CDN -->
+	<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+	<link href="styles/campaignOverview.css" rel="stylesheet" type="text/css" />
+	<link href="styles/style.css" rel="stylesheet" type="text/css" />
+	<script src="https://cdn.tailwindcss.com"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.5/xlsx.full.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+	<link href="styles/permissions.css" rel="stylesheet" type="text/css" />
+	
+</head>
+<%- include("../commonJS/loader") %>
+<body>
+	<!-- Sidebar -->
+	<div class="layout-container">
+		<%- include("../commonJS/sidebar")  %>
+		
+		<!-- START PAGE-CONTAINER -->
+		<div class="main-content">
+			<!-- END HEADER -->
+			<div class="logo breadCrumb">
+				
+				<div class="flex items-center ">
+					<!-- START BREADCRUMB -->
+					
+					<div class="flex items-center">
+						<a href="/reports/campaign-list" class="text-gray-500 hover:text-gray-700 hover:no-underline ">Reports</a>
+						<svg class="w-4 h-4 mx-2 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+							<path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L11.586 10 7.293 5.707a1 1 0 011.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+						</svg>
+					</div>
+					
+					<a onclick="location.reload()" href="/reports/campaign-list" class="text-red-600 hover:text-gray-700 hover:no-underline ">Campaign Overview</a>
+					<div class="relative inline-block pl-2">
+						<i class="info-icon text-red-700 hover:text-red-900">
+							<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+								<circle cx="12" cy="12" r="10"></circle>
+								<line x1="12" y1="16" x2="12" y2="12"></line>
+								<line x1="12" y1="8" x2="12.01" y2="8"></line>
+							</svg>
+							
+						</i>
+						<div class="tooltip invisible opacity-0 w-64 bg-gray-900 text-white text-sm rounded-lg absolute z-10 p-4 -translate-x-1/2 left-1/2 mt-2 transition-opacity duration-300">
+							<!-- Arrow -->
+							<div class="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-gray-900 transform rotate-45"></div>
+							<!-- Content -->
+							<div class="relative">
+								Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+							</div>
+						</div>
+					</div>
+					
+				</div>
+			</div>
+			<div class="mainDiv">
+				<div class="flex items-center h-fit px-2 pt-3">
+					<!-- Button for Overview -->
+					<button onclick="location.href = `/reports/campaign-list/<%= id %>`" type="button" class="p-2">Overview</button>
+					<div class="border h-4 m-2"></div>
+					
+					<!-- Button for Sent Messages -->
+					<button onclick="location.href = `/reports/campaign-list/<%= id %>?filter=sent`" type="button" class="p-2">Sent</button>
+					<div class="border h-4 m-2"></div>
+					
+					<!-- Button for Delivered Messages -->
+					<button onclick="location.href = `/reports/campaign-list/<%= id %>?filter=delivered`" type="button" class="p-2">Delivered</button>
+					<div class="border h-4 m-2"></div>
+					
+					<!-- Button for Read Messages -->
+					<button onclick="location.href = `/reports/campaign-list/<%= id %>?filter=read`" type="button" class="p-2">Read</button>
+					<div class="border h-4 m-2"></div>
+					
+					<!-- Button for Replies Received -->
+					<button onclick="location.href = `/reports/campaign-list/<%= id %>?filter=replies`" type="button" class="p-2">Replies received</button>
+					<div class="border h-4 m-2"></div>
+					
+					<!-- Button for Failed Messages -->
+					<button onclick="location.href = `/reports/campaign-list/<%= id %>?filter=failed`" type="button" class="py-1 px-2 bg-black text-white rounded">Failed</button>
+				</div>
+				
+			
+			<div class="mt-3 flex justify-between items-center w-[97%]"><span class="font-semibold text-xl">Message Failed <%= totalCount  %></span>
+				<span class="flex space-x-5">
+					<button id="exportCSV" class="rounded border border-gray-500 flex items-center p-2 space-x-2" type="button"><svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" fill="#000000" viewBox="0 0 256 256">
+							<path d="M240,136v64a16,16,0,0,1-16,16H32a16,16,0,0,1-16-16V136a16,16,0,0,1,16-16H80a8,8,0,0,1,0,16H32v64H224V136H176a8,8,0,0,1,0-16h48A16,16,0,0,1,240,136ZM85.66,77.66,120,43.31V128a8,8,0,0,0,16,0V43.31l34.34,34.35a8,8,0,0,0,11.32-11.32l-48-48a8,8,0,0,0-11.32,0l-48,48A8,8,0,0,0,85.66,77.66ZM200,168a12,12,0,1,0-12,12A12,12,0,0,0,200,168Z"></path>
+						</svg><span> Export CSV</span>
+					</button>
+					<% if(access?.reports?.conversationReports?.retargetingUsers) { %>
+					<button id="broadcast" class="rounded flex items-center p-2 space-x-2 bg-gray-300 hover:bg-gray-200 hover:cursor-not-allowed text-white" type="button"><svg width="17" height="17" viewBox="0 0 17 17" fill="white" xmlns="http://www.w3.org/2000/svg">
+							<path d="M15.9834 1.01675C15.8419 0.875373 15.6653 0.774266 15.4718 0.723842C15.2782 0.673418 15.0748 0.6755 14.8823 0.729874H14.8717L1.37596 4.82487C1.15686 4.88802 0.962123 5.01625 0.81755 5.19257C0.672976 5.36889 0.585394 5.58498 0.566408 5.8122C0.547422 6.03942 0.597928 6.26705 0.711235 6.46492C0.824542 6.66279 0.9953 6.82156 1.20088 6.92019L7.17182 9.82831L10.0757 15.7957C10.166 15.9885 10.3096 16.1513 10.4896 16.2651C10.6695 16.3789 10.8782 16.4387 11.091 16.4377C11.1234 16.4377 11.1557 16.4363 11.1881 16.4335C11.4151 16.4151 11.6311 16.3277 11.807 16.183C11.983 16.0384 12.1105 15.8434 12.1724 15.6242L16.2646 2.12839C16.2646 2.12487 16.2646 2.12136 16.2646 2.11784C16.3197 1.92586 16.3227 1.72268 16.2733 1.52917C16.2238 1.33566 16.1238 1.1588 15.9834 1.01675ZM11.0974 15.3021L11.0938 15.312V15.3071L8.27713 9.52034L11.6521 6.14534C11.7532 6.039 11.8087 5.89739 11.8068 5.75071C11.8049 5.60403 11.7458 5.46389 11.6421 5.36016C11.5384 5.25644 11.3982 5.19733 11.2515 5.19546C11.1049 5.19358 10.9632 5.24907 10.8569 5.35011L7.4819 8.72511L1.69307 5.90839H1.68815H1.69799L15.1874 1.81269L11.0974 15.3021Z" />
+						</svg><span> Broadcast</span>
+					</button>
+					<% } else { %>
+					<button title="You don't have the permissions to access this'" class="rounded flex items-center p-2 space-x-2 bg-gray-300 hover:bg-gray-200 hover:cursor-not-allowed text-white" type="button" disabled><svg width="17" height="17" viewBox="0 0 17 17" fill="white" xmlns="http://www.w3.org/2000/svg">
+							<path d="M15.9834 1.01675C15.8419 0.875373 15.6653 0.774266 15.4718 0.723842C15.2782 0.673418 15.0748 0.6755 14.8823 0.729874H14.8717L1.37596 4.82487C1.15686 4.88802 0.962123 5.01625 0.81755 5.19257C0.672976 5.36889 0.585394 5.58498 0.566408 5.8122C0.547422 6.03942 0.597928 6.26705 0.711235 6.46492C0.824542 6.66279 0.9953 6.82156 1.20088 6.92019L7.17182 9.82831L10.0757 15.7957C10.166 15.9885 10.3096 16.1513 10.4896 16.2651C10.6695 16.3789 10.8782 16.4387 11.091 16.4377C11.1234 16.4377 11.1557 16.4363 11.1881 16.4335C11.4151 16.4151 11.6311 16.3277 11.807 16.183C11.983 16.0384 12.1105 15.8434 12.1724 15.6242L16.2646 2.12839C16.2646 2.12487 16.2646 2.12136 16.2646 2.11784C16.3197 1.92586 16.3227 1.72268 16.2733 1.52917C16.2238 1.33566 16.1238 1.1588 15.9834 1.01675ZM11.0974 15.3021L11.0938 15.312V15.3071L8.27713 9.52034L11.6521 6.14534C11.7532 6.039 11.8087 5.89739 11.8068 5.75071C11.8049 5.60403 11.7458 5.46389 11.6421 5.36016C11.5384 5.25644 11.3982 5.19733 11.2515 5.19546C11.1049 5.19358 10.9632 5.24907 10.8569 5.35011L7.4819 8.72511L1.69307 5.90839H1.68815H1.69799L15.1874 1.81269L11.0974 15.3021Z" />
+						</svg><span> Broadcast</span>
+					</button>
+					<% } %>
+				</span>
+			</div>
+			<div class="container">
+				<% if (campaigns.length > 0) { %>
+				<div class="message-list">
+					<table class="text-center min-w-full border-separate border-spacing-y-4">
+						<thead>
+							<tr class="text-gray-400">
+								<td class="py-4"><input type="checkbox" class="checkbox" /></td>
+								<td>Name</td>
+								<td class="py-4">Contact</td>							
+								<td class="py-4">Send At</td>
+								<td class="py-4">Failed At</td>
+								<td class="py-4">Error Code</td>
+								<td class="py-4">Error</td>
+								<td class="py-4">Message Sent</td>
+							</tr>
+						</thead>
+						<tbody>
+							<% campaigns.forEach(report => { %>
+							<tr class="hover:bg-gray-100 cursor-pointer border text-gray-700">
+								<td class="border-l border-t border-b rounded-lg py-4 px-2 border-gray-200 text-sm">
+									<input type="checkbox" class="checkbox" />
+								</td>
+								<td class="border-t border-b border-gray-200">
+									<%= report.contactName %>
+								</td>
+								<td class="border-t border-b border-gray-200" aria-label="<%= report.recipientPhone %>">
+									<% 
+                						const phoneNumber = report.recipientPhone;
+                						const maskedPhone = phoneNumber.slice(0, -2).replace(/\d/g, 'X') + phoneNumber.slice(-2);
+                					%>
+									<%= maskedPhone %>
+								</td>
+								<td class="border-t border-b border-gray-200 date-cell" data-date="<%= report.createdAt %>">
+									
+								</td>
+								<td class="border-t border-b border-gray-200 date-cell" data-date="<%= report.updatedAt %>">
+									
+								</td>								
+								<td class="border-t border-b border-gray-200">
+									<%= report.failed?.code %>
+								</td>
+								<td class="border-t border-b border-gray-200 max-w-xs">
+									<%= report.failed?.text %>
+								</td>
+								<td class="border-r border-t border-b rounded-lg border-gray-200 max-w-xs">
+									<p class="inline">
+										<span class="messageText block overflow-hidden  text-base text-ellipsis whitespace-nowrap">
+											<%= report?.messageTemplate || report?.text || report?.media_type %>
+										</span>
+										<% if (report.messageTemplate && report.messageTemplate.length > 100) { %>
+										<button id="readMoreBtn" class="text-gray-900 hover:text-gray-900 italic" onclick="toggleReadMore(event)">Read more</button>
+										<% } %>
+									</p>
+								</td>
+							</tr>
+							<% }) %>
+						</tbody>
+						<script>
+							const contact = <%- JSON.stringify(contact) %>;
+						</script>
+					</table>
+				</div>
+				<% } %>
+			</div>
+		</div>
+		</div>
+	</div>
+
+	<script>
+		document.querySelectorAll('.date-cell').forEach((el) => {
+			const rawDate = el.getAttribute('data-date');
+			if (rawDate) {
+				const date = new Date(Number(rawDate));
+				const formatted = date.toLocaleDateString('en-GB', {
+					day: '2-digit',
+					month: 'short',
+					year: 'numeric',
+					hour: '2-digit',
+					minute: '2-digit',
+					hour12: true,
+				}).replace(',', ' at ');
+				el.textContent = formatted;
+			}
+		});
+	</script>
+	  
+	
+	<script src="/reports/js/campaignSentBroadcast.js"></script>
+	<script src="/toast.js"></script>
+	<script src="/menu.js"></script>
+</body> 
+
+</html>

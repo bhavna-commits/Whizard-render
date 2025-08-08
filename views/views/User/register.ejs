@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Sign Up</title>
+	<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+	<meta charset="utf-8" />
+	<title>Pages - Admin Dashboard UI Kit - Cards</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no" />
+	<link rel="apple-touch-icon" href="pages/ico/60.png">
+	<link rel="apple-touch-icon" sizes="76x76" href="pages/ico/76.png">
+	<link rel="apple-touch-icon" sizes="120x120" href="pages/ico/120.png">
+	<link rel="apple-touch-icon" sizes="152x152" href="pages/ico/152.png">
+	<link rel="icon" type="image/x-icon" href="favicon.ico" />
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-touch-fullscreen" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="default">
+	<meta content="Meet pages - The simplest and fastest way to build web UI for your dashboard or app." name="description" />
+	<meta content="Ace" name="author" />
+	<link href="assets/plugins/pace/pace-theme-flash.css" rel="stylesheet" type="text/css" />
+	<link href="assets/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+	<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+	<link href="assets/plugins/jquery-scrollbar/jquery.scrollbar.css" rel="stylesheet" type="text/css" media="screen" />
+	<link href="assets/plugins/select2/css/select2.min.css" rel="stylesheet" type="text/css" media="screen" />
+	<!-- <link class="main-stylesheet" href="pages/css/themes/corporate.css" rel="stylesheet" type="text/css" /> -->
+	<!-- Please remove the file below for production: Contains demo classes -->
+	<link class="main-stylesheet" href="assets/css/style.css" rel="stylesheet" type="text/css" />
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="/styles/style.css">
+	<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+	<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" />
+	<script src="https://cdn.tailwindcss.com"></script>
+	<link rel="stylesheet" href="/styles/countrySelector.css" />
+	<style>		
+		#errorMessage {
+			color: red;
+			margin-top: 10px;
+		}
+	</style>
+</head>
+
+<body>
+	<%- include("../commonJS/loader") %>
+	<div class="layout-container">
+		<!-- Left Section -->
+		<%- include("common/leftSide")  %>
+		
+		<!-- Right Section - Sign Up Form -->
+		<div class="flex-shrink right-section justify-center p-5">
+			<div class="d-flex justify-content-center align-items-center border-0">
+				<div class="w-[75%]">	
+					<h2 class="card-title text-center text-3xl mb-7 font-semibold">Sign Up</h2>
+					<form id="signUpForm">
+						<div class="mb-4">
+							<label for="name" class="form-label text-gray-600">Name</label>
+							<input type="text" class="form-control text-gray-600 placeholder:text-gray-400" id="name" name="name" placeholder="Enter your full name" required />
+						</div>
+						<div class="mb-4">
+							<label for="email" class="form-label text-gray-600">Email</label>
+							<input type="email" class="form-control text-gray-600 placeholder:text-gray-400" id="email" name="email" placeholder="Enter your work email" required />
+							<p id="emailWarning" class="text-red-500 text-sm hidden mt-2">Only company emails are accepted.</p>
+						</div>
+						<div class="mb-4">
+							<label for="phone" class="form-label   text-gray-600">Phone number</label>
+							<div class="input-group">
+								<div class="flex items-center focus:outline-none" id="countrySelector">
+									
+									<div class="country-dropdown hidden " id="countryDropdown">
+										<div class="search-container focus:outline-none">
+											<input type="text" id="countrySearch" placeholder="Search country or code...">
+										</div>
+										<div class="countries-list">
+											<% countries.forEach(function(country) { %>
+											<button type="button" class="country-option focus:outline-none">
+												<span class="country-flag"><%= country.flag %></span>
+												<span class="country-name"><%= country.name %></span>
+												<span class="country-dial-code"><%= country.dialCode %></span>
+											</button>
+											<% }); %>
+										</div>
+									</div>
+								</div>
+								<div class="form-control flex items-center">
+									<button type="button" class="w-16 flex items-center" id="countrySelectorButton">
+										<span id="selectedFlag" class="">🇮🇳</span>&nbsp;
+										<input type="text" name="countryCode" class="cursor-pointer" id="selectedDialCode" value="+91" readonly>
+									</button>
+									<input type="tel" id="phone" name="phoneNumber" class="w-full" placeholder="Enter WhatsApp number" minlength="8" maxlength="15" required />
+								</div>
+							</div>
+							<small id="phone-error" class="text-danger pt-2" style="display: none;">Please enter a valid phone number (numbers only, 8 to 15 digits).</small>
+						</div>
+						<div class="mb-4">
+							<label for="password" class="form-label text-gray-700">Password</label>
+							<div class="form-control flex items-center justify-between">
+								<input type="password" id="password" name="password" placeholder="Enter password" class=" w-full" required />
+								<!-- Visible eye icon -->
+								<span id="visiblePassword" style="cursor: pointer; width: fit-content;">
+									<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="18px" fill="#9ca3af">
+										<path d="m644-428-58-58q9-47-27-88t-93-32l-58-58q17-8 34.5-12t37.5-4q75 0 127.5 52.5T660-500q0 20-4 37.5T644-428Zm128 126-58-56q38-29 67.5-63.5T832-500q-50-101-143.5-160.5T480-720q-29 0-57 4t-55 12l-62-62q41-17 84-25.5t90-8.5q151 0 269 83.5T920-500q-23 59-60.5 109.5T772-302Zm20 246L624-222q-35 11-70.5 16.5T480-200q-151 0-269-83.5T40-500q21-53 53-98.5t73-81.5L56-792l56-56 736 736-56 56ZM222-624q-29 26-53 57t-53 67q50 101 143.5 160.5T480-280q20 0 39-2.5t39-5.5l-36-38q-11 3-21 4.5t-21 1.5q-75 0-127.5-52.5T300-500q0-11 1.5-21t4.5-21l-84-82Zm319 93Zm-151 75Z" />
+									</svg>
+								</span>
+								<!-- Not visible (slashed eye) icon -->
+								<span id="notVisiblePassword" style="cursor: pointer; display:none; width: fit-content;">
+									<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="18px" fill="#9ca3af">
+										<path d="M480-320q75 0 127.5-52.5T660-500q0-75-52.5-127.5T480-680q-75 0-127.5 52.5T300-500q0 75 52.5 127.5T480-320Zm0-72q-45 0-76.5-31.5T372-500q0-45 31.5-76.5T480-608q45 0 76.5 31.5T588-500q0 45-31.5 76.5T480-392Zm0 192q-146 0-266-81.5T40-500q54-137 174-218.5T480-800q146 0 266 81.5T920-500q-54 137-174 218.5T480-200Zm0-300Zm0 220q113 0 207.5-59.5T832-500q-50-101-144.5-160.5T480-720q-113 0-207.5 59.5T128-500q50 101 144.5 160.5T480-280Z" />
+									</svg>
+								</span>
+							</div>
+							<small id="passwordError" class="text-danger pt-2" style="display: none;"></small>
+						</div>
+						
+						<div class="mb-4">
+							<label for="confirmPassword" class="form-label text-gray-700">Confirm password</label>
+							<div class="form-control flex items-center justify-between">
+								<input type="password" id="confirmPassword" name="confirmPassword" class=" w-full" placeholder="Confirm your password" required />
+								<!-- Visible eye icon -->
+								<span id="visibleConfirmPassword" style="cursor: pointer; width: fit-content;">
+									<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="18px" fill="#9ca3af">
+										<path d="m644-428-58-58q9-47-27-88t-93-32l-58-58q17-8 34.5-12t37.5-4q75 0 127.5 52.5T660-500q0 20-4 37.5T644-428Zm128 126-58-56q38-29 67.5-63.5T832-500q-50-101-143.5-160.5T480-720q-29 0-57 4t-55 12l-62-62q41-17 84-25.5t90-8.5q151 0 269 83.5T920-500q-23 59-60.5 109.5T772-302Zm20 246L624-222q-35 11-70.5 16.5T480-200q-151 0-269-83.5T40-500q21-53 53-98.5t73-81.5L56-792l56-56 736 736-56 56ZM222-624q-29 26-53 57t-53 67q50 101 143.5 160.5T480-280q20 0 39-2.5t39-5.5l-36-38q-11 3-21 4.5t-21 1.5q-75 0-127.5-52.5T300-500q0-11 1.5-21t4.5-21l-84-82Zm319 93Zm-151 75Z" />
+									</svg>
+								</span>
+								<!-- Not visible (slashed eye) icon -->
+								<span id="notVisibleConfirmPassword" style="cursor: pointer; display:none; width: fit-content;">
+									<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="18px" fill="#9ca3af">
+										<path d="M480-320q75 0 127.5-52.5T660-500q0-75-52.5-127.5T480-680q-75 0-127.5 52.5T300-500q0 75 52.5 127.5T480-320Zm0-72q-45 0-76.5-31.5T372-500q0-45 31.5-76.5T480-608q45 0 76.5 31.5T588-500q0 45-31.5 76.5T480-392Zm0 192q-146 0-266-81.5T40-500q54-137 174-218.5T480-800q146 0 266 81.5T920-500q-54 137-174 218.5T480-200Zm0-300Zm0 220q113 0 207.5-59.5T832-500q-50-101-144.5-160.5T480-720q-113 0-207.5 59.5T128-500q50 101 144.5 160.5T480-280Z" />
+									</svg>
+								</span>
+							</div>
+							<small id="confirmPasswordError" class="text-danger pt-2" style="display: none;"></small>
+						</div>
+						
+						<button type="submit" class="bg-black w-full text-white rounded-[.6rem] p-2 flex justify-center items-center h-10" id="submitBtn">
+							Sign Up
+						</button>
+						<p class="text-center py-2  text-gray-500">Existing user ? <a class="text-black hover:underline-offset-2 hover:text-black " href="/login">Login</a></p>
+						<div id="successMessage" class="text-success text-center hidden py-3"></div>
+						<div id="errorMessage" class="hidden text-center py-3"></div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+	<script src="/user/js/register.js"></script>
+	<script src="carousel.js"></script>
+	<script src="/toast.js"></script>
+</body>
+
+</html>

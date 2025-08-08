@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+	<meta charset="utf-8" />
+	<title>Profile - Whizard</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no" />
+	<link rel="apple-touch-icon" href="pages/ico/60.png" />
+	<link rel="apple-touch-icon" sizes="76x76" href="pages/ico/76.png" />
+	<link rel="apple-touch-icon" sizes="120x120" href="pages/ico/120.png" />
+	<link rel="apple-touch-icon" sizes="152x152" href="pages/ico/152.png" />
+	<link rel="icon" type="image/x-icon" href="favicon.ico" />
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+	<meta name="apple-touch-fullscreen" content="yes" />
+	<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+	<meta content="Meet pages - The simplest and fastest way to build web UI for your dashboard or app." name="description" />
+	<meta content="Ace" name="author" />
+	<link href="assets/plugins/pace/pace-theme-flash.css" rel="stylesheet" type="text/css" />
+	<link href="assets/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+	<!-- <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" /> -->
+	<link href="assets/plugins/jquery-scrollbar/jquery.scrollbar.css" rel="stylesheet" type="text/css" media="screen" />
+	<link href="assets/plugins/select2/css/select2.min.css" rel="stylesheet" type="text/css" media="screen" />
+	<!-- <link class="main-stylesheet" href="pages/css/themes/corporate.css" rel="stylesheet" type="text/css" /> -->
+	<!-- Please remove the file below for production: Contains demo classes -->
+	<link class="main-stylesheet" href="assets/css/style.css" rel="stylesheet" type="text/css" />
+	<link rel="preconnect" href="https://fonts.googleapis.com" />
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+	<link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet" />
+	<script src="https://viralpitch.co/insights/app/js/apexcharts-bundle/dist/apexcharts.js"></script>
+	<link rel="stylesheet" href="styles/template.css" />
+	<link rel="stylesheet" href="https://viralpitch.co/insights/app/js/apexcharts-bundle/dist/apexcharts.css" />
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+	<link href="styles/style.css" rel="stylesheet" type="text/css" />
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+	<script src="https://cdn.tailwindcss.com"></script>
+	<!-- <link rel="stylesheet" type="text/css" href="styles/template-preview.css" /> -->
+	<style>
+		.loading-spinner {
+			border: 3px solid rgba(0, 0, 0, 0.1);
+			border-left-color: #fff;
+			border-radius: 100%;
+			width: 16px;
+			height: 16px;
+			animation: spin 1s linear infinite;
+		}
+		
+		@keyframes spin {
+			0% {
+				transform: rotate(0deg);
+			}
+			
+			100% {
+				transform: rotate(360deg);
+			}
+		}
+	</style>
+</head>
+<!-- Loader HTML -->
+<%- include("../commonJS/loader") %>
+
+<body>
+	<div class="layout-container">
+		<%- include("../commonJS/sidebar")  %>
+		<!-- END SIDEBAR MENU TOP TRAY CONTENT-->
+		
+		<!-- START PAGE-CONTAINER -->
+		<div class="main-content">
+			<!-- END HEADER -->
+			<div class="logo breadCrumb">
+				
+				<!-- START BREADCRUMB -->
+				<nav class="flex" aria-label="Breadcrumb">
+					
+					<div class="flex items-center">
+						<a href="/settings" class="text-gray-500 hover:text-gray-700 ">Settings</a>
+						<svg class="w-4 h-4 mx-2 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+							<path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L11.586 10 7.293 5.707a1 1 0 011.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+						</svg>
+					</div>
+					
+					<div class="flex items-center">
+						<a href="/settings/profile" class="text-red-500 hover:text-gray-700  ">Profile</a>
+						<div class="relative inline-block pl-2">
+							<i class="info-icon text-red-700 hover:text-red-900">
+								<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+									<circle cx="12" cy="12" r="10"></circle>
+									<line x1="12" y1="16" x2="12" y2="12"></line>
+									<line x1="12" y1="8" x2="12.01" y2="8"></line>
+								</svg>
+								
+							</i>
+							<div class="tooltip invisible opacity-0 w-64 bg-gray-900 text-white text-sm rounded-lg absolute z-10 p-4 -translate-x-1/2 left-1/2 mt-2 transition-opacity duration-300">
+								<!-- Arrow -->
+								<div class="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-gray-900 transform rotate-45"></div>
+								<!-- Content -->
+								<div class="relative">
+									Your profile
+								</div>
+							</div>
+						</div>
+					</div>
+					
+				</nav>
+				<!-- END BREADCRUMB -->
+				
+			</div>
+			<div class="max-w-5xl mx-auto min-w-[60%] bg-white">
+				<h1 class="text-2xl my-4">Personal Profile</h1>
+				
+				<form id="profileForm" class="space-y-6 border rounded-xl p-4" enctype="multipart/form-data">
+					<!-- Profile Image Section -->
+					<div class="flex items-center justify-between space-x-4">
+						<!-- Profile Picture -->
+						<div class="space-y-1">
+							<label class="text-[#191919] text-lg block">Profile Image</label>
+							
+							<p class="text-sm  text-[#656565]">Image should be less than 100KB</p>
+						</div>
+						<div class="flex items-center w-3/5">
+							<div class="w-20 h-20 rounded-full bg-[<%= color %>] text-white flex items-center justify-center text-xl font-semibold mr-3 relative overflow-hidden">
+								<% if (photo) { %>
+								
+								<img id="profilePreview" src="/<%= photo %>" class="w-full h-full object-cover block" />
+								
+								<% } else { %>
+								
+								<span id="userInitial" class="block text-3xl"><%= user.name.charAt(0) + user.name.charAt(name.length - 1) %></span>
+								<% } %>
+								<img id="dpPreview" src="" class="w-full h-full absolute object-cover hidden" />
+							</div>
+							
+							<div class="relative inline-block">
+								<input type="file" name="profilePhoto" id="profilePhoto" accept="image/*" onchange="handleFileChange(event)" class="hidden">
+								<label for="profilePhoto" id="fileLabel" class="inline-block px-4 py-2 bg-white border border-gray-200 rounded-md cursor-pointer shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)] font-medium text-[#191919] hover:bg-gray-50 transition-colors duration-200">
+									Upload
+								</label>
+							</div>
+							
+						</div>
+					</div>
+					
+					<!-- Name Field -->
+					<div class="flex justify-between items-center">
+						<label class="text-[#191919]">Name</label>
+						<input type="text" name="name" value="<%= user.name %>" class="w-3/5 p-3 border rounded-xl bg-white">
+					</div>
+					
+					<!-- Email Field -->
+					<div class="flex justify-between items-center">
+						<label class=" text-[#191919]">Email</label>
+						<input type="email" name="email" value="<%= user.email %>" class="w-3/5 p-3 text-[#B8B8B8] border rounded-xl bg-white hover:cursor-not-allowed" disabled>
+					</div>
+					
+					<!-- Role Field (Disabled) -->
+					<div class="flex justify-between items-center ">
+						<label class=" text-[#191919]">Role</label>
+						<input type="text" name="role" value="<%= user.roleName || "Owner" %> " class="w-3/5 p-3 text-[#B8B8B8] border rounded-xl bg-white hover:cursor-not-allowed" disabled />
+					</div>
+					
+					<!-- Language Dropdown -->
+					<div class="flex justify-between items-center ">
+						<label class=" text-[#191919]">Language</label>
+						<div class="select-wrapper w-3/5">
+							<select name="language" class="w-full p-3 border rounded-xl bg-white">
+								<% languages.forEach(function(lang) { %>
+								<option value="<%= lang %>" <%= (user?.language ? user.language : 'English') === lang ? 'selected' : '' %>>
+									<%= lang %>
+								</option>
+								<% }); %>
+							</select>
+						</div>
+					</div>
+					
+					<!-- Password Field -->
+					<div class="flex justify-between items-center">
+						<label class="text-[#191919]">Password</label>
+						<button type="button" id="openModalBtn" class="w-3/5 p-3 border rounded-xl hover:bg-slate-100 bg-white text-left">
+							Change Password
+						</button>
+					</div>
+					
+					<!-- Action Buttons -->
+					<div class="flex justify-end">
+						<div class="flex justify-evenly">
+							<button type="button" class="text-gray-500 border p-2 rounded-xl " onclick="location.reload()">Cancel</button>
+							<button type="button" id="saveChanges" class=" bg-black ml-3 text-white py-2 px-4 rounded-xl"><span id="submitText">Save changes</span><span class="inline-block loading-spinner m-auto hidden"></span></button>
+						</div>
+					</div>
+					<div id="message" class="mt-4"></div>
+				</form>
+			</div>
+		</div>
+	</div>
+	
+	<script src="/settings/js/profile.js"></script>
+	<script src="/toast.js"></script>
+	<script src="/menu.js"></script>
+	<%- include("partials/changePassword") %>
+	
+	
+</body>
+
+</html>

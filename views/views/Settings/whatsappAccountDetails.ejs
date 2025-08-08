@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+	<meta charset="utf-8" />
+	<title>Account Details - Whizard</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no" />
+	<link rel="apple-touch-icon" href="pages/ico/60.png" />
+	<link rel="apple-touch-icon" sizes="76x76" href="pages/ico/76.png" />
+	<link rel="apple-touch-icon" sizes="120x120" href="pages/ico/120.png" />
+	<link rel="apple-touch-icon" sizes="152x152" href="pages/ico/152.png" />
+	<link rel="icon" type="image/x-icon" href="favicon.ico" />
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+	<meta name="apple-touch-fullscreen" content="yes" />
+	<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+	<meta content="Meet pages - The simplest and fastest way to build web UI for your dashboard or app." name="description" />
+	<meta content="Ace" name="author" />
+	<link href="assets/plugins/pace/pace-theme-flash.css" rel="stylesheet" type="text/css" />
+	<link href="assets/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+	<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+	<link href="assets/plugins/jquery-scrollbar/jquery.scrollbar.css" rel="stylesheet" type="text/css" media="screen" />
+	<link href="assets/plugins/select2/css/select2.min.css" rel="stylesheet" type="text/css" media="screen" />
+	<!-- <link class="main-stylesheet" href="pages/css/themes/corporate.css" rel="stylesheet" type="text/css" /> -->
+	<!-- Please remove the file below for production: Contains demo classes -->
+	<link class="main-stylesheet" href="assets/css/style.css" rel="stylesheet" type="text/css" />
+	
+	<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+	<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" />
+	<script src="https://cdn.tailwindcss.com"></script>
+	<link rel="stylesheet" href="/styles/countrySelector.css" />
+	<link rel="preconnect" href="https://fonts.googleapis.com" />
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+	<link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+	<link href="styles/style.css" rel="stylesheet" type="text/css" /> <!-- <script src="https://kit.fontawesome.com/44e4e59292.js" crossorigin="anonymous"></script> -->
+	<style>
+		.loading-spinner {
+			border: 3px solid rgba(0, 0, 0, 0.1);
+			border-left-color: #fff;
+			border-radius: 100%;
+			width: 16px;
+			height: 16px;
+			animation: spin 1s linear infinite;
+		}
+		
+		@keyframes spin {
+			0% {
+				transform: rotate(0deg);
+			}
+			
+			100% {
+				transform: rotate(360deg);
+			}
+		}
+	</style>
+</head>
+<!-- Loader HTML -->
+
+
+<body>
+	
+	<%- include("../commonJS/loader") %>
+	<div class="layout-container">
+		<%- include("../commonJS/sidebar")  %>
+		<!-- END SIDEBAR MENU TOP TRAY CONTENT-->
+		
+		<!-- START PAGE-CONTAINER -->
+		<div class="main-content">
+			<!-- END HEADER -->
+			<div class="logo breadCrumb">
+				
+				<!-- START BREADCRUMB -->
+				<nav class="flex" aria-label="Breadcrumb">
+					
+					<div class="flex items-center">
+						<a href="/settings" class="text-gray-500 hover:text-gray-700 hover:no-underline">Settings</a>
+						<svg class="w-4 h-4 mx-2 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+							<path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L11.586 10 7.293 5.707a1 1 0 011.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+						</svg>
+					</div>
+					
+					<div class="flex items-center">
+						<a href="/settings/account-details" class="text-red-500 hover:text-gray-700 hover:no-underline">WhatsApp Account Details</a>
+						<div class="relative inline-block pl-2">
+							<i class="info-icon text-red-700 hover:text-red-900">
+								<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+									<circle cx="12" cy="12" r="10"></circle>
+									<line x1="12" y1="16" x2="12" y2="12"></line>
+									<line x1="12" y1="8" x2="12.01" y2="8"></line>
+								</svg>
+								
+							</i>
+							<div class="tooltip invisible opacity-0 w-64 bg-gray-900 text-white text-sm rounded-lg absolute z-10 p-4 -translate-x-1/2 left-1/2 mt-2 transition-opacity duration-300">
+								<!-- Arrow -->
+								<div class="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-gray-900 transform rotate-45"></div>
+								<!-- Content -->
+								<div class="relative text-sm">
+									The Business Profile panel allows you to manage key public-facing details of your WhatsApp Business account, such as your email, about text, description, industry category, website links, and address—ensuring your brand appears authentic and professional to users.
+								</div>
+							</div>
+						</div>
+					</div>
+					
+				</nav>
+				<!-- END BREADCRUMB -->
+				
+			</div>
+			<div class="w-full flex flex-col justify-start items-center mx-auto bg-white ">
+				
+				<h1 class="text-xl my-3 w-[65%] ">WhatsApp Account Details</h1>
+				<div class="w-[65%] max-w-5xl py-3 px-5 border rounded-xl">
+					
+					<form id="signUpForm">
+						<div class="flex items-center justify-between space-x-4 mb-4">
+							<!-- Profile Picture -->
+							<div class="space-y-1">
+								<label class="text-[#191919] text-lg block">Profile Image</label>
+							</div>
+							<div class="flex items-center w-3/5">
+								<div class="w-16 h-16 rounded-full bg-[<%= color %>] text-white flex items-center justify-center text-xl font-semibold mr-3 relative overflow-hidden">
+									<% if (selectedNumber?.dp) { %>
+									
+									<img id="profilePreview" src="/<%= selectedNumber?.dp %>" class="w-full h-full object-cover block" />
+									
+									<% } else { %>
+									
+									<span id="userInitial" class="block text-3xl"><%= selectedNumber?.friendly_name.charAt(0) + selectedNumber?.friendly_name.charAt(selectedNumber?.friendly_name.length - 1) %></span>
+									<% } %>
+									<img id="dpPreview" src="" class="w-full h-full absolute object-cover hidden" />
+								</div>
+								
+								<div class="relative inline-block">
+									<input type="file" name="profilePhoto" id="profilePhoto" accept="image/*" onchange="handleFileChange(event)" class="hidden">
+									<label for="profilePhoto" id="fileLabel" class="inline-block px-4 py-2 bg-white border border-gray-200 rounded-md cursor-pointer shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)] font-medium text-[#191919] hover:bg-gray-50 transition-colors duration-200">
+										Upload
+									</label>
+								</div>
+								
+							</div>
+						</div>
+						<div class="mb-4 flex justify-between items-center">
+							<label for="name" class="form-label text-[#191919]">Company Name</label>
+							<input type="text" class="form-control w-3/5 text-[#191919]" id="name" name="name" value="<%= selectedNumber?.companyName %>" placeholder="Enter your Company's Name" />
+						</div>
+						<div class="mb-4 flex justify-between items-center">
+							<label for="website" class="form-label text-[#191919]">Display Email</label>
+							<input type="email" id="email" class="px-3 py-2 rounded-xl w-3/5 border outline-none form-control text-[#191919]" name="email" placeholder="contact@company.com" value="<%= selectedNumber?.companyDisplayEmail %>" />
+						</div>
+						<div class="mb-4 flex justify-between items-start">
+							<label for="about" class="form-label text-[#191919]">About</label>
+							<div class="w-3/5 about block relative">
+								<textarea class="form-control w-full text-[#191919] " name="about" placeholder="Tell us a bit about your company..." rows="2" maxlength="139"><%= selectedNumber?.displayAbout %></textarea>
+								<div class="form-text text-gray-500 absolute right-2 bottom-0 mt-2 text-sm text-right wordCount">
+									0/139
+								</div>
+							</div>
+						</div>
+						<div class="mb-4 flex justify-between items-start">
+							<label for="description" class="form-label text-[#191919]">Description</label>
+							<div class="w-3/5 block relative">
+								<textarea class="form-control w-full text-[#191919] " name="description" placeholder="Brief about your company..." rows="2" maxlength="512"><%= selectedNumber?.companyDescription %></textarea>
+								<div class="form-text text-gray-500 mt-2 absolute right-2 bottom-0 text-sm text-right wordCount">
+									0/512
+								</div>
+							</div>
+						</div>
+						<div class="mb-4 flex justify-between items-start">
+							<label for="address" class="form-label text-[#191919]">Business Address</label>
+							<div class="w-3/5 block relative">
+								<textarea type="text" id="address" name="address" class="form-control text-[#191919]" placeholder="Enter your business address" value="<%= selectedNumber?.displayAddress || '' %>" rows="2" maxlength="256"><%= selectedNumber?.displayAddress %></textarea>
+								<div class="form-text text-gray-500 mt-2 absolute right-2 bottom-0 text-sm text-right wordCount">
+									0/256
+								</div>
+							</div>
+						</div>
+						<div class="mb-4 flex justify-between items-center">
+							<label for="industry" class="form-label text-[#191919]">Industry/Category</label>
+							<div class="select-wrapper  w-3/5">
+								<select id="industry" name="industry" class="form-control text-[#191919]">
+									<option value="">Select industry type</option>
+									<% for (const [key, label] of Object.entries(verticalCategories)) { %>
+									<option value="<%= key %>" <%= selectedNumber?.industry === key ? 'selected' : '' %>><%= label %></option>
+									<% } %>
+								</select>
+							</div>
+						</div>
+						
+						<div class="mb-4 flex justify-between items-center">
+							<label for="website" class="form-label text-[#191919]">Website URL</label>
+							<input type="url" id="website" class="px-3 py-2 rounded-xl w-3/5 border outline-none form-control text-[#191919]" name="website" placeholder="https://example.com" value="<%= selectedNumber?.website[0] %>" />
+						</div>
+						
+						
+						<!-- Action Buttons -->
+						<div class="flex justify-end">
+							<div class="flex justify-evenly">
+								<button type="button" class="text-[#191919] border p-2 rounded-lg " onclick="location.reload()">Cancel</button>
+								<button type="submit" id="submitBtn" class=" bg-black ml-3 text-white py-2 px-4 rounded-lg">Save changes</button>
+							</div>
+						</div>
+						
+						<div id="errorMessage" class="hidden w-full text-center tex"></div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<script>
+		const user = <%- JSON.stringify(user) %>;
+	</script>
+	<script src="/settings/js/whatsappAccountDetails.js"></script>
+	<script src="/toast.js"></script>
+	<script src="/menu.js"></script>
+</body>
+
+</html>

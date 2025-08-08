@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Whizard - Cost Report</title>	
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.css" />
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@2.0.0"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.3.4/axios.min.js"></script>
+	<!-- <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"> -->
+	<link rel="preconnect" href="https://fonts.googleapis.com" />
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+	<link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet" />
+	<link href="styles/style.css" rel="stylesheet" type="text/css" />
+	<script src="https://cdn.tailwindcss.com"></script>
+</head>
+<%- include("../commonJS/loader") %>
+<body>
+
+	<div class="layout-container">
+		<%- include("../commonJS/sidebar")  %>
+		
+		<div class="main-content">
+			<!-- END HEADER -->
+			<div class="logo breadCrumb">
+				
+				<div class="flex items-center ">
+					<!-- START BREADCRUMB -->
+					
+					<div class="flex items-center">
+						<a href="/reports/campaign-list" class="text-gray-500 hover:text-gray-700 hover:no-underline  ">Reports</a>
+						<svg class="w-4 h-4 mx-2 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+							<path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L11.586 10 7.293 5.707a1 1 0 011.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+						</svg>
+					</div>
+					
+					<a onclick="location.reload()" href="/reports/cost-report" class="text-red-600 hover:text-gray-700  hover:no-underline ">Cost Report</a>
+					<div class="relative inline-block pl-2">
+						<i class="info-icon text-red-700 hover:text-red-900">
+							<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+								<circle cx="12" cy="12" r="10"></circle>
+								<line x1="12" y1="16" x2="12" y2="12"></line>
+								<line x1="12" y1="8" x2="12.01" y2="8"></line>
+							</svg>
+							
+						</i>
+						<div class="tooltip invisible opacity-0 w-64 bg-gray-900 text-white text-sm rounded-lg absolute z-10 p-4 -translate-x-1/2 left-1/2 mt-2 transition-opacity duration-300">
+							<!-- Arrow -->
+							<div class="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-gray-900 transform rotate-45"></div>
+							<!-- Content -->
+							<div class="relative">
+								Track all campaigns with performance insights. Click on any campaign for detailed analytics.
+							</div>
+						</div>
+					</div>
+					
+				</div>
+			</div>
+			<div class="mainDiv">
+				
+				<div class="container mx-auto px-4 py-8">
+					<!-- Date Range Picker -->
+					
+					<div class="w-full flex items-center justify-between">
+						<div class="flex items-center space-x-2 border rounded-lg p-2 w-64">
+							<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+							</svg>
+							<input type="text" id="dateRange" class="flex-1 p-1 text-gray-600" placeholder="Select date range" readonly />
+						</div>
+						<button type="button" onclick="createCSV()" class="flex items-center border rounded-lg p-2"><svg width="12" height="13" viewBox="0 0 12 13" fill="currentColor" xmlns="http://www.w3.org/2000/svg" class="mr-2">
+								<path d="M11.5 5.99991V11.9999C11.5 12.2651 11.3946 12.5195 11.2071 12.707C11.0196 12.8945 10.7652 12.9999 10.5 12.9999H1.5C1.23478 12.9999 0.98043 12.8945 0.792893 12.707C0.605357 12.5195 0.5 12.2651 0.5 11.9999V5.99991C0.5 5.73469 0.605357 5.48033 0.792893 5.2928C0.98043 5.10526 1.23478 4.99991 1.5 4.99991H3C3.13261 4.99991 3.25979 5.05258 3.35355 5.14635C3.44732 5.24012 3.5 5.3673 3.5 5.49991C3.5 5.63251 3.44732 5.75969 3.35355 5.85346C3.25979 5.94723 3.13261 5.99991 3 5.99991H1.5V11.9999H10.5V5.99991H9C8.86739 5.99991 8.74021 5.94723 8.64645 5.85346C8.55268 5.75969 8.5 5.63251 8.5 5.49991C8.5 5.3673 8.55268 5.24012 8.64645 5.14635C8.74021 5.05258 8.86739 4.99991 9 4.99991H10.5C10.7652 4.99991 11.0196 5.10526 11.2071 5.2928C11.3946 5.48033 11.5 5.73469 11.5 5.99991ZM3.85375 3.35366L5.5 1.70678V7.49991C5.5 7.63251 5.55268 7.75969 5.64645 7.85346C5.74021 7.94723 5.86739 7.9999 6 7.9999C6.13261 7.9999 6.25979 7.94723 6.35355 7.85346C6.44732 7.75969 6.5 7.63251 6.5 7.49991V1.70678L8.14625 3.35366C8.24007 3.44748 8.36732 3.50018 8.5 3.50018C8.63268 3.50018 8.75993 3.44748 8.85375 3.35366C8.94757 3.25984 9.00028 3.13259 9.00028 2.99991C9.00028 2.86722 8.94757 2.73998 8.85375 2.64616L6.35375 0.146155C6.30731 0.0996668 6.25217 0.0627873 6.19147 0.0376251C6.13077 0.012463 6.06571 -0.000488281 6 -0.000488281C5.93429 -0.000488281 5.86923 0.012463 5.80853 0.0376251C5.74783 0.0627873 5.69269 0.0996668 5.64625 0.146155L3.14625 2.64616C3.05243 2.73998 2.99972 2.86722 2.99972 2.99991C2.99972 3.13259 3.05243 3.25983 3.14625 3.35365C3.24007 3.44748 3.36732 3.50018 3.5 3.50018C3.63268 3.50018 3.75993 3.44748 3.85375 3.35366Z" />
+							</svg>Export
+						</button>
+					</div>
+					<div class="text-gray-500 my-6 text-sm">Note: All insights data is important and may differ from what&apos;s shown on your invoice due to small variations in data processing.</div>
+					
+					<!-- Summary Boxes -->
+					<div class="flex gap-4 mb-8">
+						<!-- Left box group -->
+						<div class="bg-white rounded-lg border p-4">
+							<div class="flex items-center justify-between space-x-16 mb-4">
+								<h2 class="text-gray-500 ">All Conversations</h2>
+								<span class="text-gray-500 conversation-count" id="totalCount">0</span>
+							</div>
+							<div class="space-y-4">
+								<div class="flex items-center justify-between space-x-16">
+									<div class="flex items-center">
+										<span class="w-2 h-2 bg-orange-400 rounded-full mr-2"></span>
+										<span>Marketing</span>
+									</div>
+									<span class="text-gray-500 conversation-count" id="marketingCount">0</span>
+								</div>
+								<div class="flex items-center justify-between space-x-16">
+									<div class="flex items-center">
+										<span class="w-2 h-2 bg-purple-600 rounded-full mr-2"></span>
+										<span>Utility</span>
+									</div>
+									<span class="text-gray-500 conversation-count" id="utilityCount">0</span>
+								</div>
+								<div class="flex items-center justify-between space-x-16">
+									<div class="flex items-center">
+										<span class="w-2 h-2 bg-blue-400 rounded-full mr-2"></span>
+										<span>Authentication</span>
+									</div>
+									<span class="text-gray-500 conversation-count" id="authCount">0</span>
+								</div>
+							</div>
+						</div>
+						
+						<!-- Right box group -->
+						<div class="bg-white rounded-lg border p-4">
+							<div class="flex items-center justify-between space-x-16 mb-4">
+								<h2 class="text-gray-500 ">Approximate Charges</h2>
+								<div><span class="text-gray-500 pr-1"><%= currency %></span><span class="text-gray-500 cost" id="totalCost">0.0</span></div>
+							</div>
+							<div class="space-y-4">
+								<div class="flex items-center justify-between space-x-16">
+									<div class="flex items-center">
+										<span class="w-2 h-2 bg-orange-400 rounded-full mr-2"></span>
+										<span>Marketing</span>
+									</div>
+									<div><span class="text-gray-500 pr-1"><%= currency %></span><span class="text-gray-500 cost" id="marketingCost">0.0</span></div>
+								</div>
+								<div class="flex items-center justify-between space-x-16">
+									<div class="flex items-center">
+										<span class="w-2 h-2 bg-purple-600 rounded-full mr-2"></span>
+										<span>Utility</span>
+									</div>
+									<div><span class="text-gray-500 pr-1"><%= currency %></span><span class="text-gray-500 cost" id="utilityCost">0.0</span></div>
+								</div>
+								<div class="flex items-center justify-between space-x-16">
+									<div class="flex items-center">
+										<span class="w-2 h-2 bg-blue-400 rounded-full mr-2"></span>
+										<span>Authentication</span>
+									</div>
+									<div><span class="text-gray-500 pr-1"><%= currency %></span><span class="text-gray-500 cost" id="authCost">0.0</span></div>
+								</div>
+							</div>
+						</div>
+					</div>
+					
+					<!-- Modified Graph HTML with loading states -->
+					<div class="bg-white rounded-lg border p-4 relative">
+						<div class="text-gray-500 text-xl">Conversations</div>
+						<div class="relative">
+							<!-- Loading overlay -->
+							<div id="analyticsLoading" class="hidden absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-10">
+								<div class="animate-spin inline-block w-8 h-8 border-4 border-black border-t-transparent rounded-full"></div>
+							</div>
+							<canvas id="analyticsChart" height="200" width="1200"></canvas>
+						</div>
+					</div>
+					
+					<div class="bg-white rounded-lg border mt-6 p-4 relative">
+						<div class="text-gray-500 text-xl">Approximate Charges</div>
+						<div class="relative">
+							<!-- Loading overlay -->
+							<div id="chargesLoading" class="hidden absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-10">
+								<div class="animate-spin inline-block w-8 h-8 border-4 border-black border-t-transparent rounded-full"></div>
+							</div>
+							<canvas id="chargesChart" height="200" width="1200"></canvas>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<script src="/reports/js/costReport.js"></script>
+	<script>
+		// Global chart instances
+		let conversationChart = null;
+		let costChart = null;
+	
+		function updateConversationChart (data) {
+			// Destroy existing chart if it exists
+			if (conversationChart) {
+				conversationChart.destroy();
+			}
+			
+			if (!data.timeseriesData || !data.timeseriesData.length) {
+				console.warn("No timeseries data available for chart");
+				return;
+			}
+			
+			const ctx = document.getElementById("analyticsChart").getContext("2d");
+			// console.log(data.timeseriesData.map(point => point.date));
+			const chartData = {
+				labels: data.timeseriesData.map(point => point.date),
+				datasets: [{
+						label: "Marketing",
+						data: data.timeseriesData.map(point => point.marketing.count),
+						borderColor: "#FB923C",
+						tension: 0,
+						fill: false
+					},
+					{
+						label: "Utility",
+						data: data.timeseriesData.map(point => point.utility.count),
+						borderColor: "#C084FC",
+						tension: 0,
+						fill: false
+					},
+					{
+						label: "Authentication",
+						data: data.timeseriesData.map(point => point.authentication.count),
+						borderColor: "#60A5FA",
+						tension: 0,
+						fill: false
+					}
+				]
+			};
+			
+			conversationChart = new Chart(ctx, {
+				type: "line",
+				data: chartData,
+				options: {
+					responsive: true,
+					interaction: {
+						intersect: false,
+						mode: "index"
+					},
+					plugins: {
+						legend: {
+							position: "top"
+						}
+					},
+					scales: {
+						y: {
+							beginAtZero: true,
+							ticks: {
+								stepSize: 2
+							}
+						},
+						x: {
+							type: 'category',
+							title: {
+								display: true,
+								text: 'Date'
+							}
+						}
+					},
+					elements: {
+						line: {
+							borderDash: [5, 5],
+							tension: 0,
+							cubicInterpolationMode: 'monotone',
+							borderWidth: 1,
+						}
+					}
+				}
+			});
+		}
+		
+		function updateCostChart (data) {
+			// Destroy existing cost chart if it exists
+			if (costChart) {
+				costChart.destroy();
+			}
+			
+			if (!data.timeseriesData || !data.timeseriesData.length) {
+				console.warn("No timeseries data available for cost chart");
+				return;
+			}
+			
+			const ctx = document.getElementById("chargesChart").getContext("2d");
+			
+			const chartData = {
+				labels: data.timeseriesData.map(point => point.date),
+				datasets: [{
+						label: "Marketing",
+						data: data.timeseriesData.map(point => point.marketing.cost),
+						borderColor: "#FB923C",
+						tension: 0,
+						fill: false
+					},
+					{
+						label: "Utility",
+						data: data.timeseriesData.map(point => point.utility.cost),
+						borderColor: "#C084FC",
+						tension: 0,
+						fill: false
+					},
+					{
+						label: "Authentication",
+						data: data.timeseriesData.map(point => point.authentication.cost),
+						borderColor: "#60A5FA",
+						tension: 0,
+						fill: false
+					}
+				]
+			};
+			
+			costChart = new Chart(ctx, {
+				type: "line",
+				data: chartData,
+				options: {
+					responsive: true,
+					interaction: {
+						intersect: false,
+						mode: "index"
+					},
+					plugins: {
+						legend: {
+							position: "top"
+						}
+					},
+					scales: {
+						y: {
+							beginAtZero: true,
+							ticks: {
+                                stepSize: 2,
+								callback: function (value) {
+									return '₹' + value.toFixed(2);
+								}
+							}
+						},
+						x: {
+							type: 'category',
+							title: {
+								display: true,
+								text: 'Date'
+							}
+						}
+					},
+					elements: {
+						line: {
+							borderDash: [5, 5],
+							tension: 0,
+							cubicInterpolationMode: 'monotone',
+							borderWidth: 1,
+						}
+					}
+				}
+			});
+		}
+		
+		// Initialize everything after DOM content is loaded
+		document.addEventListener("DOMContentLoaded", async () => {
+			initializeDatePicker();
+			
+			// Get initial dates from the date picker
+			const [startDate, endDate] = getQuarterDates();
+			const data = await fetchAnalytics(startDate, endDate);
+			if (data) {
+				updateUI(data);
+			}
+		});
+	</script>
+	<script src="/toast.js"></script>
+	<script src="/menu.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+	<meta charset="UTF-8" />
+	<title>Whizard - Create Campaign</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<!-- <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css"> -->
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+	<link href="assets/plugins/pace/pace-theme-flash.css" rel="stylesheet" type="text/css" />
+	<link href="assets/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+	<link href="assets/plugins/jquery-scrollbar/jquery.scrollbar.css" rel="stylesheet" type="text/css" media="screen" />
+	<link href="assets/plugins/select2/css/select2.css" rel="stylesheet" type="text/css" media="screen" />
+	<!-- <link class="main-stylesheet" href="/pages/css/themes/corporate.css" rel="stylesheet" type="text/css" /> -->
+	<!-- Please remove the file below for production: Contains demo classes -->
+	<!-- <link class="main-stylesheet" href="assets/css/style.css" rel="stylesheet" type="text/css" /> -->
+	<link rel="preconnect" href="https://fonts.googleapis.com" />
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+	<link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet" />
+	<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+	<link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet">
+	<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/en.js"></script>
+	<link href="styles/style.css" rel="stylesheet" type="text/css" />
+	<script src="https://cdn.tailwindcss.com"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.5/xlsx.full.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+	
+	<!-- <link href="styles/createList.css" rel="stylesheet" type="text/css" /> -->
+	<style>
+		.loader-submit {
+			border: 2px solid rgba(255, 255, 255, 0.2);
+			border-left-color: #fff;
+			border-radius: 50%;
+			width: 1rem;
+			height: 1rem;
+			animation: spin 1s linear infinite;
+		}
+		
+		@keyframes spin {
+			to {
+				transform: rotate(360deg);
+			}
+		}
+	</style>
+</head>
+<%- include("../commonJS/loader") %>
+
+<body>
+	
+	<div class="layout-container">
+		<%- include("../commonJS/sidebar")  %>
+		<!-- END SIDEBAR MENU TOP TRAY CONTENT-->
+		
+		<!-- START PAGE-CONTAINER -->
+		<div class="main-content">
+			<!-- END HEADER -->
+			<div class="logo breadCrumb">
+				<div class="flex items-center justify-between w-full">
+					<!-- START BREADCRUMB -->
+					<nav class="flex" aria-label="Breadcrumb">
+						
+						<div class="flex items-center">
+							<a href="/" class="text-gray-500 hover:text-gray-700">Dashboard</a>
+							<svg class="w-4 h-4 mx-2 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+								<path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L11.586 10 7.293 5.707a1 1 0 011.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+							</svg>
+						</div>
+						
+						<div class="flex items-center">
+							<a href="/contact-list" class="text-gray-500 hover:text-gray-700 hover:no-underline">Contact List</a>
+							<svg class="w-4 h-4 mx-2 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+								<path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L11.586 10 7.293 5.707a1 1 0 011.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+							</svg>
+						</div>
+						<div class="flex items-center">
+							<a href="/contact-list/createCampaign" class="text-red-600 hover:no-underline">Create Campaign</a>
+							<div class="relative inline-block pl-2">
+								<i class="info-icon text-red-700 hover:text-red-900">
+									<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+										<circle cx="12" cy="12" r="10"></circle>
+										<line x1="12" y1="16" x2="12" y2="12"></line>
+										<line x1="12" y1="8" x2="12.01" y2="8"></line>
+									</svg>
+									
+								</i>
+								<div class="tooltip invisible opacity-0 w-64 bg-gray-900 text-white text-sm rounded-lg absolute z-10 p-4 -translate-x-1/2 left-1/2 mt-2 transition-opacity duration-300">
+									<!-- Arrow -->
+									<div class="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-gray-900 transform rotate-45"></div>
+									<!-- Content -->
+									<div class="relative">
+										Create and customize campaigns with dynamic attributes. Preview the template before sending and schedule campaigns for later as needed.
+									</div>
+								</div>
+							</div>
+						</div>
+					</nav>
+					
+					<span class="text-gray-500">Messages Left : <%= message %></span>
+				</div>
+			</div>
+			<div class="mainDiv">
+				<div class="flex w-full bg-gray-50">
+					<div class="px-1 flex-shrink flex-grow w-1/3 bg-white">
+						<div class=" p-3 ">
+							<div class="title pb-4">
+								<h4 class="page-title font-semibold text-xl">Create Campaign</h4>
+							</div>
+							<form id="campaign-form">
+								<div class="space-y-6 flex flex-col">
+									<div class="">
+										<label class=" text-gray-400">Campaign name</label>
+										<input type="text" id="campaign-name" class="form-control p-2 placeholder:text-[#959595]  rounded-lg border " placeholder="Enter campaign name" required />
+									</div>
+									
+									<div class=" flex flex-col items-start relative">
+										<label class="pr-3 text-gray-400">Select template</label>
+										<!-- <div class="select-wrapper"> -->
+										<select id="template-select" class=" w-full text-[#959595] bg-white border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+											<option class="text-[#959595]" value="">
+												Select a template...
+											</option>
+										</select>
+										<!-- </div> -->
+									</div>
+									
+									
+									
+									<div class=" flex flex-col items-start relative">
+										<label class="pr-3 text-gray-400">Select recipient list</label>
+										<!-- <div class="select-wrapper"> -->
+										<select id="recipient-select" class="w-full p-2 text-[#959595] bg-white border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+											<option class="text-[#959595]" disabled>
+												Recipient List
+											</option>
+										</select>
+										<!-- </div> -->
+									</div>
+									<div class="flex flex-col items-start relative">
+										<label for="testNumber" class="pr-3 text-gray-400">Test your campaign (Optional)</label>
+										<div class="flex w-full">
+											<input id="testNumber" type="tel" minlength="12" maxlength="15" placeholder="Enter Test WhatsApp Number" class="form-control text-[#959595] placeholder:text-[#959595] bg-white border border-gray-300 rounded-md  focus:ring-indigo-500 focus:border-indigo-500 p-2" />
+											
+											<button type="submit" value="test" class="text-white ml-2
+											 px-2 py-1 rounded-md bg-black w-36">
+												<span class="inline-block loader-submit hidden"></span>
+												<span class="button-text">Send test</span>
+											</button>
+											
+										</div>
+										
+										<small id="testError" class="text-red-500 hidden p-2">The number must include country code WITHOUT +</small>
+										
+									</div>
+								</div>
+								<div class="w-full pt-5">
+									<div class="flex justify-between items-center mb-2">
+										<h2 class="text-xl font-semibold">Schedule Date & Time</h2>
+										<div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in" id="toggleSwitch">
+											<div class="block w-10 h-6 bg-gray-500 rounded-full cursor-pointer transition-colors duration-300 ease-[cubic-bezier(0.95,0.05,0.795,0.035)]"></div>
+											<div id="toggleKnob" class="absolute top-[3.4px] left-1 w-4 h-4 bg-white rounded-full transform transition-transform duration-300 ease-[cubic-bezier(0.95,0.05,0.795,0.035)] pointer-events-none"></div>
+										</div>
+									</div>
+									<p class="text-sm w-[40%] text-gray-500 mb-2">Schedule your campaign by selecting date & time.</p>
+									
+									<div id="scheduleSection" class="mb-6 overflow-hidden transform-gpu transition-all duration-300 max-h-0  ease-[cubic-bezier(0.95,0.05,0.795,0.035)]">
+										<div class="mb-4 ">
+											<label class="block text-gray-600 text-sm mb-2">Select Date</label>
+											<div class="relative">
+												<input id="datePicker" type="text" class="w-full px-4 py-2 text-gray-600 bg-gray-100 rounded-md border focus:outline-none focus:ring-2 focus:ring-black" placeholder="Select Date" />
+												<div class="absolute inset-y-0 right-0 flex items-center pr-3">
+													<svg xmlns="http://www.w3.org/2000/svg" fill="none" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor" class="h-6 w-6 text-gray-400">
+														<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10m4 12H5a2 2 0 01-2-2V7a2 2 0 012-2h14a2 2 0 012 2v14a2 2 0 01-2 2z" />
+													</svg>
+												</div>
+											</div>
+										</div>
+										
+										<div class="mb-6">
+											<label class="block text-gray-600 text-sm mb-2">Select Time</label>
+											<div class="relative">
+												<input id="timePicker" type="text" class="w-full px-4 py-2 text-gray-600 bg-gray-100 rounded-md border focus:outline-none focus:ring-2 focus:ring-black" placeholder="Select Time" />
+												<div class="absolute inset-y-0 right-0 flex items-center pr-3">
+													<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-400">
+														<circle cx="12" cy="12" r="10" />
+														<polyline points="12 6 12 12 16 14" />
+													</svg>
+												</div>
+											</div>
+										</div>
+									</div>
+									
+									
+									<!-- Schedule Button -->
+									<button type="submit" name="actionType" value="schedule" id="scheduleButton" class="w-[40%] bg-black text-white py-2 rounded-md hover:bg-gray-800 transition-colors hidden">
+										<span class="inline-block loader-submit hidden"></span>
+										<span class="button-text">Schedule Campaign</span>
+									</button>
+									
+									<!-- Send Now Button -->
+									<button type="submit" name="actionType" value="sendNow" id="sendNowButton" class="w-[40%] bg-black text-white py-2 rounded-md hover:bg-gray-800 transition-colors">
+										<span class="inline-block loader-submit hidden"></span>
+										<span class="button-text">Send Now</span>
+									</button>
+									
+								</div>
+							</form>
+						</div>
+					</div>
+					
+					<div class="px-1 mx-2 bg-white flex-grow w-1/3 flex-shrink">
+						<div class=" p-3">
+							<div class="pb-4 d-flex justify-content-between align-items-center">
+								<div class="title">
+									<h4 class="page-title font-semibold text-xl">Preview</h4>
+								</div>
+							</div>
+							<div id="preview-container" class=" bg-white py-2">
+								<!-- Preview content will be dynamically inserted here -->
+							</div>
+						</div>
+					</div>
+					
+					<div class="px-1 flex-shrink flex-grow w-1/3 bg-white">
+						<div class=" p-3">
+							<div class="title pb-4">
+								<h4 class="page-title font-semibold text-xl">Add Attributes</h4>
+							</div>
+							<form id="attributes-form" class="attributes-form">
+								<!-- Dynamic attributes will be inserted here -->
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<script src="assets/plugins/pace/pace.min.js" type="text/javascript"></script>
+	<!--  A polyfill for browsers that don't support ligatures: remove liga.js if not needed-->
+	<script src="assets/plugins/liga.js" type="text/javascript"></script>
+	<script src="assets/plugins/jquery/jquery-3.2.1.min.js" type="text/javascript"></script>
+	<script src="assets/plugins/modernizr.custom.js" type="text/javascript"></script>
+	<script src="assets/plugins/jquery-ui/jquery-ui.min.js" type="text/javascript"></script>
+	<script src="assets/plugins/popper/umd/popper.min.js" type="text/javascript"></script>
+	<script src="assets/plugins/bootstrap/js/bootstrap.min.js" type="text/javascript"></script>
+	<script src="assets/plugins/jquery/jquery-easy.js" type="text/javascript"></script>
+	<script src="assets/plugins/jquery-unveil/jquery.unveil.min.js" type="text/javascript"></script>
+	<script src="assets/plugins/jquery-ios-list/jquery.ioslist.min.js" type="text/javascript"></script>
+	<script src="assets/plugins/jquery-actual/jquery.actual.min.js"></script>
+	<script src="assets/plugins/jquery-scrollbar/jquery.scrollbar.min.js"></script>
+	<script type="text/javascript" src="assets/plugins/select2/js/select2.full.min.js"></script>
+	<script type="text/javascript" src="assets/plugins/classie/classie.js"></script>
+	
+	<script src="pages/js/pages.js"></script>
+	<script src="assets/js/card.js" type="text/javascript"></script>
+	<script src="assets/js/scripts.js" type="text/javascript"></script>
+	<script src="/contact-list/js/createCampaign.js" type="text/javascript"></script>
+	<script src="/toast.js"></script>
+	<script src="/menu.js"></script>
+	
+</body>
+
+</html>

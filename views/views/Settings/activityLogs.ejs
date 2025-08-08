@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+	<meta charset="utf-8" />
+	<title>Activity Logs - Whizard</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no" />
+	<link rel="apple-touch-icon" href="pages/ico/60.png" />
+	<link rel="apple-touch-icon" sizes="76x76" href="pages/ico/76.png" />
+	<link rel="apple-touch-icon" sizes="120x120" href="pages/ico/120.png" />
+	<link rel="apple-touch-icon" sizes="152x152" href="pages/ico/152.png" />
+	<link rel="icon" type="image/x-icon" href="favicon.ico" />
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+	<meta name="apple-touch-fullscreen" content="yes" />
+	<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+	<meta content="Meet pages - The simplest and fastest way to build web UI for your dashboard or app." name="description" />
+	<meta content="Ace" name="author" />
+	<link href="assets/plugins/pace/pace-theme-flash.css" rel="stylesheet" type="text/css" />
+	<link href="assets/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+	<!-- <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" /> -->
+	<link href="assets/plugins/jquery-scrollbar/jquery.scrollbar.css" rel="stylesheet" type="text/css" media="screen" />
+	<link href="assets/plugins/select2/css/select2.min.css" rel="stylesheet" type="text/css" media="screen" />
+	<!-- <link class="main-stylesheet" href="pages/css/themes/corporate.css" rel="stylesheet" type="text/css" /> -->
+	<!-- Please remove the file below for production: Contains demo classes -->
+	<link class="main-stylesheet" href="assets/css/style.css" rel="stylesheet" type="text/css" />
+	<link rel="preconnect" href="https://fonts.googleapis.com" />
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+	<link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet" />
+	<script src="https://viralpitch.co/insights/app/js/apexcharts-bundle/dist/apexcharts.js"></script>
+	<link rel="stylesheet" href="styles/template.css" />
+	<link rel="stylesheet" href="https://viralpitch.co/insights/app/js/apexcharts-bundle/dist/apexcharts.css" />
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+	<link href="styles/style.css" rel="stylesheet" type="text/css" />
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+	<script src="https://cdn.tailwindcss.com"></script>
+	<!-- <link rel="stylesheet" type="text/css" href="styles/template-preview.css" /> -->
+</head>
+<!-- Loader HTML -->
+<%- include("../commonJS/loader") %>
+
+<body>
+	
+	
+	<div class="layout-container">
+		<%- include("../commonJS/sidebar")  %>
+		<!-- END SIDEBAR MENU TOP TRAY CONTENT-->
+		
+		<!-- START PAGE-CONTAINER -->
+		<div class="main-content">
+			<div class="logo breadCrumb">
+				
+				<!-- START BREADCRUMB -->
+				<nav class="flex" aria-label="Breadcrumb">
+					
+					<div class="flex items-center">
+						<a href="/settings" class="text-gray-500 hover:text-gray-700 ">Settings</a>
+						<svg class="w-4 h-4 mx-2 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+							<path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L11.586 10 7.293 5.707a1 1 0 011.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+						</svg>
+					</div>
+					
+					<div class="flex items-center">
+						<a href="/settings/activity-logs" class="text-red-500 hover:text-gray-700  ">Activity logs</a>
+						<div class="relative inline-block pl-2">
+							<i class="info-icon text-red-700 hover:text-red-900">
+								<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+									<circle cx="12" cy="12" r="10"></circle>
+									<line x1="12" y1="16" x2="12" y2="12"></line>
+									<line x1="12" y1="8" x2="12.01" y2="8"></line>
+								</svg>
+								
+							</i>
+							<div class="tooltip invisible opacity-0 w-64 bg-gray-900 text-white text-sm rounded-lg absolute z-10 p-4 -translate-x-1/2 left-1/2 mt-2 transition-opacity duration-300">
+								<!-- Arrow -->
+								<div class="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-gray-900 transform rotate-45"></div>
+								<!-- Content -->
+								<div class="relative">
+									Activity Logs
+								</div>
+							</div>
+						</div>
+					</div>
+					
+				</nav>
+				<!-- END BREADCRUMB -->
+				
+			</div>
+			<div class="container w-[80%] mx-auto py-5">
+				<div class="flex justify-between mb-6">
+					<div class="text-2xl">Activity Logs</div>
+					<div class="flex space-x-4">					
+						<div class="select-wrapper  ">
+							<select id="dateRange" class="mt-1 block w-44 py-2 px-3 border border-gray-300 bg-white rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+								<option>Past 7 days</option>
+								<option>Past 30 days</option>
+								<option>Past 90 days</option>
+								<option>This month</option>
+								<option>Previous month</option>
+							</select>
+						</div>
+						<div class="select-wrapper">
+							<select id="actionFilter" class="mt-1 block w-32 py-2 px-3 border border-gray-300 bg-white rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+								<option>All action</option>
+								<option>Update</option>
+								<option>Create</option>
+								<option>Delete</option>
+								<option>Send</option>
+							</select>
+						</div>					
+					</div>
+				</div>
+				
+				<!-- Activity Logs -->
+				<div id="activityLogs" class="border rounded-2xl max-h-[70vh] overflow-auto p-4">
+					<%- include("partials/activityLogs") %>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	
+	<script src="/settings/js/activityLogs.js"></script>
+	<script src="/toast.js"></script>
+	<script src="/menu.js"></script>
+</body>
+
+</html>

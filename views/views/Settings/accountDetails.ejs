@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+	<meta charset="utf-8" />
+	<title>Account Details - Whizard</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no" />
+	<link rel="apple-touch-icon" href="pages/ico/60.png" />
+	<link rel="apple-touch-icon" sizes="76x76" href="pages/ico/76.png" />
+	<link rel="apple-touch-icon" sizes="120x120" href="pages/ico/120.png" />
+	<link rel="apple-touch-icon" sizes="152x152" href="pages/ico/152.png" />
+	<link rel="icon" type="image/x-icon" href="favicon.ico" />
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+	<meta name="apple-touch-fullscreen" content="yes" />
+	<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+	<meta content="Meet pages - The simplest and fastest way to build web UI for your dashboard or app." name="description" />
+	<meta content="Ace" name="author" />
+	<link href="assets/plugins/pace/pace-theme-flash.css" rel="stylesheet" type="text/css" />
+	<link href="assets/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+	<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+	<link href="assets/plugins/jquery-scrollbar/jquery.scrollbar.css" rel="stylesheet" type="text/css" media="screen" />
+	<link href="assets/plugins/select2/css/select2.min.css" rel="stylesheet" type="text/css" media="screen" />
+	<!-- <link class="main-stylesheet" href="pages/css/themes/corporate.css" rel="stylesheet" type="text/css" /> -->
+	<!-- Please remove the file below for production: Contains demo classes -->
+	<link class="main-stylesheet" href="assets/css/style.css" rel="stylesheet" type="text/css" />
+	
+	<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+	<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" />
+	<script src="https://cdn.tailwindcss.com"></script>
+	<link rel="stylesheet" href="/styles/countrySelector.css" />
+	<link rel="preconnect" href="https://fonts.googleapis.com" />
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+	<link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+	<link href="styles/style.css" rel="stylesheet" type="text/css" /> <!-- <script src="https://kit.fontawesome.com/44e4e59292.js" crossorigin="anonymous"></script> -->
+	<style>
+		.loading-spinner {
+			border: 3px solid rgba(0, 0, 0, 0.1);
+			border-left-color: #fff;
+			border-radius: 100%;
+			width: 16px;
+			height: 16px;
+			animation: spin 1s linear infinite;
+		}
+		
+		@keyframes spin {
+			0% {
+				transform: rotate(0deg);
+			}
+			
+			100% {
+				transform: rotate(360deg);
+			}
+		}
+	</style>
+</head>
+<!-- Loader HTML -->
+<%- include("../commonJS/loader") %>
+
+<body>
+	
+	
+	<div class="layout-container">
+		<%- include("../commonJS/sidebar")  %>
+		<!-- END SIDEBAR MENU TOP TRAY CONTENT-->
+		
+		<!-- START PAGE-CONTAINER -->
+		<div class="main-content">
+			<!-- END HEADER -->
+			<div class="logo breadCrumb">
+				
+				<!-- START BREADCRUMB -->
+				<nav class="flex" aria-label="Breadcrumb">
+					
+					<div class="flex items-center">
+						<a href="/settings" class="text-gray-500 hover:text-gray-700 hover:no-underline">Settings</a>
+						<svg class="w-4 h-4 mx-2 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+							<path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L11.586 10 7.293 5.707a1 1 0 011.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+						</svg>
+					</div>
+					
+					<div class="flex items-center">
+						<a href="/settings/account-details" class="text-red-500 hover:text-gray-700 hover:no-underline">Account Details</a>
+						<div class="relative inline-block pl-2">
+							<i class="info-icon text-red-700 hover:text-red-900">
+								<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+									<circle cx="12" cy="12" r="10"></circle>
+									<line x1="12" y1="16" x2="12" y2="12"></line>
+									<line x1="12" y1="8" x2="12.01" y2="8"></line>
+								</svg>
+								
+							</i>
+							<div class="tooltip invisible opacity-0 w-64 bg-gray-900 text-white text-sm rounded-lg absolute z-10 p-4 -translate-x-1/2 left-1/2 mt-2 transition-opacity duration-300">
+								<!-- Arrow -->
+								<div class="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-gray-900 transform rotate-45"></div>
+								<!-- Content -->
+								<div class="relative">
+									Account Details
+								</div>
+							</div>
+						</div>
+					</div>
+					
+				</nav>
+				<!-- END BREADCRUMB -->
+				
+			</div>
+			<div class="w-full flex flex-col justify-start items-center mx-auto bg-white ">
+				
+				<h1 class="text-xl my-3 w-[65%] ">Account Details</h1>
+				<div class="w-[65%] max-w-5xl p-5 border rounded-xl">
+					
+					<form id="signUpForm">
+						<div class="mb-4 flex justify-between items-center">
+							<label for="name" class="form-label text-[#191919]">Company Name</label>
+							<input type="text" class="form-control w-3/5 text-[#191919]" id="name" name="name" value="<%= user.companyName %>" placeholder="Enter your Company's Name" required />
+						</div>
+						<div class="mb-4 flex justify-between items-start">
+							<label for="description" class="form-label text-[#191919]">Description</label>
+							<div class="w-3/5  block">
+								<textarea class="form-control w-full text-[#191919] " id="description" name="description" placeholder="Tell us a bit about your company..." rows="2" maxlength="100" required><%= user.companyDescription %></textarea>
+								<div class="form-text text-[#191919] mt-2 text-sm text-right" id="wordCount">
+									0/100 words
+								</div>
+							</div>
+						</div>
+						<div class="mb-4 flex justify-between items-center w-full">
+							<label for="country" class="form-label text-[#191919]">Country</label>
+							<div class="country-selector w-3/5 text-[#191919] focus:outline-none" id="countrySelector">
+								<button type="button" class="country-selector-button  outline-blue-500 w-full" id="countrySelectorButton">
+									<span id="selectedFlag"></span> &nbsp;
+									<input type="text" name="countryCode" value="<%= user.country %>" id="countrySearch" placeholder="Search country..." class="p-0 outline-none" />
+									<div class="rotate-180">
+										<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="18px" fill="black" class="text-black z-20">
+											<path d="M480-528 296-344l-56-56 240-240 240 240-56 56-184-184Z" />
+										</svg>
+									</div>
+								</button>
+								<div class="country-dropdown hidden" id="countryDropdown">
+									<div class="countries-list">
+										<% countries.forEach(function(country) { %>
+										<button type="button" class="country-option focus:outline-none">
+											<!-- <span class="country-flag"><% country.flag %></span> -->
+											<img src="flags/<%= country.code %>.svg" alt="<%= country.code %> flag" class="w-5 h-5 inline-block country-flag" />
+											<span class="country-name"><%= country.name %></span>
+										</button>
+										<% }); %>
+									</div>
+								</div>
+							</div>
+						</div>
+						
+						<div class="mb-4 flex justify-between items-center w-full">
+							<label for="state" class="form-label text-[#191919]">State</label>
+							<div class="w-3/5 ">
+								<input type="text" id="stateInput" class="hidden form-control " value="<%= user.state %>" placeholder="Enter your state" />
+								<div class="select-wrapper">
+									<select id="stateDropdown" class="form-control text-[#191919]">
+										<option value="<%= user.state %>"><%= user.state %></option>
+									</select>
+								</div>
+							</div>
+						</div>
+						
+						
+						<div class="mb-4 flex justify-between items-center">
+							<label for="companySize" class="form-label text-[#191919]">Company Size</label>
+							<div class="select-wrapper  w-3/5">
+								<select id="companySize" name="companySize" class="form-control text-[#191919]" required>
+									<option value="">Select company size</option>
+									<% size.forEach(function(s) { %>
+									<option value="<%= s %>" <%= user.companySize === s ? 'selected' : '' %>><%= s %></option>
+									<% }); %>
+								</select>
+							</div>
+						</div>
+						
+						<div class="mb-4 flex justify-between items-center">
+							<label for="industry" class="form-label text-[#191919]">Industry/Category</label>
+							<div class="select-wrapper  w-3/5">
+								<select id="industry" name="industry" class="form-control text-[#191919]" required>
+									<option value="">Select industry type</option>
+									<% industryCategory.forEach(function(industry) { %>
+									<option value="<%= industry %>" <%= user.industry === industry ? 'selected' : '' %>><%= industry %></option>
+									<% }); %>
+								</select>
+							</div>
+						</div>
+						
+						<div class="mb-4 flex justify-between items-center">
+							<label for="jobRole" class="form-label text-[#191919]">Job Role</label>
+							<div class="select-wrapper  w-3/5">
+								<select id="jobRole" name="jobRole" class="form-control text-[#191919]" required>
+									<option value="">Select your role</option>
+									<% roles.forEach(function(role) { %>
+									<option value="<%= role %>" <%= user.jobRole === role ? 'selected' : '' %>><%= role %></option>
+									<% }); %>
+								</select>
+							</div>
+						</div>
+						
+						<div class="mb-4 flex justify-between items-center">
+							<label for="website" class="form-label text-[#191919]">Website URL</label>
+							<input type="url" id="website" class="px-3 py-2 rounded-xl w-3/5 border outline-none form-control text-[#191919]" name="website" placeholder="https://example.com" value="<%= user.website %>" />
+						</div>
+						
+						
+						<!-- Action Buttons -->
+						<div class="flex justify-end">
+							<div class="flex justify-evenly">
+								<button type="button" class="text-[#191919] border p-2 rounded-lg " onclick="location.reload()">Cancel</button>
+								<button type="submit" id="submitBtn" class=" bg-black ml-3 text-white py-2 px-4 rounded-lg">Save changes</button>
+							</div>
+						</div>
+						
+						<div id="errorMessage" class="hidden w-full text-center tex"></div>
+					</form>
+				</div>
+				
+				
+				<!-- Success/Error Message Display -->
+				
+			</div>
+		</div>
+	</div>
+	
+	
+	<script>
+		const countries = <%- JSON.stringify(countries) %>;
+		const user = <%- JSON.stringify(user) %>;
+		// console.log(typeof user.companyName);
+	</script>
+	<script src="/settings/js/accountDetails.js"></script>
+	<script src="/toast.js"></script>
+	<script src="/menu.js"></script>
+</body>
+
+</html>

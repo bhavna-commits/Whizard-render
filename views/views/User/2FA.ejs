@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>2FA</title>
+	<link rel="apple-touch-icon" href="pages/ico/60.png" />
+	<link rel="apple-touch-icon" sizes="76x76" href="pages/ico/76.png" />
+	<link rel="apple-touch-icon" sizes="120x120" href="pages/ico/120.png" />
+	<link rel="apple-touch-icon" sizes="152x152" href="pages/ico/152.png" />
+	<link rel="icon" type="image/x-icon" href="favicon.ico" />
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+	<meta name="apple-touch-fullscreen" content="yes" />
+	<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+	<meta content="Meet pages - The simplest and fastest way to build web UI for your dashboard or app." name="description" />
+	<meta content="Ace" name="author" />
+	<link href="assets/plugins/pace/pace-theme-flash.css" rel="stylesheet" type="text/css" />
+	<link href="assets/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+	<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+	<link href="assets/plugins/jquery-scrollbar/jquery.scrollbar.css" rel="stylesheet" type="text/css" media="screen" />
+	<link href="assets/plugins/select2/css/select2.min.css" rel="stylesheet" type="text/css" media="screen" />
+	<link class="main-stylesheet" href="assets/css/style.css" rel="stylesheet" type="text/css" />
+	<link rel="stylesheet" href="/styles/style.css" />
+	<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+	<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" />
+	<script src="https://cdn.tailwindcss.com"></script>
+	<link rel="stylesheet" href="/styles/countrySelector.css" />
+	<link rel="preconnect" href="https://fonts.googleapis.com" />
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+	<link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+	<script src="https://kit.fontawesome.com/44e4e59292.js" crossorigin="anonymous"></script>
+	<style>
+		.loading-spinner {
+			border: 3px solid rgba(0, 0, 0, 0.1);
+			border-left-color: #fff;
+			border-radius: 100%;
+			width: 16px;
+			height: 16px;
+			animation: spin 1s linear infinite;
+		}
+		
+		@keyframes spin {
+			0% {
+				transform: rotate(0deg);
+			}
+			
+			100% {
+				transform: rotate(360deg);
+			}
+		}
+		
+		/* Style for the disabled resend button */
+		.btn-disabled {
+			opacity: 0.6;
+		}
+		
+		.btn-disabled:hover {
+			cursor: not-allowed;
+		}
+		
+		/* When enabled, you can add a hover effect */
+		#resendOtp:hover,
+		#resendCombinedOtp:hover,
+		#resendMobileOtp:hover,
+		#resendEmailOtp:hover {
+			cursor: pointer;
+			/* Customize hover color if needed */
+		}
+	</style>
+</head>
+
+<body>
+	<%- include("../commonJS/loader") %>
+	<div class="layout-container ">
+
+		<%- include("common/leftSide")  %>
+		
+		<div class="w-1/2 h-full flex-shrink flex flex-col items-center">
+			<div class="flex items-center justify-start w-2/3 py-5">
+				<span class="material-symbols-outlined cursor-pointer pr-2" onclick="history.back()">
+					<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="18px" fill="black">
+						<path d="M360-200 80-480l280-280 56 56-183 184h647v80H233l184 184-57 56Z" />
+					</svg>
+				</span>
+				<span class="text-xl cursor-pointer" onclick="history.back()">Back</span>
+			</div>
+			
+			<% if (ENABLE_EMAIL_OTP && ENABLE_MOBILE_OTP) { %>
+			<!-- Combined Form for Both OTPs -->
+			<div class="w-2/3 flex flex-col items-center">
+				<h2 class="text-3xl p-3">Verify your Email and WhatsApp Number</h2>
+				<p class="text-gray-400 pb-5">Enter the 6 digit codes sent to your Email and WhatsApp Number</p>
+				<form id="combinedOtpForm">
+					<!-- Mobile OTP input -->
+					<div class="mb-3">
+						<label for="mobileOtp" class="form-label text-gray-500">Enter WhatsApp OTP</label>
+						<div class="d-flex gap-2">
+							<% for(let i = 1; i <= 6; i++) { %>
+							<input type="number" id="mobileOtp<%= i %>" name="mobileOtp<%= i %>" class="form-control mobile-otp-input" maxlength="1" required />
+							<% } %>
+						</div>
+					</div>
+					<!-- Email OTP input -->
+					<div class="mb-3">
+						<label for="emailOtp" class="form-label text-gray-500">Enter Email OTP</label>
+						<div class="d-flex gap-2">
+							<% for(let i = 1; i <= 6; i++) { %>
+							<input type="number" id="emailOtp<%= i %>" name="emailOtp<%= i %>" class="form-control email-otp-input" maxlength="1" required />
+							<% } %>
+						</div>
+					</div>
+					<!-- Resend button -->
+					<div class="mb-5 flex justify-end text-sm w-full">
+						<div class="w-fit">
+							Didn't get OTP?
+							<button type="button" id="resendCombinedOtp" class="disabled text-danger focus:outline-none focus:border-none">
+								Resend (30s)
+							</button>
+						</div>
+					</div>
+					<!-- Verify button -->
+					<div class="mb-3">
+						<button type="submit" id="verifyCombinedOtp" class="bg-black w-full text-white rounded-[.6rem] p-2">
+							<span id="verifyCombinedText">Verify OTP</span>
+							<div class="loading-spinner text-light" id="verifyCombinedSpinner" role="status"></div>
+						</button>
+					</div>
+					<div id="resendCombinedOtpMessage" class="alert" style="display:none;"></div>
+				</form>
+			</div>
+			<% } else if (ENABLE_MOBILE_OTP) { %>
+			<!-- Only Mobile OTP Form -->
+			<div class="w-2/3 flex flex-col items-center">
+				<h2 class="text-3xl p-3">Verify your WhatsApp Number</h2>
+				<p class="text-gray-400 pb-5">Enter the 6 digit code sent to your WhatsApp Number</p>
+				<form id="mobileOtpForm">
+					<div class="mb-3">
+						<label for="mobileOtp" class="form-label text-gray-500">Enter OTP</label>
+						<div class="d-flex gap-2">
+							<% for(let i = 1; i <= 6; i++) { %>
+							<input type="number" id="mobileOtp<%= i %>" name="mobileOtp<%= i %>" class="form-control otp-input" maxlength="1" required />
+							<% } %>
+						</div>
+					</div>
+					<div class="mb-5 flex justify-end text-sm w-full">
+						<div class="w-fit">
+							Didn't get OTP?
+							<button type="button" id="resendMobileOtp" class="disabled text-danger focus:outline-none focus:border-none">
+								Resend (30s)
+							</button>
+						</div>
+					</div>
+					<div class="mb-3">
+						<button type="submit" id="verifyMobileOtp" class="bg-black w-full text-white rounded-[.6rem] p-2">
+							<span id="verifyMobileText">Verify OTP</span>
+							<div class="loading-spinner text-light" id="verifyMobileSpinner" role="status"></div>
+						</button>
+					</div>
+					<div id="resendMobileOtpMessage" class="alert" style="display:none;"></div>
+				</form>
+			</div>
+			<% } else if (ENABLE_EMAIL_OTP) { %>
+			<!-- Only Email OTP Form -->
+			<div class="w-2/3 flex flex-col items-center">
+				<h2 class="text-3xl p-3">Verify your Email</h2>
+				<p class="text-gray-400 pb-5">Enter the 6 digit code sent to your Email</p>
+				<form id="emailOtpForm">
+					<div class="mb-3">
+						<label for="emailOtp" class="form-label text-gray-500">Enter OTP</label>
+						<div class="d-flex gap-2">
+							<% for(let i = 1; i <= 6; i++) { %>
+							<input type="number" id="emailOtp<%= i %>" name="emailOtp<%= i %>" class="form-control otp-input" maxlength="1" required />
+							<% } %>
+						</div>
+					</div>
+					<div class="mb-5 flex justify-end text-sm w-full">
+						<div class="w-fit">
+							Didn't get OTP?
+							<button type="button" id="resendEmailOtp" class="text-danger focus:outline-none focus:border-none">
+								Resend (30s)
+							</button>
+						</div>
+					</div>
+					<div class="mb-3">
+						<button type="submit" id="verifyEmailOtp" class="bg-black w-full text-white rounded-[.6rem] p-2 h-10">
+							<span id="verifyEmailText">Verify OTP</span>
+							<div class="loading-spinner text-light hidden" id="verifyEmailSpinner" role="status"></div>
+						</button>
+					</div>
+					<div id="resendEmailOtpMessage" class="alert" style="display:none;"></div>
+					<div id="successMessage" style="display: none; text-align: center; margin-top: 10px;"></div>
+				</form>
+			</div>
+			<% } %>
+		</div>
+	</div>
+	<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+	<script src="/user/js/verifyOTP.js"></script>
+	<script src="/toast.js"></script>
+	<script src="carousel.js"></script>
+</body>
+
+</html>

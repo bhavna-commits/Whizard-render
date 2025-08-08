@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+	<meta charset="utf-8" />
+	<title>User Management - </title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no" />
+	<link rel="apple-touch-icon" href="pages/ico/60.png" />
+	<link rel="apple-touch-icon" sizes="76x76" href="pages/ico/76.png" />
+	<link rel="apple-touch-icon" sizes="120x120" href="pages/ico/120.png" />
+	<link rel="apple-touch-icon" sizes="152x152" href="pages/ico/152.png" />
+	<link rel="icon" type="image/x-icon" href="favicon.ico" />
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+	<meta name="apple-touch-fullscreen" content="yes" />
+	<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+	<meta content="Meet pages - The simplest and fastest way to build web UI for your dashboard or app." name="description" />
+	<meta content="Ace" name="author" />
+	<link rel="preconnect" href="https://fonts.googleapis.com" />
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+	<link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet" />
+	<!-- <script src="https://viralpitch.co/insights/app/js/apexcharts-bundle/dist/apexcharts.js"></script>
+	<link rel="stylesheet" href="styles/template.css" />
+	<link rel="stylesheet" href="https://viralpitch.co/insights/app/js/apexcharts-bundle/dist/apexcharts.css" /> -->
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+	<link href="styles/style.css" rel="stylesheet" type="text/css" />
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+	<script src="https://cdn.tailwindcss.com"></script>
+	<link rel="stylesheet" type="text/css" href="styles/permissions.css" />
+</head>
+
+<body>
+	<!-- Loader HTML -->
+	<%- include("../commonJS/loader") %>
+	
+	<div class="layout-container">
+		<%- include("../commonJS/sidebar")  %>
+		
+		<!-- START PAGE-CONTAINER -->
+		<div class="main-content">
+			<div class="logo breadCrumb">
+				<nav class="flex " aria-label="Breadcrumb">
+					<div class="flex items-center">
+						<a href="/settings" class="text-gray-500 hover:text-gray-700">Settings</a>
+						<svg class="w-4 h-4 mx-2 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+							<path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L11.586 10 7.293 5.707a1 1 0 011.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+						</svg>
+					</div>
+					
+					<div class="flex items-center">
+						<a href="/settings/user-management" class="text-gray-500 hover:text-gray-700 ">User Management</a>
+						<svg class="w-4 h-4 mx-2 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+							<path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L11.586 10 7.293 5.707a1 1 0 011.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+						</svg>
+					</div>
+					<div class="flex items-center">
+						<a href="/settings/user-management/permissions" class="text-red-500 hover:text-gray-700 ">Permissions</a>
+						<div class="relative inline-block pl-2">
+							<i class="info-icon text-red-700 hover:text-red-900">
+								<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+									<circle cx="12" cy="12" r="10"></circle>
+									<line x1="12" y1="16" x2="12" y2="12"></line>
+									<line x1="12" y1="8" x2="12.01" y2="8"></line>
+								</svg>
+								
+							</i>
+							<div class="tooltip invisible opacity-0 w-64 bg-gray-900 text-white text-sm rounded-lg absolute z-10 p-4 -translate-x-1/2 left-1/2 mt-2 transition-opacity duration-300">
+								<!-- Arrow -->
+								<div class="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-gray-900 transform rotate-45"></div>
+								<!-- Content -->
+								<div class="relative">
+									Permissions
+								</div>
+							</div>
+						</div>
+					</div>
+					
+				</nav>
+			</div>
+			<div class="mainDiv">
+				<div class="flex justify-between items-center my-6">
+					<h1 class="text-lg">Role Management</h1>
+					<div id="statusMessage" class="hidden"></div>
+				</div>
+				
+				<form id="roleForm" class="space-y-6 border rounded-xl p-6">
+					<!-- Role Name Section -->
+					<% if (!editPermission) { %>
+					<div class="space-x-2 flex items-center justify-between ">
+						<label for="roleName" class="block  ">Role Name</label>
+						<input type="text" id="roleName" placeholder="Enter role name" name="roleName" required class="w-[60%] text-sm p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500">
+					</div>
+					<% } %>
+					
+					<!-- Dashboard Section -->
+					<div class="flex items-center justify-between toggle-section border-b pb-4">
+						<h2 class="">Dashboard</h2>
+						<div class="grid grid-cols-1 md:grid-cols-4 w-[60%]">
+							<label class="flex items-center space-x-2 min-w-fit">
+								<input type="checkbox" name="permissions[dashboard][enabled]" value="connectNow" class="rounded checkbox text-black">
+								<span>Connect Now</span>
+							</label>
+							<label class="flex items-center space-x-2 min-w-fit">
+								<input type="checkbox" name="permissions[dashboard][enabled]" value="quickActions" class="rounded checkbox text-black">
+								<span>Quick Actions</span>
+							</label>
+							<label class="flex items-center space-x-2 min-w-fit">
+								<input type="checkbox" name="permissions[dashboard][enabled]" value="addPhoneNumber" class="rounded checkbox text-black">
+								<span>Add Phone Number</span>
+							</label>
+						</div>
+					</div>
+					
+					<!-- Chats Section -->
+					<div class=" flex justify-between items-center toggle-section border-b pb-4">
+						
+						<h2 class="">Chats</h2>
+						<!-- <div class="flex items-center space-x-2">
+								<label class="relative flex items-center cursor-pointer ">
+									
+									<input type="checkbox" name="permissions[chats]" class="sr-only peer section-toggle">
+									
+								
+									<div class="w-11 h-6  bg-gray-200 peer-focus:outline-none peer-focus:ring-4 
+												peer-focus:ring-blue-300 rounded-full peer 
+												peer-checked:after:translate-x-full peer-checked:after:border-white 
+												after:content-[''] after:absolute after:top-[.15rem] after:left-[.12rem] 
+												after:bg-white after:border-gray-300 after:border after:rounded-full 
+												after:h-5 after:w-5 after:transition-all peer-checked:bg-black"></div>
+									
+									
+									<span class="ml-3 text-sm font-medium toggle-label text-gray-500">No</span>
+								</label>
+								
+							</div> -->
+						
+						<div class="grid grid-cols-1 md:grid-cols-4 w-[60%]">
+							<!-- <label class="flex items-center space-x-2 min-w-fit">
+								<input type="checkbox" name="permissions[chats][]" value="view" class="rounded checkbox option-checkbox text-black" disabled />
+								<span class="option-label text-gray-500">View</span>
+							</label> -->
+							<label class="flex items-center space-x-2 min-w-fit">
+								<input type="checkbox" name="permissions[chats][enabled]" value="chat" class="rounded checkbox text-black" />
+								<span class="option-label text-black">Individual Chat</span>
+							</label>
+							<label class="flex items-center space-x-2 min-w-fit">
+								<input type="checkbox" name="permissions[chats][enabled]" value="allChats" class="rounded checkbox text-black" />
+								<span class="option-label text-black">All Chats</span>
+							</label>
+						</div>
+					</div>
+					
+					<!-- Contact List Section -->
+					<div class=" flex justify-between toggle-section border-b pb-4">
+						<div class="flex justify-between items-center w-[15%] mb-4">
+							<h2 class="">Contact List</h2>
+							<div class="flex items-center space-x-2">
+								<label class="relative inline-flex  items-center cursor-pointer">
+									<input type="checkbox" name="permissions[contactlist]" class="sr-only peer section-toggle">
+									<div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 
+												peer-focus:ring-blue-300 rounded-full peer 
+												peer-checked:after:translate-x-full peer-checked:after:border-white 
+												after:content-[''] after:absolute after:top-[.15rem] after:left-[.12rem]
+												after:bg-white after:border-gray-300 after:border after:rounded-full 
+												after:h-5 after:w-5 after:transition-all peer-checked:bg-black">
+									</div>
+									<span class="ml-3 text-sm font-medium toggle-label text-gray-500">No</span>
+								</label>
+							</div>
+						</div>
+						<div class="options-container grid grid-cols-1 md:grid-cols-4 space-y-4 w-[60%]">
+							<div class="flex items-end">
+								<label class="flex items-center space-x-2">
+									<input type="checkbox" name="permissions[contactlist][]" value="customField" class="rounded option-checkbox  text-blue-600 checkbox">
+									<span class="option-label text-gray-500">Custom Field</span>
+								</label>
+							</div>
+							<label class="flex items-center space-x-2">
+								<input type="checkbox" name="permissions[contactlist][]" value="addContactIndividual" class="rounded option-checkbox text-blue-600 checkbox" />
+								<span class="option-label text-gray-500">Add Contact</span>
+							</label>
+							<label class="flex items-center space-x-2">
+								<input type="checkbox" name="permissions[contactlist][]" value="editContactIndividual" class="rounded option-checkbox text-blue-600 checkbox" />
+								<span class="option-label text-gray-500">Edit Contact</span>
+							</label>
+							<label class="flex items-center space-x-2">
+								<input type="checkbox" name="permissions[contactlist][]" value="deleteContactIndividual" class="rounded option-checkbox text-blue-600 checkbox" />
+								<span class="option-label text-gray-500">Delete Contact</span>
+							</label>
+							<label class="flex items-center space-x-2">
+								<input type="checkbox" name="permissions[contactlist][]" value="addContactListCSV" class="rounded option-checkbox text-blue-600 checkbox" />
+								<span class="option-label text-gray-500">Upload Contact List</span>
+							</label>
+							<label class="flex items-center space-x-2">
+								<input type="checkbox" name="permissions[contactlist][]" value="deleteList" class="rounded option-checkbox text-blue-600 checkbox" />
+								<span class="option-label text-gray-500">Archive List</span>
+							</label>
+							<label class="flex items-center space-x-2">
+								<input type="checkbox" name="permissions[contactlist][]" value="sendBroadcast" class="rounded option-checkbox text-blue-600 checkbox" />
+								<span class="option-label text-gray-500">Send Broadcast</span>
+							</label>
+							<label class="flex items-center space-x-2">
+								<input type="checkbox" name="permissions[contactlist][]" value="allList" class="rounded option-checkbox text-blue-600 checkbox" />
+								<span class="option-label text-gray-500">All Contact List</span>
+							</label>
+							<label class="flex items-center space-x-2">
+								<input type="checkbox" name="permissions[contactlist][]" value="downloadList" class="rounded option-checkbox text-blue-600 checkbox" />
+								<span class="option-label text-gray-500">Download List</span>
+							</label>
+						</div>
+					</div>
+					
+					<!-- Templates Section -->
+					<div class="flex justify-between toggle-section border-b pb-4">
+						<div class="flex justify-between items-center  w-[15%] mb-4">
+							<h2 class="">Templates</h2>
+							<div class="flex items-center space-x-2">
+								<label class="relative inline-flex   items-center cursor-pointer">
+									<input type="checkbox" name="permissions[templates][enabled]" class="sr-only peer section-toggle">
+									<div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 
+                                          peer-focus:ring-blue-300 rounded-full peer 
+                                          peer-checked:after:translate-x-full peer-checked:after:border-white 
+                                          after:content-[''] after:absolute after:top-[.15rem] after:left-[.12rem]
+                                          after:bg-white after:border-gray-300 after:border after:rounded-full 
+                                          after:h-5 after:w-5 after:transition-all peer-checked:bg-black"></div>
+									<span class="ml-3 text-sm font-medium toggle-label text-gray-500">No</span>
+								</label>
+							</div>
+						</div>
+						<div class="options-container grid grid-cols-1 md:grid-cols-4 w-[60%]">
+							<label class="flex items-center space-x-2">
+								<input type="checkbox" name="permissions[templates][]" value="createTemplate" class="rounded checkbox option-checkbox  text-blue-600">
+								<span class="option-label text-gray-500">Create Template</span>
+							</label>
+							<label class="flex items-center space-x-2">
+								<input type="checkbox" name="permissions[templates][]" value="editTemplate" class="rounded checkbox option-checkbox  text-blue-600">
+								<span class="option-label text-gray-500">Edit Template</span>
+							</label>
+							<label class="flex items-center space-x-2">
+								<input type="checkbox" name="permissions[templates][]" value="duplicateTemplate" class="rounded checkbox option-checkbox  text-blue-600">
+								<span class="option-label text-gray-500">Duplicate Template</span>
+							</label>
+							<label class="flex items-center space-x-2">
+								<input type="checkbox" name="permissions[templates][]" value="deleteTemplate" class="rounded checkbox option-checkbox  text-blue-600">
+								<span class="option-label text-gray-500">Delete Template</span>
+							</label>
+						</div>
+					</div>
+					
+					<!-- Reports Section -->
+					<div class="flex justify-between toggle-section border-b pb-4">
+						<div class="flex justify-between items-center w-[15%] mb-4">
+							<h2 class="">Reports</h2>
+							<div class="flex items-center space-x-2">
+								<label class="relative inline-flex  items-center cursor-pointer">
+									<input type="checkbox" name="permissions[reports][enabled]" class="sr-only peer section-toggle">
+									<div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 
+												peer-focus:ring-blue-300 rounded-full peer 
+												peer-checked:after:translate-x-full peer-checked:after:border-white 
+												after:content-[''] after:absolute after:top-[.15rem] after:left-[.12rem]
+												after:bg-white after:border-gray-300 after:border after:rounded-full 
+												after:h-5 after:w-5 after:transition-all peer-checked:bg-black">
+									</div>
+									<span class="ml-3 text-sm font-medium toggle-label text-gray-500">No</span>
+								</label>
+							</div>
+						</div>
+						
+						<div class="options-container grid grid-cols-1 md:grid-cols-4 mb-4 w-[60%]">
+							<div>
+								<label class="flex items-center space-x-2 mb-3">
+									<input type="checkbox" name="permissions[reports][]" value="conversationReports" class="rounded option-checkbox  checkbox text-blue-600 toggle-option conversation-toggle">
+									<span class="option-label text-gray-500">Conversation Reports</span>
+								</label>
+								
+								<div class="grid-flow-col gap-4 pl-3 nested-options space-y-3">
+									<label class="flex items-center space-x-2">
+										<input type="checkbox" name="permissions[reports][]" value="viewReports" class="rounded nested-checkbox  checkboxSmall text-blue-600 text-sm toggle-option">
+										<span class="text-sm nested-label text-gray-500">View Reports</span>
+									</label>
+									<label class="flex text-sm items-center space-x-2">
+										<input type="checkbox" name="permissions[reports][]" value="retargetingUsers" class="rounded nested-checkbox  checkboxSmall text-blue-600 text-sm toggle-option">
+										<span class="text-sm nested-label text-gray-500">Retargeting Users</span>
+									</label>
+									<!-- <label class="flex text-sm items-center space-x-2">
+												<input type="checkbox" name="permissions[reports][]" value="redirectedToVPChat" class="rounded nested-checkbox checkboxSmall text-blue-600 text-sm toggle-option">
+												<span class="text-sm nested-label text-gray-500">Redirected to VP chat</span>
+											</label> -->
+								</div>
+							</div>
+							<div class="">
+								<label class="flex items-center space-x-2">
+									<input type="checkbox" name="permissions[reports][]" value="costReports" class="rounded option-checkbox checkbox text-blue-600 toggle-option">
+									<span class="option-label text-gray-500">Cost Reports</span>
+								</label>
+							</div>
+						</div>
+					</div>
+					
+					<!-- Settings Section -->
+					<div class="flex justify-between toggle-section border-b pb-4">
+						<div class="flex justify-between items-center mb-4 w-[15%]">
+							<h2 class="">Settings</h2>
+							<div class="flex items-center space-x-2">
+								<label class="relative inline-flex items-center cursor-pointer">
+									<input type="checkbox" name="permissions[settings][enabled]" class="sr-only peer section-toggle" id="settings-toggle">
+									<div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 
+												peer-focus:ring-blue-300 rounded-full peer 
+												peer-checked:after:translate-x-full peer-checked:after:border-white 
+												after:content-[''] after:absolute after:top-[2px] after:left-[2px] 
+												after:bg-white after:border-gray-300 after:border after:rounded-full 
+												after:h-5 after:w-5 after:transition-all peer-checked:bg-black">
+									</div>
+									<span class="ml-3 text-sm font-medium toggle-label text-gray-500">No</span>
+								</label>
+							</div>
+						</div>
+						
+						<div class="options-container grid grid-cols-1 md:grid-cols-4 mb-4 w-[60%]">
+							<!-- <div class="permission-group" id="manage-tags-section">
+										<label class="flex items-center space-x-2">
+											<input type="checkbox" name="permissions[settings][]" value="manageTags" class="rounded option-checkbox checkbox text-blue-600 toggle-option" id="manage-tags-toggle">
+											<span class="option-label text-gray-500">Manage Tags</span>
+										</label>
+										<div class="grid-flow-col gap-4 pl-3 nested-options" id="manage-tags-options">
+											<label class="flex items-center space-x-2">
+												<input type="checkbox" name="permissions[settings][]" value="addTags" class="rounded checkboxSmall text-blue-600 text-sm nested-checkbox" id="add-tags">
+												<span class="text-sm nested-label text-gray-500">Add Tags</span>
+											</label>
+											<label class="flex items-center space-x-2">
+												<input type="checkbox" name="permissions[settings][]" value="deleteTags" class="rounded checkboxSmall text-blue-600 text-sm nested-checkbox" id="delete-tags">
+												<span class="text-sm nested-label text-gray-500">Delete Tags</span>
+											</label>
+											<label class="flex items-center space-x-2">
+												<input type="checkbox" name="permissions[settings][]" value="viewTags" class="rounded checkboxSmall text-blue-600 text-sm nested-checkbox" id="view-tags">
+												<span class="text-sm nested-label text-gray-500">View Tags</span>
+											</label>
+										</div>
+									</div> -->
+							<div class="permission-group ">
+								<label class="flex items-center space-x-2 mb-3">
+									<input type="checkbox" name="permissions[settings][]" value="userManagement" class="rounded option-checkbox checkbox text-blue-600" id="user-management">
+									<span class="option-label text-gray-500">User Management</span>
+								</label>
+								<div class="grid-flow-col gap-4 pl-3 nested-options space-y-3">
+									<label class="flex items-center space-x-2">
+										<input type="checkbox" name="permissions[settings][]" value="addPermission" class="rounded checkboxSmall text-blue-600 text-sm nested-checkbox">
+										<span class="text-sm nested-label text-gray-500">Add Permissions</span>
+									</label>
+									
+									<label class="flex items-center space-x-2">
+										<input type="checkbox" name="permissions[settings][]" value="editPermission" class="rounded checkboxSmall text-blue-600 text-sm nested-checkbox">
+										<span class="text-sm nested-label text-gray-500">Edit Permissions</span>
+									</label>
+									<label class="flex items-center space-x-2">
+										<input type="checkbox" name="permissions[settings][]" value="deletePermission" class="rounded checkboxSmall text-blue-600 text-sm nested-checkbox">
+										<span class="text-sm nested-label text-gray-500">Delete Permissions</span>
+									</label>
+									<label class="flex items-center space-x-2">
+										<input type="checkbox" name="permissions[settings][]" value="addUser" class="rounded checkboxSmall text-blue-600 text-sm nested-checkbox">
+										<span class="text-sm nested-label text-gray-500">Add Users</span>
+									</label>
+								</div>
+							</div>
+							<div>
+								<label class="flex items-center space-x-2">
+									<input type="checkbox" name="permissions[settings][]" value="activityLogs" class="rounded option-checkbox checkbox text-blue-600" id="activity-logs">
+									<span class="option-label text-gray-500">Activity Logs</span>
+								</label>
+								
+							</div>
+							<div>
+								<label class="flex items-center space-x-2">
+									<input type="checkbox" name="permissions[settings][]" value="whatsAppAccountDetails" class="rounded option-checkbox checkbox text-blue-600" >
+									<span class="option-label text-gray-500">WhatsApp Account Details</span>
+								</label>
+							</div>
+							<div>
+								<label class="flex items-center space-x-2">
+									<input type="checkbox" name="permissions[settings][]" value="accountDetails" class="rounded option-checkbox checkbox text-blue-600">
+									<span class="option-label text-gray-500">Account Details</span>
+								</label>
+							</div>
+							<div>
+								<label class="flex items-center space-x-2">
+									<input type="checkbox" name="permissions[settings][]" value="payment" class="rounded option-checkbox checkbox text-blue-600">
+									<span class="option-label text-gray-500">Payments</span>
+								</label>
+							</div>
+						</div>
+					</div>
+					
+					<!-- Form Action Buttons -->
+					<div class="flex justify-end space-x-4 ">
+						<button type="button" onclick="location.href = '/settings/user-management'" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+							Cancel
+						</button>
+						<button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-gray-700 border border-transparent rounded-md hover:bg-black focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+							<%= editPermission ? "Edit Role" : "Add Role" %>
+						</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+	<script>
+		const editPermissionJS = <%- JSON.stringify(editPermission) %>;
+	</script>
+	<script src="/settings/js/permissions.js"></script>
+	<script src="/toast.js"></script>
+	<script src="/menu.js"></script>
+	
+</body>
+
+</html>

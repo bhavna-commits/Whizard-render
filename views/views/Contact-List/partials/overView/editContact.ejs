@@ -1,0 +1,218 @@
+<div class="overlay" id="editContactOverlay" onclick="closeEditContact()"></div>
+
+<div class="filter-sidebar overflow-scroll" id="editContactSidebar">
+	<div class="filter-header">
+		<h2 class="font-medium text-2xl">Edit Contact</h2>
+		<button class="close-btn" onclick="closeEditContact()">&times;</button>
+	</div>
+	
+	<div class="filter-section">
+		<form id="editContactForm" class=" space-y-4">
+			<input type="hidden" id="edit-contact-id" />
+			
+			<div class="form-group">
+				<label for="edit-contact-name">Name</label>
+				<input type="text" id="edit-contact-name" name="Name" class="date-input " required>
+			</div>
+			
+			<div class="input-group focus:outline-none" id="countrySelector2">
+				<label for="contactNumber2">Phone Number</label>
+				
+				<div class="country-dropdown hidden" id="countryDropdown2">
+					<div class="search-container focus:outline-none">
+						<input type="text" id="countrySearch2" placeholder="Search country or code..." />
+					</div>
+					<div class="countries-list">
+						<% countries.forEach(function(country) { %>
+						<button type="button" class="country-option focus:outline-none">
+							<span class="country-flag"><%= country.flag %></span>
+							<span class="country-name"><%= country.name %></span>
+							<span class="country-dial-code"><%= country.dialCode %></span>
+						</button>
+						<% }); %>
+					</div>
+				</div>
+				
+				<div class="date-input flex items-center">
+					<button type="button" class="w-16 flex items-center" id="countrySelectorButton2">
+						<span id="selectedFlag2" class="">🇮🇳</span>&nbsp;
+						<input type="text" name="countryCode" class="cursor-pointer border-0" id="selectedDialCode2" value="+91" readonly />
+					</button>
+					<input type="tel" id="phone2" name="wa_id" class="w-full border-0" placeholder="Enter WhatsApp number" minlength="8" maxlength="15" pattern="[0-9]{8,15}" required />
+					
+				</div>
+				<small id="phone-error2" class="error-message text-red-500" style="display: none;"></small>
+			</div>
+			<div id="dynamicFieldsContainer" class="space-y-4"></div>
+			
+			<button type="submit" class="apply-btn">Save Changes</button>
+		</form>
+	</div>
+</div>
+
+<script>
+	const phoneInput2 = document.getElementById('phone2');
+	const phoneError2 = document.getElementById('phone-error2');
+	
+	phoneInput2.addEventListener('input', function () {
+		const phoneValue = phoneInput2.value;
+		
+		// Regex to check for numbers only
+		const phonePattern = /^[0-9]{0,15}$/;
+		
+		if (!phonePattern.test(phoneValue)) {
+			phoneError2.textContent = "Only numbers are allowed.";
+			phoneError2.style.display = "block";
+			phoneInput2.setCustomValidity("Invalid phone number.");
+		} else if (phoneValue.length 	
+			<
+			8) {
+			phoneError2.textContent = "Phone number must be at least 8 digits.";
+			phoneError2.style.display = "block";
+			phoneInput2.setCustomValidity("Phone number too short.");
+		} else if (phoneValue.length > 15) {
+			phoneError2.textContent = "Phone number must not exceed 15 digits.";
+			phoneError2.style.display = "block";
+			phoneInput2.setCustomValidity("Phone number too long.");
+		} else {
+			phoneError2.style.display = "none";
+			phoneInput2.setCustomValidity(""); // Clear any custom validity
+		}
+	});
+	
+	const countrySelectorButton2 = document.getElementById("countrySelectorButton2");
+	const countryDropdown2 = document.getElementById("countryDropdown2");
+	const countryOptions2 = document.querySelectorAll(".country-option");
+	const countrySearch2 = document.getElementById("countrySearch2");
+	const selectedFlag2 = document.getElementById("selectedFlag2");
+	const selectedDialCode2 = document.getElementById("selectedDialCode2");
+	
+	countrySelectorButton2.addEventListener("click", function (e) {
+		e.preventDefault();
+		countryDropdown2.classList.toggle("hidden");
+	});
+	
+	
+	countryOptions2.forEach((option) => {
+		option.addEventListener("click", function () {
+			const flag = this.querySelector(".country-flag").textContent;
+			const dialCode = this.querySelector(".country-dial-code").textContent;
+			selectedFlag2.textContent = flag;
+			selectedDialCode2.value = dialCode;
+			countryDropdown2.classList.add("hidden");
+		});
+	});
+	
+	countrySearch2.addEventListener("input", function () {
+		const searchValue = this.value.toLowerCase();
+		countryOptions2.forEach((option) => {
+			const countryName = option
+				.querySelector(".country-name")
+				.textContent.toLowerCase();
+			const dialCode = option
+				.querySelector(".country-dial-code")
+				.textContent.toLowerCase();
+			option.style.display =
+				countryName.includes(searchValue) || dialCode.includes(searchValue) ?
+				"flex" :
+				"none";
+		});
+	});
+	
+	document.addEventListener("click", function (e) {
+		if (
+			!countrySelectorButton2.contains(e.target) &&
+			!countryDropdown2.contains(e.target)
+		) {
+			countryDropdown2.classList.add("hidden");
+		}
+	});
+	
+	
+	document
+		.getElementById("editContactForm")
+		.addEventListener("submit", function (event) {
+			event.preventDefault();
+			const contactId = document.getElementById("edit-contact-id").value;
+			console.log(contactId);
+			let formData = new FormData(this);
+			
+			const saveButton = this.querySelector("button[type='submit']");
+			const originalButtonText = saveButton.innerHTML;
+			saveButton.disabled = true;
+			saveButton.innerHTML =
+				'<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving...';
+			
+			fetch(`/api/contact-list/contacts/${contactId}`, {
+					method: "PUT",
+					body: formData,
+				})
+				.then((response) => response.json())
+				.then((data) => {
+					if (data.success) {
+						location.reload();
+					} else {
+						saveButton.innerHTML = originalButtonText;
+						saveButton.disabled = false;
+						
+						// Remove any existing error message
+						const existingErrorMessage = saveButton.parentNode.querySelector(".text-danger");
+						if (existingErrorMessage) {
+							existingErrorMessage.remove();
+						}
+						
+						const errorMessage = document.createElement("div");
+						errorMessage.className = "text-danger mt-2";
+						errorMessage.innerText = "Error updating contact: " + data.message;
+						saveButton.parentNode.appendChild(errorMessage);
+						
+					}
+				})
+				.catch((err) => {
+					saveButton.innerHTML = originalButtonText;
+					saveButton.disabled = false;
+					
+					// Remove any existing error message
+					const existingErrorMessage = saveButton.parentNode.querySelector(".text-danger");
+					if (existingErrorMessage) {
+						existingErrorMessage.remove();
+					}
+					
+					const errorMessage = document.createElement("div");
+					errorMessage.className = "text-danger mt-2";
+					errorMessage.innerText = "An error occurred. Please try again.";
+					saveButton.parentNode.appendChild(errorMessage);
+				});
+		});
+	
+	
+	// Function to hide the modal
+	function closeDeleteContact () {
+		document.getElementById('deleteModal').classList.add('hidden');
+	}
+	
+	function openDeleteModal (id, name) {
+		// Custom toastConfirm function for modern UI confirmation
+		toastConfirm(`Are you sure you want to delete ${name}'s contact?`)
+			.then((confirmation) => {
+				if (confirmation) {
+					// Proceed with deleting the contact if the user confirmed
+					fetch(`/api/contact-list/contacts/${id}`, {
+							method: "DELETE",
+						})
+						.then((response) => response.json())
+						.then((data) => {
+							if (data.success) {
+								location.reload(); // Reload the page on success
+							} else {
+								toast("error", data.message); // Show error message on failure
+							}
+						})
+						.catch((err) => {
+							console.error("Error:", err);
+							toast("error", "An error occurred while deleting the contact.");
+						});
+				}
+			});
+	}
+</script>

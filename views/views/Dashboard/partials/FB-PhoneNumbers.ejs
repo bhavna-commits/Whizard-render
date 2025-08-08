@@ -1,0 +1,176 @@
+<div class="max-w-2xl flex items-center space-x-3 <%= status == 'Pending' ? 'hidden' : '' %>">
+	<div id="dropdown" class="relative inline-block min-w-56">
+		<!-- Button to show selected phone number or "Select phone number" -->
+		<% if (access?.dashboard?.addPhoneNumber) { %>
+		<button id="dropdownButton" class="bg-white border border-gray-300 rounded-md w-full p-2 text-left flex items-center justify-between">
+			<span id="selectedOption">
+				<% 
+				  const selectedNumber = addedUser?.selectedFBNumber 
+					|| user?.FB_PHONE_NUMBERS.find(number => number.selected);
+				%>
+				<%= selectedNumber ? (selectedNumber.friendly_name || selectedNumber.phone_number_id) : "Select phone number" %>
+			</span>			  
+			<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+				<path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+			</svg>
+		</button>
+		<% } else { %>
+		<button disabled class="bg-white border border-gray-300 rounded-md w-full p-2 text-left flex items-center justify-between hover:cursor-not-allowed" title="You don't have permissions to access this">
+			<span id="selectedOption">
+				<% 
+				  const selectedNumber = addedUser?.selectedFBNumber 
+					|| user?.FB_PHONE_NUMBERS.find(number => number.selected);
+				%>
+				<%= selectedNumber ? (selectedNumber.friendly_name || selectedNumber.phone_number_id) : "Select phone number" %>
+			</span>			  
+			<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+				<path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+			</svg>
+		</button>
+		<% } %>
+		<!-- Dropdown menu with list of phone numbers -->
+		<div id="dropdownMenu" class="hidden absolute w-full mt-2 bg-white border border-gray-300 rounded-md shadow-lg max-h-48 overflow-y-auto z-10">
+			<div class="flex justify-center items-center p-3 hidden buttonLoader">
+				<div class=" loader border-t-white border-4 border-black rounded-full w-6 h-6 animate-spin"></div>
+			</div>
+			<ul id="dropdownUl" class="p-2">
+				<% user.FB_PHONE_NUMBERS.forEach((number, index) => { %>
+				<li class="p-2 hover:bg-gray-100 flex items-center justify-between rounded cursor-pointer" data-value="<%= number.phone_number_id %>" data-verified="<%= number.verified %>">
+					<div class="flex items-center">
+						<span><%= number.friendly_name || number.phone_number_id %></span>
+						<% if (number.verified) { %>
+						<img src="svg/verifiedNumber.svg" class="w-5 h-5 mb-1 ml-2" alt="Verified" title="Verified Number" />
+						<% } %>
+					</div>
+					<!-- <img onclick="deletePhoneNumber(event, '<%= number.phone_number_id %>')" src="svg/bin.svg" alt="bin" title="Delete Number" /> -->
+				</li>
+				<% }); %>
+			</ul>
+		</div>
+	</div>
+	
+	<!-- Button to add a new phone number -->
+	<% if (access?.dashboard?.addPhoneNumber) { %>
+	<button onclick="openAddNumber()" type="button" class="bg-black text-white p-2 rounded-md flex items-center">
+		<img src="svg/plus.svg" class="h-5 pr-2" alt="plus" />Add Phone Number
+	</button>
+	<% } else { %>
+	<button disabled type="button" class="bg-black text-white p-2 rounded-md flex items-center hover:cursor-not-allowed" title="You don't have permissions to access this">
+		<img src="svg/plus.svg" class="h-5 pr-2" alt="plus" />Add Phone Number
+	</button>
+	<% } %>
+</div>
+
+<!-- Modal Structure -->
+<div class="fixed inset-0 flex items-center justify-center transition-opacity duration-300 ease-out opacity-0 hidden z-50" id="addNumberModal">
+	<!-- Background overlay with blur -->
+	<div class="absolute inset-0 bg-gray-900 bg-opacity-50  transition-opacity duration-300 ease-out" onclick="closeAddNumber(event)"></div>
+	
+	<!-- Modal content -->
+	<div id="modalContent" class="relative bg-white rounded-lg shadow-lg w-96 p-6 transition-opacity duration-300 ease-out opacity-100 scale-100">
+		
+		<!-- Close Button -->
+		<button onclick="closeAddNumber(event)" class="absolute top-1 right-2 text-gray-500 hover:text-gray-700 text-3xl p-3">&times;</button>
+		
+		<!-- Add Number Form -->
+		<div id="addNumberForm">
+			<h2 class="text-xl font-semibold mb-6">Add phone number</h2>
+			
+			<!-- Error Message -->
+			<div id="addNewNumberError" class="mb-4 p-3 hidden bg-red-100 text-red-700 rounded"></div>
+			
+			<form onsubmit="addPhoneNumber(event)">
+				<!-- Name Field -->
+				<div class="mb-4">
+					<label class="block text-gray-500 mb-2">WhatsApp business display name </label>
+					<div class="text-sm text-gray-400 mb-2">Your display name should match your business name and adhere to WhatsApp Business display name guidelines. <a href="https://www.facebook.com/business/help/757569725593362" class="text-blue-500 text-sm">Learn more</a></div>
+					<input type="text" name="name" id="name" class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter phone number's name" required>
+				</div>
+				
+				<div class="mb-4">
+					<label class="block text-gray-500 mb-2">Phone Number</label>
+					<div class="relative">
+						<div class="flex items-center focus:outline-none" id="countrySelector">
+							
+							<div class="country-dropdown hidden " id="countryDropdown">
+								<div class="search-container focus:outline-none">
+									<input type="text" id="countrySearch" placeholder="Search country or code...">
+								</div>
+								<div class="countries-list">
+									<% countries.forEach(function(country) { %>
+									<button type="button" class="country-option focus:outline-none">
+										<span class="country-flag"><%= country.flag %></span>
+										<span class="country-name"><%= country.name %></span>
+										<span class="country-dial-code"><%= country.dialCode %></span>
+									</button>
+									<% }); %>
+								</div>
+							</div>
+						</div>
+						<div class="form-control flex items-center ">
+							<button type="button" class="w-16 flex items-center" id="countrySelectorButton">
+								<span id="selectedFlag" class="">🇮🇳</span>&nbsp;
+								<input type="text" name="countryCode" class="cursor-pointer" id="selectedDialCode" value="+91" readonly />
+							</button>
+							<input type="tel" name="phoneNumber" id="phoneNumber" class="w-full " placeholder="Enter Phone Number" required />
+						</div>
+					</div>
+				</div>
+				
+				<!-- Register Button -->
+				<button type="submit" id="submitButton" class="bg-gray-400 flex justify-center items-center text-white px-4 py-2 rounded w-full cursor-not-allowed relative" disabled>
+					<span class="buttonText">Register number</span>
+					<div class="buttonLoader hidden loader border-t-white border-4 border-black rounded-full w-6 h-6 animate-spin"></div>
+				</button>
+			</form>
+		</div>
+		
+		<!-- Verify Number Form (Initially hidden) -->
+		<div id="verifyNumberForm" class="hidden">
+			<h2 class="text-xl font-semibold mb-6">Verify Number</h2>
+			<div id="verifyNewNumberError" class="mb-4 p-3 hidden bg-red-100 text-red-700 rounded"></div>
+			<form onsubmit="verifyPhoneNumber(event)">
+				<input type="hidden" name="phoneNumber" id="hiddenPhoneNumber" />
+				<div class="mb-4">
+					<label class="block text-[#959595] mb-2">Verification Code</label>
+					<div class="d-flex gap-2">
+						<% for(let i = 1; i <= 6; i++) { %>
+						<input type="text" class="form-control otp-verify" maxlength="1" required />
+						<% } %>
+					</div>
+				</div>
+				
+				<!-- Verify Button -->
+				<button type="submit" id="verifyButton" class="bg-gray-400 flex justify-center items-center text-white px-4 py-2 rounded w-full cursor-not-allowed relative" disabled>
+					<span class="buttonText">Verify Number</span>
+					<div class="buttonLoader hidden loader border-t-white border-4 border-black rounded-full w-6 h-6 animate-spin"></div>
+				</button>
+			</form>
+		</div>
+		
+		<!-- Register Number Form (Initially hidden) -->
+		<div id="twoFactorForm" class="hidden">
+			<h2 class="text-xl font-semibold mb-6">Register Number</h2>
+			<div id="set2FAPinStatus" class="mb-4 p-3 hidden bg-red-100 text-red-700 rounded"></div>
+			<form onsubmit="twoFactorAuthentication(event)">
+				<div class="mb-4">
+					<label class="block text-[#959595] mb-2">Enter 2FA Pin</label>
+					<div class="d-flex gap-2">
+						<% for(let i = 1; i <= 6; i++) { %>
+						<input type="text" class="form-control otp-input" maxlength="1" required />
+						<% } %>
+					</div>
+				</div>
+				<!-- Verify Button -->
+				<button type="submit" id="set2FAPinButton" class="bg-gray-400 flex justify-center items-center text-white px-4 py-2 rounded w-full cursor-not-allowed relative" disabled>
+					<span class="buttonText">Set Pin</span>
+					<div class="buttonLoader loader hidden border-t-white border-4 border-black rounded-full w-6 h-6 animate-spin"></div>
+				</button>
+			</form>
+		</div>
+		
+	</div>
+</div>
+
+<!-- JavaScript for handling the modal -->
+<script src="/Dashboard/js/addPhoneNumber.js"></script>

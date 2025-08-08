@@ -1,0 +1,291 @@
+<nav class="sidebar">
+	<!-- Mobile Hamburger Button (visible only on mobile) -->
+	<div class="hamburger-button">
+		<button onclick="toggleSidebar()" id="hamburger">
+			<img src="svg/hamburger.svg" alt="Menu" id="hamburgerIcon" />
+			<img src="svg/close.svg" alt="Close" id="closeIcon" class="hidden" />
+		</button>
+	</div>
+	
+	<div class="logo">
+		<img onclick="location.href = '/'" class="cursor-pointer" loading="lazy" src="/assets/img/Wizard_logo.png" alt="Whizard Logo" />
+	</div>
+	
+	<!-- Main sidebar content that will be hidden/shown on mobile -->
+	<ul id="sidebarMenu" class="md:flex hidden-mobile">
+		<!-- Dashboard: Always enabled -->
+		<li>
+			<a href="/" class="dashboard-link">
+				<span class="icon"><img loading="lazy" src="svg/dashboard.svg" /></span>
+				Dashboard
+			</a>
+		</li>
+		
+		<!-- Chats: Conditionally rendered based on permissions -->
+		<li>
+			<% if (access?.chats?.chat || access?.chats?.allChats) { %>
+			<a href="/chats" class="chats-link">
+				<span class="icon"><img loading="lazy" src="svg/chats.svg" /></span>
+				Chats
+			</a>
+			<% } else { %>
+			<a href="javascript:void(0);" class="hover:cursor-not-allowed" title="You don't have permission to access this">
+				<span class="icon"><img loading="lazy" src="svg/chats.svg" /></span>
+				Chats
+			</a>
+			<% } %>
+		</li>
+		
+		<!-- Contact List: Conditionally rendered based on permissions -->
+		<li>
+			<% if (access?.contactList?.type) { %>
+			<a href="/contact-list" class="contact-list-link">
+				<span class="icon"><img loading="lazy" src="svg/contact-list.svg" /></span>
+				Contact List
+			</a>
+			<% } else { %>
+			<a href="javascript:void(0);" class="hover:cursor-not-allowed" title="You don't have permission to access this">
+				<span class="icon"><img loading="lazy" src="svg/contact-list.svg" /></span>
+				Contact List
+			</a>
+			<% } %>
+		</li>
+		
+		<!-- Template: Conditionally rendered based on permissions -->
+		<li>
+			<% if (access?.templates?.type) { %>
+			<a href="/template" class="template-link">
+				<span class="icon"><img loading="lazy" src="svg/template.svg" /></span>
+				Template
+			</a>
+			<% } else { %>
+			<a href="javascript:void(0);" class="hover:cursor-not-allowed" title="You don't have permission to access this">
+				<span class="icon"><img loading="lazy" src="svg/template.svg" /></span>
+				Template
+			</a>
+			<% } %>
+		</li>
+		
+		<!-- Settings: Conditionally rendered based on permissions -->
+		<li>
+			<% if (access?.settings?.type) { %>
+			<a href="/settings" class="settings-link">
+				<span class="icon"><img loading="lazy" src="svg/settings.svg" /></span>
+				Settings
+			</a>
+			<% } else { %>
+			<a href="javascript:void(0);" class="hover:cursor-not-allowed" title="You don't have permission to access this">
+				<span class="icon"><img loading="lazy" src="svg/settings.svg" /></span>
+				Settings
+			</a>
+			<% } %>
+		</li>
+		
+		<!-- Reports: Conditionally rendered based on permissions -->
+		<li>
+			<% if (access?.reports?.type) { %>
+			<div class="report-menu relative">
+				<a href="javascript:void(0);" class="reports-link" onclick="getReportsMenu()">
+					<span class="icon"><img loading="lazy" src="svg/reports.svg" /></span>
+					Reports
+				</a>
+				<div id="reportMenu" class="report-card hidden">
+					<% if (access?.reports?.conversationReports?.type) { %>
+					<a href="/reports/campaign-list" class=" "><img loading="lazy" src="svg/conversationReport.svg" class="pr-2" /><span>Campaign Report</span></a>
+					<% } else { %>
+					<a href="javascript:void(0);" class=" hover:cursor-not-allowed " title="You don't have permission to access this"><img loading="lazy" src="svg/conversationReport.svg" class="pr-2" /><span>Campaign Report</span></a>
+					<% } %>
+					<% if (access?.reports?.costReports) { %>
+					<a href="/reports/cost-report" class=" "><img loading="lazy" src="svg/costReport.svg" class="pr-2" /><span>Cost Report</span></a>
+					<% } else { %>
+					<a href="javascript:void(0);" class=" hover:cursor-not-allowed" title="You don't have permission to access this"><img loading="lazy" src="svg/costReport.svg" class="pr-2" /><span>Cost Report</span></a>
+					<% } %>
+				</div>
+			</div>
+			<% } else { %>
+			<a href="javascript:void(0);" class="hover:cursor-not-allowed" title="You don't have permission to access this">
+				<span class="icon"><img loading="lazy" src="svg/reports.svg" /></span>
+				Reports
+			</a>
+			<% } %>
+		</li>
+		
+		<!-- Admin Panel -->
+		<%# if (admin) { %>
+		<!-- <li>
+			<a href="/settings" class="admin-link">
+				<span class="icon"><img loading="lazy" src="svg/adminPanel.svg" /></span>
+				Settings
+			</a>
+		</li> -->
+		<%# } %>
+	</ul>
+	
+	<div>
+		<%- include("help") %>
+		<div class="user-profile text-white flex justify-center items-center text-center">
+			
+			<% if (photo) { %>
+			<img loading="lazy" src="/<%= photo %>" alt="User Profile" class="user-profile-img" onclick="toggleDropdown()" />
+			<% } else { %>
+			<!-- Extract and display the initials -->
+			<div class="user-profile-name bg-[<%= color %>]" onclick="toggleDropdown()">
+				<%= name?.split(' ').map(n => n[0].toUpperCase()).join(''); %>
+			</div>
+			<% } %>
+			<div id="downMenu" class="account-menu hidden">
+				<a href="/settings/profile" class="flex items-center"><img loading="lazy" src="svg/profileLogo.svg" class="pr-2" />View profile</a>
+				<button onclick="logout()" class="flex items-center"><img loading="lazy" src="svg/logOut.svg" class="pr-2" />Log out</button>
+			</div>
+		</div>
+	</div>
+</nav>
+
+<!-- Overlay for when mobile menu is open -->
+<!-- <div id="sidebarOverlay" class="sidebar-overlay hidden" onclick="toggleSidebar()"></div> -->
+
+<script>
+	// Helper function to get the formatted first segment of the URL path
+	const getFirstSegment = () => {
+		const currentPath = window.location.pathname;
+		
+		// Split the path by "/" and filter out empty parts
+		const pathSegments = currentPath.split("/").filter(Boolean);
+		
+		// Return the first segment or 'dashboard' if path is root '/'
+		return pathSegments[0] || 'dashboard';
+	};
+	
+	window.onload = function () {
+		const firstSegment = getFirstSegment();
+		
+		// Define the mapping for each route and corresponding SVG icons
+		const routeMap = {
+			dashboard: {
+				linkClass: '.dashboard-link',
+				iconNormal: 'svg/dashboard.svg',
+				iconClicked: 'svg/dashboardClicked.svg'
+			},
+			settings: {
+				linkClass: '.settings-link',
+				iconNormal: 'svg/settings.svg',
+				iconClicked: 'svg/settingsClicked.svg'
+			},
+			'contact-list': {
+				linkClass: '.contact-list-link',
+				iconNormal: 'svg/contact-list.svg',
+				iconClicked: 'svg/contact-listClicked.svg'
+			},
+			template: {
+				linkClass: '.template-link',
+				iconNormal: 'svg/template.svg',
+				iconClicked: 'svg/templateClicked.svg'
+			},
+			reports: {
+				linkClass: '.reports-link',
+				iconNormal: 'svg/reports.svg',
+				iconClicked: 'svg/reportsClicked.svg'
+			},
+			chats: {
+				linkClass: '.chats-link',
+				iconNormal: 'svg/chats.svg',
+				iconClicked: 'svg/chatsClicked.svg'
+			},
+			admin: {
+				linkClass: '.admin-link',
+				iconNormal: 'svg/adminPanel.svg',
+				iconClicked: 'svg/adminPanelClicked.svg'
+			}
+		};
+		
+		// Iterate through the routes and update their respective SVGs
+		Object.keys(routeMap).forEach((key) => {
+			const route = routeMap[key];
+			const link = document.querySelector(`${route.linkClass} .icon img`);
+			
+			// If the current route matches the first segment, use the "clicked" icon
+			if (firstSegment === key && link) {
+				link.src = route.iconClicked;
+				link.alt = `${key} clicked`;
+				link.closest('.icon').classList.add('active'); // Add 'active' class
+			} else if (link) {
+				// Otherwise, use the normal icon
+				link.src = route.iconNormal;
+				link.alt = key;
+			}
+		});
+	};
+	
+	// Toggle sidebar menu on mobile
+	function toggleSidebar () {
+		const sidebarMenu = document.getElementById('sidebarMenu');
+		// const overlay = document.getElementById('sidebarOverlay');
+		const hamburgerIcon = document.getElementById('hamburgerIcon');
+		const closeIcon = document.getElementById('closeIcon');
+		
+		// Toggle sidebar visibility
+		sidebarMenu.classList.toggle('show');
+		sidebarMenu.classList.toggle('hidden-mobile');
+		
+		// Toggle overlay
+		// overlay.classList.toggle('hidden');
+		
+		// Toggle hamburger/close icon
+		hamburgerIcon.classList.toggle('hidden');
+		closeIcon.classList.toggle('hidden');
+		
+		// Prevent scrolling on body when sidebar is open
+		document.body.style.overflow = sidebarMenu.classList.contains('show') ? 'hidden' : 'auto';
+	}
+	
+	// Toggle user dropdown
+	function toggleDropdown () {
+		const downMenu = document.getElementById('downMenu');
+		downMenu.classList.toggle('hidden');
+	}
+	
+	// Toggle reports dropdown
+	function getReportsMenu () {
+		const reportMenu = document.getElementById('reportMenu');
+		reportMenu.classList.toggle('hidden');
+	}
+	
+	// Close dropdowns when clicking outside
+	document.addEventListener('click', function (event) {
+		// Close user dropdown when clicking outside
+		const userProfile = document.querySelector('.user-profile');
+		const downMenu = document.getElementById('downMenu');
+		if (!userProfile.contains(event.target) && !downMenu.classList.contains('hidden')) {
+			downMenu.classList.add('hidden');
+		}
+		
+		// Close reports dropdown when clicking outside
+		const reportMenu = document.getElementById('reportMenu');
+		const reportLink = document.querySelector('.reports-link');
+		if (reportMenu && !reportMenu.contains(event.target) && !reportLink.contains(event.target) && !reportMenu.classList.contains('hidden')) {
+			reportMenu.classList.add('hidden');
+		}
+	});
+	
+	// Initialize responsive behavior on page load
+	
+	// Handle initial state based on screen size
+	const checkScreenSize = () => {
+		const sidebarMenu = document.getElementById('sidebarMenu');
+		if (window.innerWidth >= 769) {
+			sidebarMenu.classList.remove('hidden-mobile');
+			sidebarMenu.classList.remove('show');
+			// document.getElementById('sidebarOverlay').classList.add('hidden');
+			// document.body.style.overflow = 'auto';
+		} else {
+			if (!sidebarMenu.classList.contains('show')) {
+				sidebarMenu.classList.add('hidden-mobile');
+			}
+		}
+	};
+	
+	checkScreenSize();
+	
+	// Update on window resize
+	window.addEventListener('resize', checkScreenSize);
+</script>

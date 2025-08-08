@@ -14,6 +14,7 @@ import {
 	getDeliveredReportsById,
 	getSentReportsById,
 	getCampaignOverview,
+	safeParseJSON,
 } from "./reports.functions.js";
 import {
 	isNumber,
@@ -503,10 +504,9 @@ export const createCampaign = async (req, res, next) => {
 
 		if (!isString(name)) return next();
 
-		variables =
-			typeof variables === "string" ? JSON.parse(variables) : variables;
-		schedule =
-			typeof schedule === "string" ? JSON.parse(schedule) : schedule;
+		contactList = safeParseJSON(contactList, []);
+		variables = safeParseJSON(variables, {});
+		schedule = safeParseJSON(schedule, null);
 
 		let id = req.session?.user?.id || req.session?.addedUser?.owner;
 		const addedUserId = req.session?.addedUser?.id;
@@ -535,6 +535,7 @@ export const createCampaign = async (req, res, next) => {
 		const totalCount = user?.payment?.totalMessages || 0;
 		if (contactList.length > totalCount - messagesCount) {
 			return res.status(400).json({
+				success: false,
 				message: `Not enough credits. You have ${
 					totalCount - messagesCount
 				} messages left, but you're trying to send ${

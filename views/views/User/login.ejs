@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8" />
+	<title>Login</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=yes" />
+	<link rel="apple-touch-icon" href="pages/ico/60.png" />
+	<link rel="apple-touch-icon" sizes="76x76" href="pages/ico/76.png" />
+	<link rel="apple-touch-icon" sizes="120x120" href="pages/ico/120.png" />
+	<link rel="apple-touch-icon" sizes="152x152" href="pages/ico/152.png" />
+	<link rel="icon" type="image/x-icon" href="favicon.ico" />
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+	<meta name="apple-touch-fullscreen" content="yes" />
+	<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+	<meta content="Meet pages - The simplest and fastest way to build web UI for your dashboard or app." name="description" />
+	<meta content="Ace" name="author" />
+	<link href="assets/plugins/pace/pace-theme-flash.css" rel="stylesheet" type="text/css" />
+	<link href="assets/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+	<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+	<link href="assets/plugins/jquery-scrollbar/jquery.scrollbar.css" rel="stylesheet" type="text/css" media="screen" />
+	<link href="assets/plugins/select2/css/select2.min.css" rel="stylesheet" type="text/css" media="screen" />
+	<!-- <link class="main-stylesheet" href="pages/css/themes/corporate.css" rel="stylesheet" type="text/css" /> -->
+	<!-- Please remove the file below for production: Contains demo classes -->
+	<link class="main-stylesheet" href="assets/css/style.css" rel="stylesheet" type="text/css" />
+	<link rel="stylesheet" href="/styles/style.css" />
+	<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+	<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" />
+	<script src="https://cdn.tailwindcss.com"></script>
+	<link rel="stylesheet" href="/styles/countrySelector.css" />
+	<link rel="preconnect" href="https://fonts.googleapis.com" />
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+	<link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+	<script src="https://kit.fontawesome.com/44e4e59292.js" crossorigin="anonymous"></script>
+	<style>
+		.loading-spinner {
+			border: 3px solid rgba(0, 0, 0, 0.1);
+			border-left-color: #fff;
+			border-radius: 100%;
+			width: 16px;
+			height: 16px;
+			animation: spin 1s linear infinite;
+		}
+		
+		@keyframes spin {
+			0% {
+				transform: rotate(0deg);
+			}
+			
+			100% {
+				transform: rotate(360deg);
+			}
+		}
+		
+		#errorMessage,
+		#successMessage {
+			margin-top: 10px;
+			display: none;
+		}
+		
+		#errorMessage {
+			color: red;
+		}
+		
+		#successMessage {
+			color: green;
+		}
+	</style>
+</head>
+
+<body>
+	<%- include("../commonJS/loader") %>
+	<div class="layout-container">
+		<!-- Left Section -->
+		<%- include("common/leftSide")  %>
+		
+		<!-- Right Section - Login Form -->
+		<div class="flex-shrink right-section justify-center p-5">
+			<div class="text-center">
+				<h3 class="mb-2 text-3xl">Sign In</h3>
+				<p class="p-text text-lg">Enter your email address and password to sign in!</p>
+			</div>
+			<form id="signInForm" class="sign-in-form">
+				<div class="form-group">
+					<label class="p-text" for="email">Email</label>
+					<input type="email" class="form-control placeholder:text-gray-400" id="email" name="email" placeholder="Enter email address" required>
+					<div class="invalid-feedback">Enter a valid email</div>
+				</div>
+					
+				<div class="form-group">
+					<label class="p-text" for="password">Password</label>
+					<div class="input-group form-control">
+						<input type="password" class="w-[93%] placeholder:text-gray-400" id="password" name="password" placeholder="Enter password" required />
+						<span id="togglePassword">
+							<span id="visibleConfirmPassword" style="cursor: pointer; width: fit-content;">
+								<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="18px" fill="#9ca3af">
+									<path d="m644-428-58-58q9-47-27-88t-93-32l-58-58q17-8 34.5-12t37.5-4q75 0 127.5 52.5T660-500q0 20-4 37.5T644-428Zm128 126-58-56q38-29 67.5-63.5T832-500q-50-101-143.5-160.5T480-720q-29 0-57 4t-55 12l-62-62q41-17 84-25.5t90-8.5q151 0 269 83.5T920-500q-23 59-60.5 109.5T772-302Zm20 246L624-222q-35 11-70.5 16.5T480-200q-151 0-269-83.5T40-500q21-53 53-98.5t73-81.5L56-792l56-56 736 736-56 56ZM222-624q-29 26-53 57t-53 67q50 101 143.5 160.5T480-280q20 0 39-2.5t39-5.5l-36-38q-11 3-21 4.5t-21 1.5q-75 0-127.5-52.5T300-500q0-11 1.5-21t4.5-21l-84-82Zm319 93Zm-151 75Z" />
+								</svg>
+							</span>
+							<!-- Not visible (slashed eye) icon -->
+							<span id="notVisibleConfirmPassword" class="hidden" style="cursor: pointer; width: fit-content;">
+								<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="18px" fill="#9ca3af">
+									<path d="M480-320q75 0 127.5-52.5T660-500q0-75-52.5-127.5T480-680q-75 0-127.5 52.5T300-500q0 75 52.5 127.5T480-320Zm0-72q-45 0-76.5-31.5T372-500q0-45 31.5-76.5T480-608q45 0 76.5 31.5T588-500q0 45-31.5 76.5T480-392Zm0 192q-146 0-266-81.5T40-500q54-137 174-218.5T480-800q146 0 266 81.5T920-500q-54 137-174 218.5T480-200Zm0-300Zm0 220q113 0 207.5-59.5T832-500q-50-101-144.5-160.5T480-720q-113 0-207.5 59.5T128-500q50 101 144.5 160.5T480-280Z" />
+								</svg>
+							</span>
+						</span>
+					</div>
+				</div>
+				
+				<div class="form-group d-flex justify-content-between">
+					<div class="remember-me">
+						<input type="checkbox" id="remember-me">
+						<label class="p-text" for="remember-me">Remember me</label>
+					</div>
+					<a href="resetPassword" class="forgot-password">Forgot password?</a>
+				</div>
+				
+				<button type="submit" class="bg-black w-full text-white rounded-[.6rem] p-2 h-10"> <span class="inline-block loading-spinner m-auto hidden"></span>
+					<span id="submitText">Sign In</span></button>
+				<p class="text-center py-2  text-gray-500">Don't have an account yet ? <a href="/register" class="text-black hover:underline-offset-2 hover:text-black ">Register here</a></p>
+			</form>
+			<!-- <div class="text-center" id="errorMessage"></div>
+			<div class="text-center" id="successMessage"></div> -->
+		</div>
+	</div>
+	
+	<script>
+		const OTPLogin = <%- JSON.parse(OTPLogin) %>;
+		// Toggle password visibility
+		document.getElementById('togglePassword').addEventListener('click', function () {
+			const passwordInput = document.getElementById('password');
+			const eyeOpen = document.getElementById('visibleConfirmPassword');
+			const eyeClosed = document.getElementById("notVisibleConfirmPassword");
+			
+			if (passwordInput.type === 'password') {
+				passwordInput.type = 'text';
+				eyeOpen.classList.add('hidden');
+				eyeClosed.classList.remove('hidden');
+				
+			} else {
+				passwordInput.type = 'password';
+				
+				eyeOpen.classList.remove('hidden');
+				eyeClosed.classList.add('hidden');
+			}
+		});
+		
+		// Handle form submission with fetch API
+		document.getElementById('signInForm').addEventListener('submit', async function (e) {
+			e.preventDefault(); // Prevent default form submission
+			
+			// Get form values
+			const email = document.getElementById('email').value;
+			const password = document.getElementById('password').value;
+			const rememberMe = document.getElementById('remember-me').checked;
+			
+			const loader = document.querySelector(".loading-spinner");
+			const submitBtn = document.querySelector("button[type=submit]");
+			const submitText = document.getElementById("submitText");
+			submitBtn.disabled = true;
+			submitText.textContent = '';
+			loader.classList.remove("hidden");
+			// Clear any previous messages
+			// document.getElementById('errorMessage').style.display = 'none';
+			// document.getElementById('successMessage').style.display = 'none';
+			
+			try {
+				// Make API call to login route
+				const response = await fetch('/api/users/login', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify({
+						email,
+						password,
+						rememberMe
+					}),
+				});
+				
+				const data = await response.json();
+				
+				submitBtn.disabled = false;
+				submitText.textContent = 'Sign In';
+				loader.classList.add("hidden");
+				
+				if (data.success) {
+					// Show success message
+					toast("success", data.message);
+					// Remember email if the "Remember Me" checkbox is checked
+					if (rememberMe) {
+						localStorage.setItem('rememberedEmail', email);
+					} else {
+						localStorage.removeItem('rememberedEmail');
+					}
+					if (OTPLogin) return setTimeout(() => {
+						window.location.href = '/2FA';
+					}, 500);
+					// Redirect to the dashboard
+					setTimeout(() => {
+						window.location.href = '/';
+					}, 500);
+				} else {
+					// Show error message
+					toast("error", data.message);
+				}
+			} catch (error) {
+				// Handle errors
+				toast("error", error);
+				submitBtn.disabled = false;
+				submitText.textContent = 'Sign In';
+				loader.classList.add("hidden");
+			}
+		});
+		
+		// Remember email if it's stored in localStorage
+		window.addEventListener('DOMContentLoaded', (event) => {
+			const rememberedEmail = localStorage.getItem('rememberedEmail');
+			if (rememberedEmail) {
+				document.getElementById('email').value = rememberedEmail;
+				document.getElementById('remember-me').checked = true;
+			}
+		});
+	</script>
+	
+	<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+	<script src="carousel.js"></script>
+	<script src="/toast.js"></script>
+</body>
+
+</html>

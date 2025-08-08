@@ -85,6 +85,8 @@ export const getPayment = async (req, res) => {
 				req.session?.addedUser?.whatsAppStatus,
 			page,
 			totalPages: Math.ceil(total / limit),
+			clientKeyRazorpay: process.env.RAZORPAY_CLIENT_KEY,
+			clientKeyStripe: process.env.STRIPE_CLIENT_KEY,
 		});
 	} catch (error) {
 		console.error("Payment Page Error:", error);
@@ -142,7 +144,7 @@ export const getIntent = async (req, res, next) => {
 				? await handleStripePayment(args, stripe)
 				: await handleRazorpayPayment(args, razorpay);
 
-		user.payment.plan = `${messages} messages`;
+		user.payment.plan = messages;
 		await user.save();
 
 		res.status(201).json(result);
@@ -455,7 +457,7 @@ export const razorpayWebhook = async (req, res) => {
 					{ unique_id: payment.useradmin },
 					{
 						$set: {
-							"payment.previousMessagesCount": prevTotal,
+							"payment.previousMessagesCount": newMessages,
 							"payment.totalMessages": prevTotal + newMessages,
 						},
 					},
@@ -542,7 +544,7 @@ export const stripeWebhook = async (req, res) => {
 				{ unique_id: payment.useradmin },
 				{
 					$set: {
-						"payment.previousMessagesCount": prevTotal,
+						"payment.previousMessagesCount": newMessages,
 						"payment.totalMessages": prevTotal + newMessages,
 					},
 				},

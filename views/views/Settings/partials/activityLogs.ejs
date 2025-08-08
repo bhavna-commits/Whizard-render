@@ -1,0 +1,99 @@
+<%
+// Helper function to get formatted date
+const formatDate = (date) => {
+  return new Date(date).toLocaleDateString("en-GB", { 
+    day: 'numeric', 
+    month: 'short', 
+    year: 'numeric' 
+  });
+};
+
+// Group logs by date
+const groupedLogs = logs.reduce((groups, log) => {
+  const date = formatDate(log.createdAt);
+  if (!groups[date]) {
+    groups[date] = [];
+  }
+  groups[date].push(log);
+  return groups;
+}, {});
+
+// Get today's date in the same format
+const today = formatDate(new Date());
+const oneDayInMillis = 24 * 60 * 60 * 1000;
+const yesterdayDate = new Date(new Date().getTime() - oneDayInMillis);
+const yesterday = formatDate(yesterdayDate);
+%>
+
+<% if (Object.keys(groupedLogs).length == 0) { %>
+<p class="text-center text-gray-500">No logs found.</p>
+<% } else { %>
+<% Object.entries(groupedLogs).forEach(([date, dateLogs], groupIndex, allGroups) => { %>
+<div class="timeline-date font-bold text-lg mt-10 mb-6">
+	<%= date %> <%= date == today ? "(Today)" : "" %> <%= date == yesterday ? "(Yesterday)" : "" %>
+</div>
+
+<% dateLogs.forEach((log, index) => { %>
+<div class="timeline-item flex items-center relative">
+	<div class="flex flex-col">
+		<div class="flex items-center">
+			<div class="bg-[<%= log.color || '#43a2ea' %>] border text-white rounded-full flex justify-center items-center w-10 h-10 font-semibold">
+				<% if (log.photo) { %>
+				<img id="profilePreview" src="/<%= log.photo %>" class="w-full h-full rounded-full object-cover block" />
+				<% } else { %>
+				<%= log.name.split(" ").map(n => n[0]).join("").toUpperCase() %>
+				<% } %>
+			</div>
+			
+			<div class="content ml-4">
+				<div class="flex justify-between w-full space-x-7">
+					<div>
+						<p class="font-bold"><%= log.name %></p>
+						<p class="text-sm text-gray-500 log-time" data-date="<%= log.createdAt %>"></p>						
+					</div>
+					<span class="<%= log.actions.toLowerCase() %> 
+						bg-<%= log.actions.toLowerCase() === 'send' ? 'orange-100' : 
+							log.actions.toLowerCase() === 'create' ? 'green-100' : 
+							log.actions.toLowerCase() === 'update' ? 'pink-100' : 
+							'red-100' %> 
+						text-<%= log.actions.toLowerCase() === 'send' ? 'orange-500' : 
+								log.actions.toLowerCase() === 'create' ? 'green-500' : 
+								log.actions.toLowerCase() === 'update' ? 'pink-500' : 
+								'red-500' %> 
+						align-middle h-fit p-1 rounded text-sm">
+						<%= log.actions %>
+					</span>
+					<div class="text-gray-600 text-right"><%= log.details %></div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<% if (index < dateLogs.length - 1) { %>
+<div class="border-r pl-[1.23rem] h-10 w-0"></div>
+<% } %>
+
+<% }); %>
+
+<% if (groupIndex != allGroups.length - 1) { %>
+<div class="border-b h-0 w-full py-3 text-center"></div>
+<% } %>
+
+<% }); %>
+<% } %>
+
+<script>
+	document.querySelectorAll('.log-time').forEach((el) => {
+		const isoDate = el.getAttribute('data-date');
+		if (isoDate) {
+			const date = new Date(Number(isoDate));
+			const formatted = date.toLocaleTimeString('en-GB', {
+				hour: '2-digit',
+				minute: '2-digit',
+				hour12: true,
+			});
+			el.textContent = formatted;
+		}
+	});
+</script>
