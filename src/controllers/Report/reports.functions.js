@@ -209,54 +209,41 @@ export async function sendMessagesReports(
 	fileName,
 ) {
 	try {
-		// Find the template by unique_id
 		const template = await Template.findOne({
 			unique_id: campaign.templateId,
 		});
-
-		if (!template) {
+		if (!template)
 			throw new Error(
 				`Template with ID ${campaign.templateId} not found`,
 			);
-		}
-
-		if (contactList?.length === 0) {
+		if (!contactList?.length)
 			throw new Error(
 				`No contacts found for contact list ID ${campaign.contactListId}`,
 			);
-		}
 
 		const headerComponent = template.components.find(
 			(c) => c.type === "HEADER",
 		);
-
-		if (fileName) {
-			if (headerComponent) {
-				let fileUrl = `${url}/uploads/${user.unique_id}/${fileName}`;
-				if (headerComponent.format === "IMAGE") {
-					console.log("img");
-					headerComponent.example.header_url = fileUrl;
-				} else if (headerComponent.format === "VIDEO") {
-					console.log("vid");
-					headerComponent.example.header_url = fileUrl;
-					console.log(headerComponent.example.header_url);
-				} else if (headerComponent.format === "DOCUMENT") {
-					console.log("doc");
-					headerComponent.example.header_url = fileUrl;
-				}
+		if (fileName && headerComponent) {
+			let fileUrl = `${url}/uploads/${user.unique_id}/${fileName}`;
+			if (
+				["IMAGE", "VIDEO", "DOCUMENT"].includes(headerComponent.format)
+			) {
+				headerComponent.example.header_url = fileUrl;
 			}
 		}
 
 		const countUser = await User.findOne({ unique_id: user.unique_id });
-		let remainingCount = countUser?.payment?.messagesCount || 0;
+		const remainingCount =
+			countUser?.payment?.totalMessages -
+			(countUser?.payment?.messagesCount || 0);
 
 		if (contactList.length > remainingCount) {
 			throw new Error(
 				`Not enough credits. You have ${remainingCount} messages left, but you're trying to send ${contactList.length}.`,
 			);
-		}		
+		}
 
-		// Loop through each contact in the contact list
 		for (let contact of contactList) {
 			try {
 				const personalizedMessage = replaceDynamicVariables(
@@ -264,18 +251,12 @@ export async function sendMessagesReports(
 					campaign.variables,
 					contact,
 				);
-				// console.log(personalizedMessage);
 				const response = await sendMessageThroughWhatsApp(
 					user,
 					template,
 					contact.wa_id,
 					personalizedMessage,
 					phone_number,
-				);
-
-				const messageTemplate = generatePreviewMessage(
-					template,
-					personalizedMessage,
 				);
 
 				if (response.status === "FAILED") {
@@ -285,8 +266,11 @@ export async function sendMessagesReports(
 					continue;
 				}
 
+				const messageTemplate = generatePreviewMessage(
+					template,
+					personalizedMessage,
+				);
 				const mediaPreview = getMediaPreviewFromTemplate(template);
-
 				const components = generatePreviewComponents(
 					template,
 					personalizedMessage,
@@ -304,6 +288,11 @@ export async function sendMessagesReports(
 					status: response.status,
 					messageId: response.response.messages[0].id,
 					messageTemplate,
+					components,
+					templateId: campaign.templateId,
+					templatename: template.name,
+					agent: addedUserId ? addedUserId : user.unique_id,
+					type: "Campaign",
 				};
 
 				if (mediaPreview) {
@@ -312,12 +301,6 @@ export async function sendMessagesReports(
 						fileName: mediaPreview.fileName,
 					};
 				}
-
-				reportData.components = components;
-				reportData.templateId = campaign.templateId;
-				reportData.templatename = template.name;
-				reportData.agent = addedUserId ? addedUserId : user.unique_id;
-				reportData.type = "Campaign";
 
 				let reportData2 = {
 					name: contact.Name,
@@ -334,8 +317,6 @@ export async function sendMessagesReports(
 				await TempMessageModel.create(reportData2);
 				const chat = new Chat(reportData);
 				await chat.save();
-
-				remainingCount -= 1;
 			} catch (error) {
 				console.error("Error sending messages:", error.message);
 				continue;
@@ -1062,6 +1043,8 @@ agenda.define("process campaign", async (job) => {
 		addedUserId,
 		url,
 		fileName,
+		contactList,
+		template,
 	} = job.attrs.data;
 
 	console.log("Sending Campaign");
@@ -1074,6 +1057,8 @@ agenda.define("process campaign", async (job) => {
 			addedUserId,
 			url,
 			fileName,
+			contactList,
+			template,
 		);
 
 		await Campaign.updateOne(
@@ -1081,13 +1066,14 @@ agenda.define("process campaign", async (job) => {
 			{ $set: { status: "SENT" } },
 		);
 
-		const time = Date.now() + 15 * 60 * 1000;
-		const reportTime = new Date(time);
-
-		agenda.schedule(reportTime, "send campaign report email", {
-			campaignId: newCampaign.unique_id,
-			userId: newCampaign.useradmin,
-		});
+		agenda.schedule(
+			new Date(Date.now() + 15 * 60 * 1000),
+			"send campaign report email",
+			{
+				campaignId: newCampaign.unique_id,
+				userId: newCampaign.useradmin,
+			},
+		);
 	} catch (error) {
 		console.error(
 			`Error processing campaign ${newCampaign.unique_id}:`,

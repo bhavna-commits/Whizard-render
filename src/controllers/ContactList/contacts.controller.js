@@ -6,6 +6,7 @@ import Contacts from "../../models/contacts.model.js";
 import Permissions from "../../models/permissions.model.js";
 import ActivityLogs from "../../models/activityLogs.model.js";
 import Campaign from "../../models/campaign.model.js";
+import Template from "../../models/templates.model.js";
 import User from "../../models/user.model.js";
 import ChatsUsers from "../../models/chatsUsers.model.js";
 import { fileURLToPath } from "url";
@@ -599,185 +600,161 @@ export const createCampaign = async (req, res, next) => {
 		if (!isString(templateId, contactListId, variables, name))
 			return next();
 
-		// console.log(variables);
 		variables =
 			typeof variables === "string" ? JSON.parse(variables) : variables;
 		schedule =
 			typeof schedule === "string" ? JSON.parse(schedule) : schedule;
 		test = typeof test === "string" ? JSON.parse(test) : test;
 
-		let id = req.session?.user?.id || req.session?.addedUser?.owner;
-
+		const userId = req.session?.user?.id || req.session?.addedUser?.owner;
 		const addedUserId = req.session?.addedUser?.id;
 
-		let user = await User.findOne({ unique_id: id, deleted: false });
+		const [user, contactList, template] = await Promise.all([
+			User.findOne({ unique_id: userId, deleted: false }),
+			Contacts.find({ contactId: contactListId, subscribe: 1 }),
+			Template.findOne({ unique_id: templateId }),
+		]);
+
+		if (!user) throw new Error("User not found");
+		if (!template)
+			throw new Error(`Template with ID ${templateId} not found`);
+		if (!contactList.length)
+			throw new Error(`No contacts found for list ${contactListId}`);
 
 		const phone_number =
 			req.session?.addedUser?.selectedFBNumber?.phone_number_id ||
-			user.FB_PHONE_NUMBERS.find((n) => n.selected == true)
-				.phone_number_id;
+			user.FB_PHONE_NUMBERS.find((n) => n.selected)?.phone_number_id;
+		if (!phone_number) throw new Error("No phone number selected");
 
-		if (!phone_number) {
-			throw new Error("No phone number selected.");
+		const messagesCount = user?.payment?.messagesCount || 0;
+		const totalCount = user?.payment?.totalMessages || 0;
+		if (contactList.length > totalCount - messagesCount) {
+			throw new Error(
+				`Not enough credits. You have ${
+					totalCount - messagesCount
+				} messages left, but you're trying to send ${
+					contactList.length
+				}.`,
+			);
 		}
 
-		let message = "Campaign created successfully";
-
 		if (test) {
-			try {
-				await sendTestMessage(
-					user,
-					templateId,
-					variables,
-					contactListId,
-					test,
-					phone_number,
-					addedUserId,
-					url,
-					req.file?.filename,
-				);
-				await ActivityLogs.create({
-					useradmin: id,
-					unique_id: generateUniqueId(),
-					name: req.session?.user?.name
-						? req.session?.user?.name
-						: req.session?.addedUser?.name,
-					photo: req.session?.user?.photo
-						? req.session?.user?.photo
-						: req.session?.addedUser?.photo,
-					color: req.session?.user?.color
-						? req.session?.user?.color
-						: req.session?.addedUser?.color,
-					actions: "Send",
-					details: `Sent a test message named: ${name}`,
-				});
-				return res.status(201).json({
-					success: true,
-					message: "Test message sent succesfully",
-				});
-			} catch (error) {
-				console.log("error sending test message :", error);
-				return res.status(500).json({
-					success: false,
-					message: error,
-				});
-			}
+			await sendTestMessage(
+				user,
+				template,
+				variables,
+				contactList[0],
+				test,
+				phone_number,
+				addedUserId,
+				url,
+				req.file?.filename,
+			);
+
+			await ActivityLogs.create({
+				useradmin: userId,
+				unique_id: generateUniqueId(),
+				name: req.session?.user?.name || req.session?.addedUser?.name,
+				photo:
+					req.session?.user?.photo || req.session?.addedUser?.photo,
+				color:
+					req.session?.user?.color || req.session?.addedUser?.color,
+				actions: "Send",
+				details: `Sent a test message named: ${name}`,
+			});
+
+			return res.status(201).json({
+				success: true,
+				message: "Test message sent successfully",
+			});
 		}
 
 		const newCampaign = new Campaign({
-			useradmin: id,
+			useradmin: userId,
 			unique_id: generateUniqueId(),
 			templateId,
 			contactListId,
 			variables,
 			name,
 			phoneNumberId: phone_number,
+			status: schedule ? "SCHEDULED" : "SENT",
 		});
 
-		if (!schedule) {
-			newCampaign.status = "SENT";
-
-			let time = Date.now() + 2 * 60 * 1000;
-			let reportTime = new Date(time);
-
-			agenda.schedule(reportTime, "process campaign", {
-				newCampaign,
-				user,
-				unique_id: generateUniqueId(),
-				phone_number,
-				addedUserId,
-				url,
-				fileName: req?.file?.filename,
-			});
-
-			await ActivityLogs.create({
-				useradmin: id,
-				unique_id: generateUniqueId(),
-				name: req.session?.user?.name
-					? req.session?.user?.name
-					: req.session?.addedUser?.name,
-				actions: "Send",
-				details: `Sent campaign named: ${name}`,
-			});
-
-			message = "Campaign created successfully";
-		} else {
+		let reportTime;
+		if (schedule) {
 			newCampaign.scheduledAt = Number(schedule) * 1000;
-			newCampaign.status = "SCHEDULED";
-
-			let time = Number(schedule) * 1000;
-			let reportTime = new Date(time);
-
-			agenda.schedule(reportTime, "process campaign", {
-				newCampaign,
-				user,
-				unique_id: generateUniqueId(),
-				phone_number,
-				addedUserId,
-				url,
-				fileName: req.file?.filename,
-			});
+			reportTime = new Date(newCampaign.scheduledAt);
 
 			await sendCampaignScheduledEmail(
 				user.email,
 				name,
 				newCampaign.scheduledAt,
 			);
-
 			await ActivityLogs.create({
-				useradmin: id,
+				useradmin: userId,
 				unique_id: generateUniqueId(),
-				name: req.session?.user?.name
-					? req.session?.user?.name
-					: req.session?.addedUser?.name,
+				name: req.session?.user?.name || req.session?.addedUser?.name,
 				actions: "Send",
 				details: `Scheduled new campaign named: ${name}`,
 			});
-
-			message = "Campaign scheduled successfully";
+		} else {
+			reportTime = new Date(Date.now() + 2 * 60 * 1000);
+			await ActivityLogs.create({
+				useradmin: userId,
+				unique_id: generateUniqueId(),
+				name: req.session?.user?.name || req.session?.addedUser?.name,
+				actions: "Send",
+				details: `Sent campaign named: ${name}`,
+			});
 		}
-		const contactList = await Contacts.find({
-			contactId: contactListId,
-			subscribe: 1,
+
+		agenda.schedule(reportTime, "process campaign", {
+			newCampaign,
+			user,
+			unique_id: generateUniqueId(),
+			phone_number,
+			addedUserId,
+			url,
+			fileName: req.file?.filename,
+			contactList,
+			template,
 		});
 
 		const contactNumberGroup = contactList.map((c) => c.wa_id);
-
 		const chatUsers = await chatsUsersModel.find({
-			useradmin: id,
+			useradmin: userId,
 			FB_PHONE_ID: phone_number,
 			wa_id: { $in: contactNumberGroup },
 		});
 
-		const chatNumbers = chatUsers.map((c) => c.wa_id);
-
+		const existingNumbers = new Set(chatUsers.map((c) => c.wa_id));
 		const newContacts = contactList.filter(
-			(c) => !chatNumbers.includes(c.wa_id),
+			(c) => !existingNumbers.has(c.wa_id),
 		);
 
-		const chatusersToInsert = newContacts.map((c) => ({
-			wa_id: c.wa_id,
-			useradmin: id,
-			unique_id: generateUniqueId(),
-			FB_PHONE_ID: phone_number,
-			contactName: c.Name,
-			campaignName: newCampaign.name,
-			campaignId: newCampaign.unique_id,
-			updatedAt: Date.now(),
-			lastMessage: "-",
-			lastSend: Date.now(),
-			messageStatus: "SENT",
-			replyStatus: 0,
-			agent: addedUserId || id,
-		}));
-
-		if (chatusersToInsert.length > 0) {
-			await chatsUsersModel.insertMany(chatusersToInsert);
+		if (newContacts.length) {
+			await chatsUsersModel.insertMany(
+				newContacts.map((c) => ({
+					wa_id: c.wa_id,
+					useradmin: userId,
+					unique_id: generateUniqueId(),
+					FB_PHONE_ID: phone_number,
+					contactName: c.Name,
+					campaignName: newCampaign.name,
+					campaignId: newCampaign.unique_id,
+					updatedAt: Date.now(),
+					lastMessage: "-",
+					lastSend: Date.now(),
+					messageStatus: "SENT",
+					replyStatus: 0,
+					agent: addedUserId || userId,
+				})),
+			);
 		}
 
 		await chatsUsersModel.updateMany(
 			{
-				useradmin: id,
+				useradmin: userId,
 				FB_PHONE_ID: phone_number,
 				wa_id: { $in: contactNumberGroup },
 			},
@@ -791,8 +768,11 @@ export const createCampaign = async (req, res, next) => {
 		);
 
 		await newCampaign.save();
+
 		res.status(201).json({
-			message,
+			message: schedule
+				? "Campaign scheduled successfully"
+				: "Campaign created successfully",
 			campaign: newCampaign,
 			success: true,
 		});
@@ -979,6 +959,7 @@ export const getCreateCampaign = async (req, res) => {
 	const ownerId = sessionUser?.id || addedUser?.owner;
 
 	const user = await User.findOne({ unique_id: ownerId });
+	const message = user.payment?.totalMessages - user.payment?.messagesCount;
 	let renderData = null;
 
 	if (addedUser?.permissions) {
@@ -993,7 +974,7 @@ export const getCreateCampaign = async (req, res) => {
 				photo: addedUser.photo,
 				color: addedUser.color,
 				help,
-				message: user.payment?.messagesCount,
+				message,
 				view: "Contact-List/createCampaign",
 			};
 		}
@@ -1004,11 +985,10 @@ export const getCreateCampaign = async (req, res) => {
 			photo: sessionUser.photo,
 			color: sessionUser.color,
 			help,
-			message: user.payment?.messagesCount,
+			message,
 			view: "Contact-List/createCampaign",
 		};
 	}
 
 	res.render(renderData?.view || "errors/notAllowed", renderData || {});
 };
-

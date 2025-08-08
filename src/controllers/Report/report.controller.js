@@ -424,48 +424,53 @@ export const getCampaignReports = async (req, res, next) => {
 };
 
 export const getSendBroadcast = async (req, res, next) => {
-	const data = req.session?.sendBroadcast;
-	const user = await User.findOne({
-		unique_id: req.session?.user?.id || req.session?.addedUser?.owner,
-	});
-	if (data) {
-		const permissions = req.session?.addedUser?.permissions;
-		if (permissions) {
-			const access = await Permissions.findOne({
-				unique_id: permissions,
-			});
-			if (
-				access.contactList.sendBroadcast &&
-				req.session?.addedUser?.whatsAppStatus
-			) {
-				res.render("Reports/createCampaign", {
-					access,
-					name: req.session?.addedUser?.name,
-					photo: req.session?.addedUser?.photo,
-					color: req.session?.addedUser?.color,
-					data,
-					help,
-					message: user.payment?.messagesCount,
-				});
-			} else {
-				res.render("errors/notAllowed");
-			}
-		} else if (req.session?.user?.whatsAppStatus) {
-			res.render("Reports/createCampaign", {
-				access: user.access,
-				name: req.session?.user?.name,
-				photo: req.session?.user?.photo,
-				color: req.session?.user?.color,
-				data,
-				help,
-				message: user.payment?.messagesCount,
-			});
-		} else {
-			res.render("errors/notAllowed");
-		}
-	} else {
+	const sessionUser = req.session?.user;
+	const addedUser = req.session?.addedUser;
+	const ownerId = sessionUser?.id || addedUser?.owner;
+
+	const user = await User.findOne({ unique_id: ownerId });
+	if (!user) {
+		console.log("User not found");
+		return res.render("errors/serverError");
+	}
+
+	const message = user.payment?.totalMessages - user.payment?.messagesCount;
+
+	if (!req.session?.sendBroadcast) {
 		console.log("broadcast data not found");
 		return res.render("errors/serverError");
+	}
+
+	if (addedUser?.permissions) {
+		const access = await Permissions.findOne({
+			unique_id: addedUser.permissions,
+		});
+
+		if (access?.contactList?.sendBroadcast && addedUser?.whatsAppStatus) {
+			return res.render("Reports/createCampaign", {
+				access,
+				name: addedUser.name,
+				photo: addedUser.photo,
+				color: addedUser.color,
+				data: req.session.sendBroadcast,
+				help,
+				message,
+			});
+		} else {
+			return res.render("errors/notAllowed");
+		}
+	} else if (sessionUser?.whatsAppStatus === "Live") {
+		return res.render("Reports/createCampaign", {
+			access: user.access,
+			name: sessionUser.name,
+			photo: sessionUser.photo,
+			color: sessionUser.color,
+			data: req.session.sendBroadcast,
+			help,
+			message,
+		});
+	} else {
+		return res.render("errors/notAllowed");
 	}
 };
 
@@ -493,9 +498,7 @@ export const createCampaign = async (req, res, next) => {
 		} = req.body;
 
 		if (!templateId || !contactListId || !name) {
-			return res.status(400).json({
-				message: "All fields are required",
-			});
+			return res.status(400).json({ message: "All fields are required" });
 		}
 
 		if (!isString(name)) return next();
@@ -506,7 +509,6 @@ export const createCampaign = async (req, res, next) => {
 			typeof schedule === "string" ? JSON.parse(schedule) : schedule;
 
 		let id = req.session?.user?.id || req.session?.addedUser?.owner;
-
 		const addedUserId = req.session?.addedUser?.id;
 
 		let user = await User.findOne({ unique_id: id, deleted: false });
@@ -516,22 +518,30 @@ export const createCampaign = async (req, res, next) => {
 			user.FB_PHONE_NUMBERS.find((n) => n.selected == true)
 				.phone_number_id;
 
-		if (!phone_number) {
-			throw new Error("No phone number selected.");
-		}
+		if (!phone_number) throw new Error("No phone number selected.");
 
-		const contactLists = await Contacts.find({
-			contactId: contactListId,
-		});
+		const contactLists = await Contacts.find({ contactId: contactListId });
 
-		contactList = contactLists.filter((c) => {
-			return contactList.some((cl) => {
-				return (
+		contactList = contactLists.filter((c) =>
+			contactList.some(
+				(cl) =>
 					c.wa_id === cl.recipientPhone ||
-					"91" + c.wa_id === cl.recipientPhone
-				);
+					"91" + c.wa_id === cl.recipientPhone,
+			),
+		);
+
+		// === CREDIT CHECK ===
+		const messagesCount = user?.payment?.messagesCount || 0;
+		const totalCount = user?.payment?.totalMessages || 0;
+		if (contactList.length > totalCount - messagesCount) {
+			return res.status(400).json({
+				message: `Not enough credits. You have ${
+					totalCount - messagesCount
+				} messages left, but you're trying to send ${
+					contactList.length
+				}.`,
 			});
-		});
+		}
 
 		const newCampaign = new Campaign({
 			useradmin: id,
@@ -574,9 +584,7 @@ export const createCampaign = async (req, res, next) => {
 			await ActivityLogs.create({
 				useradmin: id,
 				unique_id: generateUniqueId(),
-				name: req.session?.user?.name
-					? req.session?.user?.name
-					: req.session?.addedUser?.name,
+				name: req.session?.user?.name || req.session?.addedUser?.name,
 				actions: "Send",
 				details: `Sent campaign named: ${name}`,
 			});
@@ -609,21 +617,15 @@ export const createCampaign = async (req, res, next) => {
 			await ActivityLogs.create({
 				useradmin: id,
 				unique_id: generateUniqueId(),
-				name: req.session?.user?.name
-					? req.session?.user?.name
-					: req.session?.addedUser?.name,
+				name: req.session?.user?.name || req.session?.addedUser?.name,
 				actions: "Send",
 				details: `Scheduled new campaign named: ${name}`,
 			});
 			message = "Campaign scheduled successfully";
 		}
 
-		// Save the campaign
 		await newCampaign.save();
-		res.status(201).json({
-			message,
-			campaign: newCampaign,
-		});
+		res.status(201).json({ message, campaign: newCampaign });
 	} catch (error) {
 		console.error("Error creating campaign:", error.message);
 		res.status(500).json({
