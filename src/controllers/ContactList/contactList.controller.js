@@ -779,7 +779,7 @@ export const deleteList = async (req, res, next) => {
 
 export const sampleCSV = async (req, res) => {
 	try {
-		const userId = req.session.user.id;
+		const userId = req.session?.user?.id || req.session?.addedUser?.owner;
 		const userDir = path.join(__dirname, "..", "..", "..", "CSV", userId);
 		const userCSVPath = path.join(userDir, "sample.csv");
 
