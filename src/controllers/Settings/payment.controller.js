@@ -450,15 +450,15 @@ export const razorpayWebhook = async (req, res) => {
 			const user = await User.findOne({ unique_id: payment.useradmin });
 
 			if (user && update.status === "succeeded") {
-				const prevTotal = user.payment?.totalMessages || 0;
-				const newMessages = payment.messagesCount || 0;
+				const previousCount = user.payment?.messagesCount || 0;
+				const newTotal = payment.messagesCount || 0;
 
 				await User.updateOne(
 					{ unique_id: payment.useradmin },
 					{
 						$set: {
-							"payment.previousMessagesCount": newMessages,
-							"payment.totalMessages": prevTotal + newMessages,
+							"payment.previousMessagesCount": previousCount,
+							"payment.totalMessages": newTotal + previousCount,
 						},
 					},
 				);
@@ -537,15 +537,15 @@ export const stripeWebhook = async (req, res) => {
 		const user = await User.findOne({ unique_id: payment.useradmin });
 
 		if (user && update.status === "succeeded") {
-			const prevTotal = user.payment?.totalMessages || 0;
-			const newMessages = payment.messagesCount || 0;
+			const previousCount = user.payment?.messagesCount || 0;
+			const newTotal = payment.messagesCount || 0;
 
 			await User.updateOne(
 				{ unique_id: payment.useradmin },
 				{
 					$set: {
-						"payment.previousMessagesCount": newMessages,
-						"payment.totalMessages": prevTotal + newMessages,
+						"payment.previousMessagesCount": previousCount,
+						"payment.totalMessages": newTotal + previousCount,
 					},
 				},
 			);
