@@ -1,9 +1,11 @@
 import express from "express";
 import sessionMiddleware from "./middleWares/sessionHandler.js";
 import corsMiddleware from "./middleWares/cors.js";
+import paymentWebhooksRoutes from "./backEnd-Routes/payment.webhook.routes.js";
 
 const app = express();
 
+app.use("/payments", paymentWebhooksRoutes);
 app.use(express.json({ limit: "100mb" }));
 app.use(express.urlencoded({ limit: "100mb", extended: true }));
 app.use(corsMiddleware);

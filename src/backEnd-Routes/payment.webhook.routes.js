@@ -1,8 +1,8 @@
+// backEnd-Routes/payment.webhook.routes.js
 import express from "express";
 import {
 	razorpayWebhook,
 	stripeWebhook,
-	getRazorConfirm,
 } from "../controllers/Settings/payment.controller.js";
 
 const router = express.Router();
@@ -19,11 +19,7 @@ router.post(
 
 router.post(
 	"/stripe_webhook",
-	express.json({
-		verify: (req, res, buf) => {
-			req.rawBody = buf;
-		},
-	}),
+	express.raw({ type: "application/json" }),
 	stripeWebhook,
 );
 
