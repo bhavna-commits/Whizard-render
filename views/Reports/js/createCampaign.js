@@ -233,8 +233,8 @@ class Preview {
 		const uploadTrigger = this.container.querySelector(".upload-label");
 		const uploadInput = this.container.querySelector(".upload-input");
 
-		uploadTrigger.addEventListener("click", () => {
-			uploadInput.click();
+		uploadTrigger?.addEventListener("click", () => {
+			uploadInput?.click();
 		});
 
 		if (fileInput) {
@@ -463,7 +463,7 @@ class TemplateManager {
 			"name",
 			document.getElementById("campaign-name").value,
 		);
-		testFormData.append("contactList", contactLists);
+		testFormData.append("contactList", JSON.stringify(contactLists));
 		testFormData.append("url", `https://${location.hostname}`);
 
 		// FORM DATA FOR ACTUAL BROADCAST
@@ -471,7 +471,7 @@ class TemplateManager {
 		formData.append("templateId", this.templateSelect.val());
 		formData.append("contactListId", contactListId);
 		formData.append("name", document.getElementById("campaign-name").value);
-		formData.append("contactList", contactLists);
+		formData.append("contactList", JSON.stringify(contactLists));
 
 		const fileInput = this.campaignForm.querySelector(
 			'.upload-input[type="file"]',

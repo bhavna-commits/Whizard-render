@@ -233,8 +233,8 @@ class Preview {
 		const uploadTrigger = this.container.querySelector(".upload-label");
 		const uploadInput = this.container.querySelector(".upload-input");
 
-		uploadTrigger.addEventListener("click", () => {
-			uploadInput.click();
+		uploadTrigger?.addEventListener("click", () => {
+			uploadInput?.click();
 		});
 
 		if (fileInput) {
@@ -413,7 +413,6 @@ class TemplateManager {
 
 		try {
 			const { template } = await fetchTemplateById(templateId);
-			console.log(template);
 			this.currentTemplate = template;
 			this.preview.update(template);
 			this.attributeManager.update(template, this.currentContacts);

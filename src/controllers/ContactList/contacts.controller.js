@@ -592,9 +592,11 @@ export const createCampaign = async (req, res, next) => {
 		} = req.body;
 
 		if (!templateId || !contactListId) {
-			return res.status(400).json({
-				message: "Template ID and Contact List ID are required",
-			});
+			return res
+				.status(400)
+				.json({
+					message: "Template ID and Contact List ID are required",
+				});
 		}
 
 		if (!isString(templateId, contactListId, variables, name))
@@ -663,10 +665,12 @@ export const createCampaign = async (req, res, next) => {
 				details: `Sent a test message named: ${name}`,
 			});
 
-			return res.status(201).json({
-				success: true,
-				message: "Test message sent successfully",
-			});
+			return res
+				.status(201)
+				.json({
+					success: true,
+					message: "Test message sent successfully",
+				});
 		}
 
 		const newCampaign = new Campaign({

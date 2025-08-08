@@ -131,21 +131,14 @@
 							</p>
 						</div>
 						
-						<div class="flex items-center mb-4">
-							<p class="text-sm flex flex-col text-gray-500 mr-3">
-								Up to <%= user?.payment?.totalMessages %> <span>Messages</span>
-							</p>
-							<h2 class="text-xl font-bold text-gray-800">
-								<span class="mr-1"><%= user?.currency %></span><%= user?.payment?.messagesCount %>
-							</h2>
-						</div>
+						
 					</div>
 					<div class="relative w-full">
 						<!-- Slider track -->
 						<div class="absolute left-0 right-0 top-2 transform -translate-y-1/2 h-2 bg-gray-200 rounded-full"></div>
 						
 						<!-- Tooltip showing messagesCount -->
-						<div class="absolute z-10 top-8 transform -translate-x-1/2 bg-red-500 text-white text-xs px-3 py-1 rounded-full shadow" style="left: <%= (user?.payment?.messagesCount + 20 / user?.payment?.totalMessages) * 100 %>%">
+						<div class="absolute z-10 top-8 transform -translate-x-1/2 bg-red-500 text-white text-xs px-3 py-1 rounded-full shadow" style="left: <%= (user?.payment?.messagesCount / user?.payment?.totalMessages) * 100 %>%">
 							<div class="absolute -top-[5.6px] left-1/2 -translate-x-1/2 w-0 h-0 border-l-transparent border-r-transparent border-b-red-500" style="border-left: 6px solid transparent; border-right: 6px solid transparent; border-bottom: 6px solid #ef4444;"></div>
 							<%= user?.payment?.messagesCount %>
 						</div>
@@ -207,6 +200,7 @@
 		const name = <%- JSON.stringify(user.name) %>;
 		const email = <%- JSON.stringify(user.email) %>;
 		const contact = <%- JSON.stringify(user.phone) %>;
+        const key = <%- JSON.stringify(clientKeyRazorpay) %>;
 	</script>
 	<script src="/payment/js/razorpay.js"></script>
 	<script>
@@ -230,7 +224,9 @@
 		})
 	</script>
 	<% } else { %>
-	
+	<script>
+          const key = <%- JSON.stringify(clientKeyStripe) %>;
+    </script>
 	<script src="/payment/js/stripe.js"></script>
 	<script>
 		restoreBtn?.addEventListener("click", () => {
@@ -238,10 +234,12 @@
 				setTimeout(() => {
 					restoreBtn.querySelector(".loader-text").classList.add("hidden");
 					restoreBtn.querySelector(".loading-spinner").classList.remove("hidden");
-					meterSection.classList.add("hidden");
-					paymentPlanUI.classList.remove("hidden");
 					document.getElementById("btn")?.click();
 				}, 0);
+				setTimeout(() => {
+					meterSection.classList.add("hidden");
+					paymentPlanUI.classList.remove("hidden");
+				}, 500)
 			} catch (err) {
 				console.error("Error getting payment:", err);
 			} finally {

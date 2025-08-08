@@ -1,6 +1,4 @@
-const stripe = Stripe(
-	"pk_test_51RisfVPXXM07qeUBQiIX88g2vQuFP0tMls2YDyb7rHMaFJJT6Vu2ULAxYQl28DcDP7I0eYHPS5YyanOYGdo49WNd00XG3oHThu",
-);
+const stripe = Stripe(key);
 
 document.addEventListener("DOMContentLoaded", () => {
 	const stripeBtn = document.getElementById("btn");

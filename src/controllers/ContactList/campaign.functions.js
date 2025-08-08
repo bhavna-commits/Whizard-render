@@ -475,11 +475,11 @@ export function generatePreviewComponents(template, message) {
 }
 
 export async function sendTestMessage(
-	user,
-	template,
+	user, 
+	template, 
 	variables,
-	contact,
-	phoneNumber,
+	contact, 
+	phoneNumber, 
 	fb_phone_number,
 	addedUserId,
 	url,

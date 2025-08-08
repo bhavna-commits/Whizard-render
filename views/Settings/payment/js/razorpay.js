@@ -2,7 +2,7 @@ let selectedAmount = 500;
 let selectedMessages = 5000;
 
 let options = {
-	key: "rzp_test_M49Qr1IfUjjfpq",
+	key,
 	amount: "50000",
 	currency: currencyTag,
 	name: "Whizard",
