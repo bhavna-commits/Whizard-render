@@ -411,30 +411,23 @@ export const razorConfirm = async (req, res) => {
 // Web Hooks
 
 export const razorpayWebhook = async (req, res) => {
-	const secret = process.env.RAZORPAY_WEBHOOK_SECRET;
-	const signature = req.headers["x-razorpay-signature"];
-
-	const body = req.body.toString("utf8"); // raw buffer → string
-
-	const expectedSignature = crypto
-		.createHmac("sha256", secret)
-		.update(body)
-		.digest("hex");
-
-	if (signature !== expectedSignature) {
-		return res.status(400).send("Invalid signature");
-	}
-
-	let parsed;
 	try {
-		parsed = JSON.parse(body);
-	} catch {
-		return res.status(400).send("Invalid JSON body");
-	}
+		const secret = process.env.RAZORPAY_WEBHOOK_SECRET;
+		const signature = req.headers["x-razorpay-signature"];
 
-	const { event, payload } = parsed;
+		const body = JSON.stringify(req.body);
+		const expectedSignature = crypto
+			.createHmac("sha256", secret)
+			.update(body)
+			.digest("hex");
 
-	try {
+		if (signature !== expectedSignature) {
+			console.error("Invalid signature");
+			return res.status(400).send("Invalid signature");
+		}
+
+		const { event, payload } = req.body;
+
 		if (event === "payment.captured" || event === "payment.failed") {
 			const p = payload.payment.entity;
 			const payment = await Payment.findOne({ orderId: p.order_id });
@@ -453,21 +446,25 @@ export const razorpayWebhook = async (req, res) => {
 
 			await Payment.updateOne({ _id: payment._id }, update);
 
-			const user = await User.findOne({ unique_id: payment.useradmin });
+			if (update.status === "succeeded") {
+				const user = await User.findOne({
+					unique_id: payment.useradmin,
+				});
+				if (user) {
+					const previousCount = user.payment?.messagesCount || 0;
+					const newTotal = payment.messagesCount || 0;
 
-			if (user && update.status === "succeeded") {
-				const previousCount = user.payment?.messagesCount || 0;
-				const newTotal = payment.messagesCount || 0;
-
-				await User.updateOne(
-					{ unique_id: payment.useradmin },
-					{
-						$set: {
-							"payment.previousMessagesCount": previousCount,
-							"payment.totalMessages": newTotal + previousCount,
+					await User.updateOne(
+						{ unique_id: payment.useradmin },
+						{
+							$set: {
+								"payment.previousMessagesCount": previousCount,
+								"payment.totalMessages":
+									newTotal + previousCount,
+							},
 						},
-					},
-				);
+					);
+				}
 			}
 		}
 

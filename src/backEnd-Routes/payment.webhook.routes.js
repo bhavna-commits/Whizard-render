@@ -7,11 +7,7 @@ import {
 
 const router = express.Router();
 
-router.post(
-	"/razorpay_webhook",
-	express.raw({ type: "application/json" }),
-	razorpayWebhook,
-);
+router.post("/razorpay_webhook", express.json(), razorpayWebhook);
 
 router.post(
 	"/stripe_webhook",
