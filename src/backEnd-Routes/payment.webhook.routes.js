@@ -9,11 +9,7 @@ const router = express.Router();
 
 router.post(
 	"/razorpay_webhook",
-	express.json({
-		verify: (req, res, buf) => {
-			req.rawBody = buf;
-		},
-	}),
+	express.raw({ type: "application/json" }),
 	razorpayWebhook,
 );
 

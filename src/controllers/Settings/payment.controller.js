@@ -413,7 +413,8 @@ export const razorConfirm = async (req, res) => {
 export const razorpayWebhook = async (req, res) => {
 	const secret = process.env.RAZORPAY_WEBHOOK_SECRET;
 	const signature = req.headers["x-razorpay-signature"];
-	const body = JSON.stringify(req.body);
+
+	const body = req.body.toString("utf8"); // raw buffer → string
 
 	const expectedSignature = crypto
 		.createHmac("sha256", secret)
@@ -424,14 +425,19 @@ export const razorpayWebhook = async (req, res) => {
 		return res.status(400).send("Invalid signature");
 	}
 
-	const { event, payload } = req.body;
+	let parsed;
+	try {
+		parsed = JSON.parse(body);
+	} catch {
+		return res.status(400).send("Invalid JSON body");
+	}
+
+	const { event, payload } = parsed;
 
 	try {
 		if (event === "payment.captured" || event === "payment.failed") {
 			const p = payload.payment.entity;
-
 			const payment = await Payment.findOne({ orderId: p.order_id });
-
 			if (!payment) return res.status(404).send("Payment not found");
 
 			const update = {
@@ -467,9 +473,7 @@ export const razorpayWebhook = async (req, res) => {
 
 		if (event === "order.paid" || event === "order.failed") {
 			const o = payload.order.entity;
-
 			const payment = await Payment.findOne({ orderId: o.id });
-
 			if (!payment) return res.status(404).send("Payment not found");
 
 			const update = {
@@ -492,7 +496,8 @@ export const razorpayWebhook = async (req, res) => {
 		}
 
 		res.status(200).json({ status: "ok" });
-	} catch {
+	} catch (err) {
+		console.error("Webhook error:", err);
 		res.status(500).json({ error: "Webhook failed" });
 	}
 };
