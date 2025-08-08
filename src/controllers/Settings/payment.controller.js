@@ -198,7 +198,7 @@ export const getStripeConfirm = async (req, res) => {
 			order.failedReason =
 				error || "Unknown error or payment not completed";
 
-			return res.render("settings/payment/confirm", {
+			return res.render("Settings/payment/confirm", {
 				intent: {
 					id: payment_intent,
 					status: "failed",
@@ -217,7 +217,7 @@ export const getStripeConfirm = async (req, res) => {
 		// success
 
 		if (!order) {
-			return res.render("settings/payment/confirm", {
+			return res.render("Settings/payment/confirm", {
 				intent: {
 					id: payment_intent,
 					status: "error",
@@ -241,7 +241,7 @@ export const getStripeConfirm = async (req, res) => {
 		// 	{ $inc: { totalMessages: order.messagesCount } },
 		// );
 
-		return res.render("settings/payment/confirm", {
+		return res.render("Settings/payment/confirm", {
 			intent: {
 				id: payment_intent,
 				status: "succeeded",
@@ -271,7 +271,7 @@ export const getStripeConfirm = async (req, res) => {
 		const color =
 			req.session?.user?.color || req.session?.addedUser?.color || "";
 
-		res.render("settings/payment/confirm", {
+		res.render("Settings/payment/confirm", {
 			intent: {
 				id: null,
 				status: "error",
@@ -306,7 +306,7 @@ export const getRazorConfirm = async (req, res) => {
 			access = user.access;
 		}
 
-		res.render("settings/payment/confirm", {
+		res.render("Settings/payment/confirm", {
 			intent: {
 				id,
 				status,
