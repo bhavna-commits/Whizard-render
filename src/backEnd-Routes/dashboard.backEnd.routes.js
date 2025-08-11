@@ -16,9 +16,10 @@ import {
 	verifyDeleteOTP,
 	changeSuperAdminEmail,
 	verifySuperAdminEmailOTP,
-	togglePaymentStatus,
+	togglePaymentPlace,
 	renewAdminToken,
 	migrate,
+	togglePaymentPlan,
 } from "../controllers/Dashboard/adminPanel.controller.js";
 
 import { trackSanitationFailures } from "../middleWares/sanitiseInput.js";
@@ -60,7 +61,13 @@ router.post(
 
 router.post("/:id/verify-delete", checkAdminSession, verifyDeleteOTP);
 
-router.post("/:id/toggle-payment-card", checkAdminSession, togglePaymentStatus);
+router.post("/:id/toggle-payment-place", checkAdminSession, togglePaymentPlace);
+
+router.post(
+	"/:id/toggle-payment-plan",
+	checkAdminSession,
+	togglePaymentPlan,
+);
 
 router.get("/run-migration", checkAdminSession, migrate);
 

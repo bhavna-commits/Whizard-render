@@ -176,18 +176,17 @@ export const login = async (req, res, next) => {
 			.json({ message: "Password is not in the valid format." });
 
 	try {
-		const user = await User.findOne({ email, deleted: false }).lean();
+		const user = await User.findOne({ email, deleted: false });
 
 		if (!user) {
 			// If no user found in the primary collection, check the AddedUser model.
 			const addedUser = await AddedUser.findOne({
 				email,
 				deleted: false,
-			})
-				.sort({
-					createdAt: -1,
-				})
-				.lean();
+			}).sort({
+				createdAt: -1,
+			});
+
 			if (addedUser) {
 				if (addedUser.blocked) {
 					return res
@@ -208,7 +207,6 @@ export const login = async (req, res, next) => {
 				);
 				if (!isMatch) {
 					await incrementLoginAttempts(addedUser);
-					await addedUser.save();
 					return res
 						.status(400)
 						.json({ message: "Invalid credentials" });
@@ -310,7 +308,6 @@ export const login = async (req, res, next) => {
 			const isMatch = await bcrypt.compare(password, user.password);
 			if (!isMatch) {
 				await incrementLoginAttempts(user);
-				await user.save();
 				return res
 					.status(400)
 					.json({ message: "Invalid credentials", success: false });

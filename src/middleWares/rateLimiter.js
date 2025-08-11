@@ -38,6 +38,6 @@ export const incrementLoginAttempts = async (user) => {
 		updates = { loginAttempts: 0, blocked: true }; // Block user
 	}
 
-	user.updateOne(updates); 
+	await user.updateOne(updates); 
 	return timeout;
 };

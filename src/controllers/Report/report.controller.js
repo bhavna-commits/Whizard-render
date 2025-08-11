@@ -1,13 +1,10 @@
 import Campaign from "../../models/campaign.model.js";
 import dotenv from "dotenv";
 import Contacts from "../../models/contacts.model.js";
-import ContactList from "../../models/contactList.model.js";
 import Permissions from "../../models/permissions.model.js";
 import ActivityLogs from "../../models/activityLogs.model.js";
 import User from "../../models/user.model.js";
 import {
-	overview,
-	sendMessagesReports,
 	getFailedReportsById,
 	getRepliesReportsById,
 	getReadReportsById,
@@ -19,13 +16,11 @@ import {
 import {
 	isNumber,
 	isString,
-	isBoolean,
 } from "../../middleWares/sanitiseInput.js";
 import { generateUniqueId } from "../../utils/otpGenerator.js";
 import { agenda } from "../../config/db.js";
 import { sendCampaignScheduledEmail } from "../../services/OTP/reportsEmail.js";
 import { help } from "../../utils/dropDown.js";
-// import { user.FB_ACCESS_TOKEN } from "../../backEnd-Routes/facebook.backEnd.routes.js";
 
 dotenv.config();
 
@@ -432,10 +427,13 @@ export const getSendBroadcast = async (req, res, next) => {
 	const user = await User.findOne({ unique_id: ownerId });
 	if (!user) {
 		console.log("User not found");
-		return res.render("errors/serverError");
+		return res.render("errors/notFound");
 	}
 
-	const message = user.payment?.totalMessages - user.payment?.messagesCount;
+	let message = user.payment?.plan;
+	if (message !== "unlimited") {
+		message = user.payment?.totalMessages - user.payment?.messagesCount;
+	}
 
 	if (!req.session?.sendBroadcast) {
 		console.log("broadcast data not found");
@@ -533,15 +531,17 @@ export const createCampaign = async (req, res, next) => {
 		// === CREDIT CHECK ===
 		const messagesCount = user?.payment?.messagesCount || 0;
 		const totalCount = user?.payment?.totalMessages || 0;
-		if (contactList.length > totalCount - messagesCount) {
-			return res.status(400).json({
-				success: false,
-				message: `Not enough credits. You have ${
+		if (
+			user?.payment?.plan !== "unlimited" &&
+			contactList.length > totalCount - messagesCount
+		) {
+			throw new Error(
+				`Not enough credits. You have ${
 					totalCount - messagesCount
 				} messages left, but you're trying to send ${
 					contactList.length
 				}.`,
-			});
+			);
 		}
 
 		const newCampaign = new Campaign({

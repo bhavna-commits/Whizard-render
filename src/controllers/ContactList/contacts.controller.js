@@ -579,216 +579,6 @@ export const createContact = async (req, res, next) => {
 	}
 };
 
-export const createCampaign = async (req, res, next) => {
-	try {
-		let {
-			templateId,
-			contactListId,
-			variables,
-			schedule,
-			name,
-			test,
-			url,
-		} = req.body;
-
-		if (!templateId || !contactListId) {
-			return res
-				.status(400)
-				.json({
-					message: "Template ID and Contact List ID are required",
-				});
-		}
-
-		if (!isString(templateId, contactListId, variables, name))
-			return next();
-
-		variables =
-			typeof variables === "string" ? JSON.parse(variables) : variables;
-		schedule =
-			typeof schedule === "string" ? JSON.parse(schedule) : schedule;
-		test = typeof test === "string" ? JSON.parse(test) : test;
-
-		const userId = req.session?.user?.id || req.session?.addedUser?.owner;
-		const addedUserId = req.session?.addedUser?.id;
-
-		const [user, contactList, template] = await Promise.all([
-			User.findOne({ unique_id: userId, deleted: false }),
-			Contacts.find({ contactId: contactListId, subscribe: 1 }),
-			Template.findOne({ unique_id: templateId }),
-		]);
-
-		if (!user) throw new Error("User not found");
-		if (!template)
-			throw new Error(`Template with ID ${templateId} not found`);
-		if (!contactList.length)
-			throw new Error(`No contacts found for list ${contactListId}`);
-
-		const phone_number =
-			req.session?.addedUser?.selectedFBNumber?.phone_number_id ||
-			user.FB_PHONE_NUMBERS.find((n) => n.selected)?.phone_number_id;
-		if (!phone_number) throw new Error("No phone number selected");
-
-		const messagesCount = user?.payment?.messagesCount || 0;
-		const totalCount = user?.payment?.totalMessages || 0;
-		if (contactList.length > totalCount - messagesCount) {
-			throw new Error(
-				`Not enough credits. You have ${
-					totalCount - messagesCount
-				} messages left, but you're trying to send ${
-					contactList.length
-				}.`,
-			);
-		}
-
-		if (test) {
-			await sendTestMessage(
-				user,
-				template,
-				variables,
-				contactList[0],
-				test,
-				phone_number,
-				addedUserId,
-				url,
-				req.file?.filename,
-			);
-
-			await ActivityLogs.create({
-				useradmin: userId,
-				unique_id: generateUniqueId(),
-				name: req.session?.user?.name || req.session?.addedUser?.name,
-				photo:
-					req.session?.user?.photo || req.session?.addedUser?.photo,
-				color:
-					req.session?.user?.color || req.session?.addedUser?.color,
-				actions: "Send",
-				details: `Sent a test message named: ${name}`,
-			});
-
-			return res
-				.status(201)
-				.json({
-					success: true,
-					message: "Test message sent successfully",
-				});
-		}
-
-		const newCampaign = new Campaign({
-			useradmin: userId,
-			unique_id: generateUniqueId(),
-			templateId,
-			contactListId,
-			variables,
-			name,
-			phoneNumberId: phone_number,
-			status: schedule ? "SCHEDULED" : "SENT",
-		});
-
-		let reportTime;
-		if (schedule) {
-			newCampaign.scheduledAt = Number(schedule) * 1000;
-			reportTime = new Date(newCampaign.scheduledAt);
-
-			await sendCampaignScheduledEmail(
-				user.email,
-				name,
-				newCampaign.scheduledAt,
-			);
-			await ActivityLogs.create({
-				useradmin: userId,
-				unique_id: generateUniqueId(),
-				name: req.session?.user?.name || req.session?.addedUser?.name,
-				actions: "Send",
-				details: `Scheduled new campaign named: ${name}`,
-			});
-		} else {
-			reportTime = new Date(Date.now() + 2 * 60 * 1000);
-			await ActivityLogs.create({
-				useradmin: userId,
-				unique_id: generateUniqueId(),
-				name: req.session?.user?.name || req.session?.addedUser?.name,
-				actions: "Send",
-				details: `Sent campaign named: ${name}`,
-			});
-		}
-
-		agenda.schedule(reportTime, "process campaign", {
-			newCampaign,
-			user,
-			unique_id: generateUniqueId(),
-			phone_number,
-			addedUserId,
-			url,
-			fileName: req.file?.filename,
-			contactList,
-			template,
-		});
-
-		const contactNumberGroup = contactList.map((c) => c.wa_id);
-		const chatUsers = await chatsUsersModel.find({
-			useradmin: userId,
-			FB_PHONE_ID: phone_number,
-			wa_id: { $in: contactNumberGroup },
-		});
-
-		const existingNumbers = new Set(chatUsers.map((c) => c.wa_id));
-		const newContacts = contactList.filter(
-			(c) => !existingNumbers.has(c.wa_id),
-		);
-
-		if (newContacts.length) {
-			await chatsUsersModel.insertMany(
-				newContacts.map((c) => ({
-					wa_id: c.wa_id,
-					useradmin: userId,
-					unique_id: generateUniqueId(),
-					FB_PHONE_ID: phone_number,
-					contactName: c.Name,
-					campaignName: newCampaign.name,
-					campaignId: newCampaign.unique_id,
-					updatedAt: Date.now(),
-					lastMessage: "-",
-					lastSend: Date.now(),
-					messageStatus: "SENT",
-					replyStatus: 0,
-					agent: addedUserId || userId,
-				})),
-			);
-		}
-
-		await chatsUsersModel.updateMany(
-			{
-				useradmin: userId,
-				FB_PHONE_ID: phone_number,
-				wa_id: { $in: contactNumberGroup },
-			},
-			{
-				$set: {
-					replyStatus: 0,
-					campaignName: newCampaign.name,
-					campaignId: newCampaign.unique_id,
-				},
-			},
-		);
-
-		await newCampaign.save();
-
-		res.status(201).json({
-			message: schedule
-				? "Campaign scheduled successfully"
-				: "Campaign created successfully",
-			campaign: newCampaign,
-			success: true,
-		});
-	} catch (error) {
-		console.error("Error creating campaign:", error.message || error);
-		res.status(500).json({
-			message: error.message || error,
-			success: false,
-		});
-	}
-};
-
 export const getFilteredContacts = async (req, res, next) => {
 	try {
 		const id = req.params?.id;
@@ -957,13 +747,18 @@ export const getOverviewFilter = async (req, res) => {
 	}
 };
 
+// campaign
+
 export const getCreateCampaign = async (req, res) => {
 	const sessionUser = req.session?.user;
 	const addedUser = req.session?.addedUser;
 	const ownerId = sessionUser?.id || addedUser?.owner;
 
 	const user = await User.findOne({ unique_id: ownerId });
-	const message = user.payment?.totalMessages - user.payment?.messagesCount;
+	let message = user.payment?.plan;
+	if (message !== "unlimited") {
+		message = user.payment?.totalMessages - user.payment?.messagesCount;
+	}
 	let renderData = null;
 
 	if (addedUser?.permissions) {
@@ -995,4 +790,257 @@ export const getCreateCampaign = async (req, res) => {
 	}
 
 	res.render(renderData?.view || "errors/notAllowed", renderData || {});
+};
+
+export const validateAndPrepareCampaign = async (req, res, next) => {
+	try {
+		let {
+			templateId,
+			contactListId,
+			variables,
+			schedule,
+			name,
+			test,
+			url,
+		} = req.body;
+
+		if (!templateId || !contactListId) {
+			return res.status(400).json({
+				message: "Template ID and Contact List ID are required",
+			});
+		}
+
+		if (!isString(templateId, contactListId, variables, name))
+			return next();
+
+		variables =
+			typeof variables === "string" ? JSON.parse(variables) : variables;
+		schedule =
+			typeof schedule === "string" ? JSON.parse(schedule) : schedule;
+		test = typeof test === "string" ? JSON.parse(test) : test;
+
+		const userId = req.session?.user?.id || req.session?.addedUser?.owner;
+		const addedUserId = req.session?.addedUser?.id;
+
+		const [user, contactList, template] = await Promise.all([
+			User.findOne({ unique_id: userId, deleted: false }),
+			Contacts.find({ contactId: contactListId, subscribe: 1 }),
+			Template.findOne({ unique_id: templateId }),
+		]);
+
+		if (!user) throw new Error("User not found");
+		if (!template)
+			throw new Error(`Template with ID ${templateId} not found`);
+		if (!contactList.length)
+			throw new Error(`No contacts found for list ${contactListId}`);
+
+		const phone_number =
+			req.session?.addedUser?.selectedFBNumber?.phone_number_id ||
+			user.FB_PHONE_NUMBERS.find((n) => n.selected)?.phone_number_id;
+		if (!phone_number) throw new Error("No phone number selected");
+
+		const messagesCount = user?.payment?.messagesCount || 0;
+		const totalCount = user?.payment?.totalMessages || 0;
+
+		if (
+			user?.payment?.plan !== "unlimited" &&
+			contactList.length > totalCount - messagesCount
+		) {
+			throw new Error(
+				`Not enough credits. You have ${
+					totalCount - messagesCount
+				} messages left, but you're trying to send ${
+					contactList.length
+				}.`,
+			);
+		}
+
+		req.campaignData = {
+			templateId,
+			contactListId,
+			variables,
+			schedule,
+			name,
+			test,
+			url,
+			user,
+			userId,
+			addedUserId,
+			contactList,
+			template,
+			phone_number,
+		};
+
+		next();
+	} catch (error) {
+		console.error("Campaign validation error:", error.message || error);
+		res.status(400).json({
+			message: error.message || error,
+			success: false,
+		});
+	}
+};
+
+export const createCampaign = async (req, res) => {
+	try {
+		const {
+			templateId,
+			contactListId,
+			variables,
+			schedule,
+			name,
+			test,
+			url,
+			user,
+			userId,
+			addedUserId,
+			contactList,
+			template,
+			phone_number,
+		} = req.campaignData;
+
+		if (test) {
+			await sendTestMessage(
+				user,
+				template,
+				variables,
+				contactList[0],
+				test,
+				phone_number,
+				addedUserId,
+				url,
+				req.file?.filename,
+			);
+
+			await ActivityLogs.create({
+				useradmin: userId,
+				unique_id: generateUniqueId(),
+				name: req.session?.user?.name || req.session?.addedUser?.name,
+				photo:
+					req.session?.user?.photo || req.session?.addedUser?.photo,
+				color:
+					req.session?.user?.color || req.session?.addedUser?.color,
+				actions: "Send",
+				details: `Sent a test message named: ${name}`,
+			});
+
+			return res.status(201).json({
+				success: true,
+				message: "Test message sent successfully",
+			});
+		}
+		const newCampaign = new Campaign({
+			useradmin: userId,
+			unique_id: generateUniqueId(),
+			templateId,
+			contactListId,
+			variables,
+			name,
+			phoneNumberId: phone_number,
+			status: schedule ? "SCHEDULED" : "SENT",
+		});
+
+		let reportTime;
+		if (schedule) {
+			newCampaign.scheduledAt = Number(schedule) * 1000;
+			reportTime = new Date(newCampaign.scheduledAt);
+
+			await sendCampaignScheduledEmail(
+				user.email,
+				name,
+				newCampaign.scheduledAt,
+			);
+			await ActivityLogs.create({
+				useradmin: userId,
+				unique_id: generateUniqueId(),
+				name: req.session?.user?.name || req.session?.addedUser?.name,
+				actions: "Send",
+				details: `Scheduled new campaign named: ${name}`,
+			});
+		} else {
+			reportTime = new Date(Date.now() + 2 * 60 * 1000);
+			await ActivityLogs.create({
+				useradmin: userId,
+				unique_id: generateUniqueId(),
+				name: req.session?.user?.name || req.session?.addedUser?.name,
+				actions: "Send",
+				details: `Sent campaign named: ${name}`,
+			});
+		}
+
+		agenda.schedule(reportTime, "process campaign", {
+			newCampaign,
+			user,
+			unique_id: generateUniqueId(),
+			phone_number,
+			addedUserId,
+			url,
+			fileName: req.file?.filename,
+			contactList,
+			template,
+		});
+
+		const contactNumberGroup = contactList.map((c) => c.wa_id);
+		const chatUsers = await chatsUsersModel.find({
+			useradmin: userId,
+			FB_PHONE_ID: phone_number,
+			wa_id: { $in: contactNumberGroup },
+		});
+
+		const existingNumbers = new Set(chatUsers.map((c) => c.wa_id));
+		const newContacts = contactList.filter(
+			(c) => !existingNumbers.has(c.wa_id),
+		);
+
+		if (newContacts.length) {
+			await chatsUsersModel.insertMany(
+				newContacts.map((c) => ({
+					wa_id: c.wa_id,
+					useradmin: userId,
+					unique_id: generateUniqueId(),
+					FB_PHONE_ID: phone_number,
+					contactName: c.Name,
+					campaignName: newCampaign.name,
+					campaignId: newCampaign.unique_id,
+					updatedAt: Date.now(),
+					lastMessage: "-",
+					lastSend: Date.now(),
+					messageStatus: "SENT",
+					replyStatus: 0,
+					agent: addedUserId || userId,
+				})),
+			);
+		}
+
+		await chatsUsersModel.updateMany(
+			{
+				useradmin: userId,
+				FB_PHONE_ID: phone_number,
+				wa_id: { $in: contactNumberGroup },
+			},
+			{
+				$set: {
+					replyStatus: 0,
+					campaignName: newCampaign.name,
+					campaignId: newCampaign.unique_id,
+				},
+			},
+		);
+
+		await newCampaign.save();
+
+		res.status(201).json({
+			message: schedule
+				? "Campaign scheduled successfully"
+				: "Campaign created successfully",
+			campaign: newCampaign,
+			success: true,
+		});
+	} catch (error) {
+		console.error("Error creating campaign:", error.message || error);
+		res.status(500).json({
+			message: error.message || error,
+			success: false,
+		});
+	}
 };

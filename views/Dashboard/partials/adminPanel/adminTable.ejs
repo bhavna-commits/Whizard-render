@@ -7,7 +7,8 @@
 				<td class="p-4 text-center">User Name</td>
 				<td class="p-4 text-center">Email</td>
 				<td class="p-4 text-center">WABA</td>
-				<td class="p-4 text-center">Payment</td>
+				<td class="p-4 text-center">Payment Place</td>
+				<td class="p-4 text-center">Payment Plan</td>
 				<td class="p-4 text-center">Status</td>
 				<td class="p-4 text-center">Actions</td>
 				<td class="p-4 text-center">Delete</td>
@@ -22,13 +23,25 @@
 				<td class="p-4 text-center "><%= user.WABA_ID %></td>
 				<td class="p-4 text-center">
 					<div class="flex justify-center items-center">
-						<div class="relative inline-flex items-center cursor-pointer select-none transition duration-300 ease-in-out" data-user-id="<%= user.unique_id %>" data-status="<%= user.paymentCard %>" onclick="togglePaymentStatus(this)">
-							<div class="relative w-12 h-6 rounded-full transition-colors duration-300 ease-in-out bg-toggle <%= user.paymentCard === "Internal" ? 'bg-black' : 'bg-gray-300' %>">
-								<div class="absolute top-0 left-0 w-6 h-6 bg-white border rounded-full shadow transform transition-transform duration-300 ease-in-out knob <%= user.paymentCard === 'Internal' ? 'translate-x-6' : 'translate-x-0' %>"></div>
+						<div class="relative inline-flex items-center cursor-pointer select-none transition duration-300 ease-in-out" data-user-id="<%= user.unique_id %>" data-status="<%= user.payment.place %>" onclick="togglePaymentPlace(this)">
+							<div class="relative w-12 h-6 rounded-full transition-colors duration-300 ease-in-out bg-toggle <%= user.payment.place === "Internal" ? 'bg-black' : 'bg-gray-300' %>">
+								<div class="absolute top-0 left-0 w-6 h-6 bg-white border rounded-full shadow transform transition-transform duration-300 ease-in-out knob <%= user.payment.place === 'Internal' ? 'translate-x-6' : 'translate-x-0' %>"></div>
 							</div>							
 						</div>
-						<span class="ml-3 text-sm font-medium status-label <%= user.paymentCard === "Internal" ? 'text-black' : 'text-gray-500' %>">
-							<%= user.paymentCard === "Internal" ? 'Internal' : 'External' %>
+						<span class="ml-3 text-sm font-medium status-label <%= user.payment.place === "Internal" ? 'text-black' : 'text-gray-500' %>">
+							<%= user.payment.place === "Internal" ? 'Internal' : 'External' %>
+						</span>
+					</div>
+				</td>
+				<td class="p-4 text-center">
+					<div class="flex justify-center items-center">
+						<div class="relative inline-flex items-center cursor-pointer select-none transition duration-300 ease-in-out" data-user-id="<%= user.unique_id %>" data-status="<%= user.payment.plan %>" onclick="togglePaymentPlan(this)">
+							<div class="relative w-12 h-6 rounded-full transition-colors duration-300 ease-in-out bg-toggle <%= user.payment.plan === "unlimited" ? 'bg-black' : 'bg-gray-300' %>">
+								<div class="absolute top-0 left-0 w-6 h-6 bg-white border rounded-full shadow transform transition-transform duration-300 ease-in-out knob <%= user.payment.plan === 'unlimited' ? 'translate-x-6' : 'translate-x-0' %>"></div>
+							</div>
+						</div>
+						<span class="ml-3 text-sm font-medium status-label <%= user.payment.plan === "unlimited" ? 'text-black' : 'text-gray-500' %>">
+							<%= user.payment.plan === "unlimited" ? 'Unlimited' : 'Messages' %>
 						</span>
 					</div>
 				</td>

@@ -22,6 +22,7 @@ import {
 	createContact,
 	createCampaign,
 	getFilteredContacts,
+	validateAndPrepareCampaign,
 } from "../controllers/ContactList/contacts.controller.js";
 import { trackSanitationFailures } from "../middleWares/sanitiseInput.js";
 import { multerMiddle } from "../config/multerMiddleware.js";
@@ -84,6 +85,7 @@ router.get("/search", searchContactLists, trackSanitationFailures);
 router.post(
 	"/create-campaign",
 	multerMiddle,
+	validateAndPrepareCampaign,
 	createCampaign,
 	trackSanitationFailures,
 );

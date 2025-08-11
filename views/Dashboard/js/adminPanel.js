@@ -72,7 +72,7 @@ async function toggleUserStatus(toggleElement) {
 	}
 }
 
-async function togglePaymentStatus(toggleElement) {
+async function togglePaymentPlace(toggleElement) {
 	const userId = toggleElement.dataset.userId;
 	const currentStatus = toggleElement.dataset.status === "Internal";
 	const newStatus = currentStatus ? "External" : "Internal"; // flip the status
@@ -81,7 +81,7 @@ async function togglePaymentStatus(toggleElement) {
 
 	try {
 		const res = await fetch(
-			`/api/dashboard/${userId}/toggle-payment-card`,
+			`/api/dashboard/${userId}/toggle-payment-place`,
 			{
 				method: "POST",
 				headers: {
@@ -110,6 +110,54 @@ async function togglePaymentStatus(toggleElement) {
 		bg.classList.toggle("bg-gray-300", !isInternal);
 
 		label.textContent = isInternal ? "Internal" : "External";
+		label.classList.toggle("text-black", isInternal);
+		label.classList.toggle("text-gray-500", !isInternal);
+	} catch (err) {
+		console.error(err);
+		toast("error", err.message);
+	} finally {
+		document.body.classList.remove("cursor-wait");
+	}
+}
+
+async function togglePaymentPlan(toggleElement) {
+	const userId = toggleElement.dataset.userId;
+	const currentStatus = toggleElement.dataset.status === "unlimited";
+	const newStatus = currentStatus ? 5000 : "unlimited"; 
+
+	document.body.classList.add("cursor-wait");
+
+	try {
+		const res = await fetch(
+			`/api/dashboard/${userId}/toggle-payment-plan`,
+			{
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({ status: newStatus }),
+			},
+		);
+
+		if (!res.ok) throw new Error("Status update failed");
+
+		// Update the toggle visually
+		toggleElement.dataset.status = newStatus;
+
+		const knob = toggleElement.querySelector(".knob");
+		const bg = toggleElement.querySelector(".bg-toggle");
+		const label =
+			toggleElement.parentElement.querySelector(".status-label");
+
+		const isInternal = newStatus === "unlimited";
+
+		knob.classList.toggle("translate-x-6", isInternal);
+		knob.classList.toggle("translate-x-0", !isInternal);
+
+		bg.classList.toggle("bg-black", isInternal);
+		bg.classList.toggle("bg-gray-300", !isInternal);
+
+		label.textContent = isInternal ? "unlimited" : "External";
 		label.classList.toggle("text-black", isInternal);
 		label.classList.toggle("text-gray-500", !isInternal);
 	} catch (err) {

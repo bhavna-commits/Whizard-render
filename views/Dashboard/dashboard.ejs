@@ -70,8 +70,6 @@
 				customized results.
 			</p>
 			
-			<!-- Connect to WhatsApp -->
-			<!-- Loader overlay (hidden by default) -->
 			<div id="afterSignUpLoader" class="fixed inset-0 flex justify-center items-center bg-gray-500 bg-opacity-50 hidden">
 				<div class="loader border-t-4 border-blue-500 rounded-full w-12 h-12 animate-spin"></div>
 			</div>
@@ -133,6 +131,12 @@
 						<div class="watchDemo flex items-center"><img src="svg/demo.svg" alt="Demo" class="pr-2 "> Watch Demo
 						</div>
 					</div>
+					<% if (user?.payment?.plan !== "unlimited") { %>
+					<button class="gradient-button rounded-md p-2 flex items-center" onclick="location.href='/settings/payments'">
+						<img src="svg/coins.svg" alt="" class="w-6 mr-2">
+						Payment Plan
+					</button>
+					<% } %>
 					<% if (admin) { %>
 					<button type="button" class="flex items-center border p-2 rounded-md" onclick="location.href='/admin-panel'"><img src="svg/adminPanelClicked.svg" alt="" class="pr-2">Admin Panel</button>
 					<% } %>
@@ -392,6 +396,17 @@
 		const config_id = <%- JSON.stringify(config) %>;
 		const graph_v = <%- JSON.stringify(graph) %>;
 		const fbStatus = <%- JSON.stringify(status) %>;
+		
+		const element = document.querySelector(".gradient-button");
+		
+		let angle = 0;
+		const rotateGradient = () => {
+			angle = (angle + 5) % 360; // Increment angle and keep it within 0-360
+			element.style.setProperty("--gradient-angle", `${angle}deg`);
+			requestAnimationFrame(rotateGradient); // Smooth animation loop
+		};
+		
+		rotateGradient();
 	</script>
 	<script src="assets/plugins/pace/pace.min.js" type="text/javascript"></script>
 	<script src="https://kit.fontawesome.com/44e4e59292.js" crossorigin="anonymous"></script>

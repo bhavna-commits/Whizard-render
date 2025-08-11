@@ -3,26 +3,18 @@ import User from "../../models/user.model.js";
 import Campaign from "../../models/campaign.model.js";
 import bcrypt from "bcrypt";
 
-import {
-	generate6DigitOTP,
-	generateUniqueId,
-	isValidEmail,
-	setOTPExpiry,
-	validatePassword,
-} from "../../utils/otpGenerator.js";
+import { generate6DigitOTP, setOTPExpiry } from "../../utils/otpGenerator.js";
 
 import sendDeleteAccountEmail from "../../services/OTP/deleteAccountEmail.js";
-import { sendVerificationEmail } from "../../services/OTP/emailOTPService.js";
-import { refreshBusinessToken } from "../../services/facebook/refreshToken.facebook.js";
 import runMigration, { doMigration } from "../../utils/migration.js";
 import { help } from "../../utils/dropDown.js";
 
 export const adminPanel = async (req, res) => {
 	try {
-		let users = await User.find(
-			{ unique_id: { $ne: "db2426e80f" }, deleted: false },
-			"WABA_ID email name blocked unique_id deleted paymentCard",
-		).lean();
+		let users = await User.find({
+			unique_id: { $ne: "db2426e80f" },
+			deleted: false,
+		}).lean();
 
 		const campaignOwners = await Campaign.aggregate([
 			{
@@ -48,12 +40,9 @@ export const adminPanel = async (req, res) => {
 			help,
 		};
 
-		const access = await User.findOne(
-			{
-				unique_id: req.session?.user?.id,
-			},
-			"access",
-		);
+		const access = await User.findOne({
+			unique_id: req.session?.user?.id,
+		});
 
 		renderData.access = access.access;
 
@@ -271,7 +260,7 @@ export const verifySuperAdminEmailOTP = async (req, res) => {
 	}
 };
 
-export const togglePaymentStatus = async (req, res) => {
+export const togglePaymentPlace = async (req, res) => {
 	try {
 		const { id } = req.params;
 		const { status } = req.body;
@@ -284,7 +273,31 @@ export const togglePaymentStatus = async (req, res) => {
 
 		await User.findOneAndUpdate(
 			{ unique_id: id },
-			{ paymentCard: status },
+			{ "payment.place": status },
+			{ new: true },
+		);
+
+		res.json({ success: true, message: "Payment card type updated" });
+	} catch (err) {
+		console.error("togglePaymentStatus error:", err);
+		res.status(500).json({ success: false, message: err });
+	}
+};
+
+export const togglePaymentPlan = async (req, res) => {
+	try {
+		const { id } = req.params;
+		const { status } = req.body;
+
+		const user = await User.findOne({ unique_id: id });
+
+		if (!user) {
+			return res.status(404).json({ message: "User not found" });
+		}
+
+		await User.findOneAndUpdate(
+			{ unique_id: id },
+			{ "payment.plan": status },
 			{ new: true },
 		);
 

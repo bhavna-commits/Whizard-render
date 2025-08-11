@@ -23,14 +23,14 @@ export const getPayment = async (req, res) => {
 		let owner = req?.session?.user?.id || req.session?.addedUser?.owner;
 		let user = await User.findOne({ unique_id: owner, deleted: false });
 		let access;
-		let isMainUser = false;
 		let paymentTableData;
 		let page = parseInt(req.query.page) || 1;
 		const limit = 4;
 		let total = 0;
 
 		if (owner) {
-			if (!user) return res.status(404).render("errors/serverError");
+			if (!user) return res.status(404).render("errors/notFound");
+			if (user.payment.plan === "unlimited") return res.status(404).render("errors/notAllowed");
 			isMainUser = true;
 		} else {
 			id = req.session?.addedUser?.id;
@@ -198,7 +198,7 @@ export const getStripeConfirm = async (req, res) => {
 			order.failedReason =
 				error || "Unknown error or payment not completed";
 
-			return res.render("Settings/payment/confirm", {
+			return res.render("settings/payment/confirm", {
 				intent: {
 					id: payment_intent,
 					status: "failed",
@@ -217,7 +217,7 @@ export const getStripeConfirm = async (req, res) => {
 		// success
 
 		if (!order) {
-			return res.render("Settings/payment/confirm", {
+			return res.render("settings/payment/confirm", {
 				intent: {
 					id: payment_intent,
 					status: "error",
@@ -241,7 +241,7 @@ export const getStripeConfirm = async (req, res) => {
 		// 	{ $inc: { totalMessages: order.messagesCount } },
 		// );
 
-		return res.render("Settings/payment/confirm", {
+		return res.render("settings/payment/confirm", {
 			intent: {
 				id: payment_intent,
 				status: "succeeded",
@@ -271,7 +271,7 @@ export const getStripeConfirm = async (req, res) => {
 		const color =
 			req.session?.user?.color || req.session?.addedUser?.color || "";
 
-		res.render("Settings/payment/confirm", {
+		res.render("settings/payment/confirm", {
 			intent: {
 				id: null,
 				status: "error",
@@ -306,7 +306,7 @@ export const getRazorConfirm = async (req, res) => {
 			access = user.access;
 		}
 
-		res.render("Settings/payment/confirm", {
+		res.render("settings/payment/confirm", {
 			intent: {
 				id,
 				status,
@@ -498,6 +498,7 @@ export const razorpayWebhook = async (req, res) => {
 		res.status(500).json({ error: "Webhook failed" });
 	}
 };
+
 
 export const stripeWebhook = async (req, res) => {
 	const sig = req.headers["stripe-signature"];

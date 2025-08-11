@@ -139,13 +139,13 @@ const userSchema = new mongoose.Schema(
 		},
 		nextRefreshAt: { type: Schema.Types.Mixed },
 		authTemplateToken: String,
-		paymentCard: {
-			type: String,
-			enum: ["Internal", "External"],
-			default: "External",
-		},
 		currency: String,
 		payment: {
+			place: {
+				type: String,
+				enum: ["Internal", "External"],
+				defaultValue: "External",
+			},
 			plan: {
 				type: Schema.Types.Mixed,
 			},
