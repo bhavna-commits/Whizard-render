@@ -10,7 +10,7 @@
 			<td class="">Created At</td>
 			<td class="">Created By</td>
 		</tr>
-		<% paymentTableData.forEach((contact, index) => { %>
+		<% paymentTableData?.forEach((contact, index) => { %>
 		<tr class="hover:bg-gray-100 group border">
 			<td class="border-l border-t border-b rounded-l-lg py-6 border-gray-200 text-sm text-gray-500">
 				<%= (page - 1) * 6 + (index + 1) %>

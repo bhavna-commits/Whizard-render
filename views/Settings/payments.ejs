@@ -170,7 +170,7 @@
 		</div>
 	</div>
 	<script>
-		const currencyTag = <%- JSON.stringify(user.currency) %>
+		const currencyTag = <%- JSON.stringify(user?.currency || "")  %>;
 		const host = location.hostname;
 		let url;
 		if (host === "localhost") {
@@ -200,7 +200,7 @@
 		const name = <%- JSON.stringify(user.name) %>;
 		const email = <%- JSON.stringify(user.email) %>;
 		const contact = <%- JSON.stringify(user.phone) %>;
-        const key = <%- JSON.stringify(clientKeyRazorpay) %>;
+		const key = <%- JSON.stringify(clientKeyRazorpay) %>;
 	</script>
 	<script src="/payment/js/razorpay.js"></script>
 	<script>
@@ -225,8 +225,8 @@
 	</script>
 	<% } else { %>
 	<script>
-          const key = <%- JSON.stringify(clientKeyStripe) %>;
-    </script>
+		const key = <%- JSON.stringify(clientKeyStripe) %>;
+	</script>
 	<script src="/payment/js/stripe.js"></script>
 	<script>
 		restoreBtn?.addEventListener("click", () => {

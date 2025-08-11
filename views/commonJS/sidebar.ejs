@@ -36,21 +36,6 @@
 			<% } %>
 		</li>
 		
-		<!-- Contact List: Conditionally rendered based on permissions -->
-		<li>
-			<% if (access?.contactList?.type) { %>
-			<a href="/contact-list" class="contact-list-link">
-				<span class="icon"><img loading="lazy" src="svg/contact-list.svg" /></span>
-				Contact List
-			</a>
-			<% } else { %>
-			<a href="javascript:void(0);" class="hover:cursor-not-allowed" title="You don't have permission to access this">
-				<span class="icon"><img loading="lazy" src="svg/contact-list.svg" /></span>
-				Contact List
-			</a>
-			<% } %>
-		</li>
-		
 		<!-- Template: Conditionally rendered based on permissions -->
 		<li>
 			<% if (access?.templates?.type) { %>
@@ -65,18 +50,18 @@
 			</a>
 			<% } %>
 		</li>
-		
-		<!-- Settings: Conditionally rendered based on permissions -->
+
+		<!-- Contact List: Conditionally rendered based on permissions -->
 		<li>
-			<% if (access?.settings?.type) { %>
-			<a href="/settings" class="settings-link">
-				<span class="icon"><img loading="lazy" src="svg/settings.svg" /></span>
-				Settings
+			<% if (access?.contactList?.type) { %>
+			<a href="/contact-list" class="contact-list-link">
+				<span class="icon"><img loading="lazy" src="svg/contact-list.svg" /></span>
+				Contact List
 			</a>
 			<% } else { %>
 			<a href="javascript:void(0);" class="hover:cursor-not-allowed" title="You don't have permission to access this">
-				<span class="icon"><img loading="lazy" src="svg/settings.svg" /></span>
-				Settings
+				<span class="icon"><img loading="lazy" src="svg/contact-list.svg" /></span>
+				Contact List
 			</a>
 			<% } %>
 		</li>
@@ -110,15 +95,20 @@
 			<% } %>
 		</li>
 		
-		<!-- Admin Panel -->
-		<%# if (admin) { %>
-		<!-- <li>
-			<a href="/settings" class="admin-link">
-				<span class="icon"><img loading="lazy" src="svg/adminPanel.svg" /></span>
+		<!-- Settings: Conditionally rendered based on permissions -->
+		<li>
+			<% if (access?.settings?.type) { %>
+			<a href="/settings" class="settings-link">
+				<span class="icon"><img loading="lazy" src="svg/settings.svg" /></span>
 				Settings
 			</a>
-		</li> -->
-		<%# } %>
+			<% } else { %>
+			<a href="javascript:void(0);" class="hover:cursor-not-allowed" title="You don't have permission to access this">
+				<span class="icon"><img loading="lazy" src="svg/settings.svg" /></span>
+				Settings
+			</a>
+			<% } %>
+		</li>
 	</ul>
 	
 	<div>

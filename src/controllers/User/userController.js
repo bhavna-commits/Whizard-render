@@ -786,6 +786,7 @@ export const about = async (req, res, next) => {
 				phone,
 				unique_id,
 				color,
+				"payment.plan": "noplan",
 			});
 
 			// console.log(newUser);

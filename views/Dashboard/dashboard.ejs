@@ -131,7 +131,7 @@
 						<div class="watchDemo flex items-center"><img src="svg/demo.svg" alt="Demo" class="pr-2 "> Watch Demo
 						</div>
 					</div>
-					<% if (user?.payment?.plan !== "unlimited") { %>
+					<% if (user?.payment?.plan !== "unlimited" || user?.payment?.plan !== "noplan") { %>
 					<button class="gradient-button rounded-md p-2 flex items-center" onclick="location.href='/settings/payments'">
 						<img src="svg/coins.svg" alt="" class="w-6 mr-2">
 						Payment Plan

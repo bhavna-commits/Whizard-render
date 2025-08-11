@@ -1,7 +1,7 @@
 import path from "path";
 import bcrypt from "bcrypt";
 import mongoose from "mongoose";
-import { isObject, isString } from "../../middleWares/sanitiseInput.js";
+import { isString } from "../../middleWares/sanitiseInput.js";
 import {
 	generateUniqueId,
 	validatePassword,
@@ -30,6 +30,8 @@ dotenv.config();
 
 export const home = async (req, res) => {
 	try {
+		const id = req.session?.user?.id || req.session?.addedUser?.owner;
+		const user = await User.findOne({ unique_id: id });
 		const permissions = req.session?.addedUser?.permissions;
 		if (permissions) {
 			const access = await Permissions.findOne({
@@ -42,20 +44,19 @@ export const home = async (req, res) => {
 					name: req.session?.addedUser?.name,
 					color: req.session?.addedUser?.color,
 					help,
+					user,
 				});
 			} else {
 				res.render("errors/notAllowed");
 			}
 		} else {
-			const id = req.session?.user?.id;
-			const access = await User.findOne({ unique_id: id });
-			// console.log(access.access);
 			res.render("Settings/home", {
-				access: access.access,
+				access: user.access,
 				photo: req.session?.user?.photo,
 				name: req.session?.user?.name,
 				color: req.session?.user?.color,
 				help,
+				user,
 			});
 		}
 	} catch (err) {
@@ -528,7 +529,7 @@ export const whatsAppAccountDetails = async (req, res) => {
 				unique_id: permissions,
 			});
 			if (access?.settings?.whatsAppAccountDetails) {
-				res.render("Settings/accountDetails", {
+				res.render("Settings/whatsappAccountDetails", {
 					access,
 					user,
 					photo: req.session.addedUser?.photo,
@@ -545,7 +546,7 @@ export const whatsAppAccountDetails = async (req, res) => {
 			const id = req.session?.user?.id;
 			const access = await User.findOne({ unique_id: id });
 			// console.log(access.access);
-			res.render("Settings/accountDetails", {
+			res.render("Settings/whatsappAccountDetails", {
 				access: access.access,
 				user,
 				photo: req.session.user?.photo,
@@ -699,11 +700,10 @@ export const getActivityLogs = async (req, res) => {
 		filter.createdAt = { $gte: startDate };
 
 		const [users, addedUsers] = await Promise.all([
-			User.find({ unique_id: filter.useradmin }), // Retrieve all users
-			AddedUser.find({ useradmin: filter.useradmin, deleted: false }), // Retrieve all addedUsers that are not deleted
+			User.find({ unique_id: filter.useradmin }),
+			AddedUser.find({ useradmin: filter.useradmin, deleted: false }),
 		]);
 
-		// Step 2: Create a map (or dictionary) of users and addedUsers by their names for quick lookup
 		const userMap = new Map();
 		users.forEach((user) => {
 			userMap.set(user.name, {

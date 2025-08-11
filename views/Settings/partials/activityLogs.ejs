@@ -9,7 +9,7 @@ const formatDate = (date) => {
 };
 
 // Group logs by date
-const groupedLogs = logs.reduce((groups, log) => {
+const groupedLogs = logs?.reduce((groups, log) => {
   const date = formatDate(log.createdAt);
   if (!groups[date]) {
     groups[date] = [];
@@ -25,7 +25,7 @@ const yesterdayDate = new Date(new Date().getTime() - oneDayInMillis);
 const yesterday = formatDate(yesterdayDate);
 %>
 
-<% if (Object.keys(groupedLogs).length == 0) { %>
+<% if (Object.keys(groupedLogs)?.length == 0) { %>
 <p class="text-center text-gray-500">No logs found.</p>
 <% } else { %>
 <% Object.entries(groupedLogs).forEach(([date, dateLogs], groupIndex, allGroups) => { %>
@@ -37,7 +37,7 @@ const yesterday = formatDate(yesterdayDate);
 <div class="timeline-item flex items-center relative">
 	<div class="flex flex-col">
 		<div class="flex items-center">
-			<div class="bg-[<%= log.color || '#43a2ea' %>] border text-white rounded-full flex justify-center items-center w-10 h-10 font-semibold">
+			<div class="bg-[<%= log.photo ? "transparent" : log.color || '#43a2ea' %>] border text-white rounded-full flex justify-center items-center w-10 h-10 font-semibold">
 				<% if (log.photo) { %>
 				<img id="profilePreview" src="/<%= log.photo %>" class="w-full h-full rounded-full object-cover block" />
 				<% } else { %>

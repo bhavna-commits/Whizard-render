@@ -643,7 +643,7 @@ export const getCostReport = async (req, res) => {
 		const WABA_ID = user.WABA_ID;
 		const graph = process.env.FB_GRAPH_VERSION;
 
-		if (!user || !WABA_ID || !graph) {
+		if (!user || !WABA_ID || !graph || WABA_ID === "-") {
 			return res.status(400).json({
 				error: "WhatsApp Business Account not connected",
 			});

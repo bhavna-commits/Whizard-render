@@ -31,7 +31,6 @@ export const getPayment = async (req, res) => {
 		if (owner) {
 			if (!user) return res.status(404).render("errors/notFound");
 			if (user.payment.plan === "unlimited") return res.status(404).render("errors/notAllowed");
-			isMainUser = true;
 		} else {
 			id = req.session?.addedUser?.id;
 			const addedUser = await AddedUser.findOne({ unique_id: id });
@@ -412,6 +411,7 @@ export const razorConfirm = async (req, res) => {
 
 export const razorpayWebhook = async (req, res) => {
 	try {
+		console.log("🪝 Razorpay webhook received");
 		const secret = process.env.RAZORPAY_WEBHOOK_SECRET;
 		const signature = req.headers["x-razorpay-signature"];
 
@@ -422,16 +422,22 @@ export const razorpayWebhook = async (req, res) => {
 			.digest("hex");
 
 		if (signature !== expectedSignature) {
-			console.error("Invalid signature");
+			console.error("❌ Invalid Razorpay signature");
 			return res.status(400).send("Invalid signature");
 		}
 
 		const { event, payload } = req.body;
+		console.log("📢 Razorpay event:", event);
 
 		if (event === "payment.captured" || event === "payment.failed") {
 			const p = payload.payment.entity;
+			console.log("🔍 Payment entity:", p.id, "Order:", p.order_id);
+
 			const payment = await Payment.findOne({ orderId: p.order_id });
-			if (!payment) return res.status(404).send("Payment not found");
+			if (!payment) {
+				console.error("⚠️ Payment not found for orderId:", p.order_id);
+				return res.status(404).send("Payment not found");
+			}
 
 			const update = {
 				status: event === "payment.captured" ? "succeeded" : "failed",
@@ -444,15 +450,28 @@ export const razorpayWebhook = async (req, res) => {
 				update.failedReason = p.error_description || "Unknown failure";
 			}
 
+			console.log("💾 Updating payment:", payment._id);
+			console.table(update);
 			await Payment.updateOne({ _id: payment._id }, update);
 
 			if (update.status === "succeeded") {
+				console.log(
+					"✅ Payment succeeded for user:",
+					payment.useradmin,
+				);
 				const user = await User.findOne({
 					unique_id: payment.useradmin,
 				});
 				if (user) {
 					const previousCount = user.payment?.messagesCount || 0;
 					const newTotal = payment.messagesCount || 0;
+
+					console.log("💬 Updating message counts");
+					console.table({
+						previousCount,
+						addedCount: newTotal,
+						newTotal: newTotal + previousCount,
+					});
 
 					await User.updateOne(
 						{ unique_id: payment.useradmin },
@@ -470,8 +489,13 @@ export const razorpayWebhook = async (req, res) => {
 
 		if (event === "order.paid" || event === "order.failed") {
 			const o = payload.order.entity;
+			console.log("🔍 Order entity:", o.id);
+
 			const payment = await Payment.findOne({ orderId: o.id });
-			if (!payment) return res.status(404).send("Payment not found");
+			if (!payment) {
+				console.error("⚠️ Payment not found for orderId:", o.id);
+				return res.status(404).send("Payment not found");
+			}
 
 			const update = {
 				status: event === "order.paid" ? "succeeded" : "failed",
@@ -482,9 +506,12 @@ export const razorpayWebhook = async (req, res) => {
 				update.failedReason = "Order payment failed";
 			}
 
+			console.log("💾 Updating payment:", payment._id);
+			console.table(update);
 			await Payment.updateOne({ _id: payment._id }, update);
 
 			if (update.status === "succeeded") {
+				console.log("✅ Order succeeded for user:", payment.useradmin);
 				await User.findOneAndUpdate(
 					{ unique_id: payment.useradmin },
 					{ messagesCount: payment.messagesCount },
@@ -494,13 +521,13 @@ export const razorpayWebhook = async (req, res) => {
 
 		res.status(200).json({ status: "ok" });
 	} catch (err) {
-		console.error("Webhook error:", err);
+		console.error("❌ Webhook error:", err);
 		res.status(500).json({ error: "Webhook failed" });
 	}
 };
 
-
 export const stripeWebhook = async (req, res) => {
+	console.log("🪝 Stripe webhook received");
 	const sig = req.headers["stripe-signature"];
 	const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
@@ -510,18 +537,21 @@ export const stripeWebhook = async (req, res) => {
 	try {
 		event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
 	} catch (err) {
-		console.error("Error constructing event", err.message);
+		console.error("❌ Invalid Stripe signature:", err.message);
 		return res.status(400).json("Invalid Stripe signature");
 	}
 
 	try {
+		console.log("📢 Stripe event:", event.type);
 		const pi = event.data.object;
-		const payment = await Payment.findOne({ paymentId: pi.id });
+		console.log("🔍 Payment Intent:", pi.id);
 
+		const payment = await Payment.findOne({ paymentId: pi.id });
 		if (!payment) {
-			console.error("Payment not found for paymentId:", pi.id);
+			console.error("⚠️ Payment not found for paymentId:", pi.id);
 			return res.status(404).json("Payment not found");
 		}
+
 		const update = {
 			paymentId: pi.id,
 			method: pi.payment_method_types[0],
@@ -536,12 +566,21 @@ export const stripeWebhook = async (req, res) => {
 				pi.last_payment_error?.message || "Unknown failure";
 		}
 
+		console.log("💾 Updating payment:", payment._id);
+		console.table(update);
 		await Payment.updateOne({ _id: payment._id }, update);
-		const user = await User.findOne({ unique_id: payment.useradmin });
 
+		const user = await User.findOne({ unique_id: payment.useradmin });
 		if (user && update.status === "succeeded") {
 			const previousCount = user.payment?.messagesCount || 0;
 			const newTotal = payment.messagesCount || 0;
+
+			console.log("💬 Updating message counts");
+			console.table({
+				previousCount,
+				addedCount: newTotal,
+				newTotal: newTotal + previousCount,
+			});
 
 			await User.updateOne(
 				{ unique_id: payment.useradmin },
@@ -555,7 +594,8 @@ export const stripeWebhook = async (req, res) => {
 		}
 
 		res.status(200).json({ received: true });
-	} catch {
+	} catch (err) {
+		console.error("❌ Stripe webhook error:", err);
 		res.status(500).json({ error: "Stripe webhook failed" });
 	}
 };

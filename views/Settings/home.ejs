@@ -86,8 +86,9 @@
 						<h2 class="text-2xl text-black">Profile</h2>
 						<p>Manage personal details such as name, email, password, language preferences, and user role.</p>
 					</div>
+					<% if (user.FB_PHONE_NUMBERS.length > 0) { %>
 					<% if (access?.settings?.whatsAppAccountDetails) { %>
-					<div onclick="location.href='/settings/account-details'" class="border cursor-pointer rounded-xl text-slate-500 space-y-3 p-3 hover:bg-slate-100">
+					<div onclick="location.href='/settings/whatsapp-account-details'" class="border cursor-pointer rounded-xl text-slate-500 space-y-3 p-3 hover:bg-slate-100">
 						<i class="fas fa-info-circle text-black text-xl"></i>
 						<h2 class="text-2xl text-black">WhatsApp Account Details</h2>
 						<p>View and update WhatsApp account information.</p>
@@ -98,6 +99,7 @@
 						<h2 class="text-2xl text-black">WhatsApp Account Details</h2>
 						<p>View and update WhatsApp account information.</p>
 					</div>
+					<% } %>
 					<% } %>
 					<% if (access?.settings?.accountDetails) { %>
 					<div onclick="location.href='/settings/account-details'" class="border cursor-pointer rounded-xl text-slate-500 space-y-3 p-3 hover:bg-slate-100">

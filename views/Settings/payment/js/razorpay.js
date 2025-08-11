@@ -4,7 +4,7 @@ let selectedMessages = 5000;
 let options = {
 	key,
 	amount: "50000",
-	currency: currencyTag,
+	currency: currencyTag || "INR",
 	name: "Whizard",
 	description: `${selectedMessages} Messages`,
 	image: `${url}/whizardLogo.png`,
