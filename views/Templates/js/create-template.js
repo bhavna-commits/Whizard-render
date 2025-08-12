@@ -153,13 +153,14 @@ const allowedFileTypes = {
 	image: ["image/jpeg", "image/jpg", "image/png"],
 	video: ["video/mp4", "video/3gp"],
 	document: [
-		"application/pdf",
+		"text/plain",
+		"application/vnd.ms-excel",
+		"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 		"application/msword",
 		"application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-		"text/plain",
-		"text/csv",
-		"application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-		"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", // XLSX
+		"application/vnd.ms-powerpoint",
+		"application/vnd.openxmlformats-officedocument.presentationml.presentation",
+		"application/pdf",
 	],
 	location: ["application/gpx+xml", "application/vnd.google-earth.kml+xml"],
 };
@@ -249,7 +250,7 @@ document.getElementById("mediaType")?.addEventListener("change", (e) => {
 	} else if (value === "video") {
 		uploadText.textContent = "Choose from .mp4, .avi or .webm";
 	} else if (value === "document") {
-		uploadText.textContent = "Choose from .pdf, .doc, .docx, .txt";
+		uploadText.textContent = "Choose from .pdf, .doc, .docx, .txt, .xls, xlsx, .ppt, .pptx";
 	} else {
 		uploadText.textContent = "Choose from .gpx, .kml";
 	}

@@ -131,8 +131,8 @@ class Preview {
 				let formatLabel = component.format.toLowerCase();
 				if (formatLabel === "image") acceptType = "image/*";
 				else if (formatLabel === "video") acceptType = "video/*";
-				else acceptType = ".pdf,.doc,.docx";
-
+				else acceptType = ".pdf,.doc,.docx,.xls,.txt,.xlsx,.ppt,.pptx";
+				
 				uploadSection = `
 			<div class="my-4">
 				<div class="flex items-center gap-8">
@@ -239,7 +239,7 @@ class Preview {
 		uploadTrigger?.addEventListener("click", () => {
 			uploadInput?.click();
 		});
-		
+
 		if (fileInput) {
 			fileInput.addEventListener("change", (e) => {
 				const file = e.target.files?.[0];

@@ -128,7 +128,7 @@ class Preview {
 				let formatLabel = component.format.toLowerCase();
 				if (formatLabel === "image") acceptType = "image/*";
 				else if (formatLabel === "video") acceptType = "video/*";
-				else acceptType = ".pdf,.doc,.docx";
+				else acceptType = ".pdf,.doc,.docx,.xls,.txt,.xlsx,.ppt,.pptx";
 
 				uploadSection = `
 			<div class="my-4">
