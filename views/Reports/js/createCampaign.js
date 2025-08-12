@@ -239,13 +239,27 @@ class Preview {
 
 		if (fileInput) {
 			fileInput.addEventListener("change", (e) => {
-				const file = e.target.files[0];
+				const file = e.target.files?.[0];
 				const format = e.target.dataset.format;
 
 				if (!file || !format) return;
 
-				const reader = new FileReader();
+				// validate
+				const { ok, message } = validateFileForFormat(file, format);
+				if (!ok) {
+					toast("error", message);
+					e.target.value = ""; 
+					selectedSource = null;
+					selectedSamplePath = null;
+					previewDiv.innerHTML = "";
+					return;
+				}
 
+				// valid: mark as upload and show preview
+				selectedSource = "upload";
+				selectedSamplePath = null;
+
+				const reader = new FileReader();
 				reader.onload = function (event) {
 					let previewHTML = "";
 					const fileURL = event.target.result;
@@ -254,11 +268,11 @@ class Preview {
 						previewHTML = `<img src="${fileURL}" class="custom-card-img max-h-96" />`;
 					} else if (format === "VIDEO") {
 						previewHTML = `
-							<video controls class="custom-card-img">
-								<source src="${fileURL}" type="${file.type}">
-								Your browser does not support the video tag.
-							</video>
-						`;
+					<video controls class="custom-card-img">
+						<source src="${fileURL}" type="${file.type}">
+						Your browser does not support the video tag.
+					</video>
+				`;
 					} else if (format === "DOCUMENT") {
 						previewHTML = `<iframe src="${fileURL}" class="w-full h-[500px]"></iframe>`;
 					}
@@ -276,18 +290,23 @@ class Preview {
 				const format = fileInput?.dataset.format;
 				let previewHTML = "";
 
-				fileInput.value = "";
+				// clear any uploaded file (so form won't send it)
+				if (fileInput) fileInput.value = "";
+
+				// mark sample selected
+				selectedSource = "sample";
+				selectedSamplePath = filePath;
 
 				if (format === "IMAGE") {
 					previewHTML = `<img src="${filePath}" class="custom-card-img max-h-96" />`;
 				} else if (format === "VIDEO") {
 					const fileExtension = filePath.split(".").pop();
 					previewHTML = `
-						<video controls class="custom-card-img">
-							<source src="${filePath}" type="video/${fileExtension}">
-							Your browser does not support the video tag.
-						</video>
-					`;
+				<video controls class="custom-card-img">
+					<source src="${filePath}" type="video/${fileExtension}">
+					Your browser does not support the video tag.
+				</video>
+			`;
 				} else if (format === "DOCUMENT") {
 					previewHTML = `<iframe src="${filePath}" class="w-full h-[500px]"></iframe>`;
 				}
@@ -474,7 +493,7 @@ class TemplateManager {
 		formData.append("contactList", JSON.stringify(contactLists));
 
 		const fileInput = document.querySelector(".upload-input");
-		
+
 		if (fileInput?.files?.length > 0) {
 			const uploadedFile = fileInput.files[0];
 			formData.append("headerFile", uploadedFile);
@@ -759,3 +778,78 @@ const current24HourTime = () => {
 
 	return `${hours}:${minutes}`;
 };
+
+function bytesToMB(bytes) {
+	return +(bytes / (1024 * 1024)).toFixed(2);
+}
+
+function validateFileForFormat(file, format) {
+	const ext = (file.name.split(".").pop() || "").toLowerCase();
+	const mime = (file.type || "").toLowerCase();
+	const size = file.size;
+
+	const rules = {
+		IMAGE: {
+			exts: ["jpeg", "jpg", "png"],
+			mimes: ["image/jpeg", "image/png"],
+			maxBytes: 5 * 1024 * 1024, // 5 MB
+		},
+		VIDEO: {
+			exts: ["mp4", "3gp"],
+			mimes: ["video/mp4", "video/3gpp"],
+			maxBytes: 16 * 1024 * 1024, // 16 MB
+		},
+		DOCUMENT: {
+			exts: [
+				"txt",
+				"xls",
+				"xlsx",
+				"doc",
+				"docx",
+				"ppt",
+				"pptx",
+				"pdf",
+			],
+			mimes: [
+				"text/plain",
+				"application/vnd.ms-excel",
+				"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+				"application/msword",
+				"application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+				"application/vnd.ms-powerpoint",
+				"application/vnd.openxmlformats-officedocument.presentationml.presentation",
+				"application/pdf",
+			],
+			maxBytes: 100 * 1024 * 1024, // 100 MB
+		},
+	};
+
+	const cfg = rules[format];
+	if (!cfg)
+		return { ok: false, message: `Unsupported format: ${format}` };
+
+	// Prefer extension check (file.type can be empty or unreliable in some browsers)
+	const extOk = cfg.exts.includes(ext);
+	const mimeOk =
+		cfg.mimes.length === 0 ? true : cfg.mimes.includes(mime);
+
+	if (!extOk && !mimeOk) {
+		return {
+			ok: false,
+			message: `Invalid file type. Allowed extensions: ${cfg.exts.join(
+				", ",
+			)}.`,
+		};
+	}
+
+	if (size > cfg.maxBytes) {
+		return {
+			ok: false,
+			message: `File too large (${bytesToMB(
+				size,
+			)} MB). Max ${bytesToMB(cfg.maxBytes)} MB allowed.`,
+		};
+	}
+
+	return { ok: true };
+}

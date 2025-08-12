@@ -150,22 +150,8 @@ const defaultText = uploadText?.textContent;
 
 // Allowed file types by category
 const allowedFileTypes = {
-	image: [
-		"image/jpeg",
-		"image/png",
-		"image/gif",
-		"image/bmp",
-		"image/webp",
-		"image/svg+xml",
-	],
-	video: [
-		"video/mp4",
-		"video/x-msvideo", // avi
-		"video/x-matroska", // mkv
-		"video/quicktime", // mov
-		"video/webm",
-		"video/ogg",
-	],
+	image: ["image/jpeg", "image/jpg", "image/png"],
+	video: ["video/mp4", "video/3gp"],
 	document: [
 		"application/pdf",
 		"application/msword",
@@ -259,7 +245,7 @@ document.getElementById("mediaType")?.addEventListener("change", (e) => {
 	const value = e.target.value;
 
 	if (value === "image") {
-		uploadText.textContent = "Choose from .jpg, .png or .webp";
+		uploadText.textContent = "Choose from .jpg, .png";
 	} else if (value === "video") {
 		uploadText.textContent = "Choose from .mp4, .avi or .webm";
 	} else if (value === "document") {
