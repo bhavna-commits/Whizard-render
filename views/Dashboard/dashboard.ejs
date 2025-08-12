@@ -401,9 +401,9 @@
 		
 		let angle = 0;
 		const rotateGradient = () => {
-			angle = (angle + 5) % 360; // Increment angle and keep it within 0-360
+			angle = (angle + 5) % 360;
 			element.style.setProperty("--gradient-angle", `${angle}deg`);
-			requestAnimationFrame(rotateGradient); // Smooth animation loop
+			requestAnimationFrame(rotateGradient);
 		};
 		
 		rotateGradient();

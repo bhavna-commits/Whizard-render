@@ -1,9 +1,9 @@
-let selectedAmount = 500;
+let selectedAmount = 499;
 let selectedMessages = 5000;
 
 let options = {
 	key,
-	amount: "50000",
+	amount: "49900",
 	currency: currencyTag || "INR",
 	name: "Whizard",
 	description: `${selectedMessages} Messages`,
@@ -55,25 +55,20 @@ document.addEventListener("DOMContentLoaded", () => {
 	const stripeSection = document.getElementById("stripe-section");
 	const backBtn = document.getElementById("back-to-plans");
 	const planInputs = document.querySelectorAll('input[name="plan"]');
-	const planTitle = document.getElementById("payment-plan-title");
 	const errorDiv = document.getElementById("card-errors");
-	const titleHead = document.getElementById("titleHead");
 
 	planInputs.forEach((input) => {
 		input.addEventListener("change", () => {
 			const planCard = input.nextElementSibling;
-			const priceText = planCard
-				.querySelector(".text-xl")
-				.textContent.trim();
+
+			// Extract number of messages
 			const messageText = planCard.querySelector("h3").textContent.trim();
-
-			selectedAmount = priceText.replace(currencyTag, "");
-			selectedMessages = Number(messageText.replace(" Messages", ""));
-
-			planTitle.innerText = `You chose: ${selectedMessages} Messages – ${currencyTag} ${selectedAmount}`;
-			titleHead.innerText = `${selectedMessages} Messages for ${currencyTag} ${selectedAmount}`;
+			const messagesMatch = messageText.match(/([\d,]+)\s*messages/i);
+			selectedMessages = messagesMatch
+				? Number(messagesMatch[1].replace(/,/g, ""))
+				: 0;
 		});
-	});
+	});	
 
 	stripeBtn?.addEventListener("click", async () => {
 		loadingSpinner.classList.remove("hidden");

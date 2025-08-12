@@ -157,9 +157,9 @@ export const getContactList = async (req, res) => {
 
 		const user = await User.findOne({ unique_id: id });
 
-		const FB_PHONE_ID = req.session?.addedUser?.selectedFBNumber?.phone_number_id || user.FB_PHONE_NUMBERS.find(
-			(n) => n.selected,
-		).phone_number_id;
+		const FB_PHONE_ID =
+			req.session?.addedUser?.selectedFBNumber?.phone_number_id ||
+			user.FB_PHONE_NUMBERS.find((n) => n.selected).phone_number_id;
 
 		const query = {
 			FB_PHONE_ID,

@@ -13,9 +13,9 @@ import {
 } from "./payment.functions.js";
 
 const basePlans = {
-	3000: { currency: "INR", amount: 300 },
-	5000: { currency: "INR", amount: 500 },
-	10000: { currency: "INR", amount: 1000 },
+	3000: { currency: "INR", amount: 299 },
+	5000: { currency: "INR", amount: 499 },
+	10000: { currency: "INR", amount: 799 },
 };
 
 export const getPayment = async (req, res) => {

@@ -69,10 +69,9 @@ document.addEventListener("DOMContentLoaded", () => {
 	};
 
 	document
-		.querySelectorAll("tbody tr:not(.text-gray-400)")
-		.forEach(bindRowEvents);
+		.querySelectorAll("tbody tr:not(.text-gray-400)")?.forEach(bindRowEvents);
 
-	headCheckbox.addEventListener("change", () => {
+	headCheckbox?.addEventListener("change", () => {
 		const checkboxes = bodyCheckboxes();
 		checkboxes.forEach((cb) => {
 			cb.checked = headCheckbox.checked;
@@ -88,7 +87,7 @@ document.addEventListener("DOMContentLoaded", () => {
 		updateSelectionUI();
 	});
 
-	clearSelectionBtn.addEventListener("click", () => {
+	clearSelectionBtn?.addEventListener("click", () => {
 		bodyCheckboxes().forEach((cb) => {
 			cb.checked = false;
 			cb.style.opacity = "0";
@@ -103,7 +102,7 @@ document.addEventListener("DOMContentLoaded", () => {
 		updateHeadCheckboxState();
 	});
 
-	sendBroadcastBtn.addEventListener("click", async () => {
+	sendBroadcastBtn?.addEventListener("click", async () => {
 		const selectedReports = [...bodyCheckboxes()]
 			.filter((cb) => cb.checked)
 			.map((cb) => {
@@ -140,7 +139,7 @@ document.addEventListener("DOMContentLoaded", () => {
 		}
 	});
 
-	loadMoreBtn.addEventListener("click", async function () {
+	loadMoreBtn?.addEventListener("click", async function () {
 		if (currentPage >= totalPage) return;
 		currentPage++;
 

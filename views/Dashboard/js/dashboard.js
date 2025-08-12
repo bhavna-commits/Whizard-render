@@ -70,7 +70,6 @@ function sendDataToBackend() {
 	}
 }
 
-
 // Message event listener
 window.addEventListener("message", (event) => {
 	if (

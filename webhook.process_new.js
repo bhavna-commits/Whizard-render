@@ -40,7 +40,7 @@ export const processTempStatuses = async () => {
 	try {
 		const tempStatuses = await TempStatus.find()
 			.sort({ createdAt: -1 })
-			.toArray();
+			.lean();
 
 		if (!tempStatuses.length) {
 			console.log("No temp statuses to process");
@@ -107,11 +107,11 @@ export const processTempStatuses = async () => {
 
 export const processTempMessages = async () => {
 	try {
-		const tempMessages = await TempMessage.find().toArray();
+		const tempMessages = await TempMessage.find().lean();
 
 		const agentUser = await AddedUser.find({
 			roleId: "UnAssignedChats",
-		}).toArray();
+		}).lean();
 
 		let allAgent = {};
 
@@ -126,7 +126,7 @@ export const processTempMessages = async () => {
 			}
 		}
 
-		const WabaUser = await User.find().toArray();
+		const WabaUser = await User.find().lean();
 
 		let wabaAgent = {};
 
@@ -231,7 +231,7 @@ export const processTempMessages = async () => {
 				useradmin: tempnumber.wabaUserAdmin,
 			};
 
-			const users = await ChatsUsers.find(filter).toArray();
+			const users = await ChatsUsers.find(filter).lean();
 
 			for (const urow of users) {
 				let finalkey =
@@ -391,7 +391,7 @@ export const processTempMessages = async () => {
 
 export const processTempTemplateRejections = async () => {
 	try {
-		const tempRejections = await TempTemplateRejection.find().toArray();
+		const tempRejections = await TempTemplateRejection.find().lean();
 
 		const ops = tempRejections.map((temp) => ({
 			updateOne: {

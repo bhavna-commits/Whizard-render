@@ -157,7 +157,7 @@ async function togglePaymentPlan(toggleElement) {
 		bg.classList.toggle("bg-black", isInternal);
 		bg.classList.toggle("bg-gray-300", !isInternal);
 
-		label.textContent = isInternal ? "unlimited" : "External";
+		label.textContent = isInternal ? "Unlimited" : "Messages";
 		label.classList.toggle("text-black", isInternal);
 		label.classList.toggle("text-gray-500", !isInternal);
 	} catch (err) {

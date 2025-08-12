@@ -183,7 +183,7 @@
 	background: linear-gradient(var(--c), var(--c)) padding-box,
 		conic-gradient(
 				from var(--gradient-angle, 0deg),
-				rgb(254, 4, 158),
+				rgb(254, 4, 158) var(--p),
 				rgb(255, 0, 0) var(--p),
 				#dee2e6 calc(var(--p) * 2)
 			)
