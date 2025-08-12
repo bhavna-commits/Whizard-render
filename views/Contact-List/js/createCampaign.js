@@ -19,6 +19,9 @@ async function fetchContactListContacts(contactListId) {
 	return response.json();
 }
 
+let selectedSource = null;
+let selectedSamplePath = null;
+
 class AttributeManager {
 	constructor(container, onAttributeChange) {
 		this.container = container;
@@ -244,29 +247,30 @@ class Preview {
 
 				if (!file || !format) return;
 
-				const reader = new FileReader();
+				selectedSource = "upload";
+				selectedSamplePath = null;
 
+				const reader = new FileReader();
 				reader.onload = function (event) {
-					let previewHTML = "";
 					const fileURL = event.target.result;
+					let previewHTML = "";
 
 					if (format === "IMAGE") {
 						previewHTML = `<img src="${fileURL}" class="custom-card-img max-h-96" />`;
 					} else if (format === "VIDEO") {
 						previewHTML = `
-							<video controls class="custom-card-img">
-								<source src="${fileURL}" type="${file.type}">
-								Your browser does not support the video tag.
-							</video>
-						`;
+					<video controls class="custom-card-img">
+						<source src="${fileURL}" type="${file.type}">
+						Your browser does not support the video tag.
+					</video>
+				`;
 					} else if (format === "DOCUMENT") {
 						previewHTML = `<iframe src="${fileURL}" class="w-full h-[500px]"></iframe>`;
 					}
 
 					previewDiv.innerHTML = previewHTML;
 				};
-
-				reader.readAsDataURL(file); // Triggers reader.onload
+				reader.readAsDataURL(file);
 			});
 		}
 
@@ -277,17 +281,19 @@ class Preview {
 				let previewHTML = "";
 
 				fileInput.value = "";
+				selectedSource = "sample";
+				selectedSamplePath = filePath;
 
 				if (format === "IMAGE") {
 					previewHTML = `<img src="${filePath}" class="custom-card-img max-h-96" />`;
 				} else if (format === "VIDEO") {
 					const fileExtension = filePath.split(".").pop();
 					previewHTML = `
-						<video controls class="custom-card-img">
-							<source src="${filePath}" type="video/${fileExtension}">
-							Your browser does not support the video tag.
-						</video>
-					`;
+				<video controls class="custom-card-img">
+					<source src="${filePath}" type="video/${fileExtension}">
+					Your browser does not support the video tag.
+				</video>
+			`;
 				} else if (format === "DOCUMENT") {
 					previewHTML = `<iframe src="${filePath}" class="w-full h-[500px]"></iframe>`;
 				}
@@ -295,9 +301,8 @@ class Preview {
 				previewDiv.innerHTML = previewHTML;
 			});
 		}
-		
 	}
-} 
+}
 
 class TemplateManager {
 	constructor() {
@@ -495,10 +500,9 @@ class TemplateManager {
 		formData.append("name", document.getElementById("campaign-name").value);
 		formData.append("url", `https://${location.hostname}`);
 
-		const fileInput = this.campaignForm.querySelector(
-			'.upload-input[type="file"]',
-		);
-		if (fileInput?.files?.length > 0) {
+		const fileInput = document.querySelector(".upload-input");
+
+		if (selectedSource === "upload" && fileInput?.files?.length > 0) {
 			const uploadedFile = fileInput.files[0];
 			formData.append("headerFile", uploadedFile);
 		}

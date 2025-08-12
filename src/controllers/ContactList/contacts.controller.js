@@ -844,6 +844,7 @@ export const validateAndPrepareCampaign = async (req, res, next) => {
 
 		if (
 			user?.payment?.plan !== "unlimited" &&
+			user?.payment?.plan !== "noplan" &&
 			contactList.length > totalCount - messagesCount
 		) {
 			throw new Error(
@@ -909,7 +910,7 @@ export const createCampaign = async (req, res) => {
 				phone_number,
 				addedUserId,
 				url,
-				req.file?.filename,
+				req?.file?.filename,
 			);
 
 			await ActivityLogs.create({

@@ -473,9 +473,8 @@ class TemplateManager {
 		formData.append("name", document.getElementById("campaign-name").value);
 		formData.append("contactList", JSON.stringify(contactLists));
 
-		const fileInput = this.campaignForm.querySelector(
-			'.upload-input[type="file"]',
-		);
+		const fileInput = document.querySelector(".upload-input");
+		
 		if (fileInput?.files?.length > 0) {
 			const uploadedFile = fileInput.files[0];
 			formData.append("headerFile", uploadedFile);
