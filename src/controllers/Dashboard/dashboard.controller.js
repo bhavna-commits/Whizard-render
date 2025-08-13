@@ -618,6 +618,78 @@ export const sendOtpController = async (req, res) => {
 	}
 };
 
+export const testTemplateSend = async (req, res, next) => {
+	const { phone, name } = req.body;
+	if (!phone || !name)
+		return res.json({ success: false, error: "Details not provided" });
+
+	if (!isString(phone, name)) return next();
+
+	let user;
+	let fb_account;
+	try {
+		fb_account = await User.findOne({ unique_id: "db2426e80f" });
+		user = await User.findOne({
+			unique_id: req.session?.user?.id || req.session?.addedUser?.owner,
+		});
+	} catch (error) {
+		console.error("Error getting user for test message :", error);
+		return res
+			.status(500)
+			.json({ success: false, message: "Internal Server Error" });
+	}
+
+	if (user.testMessagesCount <= 0) {
+		return res
+			.status(400)
+			.json({ success: false, message: "You have exhausted limit." });
+	}
+	try {
+		const response = await fetch(
+			`https://graph.facebook.com/${process.env.FB_GRAPH_VERSION}/173988142466890/messages`,
+			{
+				method: "POST",
+				headers: {
+					Authorization: `Bearer ${fb_account.FB_ACCESS_TOKEN}`,
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					messaging_product: "whatsapp",
+					to: phone,
+					type: "template",
+					template: {
+						name: "demo_welcome",
+						language: { code: "en" },
+						components: [
+							{
+								type: "body",
+								parameters: [{ type: "text", text: name }],
+							},
+						],
+					},
+				}),
+			},
+		);
+
+		const data = await response.json();
+		if (data.messages) {
+			user.testMessagesCount--;
+			await user.save();
+
+			res.json({ success: true });
+		} else {
+			console.error("test message fb error :", data.error);
+			res.json({
+				success: false,
+				message: data.error?.message || "Failed to send",
+			});
+		}
+	} catch (err) {
+		console.error("Error sending test message :", err);
+		res.json({ success: false, message: err?.message || err });
+	}
+};
+
 const getPhoneNumbers = async (user) => {
 	try {
 		// Fetch phone numbers from Facebook Graph API

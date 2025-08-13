@@ -1,4 +1,5 @@
 import mongoose, { Schema } from "mongoose";
+import { type } from "os";
 
 const userSchema = new mongoose.Schema(
 	{
@@ -140,6 +141,7 @@ const userSchema = new mongoose.Schema(
 		nextRefreshAt: { type: Schema.Types.Mixed },
 		authTemplateToken: String,
 		currency: String,
+		testMessagesCount: { type: Number, default: 20 },
 		payment: {
 			place: {
 				type: String,

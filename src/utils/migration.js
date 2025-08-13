@@ -18,19 +18,43 @@ export default async function runMigration() {
 		]);
 
 		await Promise.all([
+			migrateUsersTestCount(),
 			migrateUsers(userMap),
 			migratePermissions(),
 			migrateTemplates(userMap),
 			migrateCustomFields(userMap),
 			migrateContactLists(userMap, addedUserMap),
 			migratePaymentPlaceDefault(),
-		]);		
+		]);
 
 		console.log("🎉 Migration complete");
 		migrationPending = false;
 	} catch (err) {
 		console.error("❌ Migration failed:", err);
 	}
+}
+
+async function migrateUsersTestCount() {
+	const cursor = User.find().cursor();
+	const ops = [];
+	for await (const user of cursor) {
+		ops.push({
+			updateOne: {
+				filter: { _id: user._id },
+				update: {
+					$set: {
+						testMessagesCount: 20,
+					},
+				},
+			},
+		});
+		if (ops.length >= 500) {
+			await User.bulkWrite(ops);
+			ops.length = 0;
+		}
+	}
+	if (ops.length) await User.bulkWrite(ops);
+	console.log("✅ Users updated");
 }
 
 async function migratePaymentPlaceDefault() {

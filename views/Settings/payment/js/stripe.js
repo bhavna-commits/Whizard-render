@@ -19,11 +19,9 @@ document.addEventListener("DOMContentLoaded", () => {
 	planInputs.forEach((input) => {
 		input.addEventListener("change", () => {
 			const planCard = input.nextElementSibling;
-			const messageText = planCard.querySelector("h3").textContent.trim();
-			const messagesMatch = messageText.match(/([\d,]+)\s*messages/i);
-			selectedMessages = messagesMatch
-				? Number(messagesMatch[1].replace(/,/g, ""))
-				: 5000;
+			selectedMessages = Number(
+				planCard.querySelector("input").value.trim(),
+			);
 		});
 	});	
 

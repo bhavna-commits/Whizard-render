@@ -113,3 +113,16 @@ const launchWhatsAppSignup = () => {
 		},
 	});
 };
+
+// Payment Button
+
+const element = document.querySelector(".gradient-button");
+
+let angle = 0;
+const rotateGradient = () => {
+	angle = (angle + 5) % 360;
+	element?.style?.setProperty("--gradient-angle", `${angle}deg`);
+	requestAnimationFrame(rotateGradient);
+};
+
+rotateGradient();

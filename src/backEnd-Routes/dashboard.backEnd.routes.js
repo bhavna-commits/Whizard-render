@@ -7,6 +7,7 @@ import {
 	sendOtpController,
 	set2FAPin,
 	refreshPhoneNumbers,
+	testTemplateSend,
 } from "../controllers/Dashboard/dashboard.controller.js";
 
 import {
@@ -40,6 +41,8 @@ router.post("/send-otp", sendOtpController);
 router.post("/set-2FA-pin", set2FAPin);
 
 router.get("/refresh-phone-numbers", refreshPhoneNumbers);
+
+router.post("/test-number", testTemplateSend, trackSanitationFailures);
 
 router.post("/:id/toggleStatus", checkAdminSession, toggleStatus);
 

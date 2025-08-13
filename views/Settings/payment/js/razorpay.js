@@ -60,15 +60,11 @@ document.addEventListener("DOMContentLoaded", () => {
 	planInputs.forEach((input) => {
 		input.addEventListener("change", () => {
 			const planCard = input.nextElementSibling;
-
-			// Extract number of messages
-			const messageText = planCard.querySelector("h3").textContent.trim();
-			const messagesMatch = messageText.match(/([\d,]+)\s*messages/i);
-			selectedMessages = messagesMatch
-				? Number(messagesMatch[1].replace(/,/g, ""))
-				: 0;
+			selectedMessages = Number(
+				planCard.querySelector("input").value.trim(),
+			);
 		});
-	});	
+	});
 
 	stripeBtn?.addEventListener("click", async () => {
 		loadingSpinner.classList.remove("hidden");

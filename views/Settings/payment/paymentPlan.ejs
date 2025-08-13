@@ -1,108 +1,107 @@
 <div class="w-full px-3 bg-white">
 	<div class="flex flex-col w-full items-center">
-		<div class="w-1/2 h-full flex justify-center box-content rounded-xl" id="right-side">
-			<div class="w-9/12">
+		<div class="w-full h-full flex justify-center box-content rounded-xl" id="right-side">
+			<div class="w-11/12">
 				
-				<div class="flex items-center justify-between my-4">
-					<button type="button" id="open-table" class="<%= paymentTableData?.length > 0 ? '' : 'hidden' %>flex items-center text-sm text-gray-500"><span class="mb-1 mr-1">&LeftArrow;</span> Go Back</button>
-					<h1 class="text-2xl text-center">Payment Plan</h1>
+				<div class="flex items-center justify-between my-8">
+					<button type="button" id="open-table" class="<%= paymentTableData?.length > 0 ? '' : 'hidden' %>flex items-center  text-gray-500"><span class="mb-1 mr-1">&LeftArrow;</span> Go Back</button>
+					<h1 class="text-2xl text-center font-semibold">Payment Plan</h1>
 					<div class="invisible">payment</div>
 				</div>
 				
 				<!-- Plan Selection -->
-				<div class="space-y-4">
+				<div class="grid grid-cols-3 gap-10">
 					<!-- Weekday Fall Pass -->
-					<label class="radio-option block cursor-pointer">
+					<label class="radio-option block cursor-pointer grow">
 						<input type="radio" name="plan" value="weekday" class="sr-only">
-						<div class="option-content border-2 border-gray-200 rounded-xl p-6 hover:border-gray-300">
-							<div class="flex items-center justify-between">
-								<div class="flex items-center space-x-4">
-									<div class="check-indicator"></div>
-									<div>
-										<h3 class="text-xl font-semibold text-gray-900">Starter | 3,000 messages</h3>
-										<h4 class="text-lg font-semibold text-gray-900"></h4>
-										<div class="ml-5 mt-2">
-											<ul class="list-disc">
-												<li class="text-sm text-gray-600">Access to all dashboard features</li>
-												<li class="text-sm text-gray-600">Basic reports & analytics</li>
-												<li class="text-sm text-gray-600">Real-time tracking of messages left</li>
-												<li class="text-sm text-gray-600">Access for 24 * 7 messaging</li>
-											</ul>
-										</div>
+						<div class="option-content  h-[30rem] border-2 border-gray-200 rounded-xl p-8 hover:border-gray-300">
+							<div class="flex items-center space-x-4 w-full">
+								<div class="w-full">
+									<input type="number" hidden value="3000" />
+									<h3 class="text-2xl font-semibold text-gray-900">Starter</h3>
+									<h4 class=" text-gray-500 text-lg">Everything you need to get started with your business.</h4>
+									<div class="flex items-center justify-between my-3">
+										<div class="text-lg text-red-500 line-through"><span class=" mr-1 text-gray-500"><%= plans[3000].currency %></span><%= plans[3000].amount * 3 %></div>
+										<div class="text-2xl font-bold text-gray-900"><span class=" mr-1 text-gray-500"><%= plans[3000].currency %></span><%= plans[3000].amount %></div>
 									</div>
-									
+									<div class=" mt-2">
+										<ul class="space-y-2">
+											<li class=" text-gray-600 flex items-center"><img src="svg/check-circle.svg" alt="check" class="w-6 mr-2" />Access to all dashboard features</li>
+											<li class=" text-gray-600 flex items-center"><img src="svg/check-circle.svg" alt="check" class="w-6 mr-2" />Basic reports & analytics</li>
+											<li class=" text-gray-600 flex items-center"><img src="svg/check-circle.svg" alt="check" class="w-6 mr-2" />Real-time tracking of messages left</li>
+											<li class=" text-gray-600 flex items-center"><img src="svg/check-circle.svg" alt="check" class="w-6 mr-2" />Access for 24 * 7 messaging</li>
+											<li class=" text-gray-600 flex items-center"><img src="svg/cross.svg" alt="cross" class="w-6 mr-2" />Advanced reports & analytics</li>
+											<li class=" text-gray-600 flex items-center"><img src="svg/cross.svg" alt="cross" class="w-6 mr-2" />Priority support</li>
+										</ul>
+									</div>
 								</div>
-								<div class="text-right">
-									<div class="text-sm text-red-500 line-through"><span class="text-sm mr-1 text-gray-500"><%= plans[3000].currency %></span><%= plans[3000].amount * 2 %></div>
-									<div class="text-xl font-bold text-gray-900"><span class="text-sm mr-1 text-gray-500"><%= plans[3000].currency %></span><%= plans[3000].amount %></div>
-									<!-- <div class="text-sm text-gray-500">Sep to Jan</div> -->
-								</div>
+								
 							</div>
+							
 						</div>
 						
 					</label>
 					
 					<!-- Unlimited Fall Pass (Most Popular) -->
-					<label class="radio-option block cursor-pointer">
+					<label class="radio-option block cursor-pointer grow min-h">
 						<input type="radio" name="plan" value="unlimited" class="sr-only" checked>
-						<div class="option-content border-2 border-gray-200 rounded-xl p-6 hover:border-gray-300">
+						<div class="option-content  h-[30rem] border-2 border-gray-200 rounded-xl p-6 hover:border-gray-300">
 							<div class="flex items-center justify-between">
-								<div class="flex items-center space-x-4">
-									<div class="check-indicator ">
-										<!-- <div class="absolute left-1.5 top-0.5 w-1.5 h-3 border-white border-r-2 border-b-2 transform rotate-45">
-
-                                        </div> -->
-									</div>
-									<div>
-										<h3 class="text-xl font-semibold text-gray-900">Growth | 5,000 messages</h3>
-										<h4 class="text-lg font-semibold text-gray-900"></h4>
-										<div class="ml-5 mt-2">
-											<ul class="list-disc">
-												<li class="text-sm text-gray-600">Access to all dashboard features</li>
-												<li class="text-sm text-gray-600">Advanced reports & analytics</li>
-												<li class="text-sm text-gray-600">Real-time tracking of messages left</li>
-												<li class="text-sm text-gray-600">Access for 24 * 7 messaging</li>
-												<li class="text-sm text-gray-600">Priority support</li>
+								<div class="flex items-center space-x-4 w-full">
+									<div class="w-full">
+										<input type="number" hidden value="5000" />
+										<h3 class="text-2xl font-semibold text-gray-900">Growth</h3>
+										<h4 class="text-gray-500 text-lg">Highly recommended plan to make the best use of Retargeting Campaigns</h4>
+										<div class="flex items-center justify-between my-3">
+											<div class="text-lg text-red-500 line-through"><span class=" mr-1 text-gray-500"><%= plans[5000].currency %></span><%= plans[5000].amount * 3 %></div>
+											<div class="text-2xl font-bold text-gray-900"><span class=" mr-1 text-gray-500"><%= plans[5000].currency %></span><%= plans[5000].amount %></div>
+											<!-- <div class=" text-gray-500">Sep to Jan</div> -->
+										</div>
+										<div class=" mt-2">
+											<ul class="space-y-2">
+												<li class=" text-gray-600 flex items-center"><img src="svg/check-circle.svg" alt="check" class="w-6 mr-2" />Access to all dashboard features</li>
+												<li class=" text-gray-600 flex items-center"><img src="svg/check-circle.svg" alt="check" class="w-6 mr-2" />Advanced reports & analytics</li>
+												<li class=" text-gray-600 flex items-center"><img src="svg/check-circle.svg" alt="check" class="w-6 mr-2" />Real-time tracking of messages left</li>
+												<li class=" text-gray-600 flex items-center"><img src="svg/check-circle.svg" alt="check" class="w-6 mr-2" />Access for 24 * 7 messaging</li>
+												<li class=" text-gray-600 flex items-center"><img src="svg/check-circle.svg" alt="check" class="w-6 mr-2" />Priority support</li>
 											</ul>
 										</div>
 									</div>
 									
 								</div>
-								<div class="text-right">
-									<div class="text-sm text-red-500 line-through"><span class="text-sm mr-1 text-gray-500"><%= plans[5000].currency %></span><%= plans[5000].amount * 2 %></div>
-									<div class="text-xl font-bold text-gray-900"><span class="text-sm mr-1 text-gray-500"><%= plans[5000].currency %></span><%= plans[5000].amount %></div>
-									<!-- <div class="text-sm text-gray-500">Sep to Jan</div> -->
-								</div>
+								
 							</div>
 						</div>
 					</label>
 					
 					<!-- Extended Fall Pass -->
-					<label class="radio-option block cursor-pointer">
+					<label class="radio-option block cursor-pointer grow">
 						<input type="radio" name="plan" value="extended" class="sr-only">
-						<div class="option-content border-2 border-gray-200 rounded-xl p-6 hover:border-gray-300">
+						<div class="option-content  h-[30rem] border-2 border-gray-200 rounded-xl p-6 hover:border-gray-300">
 							<div class="flex items-center justify-between">
-								<div class="flex items-center space-x-4">
-									<div class="check-indicator"></div>
-									<div>
-										<h3 class="text-xl font-semibold text-gray-900">Scale | 10,000 messages</h3>
-										<h4 class="text-lg font-semibold text-gray-900"></h4>
-										<div class="ml-5 mt-2">
-											<ul class="list-disc">
-												<li class="text-sm text-gray-600">Access to all dashboard features</li>
-												<li class="text-sm text-gray-600">Advanced reports & analytics</li>
-												<li class="text-sm text-gray-600">Real-time tracking of messages left</li>
-												<li class="text-sm text-gray-600">Access for 24 * 7 messaging</li>
-												<li class="text-sm text-gray-600">Priority support</li>
+								<div class="flex items-center space-x-4 w-full">
+									<!-- <div class="check-indicator"></div> -->
+									<div class="w-full">
+										<input type="number" hidden value="10000" />
+										<h3 class="text-2xl font-semibold text-gray-900">Scale</h3>
+										<h4 class="text-gray-900 text-lg">Recommended for Big Companies</h4>
+										<div class="flex items-center justify-between my-3">
+											<div class=" text-red-500 line-through"><span class=" mr-1 text-gray-500"><%= plans[10000].currency %></span><%= plans[10000].amount * 3 %></div>
+											<div class="text-2xl font-bold text-gray-900"><span class=" mr-1 text-gray-500"><%= plans[10000].currency %></span><%= plans[10000].amount %></div>
+											<!-- <div class=" text-gray-500">Sep to Jan</div> -->
+										</div>
+										<div class="mt-2">
+											<ul class="space-y-2">
+												<li class=" text-gray-600 flex items-center"><img src="svg/check-circle.svg" alt="check" class="w-6 mr-2" />Access to all dashboard features</li>
+												<li class=" text-gray-600 flex items-center"><img src="svg/check-circle.svg" alt="check" class="w-6 mr-2" />Advanced reports & analytics</li>
+												<li class=" text-gray-600 flex items-center"><img src="svg/check-circle.svg" alt="check" class="w-6 mr-2" />Real-time tracking of messages left</li>
+												<li class=" text-gray-600 flex items-center"><img src="svg/check-circle.svg" alt="check" class="w-6 mr-2" />Access for 24 * 7 messaging</li>
+												<li class=" text-gray-600 flex items-center"><img src="svg/check-circle.svg" alt="check" class="w-6 mr-2" />Priority support</li>
 											</ul>
 										</div>
 									</div>
 								</div>
-								<div class="text-right">
-									<div class="text-sm text-red-500 line-through"><span class="text-sm mr-1 text-gray-500"><%= plans[10000].currency %></span><%= plans[10000].amount * 2 %></div>
-									<div class="text-xl font-bold text-gray-900"><span class="text-sm mr-1 text-gray-500"><%= plans[10000].currency %></span><%= plans[10000].amount %></div>
-									<!-- <div class="text-sm text-gray-500">Sep to Jan</div> -->
-								</div>
+								
 							</div>
 							
 						</div>
@@ -125,7 +124,7 @@
 			<div id="stripe-section" class="hidden px-4 mt-10">
 				
 				<div id="card-wrapper" class="w-full hidden">
-					<label class="text-sm text-gray-500 mb-1 block">Card details</label>
+					<label class=" text-gray-500 mb-1 block">Card details</label>
 					<div id="card-element" class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-white"></div>
 					<div id="card-errors" class="text-xs text-red-500 mt-1"></div>
 				</div>

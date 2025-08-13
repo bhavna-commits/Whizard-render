@@ -1,0 +1,147 @@
+<div id="testMessageModal" class="hidden fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center z-10" onclick="closeTestMessage()">
+	<div class="bg-white rounded-lg p-6 w-96">
+		<div class="flex items-center justify-between mb-4">
+			<h2 class="text-xl font-semibold">Send Test WhatsApp Message</h2>
+			<span class="text-2xl text-gray-600" onclick="closeTestMessage()">&Cross;</span>
+		</div>
+		<div class="mb-4">
+			<label class="block mb-2">Name</label>
+			<input type="text" name="testName" id="testName" class="border w-full p-2 rounded" placeholder="Enter Name" />
+			
+			<label class="block mb-2 mt-4">Phone Number</label>
+			<div class="relative border rounded pb-2 px-2">
+				<div class="flex items-center focus:outline-none" id="countrySelectorTest">
+					
+					<div class="country-dropdown hidden" id="countryDropdownTest">
+						<div class="search-container focus:outline-none">
+							<input type="text" id="countrySearchTest" placeholder="Search country or code..." class="w-full border p-2">
+						</div>
+						<div class="countries-list max-h-60 overflow-y-auto">
+							<% countries.forEach(function(country) { %>
+							<button type="button" class="country-option focus:outline-none flex items-center p-2 hover:bg-gray-100 w-full text-left">
+								<span class="country-flag mr-2"><%= country.flag %></span>
+								<span class="country-name flex-1"><%= country.name %></span>
+								<span class="country-dial-code"><%= country.dialCode %></span>
+							</button>
+							<% }); %>
+						</div>
+					</div>
+				</div>
+				<div class="flex items-center mt-2">
+					<button type="button" class="w-16 flex items-center" id="countrySelectorButtonTest">
+						<span id="selectedFlagTest">🇮🇳</span>&nbsp;
+						<input type="text" name="countryCode" class="cursor-pointer w-12" id="selectedDialCodeTest" value="+91" readonly />
+					</button>
+					<input type="tel" name="phoneNumber" id="testPhoneNumber" class="w-full" placeholder="Enter Phone Number" minlength="8" maxlength="15" required />
+				</div>
+			</div>
+		</div>
+		<div class="flex justify-between items-end">
+			<span class="text-gray-600">Messages left : <%= user?.testMessagesCount %></span>		
+			<button onclick="sendTestMessage(event)" class="h-10 w-28 flex justify-center items-center bg-black text-white rounded">Send</button>
+		</div>
+	</div>
+</div>
+
+<script>
+	function openTestMessage () {
+		document.getElementById('testMessageModal').classList.remove('hidden');
+	}
+	
+	function closeTestMessage () {
+		document.getElementById('testMessageModal').classList.add('hidden');
+	}
+	
+	function sendTestMessage (e) {
+		const phoneInput = document.getElementById('testPhoneNumber').value.trim();
+		const name = document.getElementById("testName").value.trim();
+		const dialCode = document.getElementById("selectedDialCodeTest").value.trim();
+		
+		// Basic validations
+		if (!name) {
+			toast('info', 'Please enter a name');
+			return;
+		}
+		
+		if (!phoneInput) {
+			toast('info', 'Please enter a phone number');
+			return;
+		}
+		
+		// Remove non-numeric characters for length check
+		const numericPhone = phoneInput.replace(/\D/g, '');
+		if (numericPhone.length < 8 || numericPhone.length > 15) {
+			toast('error', 'Phone number must be between 8 and 15 digits');
+			return;
+		}
+		
+		const phone = dialCode.replace('+', '') + numericPhone;
+		
+		e.target.innerHTML = '<div class="loading-spinner"></div>';
+		
+		fetch('/api/dashboard/test-number', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({
+					phone,
+					name
+				})
+			})
+			.then(res => res.json())
+			.then(data => {
+				if (data.success) {
+					toast('success', 'Test message sent successfully');
+					setTimeout(() => location.reload(), 250);
+				} else {
+					toast('error', `Failed: ${data.message || 'Unknown error'}`);
+				}
+				closeTestMessage();
+			})
+			.catch(err => {
+				console.log("Error sending test message :", err);
+				toast('error', 'Error sending test message');
+				closeTestMessage();
+			}).finally(() => {
+				e.target.innerHTML = "Send";
+			});
+	}
+	
+	// Country code dropdown
+	{
+		const countrySelectorButton = document.getElementById("countrySelectorButtonTest");
+		const countryDropdown = document.getElementById("countryDropdownTest");
+		const countryOptions = countryDropdown.querySelectorAll(".country-option");
+		const countrySearch = document.getElementById("countrySearchTest");
+		const selectedFlag = document.getElementById("selectedFlagTest");
+		const selectedDialCode = document.getElementById("selectedDialCodeTest");
+		
+		// Toggle dropdown
+		countrySelectorButton.addEventListener("click", function (e) {
+			e.preventDefault();
+			countryDropdown.classList.toggle("hidden");
+		});
+		
+		// Select country
+		countryOptions.forEach((option) => {
+			option.addEventListener("click", function () {
+				const flag = this.querySelector(".country-flag").textContent;
+				const dialCode = this.querySelector(".country-dial-code").textContent;
+				selectedFlag.textContent = flag;
+				selectedDialCode.value = dialCode;
+				countryDropdown.classList.add("hidden");
+			});
+		});
+		
+		// Search countries
+		countrySearch.addEventListener("input", function () {
+			const searchValue = this.value.toLowerCase();
+			countryOptions.forEach((option) => {
+				const countryName = option.querySelector(".country-name").textContent.toLowerCase();
+				const dialCode = option.querySelector(".country-dial-code").textContent.toLowerCase();
+				option.style.display = countryName.includes(searchValue) || dialCode.includes(searchValue) ? "flex" : "none";
+			});
+		});
+	}
+</script>
