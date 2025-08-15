@@ -13,6 +13,7 @@ const paymentSchema = new Schema(
 			default: "stripe",
 		},
 		messagesCount: { type: Number },
+		usersCount: { type: Number },
 		status: {
 			type: String,
 			enum: ["created", "succeeded", "failed"],
@@ -25,6 +26,10 @@ const paymentSchema = new Schema(
 		updatedAt: { type: Number, default: Date.now },
 		agentName: { type: String },
 		plan: { type: String },
+		paymentType: {
+			type: String,
+			enum: ["credits", "plan"],
+		},
 	},
 	{ timestamps: false, strict: false },
 );

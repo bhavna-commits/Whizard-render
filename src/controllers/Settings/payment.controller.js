@@ -12,10 +12,16 @@ import {
 	getCards,
 } from "./payment.functions.js";
 
-const basePlans = {
-	3000: { currency: "INR", amount: 299 },
-	5000: { currency: "INR", amount: 499 },
-	10000: { currency: "INR", amount: 799 },
+const basePlan = {
+	1: { currency: "INR", amount: 99, plan: "Starter" },
+	3: { currency: "INR", amount: 299, plan: "Growth" },
+	5: { currency: "INR", amount: 599, plan: "Scale" },
+};
+
+const baseCredits = {
+	3000: { currency: "INR", amount: 299, plan: "Starter" },
+	5000: { currency: "INR", amount: 499, plan: "Growth" },
+	10000: { currency: "INR", amount: 799, plan: "Scale" },
 };
 
 export const getPayment = async (req, res) => {
@@ -39,10 +45,10 @@ export const getPayment = async (req, res) => {
 			access = await Permissions.findOne({ unique_id: addedUser.roleId });
 		}
 
-		const convertedPlans = await convertPlansToCurrency(
-			basePlans,
-			user.currency || "INR",
-		);
+		const [convertedCredits, convertedPlans] = await Promise.all([
+			convertPlansToCurrency(baseCredits, user.currency || "INR"),
+			convertPlansToCurrency(basePlan, user.currency || "INR"),
+		]);
 
 		const { paymentMode } = getCards();
 
@@ -73,6 +79,7 @@ export const getPayment = async (req, res) => {
 		res.render("Settings/payments", {
 			access: access || user.access,
 			user,
+			credits: convertedCredits,
 			plans: convertedPlans,
 			photo: req.session?.user?.photo || req.session?.addedUser?.photo,
 			name: req.session?.user?.name || req.session?.addedUser?.name,
@@ -96,7 +103,7 @@ export const getPayment = async (req, res) => {
 
 export const getIntent = async (req, res, next) => {
 	try {
-		const { messages, intentId } = req.body;
+		const { messages, intentId, type } = req.body;
 
 		if (!messages || !isNumber(messages)) {
 			return res
@@ -118,7 +125,16 @@ export const getIntent = async (req, res, next) => {
 		const user = await User.findOne({ unique_id: ownerId });
 		if (!user) throw new Error("User not found");
 
-		const amount = basePlans[messages]?.amount;
+		let amount;
+		let plan;
+
+		if (type === "credits") {
+			amount = baseCredits[messages]?.amount;
+			plan = baseCredits[messages]?.plan;
+		} else {
+			amount = basePlan[messages]?.amount;
+			plan = basePlan[messages]?.plan;
+		}
 
 		if (!amount) {
 			return res
@@ -136,7 +152,8 @@ export const getIntent = async (req, res, next) => {
 			messages,
 			paymentMode,
 			name,
-			plan: messages,
+			plan,
+			paymentType: type,
 		};
 
 		const result =
@@ -144,7 +161,12 @@ export const getIntent = async (req, res, next) => {
 				? await handleStripePayment(args, stripe)
 				: await handleRazorpayPayment(args, razorpay);
 
-		user.payment.plan = messages;
+		if (type === "credits") {
+			user.payment.credits = plan;
+		} else {
+			user.payment.plan = plan;
+		}
+
 		await user.save();
 
 		res.status(201).json(result);
@@ -464,26 +486,45 @@ export const razorpayWebhook = async (req, res) => {
 					unique_id: payment.useradmin,
 				});
 				if (user) {
-					const previousCount = user.payment?.messagesCount || 0;
-					const newTotal = payment.messagesCount || 0;
+					if (payment?.paymentType === "plan") {
+						const expiry = Date.now() + 30 * 24 * 60 * 60 * 1000;
 
-					console.log("💬 Updating message counts");
-					console.table({
-						previousCount,
-						addedCount: newTotal,
-						newTotal: newTotal + previousCount,
-					});
+						console.log("💬 Updating plan");
 
-					await User.updateOne(
-						{ unique_id: payment.useradmin },
-						{
-							$set: {
-								"payment.previousMessagesCount": previousCount,
-								"payment.totalMessages":
-									newTotal + previousCount,
+						await User.updateOne(
+							{ unique_id: payment.useradmin },
+							{
+								$set: {
+									"payment.usersCount": payment.messagesCount,
+									"payment.expiry": expiry,
+								},
 							},
-						},
-					);
+						);
+
+						console.log("💬 Updated plan");
+					} else {
+						const previousCount = user.payment?.messagesCount || 0;
+						const newTotal = payment.messagesCount || 0;
+
+						console.log("💬 Updating message counts");
+						console.table({
+							previousCount,
+							addedCount: newTotal,
+							newTotal: newTotal + previousCount,
+						});
+
+						await User.updateOne(
+							{ unique_id: payment.useradmin },
+							{
+								$set: {
+									"payment.previousMessagesCount":
+										previousCount,
+									"payment.totalMessages":
+										newTotal + previousCount,
+								},
+							},
+						);
+					}
 				}
 			}
 		}
@@ -512,11 +553,54 @@ export const razorpayWebhook = async (req, res) => {
 			await Payment.updateOne({ _id: payment._id }, update);
 
 			if (update.status === "succeeded") {
-				console.log("✅ Order succeeded for user:", payment.useradmin);
-				await User.findOneAndUpdate(
-					{ unique_id: payment.useradmin },
-					{ messagesCount: payment.messagesCount },
+				console.log(
+					"✅ Payment succeeded for user:",
+					payment.useradmin,
 				);
+				const user = await User.findOne({
+					unique_id: payment.useradmin,
+				});
+				if (user) {
+					if (payment?.paymentType === "plan") {
+						const expiry = Date.now() + 30 * 24 * 60 * 60 * 1000;
+
+						console.log("💬 Updating plan");
+
+						await User.updateOne(
+							{ unique_id: payment.useradmin },
+							{
+								$set: {
+									"payment.usersCount": payment.messagesCount,
+									"payment.expiry": expiry,
+								},
+							},
+						);
+
+						console.log("💬 Updated plan");
+					} else {
+						const previousCount = user.payment?.messagesCount || 0;
+						const newTotal = payment.messagesCount || 0;
+
+						console.log("💬 Updating message counts");
+						console.table({
+							previousCount,
+							addedCount: newTotal,
+							newTotal: newTotal + previousCount,
+						});
+
+						await User.updateOne(
+							{ unique_id: payment.useradmin },
+							{
+								$set: {
+									"payment.previousMessagesCount":
+										previousCount,
+									"payment.totalMessages":
+										newTotal + previousCount,
+								},
+							},
+						);
+					}
+				}
 			}
 		}
 

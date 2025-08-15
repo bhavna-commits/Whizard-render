@@ -11,7 +11,7 @@ export default async function runMigration() {
 	try {
 		console.log("🚀 Starting migration...");
 
-		// Build maps ONCE
+		// Build lookup maps once
 		const [userMap, addedUserMap] = await Promise.all([
 			buildUserMap(),
 			buildAddedUserMap(),
@@ -19,7 +19,7 @@ export default async function runMigration() {
 
 		await Promise.all([
 			migrateUsersTestCount(),
-			migrateUsers(userMap),
+			migrateUsers(),
 			migratePermissions(),
 			migrateTemplates(userMap),
 			migrateCustomFields(userMap),
@@ -35,31 +35,34 @@ export default async function runMigration() {
 }
 
 async function migrateUsersTestCount() {
-	const cursor = User.find().cursor();
+	const cursor = User.find({}, { _id: 1, testMessagesCount: 1 }).cursor();
 	const ops = [];
+	let count = 0;
+
 	for await (const user of cursor) {
-		ops.push({
-			updateOne: {
-				filter: { _id: user._id },
-				update: {
-					$set: {
-						testMessagesCount: 20,
-					},
+		// Only set if not already set
+		if (user.testMessagesCount == null) {
+			ops.push({
+				updateOne: {
+					filter: { _id: user._id },
+					update: { $set: { testMessagesCount: 20 } },
 				},
-			},
-		});
+			});
+		}
+
 		if (ops.length >= 500) {
-			await User.bulkWrite(ops);
-			ops.length = 0;
+			count += await safeBulkWrite(User, ops);
 		}
 	}
-	if (ops.length) await User.bulkWrite(ops);
-	console.log("✅ Users updated");
+	if (ops.length) count += await safeBulkWrite(User, ops);
+	console.log(`✅ Users testMessagesCount updated (${count} users)`);
 }
 
 async function migratePaymentPlaceDefault() {
-	const cursor = User.find().cursor();
+	const cursor = User.find({}, { _id: 1, payment: 1 }).cursor();
 	const ops = [];
+	let count = 0;
+
 	for await (const user of cursor) {
 		ops.push({
 			updateOne: {
@@ -67,18 +70,20 @@ async function migratePaymentPlaceDefault() {
 				update: { $set: { "payment.place": "External" } },
 			},
 		});
+
 		if (ops.length >= 500) {
-			await User.bulkWrite(ops);
-			ops.length = 0;
+			count += await safeBulkWrite(User, ops);
 		}
 	}
-	if (ops.length) await User.bulkWrite(ops);
-	console.log("✅ payment.place defaults set");
+	if (ops.length) count += await safeBulkWrite(User, ops);
+	console.log(`✅ payment.place defaults set (${count} users)`);
 }
 
 async function migrateUsers() {
-	const cursor = User.find().cursor();
+	const cursor = User.find({}, { _id: 1, "access.settings": 1 }).cursor();
 	const ops = [];
+	let count = 0;
+
 	for await (const user of cursor) {
 		ops.push({
 			updateOne: {
@@ -93,18 +98,20 @@ async function migrateUsers() {
 				},
 			},
 		});
+
 		if (ops.length >= 500) {
-			await User.bulkWrite(ops);
-			ops.length = 0;
+			count += await safeBulkWrite(User, ops);
 		}
 	}
-	if (ops.length) await User.bulkWrite(ops);
-	console.log("✅ Users updated");
+	if (ops.length) count += await safeBulkWrite(User, ops);
+	console.log(`✅ Users updated (${count} users)`);
 }
 
 async function migratePermissions() {
-	const cursor = Permissions.find().cursor();
+	const cursor = Permissions.find({}, { _id: 1, settings: 1 }).cursor();
 	const ops = [];
+	let count = 0;
+
 	for await (const permission of cursor) {
 		ops.push({
 			updateOne: {
@@ -118,26 +125,32 @@ async function migratePermissions() {
 				},
 			},
 		});
+
 		if (ops.length >= 500) {
-			await Permissions.bulkWrite(ops);
-			ops.length = 0;
+			count += await safeBulkWrite(Permissions, ops);
 		}
 	}
-	if (ops.length) await Permissions.bulkWrite(ops);
-	console.log("✅ Permissions updated");
+	if (ops.length) count += await safeBulkWrite(Permissions, ops);
+	console.log(`✅ Permissions updated (${count} docs)`);
 }
 
 async function migrateTemplates(userMap) {
-	const cursor = Templates.find().cursor();
+	const cursor = Templates.find(
+		{},
+		{ _id: 1, agentName: 1, useradmin: 1, FB_PHONE_ID: 1 },
+	).cursor();
 	const ops = [];
+	let count = 0;
+
 	for await (const template of cursor) {
-		if (!template.agentName && userMap[template.useradmin]) {
+		const adminId = String(template.useradmin || "");
+		if (!template.agentName && userMap[adminId]) {
 			ops.push({
 				updateOne: {
 					filter: { _id: template._id },
 					update: {
 						$set: {
-							agentName: userMap[template.useradmin],
+							agentName: userMap[adminId],
 							FB_PHONE_ID:
 								template.FB_PHONE_ID ?? "173988142466890",
 						},
@@ -145,39 +158,50 @@ async function migrateTemplates(userMap) {
 				},
 			});
 		}
+
 		if (ops.length >= 500) {
-			await Templates.bulkWrite(ops);
-			ops.length = 0;
+			count += await safeBulkWrite(Templates, ops);
 		}
 	}
-	if (ops.length) await Templates.bulkWrite(ops);
-	console.log("✅ Templates updated");
+	if (ops.length) count += await safeBulkWrite(Templates, ops);
+	console.log(`✅ Templates updated (${count} docs)`);
 }
 
 async function migrateCustomFields(userMap) {
-	const cursor = CustomField.find().cursor();
+	const cursor = CustomField.find(
+		{},
+		{ _id: 1, agentName: 1, customid: 1 },
+	).cursor();
 	const ops = [];
+	let count = 0;
+
 	for await (const field of cursor) {
-		if (!field.agentName && userMap[field.customid]) {
+		const id = String(field.customid || "");
+		if (!field.agentName && userMap[id]) {
 			ops.push({
 				updateOne: {
 					filter: { _id: field._id },
-					update: { $set: { agentName: userMap[field.customid] } },
+					update: { $set: { agentName: userMap[id] } },
 				},
 			});
 		}
+
 		if (ops.length >= 500) {
-			await CustomField.bulkWrite(ops);
-			ops.length = 0;
+			count += await safeBulkWrite(CustomField, ops);
 		}
 	}
-	if (ops.length) await CustomField.bulkWrite(ops);
-	console.log("✅ CustomFields updated");
+	if (ops.length) count += await safeBulkWrite(CustomField, ops);
+	console.log(`✅ CustomFields updated (${count} docs)`);
 }
 
 async function migrateContactLists(userMap, addedUserMap) {
-	const cursor = ContactList.find().cursor();
+	const cursor = ContactList.find(
+		{},
+		{ _id: 1, agentName: 1, agent: 1, FB_PHONE_ID: 1 },
+	).cursor();
 	const ops = [];
+	let count = 0;
+
 	for await (const list of cursor) {
 		if (
 			!list.agentName &&
@@ -185,7 +209,7 @@ async function migrateContactLists(userMap, addedUserMap) {
 			list.agent.length > 0 &&
 			list.FB_PHONE_ID
 		) {
-			const firstId = list.agent[0];
+			const firstId = String(list.agent[0]);
 			const name = addedUserMap[firstId] || userMap[firstId];
 			if (name) {
 				ops.push({
@@ -196,20 +220,20 @@ async function migrateContactLists(userMap, addedUserMap) {
 				});
 			}
 		}
+
 		if (ops.length >= 500) {
-			await ContactList.bulkWrite(ops);
-			ops.length = 0;
+			count += await safeBulkWrite(ContactList, ops);
 		}
 	}
-	if (ops.length) await ContactList.bulkWrite(ops);
-	console.log("✅ ContactLists updated");
+	if (ops.length) count += await safeBulkWrite(ContactList, ops);
+	console.log(`✅ ContactLists updated (${count} docs)`);
 }
 
 async function buildUserMap() {
 	const cursor = User.find({}, { unique_id: 1, name: 1 }).cursor();
 	const map = {};
 	for await (const user of cursor) {
-		map[user.unique_id] = user.name;
+		map[String(user.unique_id)] = user.name;
 	}
 	return map;
 }
@@ -218,9 +242,25 @@ async function buildAddedUserMap() {
 	const cursor = AddedUser.find({}, { unique_id: 1, name: 1 }).cursor();
 	const map = {};
 	for await (const user of cursor) {
-		map[user.unique_id] = user.name;
+		map[String(user.unique_id)] = user.name;
 	}
 	return map;
+}
+
+async function safeBulkWrite(model, ops) {
+	try {
+		const res = await model.bulkWrite(ops, { ordered: false });
+		const count = res.modifiedCount || 0;
+		ops.length = 0;
+		return count;
+	} catch (err) {
+		console.error(
+			`⚠️ Bulk write error for ${model.modelName}:`,
+			err.message,
+		);
+		ops.length = 0;
+		return 0;
+	}
 }
 
 export const doMigration = () => migrationPending;

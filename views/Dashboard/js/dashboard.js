@@ -21,7 +21,7 @@ window.fbAsyncInit = function () {
 let waba_id = null;
 let phone_number_id = null;
 let fbAccessToken = null;
-let business_id = null; 
+let business_id = null;
 
 // Function to send data when all variables are available
 function showLoader() {
@@ -65,7 +65,7 @@ function sendDataToBackend() {
 			.catch((error) => {
 				hideLoader();
 				console.error("Error saving data:", error);
-				toast("error",error);
+				toast("error", error);
 			});
 	}
 }
@@ -83,7 +83,7 @@ window.addEventListener("message", (event) => {
 			console.log("message event: ", data);
 			waba_id = data?.data.waba_id;
 			phone_number_id = data?.data.phone_number_id;
-			business_id = data?.business_id;  
+			business_id = data?.business_id;
 			// sendDataToBackend();
 		}
 	} catch (error) {
@@ -116,13 +116,31 @@ const launchWhatsAppSignup = () => {
 
 // Payment Button
 
-const element = document.querySelector(".gradient-button");
+{
+	const element = document.querySelector(".gradient-button");
 
-let angle = 0;
-const rotateGradient = () => {
-	angle = (angle + 5) % 360;
-	element?.style?.setProperty("--gradient-angle", `${angle}deg`);
-	requestAnimationFrame(rotateGradient);
-};
+	let angle = 0;
+	const rotateGradient = () => {
+		angle = (angle + 5) % 360;
+		element?.style?.setProperty("--gradient-angle", `${angle}deg`);
+		requestAnimationFrame(rotateGradient);
+	};
 
-rotateGradient();
+	rotateGradient();
+}
+
+// Status
+{
+	document.querySelectorAll(".statusLive").forEach((el) => {
+		const isoDate = el.getAttribute("data-date");
+		if (isoDate) {
+			const date = new Date(Number(isoDate));
+			const formatted = date.toLocaleTimeString("en-GB", {
+				hour: "2-digit",
+				minute: "2-digit",
+				hour12: true,
+			});
+			el.textContent = formatted;
+		}
+	});
+}

@@ -3,7 +3,17 @@ import Razorpay from "razorpay";
 import Payment from "../../models/payments.model.js";
 
 export const handleStripePayment = async (
-	{ intentId, amount, user, ownerId, messages, paymentMode, name, plan },
+	{
+		intentId,
+		amount,
+		user,
+		ownerId,
+		messages,
+		paymentMode,
+		name,
+		plan,
+		paymentType,
+	},
 	stripe,
 ) => {
 	let paymentIntent;
@@ -30,6 +40,7 @@ export const handleStripePayment = async (
 		messagesCount: messages,
 		agentName: name,
 		plan,
+		paymentType,
 	});
 
 	return {
@@ -40,7 +51,7 @@ export const handleStripePayment = async (
 };
 
 export const handleRazorpayPayment = async (
-	{ amount, user, ownerId, messages, paymentMode, name, plan },
+	{ amount, user, ownerId, messages, paymentMode, name, plan, paymentType },
 	razorpay,
 ) => {
 	const paymentIntent = await razorpay.orders.create({
@@ -60,6 +71,7 @@ export const handleRazorpayPayment = async (
 		messagesCount: messages,
 		agentName: name,
 		plan,
+		paymentType,
 	});
 
 	return {

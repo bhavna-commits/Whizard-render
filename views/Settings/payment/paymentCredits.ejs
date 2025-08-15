@@ -1,11 +1,11 @@
 <div class="w-full px-3 bg-white">
 	<div class="flex flex-col w-full items-center">
-		<div class="w-full h-full flex justify-center box-content rounded-xl" id="left-side">
+		<div class="w-full h-full flex justify-center box-content rounded-xl" id="right-side">
 			<div class="w-11/12">
 				
 				<div class="flex items-center justify-between my-8">
-					<button type="button" class="<%= paymentTableData?.length > 0 ? '' : 'hidden' %>flex items-cente  text-gray-500" onclick="location.reload()"><span class="mb-1 mr-1">&LeftArrow;</span> Go Back</button>
-					<h1 class="text-2xl text-center font-semibold">Payment Plan</h1>
+					<button type="button" class="<%= paymentTableData?.length > 0 ? '' : 'hidden' %>flex items-center  text-gray-500" onclick="location.reload()"><span class="mb-1 mr-1">&LeftArrow;</span> Go Back</button>
+					<h1 class="text-2xl text-center font-semibold">Payment Credits</h1>
 					<div class="invisible">payment</div>
 				</div>
 				
@@ -13,16 +13,16 @@
 				<div class="grid grid-cols-3 gap-10">
 					<!-- Weekday Fall Pass -->
 					<label class="radio-option block cursor-pointer grow">
-						<input type="radio" name="plan" value="weekday" class="sr-only">
-						<div class="option-content h-[30rem] border-2 border-gray-200 rounded-xl p-8 hover:border-gray-300">
+						<input type="radio" name="credits" value="weekday" class="sr-only">
+						<div class="option-content  h-[30rem] border-2 border-gray-200 rounded-xl p-8 hover:border-gray-300">
 							<div class="flex items-center space-x-4 w-full">
 								<div class="w-full">
-									<input type="number" hidden value="1" />
+									<input type="number" hidden value="3000" />
 									<h3 class="text-2xl font-semibold text-gray-900">Starter</h3>
 									<h4 class=" text-gray-500 text-lg">Everything you need to get started with your business.</h4>
 									<div class="flex items-center justify-between my-3">
-										<div class="text-lg text-red-500 line-through"><span class=" mr-1 text-gray-500"><%= plans[1].currency %></span><%= plans[1].amount * 3 %></div>
-										<div class="text-2xl font-bold text-gray-900"><span class=" mr-1 text-gray-500"><%= plans[1].currency %></span><%= plans[1].amount %></div>
+										<div class="text-lg text-red-500 line-through"><span class=" mr-1 text-gray-500"><%= credits[3000].currency %></span><%= credits[3000].amount * 3 %></div>
+										<div class="text-2xl font-bold text-gray-900"><span class=" mr-1 text-gray-500"><%= credits[3000].currency %></span><%= credits[3000].amount %></div>
 									</div>
 									<div class=" mt-2">
 										<ul class="space-y-2">
@@ -44,17 +44,17 @@
 					
 					<!-- Unlimited Fall Pass (Most Popular) -->
 					<label class="radio-option block cursor-pointer grow min-h">
-						<input type="radio" name="plan" value="unlimited" class="sr-only" checked>
+						<input type="radio" name="credits" value="unlimited" class="sr-only" checked>
 						<div class="option-content  h-[30rem] border-2 border-gray-200 rounded-xl p-6 hover:border-gray-300">
 							<div class="flex items-center justify-between">
 								<div class="flex items-center space-x-4 w-full">
 									<div class="w-full">
-										<input type="number" hidden value="2" />
+										<input type="number" hidden value="5000" />
 										<h3 class="text-2xl font-semibold text-gray-900">Growth</h3>
 										<h4 class="text-gray-500 text-lg">Highly recommended plan to make the best use of Retargeting Campaigns</h4>
 										<div class="flex items-center justify-between my-3">
-											<div class="text-lg text-red-500 line-through"><span class=" mr-1 text-gray-500"><%= plans[3].currency %></span><%= plans[3].amount * 3 %></div>
-											<div class="text-2xl font-bold text-gray-900"><span class=" mr-1 text-gray-500"><%= plans[3].currency %></span><%= plans[3].amount %></div>
+											<div class="text-lg text-red-500 line-through"><span class=" mr-1 text-gray-500"><%= credits[5000].currency %></span><%= credits[5000].amount * 3 %></div>
+											<div class="text-2xl font-bold text-gray-900"><span class=" mr-1 text-gray-500"><%= credits[5000].currency %></span><%= credits[5000].amount %></div>
 											<!-- <div class=" text-gray-500">Sep to Jan</div> -->
 										</div>
 										<div class=" mt-2">
@@ -76,18 +76,18 @@
 					
 					<!-- Extended Fall Pass -->
 					<label class="radio-option block cursor-pointer grow">
-						<input type="radio" name="plan" value="extended" class="sr-only">
-						<div class="option-content  h-[30rem] border-2 border-gray-200 rounded-xl p-6 hover:border-gray-300">
+						<input type="radio" name="credits" value="extended" class="sr-only">
+						<div class="option-content h-[30rem] border-2 border-gray-200 rounded-xl p-6 hover:border-gray-300">
 							<div class="flex items-center justify-between">
 								<div class="flex items-center space-x-4 w-full">
 									<!-- <div class="check-indicator"></div> -->
 									<div class="w-full">
-										<input type="number" hidden value="5" />
+										<input type="number" hidden value="10000" />
 										<h3 class="text-2xl font-semibold text-gray-900">Scale</h3>
 										<h4 class="text-gray-900 text-lg">Recommended for Big Companies</h4>
 										<div class="flex items-center justify-between my-3">
-											<div class=" text-red-500 line-through"><span class=" mr-1 text-gray-500"><%= plans[5].currency %></span><%= plans[5].amount * 3 %></div>
-											<div class="text-2xl font-bold text-gray-900"><span class=" mr-1 text-gray-500"><%= plans[5].currency %></span><%= plans[5].amount %></div>
+											<div class=" text-red-500 line-through"><span class=" mr-1 text-gray-500"><%= credits[10000].currency %></span><%= credits[10000].amount * 3 %></div>
+											<div class="text-2xl font-bold text-gray-900"><span class=" mr-1 text-gray-500"><%= credits[10000].currency %></span><%= credits[10000].amount %></div>
 											<!-- <div class=" text-gray-500">Sep to Jan</div> -->
 										</div>
 										<div class="mt-2">
@@ -114,7 +114,7 @@
 		<div class="w-1/2 flex justify-center">
 			<div class="space-y-4 py-10" id="btn-wrap">
 				
-				<button type="button" class="bg-black rounded h-10 w-52 flex items-center justify-center" id="plan-payment-btn">
+				<button type="button" class="bg-black rounded h-10 w-52 flex items-center justify-center" id="btn">
 					<div class="text-white loader-text">Continue with Payment</div>
 					<div class="loading-spinner hidden"></div>
 				</button>

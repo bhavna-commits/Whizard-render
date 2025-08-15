@@ -58,7 +58,7 @@
 				<!-- <div id="screenSizeDisplay">Screen Width: 0px, Screen Height: 0px</div> -->
 				<span class="p-text text-lg">WhatsApp API status:
 					<span class="<%= status === 'Pending' ? 'text-red-500' : 'text-green-500' %> text-lg">
-						<%= status %>
+						<%= status %> <span class="ml-2 statusLive <%= status === 'Pending' ? 'hidden' : 'flex' %>" data-date="<%= user?.payment?.expiry %>"></span>
 					</span>
 				</span>
 			</div>
@@ -138,7 +138,7 @@
 					<% if (user?.payment?.plan !== "unlimited" && user?.payment?.plan !== "noplan" ) { %>
 					<button class="gradient-button rounded-md p-2 flex items-center" onclick="location.href='/settings/payments'">
 						<img src="svg/coins.svg" alt="" class="w-6 mr-2">
-						Payment Plan
+						Dashboard Plan
 					</button>
 					<% } %>
 					<% if (admin) { %>

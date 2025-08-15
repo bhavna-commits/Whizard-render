@@ -1,12 +1,14 @@
 let selectedAmount = 499;
 let selectedMessages = 5000;
+let selectedPlan = 3;
+let description = "Growth";
 
 let options = {
 	key,
 	amount: "49900",
 	currency: currencyTag || "INR",
 	name: "Whizard",
-	description: `${selectedMessages} Messages`,
+	description,
 	image: `${url}/whizardLogo.png`,
 	order_id: "order_IluGWxBm9U8zJ8",
 	handler: async function (response) {
@@ -47,63 +49,94 @@ let options = {
 };
 
 document.addEventListener("DOMContentLoaded", () => {
-	const stripeBtn = document.getElementById("btn");
-	const rightSide = document.getElementById("right-side");
-	const buttonText = stripeBtn.querySelector(".loader-text");
-	const loadingSpinner = stripeBtn.querySelector(".loading-spinner");
-	const btnWrap = document.getElementById("btn-wrap");
-	const stripeSection = document.getElementById("stripe-section");
-	const backBtn = document.getElementById("back-to-plans");
-	const planInputs = document.querySelectorAll('input[name="plan"]');
-	const errorDiv = document.getElementById("card-errors");
+	/** Plan */ {
+		const planInputs = document.querySelectorAll("input[name='plan']");
+		const planPaymentBtn = document.getElementById("plan-payment-btn");
+		const planButtonText = planPaymentBtn.querySelector(".loader-text");
+		const planLoadingSpinner =
+			planPaymentBtn.querySelector(".loading-spinner");
 
-	planInputs.forEach((input) => {
-		input.addEventListener("change", () => {
-			const planCard = input.nextElementSibling;
-			selectedMessages = Number(
-				planCard.querySelector("input").value.trim(),
-			);
+		planInputs.forEach((input) => {
+			input.addEventListener("change", () => {
+				const planCard = input.nextElementSibling;
+				selectedPlan = Number(
+					planCard.querySelector("input").value.trim(),
+				);
+				description = planCard.querySelector("h3").textContent.trim();
+			});
 		});
-	});
 
-	stripeBtn?.addEventListener("click", async () => {
-		loadingSpinner.classList.remove("hidden");
-		buttonText.classList.add("hidden");
-		stripeBtn.disabled = true;
+		planPaymentBtn?.addEventListener("click", async () => {
+			planLoadingSpinner.classList.remove("hidden");
+			planButtonText.classList.add("hidden");
+			planPaymentBtn.disabled = true;
 
-		try {
-			await initializeOrUpdateIntent(selectedMessages);
-		} catch (err) {
-			console.error(err?.message || err);
-			toast(
-				"error",
-				"Payment setup failed: " + (err?.message || err || "Try again"),
-			);
-		} finally {
-			loadingSpinner.classList.add("hidden");
-			buttonText.classList.remove("hidden");
-			stripeBtn.disabled = false;
-		}
-	});
+			try {
+				await initializeOrUpdateIntent(selectedPlan, "plan");
+			} catch (err) {
+				console.error(err?.message || err);
+				toast(
+					"error",
+					"Payment setup failed: " +
+						(err?.message || err || "Try again"),
+				);
+			} finally {
+				planLoadingSpinner.classList.add("hidden");
+				planButtonText.classList.remove("hidden");
+				planPaymentBtn.disabled = false;
+			}
+		});
+	}
 
-	backBtn?.addEventListener("click", () => {
-		stripeSection.classList.add("hidden");
-		rightSide.classList.remove("hidden");
-		btnWrap.classList.remove("hidden");
-	});
+	/** Messages */ {
+		const planInputs = document.querySelectorAll("input[name='credits']");
+		const stripeBtn = document.getElementById("btn");
+		const buttonText = stripeBtn.querySelector(".loader-text");
+		const loadingSpinner = stripeBtn.querySelector(".loading-spinner");
 
-	async function initializeOrUpdateIntent(messages) {
-		errorDiv.textContent = "";
+		planInputs.forEach((input) => {
+			input.addEventListener("change", () => {
+				const planCard = input.nextElementSibling;
+				selectedMessages = Number(
+					planCard.querySelector("input").value.trim(),
+				);
+				description = planCard.querySelector("h3").textContent.trim();
+			});
+		});
 
+		stripeBtn?.addEventListener("click", async () => {
+			loadingSpinner.classList.remove("hidden");
+			buttonText.classList.add("hidden");
+			stripeBtn.disabled = true;
+
+			try {
+				await initializeOrUpdateIntent(selectedMessages, "credits");
+			} catch (err) {
+				console.error(err?.message || err);
+				toast(
+					"error",
+					"Payment setup failed: " +
+						(err?.message || err || "Try again"),
+				);
+			} finally {
+				loadingSpinner.classList.add("hidden");
+				buttonText.classList.remove("hidden");
+				stripeBtn.disabled = false;
+			}
+		});
+	}
+
+	async function initializeOrUpdateIntent(messages, type) {
 		const res = await fetch("/api/settings/create-payment-intent", {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ messages }),
+			body: JSON.stringify({ messages, type }),
 		});
 
 		const { intentId, success, message } = await res.json();
 
 		options.order_id = intentId;
+		options.description = description;
 
 		if (!success) throw message;
 
@@ -111,26 +144,3 @@ document.addEventListener("DOMContentLoaded", () => {
 		rzp1.open();
 	}
 });
-
-// function showMessage(msg) {
-// 	let el = document.getElementById("payment-message");
-// 	if (!el) {
-// 		el = document.createElement("div");
-// 		el.id = "payment-message";
-// 		el.className = "text-sm text-red-600 mt-4 text-center";
-// 		stripeSection.appendChild(el);
-// 	}
-// 	el.textContent = msg;
-// 	el.classList.remove("hidden");
-// 	setTimeout(() => el.classList.add("hidden"), 4000);
-// }
-
-// function setLoading(isLoading) {
-// 	const btn = document.getElementById("submit");
-// 	if (!btn) return;
-// 	btn.disabled = isLoading;
-// 	document.getElementById("spinner").classList.toggle("hidden", !isLoading);
-// 	document
-// 		.getElementById("button-text")
-// 		.classList.toggle("hidden", isLoading);
-// }

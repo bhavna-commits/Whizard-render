@@ -1,5 +1,4 @@
 import mongoose, { Schema } from "mongoose";
-import { type } from "os";
 
 const userSchema = new mongoose.Schema(
 	{
@@ -151,6 +150,9 @@ const userSchema = new mongoose.Schema(
 			plan: {
 				type: Schema.Types.Mixed,
 			},
+			credits: {
+				type: Schema.Types.Mixed,
+			},
 			totalMessages: {
 				type: Number,
 				default: 0,
@@ -162,6 +164,16 @@ const userSchema = new mongoose.Schema(
 				required: true,
 			},
 			previousMessagesCount: {
+				type: Number,
+				default: 0,
+				required: true,
+			},
+			usersCount: {
+				type: Number,
+				default: 0,
+				required: true,
+			},
+			expiry: {
 				type: Number,
 				default: 0,
 				required: true,

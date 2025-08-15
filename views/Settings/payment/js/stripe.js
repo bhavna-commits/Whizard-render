@@ -1,68 +1,116 @@
 const stripe = Stripe(key);
 
 document.addEventListener("DOMContentLoaded", () => {
-	const stripeBtn = document.getElementById("btn");
-	const rightSide = document.getElementById("right-side");
 	const btnWrap = document.getElementById("btn-wrap");
 	const stripeSection = document.getElementById("stripe-section");
 	const backBtn = document.getElementById("back-to-plans");
-	const planInputs = document.querySelectorAll('input[name="plan"]');
 	const paymentElementContainer = document.getElementById("card-element");
 	const stripePaymentBox = document.getElementById("stripe-payment-box");
 	const cardWrapper = document.getElementById("card-wrapper");
 	const errorDiv = document.getElementById("card-errors");
 
-	let selectedMessages = 5000;
 	let currentIntentId = null;
 	let elements = null;
 
-	planInputs.forEach((input) => {
-		input.addEventListener("change", () => {
-			const planCard = input.nextElementSibling;
-			selectedMessages = Number(
-				planCard.querySelector("input").value.trim(),
-			);
+	/** Plan */ {
+		let selectedPlan = 3;
+
+		const planPaymentBtn = document.getElementById("plan-payment-btn");
+		const leftSide = document.getElementById("left-side");
+		const planInputs = document.querySelectorAll('input[name="plan"]');
+
+		planInputs.forEach((input) => {
+			input.addEventListener("change", () => {
+				const planCard = input.nextElementSibling;
+				selectedPlan = Number(
+					planCard.querySelector("input").value.trim(),
+				);
+			});
 		});
-	});	
 
-	stripeBtn?.addEventListener("click", async () => {
-		rightSide.classList.add("hidden");
-		btnWrap.classList.add("hidden");
-		stripeSection.classList.remove("hidden");
+		planPaymentBtn?.addEventListener("click", async () => {
+			leftSide.classList.add("hidden");
+			btnWrap.classList.add("hidden");
+			stripeSection.classList.remove("hidden");
 
-		stripePaymentBox.classList.add("hidden");
-		cardWrapper.classList.add("hidden");
+			stripePaymentBox.classList.add("hidden");
+			cardWrapper.classList.add("hidden");
 
-		try {
-			await initializeOrUpdateIntent(selectedMessages);
+			try {
+				await initializeOrUpdateIntent(selectedPlan, "plan");
 
-			stripePaymentBox.classList.remove("hidden");
-			cardWrapper.classList.remove("hidden");
-		} catch (err) {
+				stripePaymentBox.classList.remove("hidden");
+				cardWrapper.classList.remove("hidden");
+			} catch (err) {
+				stripeSection.classList.add("hidden");
+				btnWrap.classList.remove("hidden");
+				leftSide.classList.remove("hidden");
+				console.error(err?.message || err);
+				toast(
+					"error",
+					"Payment setup failed: " +
+						(err?.message || err || "Try again"),
+				);
+			}
+		});
+	}
+
+	/** Messages */ {
+		let selectedMessages = 5000;
+
+		const stripeBtn = document.getElementById("btn");
+		const rightSide = document.getElementById("right-side");
+		const planInputs = document.querySelectorAll('input[name="credits"]');
+
+		planInputs.forEach((input) => {
+			input.addEventListener("change", () => {
+				const planCard = input.nextElementSibling;
+				selectedPlan = Number(
+					planCard.querySelector("input").value.trim(),
+				);
+			});
+		});
+
+		stripeBtn?.addEventListener("click", async () => {
+			rightSide.classList.add("hidden");
+			btnWrap.classList.add("hidden");
+			stripeSection.classList.remove("hidden");
+
+			stripePaymentBox.classList.add("hidden");
+			cardWrapper.classList.add("hidden");
+
+			try {
+				await initializeOrUpdateIntent(selectedMessages, "credits");
+
+				stripePaymentBox.classList.remove("hidden");
+				cardWrapper.classList.remove("hidden");
+			} catch (err) {
+				stripeSection.classList.add("hidden");
+				btnWrap.classList.remove("hidden");
+				rightSide.classList.remove("hidden");
+				console.error(err?.message || err);
+				toast(
+					"error",
+					"Payment setup failed: " +
+						(err?.message || err || "Try again"),
+				);
+			}
+		});
+
+		backBtn?.addEventListener("click", () => {
 			stripeSection.classList.add("hidden");
-			btnWrap.classList.remove("hidden");
 			rightSide.classList.remove("hidden");
-			console.error(err?.message || err);
-			toast(
-				"error",
-				"Payment setup failed: " + (err?.message || err || "Try again"),
-			);
-		}
-	});
+			btnWrap.classList.remove("hidden");
+		});
+	}
 
-	backBtn?.addEventListener("click", () => {
-		stripeSection.classList.add("hidden");
-		rightSide.classList.remove("hidden");
-		btnWrap.classList.remove("hidden");
-	});
-
-	async function initializeOrUpdateIntent(messages) {
+	async function initializeOrUpdateIntent(messages, type) {
 		errorDiv.textContent = "";
 
 		const res = await fetch("/api/settings/create-payment-intent", {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ messages, intentId: currentIntentId }),
+			body: JSON.stringify({ messages, intentId: currentIntentId, type }),
 		});
 
 		const { clientSecret, intentId, success, message } = await res.json();

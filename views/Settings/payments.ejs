@@ -130,8 +130,6 @@
 								Messages are calculated as total messages sent vs total messages plan bought.
 							</p>
 						</div>
-						
-						
 					</div>
 					<div class="relative w-full">
 						<!-- Slider track -->
@@ -154,18 +152,19 @@
 					</div>
 				</div>
 				<div class="w-full space-x-3 py-4 flex items-center">
-					<button type="button" class="text-white bg-black rounded py-1 px-3 h-10 w-36" id="upgrade-plan-btn">Upgrade Plan</button>
-					<button type="button" class="border rounded h-10 w-36 px-3 py-1 flex items-center justify-center" id="restore-plan-btn">
-						<div class="loader-text">Restore Plan</div>
-						<div class="loading-spinner hidden"></div>
+					<button type="button" class="text-white bg-black rounded py-1 px-3 h-10 w-36" id="open-plan-btn">Buy Plan</button>
+					<button type="button" class="border rounded h-10 w-36 px-3 py-1 flex items-center justify-center" id="open-credits-btn">
+						Buy Credits
 					</button>
 				</div>
 				
 				<%- include("payment/paymentTable") %>
 			</div>
 			<div id="payment-plan-ui" class="<%= paymentTableData?.length > 0 ? 'hidden' : '' %> w-full">
-				
 				<%- include("payment/paymentPlan") %>
+			</div>
+			<div id="payment-credits-ui" class="<%= paymentTableData?.length > 0 ? 'hidden' : '' %> w-full">
+				<%- include("payment/paymentCredits") %>
 			</div>
 		</div>
 	</div>
@@ -179,18 +178,21 @@
 			url = `https://${host}`;
 		}
 		
-		const restoreBtn = document.getElementById("restore-plan-btn");
-		const upgradeBtn = document.getElementById("upgrade-plan-btn");
+		const openCreditsBtn = document.getElementById("open-credits-btn");
+		const openPlanBtn = document.getElementById("open-plan-btn");
 		const meterSection = document.getElementById("messages-meter");
 		const paymentPlanUI = document.getElementById("payment-plan-ui");
+		const paymentCreditsUI = document.getElementById("payment-credits-ui");
 		
 		document.addEventListener("DOMContentLoaded", () => {
-			
-			document.getElementById("open-table")?.addEventListener("click", () => location.reload());
-			
-			upgradeBtn?.addEventListener("click", () => {
+			openPlanBtn?.addEventListener("click", () => {
 				meterSection.classList.add("hidden");
 				paymentPlanUI.classList.remove("hidden");
+			});
+			
+			openCreditsBtn?.addEventListener("click", () => {
+				meterSection.classList.add("hidden");
+				paymentCreditsUI.classList.remove("hidden");
 			});
 		});
 	</script>
@@ -203,7 +205,7 @@
 		const key = <%- JSON.stringify(clientKeyRazorpay) %>;
 	</script>
 	<script src="/payment/js/razorpay.js"></script>
-	<script>
+	<!-- <script>
 		document.addEventListener("DOMContentLoaded", () => {
 			restoreBtn?.addEventListener("click", () => {
 				try {
@@ -222,13 +224,13 @@
 				}
 			});
 		})
-	</script>
+	</script> -->
 	<% } else { %>
 	<script>
 		const key = <%- JSON.stringify(clientKeyStripe) %>;
 	</script>
 	<script src="/payment/js/stripe.js"></script>
-	<script>
+	<!-- <script>
 		restoreBtn?.addEventListener("click", () => {
 			try {
 				setTimeout(() => {
@@ -249,7 +251,7 @@
 				}, 500);
 			}
 		});
-	</script>
+	</script> -->
 	<% } %>
 	
 	<script src="/toast.js"></script>
