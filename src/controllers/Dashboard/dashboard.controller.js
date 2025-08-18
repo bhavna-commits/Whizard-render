@@ -36,6 +36,12 @@ export const getDashboard = async (req, res) => {
 			selectedNumber,
 		);
 
+		let status = user?.WhatsAppConnectStatus;
+
+		if (user?.payment?.expiry < Date.now()) {
+			status = "Expired, Please renew your plan";
+		}
+
 		const permissions = req.session?.addedUser?.permissions;
 		const renderData = {
 			help,
@@ -45,7 +51,7 @@ export const getDashboard = async (req, res) => {
 			config: process.env.CONFIG_ID,
 			app: process.env.FB_APP_ID,
 			graph: process.env.FB_GRAPH_VERSION,
-			status: user?.WhatsAppConnectStatus,
+			status,
 			secret: process.env.FB_APP_SECRET,
 			totalMessages: dashboardData.campaignStats.totalMessages,
 			messagesSent: dashboardData.campaignStats.messagesSent,

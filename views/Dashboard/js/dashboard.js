@@ -133,14 +133,20 @@ const launchWhatsAppSignup = () => {
 {
 	document.querySelectorAll(".statusLive").forEach((el) => {
 		const isoDate = el.getAttribute("data-date");
+		console.log(isoDate);
 		if (isoDate) {
 			const date = new Date(Number(isoDate));
-			const formatted = date.toLocaleTimeString("en-GB", {
-				hour: "2-digit",
-				minute: "2-digit",
-				hour12: true,
-			});
-			el.textContent = formatted;
+			const formatted = date
+				.toLocaleString("en-GB", {
+					day: "2-digit",
+					month: "short",
+					year: "numeric",
+					hour: "2-digit",
+					minute: "2-digit",
+					hour12: true,
+				})
+				.replace(",", " at ");
+			el.textContent = `till ${formatted}`;
 		}
 	});
 }

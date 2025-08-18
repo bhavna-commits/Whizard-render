@@ -65,6 +65,8 @@ export const home = async (req, res) => {
 	}
 };
 
+// Profile
+
 export const profile = async (req, res) => {
 	try {
 		let id;
@@ -377,6 +379,8 @@ export const updatePassword = async (req, res, next) => {
 	}
 };
 
+//  Account Details
+
 export const accountDetails = async (req, res) => {
 	try {
 		const id = req.session?.user?.id || req.session?.addedUser?.owner;
@@ -507,6 +511,8 @@ export const updateAccountDetails = async (req, res, next) => {
 		});
 	}
 };
+
+//  WhatsApp Account Details
 
 export const whatsAppAccountDetails = async (req, res) => {
 	try {
@@ -688,6 +694,8 @@ export const updatewhatsAppAccountDetails = async (req, res, next) => {
 		});
 	}
 };
+
+//  Activity Logs
 
 export const getActivityLogs = async (req, res) => {
 	try {
@@ -896,6 +904,8 @@ export const activityLogsFiltered = async (req, res, next) => {
 	}
 };
 
+//  User Management
+
 export const getUserManagement = async (req, res) => {
 	try {
 		const id = req.session?.user?.id || req.session?.addedUser?.owner;
@@ -960,43 +970,44 @@ export const getCreatePassword = async (req, res) => {
 export const sendUserInvitation = async (req, res, next) => {
 	try {
 		const adminId = req?.session?.user?.id || req.session?.addedUser?.owner;
+		const { name, email, roleId, roleName, url, selectedFBNumber } =
+			req.body;
 
-		let { name, email, roleId, roleName, url, selectedFBNumber } = req.body;
+		if (!isString(name, email, roleId, roleName)) return next();
 
-		if (!isString(name, email, roleId, roleName)) {
-			return next();
-		}
+		const [
+			userNameExists,
+			addedUserNameExists,
+			addedUserEmailExists,
+			userEmailExists,
+		] = await Promise.all([
+			User.findOne({ name, unique_id: adminId }),
+			AddedUser.findOne({ name, deleted: false, useradmin: adminId }),
+			AddedUser.findOne({ email, deleted: false }),
+			User.findOne({ email, deleted: false }),
+		]);
 
-		let exists = await User.findOne({ name, unique_id: adminId });
-		if (exists) {
+		if (userNameExists || addedUserNameExists) {
 			return res
 				.status(409)
 				.json({ success: false, message: "Name already in use" });
 		}
+		if (addedUserEmailExists || userEmailExists) {
+			return res
+				.status(409)
+				.json({ success: false, message: "Email already in use" });
+		}
 
-		exists = await AddedUser.findOne({
-			name,
-			deleted: false,
+		const user = await User.findOne({ unique_id: adminId });
+		const totalAddedUsers = await AddedUser.countDocuments({
 			useradmin: adminId,
+			deleted: false,
 		});
-		if (exists) {
-			return res
-				.status(409)
-				.json({ success: false, message: "Name already in use" });
-		}
-
-		exists = await AddedUser.findOne({ email, deleted: false });
-		if (exists) {
-			return res
-				.status(409)
-				.json({ success: false, message: "Email already in use" });
-		}
-
-		exists = await User.findOne({ email, deleted: false });
-		if (exists) {
-			return res
-				.status(409)
-				.json({ success: false, message: "Email already in use" });
+		if ((user?.payment?.usersCount ?? 0) <= totalAddedUsers) {
+			return res.status(401).json({
+				success: false,
+				message: `You have added users to its limit.  Buy new plan to add more users`,
+			});
 		}
 
 		const newUser = new AddedUser({
@@ -1009,44 +1020,33 @@ export const sendUserInvitation = async (req, res, next) => {
 			color: getRandomColor(),
 			selectedFBNumber,
 		});
-		console.log("user added");
 
-		// Generate unique invitation link
 		const invitationToken = Buffer.from(
 			`${adminId}:${newUser.unique_id}`,
 		).toString("base64");
 		const invitationLink = `${url}/settings/user-management/create-password?token=${invitationToken}`;
 
-		// Send invitation email
 		await sendAddUserMail(
 			req.session?.user?.name || req.session?.addedUser?.name,
 			invitationLink,
 			email,
 		);
-		console.log("email sent");
 
-		// Log activity
 		await ActivityLogs.create({
-			useradmin: req.session?.user?.id || req.session?.addedUser?.owner,
+			useradmin: adminId,
 			unique_id: generateUniqueId(),
-			name: req.session?.user?.name
-				? req.session?.user?.name
-				: req.session?.addedUser?.name,
+			name: req.session?.user?.name || req.session?.addedUser?.name,
 			actions: "Send",
 			details: `Sent an invitation link to join the account`,
 		});
 
-		// Save new user to the database
 		await newUser.save();
-		console.log("last");
 
-		// Send success response
 		return res
 			.status(200)
 			.json({ message: "Invitation sent successfully" });
 	} catch (error) {
 		console.error("Error sending invitation:", error);
-		// Send error response only if no response has been sent yet
 		if (!res.headersSent) {
 			res.status(500).json({ message: "Failed to send invitation" });
 		}

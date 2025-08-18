@@ -57,8 +57,8 @@
 				</div>
 				<!-- <div id="screenSizeDisplay">Screen Width: 0px, Screen Height: 0px</div> -->
 				<span class="p-text text-lg">WhatsApp API status:
-					<span class="<%= status === 'Pending' ? 'text-red-500' : 'text-green-500' %> text-lg">
-						<%= status %> <span class="ml-2 statusLive <%= status === 'Pending' ? 'hidden' : 'flex' %>" data-date="<%= user?.payment?.expiry %>"></span>
+					<span class="<%= status === 'Live' ? 'text-green-500' : 'text-red-500' %> flex items-center">
+						<%= status %> <span class="ml-1 statusLive <%= status === 'Live' ? 'flex' : 'hidden' %>" data-date="<%= user?.payment?.expiry %>"></span>
 					</span>
 				</span>
 			</div>

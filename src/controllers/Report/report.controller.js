@@ -13,10 +13,7 @@ import {
 	getCampaignOverview,
 	safeParseJSON,
 } from "./reports.functions.js";
-import {
-	isNumber,
-	isString,
-} from "../../middleWares/sanitiseInput.js";
+import { isNumber, isString } from "../../middleWares/sanitiseInput.js";
 import { generateUniqueId } from "../../utils/otpGenerator.js";
 import { agenda } from "../../config/db.js";
 import { sendCampaignScheduledEmail } from "../../services/OTP/reportsEmail.js";
@@ -528,6 +525,16 @@ export const createCampaign = async (req, res, next) => {
 			),
 		);
 
+		// === Plan Expiry Check
+
+		if (user?.payment?.expiry < Date.now()) {
+			throw new Error(
+				`Your access to dashboard has expired on ${new Date(
+					user?.payment?.expiry,
+				).toUTCString()}. Please recharge!`,
+			);
+		}
+
 		// === CREDIT CHECK ===
 		const messagesCount = user?.payment?.messagesCount || 0;
 		const totalCount = user?.payment?.totalMessages || 0;
@@ -630,7 +637,8 @@ export const createCampaign = async (req, res, next) => {
 	} catch (error) {
 		console.error("Error creating campaign:", error.message);
 		res.status(500).json({
-			message: `Error creating campaign: ${error.message}`,
+			success: false,
+			message: error?.message || error,
 		});
 	}
 };
