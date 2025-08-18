@@ -491,9 +491,9 @@ export const updateAccountDetails = async (req, res, next) => {
 		await ActivityLogs.create({
 			useradmin: req.session?.user?.id || req.session?.addedUser?.owner,
 			unique_id: generateUniqueId(),
-			name: req.session.user.name
-				? req.session.user.name
-				: req.session.addedUser.name,
+			name: req.session?.user?.name
+				? req.session?.user?.name
+				: req.session?.addedUser?.name,
 			actions: "Update",
 			details: `Updated their account details`,
 		});
@@ -507,7 +507,7 @@ export const updateAccountDetails = async (req, res, next) => {
 		console.error("Error updating account details:", error);
 		res.status(500).json({
 			success: false,
-			message: "Server error: " + error.message,
+			message: "Server error: " + error.message || err,
 		});
 	}
 };
