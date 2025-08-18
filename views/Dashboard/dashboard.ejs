@@ -71,7 +71,6 @@
 			<div id="afterSignUpLoader" class="fixed inset-0 flex justify-center items-center bg-gray-500 bg-opacity-50 hidden z-20">
 				<div class="loader border-t-4 border-blue-500 rounded-full w-12 h-12 animate-spin"></div>
 			</div>
-			
 			<% if (status === "Pending") { %>
 			<div class="gradient-bg mb-5 rounded-2xl shadow-slate-700 shadow-md overflow-hidden relative h-44">
 				<div class="p-8 flex flex-col justify-center h-full relative z-10">
@@ -135,10 +134,10 @@
 						Test Message
 					</button>
 					<% } %>
-					<% if (user?.payment?.plan !== "unlimited" && user?.payment?.plan !== "noplan" ) { %>
+					<% if (user?.payment?.plan !== "unlimited" ) { %>
 					<button class="gradient-button rounded-md p-2 flex items-center" onclick="location.href='/settings/payments'">
 						<img src="svg/coins.svg" alt="" class="w-6 mr-2">
-						Dashboard Plan
+						Payment Plan
 					</button>
 					<% } %>
 					<% if (admin) { %>

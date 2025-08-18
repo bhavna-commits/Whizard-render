@@ -32,13 +32,13 @@ export const getDashboard = async (req, res) => {
 
 		const dashboardData = await fetchDashboardData(
 			id,
-			req.query,
+			req?.query,
 			selectedNumber,
 		);
 
 		let status = user?.WhatsAppConnectStatus;
 
-		if (user?.payment?.expiry < Date.now()) {
+		if (user?.payment?.expiry < Date.now() && status !== "Pending") {
 			status = "Expired, Please renew your plan";
 		}
 

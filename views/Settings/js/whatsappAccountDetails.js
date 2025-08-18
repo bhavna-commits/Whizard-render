@@ -101,7 +101,7 @@ function handleFileChange(event) {
 	const label = document.getElementById("fileLabel");
 
 	// Update label text with filename
-	if (input.files && input.files[0]) {
+	if (input?.files && input?.files[0]) {
 		label.textContent = input.files[0].name;
 	} else {
 		label.textContent = "Upload";
