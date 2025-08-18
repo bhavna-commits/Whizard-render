@@ -59,10 +59,13 @@ document.addEventListener("DOMContentLoaded", function () {
 		}
 
 		try {
-			const response = await fetch("/api/settings/account-details", {
-				method: "POST",
-				body: formData,
-			});
+			const response = await fetch(
+				"/api/settings/whatsapp-account-details",
+				{
+					method: "POST",
+					body: formData,
+				},
+			);
 
 			const result = await response.json();
 
