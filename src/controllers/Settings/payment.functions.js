@@ -13,7 +13,7 @@ export const handleStripePayment = async (
 		name,
 		plan,
 		paymentType,
-		credits,
+		credits
 	},
 	stripe,
 ) => {
@@ -53,17 +53,7 @@ export const handleStripePayment = async (
 };
 
 export const handleRazorpayPayment = async (
-	{
-		amount,
-		user,
-		ownerId,
-		messages,
-		paymentMode,
-		name,
-		plan,
-		paymentType,
-		credits,
-	},
+	{ amount, user, ownerId, messages, paymentMode, name, plan, paymentType, credits },
 	razorpay,
 ) => {
 	const paymentIntent = await razorpay.orders.create({

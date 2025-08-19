@@ -11,42 +11,34 @@ import { help } from "../../utils/dropDown.js";
 
 export const adminPanel = async (req, res) => {
 	try {
-		let users = await User.find({
+		const campaignOwners = await Campaign.distinct("useradmin");
+		const ownerSet = new Set(campaignOwners);
+
+		const users = await User.find({
 			unique_id: { $ne: "db2426e80f" },
 			deleted: false,
-		}).lean();
+		})
+			.sort({ updatedAt: -1 })
+			.lean();
 
-		const campaignOwners = await Campaign.aggregate([
-			{
-				$group: {
-					_id: "$useradmin",
-				},
-			},
-		]);
+		for (const user of users) {
+			user.campaign = ownerSet.has(user.unique_id);
+		}
 
-		const ownerSet = new Set(campaignOwners.map((o) => o._id));
+		const access = await User.findOne(
+			{ unique_id: req.session?.user?.id },
+			{ access: 1 },
+		).lean();
 
-		users = users.map((user) => ({
-			...user,
-			campaign: ownerSet.has(user.unique_id),
-		}));
-
-		const renderData = {
+		res.render("Dashboard/adminPanel", {
 			users,
 			photo: req.session?.user?.photo,
 			name: req.session?.user?.name,
 			color: req.session?.user?.color,
 			doMigration: doMigration(),
 			help,
-		};
-
-		const access = await User.findOne({
-			unique_id: req.session?.user?.id,
+			access: access?.access,
 		});
-
-		renderData.access = access.access;
-
-		res.render("Dashboard/adminPanel", renderData);
 	} catch (error) {
 		console.error("Error getting Admin panel :", error);
 		res.render("errors/serverError");

@@ -9,6 +9,7 @@
 				<td class="p-4 text-center">WABA</td>
 				<td class="p-4 text-center">Payment Place</td>
 				<td class="p-4 text-center">Payment Plan</td>
+				<td class="p-4 text-center">Plan Status</td>
 				<td class="p-4 text-center">Status</td>
 				<td class="p-4 text-center">Actions</td>
 				<td class="p-4 text-center">Delete</td>
@@ -44,6 +45,9 @@
 							<%= user.payment.plan === "unlimited" ? 'Unlimited' : 'Messages' %>
 						</span>
 					</div>
+				</td>
+				<td class="text-center">
+					<%= user?.payment?.plan %>, <%=  user?.payment?.totalMessages - user?.payment?.messagesCount %>
 				</td>
 				<td class="p-4 text-center">
 					<div class="flex justify-center items-center">
