@@ -573,6 +573,8 @@ export const razorpayWebhook = async (req, res) => {
 				if (user) {
 					if (payment?.paymentType === "plan") {
 						const expiry = Date.now() + 30 * 24 * 60 * 60 * 1000;
+						const previousCount = user.payment?.messagesCount || 0;
+						const newTotal = payment.messagesCount || 0;
 
 						console.log("💬 Updating plan");
 
@@ -580,7 +582,11 @@ export const razorpayWebhook = async (req, res) => {
 							{ unique_id: payment.useradmin },
 							{
 								$set: {
-									"payment.usersCount": payment.messagesCount,
+									"payment.previousMessagesCount":
+										previousCount,
+									"payment.totalMessages":
+										newTotal + previousCount,
+									"payment.usersCount": payment.usersCount,
 									"payment.expiry": expiry,
 								},
 							},
@@ -667,25 +673,47 @@ export const stripeWebhook = async (req, res) => {
 
 		const user = await User.findOne({ unique_id: payment.useradmin });
 		if (user && update.status === "succeeded") {
-			const previousCount = user.payment?.messagesCount || 0;
-			const newTotal = payment.messagesCount || 0;
+			if (payment?.paymentType === "plan") {
+				const expiry = Date.now() + 30 * 24 * 60 * 60 * 1000;
+				const previousCount = user.payment?.messagesCount || 0;
+				const newTotal = payment.messagesCount || 0;
 
-			console.log("💬 Updating message counts");
-			console.table({
-				previousCount,
-				addedCount: newTotal,
-				newTotal: newTotal + previousCount,
-			});
+				console.log("💬 Updating plan");
 
-			await User.updateOne(
-				{ unique_id: payment.useradmin },
-				{
-					$set: {
-						"payment.previousMessagesCount": previousCount,
-						"payment.totalMessages": newTotal + previousCount,
+				await User.updateOne(
+					{ unique_id: payment.useradmin },
+					{
+						$set: {
+							"payment.previousMessagesCount": previousCount,
+							"payment.totalMessages": newTotal + previousCount,
+							"payment.usersCount": payment.usersCount,
+							"payment.expiry": expiry,
+						},
 					},
-				},
-			);
+				);
+
+				console.log("💬 Updated plan");
+			} else {
+				const previousCount = user.payment?.messagesCount || 0;
+				const newTotal = payment.messagesCount || 0;
+
+				console.log("💬 Updating message counts");
+				console.table({
+					previousCount,
+					addedCount: newTotal,
+					newTotal: newTotal + previousCount,
+				});
+
+				await User.updateOne(
+					{ unique_id: payment.useradmin },
+					{
+						$set: {
+							"payment.previousMessagesCount": previousCount,
+							"payment.totalMessages": newTotal + previousCount,
+						},
+					},
+				);
+			}
 		}
 
 		res.status(200).json({ received: true });
