@@ -13,15 +13,16 @@ import {
 } from "./payment.functions.js";
 
 const basePlan = {
-	1: { currency: "INR", amount: 99, plan: "Starter" },
-	3: { currency: "INR", amount: 299, plan: "Growth" },
-	5: { currency: "INR", amount: 599, plan: "Scale" },
+	1: { currency: "INR", amount: 399, plan: "Starter", credits: 3000 },
+	3: { currency: "INR", amount: 699, plan: "Growth", credits: 5000 },
+	5: { currency: "INR", amount: 999, plan: "Scale", credits: 8000 },
 };
 
 const baseCredits = {
-	3000: { currency: "INR", amount: 299, plan: "Starter" },
-	5000: { currency: "INR", amount: 499, plan: "Growth" },
-	10000: { currency: "INR", amount: 799, plan: "Scale" },
+	1000: { currency: "INR", amount: 149, plan: "Starter" },
+	3000: { currency: "INR", amount: 399, plan: "Catch" },
+	5000: { currency: "INR", amount: 599, plan: "Growth" },
+	10000: { currency: "INR", amount: 999, plan: "Scale" },
 };
 
 export const getPayment = async (req, res) => {
@@ -127,6 +128,7 @@ export const getIntent = async (req, res, next) => {
 
 		let amount;
 		let plan;
+		let credits = null;
 
 		if (type === "credits") {
 			amount = baseCredits[messages]?.amount;
@@ -134,6 +136,7 @@ export const getIntent = async (req, res, next) => {
 		} else {
 			amount = basePlan[messages]?.amount;
 			plan = basePlan[messages]?.plan;
+			credits = basePlan[messages]?.credits;
 		}
 
 		if (!amount) {
@@ -154,6 +157,7 @@ export const getIntent = async (req, res, next) => {
 			name,
 			plan,
 			paymentType: type,
+			credits,
 		};
 
 		const result =
@@ -488,6 +492,8 @@ export const razorpayWebhook = async (req, res) => {
 				if (user) {
 					if (payment?.paymentType === "plan") {
 						const expiry = Date.now() + 30 * 24 * 60 * 60 * 1000;
+						const previousCount = user.payment?.messagesCount || 0;
+						const newTotal = payment.messagesCount || 0;
 
 						console.log("💬 Updating plan");
 
@@ -495,7 +501,11 @@ export const razorpayWebhook = async (req, res) => {
 							{ unique_id: payment.useradmin },
 							{
 								$set: {
-									"payment.usersCount": payment.messagesCount,
+									"payment.previousMessagesCount":
+										previousCount,
+									"payment.totalMessages":
+										newTotal + previousCount,
+									"payment.usersCount": payment.usersCount,
 									"payment.expiry": expiry,
 								},
 							},

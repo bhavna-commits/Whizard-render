@@ -128,16 +128,16 @@
 						<div class="watchDemo flex items-center"><img src="svg/demo.svg" alt="Demo" class="pr-2 "> Watch Demo
 						</div>
 					</div>
-					<% if (status === "Pending") { %>
-					<button class="border rounded-md bg-black text-white p-2 flex items-center" onclick="openTestMessage()">
-						<img src="svg/testing.svg" alt="" class="w-6 mr-2" />
-						Test Message
-					</button>
-					<% } %>
 					<% if (user?.payment?.plan !== "unlimited" ) { %>
 					<button class="gradient-button rounded-md p-2 flex items-center" onclick="location.href='/settings/payments'">
 						<img src="svg/coins.svg" alt="" class="w-6 mr-2">
 						Payment Plan
+					</button>
+					<% } %>
+					<% if (status === "Pending") { %>
+					<button class="border rounded-md bg-black text-white p-2 flex items-center" onclick="openTestMessage()">
+						<img src="svg/testing.svg" alt="" class="w-6 mr-2" />
+						Test Message
 					</button>
 					<% } %>
 					<% if (admin) { %>

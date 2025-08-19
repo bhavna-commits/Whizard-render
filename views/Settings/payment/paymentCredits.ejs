@@ -1,7 +1,7 @@
 <div class="w-full px-3 bg-white">
 	<div class="flex flex-col w-full items-center">
 		<div class="w-full h-full flex justify-center box-content rounded-xl" id="right-side">
-			<div class="w-11/12">
+			<div class="w-9/12">
 				
 				<div class="flex items-center justify-between my-8">
 					<button type="button" class="<%= paymentTableData?.length > 0 ? '' : 'hidden' %>flex items-center  text-gray-500" onclick="location.reload()"><span class="mb-1 mr-1">&LeftArrow;</span> Go Back</button>
@@ -10,30 +10,59 @@
 				</div>
 				
 				<!-- Plan Selection -->
-				<div class="grid grid-cols-3 gap-10">
-					<!-- Weekday Fall Pass -->
+				<div class="grid grid-cols-2 gap-10">
+					
 					<label class="radio-option block cursor-pointer grow">
 						<input type="radio" name="credits" value="weekday" class="sr-only">
-						<div class="option-content  h-[30rem] border-2 border-gray-200 rounded-xl p-8 hover:border-gray-300">
+						<div class="option-content border-2 border-gray-200 rounded-xl p-6 hover:border-gray-300">
 							<div class="flex items-center space-x-4 w-full">
-								<div class="w-full">
-									<input type="number" hidden value="3000" />
-									<h3 class="text-2xl font-semibold text-gray-900">Starter</h3>
-									<h4 class=" text-gray-500 text-lg">Everything you need to get started with your business.</h4>
+								<div class="w-full space-y-8">
+									<input type="number" hidden value="1000" />
+									<div class="flex justify-between items-center">
+										<h3 class="text-2xl font-semibold text-gray-900">Starter</h3>
+										<h3 class="text-2xl font-semibold text-gray-900">1000 <span class="">messages</span></h3>
+									</div>
+									
 									<div class="flex items-center justify-between my-3">
-										<div class="text-lg text-red-500 line-through"><span class=" mr-1 text-gray-500"><%= credits[3000].currency %></span><%= credits[3000].amount * 3 %></div>
-										<div class="text-2xl font-bold text-gray-900"><span class=" mr-1 text-gray-500"><%= credits[3000].currency %></span><%= credits[3000].amount %></div>
+										<div>
+											<div class="text-lg text-red-500 line-through"><span class=" mr-1 text-gray-500"><%= credits[1000].currency %></span><%= credits[1000].amount * 3 %></div>
+											<div class="text-2xl font-bold text-gray-900"><span class=" mr-1 text-gray-500"><%= credits[1000].currency %></span><%= credits[1000].amount %></div>
+										</div>
+										<div class="text-right">
+											<div class="text-lg text-red-500 line-through"><span class=" mr-1 text-gray-500"><%= credits[1000].currency %></span><%= (credits[1000].amount * 3 / 1000).toFixed(2) %> <span>/message</span></div>
+											<div class="text-2xl font-bold text-gray-900"><span class=" mr-1 text-gray-500"><%= credits[1000].currency %></span><%= (credits[1000].amount / 1000).toFixed(2) %> <span>/message</span></div>
+										</div>
 									</div>
-									<div class=" mt-2">
-										<ul class="space-y-2">
-											<li class=" text-gray-600 flex items-center"><img src="svg/check-circle.svg" alt="check" class="w-6 mr-2" />Access to all dashboard features</li>
-											<li class=" text-gray-600 flex items-center"><img src="svg/check-circle.svg" alt="check" class="w-6 mr-2" />Basic reports & analytics</li>
-											<li class=" text-gray-600 flex items-center"><img src="svg/check-circle.svg" alt="check" class="w-6 mr-2" />Real-time tracking of messages left</li>
-											<li class=" text-gray-600 flex items-center"><img src="svg/check-circle.svg" alt="check" class="w-6 mr-2" />Access for 24 * 7 messaging</li>
-											<li class=" text-gray-600 flex items-center"><img src="svg/cross.svg" alt="cross" class="w-6 mr-2" />Advanced reports & analytics</li>
-											<li class=" text-gray-600 flex items-center"><img src="svg/cross.svg" alt="cross" class="w-6 mr-2" />Priority support</li>
-										</ul>
+									
+								</div>
+								
+							</div>
+							
+						</div>
+						
+					</label>
+					
+					<label class="radio-option block cursor-pointer grow">
+						<input type="radio" name="credits" value="weekday" class="sr-only">
+						<div class="option-content border-2 border-gray-200 rounded-xl p-6 hover:border-gray-300">
+							<div class="flex items-center space-x-4 w-full">
+								<div class="w-full space-y-8">
+									<input type="number" hidden value="3000" />
+									<div class="flex justify-between items-center">
+										<h3 class="text-2xl font-semibold text-gray-900">Catch</h3>
+										<h3 class="text-2xl font-semibold text-gray-900">3000 <span class="">messages</span></h3>
 									</div>
+									<div class="flex items-center justify-between my-3">
+										<div>
+											<div class="text-lg text-red-500 line-through"><span class=" mr-1 text-gray-500"><%= credits[3000].currency %></span><%= credits[3000].amount * 3 %></div>
+											<div class="text-2xl font-bold text-gray-900"><span class=" mr-1 text-gray-500"><%= credits[3000].currency %></span><%= credits[3000].amount %></div>
+										</div>
+										<div class="text-right">
+											<div class="text-lg text-red-500 line-through"><span class=" mr-1 text-gray-500"><%= credits[3000].currency %></span><%= (credits[3000].amount * 3 / 3000).toFixed(2) %> <span>/message</span></div>
+											<div class="text-2xl font-bold text-gray-900"><span class=" mr-1 text-gray-500"><%= credits[3000].currency %></span><%= (credits[3000].amount / 3000).toFixed(2) %> <span>/message</span></div>
+										</div>
+									</div>
+									
 								</div>
 								
 							</div>
@@ -45,27 +74,26 @@
 					<!-- Unlimited Fall Pass (Most Popular) -->
 					<label class="radio-option block cursor-pointer grow min-h">
 						<input type="radio" name="credits" value="unlimited" class="sr-only" checked>
-						<div class="option-content  h-[30rem] border-2 border-gray-200 rounded-xl p-6 hover:border-gray-300">
+						<div class="option-content border-2 border-gray-200 rounded-xl p-6 hover:border-gray-300">
 							<div class="flex items-center justify-between">
 								<div class="flex items-center space-x-4 w-full">
-									<div class="w-full">
+									<div class="w-full space-y-8">
 										<input type="number" hidden value="5000" />
-										<h3 class="text-2xl font-semibold text-gray-900">Growth</h3>
-										<h4 class="text-gray-500 text-lg">Highly recommended plan to make the best use of Retargeting Campaigns</h4>
+										<div class="flex justify-between items-center">
+											<h3 class="text-2xl font-semibold text-gray-900">Growth</h3>
+											<h3 class="text-2xl font-semibold text-gray-900">5000 <span class="">messages</span></h3>
+										</div>
 										<div class="flex items-center justify-between my-3">
-											<div class="text-lg text-red-500 line-through"><span class=" mr-1 text-gray-500"><%= credits[5000].currency %></span><%= credits[5000].amount * 3 %></div>
-											<div class="text-2xl font-bold text-gray-900"><span class=" mr-1 text-gray-500"><%= credits[5000].currency %></span><%= credits[5000].amount %></div>
-											<!-- <div class=" text-gray-500">Sep to Jan</div> -->
+											<div>
+												<div class="text-lg text-red-500 line-through"><span class=" mr-1 text-gray-500"><%= credits[5000].currency %></span><%= credits[5000].amount * 3 %></div>
+												<div class="text-2xl font-bold text-gray-900"><span class=" mr-1 text-gray-500"><%= credits[5000].currency %></span><%= credits[5000].amount %></div>
+											</div>
+											<div class="text-right">
+												<div class="text-lg text-red-500 line-through"><span class=" mr-1 text-gray-500"><%= credits[5000].currency %></span><%= (credits[5000].amount * 3 / 5000).toFixed(2) %> <span>/message</span></div>
+												<div class="text-2xl font-bold text-gray-900"><span class=" mr-1 text-gray-500"><%= credits[5000].currency %></span><%= (credits[5000].amount / 5000).toFixed(2) %> <span>/message</span></div>
+											</div>
 										</div>
-										<div class=" mt-2">
-											<ul class="space-y-2">
-												<li class=" text-gray-600 flex items-center"><img src="svg/check-circle.svg" alt="check" class="w-6 mr-2" />Access to all dashboard features</li>
-												<li class=" text-gray-600 flex items-center"><img src="svg/check-circle.svg" alt="check" class="w-6 mr-2" />Advanced reports & analytics</li>
-												<li class=" text-gray-600 flex items-center"><img src="svg/check-circle.svg" alt="check" class="w-6 mr-2" />Real-time tracking of messages left</li>
-												<li class=" text-gray-600 flex items-center"><img src="svg/check-circle.svg" alt="check" class="w-6 mr-2" />Access for 24 * 7 messaging</li>
-												<li class=" text-gray-600 flex items-center"><img src="svg/check-circle.svg" alt="check" class="w-6 mr-2" />Priority support</li>
-											</ul>
-										</div>
+										
 									</div>
 									
 								</div>
@@ -77,27 +105,25 @@
 					<!-- Extended Fall Pass -->
 					<label class="radio-option block cursor-pointer grow">
 						<input type="radio" name="credits" value="extended" class="sr-only">
-						<div class="option-content h-[30rem] border-2 border-gray-200 rounded-xl p-6 hover:border-gray-300">
+						<div class="option-conten border-2 border-gray-200 rounded-xl p-6 hover:border-gray-300">
 							<div class="flex items-center justify-between">
 								<div class="flex items-center space-x-4 w-full">
 									<!-- <div class="check-indicator"></div> -->
-									<div class="w-full">
+									<div class="w-full space-y-8">
 										<input type="number" hidden value="10000" />
-										<h3 class="text-2xl font-semibold text-gray-900">Scale</h3>
-										<h4 class="text-gray-900 text-lg">Recommended for Big Companies</h4>
-										<div class="flex items-center justify-between my-3">
-											<div class=" text-red-500 line-through"><span class=" mr-1 text-gray-500"><%= credits[10000].currency %></span><%= credits[10000].amount * 3 %></div>
-											<div class="text-2xl font-bold text-gray-900"><span class=" mr-1 text-gray-500"><%= credits[10000].currency %></span><%= credits[10000].amount %></div>
-											<!-- <div class=" text-gray-500">Sep to Jan</div> -->
+										<div class="flex justify-between items-center">
+											<h3 class="text-2xl font-semibold text-gray-900">Scale</h3>
+											<h3 class="text-2xl font-semibold text-gray-900">10000 <span class="">messages</span></h3>
 										</div>
-										<div class="mt-2">
-											<ul class="space-y-2">
-												<li class=" text-gray-600 flex items-center"><img src="svg/check-circle.svg" alt="check" class="w-6 mr-2" />Access to all dashboard features</li>
-												<li class=" text-gray-600 flex items-center"><img src="svg/check-circle.svg" alt="check" class="w-6 mr-2" />Advanced reports & analytics</li>
-												<li class=" text-gray-600 flex items-center"><img src="svg/check-circle.svg" alt="check" class="w-6 mr-2" />Real-time tracking of messages left</li>
-												<li class=" text-gray-600 flex items-center"><img src="svg/check-circle.svg" alt="check" class="w-6 mr-2" />Access for 24 * 7 messaging</li>
-												<li class=" text-gray-600 flex items-center"><img src="svg/check-circle.svg" alt="check" class="w-6 mr-2" />Priority support</li>
-											</ul>
+										<div class="flex items-center justify-between my-3">
+											<div>
+												<div class="text-lg text-red-500 line-through"><span class=" mr-1 text-gray-500"><%= credits[10000].currency %></span><%= credits[10000].amount * 3 %></div>
+												<div class="text-2xl font-bold text-gray-900"><span class=" mr-1 text-gray-500"><%= credits[10000].currency %></span><%= credits[10000].amount %></div>
+											</div>
+											<div class="text-right">
+												<div class="text-lg text-red-500 line-through"><span class=" mr-1 text-gray-500"><%= credits[10000].currency %></span><%= (credits[10000].amount * 3 / 10000).toFixed(2) %> <span>/message</span></div>
+												<div class="text-2xl font-bold text-gray-900"><span class=" mr-1 text-gray-500"><%= credits[10000].currency %></span><%= (credits[10000].amount / 10000).toFixed(2) %> <span>/message</span></div>
+											</div>
 										</div>
 									</div>
 								</div>

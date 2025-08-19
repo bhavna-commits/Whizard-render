@@ -13,6 +13,7 @@ export const handleStripePayment = async (
 		name,
 		plan,
 		paymentType,
+		credits
 	},
 	stripe,
 ) => {
@@ -37,7 +38,8 @@ export const handleStripePayment = async (
 		currency: user?.currency || "INR",
 		paymentMode,
 		status: "created",
-		messagesCount: messages,
+		messagesCount: credits ? credits : messages,
+		usersCount: credits ? messages : 0,
 		agentName: name,
 		plan,
 		paymentType,
