@@ -166,6 +166,15 @@
 			<div id="payment-credits-ui" class="hidden w-full">
 				<%- include("payment/paymentCredits") %>
 			</div>
+			<% if (paymentMode !== "razorpay") { %>
+			<div id="stripe-section" class="hidden px-4 w-full mt-10">
+				<span class="text-gray-500 mb-1 block">Card details</span>
+				<div id="card-wrapper" class="w-fit">			
+					<div id="card-element" class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-white"></div>
+					<div id="card-errors" class="text-xs text-red-500 mt-1"></div>
+				</div>
+			</div>
+			<% } %>
 		</div>
 	</div>
 	<script>

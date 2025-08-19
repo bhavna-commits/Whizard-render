@@ -493,7 +493,9 @@ export const razorpayWebhook = async (req, res) => {
 					if (payment?.paymentType === "plan") {
 						const expiry = Date.now() + 30 * 24 * 60 * 60 * 1000;
 						const previousCount = user.payment?.messagesCount || 0;
-						const newTotal = payment.messagesCount || 0;
+						const newTotal =
+							payment?.messagesCount +
+								user?.payment?.totalMessages || 0;
 
 						console.log("💬 Updating message counts");
 						console.table({
@@ -521,7 +523,9 @@ export const razorpayWebhook = async (req, res) => {
 						console.log("💬 Updated plan");
 					} else {
 						const previousCount = user.payment?.messagesCount || 0;
-						const newTotal = payment.messagesCount || 0;
+						const newTotal =
+							payment?.messagesCount +
+								user?.payment?.totalMessages || 0;
 
 						console.log("💬 Updating message counts");
 						console.table({
@@ -602,9 +606,17 @@ export const stripeWebhook = async (req, res) => {
 			if (payment?.paymentType === "plan") {
 				const expiry = Date.now() + 30 * 24 * 60 * 60 * 1000;
 				const previousCount = user.payment?.messagesCount || 0;
-				const newTotal = payment.messagesCount || 0;
+				const newTotal =
+					payment?.messagesCount + user?.payment?.totalMessages || 0;
 
-				console.log("💬 Updating plan");
+				console.log("💬 Updating message counts");
+				console.table({
+					previousCount,
+					addedCount: newTotal,
+					newTotal: newTotal + previousCount,
+					usersCount: payment.usersCount,
+					expiry,
+				});
 
 				await User.updateOne(
 					{ unique_id: payment.useradmin },
@@ -621,7 +633,8 @@ export const stripeWebhook = async (req, res) => {
 				console.log("💬 Updated plan");
 			} else {
 				const previousCount = user.payment?.messagesCount || 0;
-				const newTotal = payment.messagesCount || 0;
+				const newTotal =
+					payment?.messagesCount + user?.payment?.totalMessages || 0;
 
 				console.log("💬 Updating message counts");
 				console.table({

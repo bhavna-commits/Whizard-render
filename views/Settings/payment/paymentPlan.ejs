@@ -10,14 +10,14 @@
 				</div>
 				
 				<!-- Plan Selection -->
-				<div class="grid grid-cols-3 gap-10">
+				<div class="grid grid-cols-3 gap-10 items-stretch">
 					<!-- Weekday Fall Pass -->
 					<label class="radio-option block cursor-pointer grow">
 						<input type="radio" name="plan" value="weekday" class="sr-only">
-						<div class="option-content h-[35rem] border-2 border-gray-200 rounded-xl p-8 hover:border-gray-300">
+						<div class="option-content h-full border-2 border-gray-200 rounded-xl p-8 hover:border-gray-300">
 							<div class="flex items-center space-x-4 w-full">
 								<div class="w-full">
-									<input type="number" hidden value="1" />
+									<input type="number" hidden value="2" />
 									<h3 class="text-2xl font-semibold text-gray-900">Starter</h3>
 									<h4 class=" text-gray-500 text-lg">Everything you need to get started with your business.</h4>
 									<div class="flex items-center justify-between my-3">
@@ -47,11 +47,11 @@
 					<!-- Unlimited Fall Pass (Most Popular) -->
 					<label class="radio-option block cursor-pointer grow min-h">
 						<input type="radio" name="plan" value="unlimited" class="sr-only" checked>
-						<div class="option-content  h-[35rem] border-2 border-gray-200 rounded-xl p-6 hover:border-gray-300">
+						<div class="option-content  h-full border-2 border-gray-200 rounded-xl p-6 hover:border-gray-300">
 							<div class="flex items-center justify-between">
 								<div class="flex items-center space-x-4 w-full">
 									<div class="w-full">
-										<input type="number" hidden value="2" />
+										<input type="number" hidden value="5" />
 										<h3 class="text-2xl font-semibold text-gray-900">Growth</h3>
 										<h4 class="text-gray-500 text-lg">Highly recommended plan to make the best use of Retargeting Campaigns</h4>
 										<div class="flex items-center justify-between my-3">
@@ -83,12 +83,12 @@
 					<!-- Extended Fall Pass -->
 					<label class="radio-option block cursor-pointer grow">
 						<input type="radio" name="plan" value="extended" class="sr-only">
-						<div class="option-content  h-[35rem] border-2 border-gray-200 rounded-xl p-6 hover:border-gray-300">
+						<div class="option-content  h-full border-2 border-gray-200 rounded-xl p-6 hover:border-gray-300">
 							<div class="flex items-center justify-between">
 								<div class="flex items-center space-x-4 w-full">
 									<!-- <div class="check-indicator"></div> -->
 									<div class="w-full">
-										<input type="number" hidden value="5" />
+										<input type="number" hidden value="10" />
 										<h3 class="text-2xl font-semibold text-gray-900">Scale</h3>
 										<h4 class="text-gray-900 text-lg">Recommended for Big Companies</h4>
 										<div class="flex items-center justify-between my-3">
@@ -127,15 +127,6 @@
 					<div class="loading-spinner hidden"></div>
 				</button>
 				
-			</div>
-			
-			<div id="stripe-section" class="hidden px-4 mt-10">
-				
-				<div id="card-wrapper" class="w-full hidden">
-					<label class=" text-gray-500 mb-1 block">Card details</label>
-					<div id="card-element" class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-white"></div>
-					<div id="card-errors" class="text-xs text-red-500 mt-1"></div>
-				</div>
 			</div>
 		</div>
 	</div>

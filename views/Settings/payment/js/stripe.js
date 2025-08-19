@@ -5,7 +5,6 @@ document.addEventListener("DOMContentLoaded", () => {
 	const stripeSection = document.getElementById("stripe-section");
 	const backBtn = document.getElementById("back-to-plans");
 	const paymentElementContainer = document.getElementById("card-element");
-	const stripePaymentBox = document.getElementById("stripe-payment-box");
 	const cardWrapper = document.getElementById("card-wrapper");
 	const errorDiv = document.getElementById("card-errors");
 
@@ -13,7 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
 	let elements = null;
 
 	/** Plan */ {
-		let selectedPlan = 3;
+		let selectedPlan = 5;
 
 		const planPaymentBtn = document.getElementById("plan-payment-btn");
 		const leftSide = document.getElementById("left-side");
@@ -22,27 +21,26 @@ document.addEventListener("DOMContentLoaded", () => {
 		planInputs.forEach((input) => {
 			input.addEventListener("change", () => {
 				const planCard = input.nextElementSibling;
-				selectedPlan = Number(
-					planCard.querySelector("input").value.trim(),
+				const hiddenInput = planCard.querySelector(
+					'input[type="number"]',
 				);
+				selectedPlan = Number(hiddenInput.value.trim());
+				console.log("Selected plan updated:", selectedPlan);
 			});
 		});
-
+		  
 		planPaymentBtn?.addEventListener("click", async () => {
 			leftSide.classList.add("hidden");
 			btnWrap.classList.add("hidden");
-			stripeSection.classList.remove("hidden");
-
-			stripePaymentBox.classList.add("hidden");
 			cardWrapper.classList.add("hidden");
+			stripeSection.classList.remove("hidden");
+			console.log(document.getElementById("stripe-section"));
 
 			try {
 				await initializeOrUpdateIntent(selectedPlan, "plan");
 
-				stripePaymentBox.classList.remove("hidden");
 				cardWrapper.classList.remove("hidden");
 			} catch (err) {
-				stripeSection.classList.add("hidden");
 				btnWrap.classList.remove("hidden");
 				leftSide.classList.remove("hidden");
 				console.error(err?.message || err);
@@ -75,14 +73,11 @@ document.addEventListener("DOMContentLoaded", () => {
 			rightSide.classList.add("hidden");
 			btnWrap.classList.add("hidden");
 			stripeSection.classList.remove("hidden");
-
-			stripePaymentBox.classList.add("hidden");
 			cardWrapper.classList.add("hidden");
 
 			try {
 				await initializeOrUpdateIntent(selectedMessages, "credits");
 
-				stripePaymentBox.classList.remove("hidden");
 				cardWrapper.classList.remove("hidden");
 			} catch (err) {
 				stripeSection.classList.add("hidden");
