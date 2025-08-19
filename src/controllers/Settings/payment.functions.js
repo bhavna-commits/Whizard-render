@@ -13,7 +13,7 @@ export const handleStripePayment = async (
 		name,
 		plan,
 		paymentType,
-		credits
+		credits,
 	},
 	stripe,
 ) => {
@@ -53,7 +53,17 @@ export const handleStripePayment = async (
 };
 
 export const handleRazorpayPayment = async (
-	{ amount, user, ownerId, messages, paymentMode, name, plan, paymentType },
+	{
+		amount,
+		user,
+		ownerId,
+		messages,
+		paymentMode,
+		name,
+		plan,
+		paymentType,
+		credits,
+	},
 	razorpay,
 ) => {
 	const paymentIntent = await razorpay.orders.create({
@@ -70,7 +80,8 @@ export const handleRazorpayPayment = async (
 		currency: user?.currency || "INR",
 		paymentMode,
 		status: "created",
-		messagesCount: messages,
+		messagesCount: credits ? credits : messages,
+		usersCount: credits ? messages : 0,
 		agentName: name,
 		plan,
 		paymentType,
