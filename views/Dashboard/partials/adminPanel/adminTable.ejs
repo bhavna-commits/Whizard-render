@@ -27,7 +27,7 @@
 						<div class="relative inline-flex items-center cursor-pointer select-none transition duration-300 ease-in-out" data-user-id="<%= user.unique_id %>" data-status="<%= user.payment.place %>" onclick="togglePaymentPlace(this)">
 							<div class="relative w-12 h-6 rounded-full transition-colors duration-300 ease-in-out bg-toggle <%= user.payment.place === "Internal" ? 'bg-black' : 'bg-gray-300' %>">
 								<div class="absolute top-0 left-0 w-6 h-6 bg-white border rounded-full shadow transform transition-transform duration-300 ease-in-out knob <%= user.payment.place === 'Internal' ? 'translate-x-6' : 'translate-x-0' %>"></div>
-							</div>							
+							</div>
 						</div>
 						<span class="ml-3 text-sm font-medium status-label <%= user.payment.place === "Internal" ? 'text-black' : 'text-gray-500' %>">
 							<%= user.payment.place === "Internal" ? 'Internal' : 'External' %>
@@ -47,8 +47,27 @@
 					</div>
 				</td>
 				<td class="text-center">
-					<%= user?.payment?.plan %>, <%=  user?.payment?.totalMessages - user?.payment?.messagesCount %>
+					<%
+						let displayPlan = "-";
+						let displayRemaining = "-";
+
+						const plan = user?.payment?.plan ? String(user.payment.plan).toLowerCase() : null;
+
+						if (plan) {
+							if (plan === "unlimited") {
+								displayPlan = "Unlimited";
+								displayRemaining = "-";
+							} else {
+								displayPlan = user?.payment?.plan;
+								let remaining = Number(user?.payment?.totalMessages) - Number(user?.payment?.messagesCount);
+								displayRemaining = isNaN(remaining) ? "-" : remaining;
+							}
+						}
+					%>
+					<%= displayPlan %>, <%= displayRemaining %>
 				</td>
+				
+				
 				<td class="p-4 text-center">
 					<div class="flex justify-center items-center">
 						<% const isActive = !user.blocked; %>
