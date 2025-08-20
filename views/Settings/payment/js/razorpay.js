@@ -1,8 +1,4 @@
-let selectedAmount = 499;
-let selectedMessages = 5000;
-let selectedPlan = 3;
 let description = "Growth";
-let currentIntentId = null;
 
 let options = {
 	key,
@@ -51,6 +47,8 @@ let options = {
 
 document.addEventListener("DOMContentLoaded", () => {
 	/** Plan */ {
+		let selectedPlan = 5;
+
 		const planInputs = document.querySelectorAll("input[name='plan']");
 		const planPaymentBtn = document.getElementById("plan-payment-btn");
 		const planButtonText = planPaymentBtn.querySelector(".loader-text");
@@ -61,7 +59,7 @@ document.addEventListener("DOMContentLoaded", () => {
 			input.addEventListener("change", () => {
 				const planCard = input.nextElementSibling;
 				selectedPlan = Number(
-					planCard.querySelector("input").value.trim(),
+					planCard.querySelector("input[type='number']").value.trim(),
 				);
 				description = planCard.querySelector("h3").textContent.trim();
 			});
@@ -90,6 +88,8 @@ document.addEventListener("DOMContentLoaded", () => {
 	}
 
 	/** Messages */ {
+		let selectedMessages = 5000;
+
 		const planInputs = document.querySelectorAll("input[name='credits']");
 		const stripeBtn = document.getElementById("credits-payment-btn");
 		const buttonText = stripeBtn.querySelector(".loader-text");
@@ -99,7 +99,7 @@ document.addEventListener("DOMContentLoaded", () => {
 			input.addEventListener("change", () => {
 				const planCard = input.nextElementSibling;
 				selectedMessages = Number(
-					planCard.querySelector("input").value.trim(),
+					planCard.querySelector("input[type='number']").value.trim(),
 				);
 				description = planCard.querySelector("h3").textContent.trim();
 			});
@@ -131,12 +131,11 @@ document.addEventListener("DOMContentLoaded", () => {
 		const res = await fetch("/api/settings/create-payment-intent", {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ messages, type, intentId: currentIntentId }),
+			body: JSON.stringify({ messages, type }),
 		});
 
 		const { intentId, success, message } = await res.json();
 
-		currentIntentId = intentId;
 		options.order_id = intentId;
 		options.description = description;
 

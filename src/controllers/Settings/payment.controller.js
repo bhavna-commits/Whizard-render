@@ -62,7 +62,7 @@ export const getPayment = async (req, res) => {
 
 		if (paymentTableData) {
 			const result = await Payment.aggregate([
-				{ $match: { useradmin: owner } },
+				{ $match: { useradmin: owner, status: { $ne: "created" } } },
 				{ $sort: { createdAt: -1 } },
 				{
 					$facet: {
