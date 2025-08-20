@@ -2,6 +2,7 @@ let selectedAmount = 499;
 let selectedMessages = 5000;
 let selectedPlan = 3;
 let description = "Growth";
+let currentIntentId = null;
 
 let options = {
 	key,
@@ -130,11 +131,12 @@ document.addEventListener("DOMContentLoaded", () => {
 		const res = await fetch("/api/settings/create-payment-intent", {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ messages, type }),
+			body: JSON.stringify({ messages, type, intentId: currentIntentId }),
 		});
 
 		const { intentId, success, message } = await res.json();
 
+		currentIntentId = intentId;
 		options.order_id = intentId;
 		options.description = description;
 
