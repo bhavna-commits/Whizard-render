@@ -50,6 +50,13 @@ document.addEventListener("DOMContentLoaded", () => {
 						(err?.message || err || "Try again"),
 				);
 			}
+
+			backBtn?.addEventListener("click", () => {
+				stripeSection.classList.add("hidden");
+				leftSide.classList.remove("hidden");
+				btnWrap.classList.remove("hidden");
+				backBtn?.removeEventListener("click");
+			});
 		});
 	}
 
@@ -90,13 +97,16 @@ document.addEventListener("DOMContentLoaded", () => {
 						(err?.message || err || "Try again"),
 				);
 			}
+
+			backBtn?.addEventListener("click", () => {
+				stripeSection.classList.add("hidden");
+				rightSide.classList.remove("hidden");
+				btnWrap.classList.remove("hidden");
+				backBtn?.removeEventListener("click");
+			});
 		});
 
-		backBtn?.addEventListener("click", () => {
-			stripeSection.classList.add("hidden");
-			rightSide.classList.remove("hidden");
-			btnWrap.classList.remove("hidden");
-		});
+		
 	}
 
 	async function initializeOrUpdateIntent(messages, type) {
@@ -105,7 +115,11 @@ document.addEventListener("DOMContentLoaded", () => {
 		const res = await fetch("/api/settings/create-payment-intent", {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ messages, intentId: currentIntentId, type }),
+			body: JSON.stringify({
+				messages,
+				intentId: currentIntentId,
+				type,
+			}),
 		});
 
 		const { clientSecret, intentId, success, message } = await res.json();
@@ -113,7 +127,6 @@ document.addEventListener("DOMContentLoaded", () => {
 		if (!success) throw message;
 
 		currentIntentId = intentId;
-		currentClientSecret = clientSecret;
 
 		const appearance = {
 			labels: "floating",
@@ -186,7 +199,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
 		paymentElementContainer.innerHTML = "";
 
-		const paymentElement = elements.create("payment", { layout: "tabs" });
+		const paymentElement = elements.create("payment", {
+			layout: "auto",
+			defaultValues: {
+				billingDetails: {
+					name: name || "",
+					email: email || "",
+					phone: contact || "",
+				},
+			},
+		});
 		paymentElement.mount("#card-element");
 
 		addSubmitButton();

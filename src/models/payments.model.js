@@ -3,7 +3,7 @@ import { Schema, model } from "mongoose";
 const paymentSchema = new Schema(
 	{
 		useradmin: { type: String, ref: "User", required: true, index: true },
-		orderId: { type: String, required: true, index: true },
+		orderId: { type: String, required: true, unique: true },
 		amount: { type: Number, required: true },
 		paymentId: { type: String, required: true, index: true },
 		currency: { type: String, required: true },

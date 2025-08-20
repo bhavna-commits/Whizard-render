@@ -167,11 +167,14 @@
 				<%- include("payment/paymentCredits") %>
 			</div>
 			<% if (paymentMode !== "razorpay") { %>
-			<div id="stripe-section" class="hidden px-4 w-full mt-10">
-				<span class="text-gray-500 mb-1 block">Card details</span>
-				<div id="card-wrapper" class="w-fit">			
-					<div id="card-element" class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-white"></div>
-					<div id="card-errors" class="text-xs text-red-500 mt-1"></div>
+			<div class="flex items-center justify-center w-full">
+				<div id="stripe-section" class="hidden  px-4 max-w-sm mt-10">					
+					<span class="text-gray-500 mb-1 block w-full text-center">Card details</span>
+					<button type="button" id="back-to-plans" class="text-red-400">&lArr; Back</button>
+					<div id="card-wrapper" class="w-fit">
+						<div id="card-element" class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-white"></div>
+						<div id="card-errors" class="text-xs text-red-500 mt-1"></div>
+					</div>					
 				</div>
 			</div>
 			<% } %>
@@ -236,6 +239,9 @@
 	</script> -->
 	<% } else { %>
 	<script>
+		const name = <%- JSON.stringify(user.name) %>;
+		const email = <%- JSON.stringify(user.email) %>;
+		const contact = <%- JSON.stringify(user.phone) %>;
 		const key = <%- JSON.stringify(clientKeyStripe) %>;
 	</script>
 	<script src="/payment/js/stripe.js"></script>

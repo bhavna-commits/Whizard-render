@@ -13,37 +13,60 @@ export const handleStripePayment = async (
 		name,
 		plan,
 		paymentType,
-		credits
+		credits,
 	},
 	stripe,
 ) => {
 	let paymentIntent;
+	let payment;
 
 	if (intentId) {
 		paymentIntent = await stripe.paymentIntents.update(intentId, {
 			amount,
 		});
+
+		payment = await Payment.findOneAndUpdate(
+			{ orderId: intentId },
+			{
+				$set: {
+					amount,
+					messagesCount: credits ? credits : messages,
+					usersCount: credits ? messages : 0,
+					plan,
+					paymentType,
+					status: "created",
+				},
+			},
+			{ new: true },
+		);
 	} else {
+
 		paymentIntent = await stripe.paymentIntents.create({
 			amount,
 			currency: user?.currency?.toLowerCase() || "inr",
 		});
-	}
 
-	await Payment.create({
-		useradmin: ownerId,
-		orderId: paymentIntent.id,
-		paymentId: paymentIntent.id,
-		amount,
-		currency: user?.currency || "INR",
-		paymentMode,
-		status: "created",
-		messagesCount: credits ? credits : messages,
-		usersCount: credits ? messages : 0,
-		agentName: name,
-		plan,
-		paymentType,
-	});
+		await Payment.findOneAndUpdate(
+			{ orderId: paymentIntent.id },
+			{
+				$set: {
+					useradmin: ownerId,
+					paymentId: paymentIntent.id,
+					amount,
+					currency: user?.currency || "INR",
+					paymentMode,
+					status: "created",
+					messagesCount: credits ? credits : messages,
+					usersCount: credits ? messages : 0,
+					agentName: name,
+					plan,
+					paymentType,
+				},
+			},
+			{ upsert: true, new: true },
+		);
+		
+	}
 
 	return {
 		success: true,
@@ -53,29 +76,68 @@ export const handleStripePayment = async (
 };
 
 export const handleRazorpayPayment = async (
-	{ amount, user, ownerId, messages, paymentMode, name, plan, paymentType, credits },
-	razorpay,
-) => {
-	const paymentIntent = await razorpay.orders.create({
+	{
+		intentId,
 		amount,
-		currency: user?.currency || "INR",
-		payment_capture: 1,
-	});
-
-	await Payment.create({
-		useradmin: ownerId,
-		orderId: paymentIntent.id,
-		paymentId: paymentIntent.id,
-		amount,
-		currency: user?.currency || "INR",
+		user,
+		ownerId,
+		messages,
 		paymentMode,
-		status: "created",
-		messagesCount: credits ? credits : messages,
-		usersCount: credits ? messages : 0,
-		agentName: name,
+		name,
 		plan,
 		paymentType,
-	});
+		credits,
+	},
+	razorpay,
+) => {
+	let paymentIntent;
+
+	if (intentId) {
+		paymentIntent = { id: intentId }; 
+
+		await Payment.findOneAndUpdate(
+			{ orderId: intentId },
+			{
+				$set: {
+					amount,
+					messagesCount: credits ? credits : messages,
+					usersCount: credits ? messages : 0,
+					plan,
+					paymentType,
+					status: "created",
+				},
+			},
+			{ new: true },
+		);
+	} else {
+		// Create new Razorpay order
+		paymentIntent = await razorpay.orders.create({
+			amount,
+			currency: user?.currency || "INR",
+			payment_capture: 1,
+		});
+
+		await Payment.findOneAndUpdate(
+			{ orderId: paymentIntent.id },
+			{
+				$set: {
+					useradmin: ownerId,
+					paymentId: paymentIntent.id,
+					amount,
+					currency: user?.currency || "INR",
+					paymentMode,
+					status: "created",
+					messagesCount: credits ? credits : messages,
+					usersCount: credits ? messages : 0,
+					agentName: name,
+					plan,
+					paymentType,
+				},
+			},
+			{ upsert: true, new: true },
+		);
+		
+	}
 
 	return {
 		success: true,
