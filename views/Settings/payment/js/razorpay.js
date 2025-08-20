@@ -90,7 +90,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 	/** Messages */ {
 		const planInputs = document.querySelectorAll("input[name='credits']");
-		const stripeBtn = document.getElementById("btn");
+		const stripeBtn = document.getElementById("credits-payment-btn");
 		const buttonText = stripeBtn.querySelector(".loader-text");
 		const loadingSpinner = stripeBtn.querySelector(".loading-spinner");
 

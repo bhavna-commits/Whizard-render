@@ -2,7 +2,8 @@
 	<tbody>
 		<tr class="text-gray-500 ">
 			<td class="">Sno.</td>
-            <td class="">Plan</td>
+            <td class="">Name</td>
+			<td class="">Type</td>
             <td class="">Order ID</td>
             <td class="">Transaction ID</td>
             <td class="">Amount</td>
@@ -15,20 +16,23 @@
 			<td class="border-l border-t border-b rounded-l-lg py-6 border-gray-200 text-sm text-gray-500">
 				<%= (page - 1) * 6 + (index + 1) %>
 			</td>
-            <td class="border-t border-b border-gray-200">
+            <td class="border-t border-b border-gray-200 px-4">
             	<%= contact.plan %>
             </td>
-            <td class="border-t border-b border-gray-200">
+			<td class="border-t border-b border-gray-200 px-4">
+				<%= contact.paymentType.charAt(0).toUpperCase() + contact.paymentType.slice(1) %>
+			</td>			  
+            <td class="border-t border-b border-gray-200 px-1">
             	<%= contact.orderId %>
             </td>
-            <td class="border-t border-b border-gray-200">
+            <td class="border-t border-b border-gray-200 px-1">
             	<%= contact.paymentId %>
             </td>
-            <td class="border-t border-b border-gray-200">
+            <td class="border-t border-b border-gray-200 px-3">
             	<span class="mr-1"><%= contact.currency %></span><%= contact.amount / 100 %>
             </td>
 			
-			<td class="border-t border-b border-gray-200">
+			<td class="border-t border-b border-gray-200 px-3">
 				<% 
                         let statusColor = "bg-gray-200 text-gray-700";
                         let statusLabel = contact.status;
@@ -49,8 +53,8 @@
 				</span>
 			</td>
 			
-			<td class="text-gray-500 border-t border-b border-gray-200 date-cell" data-date="<%= contact.createdAt %>"></td>
-			<td class="text-gray-500 border-t border-b border-r rounded-r-lg border-gray-200">
+			<td class="text-gray-500 border-t border-b border-gray-200 date-cell px-3" data-date="<%= contact.createdAt %>"></td>
+			<td class="text-gray-500 border-t border-b border-r rounded-r-lg border-gray-200 px-3">
 				<%= contact.agentName %>
 			</td>			
 		</tr>

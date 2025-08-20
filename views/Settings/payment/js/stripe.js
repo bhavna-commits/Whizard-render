@@ -1,7 +1,6 @@
 const stripe = Stripe(key);
 
 document.addEventListener("DOMContentLoaded", () => {
-	const btnWrap = document.getElementById("btn-wrap");
 	const stripeSection = document.getElementById("stripe-section");
 	const backBtn = document.getElementById("back-to-plans");
 	const paymentElementContainer = document.getElementById("card-element");
@@ -14,6 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
 	/** Plan */ {
 		let selectedPlan = 5;
 
+		const btnWrap = document.getElementById("btn-wrap-plan");
 		const planPaymentBtn = document.getElementById("plan-payment-btn");
 		const leftSide = document.getElementById("left-side");
 		const planInputs = document.querySelectorAll('input[name="plan"]');
@@ -25,7 +25,6 @@ document.addEventListener("DOMContentLoaded", () => {
 					'input[type="number"]',
 				);
 				selectedPlan = Number(hiddenInput.value.trim());
-				console.log("Selected plan updated:", selectedPlan);
 			});
 		});
 		  
@@ -34,7 +33,6 @@ document.addEventListener("DOMContentLoaded", () => {
 			btnWrap.classList.add("hidden");
 			cardWrapper.classList.add("hidden");
 			stripeSection.classList.remove("hidden");
-			console.log(document.getElementById("stripe-section"));
 
 			try {
 				await initializeOrUpdateIntent(selectedPlan, "plan");
@@ -63,16 +61,18 @@ document.addEventListener("DOMContentLoaded", () => {
 	/** Messages */ {
 		let selectedMessages = 5000;
 
-		const stripeBtn = document.getElementById("btn");
+		const btnWrap = document.getElementById("btn-wrap-credits");
+		const stripeBtn = document.getElementById("credits-payment-btn");
 		const rightSide = document.getElementById("right-side");
 		const planInputs = document.querySelectorAll('input[name="credits"]');
 
 		planInputs.forEach((input) => {
 			input.addEventListener("change", () => {
 				const planCard = input.nextElementSibling;
-				selectedPlan = Number(
-					planCard.querySelector("input").value.trim(),
+				const hiddenInput = planCard.querySelector(
+					'input[type="number"]',
 				);
+				selectedMessages = Number(hiddenInput.value.trim());
 			});
 		});
 
