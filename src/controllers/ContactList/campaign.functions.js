@@ -38,14 +38,17 @@ export async function sendMessages(
 		}
 
 		const user = await User.findOne({ unique_id: userData.unique_id });
-		let messagesCount = user?.payment?.messagesCount || 0;
-		const totalCount = user?.payment?.totalMessages || 0;
-		const remainingCount = totalCount - messagesCount;
 
-		if (contactList.length > remainingCount) {
-			throw new Error(
-				`Not enough credits. You have ${remainingCount} messages left, but you're trying to send ${contactList.length}.`,
-			);
+		if (!user?.payment?.unlimited) {
+			let messagesCount = user?.payment?.messagesCount || 0;
+			const totalCount = user?.payment?.totalMessages || 0;
+			const remainingCount = totalCount - messagesCount;
+
+			if (contactList.length > remainingCount) {
+				throw new Error(
+					`Not enough credits. You have ${remainingCount} messages left, but you're trying to send ${contactList.length}.`,
+				);
+			}
 		}
 
 		const chatDocs = [];
@@ -126,8 +129,9 @@ export async function sendMessages(
 					};
 
 				chatDocs.push(chatDoc);
-
-				messagesCount++;
+				if (!user?.payment?.unlimited) {
+					messagesCount++;
+				}
 			} catch (err) {
 				console.error(
 					`Error sending message to ${contact.wa_id}:`,
@@ -138,9 +142,10 @@ export async function sendMessages(
 
 		if (chatDocs.length) await Chat.insertMany(chatDocs);
 		if (tempMsgOps.length) await TempMessage.bulkWrite(tempMsgOps);
-
-		user.payment.messagesCount = messagesCount;
-		await user.save();
+		if (!user?.payment?.unlimited) {
+			user.payment.messagesCount = messagesCount;
+			await user.save();
+		}
 	} catch (error) {
 		console.error("Error sending messages:", error.message || error);
 		throw error;

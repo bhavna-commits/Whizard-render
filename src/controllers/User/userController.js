@@ -879,10 +879,9 @@ export const about = async (req, res, next) => {
 			website,
 			unique_id,
 			color,
+			"payment.plan": "noplan",
 		});
 
-		// console.log(newUser);
-		// Update session with the newly created user data to keep them logged in
 		req.session.user = {
 			id: newUser.unique_id,
 			name: newUser.name,

@@ -24,7 +24,7 @@ export default async function runMigration() {
 			migrateTemplates(userMap),
 			migrateCustomFields(userMap),
 			migrateContactLists(userMap, addedUserMap),
-			migratePaymentPlaceDefault(),
+			migratePaymentDefault(),
 		]);
 
 		console.log("🎉 Migration complete");
@@ -58,7 +58,7 @@ async function migrateUsersTestCount() {
 	console.log(`✅ Users testMessagesCount updated (${count} users)`);
 }
 
-async function migratePaymentPlaceDefault() {
+async function migratePaymentDefault() {
 	const cursor = User.find({}, { _id: 1, payment: 1 }).cursor();
 	const ops = [];
 	let count = 0;
@@ -67,7 +67,12 @@ async function migratePaymentPlaceDefault() {
 		ops.push({
 			updateOne: {
 				filter: { _id: user._id },
-				update: { $set: { "payment.place": "External" } },
+				update: {
+					$set: {
+						"payment.place": "External",
+						"payment.unlimited": false,
+					},
+				},
 			},
 		});
 

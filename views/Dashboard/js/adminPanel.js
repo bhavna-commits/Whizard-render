@@ -122,8 +122,7 @@ async function togglePaymentPlace(toggleElement) {
 
 async function togglePaymentPlan(toggleElement) {
 	const userId = toggleElement.dataset.userId;
-	const currentStatus = toggleElement.dataset.status === "unlimited";
-	const newStatus = currentStatus ? 5000 : "unlimited"; 
+	const currentStatus = Boolean(toggleElement.dataset.status);
 
 	document.body.classList.add("cursor-wait");
 
@@ -135,31 +134,29 @@ async function togglePaymentPlan(toggleElement) {
 				headers: {
 					"Content-Type": "application/json",
 				},
-				body: JSON.stringify({ status: newStatus }),
+				body: JSON.stringify({ status: currentStatus }),
 			},
 		);
 
 		if (!res.ok) throw new Error("Status update failed");
 
 		// Update the toggle visually
-		toggleElement.dataset.status = newStatus;
+		toggleElement.dataset.status = currentStatus;
 
 		const knob = toggleElement.querySelector(".knob");
 		const bg = toggleElement.querySelector(".bg-toggle");
 		const label =
 			toggleElement.parentElement.querySelector(".status-label");
 
-		const isInternal = newStatus === "unlimited";
+		knob.classList.toggle("translate-x-6", currentStatus);
+		knob.classList.toggle("translate-x-0", !currentStatus);
 
-		knob.classList.toggle("translate-x-6", isInternal);
-		knob.classList.toggle("translate-x-0", !isInternal);
+		bg.classList.toggle("bg-black", currentStatus);
+		bg.classList.toggle("bg-gray-300", !currentStatus);
 
-		bg.classList.toggle("bg-black", isInternal);
-		bg.classList.toggle("bg-gray-300", !isInternal);
-
-		label.textContent = isInternal ? "Unlimited" : "Messages";
-		label.classList.toggle("text-black", isInternal);
-		label.classList.toggle("text-gray-500", !isInternal);
+		label.textContent = currentStatus ? "Unlimited" : "Messages";
+		label.classList.toggle("text-black", currentStatus);
+		label.classList.toggle("text-gray-500", !currentStatus);
 	} catch (err) {
 		console.error(err);
 		toast("error", err.message);

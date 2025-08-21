@@ -13,15 +13,15 @@ import {
 } from "./payment.functions.js";
 
 const basePlan = {
-	2: { currency: "INR", amount: 1, plan: "Starter", credits: 3000 },
-	// 2: { currency: "INR", amount: 399, plan: "Starter", credits: 3000 },
+	// 2: { currency: "INR", amount: 1, plan: "Starter", credits: 3000 },
+	2: { currency: "INR", amount: 399, plan: "Starter", credits: 3000 },
 	5: { currency: "INR", amount: 699, plan: "Growth", credits: 5000 },
 	10: { currency: "INR", amount: 999, plan: "Scale", credits: 8000 },
 };
 
 const baseCredits = {
-	1000: { currency: "INR", amount: 1, plan: "Starter" },
-	// 1000: { currency: "INR", amount: 149, plan: "Starter" },
+	// 1000: { currency: "INR", amount: 1, plan: "Starter" },
+	1000: { currency: "INR", amount: 149, plan: "Starter" },
 	3000: { currency: "INR", amount: 399, plan: "Catch" },
 	5000: { currency: "INR", amount: 599, plan: "Growth" },
 	10000: { currency: "INR", amount: 999, plan: "Scale" },

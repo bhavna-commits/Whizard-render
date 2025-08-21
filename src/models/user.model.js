@@ -142,6 +142,7 @@ const userSchema = new mongoose.Schema(
 		currency: String,
 		testMessagesCount: { type: Number, default: 20 },
 		payment: {
+			unlimited: { type: Boolean, default: false },
 			place: {
 				type: String,
 				enum: ["Internal", "External"],

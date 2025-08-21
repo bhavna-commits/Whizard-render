@@ -46,6 +46,10 @@ export const getDashboard = async (req, res) => {
 			status = "Please buy a plan to get started";
 		}
 
+		if (user?.payment?.unlimited && status !== "Pending") {
+			status = "Live";
+		}
+
 		const permissions = req.session?.addedUser?.permissions;
 		const renderData = {
 			help,

@@ -141,7 +141,7 @@
 						<p>Track user activity and display a timeline of actions, including activity type, user details, and timestamps.</p>
 					</div>
 					<% } %>
-					<% if (user?.payment?.plan !== "unlimited") { %>
+					<% if (!user?.payment?.unlimited) { %>
 					<% if (access?.settings?.payment) { %>
 					<div onclick="location.href='/settings/payments'" class="border cursor-pointer rounded-xl text-slate-500 space-y-3 p-3 hover:bg-slate-100">
 						<img src="svg/coins.svg" alt="payment" class="text-black text-xl">

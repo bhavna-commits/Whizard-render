@@ -281,6 +281,8 @@ export const togglePaymentPlan = async (req, res) => {
 		const { id } = req.params;
 		const { status } = req.body;
 
+		console.log("status :", typeof status, status);
+
 		const user = await User.findOne({ unique_id: id });
 
 		if (!user) {
@@ -289,7 +291,7 @@ export const togglePaymentPlan = async (req, res) => {
 
 		await User.findOneAndUpdate(
 			{ unique_id: id },
-			{ "payment.plan": status },
+			{ "payment.unlimited": status },
 			{ new: true },
 		);
 

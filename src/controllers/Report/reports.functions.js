@@ -234,14 +234,16 @@ export async function sendMessagesReports(
 		}
 
 		const user = await User.findOne({ unique_id: userData.unique_id });
-		let messagesCount = user?.payment?.messagesCount || 0;
-		const totalCount = user?.payment?.totalMessages || 0;
-		let remainingCount = totalCount - messagesCount;
+		if (!user?.payment?.unlimited) {
+			let messagesCount = user?.payment?.messagesCount || 0;
+			const totalCount = user?.payment?.totalMessages || 0;
+			const remainingCount = totalCount - messagesCount;
 
-		if (contactList.length > remainingCount) {
-			throw new Error(
-				`Not enough credits. You have ${remainingCount} messages left, but you're trying to send ${contactList.length}.`,
-			);
+			if (contactList.length > remainingCount) {
+				throw new Error(
+					`Not enough credits. You have ${remainingCount} messages left, but you're trying to send ${contactList.length}.`,
+				);
+			}
 		}
 
 		const chatBulkOps = [];
@@ -324,8 +326,9 @@ export async function sendMessagesReports(
 
 				tempMsgBulkOps.push(tempMsgData);
 				chatBulkOps.push({ insertOne: { document: reportData } });
-
-				remainingCount--;
+				if (!user?.payment?.unlimited) {
+					remainingCount--;
+				}
 			} catch (error) {
 				console.error(
 					"Error sending message to contact:",
@@ -339,9 +342,10 @@ export async function sendMessagesReports(
 		if (chatBulkOps.length) await Chat.bulkWrite(chatBulkOps);
 		if (tempMsgBulkOps.length)
 			await TempMessageModel.bulkWrite(tempMsgBulkOps);
-
-		user.payment.messagesCount = totalCount - remainingCount;
-		await user.save();
+		if (!user?.payment?.unlimited) {
+			user.payment.messagesCount = totalCount - remainingCount;
+			await user.save();
+		}
 	} catch (error) {
 		console.error("Error sending messages:", error.message);
 		throw new Error(error.message);
@@ -1066,6 +1070,9 @@ export function safeParseJSON(str, fallback = null) {
 }
 
 export const checkPlanValidity = (user) => {
+	if (user?.payment?.unlimited) {
+		return;
+	}
 	if (user?.payment?.expiry === 0) {
 		throw "Please buy a plan first";
 	}
@@ -1081,7 +1088,7 @@ export const checkCredits = (user, contactListLength) => {
 	const totalCount = user?.payment?.totalMessages || 0;
 
 	if (
-		user?.payment?.plan !== "unlimited" &&
+		!user?.payment?.unlimited &&
 		contactListLength > totalCount - messagesCount
 	) {
 		throw `Not enough credits. You have ${

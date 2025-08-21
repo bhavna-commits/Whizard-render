@@ -20,7 +20,10 @@ import {
 	isBoolean,
 	isObject,
 } from "../../middleWares/sanitiseInput.js";
-import { checkPlanValidity, checkCredits } from "../Report/reports.functions.js";
+import {
+	checkPlanValidity,
+	checkCredits,
+} from "../Report/reports.functions.js";
 
 import { sendCampaignScheduledEmail } from "../../services/OTP/reportsEmail.js";
 import chatsUsersModel from "../../models/chatsUsers.model.js";
@@ -745,7 +748,7 @@ export const getOverviewFilter = async (req, res) => {
 	}
 };
 
-// campaign
+// Campaign
 
 export const getCreateCampaign = async (req, res) => {
 	const sessionUser = req.session?.user;
@@ -753,10 +756,13 @@ export const getCreateCampaign = async (req, res) => {
 	const ownerId = sessionUser?.id || addedUser?.owner;
 
 	const user = await User.findOne({ unique_id: ownerId });
-	let message = user.payment?.plan;
-	if (message !== "unlimited") {
+	let message = user.payment?.unlimited;
+	if (!message) {
 		message = user.payment?.totalMessages - user.payment?.messagesCount;
+	} else {
+		message = "Unlimited";
 	}
+	
 	let renderData = null;
 
 	if (addedUser?.permissions) {
