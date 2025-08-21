@@ -1065,6 +1065,31 @@ export function safeParseJSON(str, fallback = null) {
 	}
 }
 
+export const checkPlanValidity = (user) => {
+	if (user?.payment?.expiry === 0) {
+		throw "Please buy a plan first";
+	}
+	if (user?.payment?.expiry < Date.now()) {
+		throw `Your access to dashboard has expired on ${new Date(
+			user?.payment?.expiry,
+		).toUTCString()}. Please recharge!`;
+	}
+};
+
+export const checkCredits = (user, contactListLength) => {
+	const messagesCount = user?.payment?.messagesCount || 0;
+	const totalCount = user?.payment?.totalMessages || 0;
+
+	if (
+		user?.payment?.plan !== "unlimited" &&
+		contactListLength > totalCount - messagesCount
+	) {
+		throw `Not enough credits. You have ${
+			totalCount - messagesCount
+		} messages left, but you're trying to send ${contactListLength}.`;
+	}
+};
+
 agenda.define("process campaign", async (job) => {
 	const {
 		newCampaign,

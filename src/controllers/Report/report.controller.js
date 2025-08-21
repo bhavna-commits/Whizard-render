@@ -12,6 +12,8 @@ import {
 	getSentReportsById,
 	getCampaignOverview,
 	safeParseJSON,
+	checkPlanValidity,
+	checkCredits,
 } from "./reports.functions.js";
 import { isNumber, isString } from "../../middleWares/sanitiseInput.js";
 import { generateUniqueId } from "../../utils/otpGenerator.js";
@@ -525,32 +527,11 @@ export const createCampaign = async (req, res, next) => {
 			),
 		);
 
-		// === Plan Expiry Check
+		// === Separate Checks ===
+		checkPlanValidity(user);
+		checkCredits(user, contactList.length);
 
-		if (user?.payment?.expiry < Date.now()) {
-			throw new Error(
-				`Your access to dashboard has expired on ${new Date(
-					user?.payment?.expiry,
-				).toUTCString()}. Please recharge!`,
-			);
-		}
-
-		// === CREDIT CHECK ===
-		const messagesCount = user?.payment?.messagesCount || 0;
-		const totalCount = user?.payment?.totalMessages || 0;
-		if (
-			user?.payment?.plan !== "unlimited" &&
-			contactList.length > totalCount - messagesCount
-		) {
-			throw new Error(
-				`Not enough credits. You have ${
-					totalCount - messagesCount
-				} messages left, but you're trying to send ${
-					contactList.length
-				}.`,
-			);
-		}
-
+		// === Campaign creation continues unchanged ===
 		const newCampaign = new Campaign({
 			useradmin: id,
 			unique_id: generateUniqueId(),
@@ -596,8 +577,6 @@ export const createCampaign = async (req, res, next) => {
 				actions: "Send",
 				details: `Sent campaign named: ${name}`,
 			});
-
-			message = "Campaign created successfully";
 		} else {
 			newCampaign.scheduledAt = Number(schedule) * 1000;
 			newCampaign.status = "SCHEDULED";
@@ -629,6 +608,7 @@ export const createCampaign = async (req, res, next) => {
 				actions: "Send",
 				details: `Scheduled new campaign named: ${name}`,
 			});
+
 			message = "Campaign scheduled successfully";
 		}
 
