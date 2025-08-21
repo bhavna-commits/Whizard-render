@@ -97,7 +97,7 @@
 						<p><strong>Status:</strong> <span id="intent-status"></span></p>
 					</div>
 					
-					<!-- <a id="view-details" target="_blank" class="mt-6 inline-block text-blue-600 underline">View in Stripe Dashboard</a> -->
+					<div>Redirecting in: <span id="redirect-countdown">5</span> seconds</div>
 				</div>
 			</div>
 			
@@ -113,6 +113,20 @@
 	<script src="https://js.stripe.com/v3/"></script>
 	<% } %>
 	<script src="/payment/js/stripeConfirm.js"></script>
+	<script>
+		const countdownEl = document.getElementById("redirect-countdown");
+		let timeLeft = 5;
+		
+		const timer = setInterval(() => {
+			timeLeft--;
+			countdownEl.textContent = timeLeft;
+			if (timeLeft <= 0) {
+				clearInterval(timer);
+				window.location.href = "/settings/payments/";
+			}
+		}, 1000);
+	</script>
+
 </body>
 
 </html>

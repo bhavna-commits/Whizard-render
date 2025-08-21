@@ -20,10 +20,7 @@ import {
 	isBoolean,
 	isObject,
 } from "../../middleWares/sanitiseInput.js";
-import {
-	checkPlanValidity,
-	checkCredits,
-} from "../Report/reports.functions.js";
+import { checkPlanValidity, checkCredits } from "../Report/reports.functions.js";
 
 import { sendCampaignScheduledEmail } from "../../services/OTP/reportsEmail.js";
 import chatsUsersModel from "../../models/chatsUsers.model.js";
