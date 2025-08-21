@@ -42,6 +42,10 @@ export const getDashboard = async (req, res) => {
 			status = "Expired, Please renew your plan";
 		}
 
+		if (user?.payment?.expiry === 0 && status !== "Pending") {
+			status = "Please buy a plan to get started";
+		}
+
 		const permissions = req.session?.addedUser?.permissions;
 		const renderData = {
 			help,
