@@ -10,9 +10,7 @@ import Template from "../../models/templates.model.js";
 import User from "../../models/user.model.js";
 import ChatsUsers from "../../models/chatsUsers.model.js";
 import { fileURLToPath } from "url";
-import {
-	generateUniqueId,
-} from "../../utils/otpGenerator.js";
+import { generateUniqueId } from "../../utils/otpGenerator.js";
 import { agenda } from "../../config/db.js";
 import { sendMessages, sendTestMessage } from "./campaign.functions.js";
 import { countries, help } from "../../utils/dropDown.js";
@@ -22,6 +20,10 @@ import {
 	isBoolean,
 	isObject,
 } from "../../middleWares/sanitiseInput.js";
+import {
+	checkPlanValidity,
+	checkCredits,
+} from "../Report/reports.functions.js";
 
 import { sendCampaignScheduledEmail } from "../../services/OTP/reportsEmail.js";
 import chatsUsersModel from "../../models/chatsUsers.model.js";
@@ -838,34 +840,9 @@ export const validateAndPrepareCampaign = async (req, res, next) => {
 			user.FB_PHONE_NUMBERS.find((n) => n.selected)?.phone_number_id;
 		if (!phone_number) throw new Error("No phone number selected");
 
-		// === Plan Expiry Check
-
-		if (user?.payment?.expiry < Date.now()) {
-			throw new Error(
-				`Your access to dashboard has expired on ${new Date(
-					user?.payment?.expiry,
-				).toUTCString()}. Please recharge!`,
-			);
-		}
-
-		// === CREDIT CHECK ===
-
-		const messagesCount = user?.payment?.messagesCount || 0;
-		const totalCount = user?.payment?.totalMessages || 0;
-
-		if (
-			user?.payment?.plan !== "unlimited" &&
-			user?.payment?.plan !== "noplan" &&
-			contactList.length > totalCount - messagesCount
-		) {
-			throw new Error(
-				`Not enough credits. You have ${
-					totalCount - messagesCount
-				} messages left, but you're trying to send ${
-					contactList.length
-				}.`,
-			);
-		}
+		// === Separate Checks ===
+		checkPlanValidity(user);
+		checkCredits(user, contactList.length);
 
 		req.campaignData = {
 			templateId,
