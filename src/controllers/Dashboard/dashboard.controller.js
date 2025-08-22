@@ -38,16 +38,20 @@ export const getDashboard = async (req, res) => {
 
 		let status = user?.WhatsAppConnectStatus;
 
-		if (user?.payment?.expiry < Date.now() && status !== "Pending") {
+		if (
+			user?.payment?.expiry < Date.now() &&
+			status !== "Pending" &&
+			!user?.payment?.unlimited
+		) {
 			status = "Expired, Please renew your plan";
 		}
 
-		if (user?.payment?.expiry === 0 && status !== "Pending") {
+		if (
+			user?.payment?.expiry === 0 &&
+			status !== "Pending" &&
+			!user?.payment?.unlimited
+		) {
 			status = "Please buy a plan to get started";
-		}
-
-		if (user?.payment?.unlimited && status !== "Pending") {
-			status = "Live";
 		}
 
 		const permissions = req.session?.addedUser?.permissions;
