@@ -256,9 +256,9 @@
 	<script src="assets/js/card.js" type="text/javascript"></script>
 	<script src="assets/js/scripts.js" type="text/javascript"></script>
 	<script>
-		const contactLists = <%- JSON.stringify(data.reports) %>;
-		const attributes = <%- JSON.stringify(data.attributes) %>;
-		const contactListId = <%- JSON.stringify(data.contactListId) %>;
+		const contactLists = <%- JSON.stringify(data.reports || []) %>;
+		const attributes = <%- JSON.stringify(data.attributes || {}) %>;
+		const contactListId = <%- JSON.stringify(data.contactListId || null) %>;
 	</script>
 	<script src="/reports/js/createCampaign.js" type="text/javascript"></script>
 	<script src="/toast.js"></script>

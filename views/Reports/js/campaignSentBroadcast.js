@@ -77,8 +77,8 @@ broadcastButton.addEventListener("click", function () {
 		},
 		body: JSON.stringify({
 			reports: selectedReports,
-			attributes: contact.masterExtra,
-			contactListId: contact.contactId,
+			attributes: contact?.masterExtra,
+			contactListId: contact?.contactId,
 		}),
 	})
 		.then((response) => response.json())

@@ -36,8 +36,6 @@ class AttributeManager {
 		// const attributes = contacts[0]?.masterExtra || {};
 		const options = this.generateAttributeOptions(Object.keys(attributes));
 
-		console.log(template?.dynamicVariables);
-
 		this.container.innerHTML = "";
 
 		// Process BODY dynamic variables
@@ -434,7 +432,6 @@ class TemplateManager {
 
 	async handleContactListChange(event) {
 		const contactListId = event.target.value;
-		console.log("Contact list changed:", contactListId);
 
 		if (!contactListId) {
 			this.currentContacts = [];
