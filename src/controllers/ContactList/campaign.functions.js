@@ -582,8 +582,10 @@ export async function sendTestMessage(
 
 		// Deduct credit
 
-		user.payment.messagesCount += 1;
-		await user.save();
+		if (!user?.payment?.unlimited) {
+			user.payment.messagesCount += 1;
+			await user.save();
+		}
 
 		return {
 			messageTemplate,
