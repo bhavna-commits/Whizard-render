@@ -13,8 +13,8 @@ export const sendCampaignReportEmail = async (campaignId, userId) => {
 		// console.log(campaignId, userId);
 		let campaignName;
 		const user = await User.findOne({ unique_id: userId });
-		const country = user.country;
-		const countryCode = countries.find((c) => c.name === country).code;
+		const country = user?.country;
+		const countryCode = countries.find((c) => c.name === country)?.code;
 		if (!user?.email) throw "User email not found";
 
 		// Fetch campaign report data
