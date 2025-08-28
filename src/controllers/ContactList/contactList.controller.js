@@ -35,6 +35,8 @@ import {
 
 dotenv.config();
 
+// Contact List
+
 export const getList = async (req, res) => {
 	try {
 		const { archive } = req;
@@ -149,45 +151,170 @@ export const getList = async (req, res) => {
 	}
 };
 
-export const getContactList = async (req, res) => {
-	try {
-		const id = req.session?.user?.id || req.session?.addedUser?.owner;
-		const addedUserId = req.session?.addedUser?.id;
-		const permissionsId = req.session?.addedUser?.permissions;
+export const searchContactLists = async (req, res, next) => {
+	const { query } = req.query;
+	const userId = req.session?.user?.id || req.session?.addedUser?.owner;
+	const addedUserId = req.session?.addedUser?.id;
+	const page = parseInt(req.query.page) || 1;
+	const limit = 6;
+	const skip = (page - 1) * limit;
 
-		const user = await User.findOne({ unique_id: id });
+	if (!isString(query)) return next();
+	if (!isNumber(page)) return next();
+
+	try {
+		const user = await User.findOne({ unique_id: userId });
 
 		const FB_PHONE_ID =
 			req.session?.addedUser?.selectedFBNumber?.phone_number_id ||
 			user.FB_PHONE_NUMBERS.find((n) => n.selected).phone_number_id;
 
-		const query = {
+		const trimmedQuery = query.trim();
+		const escapeRegex = (text) =>
+			text.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
+
+		let escapedQuery = escapeRegex(trimmedQuery);
+
+		escapedQuery = escapedQuery.replace(/\s+/g, ".*");
+
+		const matchStage = {
 			FB_PHONE_ID,
-			useradmin: id,
+			useradmin: userId,
 			contact_status: { $ne: 0 },
 		};
 
-		if (permissionsId) {
-			let access = await Permissions.findOne({
-				unique_id: permissionsId,
-			});
-
-			if (!access?.contactList?.allList) {
-				// Only match if the agent field contains the added user's ID
-				if (addedUserId) {
-					query.agent = addedUserId;
-				}
-			}
+		if (escapedQuery) {
+			matchStage.contalistName = {
+				$regex: escapedQuery,
+				$options: "imsx",
+			};
 		}
 
-		const contactLists = await ContactList.find(query).sort({
-			createdAt: -1,
+		let access;
+		const permissions = req.session?.addedUser?.permissions;
+		if (permissions) {
+			access = await Permissions.findOne({
+				unique_id: permissions,
+			});
+
+			if (!access.contactList.allList) matchStage.agent = addedUserId;
+		}
+
+		const result = await ContactList.aggregate([
+			{
+				// Match the documents where useradmin matches the userId and contact_status is not 0
+				$match: matchStage,
+			},
+			{
+				$sort: { createdAt: -1 },
+			},
+			{
+				// Use $facet to return both paginated results and total count
+				$facet: {
+					paginatedResults: [
+						{ $skip: parseInt(skip) },
+						{ $limit: parseInt(limit) },
+					],
+					totalCount: [{ $count: "total" }],
+				},
+			},
+		]);
+
+		// Extract paginated results and total count from the aggregation result
+		const contactLists = result[0]?.paginatedResults || [];
+		const totalCount = result[0]?.totalCount[0]?.total || 0;
+
+		// Calculate total pages
+		const totalPages = Math.ceil(totalCount / limit);
+
+		if (permissions) {
+			if (access.contactList.type) {
+				res.render("Contact-List/partials/contactList/contactListTable", {
+					access,
+					contacts: contactLists,
+					totalPages,
+					page,
+					photo: req.session.addedUser?.photo,
+					name: req.session.addedUser.name,
+					color: req.session.addedUser.color,
+					whatsAppStatus: req.session?.addedUser?.whatsAppStatus,
+				});
+			} else {
+				res.render("errors/notAllowed");
+			}
+		} else {
+			const access = await User.findOne({ unique_id: userId });
+			res.render("Contact-List/partials/contactList/contactListTable", {
+				access: access.access,
+				contacts: contactLists,
+				totalPages,
+				page,
+				photo: req.session.user?.photo,
+				name: req.session.user.name,
+				color: req.session.user.color,
+				whatsAppStatus: access.WhatsAppConnectStatus,
+			});
+		}
+	} catch (error) {
+		console.error("Error fetching contact lists:", error);
+		res.render("errors/serverError");
+	}
+};
+
+export const updateContactListName = async (req, res) => {
+	const contactListId = req.params.id;
+	const { updatedValue } = req.body;
+
+	if (!isString(contactListId, updatedValue)) return next();
+
+	if (!updatedValue) {
+		return res.status(400).json({
+			success: false,
+			message: "Updated value is required",
+		});
+	}
+
+	try {
+		console.log(updatedValue);
+		// Find the contact list by ID and update the name
+		const updatedContactList = await ContactList.findOneAndUpdate(
+			{ contactId: contactListId },
+			{ $set: { contalistName: updatedValue } }, // Update the 'name' field with the new value
+			{ new: true }, // Return the updated document
+		);
+
+		console.log(updatedContactList.contalistName);
+		await updatedContactList.save();
+
+		if (!updatedContactList) {
+			return res.status(404).json({
+				success: false,
+				message: "Contact list not found",
+			});
+		}
+
+		await ActivityLogs.create({
+			useradmin: req.session?.user?.id || req.session?.addedUser?.owner,
+			unique_id: generateUniqueId(),
+			name: req.session?.user?.name
+				? req.session?.user?.name
+				: req.session?.addedUser?.name,
+			actions: "Update",
+			details: `Updated a contact List Name to : ${updatedValue}`,
 		});
 
-		res.json(contactLists);
+		// Send success response
+		res.json({
+			success: true,
+			message: "Contact list name updated successfully",
+			updatedContactList,
+		});
 	} catch (error) {
-		console.error(error);
-		res.render("errors/serverError");
+		console.error("Error updating contact list:", error);
+		res.status(500).json({
+			success: false,
+			message: "An error occurred while updating the contact list",
+		});
 	}
 };
 
@@ -777,6 +904,8 @@ export const deleteList = async (req, res, next) => {
 	}
 };
 
+// Custom Field
+
 export const sampleCSV = async (req, res) => {
 	try {
 		const userId = req.session?.user?.id || req.session?.addedUser?.owner;
@@ -1081,62 +1210,7 @@ export const deleteCustomField = async (req, res, next) => {
 	}
 };
 
-export const updateContactListName = async (req, res) => {
-	const contactListId = req.params.id;
-	const { updatedValue } = req.body;
-
-	if (!isString(contactListId, updatedValue)) return next();
-
-	if (!updatedValue) {
-		return res.status(400).json({
-			success: false,
-			message: "Updated value is required",
-		});
-	}
-
-	try {
-		console.log(updatedValue);
-		// Find the contact list by ID and update the name
-		const updatedContactList = await ContactList.findOneAndUpdate(
-			{ contactId: contactListId },
-			{ $set: { contalistName: updatedValue } }, // Update the 'name' field with the new value
-			{ new: true }, // Return the updated document
-		);
-
-		console.log(updatedContactList.contalistName);
-		await updatedContactList.save();
-
-		if (!updatedContactList) {
-			return res.status(404).json({
-				success: false,
-				message: "Contact list not found",
-			});
-		}
-
-		await ActivityLogs.create({
-			useradmin: req.session?.user?.id || req.session?.addedUser?.owner,
-			unique_id: generateUniqueId(),
-			name: req.session?.user?.name
-				? req.session?.user?.name
-				: req.session?.addedUser?.name,
-			actions: "Update",
-			details: `Updated a contact List Name to : ${updatedValue}`,
-		});
-
-		// Send success response
-		res.json({
-			success: true,
-			message: "Contact list name updated successfully",
-			updatedContactList,
-		});
-	} catch (error) {
-		console.error("Error updating contact list:", error);
-		res.status(500).json({
-			success: false,
-			message: "An error occurred while updating the contact list",
-		});
-	}
-};
+// Campaign related
 
 export const getCampaignContacts = async (req, res) => {
 	try {
@@ -1153,112 +1227,44 @@ export const getCampaignContacts = async (req, res) => {
 	}
 };
 
-export const searchContactLists = async (req, res, next) => {
-	const { query } = req.query;
-	const userId = req.session?.user?.id || req.session?.addedUser?.owner;
-	const addedUserId = req.session?.addedUser?.id;
-	const page = parseInt(req.query.page) || 1;
-	const limit = 6;
-	const skip = (page - 1) * limit;
-
-	if (!isString(query)) return next();
-	if (!isNumber(page)) return next();
-
+export const getContactList = async (req, res) => {
 	try {
-		const user = await User.findOne({ unique_id: userId });
+		const id = req.session?.user?.id || req.session?.addedUser?.owner;
+		const addedUserId = req.session?.addedUser?.id;
+		const permissionsId = req.session?.addedUser?.permissions;
+
+		const user = await User.findOne({ unique_id: id });
 
 		const FB_PHONE_ID =
 			req.session?.addedUser?.selectedFBNumber?.phone_number_id ||
 			user.FB_PHONE_NUMBERS.find((n) => n.selected).phone_number_id;
 
-		const trimmedQuery = query.trim();
-		const escapeRegex = (text) =>
-			text.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
-
-		let escapedQuery = escapeRegex(trimmedQuery);
-
-		escapedQuery = escapedQuery.replace(/\s+/g, ".*");
-
-		const matchStage = {
+		const query = {
 			FB_PHONE_ID,
-			useradmin: userId,
+			useradmin: id,
 			contact_status: { $ne: 0 },
 		};
 
-		if (escapedQuery) {
-			matchStage.contalistName = {
-				$regex: escapedQuery,
-				$options: "imsx",
-			};
-		}
-
-		let access;
-		const permissions = req.session?.addedUser?.permissions;
-		if (permissions) {
-			access = await Permissions.findOne({
-				unique_id: permissions,
+		if (permissionsId) {
+			let access = await Permissions.findOne({
+				unique_id: permissionsId,
 			});
 
-			if (!access.contactList.allList) matchStage.agent = addedUserId;
-		}
-
-		const result = await ContactList.aggregate([
-			{
-				// Match the documents where useradmin matches the userId and contact_status is not 0
-				$match: matchStage,
-			},
-			{
-				$sort: { createdAt: -1 },
-			},
-			{
-				// Use $facet to return both paginated results and total count
-				$facet: {
-					paginatedResults: [
-						{ $skip: parseInt(skip) },
-						{ $limit: parseInt(limit) },
-					],
-					totalCount: [{ $count: "total" }],
-				},
-			},
-		]);
-
-		// Extract paginated results and total count from the aggregation result
-		const contactLists = result[0]?.paginatedResults || [];
-		const totalCount = result[0]?.totalCount[0]?.total || 0;
-
-		// Calculate total pages
-		const totalPages = Math.ceil(totalCount / limit);
-
-		if (permissions) {
-			if (access.contactList.type) {
-				res.render("Contact-List/partials/contactListTable", {
-					access,
-					contacts: contactLists,
-					totalPages,
-					page,
-					photo: req.session.addedUser?.photo,
-					name: req.session.addedUser.name,
-					color: req.session.addedUser.color,
-					whatsAppStatus: req.session?.addedUser?.whatsAppStatus,
-				});
-			} else {
-				res.render("errors/notAllowed");
+			if (!access?.contactList?.allList) {
+				// Only match if the agent field contains the added user's ID
+				if (addedUserId) {
+					query.agent = addedUserId;
+				}
 			}
-		} else {
-			const access = await User.findOne({ unique_id: userId });
-			res.render("Contact-List/partials/contactListTable", {
-				access: access.access,
-				contacts: contactLists,
-				totalPages,
-				page,
-				photo: req.session.user?.photo,
-				name: req.session.user.name,
-				color: req.session.user.color,
-				whatsAppStatus: access.WhatsAppConnectStatus,
-			});
 		}
+
+		const contactLists = await ContactList.find(query).sort({
+			createdAt: -1,
+		});
+
+		res.json(contactLists);
 	} catch (error) {
-		console.error("Error fetching contact lists:", error);
+		console.error(error);
 		res.render("errors/serverError");
 	}
 };

@@ -1,4 +1,4 @@
-<div id="tableTab" class="tab-view overflow-y-auto overflow-x-hidden max-h-[87vh] h-[87vh] relative">
+<div id="tableTab" class="tab-view overflow-auto max-h-[87vh] h-[87vh] relative">
 	<% if (users.length > 0) { %>
 	<table class=" w-full text-left border-collapse">
 		<thead class="font-thin sticky top-0 bg-white z-10">
@@ -24,13 +24,13 @@
 				<td class="p-4 text-center "><%= user.WABA_ID %></td>
 				<td class="p-4 text-center">
 					<div class="flex justify-center items-center">
-						<div class="relative inline-flex items-center cursor-pointer select-none transition duration-300 ease-in-out" data-user-id="<%= user.unique_id %>" data-status="<%= user.payment.place %>" onclick="togglePaymentPlace(this)">
-							<div class="relative w-12 h-6 rounded-full transition-colors duration-300 ease-in-out bg-toggle <%= user.payment.place === "Internal" ? 'bg-black' : 'bg-gray-300' %>">
-								<div class="absolute top-0 left-0 w-6 h-6 bg-white border rounded-full shadow transform transition-transform duration-300 ease-in-out knob <%= user.payment.place === 'Internal' ? 'translate-x-6' : 'translate-x-0' %>"></div>
+						<div class="relative inline-flex items-center cursor-pointer select-none transition duration-300 ease-in-out" data-user-id="<%= user.unique_id %>" data-status="<%= user?.payment?.place %>" onclick="togglePaymentPlace(this)">
+							<div class="relative w-12 h-6 rounded-full transition-colors duration-300 ease-in-out bg-toggle <%= user?.payment?.place === "Internal" ? 'bg-black' : 'bg-gray-300' %>">
+								<div class="absolute top-0 left-0 w-6 h-6 bg-white border rounded-full shadow transform transition-transform duration-300 ease-in-out knob <%= user?.payment?.place === 'Internal' ? 'translate-x-6' : 'translate-x-0' %>"></div>
 							</div>
 						</div>
-						<span class="ml-3 text-sm font-medium status-label <%= user.payment.place === "Internal" ? 'text-black' : 'text-gray-500' %>">
-							<%= user.payment.place === "Internal" ? 'Internal' : 'External' %>
+						<span class="ml-3 text-sm font-medium status-label <%= user?.payment?.place === "Internal" ? 'text-black' : 'text-gray-500' %>">
+							<%= user?.payment?.place === "Internal" ? 'Internal' : 'External' %>
 						</span>
 					</div>
 				</td>

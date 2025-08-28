@@ -120,50 +120,50 @@ async function togglePaymentPlace(toggleElement) {
 	}
 }
 
-async function togglePaymentPlan(toggleElement) {
-	const userId = toggleElement.dataset.userId;
-	const currentStatus = Boolean(toggleElement.dataset.status);
+async function togglePaymentPlan(el) {
+	if (el.dataset.busy === "1") return;
+	el.dataset.busy = "1";
 
-	document.body.classList.add("cursor-wait");
+	const userId = el.dataset.userId;
+	const current = el.dataset.status === "true";
+	const next = !current;
+
+	const knob = el.querySelector(".knob");
+	const bg = el.querySelector(".bg-toggle");
+	const label = el.parentElement.querySelector(".status-label");
+
+	const setUI = (on) => {
+		knob.classList.toggle("translate-x-6", on);
+		knob.classList.toggle("translate-x-0", !on);
+		bg.classList.toggle("bg-black", on);
+		bg.classList.toggle("bg-gray-300", !on);
+		label.textContent = on ? "Unlimited" : "Messages";
+		label.classList.toggle("text-black", on);
+		label.classList.toggle("text-gray-500", !on);
+	};
+
+	setUI(next);
 
 	try {
 		const res = await fetch(
 			`/api/dashboard/${userId}/toggle-payment-plan`,
 			{
 				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify({ status: currentStatus }),
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ status: next }),
 			},
 		);
-
 		if (!res.ok) throw new Error("Status update failed");
-
-		// Update the toggle visually
-		toggleElement.dataset.status = currentStatus;
-
-		const knob = toggleElement.querySelector(".knob");
-		const bg = toggleElement.querySelector(".bg-toggle");
-		const label =
-			toggleElement.parentElement.querySelector(".status-label");
-
-		knob.classList.toggle("translate-x-6", currentStatus);
-		knob.classList.toggle("translate-x-0", !currentStatus);
-
-		bg.classList.toggle("bg-black", currentStatus);
-		bg.classList.toggle("bg-gray-300", !currentStatus);
-
-		label.textContent = currentStatus ? "Unlimited" : "Messages";
-		label.classList.toggle("text-black", currentStatus);
-		label.classList.toggle("text-gray-500", !currentStatus);
-	} catch (err) {
-		console.error(err);
-		toast("error", err.message);
+		el.dataset.status = String(next);
+	} catch (e) {
+		setUI(current);
+		el.dataset.status = String(current);
+		toast("error", e.message);
 	} finally {
-		document.body.classList.remove("cursor-wait");
+		el.dataset.busy = "0";
 	}
 }
+
 
 async function resetAccount(event, id) {
 	const btn = event.target;

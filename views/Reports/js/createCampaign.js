@@ -454,7 +454,7 @@ class TemplateManager {
 	}
 
 	handleAttributeSelection(variables) {
-		console.log("Attributes selected:", variables);
+		// console.log("Attributes selected:", variables);
 	}
 
 	convertDateFormat(dateString) {

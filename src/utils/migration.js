@@ -35,7 +35,7 @@ export default async function runMigration() {
 }
 
 async function migrateUsersTestCount() {
-	const cursor = User.find({}, { _id: 1, testMessagesCount: 1 }).cursor();
+	const cursor = User.find({}).cursor();
 	const ops = [];
 	let count = 0;
 
@@ -59,20 +59,26 @@ async function migrateUsersTestCount() {
 }
 
 async function migratePaymentDefault() {
-	const cursor = User.find({}, { _id: 1, payment: 1 }).cursor();
+	const cursor = User.find({}).cursor();
 	const ops = [];
 	let count = 0;
 
 	for await (const user of cursor) {
+		const admin = user.unique_id === "db2426e80f";
+
+		const update = {
+			"payment.place": admin ? "Internal" : "External",
+			"payment.unlimited": admin,
+		};
+
+		if (admin) {
+			update["payment.expiry"] = 0;
+		}
+
 		ops.push({
 			updateOne: {
 				filter: { _id: user._id },
-				update: {
-					$set: {
-						"payment.place": "External",
-						"payment.unlimited": false,
-					},
-				},
+				update: { $set: update },
 			},
 		});
 
@@ -85,7 +91,7 @@ async function migratePaymentDefault() {
 }
 
 async function migrateUsers() {
-	const cursor = User.find({}, { _id: 1, "access.settings": 1 }).cursor();
+	const cursor = User.find({}).cursor();
 	const ops = [];
 	let count = 0;
 
@@ -113,12 +119,40 @@ async function migrateUsers() {
 }
 
 async function migratePermissions() {
-	const cursor = Permissions.find({}, { _id: 1, settings: 1 }).cursor();
-	const ops = [];
-	let count = 0;
+	const batchUpdate = async (Model, cursor, buildUpdate, batchSize = 500) => {
+		let ops = [];
+		let count = 0;
 
-	for await (const permission of cursor) {
-		ops.push({
+		for await (const doc of cursor) {
+			ops.push(buildUpdate(doc));
+
+			if (ops.length >= batchSize) {
+				count += await safeBulkWrite(Model, ops);
+				ops = [];
+			}
+		}
+		if (ops.length) count += await safeBulkWrite(Model, ops);
+
+		return count;
+	};
+
+	const userCount = await batchUpdate(User, User.find().cursor(), (user) => ({
+		updateOne: {
+			filter: { _id: user._id },
+			update: {
+				$set: {
+					"access.settings.whatsAppAccountDetails": true,
+					"access.settings.accountDetails": true,
+					"access.settings.payment": true,
+				},
+			},
+		},
+	}));
+
+	const permissionCount = await batchUpdate(
+		Permissions,
+		Permissions.find().cursor(),
+		(permission) => ({
 			updateOne: {
 				filter: { _id: permission._id },
 				update: {
@@ -129,14 +163,14 @@ async function migratePermissions() {
 					},
 				},
 			},
-		});
+		}),
+	);
 
-		if (ops.length >= 500) {
-			count += await safeBulkWrite(Permissions, ops);
-		}
-	}
-	if (ops.length) count += await safeBulkWrite(Permissions, ops);
-	console.log(`✅ Permissions updated (${count} docs)`);
+	console.log(
+		`✅ Users updated (${userCount}), Permissions updated (${permissionCount}), Total: ${
+			userCount + permissionCount
+		}`,
+	);
 }
 
 async function migrateTemplates(userMap) {

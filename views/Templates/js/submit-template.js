@@ -387,7 +387,7 @@ function collectTemplateData() {
 				buttonData.text = callText || "Call Now";
 				buttonData.type = "PHONE_NUMBER";
 
-				if (!phoneNumber) {
+				if (phoneNumber.length < 10) {
 					toast(
 						"info",
 						`Button ${

@@ -279,26 +279,23 @@ export const togglePaymentPlace = async (req, res) => {
 export const togglePaymentPlan = async (req, res) => {
 	try {
 		const { id } = req.params;
-		const { status } = req.body;
-
-		console.log("status :", typeof status, status);
+		let { status } = req.body;
+		status = status === true || status === "true";
 
 		const user = await User.findOne({ unique_id: id });
+		if (!user) return res.status(404).json({ message: "User not found" });
 
-		if (!user) {
-			return res.status(404).json({ message: "User not found" });
-		}
-
-		await User.findOneAndUpdate(
+		await User.updateOne(
 			{ unique_id: id },
-			{ "payment.unlimited": status },
-			{ new: true },
+			{ $set: { "payment.unlimited": status } },
 		);
-
 		res.json({ success: true, message: "Payment card type updated" });
 	} catch (err) {
 		console.error("togglePaymentStatus error:", err);
-		res.status(500).json({ success: false, message: err });
+		res.status(500).json({
+			success: false,
+			message: err?.message || "Server error",
+		});
 	}
 };
 

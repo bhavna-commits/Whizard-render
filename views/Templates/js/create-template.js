@@ -250,7 +250,8 @@ document.getElementById("mediaType")?.addEventListener("change", (e) => {
 	} else if (value === "video") {
 		uploadText.textContent = "Choose from .mp4, .avi or .webm";
 	} else if (value === "document") {
-		uploadText.textContent = "Choose from .pdf, .doc, .docx, .txt, .xls, xlsx, .ppt, .pptx";
+		uploadText.textContent =
+			"Choose from .pdf, .doc, .docx, .txt, .xls, xlsx, .ppt, .pptx";
 	} else {
 		uploadText.textContent = "Choose from .gpx, .kml";
 	}
@@ -372,77 +373,122 @@ document
 			this.textContent.length + "/1024";
 	});
 
-let websiteBtnCount = 0;
-let callBtnCount = 0;
+(() => {
+	const previewContainers = ["previewButtons", "previewButton"];
+	let websiteBtnCount = 0;
+	let callBtnCount = 0;
 
-document.getElementById("addWebsiteBtn").addEventListener("click", function () {
-	if (websiteBtnCount >= 1) {
-		toast("info", "You can only add 1 website button.");
-		return;
-	}
+	const websiteForm = document.getElementById("websiteForm");
+	const callForm = document.getElementById("callForm");
+	const websiteLabel = document.getElementById("websiteBtnLabel");
+	const websiteUrl = document.getElementById("websiteUrl");
+	const callLabel = document.getElementById("callBtnLabel");
+	const phoneNumber = document.getElementById("phoneNumber");
 
-	// Display the website form
-	document.getElementById("websiteForm").style.display = "block";
-	generatePreviewWebsite();
-	websiteBtnCount++;
-
-	// Add event listener to remove the form on click
-	document
-		.getElementById("closeWebsite")
-		.addEventListener("click", function () {
-			document.getElementById("websiteForm").style.display = "none";
-			websiteBtnCount--;
-
-			// Remove the website button from preview
-			removePreviewButton("websiteBtn");
-		});
-
-	// Add input event listeners for dynamic preview update
-	document
-		.getElementById("websiteBtnLabel")
-		.addEventListener("input", generatePreviewWebsite);
-	document
-		.getElementById("websiteUrl")
-		.addEventListener("input", generatePreviewWebsite);
-});
-
-document.getElementById("addCallBtn").addEventListener("click", function () {
-	if (callBtnCount >= 1) {
-		toast("info", "You can only add 1 call button.");
-		return;
-	}
-
-	// Display the call form
-	document.getElementById("callForm").style.display = "block";
-	generatePreviewCall();
-	callBtnCount++;
-
-	// Add event listener to remove the form on click
-	document.getElementById("closeCall").addEventListener("click", function () {
-		document.getElementById("callForm").style.display = "none";
-		callBtnCount--;
-
-		// Remove the call button from preview
-		removePreviewButton("callBtn");
+	document.getElementById("addWebsiteBtn").addEventListener("click", () => {
+		if (websiteBtnCount >= 1) {
+			toast("info", "You can only add 1 website button.");
+			return;
+		}
+		websiteForm.style.display = "block";
+		websiteBtnCount++;
+		updateWebsitePreview();
 	});
 
-	// Add input event listeners for dynamic preview update
-	document
-		.getElementById("callBtnLabel")
-		.addEventListener("input", generatePreviewCall);
-	document
-		.getElementById("phoneNumber")
-		.addEventListener("input", generatePreviewCall);
-});
+	document.getElementById("closeWebsite").addEventListener("click", () => {
+		websiteForm.style.display = "none";
+		websiteBtnCount = Math.max(0, websiteBtnCount - 1);
+		removePreview("website");
+	});
 
-// // Function to remove a preview button by its ID
-function removePreviewButton(buttonId) {
-	let button = document.getElementById(buttonId);
-	if (button) {
-		button.remove();
+	document.getElementById("addCallBtn").addEventListener("click", () => {
+		if (callBtnCount >= 1) {
+			toast("info", "You can only add 1 call button.");
+			return;
+		}
+		callForm.style.display = "block";
+		callBtnCount++;
+		updateCallPreview();
+	});
+
+	document.getElementById("closeCall").addEventListener("click", () => {
+		callForm.style.display = "none";
+		callBtnCount = Math.max(0, callBtnCount - 1);
+		removePreview("call");
+	});
+
+	websiteLabel.addEventListener("input", updateWebsitePreview);
+	websiteUrl.addEventListener("input", updateWebsitePreview);
+	callLabel.addEventListener("input", updateCallPreview);
+	phoneNumber.addEventListener("input", updateCallPreview);
+
+	function updateWebsitePreview() {
+		const label = (websiteLabel?.value || "").trim() || "Visit Now";
+		const url = document.getElementById("websiteUrl").value || "#";
+		createOrUpdate("website", label, url);
 	}
-	document.getElementById("previewButton").innerHTML = "";
-}
+
+	function updateCallPreview() {
+		const label = (callLabel?.value || "").trim() || "Call Now";
+		const phone = document.getElementById("phoneNumber").value || "#";
+		createOrUpdate("call", label, phone);
+	}
+
+	function createOrUpdate(type, label, value) {
+		previewContainers.forEach((cid) => {
+			const c = document.getElementById(cid);
+			if (!c) return;
+
+			// Clear existing preview of that type first
+			const existing = c.querySelector(`[data-preview-type="${type}"]`);
+			if (existing) existing.remove();
+
+			// Add new button if label exists
+			if (label) {
+				const btn = document.createElement("button");
+				btn.setAttribute("data-preview-type", type);
+				btn.setAttribute("draggable", "true");
+				btn.className = `btn ${type}Btn`;
+				btn.style.color = "#6A67FF";
+
+				if (type === "website") {
+					btn.setAttribute(
+						"onclick",
+						`window.open('${value}', '_blank')`,
+					);
+					btn.innerHTML = `<i class="fa fa-external-link mx-2"></i>${label}`;
+				} else if (type === "call") {
+					btn.setAttribute(
+						"onclick",
+						`window.location.href='tel:${value}'`,
+					);
+					btn.innerHTML = `<i class="fa fa-phone mx-2"></i>${label}`;
+				}
+
+				c.appendChild(btn);
+			}
+		});
+		makeButtonsDraggable();
+	}
+
+
+	function removePreview(type) {
+		previewContainers.forEach((cid) => {
+			const c = document.getElementById(cid);
+			if (!c) return;
+			const el = c.querySelector(`[data-preview-type="${type}"]`);
+			if (el) el.remove();
+			Array.from(c.childNodes).forEach((node) => {
+				if (
+					node.nodeType === Node.TEXT_NODE &&
+					!node.textContent.trim()
+				)
+					node.remove();
+			});
+			if (!c.querySelector("[data-preview-type]")) c.innerHTML = "";
+		});
+	}
+})();
 
 const previewContainer = document.getElementById("previewContainer");
 let draggedElement = null;
@@ -651,9 +697,7 @@ document.getElementById("phoneNumber").addEventListener("input", function (e) {
 
 	// Check if the phone number is less than 12 digits
 	if (value.length < 8 && value.length > 0) {
-		showMessage(
-			'Phone number must be at least 8 digits long.',
-		);
+		showMessage("Phone number must be at least 8 digits long.");
 	} else {
 		hideMessage();
 	}

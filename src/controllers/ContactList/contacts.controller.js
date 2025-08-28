@@ -706,7 +706,7 @@ export const getFilteredContacts = async (req, res, next) => {
 				unique_id: permissions,
 			});
 			if (access.contactList) {
-				res.render("Contact-List/partials/OverViewTable", {
+				res.render("Contact-List/partials/overView/OverViewTable", {
 					access,
 					contacts: contactLists,
 					page,
@@ -721,7 +721,7 @@ export const getFilteredContacts = async (req, res, next) => {
 			const access = await User.findOne({
 				unique_id: req.session?.user?.id,
 			});
-			res.render("Contact-List/partials/OverViewTable", {
+			res.render("Contact-List/partials/overView/OverViewTable", {
 				access: access.access,
 				contacts: contactLists,
 				page,

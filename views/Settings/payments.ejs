@@ -102,17 +102,16 @@
 									<line x1="12" y1="16" x2="12" y2="12"></line>
 									<line x1="12" y1="8" x2="12.01" y2="8"></line>
 								</svg>
-								
 							</i>
-							<div class="tooltip invisible opacity-0 w-64 bg-gray-900 text-white text-sm rounded-lg absolute z-10 p-4 -translate-x-1/2 left-1/2 mt-2 transition-opacity duration-300">
-								<!-- Arrow -->
-								<div class="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-gray-900 transform rotate-45"></div>
-								<!-- Content -->
-								<div class="relative">
-									Payment section where you add messages and check payment history
-								</div>
+							<div class="tooltip invisible opacity-0
+           w-64 bg-gray-900 text-white text-sm rounded-lg absolute z-10 p-4 
+           -translate-x-1/2 left-1/2 mt-2 transition-opacity duration-300">
+								<div class="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 
+                bg-gray-900 transform rotate-45"></div>
+								<div class="relative">Payment section where you add messages and check payment history</div>
 							</div>
 						</div>
+						
 					</div>
 					
 				</nav>
@@ -125,7 +124,7 @@
 				<div class="w-full my-5">
 					<div class="flex justify-between items-center">
 						<div class="mb-4">
-							<h2 class="text-lg font-semibold text-gray-800">Messages Meter</h2>
+							<h2 class="text-lg font-semibold text-gray-800">Credit Usage</h2>
 							<p class="text-sm text-gray-600">
 								Messages are calculated as total messages sent vs total messages plan bought.
 							</p>
@@ -152,9 +151,47 @@
 					</div>
 				</div>
 				<div class="w-full space-x-3 py-4 flex items-center">
-					<button type="button" class="text-white bg-black rounded py-1 px-3 h-10 w-36" id="open-plan-btn">Buy Plan</button>
+					<button type="button" class="text-white bg-black rounded py-1 px-3 h-10 w-36 flex items-center justify-center" id="open-plan-btn">
+						Buy Plan
+						<div class="tooltip-wrapper relative inline-block pl-2">
+							<i class="info-icon text-white">
+								<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+									<circle cx="12" cy="12" r="10"></circle>
+									<line x1="12" y1="16" x2="12" y2="12"></line>
+									<line x1="12" y1="8" x2="12.01" y2="8"></line>
+								</svg>
+								
+							</i>
+							<div class="toolti invisible opacity-0 w-64 bg-gray-900 text-white text-sm rounded-lg absolute z-10 p-4 -translate-x-1/2 left-1/2 mt-2 transition-opacity duration-300">
+								<!-- Arrow -->
+								<div class="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-gray-900 transform rotate-45"></div>
+								<!-- Content -->
+								<div class="relative">
+									A subscription plan gives you monthly access to platform features + bundled message credits. Credits roll over once you will activate your dashboard.
+								</div>
+							</div>
+						</div>
+					</button>
 					<button type="button" class="border rounded h-10 w-36 px-3 py-1 flex items-center justify-center" id="open-credits-btn">
 						Buy Credits
+						<div class="tooltip-wrapper relative inline-block pl-2">
+							<i class="info-icon text-black">
+								<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+									<circle cx="12" cy="12" r="10"></circle>
+									<line x1="12" y1="16" x2="12" y2="12"></line>
+									<line x1="12" y1="8" x2="12.01" y2="8"></line>
+								</svg>
+								
+							</i>
+							<div class="toolti invisible opacity-0 w-64 bg-gray-900 text-white text-sm rounded-lg absolute z-10 p-4 -translate-x-1/2 left-1/2 mt-2 transition-opacity duration-300">
+								<!-- Arrow -->
+								<div class="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-gray-900 transform rotate-45"></div>
+								<!-- Content -->
+								<div class="relative">
+									Top-up packs let you add extra message credits on top of your plan. Unused top-up credits will roll over into your next cycle as long as your subscription remains active.
+								</div>
+							</div>
+						</div>
 					</button>
 				</div>
 				
@@ -168,13 +205,13 @@
 			</div>
 			<% if (paymentMode !== "razorpay") { %>
 			<div class="flex items-center justify-center w-full">
-				<div id="stripe-section" class="hidden  px-4 max-w-sm mt-10">					
+				<div id="stripe-section" class="hidden  px-4 max-w-sm mt-10">
 					<span class="text-gray-500 mb-1 block w-full text-center">Card details</span>
 					<button type="button" id="back-to-plans" class="text-red-400">&lArr; Back</button>
 					<div id="card-wrapper" class="w-fit">
 						<div id="card-element" class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-white"></div>
 						<div id="card-errors" class="text-xs text-red-500 mt-1"></div>
-					</div>					
+					</div>
 				</div>
 			</div>
 			<% } %>
@@ -205,6 +242,23 @@
 			openCreditsBtn?.addEventListener("click", () => {
 				meterSection.classList.add("hidden");
 				paymentCreditsUI.classList.remove("hidden");
+			});
+			
+			document.querySelectorAll(".tooltip-wrapper").forEach((wrapper) => {
+				const icon = wrapper.querySelector(".info-icon");
+				const tooltip = wrapper.querySelector(".toolti");
+				
+				if (!icon || !tooltip) return;
+				
+				wrapper.addEventListener("mouseenter", () => {
+					tooltip.classList.remove("invisible", "opacity-0");
+					tooltip.classList.add("visible", "opacity-100");
+				});
+				
+				wrapper.addEventListener("mouseleave", () => {
+					tooltip.classList.add("invisible", "opacity-0");
+					tooltip.classList.remove("visible", "opacity-100");
+				});
 			});
 		});
 	</script>

@@ -256,6 +256,8 @@ export const getSingleChat = async (req, res) => {
 		const oldToken = checkToken(req);
 		const { userId, token } = await getUserIdFromToken(oldToken);
 
+		console.log(req.body, JSON.stringify(req.body, null, 2));
+
 		const wa_id = req.body?.wa_id;
 		const FB_PHONE_ID = req.body?.phoneNumberId;
 		const skip = parseInt(req.body?.skip, 10) || 0;
@@ -649,11 +651,20 @@ export const sendTemplate = async (req, res) => {
 
 		const { userId, agentId, name } = await getUserIdFromToken(oldToken);
 
-		let user = await User.findOne({ unique_id: userId, deleted: false });
-		let addedUser = await AddedUser.findOne({
-			unique_id: agentId,
-			deleted: false,
-		});
+		let [user, template, addedUser] = await Promise.all([
+			User.findOne({ unique_id: userId, deleted: false }),
+			Template.findOne({ unique_id: templateId }),
+			AddedUser.findOne({
+				unique_id: agentId,
+				deleted: false,
+			}),
+		]);
+
+		if (!user) throw new Error("User not found");
+		if (!template)
+			throw new Error(`Template with ID ${templateId} not found`);
+		if (!contactList.length)
+			throw new Error(`No contacts found for list ${contactListId}`);
 
 		const fb_phone_number =
 			addedUser?.selectedFBNumber?.phone_number_id ||
@@ -666,9 +677,9 @@ export const sendTemplate = async (req, res) => {
 
 		await sendTestMessage(
 			user,
-			templateId,
+			template,
 			variables,
-			contactListId,
+			contactList[0],
 			contactList[0]?.recipientPhone,
 			fb_phone_number,
 			agentId,
@@ -695,20 +706,6 @@ export const sendTemplate = async (req, res) => {
 		});
 	}
 };
-
-/**
- * Gets url of the designated file from facebook.
- *
- * This is get request on url,
- * creates a inline rendered version of the asked file.
- *
- * @async
- * @function sendTemplate
- * @param {object} req - Express request object.
- * @param {object} res - Express response object.
- * @param {function} next - Express next middleware function.
- * @returns {Buffer}
- */
 
 export const getMedia = async (req, res) => {
 	try {

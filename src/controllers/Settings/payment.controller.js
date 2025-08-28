@@ -10,18 +10,20 @@ import {
 	handleRazorpayPayment,
 	handleStripePayment,
 	getCards,
+	scheduleExpiryJobs,
+	cancelExpiryJobs,
 } from "./payment.functions.js";
 
 const basePlan = {
-	// 2: { currency: "INR", amount: 1, plan: "Starter", credits: 3000 },
-	2: { currency: "INR", amount: 399, plan: "Starter", credits: 3000 },
+	2: { currency: "INR", amount: 1, plan: "Starter", credits: 3000 },
+	// 2: { currency: "INR", amount: 399, plan: "Starter", credits: 3000 },
 	5: { currency: "INR", amount: 699, plan: "Growth", credits: 5000 },
 	10: { currency: "INR", amount: 999, plan: "Scale", credits: 8000 },
 };
 
 const baseCredits = {
-	// 1000: { currency: "INR", amount: 1, plan: "Starter" },
-	1000: { currency: "INR", amount: 149, plan: "Starter" },
+	1000: { currency: "INR", amount: 1, plan: "Starter" },
+	// 1000: { currency: "INR", amount: 149, plan: "Starter" },
 	3000: { currency: "INR", amount: 399, plan: "Catch" },
 	5000: { currency: "INR", amount: 599, plan: "Growth" },
 	10000: { currency: "INR", amount: 999, plan: "Scale" },
@@ -356,9 +358,6 @@ export const getRazorConfirm = async (req, res) => {
 
 export const razorConfirm = async (req, res) => {
 	try {
-		const owner = req.session?.user?.id || req.session?.addedUser?.owner;
-		const addedUserId = req.session?.addedUser?.id;
-
 		const {
 			razorpay_order_id,
 			razorpay_payment_id,
@@ -369,26 +368,23 @@ export const razorConfirm = async (req, res) => {
 		const order = await Payment.findOne({ orderId: razorpay_order_id });
 		if (!order) {
 			return res.json({
-				redirectUrl: `/settings/confirm-razorpay-payment?status=failed&id=${razorpay_payment_id}&method=razorpay&desc=${encodeURIComponent(
-					description,
-				)}`,
+				redirectUrl: `/settings/confirm-razorpay-payment?status=failed&id=${razorpay_payment_id}&method=razorpay&desc=Payment not found`,
 			});
 		}
 
 		if (error) {
-			const { code, description, field } = error;
-
-			order.failedReason = description;
+			order.failedReason = error.description || "Unknown error";
 			order.status = "failed";
 			await order.save();
 
 			return res.json({
 				redirectUrl: `/settings/confirm-razorpay-payment?status=failed&id=${razorpay_payment_id}&method=razorpay&desc=${encodeURIComponent(
-					description,
+					error.description,
 				)}`,
 			});
 		}
 
+		// Signature check
 		const generated_signature = crypto
 			.createHmac("sha256", process.env.RAZORPAY_SECRET)
 			.update(razorpay_order_id + "|" + razorpay_payment_id)
@@ -396,45 +392,95 @@ export const razorConfirm = async (req, res) => {
 
 		if (generated_signature !== razorpay_signature) {
 			order.status = "failed";
-			order.description = "Invalid signature";
+			order.failedReason = "Invalid signature";
 			await order.save();
 
 			return res.json({
-				redirectUrl: `/settings/confirm-razorpay-payment?status=failed&id=${razorpay_payment_id}&method=razorpay&desc=${encodeURIComponent(
-					description,
-				)}`,
+				redirectUrl: `/settings/confirm-razorpay-payment?status=failed&id=${razorpay_payment_id}&method=razorpay&desc=Invalid signature`,
 			});
 		}
 
+		// Success
 		order.status = "succeeded";
 		order.paymentId = razorpay_payment_id;
 		await order.save();
 
-		// await User.findOneAndUpdate(
-		// 	{ unique_id: owner },
-		// 	{ $inc: { totalMessages: order.messagesCount } },
-		// );
-
-		let access = null;
-
-		if (addedUserId) {
-			const addedUser = await AddedUser.findOne({
-				unique_id: addedUserId,
-			});
-			access = await Permissions.findOne({ unique_id: addedUser.roleId });
-		} else {
-			const user = await User.findOne({ unique_id: owner });
-			access = user.access;
-		}
+		await applyPaymentEffects(order);
 
 		return res.json({
 			redirectUrl: `/settings/confirm-razorpay-payment?status=succeeded&id=${razorpay_payment_id}&method=razorpay`,
 		});
 	} catch (err) {
-		console.log("Error confirming payemnt :", err);
+		console.error("❌ Error confirming payment:", err);
 		res.render("errors/serverError");
 	}
 };
+
+async function applyPaymentEffects(payment) {
+	try {
+		const user = await User.findOne({ unique_id: payment.useradmin });
+		if (!user) return;
+
+		if (payment?.paymentType === "plan") {
+			const expiry = Date.now() + 30 * 24 * 60 * 60 * 1000;
+			const previousCount = user.payment?.messagesCount || 0;
+			const newTotal =
+				(payment?.messagesCount || 0) +
+				(user?.payment?.totalMessages || 0);
+
+			console.log("💬 Updating plan counts");
+			console.table({
+				previousCount,
+				addedCount: payment?.messagesCount,
+				newTotal: newTotal + previousCount,
+				usersCount: payment.usersCount,
+				expiry,
+			});
+
+			await User.updateOne(
+				{ unique_id: payment.useradmin },
+				{
+					$set: {
+						"payment.previousMessagesCount": previousCount,
+						"payment.totalMessages": newTotal + previousCount,
+						"payment.usersCount": payment.usersCount,
+						"payment.expiry": expiry,
+					},
+				},
+			);
+
+			await cancelExpiryJobs(user._id.toString());
+			await scheduleExpiryJobs(user, expiry);
+
+			console.log("✅ Plan updated");
+		} else {
+			const previousCount = user.payment?.messagesCount || 0;
+			const newTotal =
+				(payment?.messagesCount || 0) +
+				(user?.payment?.totalMessages || 0);
+
+			console.log("💬 Updating credits");
+			console.table({
+				previousCount,
+				addedCount: payment?.messagesCount,
+				newTotal: newTotal + previousCount,
+			});
+
+			await User.updateOne(
+				{ unique_id: payment.useradmin },
+				{
+					$set: {
+						"payment.previousMessagesCount": previousCount,
+						"payment.totalMessages": newTotal + previousCount,
+					},
+				},
+			);
+		}
+	} catch (err) {
+		console.error("❌ Error applying payment effects:", err);
+	}
+}
+
 
 // Web Hooks
 
@@ -460,7 +506,6 @@ export const razorpayWebhook = async (req, res) => {
 
 		if (event === "payment.captured" || event === "payment.failed") {
 			const p = payload.payment.entity;
-			console.log("🔍 Payment entity:", p.id, "Order:", p.order_id);
 
 			const payment = await Payment.findOne({ orderId: p.order_id });
 			if (!payment) {
@@ -479,76 +524,10 @@ export const razorpayWebhook = async (req, res) => {
 				update.failedReason = p.error_description || "Unknown failure";
 			}
 
-			console.log("💾 Updating payment:", payment._id);
-			console.table(update);
 			await Payment.updateOne({ _id: payment._id }, update);
 
 			if (update.status === "succeeded") {
-				console.log(
-					"✅ Payment succeeded for user:",
-					payment.useradmin,
-				);
-				const user = await User.findOne({
-					unique_id: payment.useradmin,
-				});
-				if (user) {
-					if (payment?.paymentType === "plan") {
-						const expiry = Date.now() + 30 * 24 * 60 * 60 * 1000;
-						const previousCount = user.payment?.messagesCount || 0;
-						const newTotal =
-							payment?.messagesCount +
-								user?.payment?.totalMessages || 0;
-
-						console.log("💬 Updating message counts");
-						console.table({
-							previousCount,
-							addedCount: newTotal,
-							newTotal: newTotal + previousCount,
-							usersCount: payment.usersCount,
-							expiry,
-						});
-
-						await User.updateOne(
-							{ unique_id: payment.useradmin },
-							{
-								$set: {
-									"payment.previousMessagesCount":
-										previousCount,
-									"payment.totalMessages":
-										newTotal + previousCount,
-									"payment.usersCount": payment.usersCount,
-									"payment.expiry": expiry,
-								},
-							},
-						);
-
-						console.log("💬 Updated plan");
-					} else {
-						const previousCount = user.payment?.messagesCount || 0;
-						const newTotal =
-							payment?.messagesCount +
-								user?.payment?.totalMessages || 0;
-
-						console.log("💬 Updating message counts");
-						console.table({
-							previousCount,
-							addedCount: newTotal,
-							newTotal: newTotal + previousCount,
-						});
-
-						await User.updateOne(
-							{ unique_id: payment.useradmin },
-							{
-								$set: {
-									"payment.previousMessagesCount":
-										previousCount,
-									"payment.totalMessages":
-										newTotal + previousCount,
-								},
-							},
-						);
-					}
-				}
+				await applyPaymentEffects(payment);
 			}
 		}
 
@@ -631,6 +610,10 @@ export const stripeWebhook = async (req, res) => {
 						},
 					},
 				);
+
+				await cancelExpiryJobs(user._id.toString());
+
+				await scheduleExpiryJobs(user, expiry);
 
 				console.log("💬 Updated plan");
 			} else {

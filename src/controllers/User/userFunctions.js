@@ -53,4 +53,3 @@ const friendlyColors = [
 export const getRandomColor = () => {
 	return friendlyColors[Math.floor(Math.random() * friendlyColors.length)];
 };
-

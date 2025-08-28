@@ -75,18 +75,19 @@ function getReportsMenu() {
 }
 
 document.querySelectorAll(".info-icon").forEach((icon) => {
-	const tooltip = document.querySelector(".tooltip");
-	icon.addEventListener("mouseenter", () => {
-		tooltip.classList.remove("invisible", "opacity-0");
-		tooltip.classList.add("visible", "opacity-100");
-		// console.log(tooltip.classList);
-	});
+	const tooltip = icon.nextElementSibling;
 
-	icon.addEventListener("mouseleave", () => {
-		tooltip.classList.add("invisible", "opacity-0");
-		tooltip.classList.remove("visible", "opacity-100");
-		// console.log(tooltip.classList);
-	});
+	if (tooltip && tooltip.classList.contains("tooltip")) {
+		icon.addEventListener("mouseenter", () => {
+			tooltip.classList.remove("invisible", "opacity-0");
+			tooltip.classList.add("visible", "opacity-100");
+		});
+
+		icon.addEventListener("mouseleave", () => {
+			tooltip.classList.add("invisible", "opacity-0");
+			tooltip.classList.remove("visible", "opacity-100");
+		});
+	}
 });
 
 const progressBar = document.getElementById("progress-bar");

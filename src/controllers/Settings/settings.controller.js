@@ -1003,7 +1003,7 @@ export const sendUserInvitation = async (req, res, next) => {
 			useradmin: adminId,
 			deleted: false,
 		});
-		if ((user?.payment?.usersCount ?? 0) <= totalAddedUsers) {
+		if ((user?.payment?.usersCount ?? 0) <= totalAddedUsers && user?.payment?.unlimited === false) {
 			return res.status(401).json({
 				success: false,
 				message: `You have added users to its limit.  Buy new plan to add more users`,
