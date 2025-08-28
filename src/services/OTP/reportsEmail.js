@@ -145,12 +145,8 @@ export const sendCampaignScheduledEmail = async (
 ) => {
 	try {
 		const user = await User.findOne({ email: userEmail, deleted: false });
-		const country = user.country;
-		const countryCode = countries.find((c) => c.name === country)?.code;
-
-		if (!countryCode) {
-			throw new Error(`Invalid or missing country code for ${country}`);
-		}
+		const country = user?.country;
+		const countryCode = countries?.find((c) => c.name === country)?.code;
 
 		// Get the first timezone for the country
 		const tzInfo = ct.getCountry(countryCode);
