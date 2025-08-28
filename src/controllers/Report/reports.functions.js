@@ -235,16 +235,9 @@ export async function sendMessagesReports(
 		}
 
 		const user = await User.findOne({ unique_id: userData.unique_id });
-
-		console.log("Loaded User:", JSON.stringify(user?.payment, null, 2));
-
 		let messagesCount = user?.payment?.messagesCount || 0;
 		const totalCount = user?.payment?.totalMessages || 0;
 		let remainingCount = totalCount - messagesCount;
-
-		console.log(
-			`Starting counts => messagesCount: ${messagesCount}, total: ${totalCount}, remaining: ${remainingCount}`,
-		);
 
 		if (!user?.payment?.unlimited) {
 			if (contactList.length > remainingCount) {
@@ -339,9 +332,6 @@ export async function sendMessagesReports(
 				if (!user?.payment?.unlimited) {
 					messagesCount++;
 					remainingCount--;
-					console.log(
-						`Message sent ✅ to ${contact.wa_id}, updated messagesCount: ${messagesCount}, remaining: ${remainingCount}`,
-					);
 				}
 			} catch (error) {
 				console.error(
@@ -364,9 +354,7 @@ export async function sendMessagesReports(
 				}`,
 			);
 			user.payment.messagesCount = messagesCount;
-			user.markModified("payment"); // make sure nested object persists
 			await user.save();
-			console.log("User payment updated in DB:", user.payment);
 		}
 	} catch (error) {
 		console.error("Error sending messages:", error.message);

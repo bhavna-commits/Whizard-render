@@ -38,16 +38,9 @@ export async function sendMessages(
 		}
 
 		const user = await User.findOne({ unique_id: userData.unique_id });
-
-		console.log("Loaded User:", JSON.stringify(user?.payment, null, 2));
-
 		let messagesCount = user?.payment?.messagesCount || 0;
 		const totalCount = user?.payment?.totalMessages || 0;
 		let remainingCount = totalCount - messagesCount;
-
-		console.log(
-			`Starting counts => messagesCount: ${messagesCount}, total: ${totalCount}, remaining: ${remainingCount}`,
-		);
 
 		if (!user?.payment?.unlimited) {
 			if (contactList.length > remainingCount) {
@@ -163,7 +156,6 @@ export async function sendMessages(
 			);
 			user.payment.messagesCount = messagesCount;
 			await user.save();
-			console.log("User payment updated in DB:", user.payment);
 		}
 	} catch (error) {
 		console.error("Error sending messages:", error.message || error);
