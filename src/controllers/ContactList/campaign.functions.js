@@ -39,14 +39,20 @@ export async function sendMessages(
 
 		const user = await User.findOne({ unique_id: userData.unique_id });
 
-		if (!user?.payment?.unlimited) {
-			let messagesCount = user?.payment?.messagesCount || 0;
-			const totalCount = user?.payment?.totalMessages || 0;
-			const remainingCount = totalCount - messagesCount;
+		console.log("Loaded User:", JSON.stringify(user?.payment, null, 2));
 
+		let messagesCount = user?.payment?.messagesCount || 0;
+		const totalCount = user?.payment?.totalMessages || 0;
+		let remainingCount = totalCount - messagesCount;
+
+		console.log(
+			`Starting counts => messagesCount: ${messagesCount}, total: ${totalCount}, remaining: ${remainingCount}`,
+		);
+
+		if (!user?.payment?.unlimited) {
 			if (contactList.length > remainingCount) {
 				throw new Error(
-					`Not enough credits. You have ${remainingCount} messages left, but you're trying to send ${contactList.length}.`,
+					`Not enough credits. You have ${remainingCount} left, need ${contactList.length}`,
 				);
 			}
 		}
@@ -122,15 +128,21 @@ export async function sendMessages(
 					type: "Campaign",
 				};
 
-				if (mediaPreview)
+				if (mediaPreview) {
 					chatDoc.media = {
 						url: mediaPreview.url,
 						fileName: mediaPreview.fileName,
 					};
+				}
 
 				chatDocs.push(chatDoc);
+
 				if (!user?.payment?.unlimited) {
 					messagesCount++;
+					remainingCount--;
+					console.log(
+						`Message sent ✅ to ${contact.wa_id}, updated messagesCount: ${messagesCount}, remaining: ${remainingCount}`,
+					);
 				}
 			} catch (err) {
 				console.error(
@@ -142,9 +154,16 @@ export async function sendMessages(
 
 		if (chatDocs.length) await Chat.insertMany(chatDocs);
 		if (tempMsgOps.length) await TempMessage.bulkWrite(tempMsgOps);
+
 		if (!user?.payment?.unlimited) {
+			console.log(
+				`Final update => messagesCount: ${messagesCount}, total: ${totalCount}, remaining: ${
+					totalCount - messagesCount
+				}`,
+			);
 			user.payment.messagesCount = messagesCount;
 			await user.save();
+			console.log("User payment updated in DB:", user.payment);
 		}
 	} catch (error) {
 		console.error("Error sending messages:", error.message || error);
