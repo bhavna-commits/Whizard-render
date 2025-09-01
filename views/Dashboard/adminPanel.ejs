@@ -48,12 +48,17 @@
 				</div>
 			</div>
 			
-			<div id="usersTab" class="tab container">				
+			<div id="usersTab" class="tab container">
 				<!-- Form View -->
 				<%- include("partials/adminPanel/adminEmailChange") %>
 				
 				<!-- Table View -->
-				<%- include("partials/adminPanel/adminTable") %>
+				<div class="" id="tableTab">
+					<div class="mt-4">Search : <input type="text" placeholder="name, number, email" class=" placeholder:text-gray-500 p-2" style="border-bottom: 1px solid #e5e7eb ;" /></div>
+					<div id="tableWrapper">
+						<%- include("partials/adminPanel/adminTable") %>
+					</div>
+				</div>
 			</div>
 		</div>
 	</div>

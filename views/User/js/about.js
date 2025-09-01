@@ -47,13 +47,11 @@ document.addEventListener("DOMContentLoaded", function () {
 			}
 
 			if (result.success) {
-				location.href = "/";
+				location.href = "/settings/payments/";
 			}
 		} catch (error) {
 			console.log(error);
 			toast("error", error);
-			// errorMessage.classList.remove("hidden");
-			// errorMessage.textContent = error;
 		} finally {
 			this.disabled = false;
 			this.innerHTML = "Submit";
@@ -114,7 +112,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 			// If the result is successful, redirect to the homepage or next page
 			if (result.success) {
-				location.href = "/";
+				location.href = "/settings/payments/";
 				// console.log(result);
 			}
 		} catch (error) {

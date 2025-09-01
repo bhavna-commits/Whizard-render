@@ -9,7 +9,10 @@ import {
 	getFilters,
 } from "../controllers/Dashboard/dashboard.controller.js";
 
-import { adminPanel } from "../controllers/Dashboard/adminPanel.controller.js";
+import {
+	adminPanel,
+	searchAdminPanel,
+} from "../controllers/Dashboard/adminPanel.controller.js";
 
 import {
 	getCreatePassword,
@@ -96,5 +99,12 @@ router.get(`/UdY0U6Zlfp`, (req, res) => {
 });
 
 router.get(`/admin-panel`, checkSession, checkAdminSession, adminPanel);
+
+router.get(
+	"/admin-panel/search/:query?",
+	checkSession,
+	checkAdminSession,
+	searchAdminPanel,
+);
 
 export default router;

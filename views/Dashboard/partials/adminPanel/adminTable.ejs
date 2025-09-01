@@ -1,28 +1,29 @@
-<div id="tableTab" class="tab-view overflow-auto max-h-[87vh] h-[87vh] relative">
+<div class="tab-view overflow-auto max-h-[87vh] h-[87vh] relative">
 	<% if (users.length > 0) { %>
-	<table class=" w-full text-left border-collapse">
+	<table class=" w-full text-left border-collapse mb-4">
 		<thead class="font-thin sticky top-0 bg-white z-10">
 			<tr class="text-gray-500 font-normal">
-				<!-- <td class="p-4 text-center">Sno.</td> -->
-				<td class="p-4 text-center">User Name</td>
-				<td class="p-4 text-center">Email</td>
-				<td class="p-4 text-center">WABA</td>
-				<td class="p-4 text-center">Payment Place</td>
-				<td class="p-4 text-center">Payment Plan</td>
-				<td class="p-4 text-center">Plan Status</td>
-				<td class="p-4 text-center">Status</td>
-				<td class="p-4 text-center">Actions</td>
-				<td class="p-4 text-center">Delete</td>
+				<!-- <td class="py-4 text-center">Sno.</td> -->
+				<td class="py-4 text-center">User Name</td>
+				<td class="py-4 text-center">Email</td>
+				<td class="py-4 text-center">Phone Number</td>
+				<td class="py-4 text-center">WABA</td>
+				<td class="py-4 text-center">Payment Place</td>
+				<td class="py-4 text-center">Payment Plan</td>
+				<td class="py-4 text-center">Plan Status</td>
+				<td class="py-4 text-center">Signed Up</td>
+				<td class="py-4 text-center">Actions</td>
 			</tr>
 		</thead>
 		<tbody class="">
 			<% users.forEach((user, index) => { %>
 			<tr class="text-gray-900">
-				<!-- <td class="p-4 text-center"><%= index + 1 %></td> -->
-				<td class="p-4 text-center"><%= user.name %></td>
-				<td class="p-4 text-center"><%= user.email %></td>
-				<td class="p-4 text-center "><%= user.WABA_ID %></td>
-				<td class="p-4 text-center">
+				<!-- <td class="py-4 text-center"><%= index + 1 %></td> -->
+				<td class="py-4 text-center"><%= user.name %></td>
+				<td class="py-4 text-center"><%= user.email %></td>
+				<td class="py-4 text-center"><%= user.phone %></td>
+				<td class="py-4 text-center "><%= user.WABA_ID %></td>
+				<td class="py-4 text-center">
 					<div class="flex justify-center items-center">
 						<div class="relative inline-flex items-center cursor-pointer select-none transition duration-300 ease-in-out" data-user-id="<%= user.unique_id %>" data-status="<%= user?.payment?.place %>" onclick="togglePaymentPlace(this)">
 							<div class="relative w-12 h-6 rounded-full transition-colors duration-300 ease-in-out bg-toggle <%= user?.payment?.place === "Internal" ? 'bg-black' : 'bg-gray-300' %>">
@@ -34,7 +35,7 @@
 						</span>
 					</div>
 				</td>
-				<td class="p-4 text-center">
+				<td class="py-4 text-center">
 					<div class="flex justify-center items-center">
 						<div class="relative inline-flex items-center cursor-pointer select-none transition duration-300 ease-in-out" data-user-id="<%= user.unique_id %>" data-status="<%= user?.payment?.unlimited %>" onclick="togglePaymentPlan(this)">
 							<div class="relative w-12 h-6 rounded-full transition-colors duration-300 ease-in-out bg-toggle <%= user?.payment?.unlimited ? 'bg-black' : 'bg-gray-300' %>">
@@ -67,37 +68,37 @@
 					%>
 					<%= displayPlan %>, <%= displayRemaining %>
 				</td>
-				
-				
-				<td class="p-4 text-center">
-					<div class="flex justify-center items-center">
-						<% const isActive = !user.blocked; %>
-						<div class="relative inline-flex items-center cursor-pointer select-none transition duration-300 ease-in-out" data-user-id="<%= user.unique_id %>" data-status="<%= isActive ? 'active' : 'inactive' %>" onclick="toggleUserStatus(this)">
-							<div class="w-12 h-6 rounded-full transition-colors duration-300 ease-in-out bg-toggle <%= isActive ? 'bg-black' : 'bg-gray-300' %>"></div>
-							<div class="absolute left-0 top-0 w-6 h-6 bg-white border rounded-full shadow transform transition-transform duration-300 ease-in-out knob <%= isActive ? 'translate-x-6' : 'translate-x-0' %>"></div>
+				<td class="py-4 text-center date-cell" data-date="<%= user.createdAt %>"></td>
+				<td class="text-center">
+					<div class="relative inline-block text-left">
+						<button type="button" class="p-2 rounded-full hover:bg-gray-200 focus:outline-none" onclick="toggleActionDropdown(this)">
+							⋮
+						</button>
+						
+						<div class="hidden absolute right-0 mt-2 w-40 bg-white border rounded-xl shadow-lg z-10">
+							<button type="button" class="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100" data-user-id="<%= user.unique_id %>" data-status="<%= !user.blocked ? 'active' : 'inactive' %>" onclick="toggleUserStatus(this)">
+								<%= !user.blocked ? 'Set In-Active' : 'Set Active' %>
+							</button>
+							
+							<button type="button" class="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 <%= user.campaign ? 'cursor-not-allowed opacity-50' : '' %>" onclick="resetAccount(event,'<%= user.unique_id %>')" <%= user.campaign ? 'disabled' : '' %>>
+								Reset
+							</button>
+							
+							<button type="button" class="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 text-red-500" onclick="deleteAccountEmail(event,'<%= user.unique_id %>')">
+								Delete
+							</button>
 						</div>
-						<span class="ml-3 text-sm font-medium status-label <%= isActive ? 'text-black' : 'text-gray-500' %>">
-							<%= isActive ? 'Active' : 'In-Active' %>
-						</span>
 					</div>
-				</td>
-				<td class="text-center">
-					<button type="button" class="text-gray-500 border px-4 py-2 rounded-2xl font-bold hover:text-gray-900 focus:outline-none <%= user.campaign ? "hover:cursor-not-allowed" : '' %>" onclick="resetAccount(event,'<%= user.unique_id %>')" title="<%= user.campaign ? 'Cannot reset account because broadcast is already sent ' : '' %>" <%= user.campaign ? 'disabled ' : '' %>>
-						Reset
-					</button>
-				</td>
-				<td class="text-center">
-					<button type="button" class="text-gray-500 border px-4 py-2 rounded-2xl font-bold hover:text-gray-900 focus:outline-none " onclick="deleteAccountEmail(event,'<%= user.unique_id %>')">
-						Delete
-					</button>
 				</td>
 			</tr>
 			<% }) %>
 		</tbody>
 	</table>
+
+	<%- include("../../../commonJS/pagination")  %>
 	<% } else { %>
 	<!-- Empty state -->
-	<div class="flex flex-col items-center justify-center min-h-[400px]  rounded-lg mt-4">
+	<div class="flex flex-col items-center justify-center min-h-[400px] rounded-lg mt-4">
 		<div class="text-center">
 			<img src="https://img.freepik.com/free-vector/hands-holding-tablet-with-forefinger-clicking-start-button-new-application-launch-flat-illustration_74855-20595.jpg?ga=GA1.1.131490893.1732525963&semt=ais_hybrid" alt="No contacts" class="w-48 h-48 mx-auto mb-4">
 			<h3 class="text-xl font-semibold text-gray-900 mb-2">No members yet</h3>
@@ -105,3 +106,39 @@
 	</div>
 	<% } %>
 </div>
+
+<script>
+	document.querySelectorAll('.date-cell').forEach((el) => {
+		const rawDate = el.getAttribute('data-date');
+		if (rawDate) {
+			const date = new Date(Number(rawDate));
+			const formatted = date.toLocaleString('en-GB', {
+				year: 'numeric',
+				month: 'short',
+				day: '2-digit',
+			});
+			el.textContent = formatted;
+		}
+	});
+	
+	function toggleActionDropdown (btn) {
+		const menu = btn.nextElementSibling
+		menu.classList.toggle("hidden")
+		
+		// close other open dropdowns
+		document.querySelectorAll(".action-dropdown-open").forEach(m => {
+			if (m !== menu) m.classList.add("hidden")
+		})
+		menu.classList.toggle("action-dropdown-open")
+	}
+	
+	// close dropdown when clicking outside
+	document.addEventListener("click", e => {
+		document.querySelectorAll(".action-dropdown-open").forEach(m => {
+			if (!m.parentElement.contains(e.target)) {
+				m.classList.add("hidden")
+				m.classList.remove("action-dropdown-open")
+			}
+		})
+	})
+</script>

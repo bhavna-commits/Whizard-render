@@ -254,59 +254,13 @@ router.post("/webhook", async (req, res) => {
 						}
 					};
 
-					await TempMessage.create({
-						name,
-						wabaId,
-						messageId,
-						from: senderPhone,
-						timestamp: timestamp * 1000,
-						type,
-						text: getMessageText(),
-						mediaId,
-						fbPhoneId,
-						status: "receive",
-					});
-
-					const replyChat = {
-						WABA_ID: wabaId,
-						FB_PHONE_ID: fbPhoneId,
-						useradmin: "-",
-						unique_id: "-",
-						campaignId: "-",
-						templateId: "-",
-						contactName: name,
-						recipientPhone: senderPhone,
-						status: "REPLIED",
-						updatedAt: timestamp * 1000,
-						messageId,
-						text: type === "text" ? text?.body : text,
-						media:
-							type !== "text"
-								? {
-										url: `/api/chats/get-media?mediaId=${mediaId}&phoneId=${fbPhoneId}`,
-										fileName:
-											type === "document"
-												? document?.filename
-												: "",
-										caption: text || "",
-								  }
-								: {},
-
-						type: "Chat",
-						media_type: type !== "text" ? type : "",
-					};
-
-					await Chats.create(replyChat);
-
 					try {
 						const c = await ChatsUsers.findOne({
 							FB_PHONE_ID: fbPhoneId,
 							wa_id: senderPhone,
-						});
+						}).lean();
 
 						let agents = c?.agent || [];
-
-						console.log(agents);
 
 						let supportagents = c?.supportAgent || [];
 						let finalagents = [];
@@ -337,6 +291,50 @@ router.post("/webhook", async (req, res) => {
 								document,
 							);
 						}
+
+						await TempMessage.create({
+							name,
+							wabaId,
+							messageId,
+							from: senderPhone,
+							timestamp: timestamp * 1000,
+							type,
+							text: getMessageText(),
+							mediaId,
+							fbPhoneId,
+							status: "receive",
+						});
+
+						const replyChat = {
+							WABA_ID: wabaId,
+							FB_PHONE_ID: fbPhoneId,
+							useradmin: c?.useradmin || "-",
+							unique_id: "-",
+							campaignId: c?.campaignId || "-",
+							templateId: "-",
+							contactName: name,
+							recipientPhone: senderPhone,
+							status: "REPLIED",
+							updatedAt: timestamp * 1000,
+							messageId,
+							text: type === "text" ? text?.body : text,
+							media:
+								type !== "text"
+									? {
+											url: `/api/chats/get-media?mediaId=${mediaId}&phoneId=${fbPhoneId}`,
+											fileName:
+												type === "document"
+													? document?.filename
+													: "",
+											caption: text || "",
+									  }
+									: {},
+
+							type: "Chat",
+							media_type: type !== "text" ? type : "",
+						};
+
+						await Chats.create(replyChat);
 					} catch (err) {
 						console.error("Error adding agent in chats:", err);
 					}

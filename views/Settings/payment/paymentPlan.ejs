@@ -3,8 +3,9 @@
 		<div class="w-full h-full flex justify-center box-content rounded-xl" id="left-side">
 			<div class="w-11/12">
 				
-				<div class="flex items-center justify-between my-8">
-					<button type="button" class="<%= paymentTableData?.length > 0 ? '' : 'hidden' %>flex items-cente  text-gray-500" onclick="location.reload()"><span class="mb-1 mr-1">&LeftArrow;</span> Go Back</button>
+				<div class="flex items-center justify-between my-8">				
+					<div class="<%= paymentTableData?.length > 0 ? 'hidden' : 'invisible' %>">payment</div>
+					<button type="button" class="<%= paymentTableData?.length > 0 ? 'flex' : 'hidden' %> items-center text-gray-500" onclick="location.reload()"><span class="mb-1 mr-1">&LeftArrow;</span> Go Back</button>
 					<h1 class="text-2xl text-center font-semibold">Payment Plan</h1>
 					<div class="invisible">payment</div>
 				</div>

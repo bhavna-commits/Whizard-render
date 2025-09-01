@@ -14,11 +14,22 @@ export const adminPanel = async (req, res) => {
 		const campaignOwners = await Campaign.distinct("useradmin");
 		const ownerSet = new Set(campaignOwners);
 
+		const page = parseInt(req.query?.page) || 1;
+		const limit = 6;
+		const skip = (page - 1) * limit;
+
+		const totalCount = await User.countDocuments({
+			unique_id: { $ne: "db2426e80f" },
+			deleted: false,
+		});
+
 		const users = await User.find({
 			unique_id: { $ne: "db2426e80f" },
 			deleted: false,
 		})
 			.sort({ updatedAt: -1 })
+			.skip(skip)
+			.limit(limit)
 			.lean();
 
 		for (const user of users) {
@@ -30,6 +41,8 @@ export const adminPanel = async (req, res) => {
 			{ access: 1 },
 		).lean();
 
+		const totalPages = Math.ceil(totalCount / limit);
+
 		res.render("Dashboard/adminPanel", {
 			users,
 			photo: req.session?.user?.photo,
@@ -38,9 +51,77 @@ export const adminPanel = async (req, res) => {
 			doMigration: doMigration(),
 			help,
 			access: access?.access,
+			page,
+			totalPages,
 		});
 	} catch (error) {
 		console.error("Error getting Admin panel :", error);
+		res.render("errors/serverError");
+	}
+};
+
+export const searchAdminPanel = async (req, res) => {
+	try {
+		const { query } = req.params;
+		const trimmedQuery = (query || "").trim();
+
+		const page = parseInt(req.query?.page) || 1;
+		const limit = 6;
+		const skip = (page - 1) * limit;
+
+		const escapeRegex = (text) =>
+			text.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
+		let escapedQuery = escapeRegex(trimmedQuery);
+		escapedQuery = escapedQuery.replace(/\s+/g, ".*");
+
+		let match = {
+			unique_id: { $ne: "db2426e80f" },
+			deleted: false,
+		};
+
+		if (escapedQuery) {
+			match.$or = [
+				{ email: { $regex: escapedQuery, $options: "imsx" } },
+				{ name: { $regex: escapedQuery, $options: "imsx" } },
+				{ phone: { $regex: escapedQuery, $options: "imsx" } },
+			];
+		}
+
+		const aggregation = [
+			{ $match: match },
+			{ $sort: { createdAt: -1 } },
+			{
+				$facet: {
+					paginatedResults: [{ $skip: skip }, { $limit: limit }],
+					totalCount: [{ $count: "total" }],
+				},
+			},
+		];
+
+		const result = await User.aggregate(aggregation);
+
+		const users = result[0]?.paginatedResults || [];
+		const totalCount = result[0]?.totalCount[0]?.total || 0;
+		const totalPages = Math.ceil(totalCount / limit);
+
+		const access = await User.findOne(
+			{ unique_id: req.session?.user?.id },
+			{ access: 1 },
+		).lean();
+
+		res.render("Dashboard/partials/adminPanel/adminTable", {
+			users,
+			photo: req.session?.user?.photo,
+			name: req.session?.user?.name,
+			color: req.session?.user?.color,
+			doMigration: doMigration(),
+			help,
+			access: access?.access,
+			page,
+			totalPages,
+		});
+	} catch (error) {
+		console.error("Error getting Admin panel search:", error);
 		res.render("errors/serverError");
 	}
 };

@@ -1,6 +1,5 @@
 function toggleDropdown() {
 	const dropdownMenu = document.getElementById("downMenu");
-	console.log(dropdownMenu);
 	dropdownMenu.classList.toggle("hidden");
 
 	const sidebar = document.querySelector(".sidebar");
@@ -22,11 +21,11 @@ async function logout() {
 		if (response.ok) {
 			window.location.href = "/login";
 		} else {
-			alert("Error logging out.");
+			toast("error","Error logging out.");
 		}
 	} catch (err) {
 		console.error("Error:", err);
-		alert("Error logging out.");
+		toast("error","Error logging out.");
 	}
 }
 

@@ -31,39 +31,74 @@ window.onload = () => showTab("table");
 
 // Table
 
-async function toggleUserStatus(toggleElement) {
-	const userId = toggleElement.dataset.userId;
-	const isActive = toggleElement.dataset.status === "active";
+const searchInput = document.querySelector('input[placeholder="name, number, email"]');
+const contactListTable = document.getElementById("tableWrapper");
+
+let debounceTimer;
+
+searchInput.addEventListener("input", function () {
+	const query = searchInput.value;
+	clearTimeout(debounceTimer);
+
+	// Show loading spinner immediately
+	contactListTable.innerHTML = `
+        <div class="flex justify-center items-center h-96">
+            <div class="animate-spin inline-block w-8 h-8 border-4 border-black border-t-transparent rounded-full"></div>
+        </div>
+    `;
+
+	// Set new timer
+	debounceTimer = setTimeout(async () => {
+		try {
+			const response = await fetch(
+				`admin-panel/search/${encodeURIComponent(
+					query,
+				)}`,
+			);
+
+			if (response.ok) {
+				const data = await response.text();
+				contactListTable.innerHTML = data;
+			} else {
+				contactListTable.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="text-center text-red-500 py-4 h-full w-full">
+                            Error loading results
+                        </td>
+                    </tr>
+                `;
+			}
+		} catch (error) {
+			console.error("Error making the request", error);
+			contactListTable.innerHTML = `
+                <tr>
+                    <td colspan="5" class="text-center text-red-500 py-4 h-full w-full">
+                        Network error - failed to fetch results
+                    </td>
+                </tr>
+            `;
+		}
+	}, 300); // 300ms delay after typing stops
+});
+
+async function toggleUserStatus(btn) {
+	const userId = btn.dataset.userId;
+	const isActive = btn.dataset.status === "active";
 	document.body.classList.add("cursor-wait");
 
 	try {
 		const res = await fetch(`/api/dashboard/${userId}/toggleStatus`, {
 			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
+			headers: { "Content-Type": "application/json" },
 			body: JSON.stringify({ blocked: isActive }),
 		});
 
 		if (!res.ok) throw new Error("Status update failed");
 
 		const newStatus = !isActive;
-		toggleElement.dataset.status = newStatus ? "active" : "inactive";
-
-		const knob = toggleElement.querySelector(".knob");
-		const bg = toggleElement.querySelector(".bg-toggle");
-		const label =
-			toggleElement.parentElement.querySelector(".status-label");
-
-		knob.classList.toggle("translate-x-6", newStatus);
-		knob.classList.toggle("translate-x-0", !newStatus);
-
-		bg.classList.toggle("bg-green-500", newStatus);
-		bg.classList.toggle("bg-gray-300", !newStatus);
-
-		label.textContent = newStatus ? "Active" : "In-Active";
-		label.classList.toggle("text-green-600", newStatus);
-		label.classList.toggle("text-gray-500", !newStatus);
+		btn.dataset.status = newStatus ? "active" : "inactive";
+		btn.textContent = newStatus ? "Set In-Active" : "Set Active";
+		toast("success", `User is now ${newStatus ? "Active" : "In-Active"}`);
 	} catch (err) {
 		console.error(err);
 		toast("error", err.message);
