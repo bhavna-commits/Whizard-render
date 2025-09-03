@@ -291,7 +291,7 @@ export const getSingleChat = async (req, res) => {
 		for (const reportItem of reports) {
 			let chatsForReport = "";
 
-			if (reportItem?.components) {
+			if (reportItem?.components?.length > 0) {
 				chatsForReport = buildCommonChatFields(reportItem, wa_id, {
 					components: reportItem?.components,
 					templatename: reportItem?.templatename,
