@@ -20,6 +20,7 @@ import { generateUniqueId } from "../../utils/otpGenerator.js";
 import { agenda } from "../../config/db.js";
 import { sendCampaignScheduledEmail } from "../../services/OTP/reportsEmail.js";
 import { help } from "../../utils/dropDown.js";
+import chatsUsersModel from "../../models/chatsUsers.model.js";
 
 dotenv.config();
 
@@ -615,6 +616,53 @@ export const createCampaign = async (req, res, next) => {
 
 			message = "Campaign scheduled successfully";
 		}
+
+		const contactNumberGroup = contactList.map((c) => c.wa_id);
+		const chatUsers = await chatsUsersModel.find({
+			useradmin: id,
+			FB_PHONE_ID: phone_number,
+			wa_id: { $in: contactNumberGroup },
+		});
+
+		const existingNumbers = new Set(chatUsers.map((c) => c.wa_id));
+		const newContacts = contactList.filter(
+			(c) => !existingNumbers.has(c.wa_id),
+		);
+
+		if (newContacts.length) {
+			await chatsUsersModel.insertMany(
+				newContacts.map((c) => ({
+					wa_id: c.wa_id,
+					useradmin: userId,
+					unique_id: generateUniqueId(),
+					FB_PHONE_ID: phone_number,
+					contactName: c.Name,
+					campaignName: newCampaign.name,
+					campaignId: newCampaign.unique_id,
+					updatedAt: Date.now(),
+					lastMessage: "-",
+					lastSend: Date.now(),
+					messageStatus: "SENT",
+					replyStatus: 0,
+					agent: addedUserId || id,
+				})),
+			);
+		}
+
+		await chatsUsersModel.updateMany(
+			{
+				useradmin: id,
+				FB_PHONE_ID: phone_number,
+				wa_id: { $in: contactNumberGroup },
+			},
+			{
+				$set: {
+					replyStatus: 0,
+					campaignName: newCampaign.name,
+					campaignId: newCampaign.unique_id,
+				},
+			},
+		);
 
 		await newCampaign.save();
 		res.status(201).json({ message, campaign: newCampaign });

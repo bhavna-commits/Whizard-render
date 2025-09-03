@@ -133,6 +133,7 @@ router.post("/auth_code", async (req, res) => {
 });
 
 router.post("/webhook", async (req, res) => {
+	if (process.env.CHAT_IFRAME_URL) return;
 	try {
 		const { entry } = req.body;
 

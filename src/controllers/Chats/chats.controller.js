@@ -256,8 +256,6 @@ export const getSingleChat = async (req, res) => {
 		const oldToken = checkToken(req);
 		const { userId, token } = await getUserIdFromToken(oldToken);
 
-		console.log(req.body);
-
 		const wa_id = req.body?.wa_id;
 		const FB_PHONE_ID = req.body?.phoneNumberId;
 		const skip = parseInt(req.body?.skip, 10) || 0;
@@ -293,10 +291,7 @@ export const getSingleChat = async (req, res) => {
 		for (const reportItem of reports) {
 			let chatsForReport = "";
 
-			if (
-				reportItem?.type === "Template" ||
-				reportItem?.type === "Campaign"
-			) {
+			if (reportItem?.components) {
 				chatsForReport = buildCommonChatFields(reportItem, wa_id, {
 					components: reportItem?.components,
 					templatename: reportItem?.templatename,
@@ -313,6 +308,8 @@ export const getSingleChat = async (req, res) => {
 				formattedChats.push(chatsForReport);
 			}
 		}
+
+		console.log(formattedChats);
 
 		return res.status(200).json({
 			success: true,
