@@ -308,9 +308,7 @@ export const getSingleChat = async (req, res) => {
 				formattedChats.push(chatsForReport);
 			}
 		}
-
-		console.log(formattedChats);
-
+		
 		return res.status(200).json({
 			success: true,
 			chats: formattedChats.reverse(),
