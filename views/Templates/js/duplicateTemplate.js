@@ -232,10 +232,10 @@ document.getElementById("bodyInput").innerHTML = bodyText.replace(
 
 // Access the FOOTER component from the `data` object
 const footerText = data.components.find((c) => c.type == "FOOTER")?.text || "";
-document.getElementById("footerInput").innerHTML = footerText.replace(
+document.getElementById("footerInput").value =   footerText.replace(
 	/\n/g,
 	"<br>",
-);
+); 
 
 const headerComponent = data.components.find((c) => c.type == "HEADER");
 const headerText = headerComponent?.text || "";
@@ -344,83 +344,155 @@ document.getElementById("previewFoot").innerHTML = footerText.replace(
 );
 document.querySelector(".footer-count").textContent = footerText.length + "/64";
 
-const buttons = data.components.find((c) => c.type == "BUTTONS")?.buttons || "";
-if (buttons) {
-	buttons.forEach((element) => {
-		if (element.type == "URL") {
-			document.getElementById("websiteForm").style.display = "block";
-			generatePrevWebsite(element.text, element.url);
-			document.querySelector('input[placeholder="Visit Now"]').value =
-				element.text;
-			document.querySelector('input[placeholder="example.com"]').value =
-				element.url;
+(() => {
+	const previewContainers = ["previewButtons", "previewButton"];
+	let websiteBtnCount = 0;
+	let callBtnCount = 0;
 
-			websiteBtnCount++;
-		} else if (element.type == "PHONE_NUMBER") {
-			document.getElementById("callForm").style.display = "block";
-			generatePrevCall(element.text, element.phone_number);
+	const websiteForm = document.getElementById("websiteForm");
+	const callForm = document.getElementById("callForm");
+	const websiteLabel = document.getElementById("websiteBtnLabel");
+	const websiteUrl = document.getElementById("websiteUrl");
+	const callLabel = document.getElementById("callBtnLabel");
+	const phoneNumber = document.getElementById("phoneNumber");
 
-			// Check for 'Call Now' (Phone Call) button
-			document.querySelector('input[placeholder="Call Now"]').value =
-				element.text;
-			document.querySelector('input[placeholder="9999999999"]').value =
-				element.phone_number;
-			callBtnCount++;
+	document.getElementById("addWebsiteBtn").addEventListener("click", () => {
+		if (websiteBtnCount >= 1) {
+			toast("info", "You can only add 1 website button.");
+			return;
 		}
+		websiteForm.style.display = "block";
+		websiteBtnCount++;
+		updateWebsitePreview();
 	});
-}
 
-document.getElementById("closeWebsite").addEventListener("click", function () {
-	document.getElementById("websiteForm").style.display = "none";
-	removePreviewButton("websiteBtn");
-	document.querySelector('input[placeholder="Visit Now"]').value = "";
-	document.querySelector('input[placeholder="example.com"]').value = "";
+	document.getElementById("closeWebsite").addEventListener("click", () => {
+		websiteForm.style.display = "none";
+		websiteBtnCount = Math.max(0, websiteBtnCount - 1);
+		removePreview("website");
+	});
 
-	websiteBtnCount--;
-});
+	document.getElementById("addCallBtn").addEventListener("click", () => {
+		if (callBtnCount >= 1) {
+			toast("info", "You can only add 1 call button.");
+			return;
+		}
+		callForm.style.display = "block";
+		callBtnCount++;
+		updateCallPreview();
+	});
 
-document.getElementById("closeCall").addEventListener("click", function () {
-	document.getElementById("callForm").style.display = "none";
-	removePreviewButton("callBtn");
-	document.querySelector('input[placeholder="Call Now"]').value = "";
-	document.querySelector('input[placeholder="9999999999"]').value = "";
+	document.getElementById("closeCall").addEventListener("click", () => {
+		callForm.style.display = "none";
+		callBtnCount = Math.max(0, callBtnCount - 1);
+		removePreview("call");
+	});
 
-	callBtnCount--;
-});
+	websiteLabel.addEventListener("input", updateWebsitePreview);
+	websiteUrl.addEventListener("input", updateWebsitePreview);
+	callLabel.addEventListener("input", updateCallPreview);
+	phoneNumber.addEventListener("input", updateCallPreview);
 
-function generatePrevWebsite(label, url) {
-	// console.log(label, url);
-	let preview = `
-				<button class="btn" id="websiteBtn" draggable="true" onclick="window.open('${url}', '_blank')" style="color: #6A67FF;">
-					<i class="fa fa-external-link mx-2"></i>${label}
-				</button>
-				`;
-
-	let existingBtn = document.getElementById("websiteBtn");
-	if (existingBtn) {
-		existingBtn.outerHTML = preview;
-	} else {
-		document.getElementById("previewButtons").innerHTML += preview;
-		document.getElementById("previewButton").innerHTML += preview;
+	function updateWebsitePreview() {
+		const label = (websiteLabel?.value || "").trim() || "Visit Now";
+		const url = document.getElementById("websiteUrl").value || "#";
+		createOrUpdate("website", label, url);
 	}
 
-	makeButtonsDraggable();
-}
-
-function generatePrevCall(label, phone) {
-	let preview = `
-				<button class="btn" id="callBtn" draggable="true" onclick="window.location.href='tel:${phone}'" style="color: #6A67FF;">
-					<i class="fa fa-phone mx-2"></i>${label}
-				</button>
-				`;
-
-	let existingBtn = document.getElementById("callBtn");
-	if (existingBtn) {
-		existingBtn.outerHTML = preview;
-	} else {
-		document.getElementById("previewButtons").innerHTML += preview;
-		document.getElementById("previewButton").innerHTML += preview;
+	function updateCallPreview() {
+		const label = (callLabel?.value || "").trim() || "Call Now";
+		const phone = document.getElementById("phoneNumber").value || "#";
+		createOrUpdate("call", label, phone);
 	}
 
-	makeButtonsDraggable();
-}
+	function createOrUpdate(type, label, value) {
+		previewContainers.forEach((cid) => {
+			const c = document.getElementById(cid);
+			if (!c) return;
+
+			// Clear existing preview of that type first
+			const existing = c.querySelector(`[data-preview-type="${type}"]`);
+			if (existing) existing.remove();
+
+			// Add new button if label exists
+			if (label) {
+				const btn = document.createElement("button");
+				btn.setAttribute("data-preview-type", type);
+				btn.setAttribute("draggable", "true");
+				btn.className = `btn ${type}Btn`;
+				btn.style.color = "#6A67FF";
+
+				if (type === "website") {
+					btn.setAttribute(
+						"onclick",
+						`window.open('${value}', '_blank')`,
+					);
+					btn.innerHTML = `<i class="fa fa-external-link mx-2"></i>${label}`;
+				} else if (type === "call") {
+					btn.setAttribute(
+						"onclick",
+						`window.location.href='tel:${value}'`,
+					);
+					btn.innerHTML = `<i class="fa fa-phone mx-2"></i>${label}`;
+				}
+
+				c.appendChild(btn);
+			}
+		});
+		makeButtonsDraggable();
+	}
+
+	function removePreview(type) {
+		previewContainers.forEach((cid) => {
+			const c = document.getElementById(cid);
+			if (!c) return;
+			const el = c.querySelector(`[data-preview-type="${type}"]`);
+			if (el) el.remove();
+			Array.from(c.childNodes).forEach((node) => {
+				if (
+					node.nodeType === Node.TEXT_NODE &&
+					!node.textContent.trim()
+				)
+					node.remove();
+			});
+			if (!c.querySelector("[data-preview-type]")) c.innerHTML = "";
+		});
+	}
+
+	const buttons =
+		data.components.find((c) => c.type == "BUTTONS")?.buttons || "";
+
+	if (buttons) {
+		buttons.forEach((element) => {
+			if (element.type == "URL") {
+				document.getElementById("websiteForm").style.display = "block";
+				document.querySelector('input[placeholder="Visit Now"]').value =
+					element.text;
+				document.querySelector(
+					'input[placeholder="example.com"]',
+				).value = element.url;
+
+				websiteBtnCount = 1;
+				createOrUpdate(
+					"website",
+					element.text || "Visit Now",
+					element.url,
+				);
+			} else if (element.type == "PHONE_NUMBER") {
+				document.getElementById("callForm").style.display = "block";
+				document.querySelector('input[placeholder="Call Now"]').value =
+					element.text;
+				document.querySelector(
+					'input[placeholder="9999999999"]',
+				).value = element.phone_number;
+
+				callBtnCount = 1;
+				createOrUpdate(
+					"call",
+					element.text || "Call Now",
+					element.phone_number,
+				);
+			}
+		});
+	}
+})();

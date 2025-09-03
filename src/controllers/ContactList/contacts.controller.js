@@ -900,6 +900,7 @@ export const createCampaign = async (req, res) => {
 				test,
 				phone_number,
 				addedUserId,
+				false,
 				url,
 				req?.file?.filename,
 			);

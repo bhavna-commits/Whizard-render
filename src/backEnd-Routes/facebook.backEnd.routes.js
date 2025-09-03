@@ -2,13 +2,11 @@ import express from "express";
 import dotenv from "dotenv";
 import { agenda } from "../config/db.js";
 import Chats from "../models/chats.model.js";
-import Report from "../models/report.model.js";
 import User from "../models/user.model.js";
 import TempStatus from "../models/TempStatus.model.js";
 import TempMessage from "../models/TempMessage.model.js";
 import TempTemplateRejection from "../models/TempTemplateRejection.model.js";
 import ChatsUsers from "../models/chatsUsers.model.js";
-import Permissions from "../models/permissions.model.js";
 import AddedUser from "../models/addedUser.model.js";
 
 dotenv.config();

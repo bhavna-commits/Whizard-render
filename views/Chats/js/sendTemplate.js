@@ -284,7 +284,7 @@ class TemplateManager {
 
 			contactLists.forEach((list) => {
 				this.recipientSelect.append(
-					new Option(list.contactName, list.recipientPhone),
+					new Option(list.Name, list.Number),
 				);
 			});
 		} catch (error) {
@@ -390,7 +390,7 @@ class TemplateManager {
 				const value = $(this).val();
 				if (value === null || value === "Select a value") {
 					isValid = false;
-					alert(`Please select a value for variable: {${variable}}`);
+					toast("info", `Please select a value for variable: {${variable}}`);
 					resetButton(button, loader, buttonText);
 					return false; // Exit early if invalid
 				}

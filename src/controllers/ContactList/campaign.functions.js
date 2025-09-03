@@ -498,9 +498,9 @@ export async function sendTestMessage(
 	phoneNumber,
 	fb_phone_number,
 	addedUserId,
+	sendCampaignMessage,
 	url,
 	fileName,
-	sendCampaignMessage,
 ) {
 	try {
 		if (!template) throw new Error("Template not found");
@@ -554,7 +554,7 @@ export async function sendTestMessage(
 				name: contact.Name,
 				wabaId: user.WABA_ID,
 				messageId: response.response.messages[0].id,
-				from: contact.wa_id,
+				from: contact.Number,
 				timestamp: Date.now(),
 				type: "text",
 				text: messageTemplate,
@@ -565,12 +565,13 @@ export async function sendTestMessage(
 			const chatData = {
 				WABA_ID: user.WABA_ID,
 				FB_PHONE_ID: fb_phone_number,
+				from: contact.Number,
 				useradmin: user.unique_id,
 				unique_id: generateUniqueId(),
 				campaignName: "-",
 				campaignId: "-",
 				contactName: contact.Name,
-				recipientPhone: contact.wa_id,
+				recipientPhone: contact.Number,
 				status: response.status,
 				messageId: response.response.messages[0].id,
 				messageTemplate,

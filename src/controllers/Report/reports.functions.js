@@ -393,7 +393,7 @@ export const getCampaignOverview = async (req, res, next) => {
 					const contact = campaign.contacts.find(
 						(contact) => contact.wa_id === report.recipientPhone,
 					);
-					report.contactName = contact.Name;
+					report.contactName = contact?.Name;
 				}
 			});
 		});

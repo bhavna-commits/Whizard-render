@@ -159,7 +159,7 @@
 						</script>
 						<%- include("partials/overView/filters") %>
 						<% if (access?.contactList?.sendBroadcast && whatsAppStatus === "Live") { %>
-						<button aria-label="Create new Contact list" type="button" id="create-List" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" onclick="location.href=`/contact-list/createCampaign?listId=${listId}&listName=${listName}`">
+						<button aria-label="Create new Contact list" type="button" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" onclick="location.href=`/contact-list/createCampaign?listId=${listId}&listName=${listName}`">
 							<span>Send message</span>
 						</button>
 						<% } else if (whatsAppStatus == "Pending")  { %>
@@ -167,7 +167,7 @@
 							<span>Send message</span>
 						</button>
 						<% } else if(access?.contactList?.sendBroadcast) { %>
-						<button aria-label="Create new Contact list" type="button" id="create-List" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" onclick="location.href=`/contact-list/createCampaign?listId=${listId}&listName=${listName}`">
+						<button aria-label="Create new Contact list" type="button" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" onclick="location.href=`/contact-list/createCampaign?listId=${listId}&listName=${listName}`">
 							<span>Send message</span>
 						</button>
 						<% } else { %>

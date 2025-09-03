@@ -234,7 +234,7 @@ export const login = async (req, res, next) => {
 						}
 					} catch (error) {
 						console.error(
-							"Error sending OTP using temp for login",
+							"Error sending OTP use 123456 for login",
 							error,
 						);
 						emailOTP = "123456";

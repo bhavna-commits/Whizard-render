@@ -256,7 +256,7 @@ export const getSingleChat = async (req, res) => {
 		const oldToken = checkToken(req);
 		const { userId, token } = await getUserIdFromToken(oldToken);
 
-		console.log(req.body, JSON.stringify(req.body, null, 2));
+		console.log(req.body);
 
 		const wa_id = req.body?.wa_id;
 		const FB_PHONE_ID = req.body?.phoneNumberId;
@@ -680,7 +680,7 @@ export const sendTemplate = async (req, res) => {
 			template,
 			variables,
 			contactList[0],
-			contactList[0]?.recipientPhone,
+			contactList[0]?.Number,
 			fb_phone_number,
 			agentId,
 			true,

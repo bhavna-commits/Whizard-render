@@ -18,13 +18,14 @@ export default async function runMigration() {
 		]);
 
 		await Promise.all([
-			migrateUsersTestCount(),
-			migrateUsers(),
-			migratePermissions(),
-			migrateTemplates(userMap),
-			migrateCustomFields(userMap),
-			migrateContactLists(userMap, addedUserMap),
-			migratePaymentDefault(),
+			// migrateUsersTestCount(),
+			// migrateUsers(),
+			// migratePermissions(),
+			// migrateTemplates(userMap),
+			// migrateCustomFields(userMap),
+			// migrateContactLists(userMap, addedUserMap),
+			// migratePaymentDefault(),
+			migrateAddedUsers(),
 		]);
 
 		console.log("🎉 Migration complete");
@@ -267,6 +268,45 @@ async function migrateContactLists(userMap, addedUserMap) {
 	if (ops.length) count += await safeBulkWrite(ContactList, ops);
 	console.log(`✅ ContactLists updated (${count} docs)`);
 }
+
+async function migrateAddedUsers() {
+	const cursor = User.find({}).cursor();
+	const ops = [];
+	let count = 0;
+
+	for await (const user of cursor) {
+		const selectedFBNumber = user?.FB_PHONE_NUMBERS?.find(
+			(n) => n.selected,
+		);
+
+		if (!selectedFBNumber) continue;
+
+		const addedUsers = AddedUser.find({
+			useradmin: user.unique_id,
+			deleted: false,
+		}).cursor();
+
+		for await (const au of addedUsers) {
+			ops.push({
+				updateOne: {
+					filter: { _id: au._id },
+					update: { $set: { selectedFBNumber } },
+				},
+			});
+		}
+
+		if (ops.length >= 500) {
+			count += await safeBulkWrite(AddedUser, ops);
+			console.log(`✅ Migrated ${count} AddedUsers so far`);
+		}
+	}
+
+	if (ops.length) count += await safeBulkWrite(AddedUser, ops);
+
+	console.log(`🎉 Migration complete. Total updated: ${count}`);
+}
+
+// functions
 
 async function buildUserMap() {
 	const cursor = User.find({}, { unique_id: 1, name: 1 }).cursor();

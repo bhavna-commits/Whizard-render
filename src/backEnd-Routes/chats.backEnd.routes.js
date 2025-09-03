@@ -30,10 +30,6 @@ router.post("/refresh-token", getRefreshToken, trackSanitationFailures);
 
 router.post("/single-chat", getSingleChat, trackSanitationFailures);
 
-// router.post("/get-more-chats", getMoreChats, trackSanitationFailures);
-
-// router.post("/get-more-users", getMoreUsers, trackSanitationFailures);
-
 router.post("/search-users", searchUsers, trackSanitationFailures);
 
 router.post("/send-template", sendTemplate, trackSanitationFailures);
