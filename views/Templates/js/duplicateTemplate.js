@@ -484,7 +484,7 @@ document.querySelector(".footer-count").textContent = footerText.length + "/64";
 					element.text;
 				document.querySelector(
 					'input[placeholder="9999999999"]',
-				).value = element.phone_number;
+				).value = element.phone_number.slice(2);
 
 				callBtnCount = 1;
 				createOrUpdate(

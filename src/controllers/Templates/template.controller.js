@@ -468,8 +468,13 @@ export const editTemplate = async (req, res, next) => {
 
 		// Parse new template data from request body
 		const templateData = JSON.parse(req.body.templateData);
-		const { dynamicVariables, templateName, selectedLanguageCode, url } =
-			templateData;
+		const {
+			dynamicVariables,
+			templateName,
+			selectedLanguageCode,
+			url,
+			body_preview,
+		} = templateData;
 		const id = req.session?.user?.id || req.session?.addedUser?.owner;
 
 		// Check for duplicate template names
@@ -487,13 +492,18 @@ export const editTemplate = async (req, res, next) => {
 			});
 		}
 
-		const components = createComponents(templateData, dynamicVariables);
+		const components = createComponents(
+			templateData,
+			dynamicVariables,
+			body_preview,
+		);
 		originalTemplate.dynamicVariables = dynamicVariables;
 		originalTemplate.name = templateName;
 		originalTemplate.selectedLanguageCode = selectedLanguageCode;
 		originalTemplate.url = url;
 		originalTemplate.components = components;
 		originalTemplate.status = "Pending";
+		originalTemplate.body_preview = body_preview;
 
 		const user = await User.findOne({ unique_id: id });
 

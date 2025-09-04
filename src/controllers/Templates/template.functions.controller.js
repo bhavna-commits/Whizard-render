@@ -425,6 +425,8 @@ export const fetchFacebookTemplates = async (id) => {
 
 export function createComponents(templateData, dynamicVariables, html) {
 	const components = [];
+	const converted = convertHtmlToWhatsApp(html);
+
 	// Add HEADER component based on type
 	if (templateData.header.type === "text") {
 		if (dynamicVariables.header && dynamicVariables.header.length > 0) {
@@ -477,7 +479,7 @@ export function createComponents(templateData, dynamicVariables, html) {
 
 		components.push({
 			type: "BODY",
-			text: convertHtmlToWhatsApp(html) || templateData.body,
+			text: converted || templateData.body,
 			example: {
 				body_text: [bodyExample],
 			},
@@ -705,20 +707,6 @@ export function convertHtmlToWhatsApp(html) {
 	out = out.replace(/\s+([*_~`]+)/g, "$1");
 
 	out = out.trim();
-
-	// validate placeholders only if any are present
-	const found = [...out.matchAll(/{{\s*(\d+)\s*}}/g)].map((x) =>
-		Number(x[1]),
-	);
-	if (found.length > 0) {
-		const max = Math.max(...found);
-		for (let i = 1; i <= max; i++) {
-			if (!found.includes(i))
-				throw new Error(`Missing placeholder {{${i}}}`);
-		}
-	}
-
-	if (out.length > 1024) throw new Error("Body exceeds 1024 characters");
 
 	return out;
 }

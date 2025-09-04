@@ -153,7 +153,7 @@ class Preview {
 					headerContent = component.text || "";
 				}
 			} else if (component.type === "BODY") {
-				bodyContent = template?.body_preview;
+				bodyContent = template?.body_preview || component.text;
 			} else if (component.type === "FOOTER") {
 				footerContent = component.text;
 				// console.log("fotter")
