@@ -277,7 +277,8 @@ export const getSingleChat = async (req, res) => {
 		})
 			.sort({ updatedAt: -1 })
 			.skip(skip)
-			.limit(limit);
+			.limit(limit)
+			.lean();
 
 		if (!reports?.length) {
 			return res.status(200).json({
@@ -291,7 +292,7 @@ export const getSingleChat = async (req, res) => {
 		for (const reportItem of reports) {
 			let chatsForReport = "";
 
-			if (reportItem?.components?.length > 0) {
+			if (reportItem?.templatename) {
 				chatsForReport = buildCommonChatFields(reportItem, wa_id, {
 					components: reportItem?.components,
 					templatename: reportItem?.templatename,
@@ -308,7 +309,7 @@ export const getSingleChat = async (req, res) => {
 				formattedChats.push(chatsForReport);
 			}
 		}
-		
+
 		return res.status(200).json({
 			success: true,
 			chats: formattedChats.reverse(),
