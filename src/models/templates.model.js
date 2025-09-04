@@ -29,6 +29,7 @@ const templateSchema = new Schema(
 		deleted: { type: Boolean, default: false, index: true },
 		logs: Schema.Types.Mixed,
 		agentName: String,
+		body_preview: { type: Schema.Types.Mixed },
 	},
 	{ timestamps: false, strict: false },
 );

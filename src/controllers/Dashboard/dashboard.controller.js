@@ -1,6 +1,5 @@
 import User from "../../models/user.model.js";
 import Campaign from "../../models/campaign.model.js";
-import ContactList from "../../models/contactList.model.js";
 import Permissions from "../../models/permissions.model.js";
 import dotenv from "dotenv";
 import {
@@ -75,8 +74,6 @@ export const getDashboard = async (req, res) => {
 			percentSent: dashboardData.percentSent,
 			percentDelivered: dashboardData.percentDelivered,
 			percentRead: dashboardData.percentRead,
-			totalContacts: dashboardData.contactOverview.totalContacts,
-			totalLists: dashboardData.contactOverview.totalLists,
 			photo: req.session?.addedUser?.photo || req.session?.user?.photo,
 			name: req.session?.addedUser?.name || req.session?.user?.name,
 			color: req.session?.addedUser?.color || req.session?.user?.color,
@@ -504,30 +501,31 @@ export const selectPhoneNumber = async (req, res) => {
 		}
 
 		let found = false;
-
-		for (const number of userDoc.FB_PHONE_NUMBERS) {
-			if (number.phone_number_id === phoneNumberId) {
-				number.selected = true;
-				found = true;
-			} else {
-				number.selected = false;
-			}
-		}
-
-		if (!found) {
-			return res
-				.status(400)
-				.json({ success: false, message: "Phone number ID not found" });
-		}
-
-		await userDoc.save();
-
 		if (addedUser) {
 			const selectedNumber = userDoc.FB_PHONE_NUMBERS.find(
 				(n) => n.phone_number_id === phoneNumberId,
 			);
 			addedUser.selectedFBNumber = selectedNumber;
 			await req.session.touch();
+		} else {
+			for (const number of userDoc.FB_PHONE_NUMBERS) {
+				if (number.phone_number_id === phoneNumberId) {
+					number.selected = true;
+					found = true;
+				} else {
+					number.selected = false;
+				}
+			}
+			if (!found) {
+				return res
+					.status(400)
+					.json({
+						success: false,
+						message: "Phone number ID not found",
+					});
+			}
+
+			await userDoc.save();
 		}
 
 		res.json({ success: true, message: "Number selected successfully" });
@@ -914,40 +912,6 @@ const fetchDashboardData = async (userId, query, FB_PHONE_ID) => {
 						totalCampaigns: 0,
 				  };
 
-		// Query for contact lists
-		const contactLists = await ContactList.aggregate([
-			{ $match: { useradmin: userId, deleted: { $ne: true } } },
-			{
-				$lookup: {
-					from: "contacts",
-					localField: "_id",
-					foreignField: "contactList",
-					as: "contacts",
-				},
-			},
-			{
-				$unwind: {
-					path: "$contacts",
-					preserveNullAndEmptyArrays: true,
-				},
-			},
-			{
-				$group: {
-					_id: null,
-					totalContacts: { $sum: 1 },
-					totalLists: { $sum: 1 },
-				},
-			},
-		]);
-
-		const contactOverview =
-			contactLists.length > 0
-				? contactLists[0]
-				: {
-						totalContacts: 0,
-						totalLists: 0,
-				  };
-
 		// Calculate percentages
 		const percentSent =
 			campaignStats.totalMessages > 0
@@ -968,7 +932,6 @@ const fetchDashboardData = async (userId, query, FB_PHONE_ID) => {
 
 		return {
 			campaignStats,
-			contactOverview,
 			percentSent: percentSent.toFixed(2),
 			percentDelivered: percentDelivered.toFixed(2),
 			percentRead: percentRead.toFixed(2),

@@ -339,7 +339,12 @@ function collectTemplateData() {
 		toast("info", "Body content cannot be empty.");
 		return null;
 	}
+
 	templateData.body = bodyInput;
+
+	const bodyPreview = document.getElementById("bodyInput").innerHTML.trim();
+
+	templateData.body_preview = bodyPreview;
 
 	const footerInput = document.getElementById("footerInput");
 	if (footerInput.value.trim()) {

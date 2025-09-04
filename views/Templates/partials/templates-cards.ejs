@@ -59,7 +59,7 @@
 					
 					<% if (component?.type === 'BODY') { %>
 					<p class="custom-card-body-text p-2">
-						<%- component?.text?.replace(/\n/g, '<br>') %>
+						<%- template?.body_preview %>
 					</p>
 					<% } else if (component?.type === 'FOOTER') { %>
 					<p class="custom-card-footer-text text-sm text-gray-500 p-2">

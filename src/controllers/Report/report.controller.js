@@ -64,9 +64,6 @@ export const getCampaignList = async (req, res, next) => {
 				endDate.setHours(23, 59, 59, 999);
 				endDate.setTime(endDate.getTime() + 1000 * 60 * 60 * 24);
 
-				console.log(startDate.getTime());
-				console.log(endDate.getTime());
-
 				matchQuery["createdAt"] = {
 					$gte: startDate.getTime(),
 					$lte: endDate.getTime(),
@@ -709,7 +706,7 @@ export const getCostReport = async (req, res) => {
 			req.query.start ||
 			Math.floor(Date.now() / 1000) - 90 * 24 * 60 * 60;
 		const end = req.query.end || Math.floor(Date.now() / 1000);
-		const categories = ["MARKETING", "UTILITY", "AUTHENTICATION"];
+		const categories = [ "MARKETING", "UTILITY", "AUTHENTICATION" ];
 
 		const apiURL =
 			`https://graph.facebook.com/${graph}/${WABA_ID}?fields=conversation_analytics` +

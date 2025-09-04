@@ -132,7 +132,7 @@ class Preview {
 				if (formatLabel === "image") acceptType = "image/*";
 				else if (formatLabel === "video") acceptType = "video/*";
 				else acceptType = ".pdf,.doc,.docx,.xls,.txt,.xlsx,.ppt,.pptx";
-				
+
 				uploadSection = `
 			<div class="my-4">
 				<div class="flex items-center gap-8">
@@ -182,7 +182,7 @@ class Preview {
 					headerContent = component.text || "";
 				}
 			} else if (component.type === "BODY") {
-				bodyContent = component.text;
+				bodyContent = template?.body_preview;
 			} else if (component.type === "FOOTER") {
 				footerContent = component.text;
 				// console.log("fotter")

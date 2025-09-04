@@ -179,6 +179,7 @@ export const saveTemplateToDatabase = async (
 			dynamicVariables,
 			language: selectedLanguageCode,
 			agentName: req.session?.user?.name || req.session?.addedUser?.name,
+			body_preview: templateData?.body_preview,
 		});
 
 		let headerComponent;
@@ -571,4 +572,150 @@ export async function saveAuthTemplate(
 		console.error("🚨 Error submitting auth template:", err);
 		throw err;
 	}
+}
+
+export function convertHtmlToWhatsApp(html) {
+	if (!html) return "";
+
+	const placeholders = [];
+	html = String(html).replace(/{{\s*\d+\s*}}/g, (m) => {
+		const i = placeholders.length;
+		placeholders.push(m);
+		return `__PH_${i}__`;
+	});
+
+	html = html.replace(/\r\n/g, "\n");
+	html = html.replace(/&nbsp;/gi, "\u00A0");
+
+	const tagRe = /<\s*(\/)?\s*([a-zA-Z0-9]+)([^>]*)>/g;
+
+	const stack = [];
+	let out = "";
+	let lastIndex = 0;
+	let m;
+
+	function markersFromTag(tagName, attrStr) {
+		const markers = [];
+		const tag = tagName.toLowerCase();
+		if (tag === "b" || tag === "strong") markers.push("*");
+		if (tag === "i" || tag === "em") markers.push("_");
+		if (tag === "u") markers.push("_");
+		if (tag === "s" || tag === "strike" || tag === "del") markers.push("~");
+
+		if (attrStr) {
+			const s = attrStr.toLowerCase();
+			if (
+				/\bfont-weight\s*:\s*(bold|\d{3,})/.test(s) &&
+				!markers.includes("*")
+			)
+				markers.unshift("*");
+			if (/\bfont-style\s*:\s*italic/.test(s) && !markers.includes("_"))
+				markers.unshift("_");
+			if (
+				/\btext-decoration\s*:\s*line-through/.test(s) &&
+				!markers.includes("~")
+			)
+				markers.unshift("~");
+			if (
+				/\btext-decoration\s*:\s*underline/.test(s) &&
+				!markers.includes("_")
+			)
+				markers.unshift("_");
+		}
+		return markers;
+	}
+
+	function extractAttr(attrStr, name) {
+		if (!attrStr) return "";
+		const re = new RegExp(
+			name + "\\s*=\\s*(?:\"([^\"]*)\"|'([^']*)'|([^\\s>]+))",
+			"i",
+		);
+		const r = re.exec(attrStr);
+		return r ? r[1] || r[2] || r[3] || "" : "";
+	}
+
+	while ((m = tagRe.exec(html)) !== null) {
+		const isClose = !!m[1];
+		const tagName = m[2];
+		const attrStr = m[3] || "";
+		const idx = m.index;
+
+		// append text before this tag
+		if (lastIndex < idx) {
+			out += html.slice(lastIndex, idx);
+		}
+		lastIndex = tagRe.lastIndex;
+
+		const tag = tagName.toLowerCase();
+
+		if (!isClose) {
+			if (tag === "br") {
+				out += "\n";
+				continue;
+			}
+
+			const markers = markersFromTag(tag, attrStr);
+			const href =
+				extractAttr(attrStr, "href") ||
+				extractAttr(attrStr, "xlink:href") ||
+				"";
+			// push stack entry that stores tag, its markers, and possible href
+			stack.push({ tag, markers, href });
+			out += markers.join("");
+		} else {
+			// closing tag: find last matching opening tag in stack
+			let popped = null;
+			for (let i = stack.length - 1; i >= 0; i--) {
+				if (stack[i].tag === tag) {
+					popped = stack.splice(i)[0];
+					break;
+				}
+			}
+			if (popped) {
+				// close in reverse order of markers
+				const closeMarkers = (popped.markers || [])
+					.slice()
+					.reverse()
+					.join("");
+				out += closeMarkers;
+				if (popped.tag === "a" && popped.href) {
+					const href = popped.href.trim();
+					if (href && href !== "#") out += ` (${href})`;
+				}
+			} else {
+				// no matching opener — ignore
+			}
+		}
+	}
+
+	// append remaining text after last tag
+	if (lastIndex < html.length) out += html.slice(lastIndex);
+
+	// restore placeholders
+	out = out.replace(/\u00A0/g, " ");
+	out = out.replace(/__PH_(\d+)__/g, (_, n) => placeholders[Number(n)] || "");
+	out = out.replace(/\s*\n\s*/g, "\n");
+
+	// collapse spaces around markers so markers don't get broken by stray spaces
+	out = out.replace(/([*_~`]+)\s+/g, "$1");
+	out = out.replace(/\s+([*_~`]+)/g, "$1");
+
+	out = out.trim();
+
+	// validate placeholders only if any are present
+	const found = [...out.matchAll(/{{\s*(\d+)\s*}}/g)].map((x) =>
+		Number(x[1]),
+	);
+	if (found.length > 0) {
+		const max = Math.max(...found);
+		for (let i = 1; i <= max; i++) {
+			if (!found.includes(i))
+				throw new Error(`Missing placeholder {{${i}}}`);
+		}
+	}
+
+	if (out.length > 1024) throw new Error("Body exceeds 1024 characters");
+
+	return out;
 }
