@@ -167,7 +167,11 @@ export const saveTemplateToDatabase = async (
 	url,
 ) => {
 	try {
-		const components = createComponents(templateData, dynamicVariables);
+		const components = createComponents(
+			templateData,
+			dynamicVariables,
+			templateData?.body_preview,
+		);
 
 		const newTemplate = new Template({
 			FB_PHONE_ID,
@@ -419,9 +423,8 @@ export const fetchFacebookTemplates = async (id) => {
 	}
 };
 
-export function createComponents(templateData, dynamicVariables) {
+export function createComponents(templateData, dynamicVariables, html) {
 	const components = [];
-	console.log(templateData.header.type);
 	// Add HEADER component based on type
 	if (templateData.header.type === "text") {
 		if (dynamicVariables.header && dynamicVariables.header.length > 0) {
@@ -474,7 +477,7 @@ export function createComponents(templateData, dynamicVariables) {
 
 		components.push({
 			type: "BODY",
-			text: templateData.body,
+			text: convertHtmlToWhatsApp(html) || templateData.body,
 			example: {
 				body_text: [bodyExample],
 			},
