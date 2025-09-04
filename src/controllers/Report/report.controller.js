@@ -145,7 +145,12 @@ export const getCampaignList = async (req, res, next) => {
 							$filter: {
 								input: "$reports",
 								as: "report",
-								cond: { $eq: ["$$report.status", "READ"] },
+								cond: {
+									$in: [
+										"$$report.status",
+										["READ", "REPLIED"],
+									],
+								},
 							},
 						},
 					},
@@ -165,7 +170,13 @@ export const getCampaignList = async (req, res, next) => {
 							$filter: {
 								input: "$reports",
 								as: "report",
-								cond: { $eq: ["$$report.status", "DELIVERED"] },
+								cond: {
+									$and: [
+										{ $ne: ["$$report.status", "SENT"] },
+										{ $ne: ["$$report.status", "FAILED"] },
+										{ $ne: ["$$report.status", "REPLIED"] },
+									],
+								},
 							},
 						},
 					},

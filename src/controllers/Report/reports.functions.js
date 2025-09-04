@@ -83,7 +83,12 @@ export const overview = async (id, userId, page, limit, skip) =>
 						$filter: {
 							input: "$reports",
 							as: "report",
-							cond: { $ne: ["$$report.status", "FAILED"] },
+							cond: {
+								$and: [
+									{ $ne: ["$$report.status", "FAILED"] },
+									{ $ne: ["$$report.status", "REPLIED"] },
+								],
+							},
 						},
 					},
 				},
@@ -96,6 +101,7 @@ export const overview = async (id, userId, page, limit, skip) =>
 								$and: [
 									{ $ne: ["$$report.status", "SENT"] },
 									{ $ne: ["$$report.status", "FAILED"] },
+									{ $ne: ["$$report.status", "REPLIED"] },
 								],
 							},
 						},

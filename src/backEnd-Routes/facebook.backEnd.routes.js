@@ -100,7 +100,7 @@ router.post("/auth_code", async (req, res) => {
 		await User.findOneAndUpdate({ unique_id: userId }, updateData, {
 			new: true,
 		});
-		
+
 		// Update session
 		if (req.session?.user) {
 			req.session.user.whatsAppStatus = "Live";
@@ -450,10 +450,8 @@ async function scheduleAllRefreshJobs() {
 			} at ${user.nextRefreshAt.toUTCString()}`,
 		);
 	}
-	
 }
 
 scheduleAllRefreshJobs();
-
 
 export default router;
