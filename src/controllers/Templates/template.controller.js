@@ -497,6 +497,7 @@ export const editTemplate = async (req, res, next) => {
 			dynamicVariables,
 			body_preview,
 		);
+
 		originalTemplate.dynamicVariables = dynamicVariables;
 		originalTemplate.name = templateName;
 		originalTemplate.selectedLanguageCode = selectedLanguageCode;

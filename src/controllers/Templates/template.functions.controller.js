@@ -594,19 +594,13 @@ export function convertHtmlToWhatsApp(html) {
 
 	const tagRe = /<\s*(\/)?\s*([a-zA-Z0-9]+)([^>]*)>/g;
 
-	const stack = [];
-	let out = "";
-	let lastIndex = 0;
-	let m;
-
 	function markersFromTag(tagName, attrStr) {
 		const markers = [];
-		const tag = tagName.toLowerCase();
+		const tag = (tagName || "").toLowerCase();
 		if (tag === "b" || tag === "strong") markers.push("*");
 		if (tag === "i" || tag === "em") markers.push("_");
 		if (tag === "u") markers.push("_");
 		if (tag === "s" || tag === "strike" || tag === "del") markers.push("~");
-
 		if (attrStr) {
 			const s = attrStr.toLowerCase();
 			if (
@@ -640,73 +634,101 @@ export function convertHtmlToWhatsApp(html) {
 		return r ? r[1] || r[2] || r[3] || "" : "";
 	}
 
+	const stack = [];
+	let out = "";
+	let lastIndex = 0;
+	let m;
+
+	function processSegment(segment) {
+		return segment.replace(/\u00A0/g, " ");
+	}
+
 	while ((m = tagRe.exec(html)) !== null) {
 		const isClose = !!m[1];
 		const tagName = m[2];
 		const attrStr = m[3] || "";
 		const idx = m.index;
 
-		// append text before this tag
 		if (lastIndex < idx) {
 			out += html.slice(lastIndex, idx);
 		}
 		lastIndex = tagRe.lastIndex;
 
-		const tag = tagName.toLowerCase();
+		const tag = (tagName || "").toLowerCase();
 
 		if (!isClose) {
 			if (tag === "br") {
 				out += "\n";
 				continue;
 			}
-
 			const markers = markersFromTag(tag, attrStr);
 			const href =
 				extractAttr(attrStr, "href") ||
 				extractAttr(attrStr, "xlink:href") ||
 				"";
-			// push stack entry that stores tag, its markers, and possible href
 			stack.push({ tag, markers, href });
 			out += markers.join("");
 		} else {
-			// closing tag: find last matching opening tag in stack
-			let popped = null;
+			// find matching opener in stack
+			let poppedIndex = -1;
 			for (let i = stack.length - 1; i >= 0; i--) {
 				if (stack[i].tag === tag) {
-					popped = stack.splice(i)[0];
+					poppedIndex = i;
 					break;
 				}
 			}
-			if (popped) {
-				// close in reverse order of markers
-				const closeMarkers = (popped.markers || [])
-					.slice()
-					.reverse()
-					.join("");
-				out += closeMarkers;
-				if (popped.tag === "a" && popped.href) {
-					const href = popped.href.trim();
-					if (href && href !== "#") out += ` (${href})`;
-				}
-			} else {
-				// no matching opener — ignore
+			if (poppedIndex === -1) {
+				// no matching opener: ignore
+				continue;
+			}
+			const popped = stack.splice(poppedIndex)[0];
+			const closeMarkers = (popped.markers || [])
+				.slice()
+				.reverse()
+				.join("");
+			out += closeMarkers;
+			if (popped.tag === "a" && popped.href) {
+				const href = popped.href.trim();
+				if (href && href !== "#") out += ` (${href})`;
 			}
 		}
 	}
 
-	// append remaining text after last tag
 	if (lastIndex < html.length) out += html.slice(lastIndex);
 
-	// restore placeholders
-	out = out.replace(/\u00A0/g, " ");
+	// second pass: fix marker placement so leading/trailing spaces are outside markers
+	// find sequences like " *text* " or "_ text _" and ensure markers wrap trimmed core only
+	out = out.replace(
+		/([*_~`]+)(\s*)([\s\S]*?)(\s*)(\1)/g,
+		(full, openM, lead, inner, trail, closeM) => {
+			if (openM !== closeM) return full;
+			const core = inner;
+			const coreTrim = core.replace(/^\s+/, "").replace(/\s+$/, "");
+			const leading = lead || "";
+			const trailing = trail || "";
+			if (coreTrim.length === 0)
+				return leading + openM + closeM + trailing;
+			return leading + openM + coreTrim + closeM + trailing;
+		},
+	);
+
+	out = processSegment(out);
 	out = out.replace(/__PH_(\d+)__/g, (_, n) => placeholders[Number(n)] || "");
 	out = out.replace(/\s*\n\s*/g, "\n");
-
-	// collapse spaces around markers so markers don't get broken by stray spaces
-	out = out.replace(/([*_~`]+)\s+/g, "$1");
-	out = out.replace(/\s+([*_~`]+)/g, "$1");
-
 	out = out.trim();
+
+	const found = [...out.matchAll(/{{\s*(\d+)\s*}}/g)].map((x) =>
+		Number(x[1]),
+	);
+	if (found.length > 0) {
+		const max = Math.max(...found);
+		for (let i = 1; i <= max; i++) {
+			if (!found.includes(i))
+				throw new Error(`Missing placeholder {{${i}}}`);
+		}
+	}
+
+	if (out.length > 1024) throw new Error("Body exceeds 1024 characters");
 
 	return out;
 }

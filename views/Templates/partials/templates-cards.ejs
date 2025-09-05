@@ -58,9 +58,9 @@
 					<!-- BODY AND FOOTER COMPONENTS -->
 					
 					<% if (component?.type === 'BODY') { %>
-					<p class="custom-card-body-text p-2">
+					<div class="custom-card-body-text p-2">
 						<%- template?.body_preview || component?.text?.replace(/\n/g, '<br>')  %>
-					</p>
+					</div>
 					<% } else if (component?.type === 'FOOTER') { %>
 					<p class="custom-card-footer-text text-sm text-gray-500 p-2">
 						<%- component?.text?.replace(/\n/g, '<br>') %>

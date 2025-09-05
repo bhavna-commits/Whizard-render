@@ -342,9 +342,9 @@ function collectTemplateData() {
 
 	templateData.body = bodyInput;
 
+	// usage
 	const bodyPreview = document.getElementById("bodyInput").innerHTML.trim();
-
-	templateData.body_preview = bodyPreview;
+	templateData.body_preview = normalizeAndWrapHtml(bodyPreview);
 
 	const footerInput = document.getElementById("footerInput");
 	if (footerInput.value.trim()) {
@@ -529,4 +529,34 @@ function collectAuthData(templateData) {
 	templateData.components.push(buttonComponent);
 
 	return templateData;
+}
+
+function normalizeAndWrapHtml(
+	html,
+	defaultStyle = "font-family: Figtree, sans-serif; font-size: 13px; line-height:1.2;",
+) {
+	if (!html) return `<div style="${defaultStyle}"></div>`;
+	const parser = new DOMParser();
+	const doc = parser.parseFromString(
+		`<div id="root">${html}</div>`,
+		"text/html",
+	);
+	const root = doc.getElementById("root");
+
+	// remove inline font-size if it equals default (keeps other styles)
+	const all = root.querySelectorAll("[style]");
+	for (const el of all) {
+		try {
+			const s = el.getAttribute("style") || "";
+			const parts = s
+				.split(";")
+				.map((p) => p.trim())
+				.filter(Boolean);
+			const kept = parts.filter((p) => !/^\s*font-size\s*:/i.test(p));
+			el.setAttribute("style", kept.join("; "));
+		} catch (e) {}
+	}
+
+	const wrapped = `<div style="${defaultStyle}">${root.innerHTML}</div>`;
+	return wrapped;
 }
