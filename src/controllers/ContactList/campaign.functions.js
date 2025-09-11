@@ -167,36 +167,24 @@ export function replaceDynamicVariables(template, variables, contact) {
 	try {
 		const messageComponents = [];
 
-		// 🛡️ Ensure variables is a Map if it's not already
 		if (variables && typeof variables.get !== "function") {
 			variables = new Map(Object.entries(variables));
 		}
 
-		// 💥 HEADER processing
 		const headerComponent = template.components.find(
 			(c) => c.type === "HEADER",
 		);
 
 		if (headerComponent) {
 			const headerParameters = [];
-
 			const link = headerComponent?.example?.header_url || "";
 
 			if (headerComponent.format === "IMAGE") {
-				headerParameters.push({
-					type: "image",
-					image: { link },
-				});
+				headerParameters.push({ type: "image", image: { link } });
 			} else if (headerComponent.format === "VIDEO") {
-				headerParameters.push({
-					type: "video",
-					video: { link },
-				});
+				headerParameters.push({ type: "video", video: { link } });
 			} else if (headerComponent.format === "DOCUMENT") {
-				headerParameters.push({
-					type: "document",
-					document: { link },
-				});
+				headerParameters.push({ type: "document", document: { link } });
 			}
 
 			if (headerParameters.length > 0) {
@@ -207,7 +195,6 @@ export function replaceDynamicVariables(template, variables, contact) {
 			}
 		}
 
-		// 🧠 BODY variable replacements
 		const bodyComponent = template.components.find(
 			(c) => c.type === "BODY",
 		);
@@ -240,6 +227,14 @@ export function replaceDynamicVariables(template, variables, contact) {
 			}
 		}
 
+		// 🟢 Debug log: show plain values before returning
+		console.log(
+			"[replaceDynamicVariables] Final body text values:",
+			messageComponents
+				.filter((c) => c.type === "body")
+				.flatMap((c) => c.parameters.map((p) => p.text)),
+		);
+
 		return messageComponents;
 	} catch (error) {
 		console.error("Error replacing dynamic variables:", error.message);
@@ -254,9 +249,7 @@ export async function sendMessageThroughWhatsApp(
 	messageComponents,
 	phone_number,
 ) {
-	// console.log(template);
 	try {
-		// Construct the message payload
 		const requestData = {
 			messaging_product: "whatsapp",
 			recipient_type: "individual",
@@ -269,25 +262,17 @@ export async function sendMessageThroughWhatsApp(
 			},
 		};
 
-		// Log the constructed requestData payload for debugging
+		// 🟢 Debug log: payload preview
 		console.log(
-			"Request Data Payload:",
-			JSON.stringify(messageComponents, null, 2),
+			"[sendMessageThroughWhatsApp] Payload:",
+			JSON.stringify(requestData, null, 2),
 		);
 
-		// Find the selected phone number from the user's array
-
-		// Log the selected phone number details
-		// console.log("Selected Phone Number:", selectedNumber);
-
-		// Construct the API URL
 		const url = `https://graph.facebook.com/${process.env.FB_GRAPH_VERSION}/${phone_number}/messages`;
-		console.log("Request URL:", url);
+		console.log("[sendMessageThroughWhatsApp] Request URL:", url);
 
-		// Declare response variable in the outer scope
 		let response;
 
-		// Send the request using axios
 		try {
 			response = await axios.post(url, requestData, {
 				headers: {
@@ -296,11 +281,13 @@ export async function sendMessageThroughWhatsApp(
 				},
 			});
 
-			// Log the response from the WhatsApp API
-			console.log("Response from WhatsApp API:", response.data);
+			console.log(
+				"[sendMessageThroughWhatsApp] WhatsApp API response:",
+				response.data,
+			);
 		} catch (error) {
 			console.error(
-				"Error sending message:",
+				"[sendMessageThroughWhatsApp] Error:",
 				error.response ? error.response.data : error.message,
 			);
 			throw error;
@@ -309,7 +296,7 @@ export async function sendMessageThroughWhatsApp(
 		return { status: "SENT", response: response.data };
 	} catch (error) {
 		console.error(
-			"Error sending WhatsApp message:",
+			"[sendMessageThroughWhatsApp] Failed:",
 			error.response?.data?.error?.message || error.message,
 		);
 		return {

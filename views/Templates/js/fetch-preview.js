@@ -92,7 +92,7 @@ function createVariableInputs(variables) {
 function updatePreview() {
 	const sections = {
 		header: document.getElementById("previewHead"),
-		body: document.getElementById("previewBod"),
+		body: document.getElementById("previewBody"),
 		footer: document.getElementById("previewFoot"),
 	};
 
@@ -105,4 +105,4 @@ function updatePreview() {
 			);
 		}
 	});
-}
+}	

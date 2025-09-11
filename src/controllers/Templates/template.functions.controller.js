@@ -667,6 +667,9 @@ export function convertHtmlToWhatsApp(html) {
 				extractAttr(attrStr, "xlink:href") ||
 				"";
 			stack.push({ tag, markers, href });
+
+			// ensure space before markers if needed
+			if (out && !out.endsWith(" ")) out += " ";
 			out += markers.join("");
 		} else {
 			// find matching opener in stack
@@ -677,16 +680,18 @@ export function convertHtmlToWhatsApp(html) {
 					break;
 				}
 			}
-			if (poppedIndex === -1) {
-				// no matching opener: ignore
-				continue;
-			}
+			if (poppedIndex === -1) continue;
+
 			const popped = stack.splice(poppedIndex)[0];
 			const closeMarkers = (popped.markers || [])
 				.slice()
 				.reverse()
 				.join("");
+
 			out += closeMarkers;
+			// ensure space after markers if needed
+			if (!out.endsWith(" ")) out += " ";
+
 			if (popped.tag === "a" && popped.href) {
 				const href = popped.href.trim();
 				if (href && href !== "#") out += ` (${href})`;
@@ -696,26 +701,23 @@ export function convertHtmlToWhatsApp(html) {
 
 	if (lastIndex < html.length) out += html.slice(lastIndex);
 
-	// second pass: fix marker placement so leading/trailing spaces are outside markers
-	// find sequences like " *text* " or "_ text _" and ensure markers wrap trimmed core only
+	// fix marker placement with spacing
 	out = out.replace(
 		/([*_~`]+)(\s*)([\s\S]*?)(\s*)(\1)/g,
 		(full, openM, lead, inner, trail, closeM) => {
 			if (openM !== closeM) return full;
-			const core = inner;
-			const coreTrim = core.replace(/^\s+/, "").replace(/\s+$/, "");
-			const leading = lead || "";
-			const trailing = trail || "";
-			if (coreTrim.length === 0)
-				return leading + openM + closeM + trailing;
-			return leading + openM + coreTrim + closeM + trailing;
+			const core = inner.trim();
+			if (!core) return "";
+			return ` ${openM}${core}${closeM} `;
 		},
 	);
 
 	out = processSegment(out);
 	out = out.replace(/__PH_(\d+)__/g, (_, n) => placeholders[Number(n)] || "");
 	out = out.replace(/\s*\n\s*/g, "\n");
-	out = out.trim();
+
+	// normalize spaces
+	out = out.replace(/\s{2,}/g, " ").trim();
 
 	const found = [...out.matchAll(/{{\s*(\d+)\s*}}/g)].map((x) =>
 		Number(x[1]),
@@ -732,3 +734,4 @@ export function convertHtmlToWhatsApp(html) {
 
 	return out;
 }
+
