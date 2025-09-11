@@ -6,7 +6,7 @@
 	"type": "module",
 	"scripts": {
 		"start": "nodemon",
-		"deploy": "vercel --prod",
+		"deploy": "npm run build",
 		"prod": "node src/server.js"
 	},
 	"repository": {
