@@ -594,34 +594,9 @@ export function convertHtmlToWhatsApp(html) {
 
 	const tagRe = /<\s*(\/)?\s*([a-zA-Z0-9]+)([^>]*)>/g;
 
+	// ✅ Updated: no markers returned (disable * _ ~ completely)
 	function markersFromTag(tagName, attrStr) {
-		const markers = [];
-		const tag = (tagName || "").toLowerCase();
-		if (tag === "b" || tag === "strong") markers.push("*");
-		if (tag === "i" || tag === "em") markers.push("_");
-		if (tag === "u") markers.push("_");
-		if (tag === "s" || tag === "strike" || tag === "del") markers.push("~");
-		if (attrStr) {
-			const s = attrStr.toLowerCase();
-			if (
-				/\bfont-weight\s*:\s*(bold|\d{3,})/.test(s) &&
-				!markers.includes("*")
-			)
-				markers.unshift("*");
-			if (/\bfont-style\s*:\s*italic/.test(s) && !markers.includes("_"))
-				markers.unshift("_");
-			if (
-				/\btext-decoration\s*:\s*line-through/.test(s) &&
-				!markers.includes("~")
-			)
-				markers.unshift("~");
-			if (
-				/\btext-decoration\s*:\s*underline/.test(s) &&
-				!markers.includes("_")
-			)
-				markers.unshift("_");
-		}
-		return markers;
+		return [];
 	}
 
 	function extractAttr(attrStr, name) {
@@ -668,9 +643,8 @@ export function convertHtmlToWhatsApp(html) {
 				"";
 			stack.push({ tag, markers, href });
 
-			// ensure space before markers if needed
-			if (out && !out.endsWith(" ")) out += " ";
-			out += markers.join("");
+			// ✅ Updated: no marker injection
+			out += "";
 		} else {
 			// find matching opener in stack
 			let poppedIndex = -1;
@@ -683,14 +657,9 @@ export function convertHtmlToWhatsApp(html) {
 			if (poppedIndex === -1) continue;
 
 			const popped = stack.splice(poppedIndex)[0];
-			const closeMarkers = (popped.markers || [])
-				.slice()
-				.reverse()
-				.join("");
 
-			out += closeMarkers;
-			// ensure space after markers if needed
-			if (!out.endsWith(" ")) out += " ";
+			// ✅ Updated: no closing markers added
+			out += "";
 
 			if (popped.tag === "a" && popped.href) {
 				const href = popped.href.trim();
@@ -701,16 +670,7 @@ export function convertHtmlToWhatsApp(html) {
 
 	if (lastIndex < html.length) out += html.slice(lastIndex);
 
-	// fix marker placement with spacing
-	out = out.replace(
-		/([*_~`]+)(\s*)([\s\S]*?)(\s*)(\1)/g,
-		(full, openM, lead, inner, trail, closeM) => {
-			if (openM !== closeM) return full;
-			const core = inner.trim();
-			if (!core) return "";
-			return ` ${openM}${core}${closeM} `;
-		},
-	);
+	// ✅ Removed marker placement regex block (not needed anymore)
 
 	out = processSegment(out);
 	out = out.replace(/__PH_(\d+)__/g, (_, n) => placeholders[Number(n)] || "");

@@ -778,8 +778,8 @@ export const getFaceBookTemplates = async (req, res) => {
 						updateFields.status = newStatus;
 					if (mongoTpl.rejected_reason !== rejectedReason)
 						updateFields.rejected_reason = rejectedReason;
-					if (mongoTpl.name !== fbTpl.name)
-						updateFields.name = fbTpl.name;
+					// if (mongoTpl.name !== fbTpl.name)
+						// updateFields.name = fbTpl.name;
 
 					if (Object.keys(updateFields).length) {
 						return {

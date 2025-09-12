@@ -6,7 +6,7 @@
 	"type": "module",
 	"scripts": {
 		"start": "nodemon",
-		"deploy": "npm run build",
+		"deploy": "npm run prod",
 		"prod": "node src/server.js"
 	},
 	"repository": {

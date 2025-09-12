@@ -167,7 +167,12 @@
 									<td class="border-r border-t border-b rounded-lg border-gray-200 max-w-xs">
 										<p class="inline">
 											<span class="messageText block overflow-hidden  text-base text-ellipsis whitespace-nowrap">
-												<%= report?.messageTemplate || report?.text || report?.media_type %>
+												<%- (report?.messageTemplate || report?.text || report?.media_type || "")
+        .replace(/\*(.*?)\*/g, "<strong>$1</strong>")
+        .replace(/_(.*?)_/g, "<em>$1</em>")
+        .replace(/~(.*?)~/g, "<s>$1</s>") 
+		    .replace(/\n/g, "<br>")
+%>
 											</span>
 										</p>
 									</td>

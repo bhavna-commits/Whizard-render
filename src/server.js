@@ -6,7 +6,7 @@ import os from "os";
 import app from "./routes.app.js";
 import { connectDB, agenda } from "./config/db.js";
 import { Server } from "socket.io";
-import http from "http"; 
+import http from "http";
 import {
 	getUsers,
 	sendMessages,
@@ -14,21 +14,9 @@ import {
 	getSingleChat,
 } from "./controllers/Chats/chats.controller.js";
 
-// import fs from "fs";
-// import path from "path";
-
-// const __dirname = path.resolve();
-
-// const privateKey = fs.readFileSync(path.join(__dirname, "certs", "private-key-no-passphrase.pem"), "utf8");
-// const certificate = fs.readFileSync(path.join(__dirname, "certs", "certificate.pem"), "utf8");
-
-// const credentials = { key: privateKey, cert: certificate };
-
-// const server = https.createServer(credentials, app); 
-
-
 const PORT = process.env.PORT || 5001;
 
+// Detect if running on Render
 const isRender = Boolean(process.env.RENDER);
 
 const startWorkerServer = () => {
@@ -88,6 +76,7 @@ const init = async () => {
 		process.exit(0);
 	});
 
+	// Local development: use clustering
 	if (!isRender && cluster.isPrimary) {
 		const cpuCount = os.cpus().length;
 		console.log(
@@ -103,6 +92,7 @@ const init = async () => {
 			cluster.fork();
 		});
 	} else {
+		// Render or worker process
 		startWorkerServer();
 	}
 };
