@@ -1,3 +1,6 @@
+let originalTemplateData = { body: "" };
+let variableValues = {}; // keep input values separately
+
 function openModal() {
 	const templateData = collectTemplateData();
 	if (!templateData) return;
@@ -10,6 +13,7 @@ function openModal() {
 		templateData.templateName;
 	createVariableInputs(variables);
 
+	// 🔥 reattach listener after clearing form
 	const previewForm = document.getElementById("previewForm");
 	previewForm.addEventListener("input", handleInputChange);
 
@@ -22,17 +26,15 @@ function closeModal() {
 
 document.getElementById("modalCloseBtn").addEventListener("click", closeModal);
 
-let originalTemplateData = {};
-
 function initializePreview(templateData) {
 	originalTemplateData = {
-		body: templateData.body || "",
+		// If backend sends preformatted body_preview (with <b>, <i>), use that
+		body: templateData.body_preview || templateData.body || "",
 	};
 
 	const bodyValidation = validateCurlyBraces(templateData.body);
-
 	if (!bodyValidation.isValid) {
-		toast("info",bodyValidation.error);
+		toast("info", bodyValidation.error);
 		return false;
 	}
 
@@ -42,29 +44,9 @@ function initializePreview(templateData) {
 function handleInputChange(event) {
 	const variable = event.target.dataset.variable;
 	const value = event.target.value.trim();
-	let span = document.getElementById(`dynamic_${variable}`);
 
-	if (span) {
-		const newSpan = `<span class="bg-transparent" id="dynamic_${variable}">${
-			value || `{{${variable}}}`
-		}</span>`;
-
-		originalTemplateData.body = originalTemplateData.body.replace(
-			span.outerHTML,
-			newSpan,
-		);
-	} else {
-		const newSpan = `<span class="bg-transparent" id="dynamic_${variable}">${
-			value || `{{${variable}}}`
-		}</span>`;
-
-		// Find the placeholder in the template body using regex and replace it with the new span
-		const regex = new RegExp(`{{\\s*${variable}\\s*}}`, "g");
-		originalTemplateData.body = originalTemplateData.body.replace(
-			regex,
-			newSpan,
-		);
-	}
+	// store separately instead of mutating template string
+	variableValues[variable] = value;
 
 	updatePreview();
 }
@@ -90,19 +72,27 @@ function createVariableInputs(variables) {
 }
 
 function updatePreview() {
-	const sections = {
-		header: document.getElementById("previewHead"),
-		body: document.getElementById("previewBody"),
-		footer: document.getElementById("previewFoot"),
-	};
+	let updatedBody = originalTemplateData.body;
 
-	Object.entries(sections).forEach(([key, element]) => {
-		// console.log(currentTemplateData[key]);
-		if (element && originalTemplateData[key]) {
-			element.innerHTML = originalTemplateData[key].replace(
-				/\n/g,
-				"<br>",
-			);
-		}
+	// 🔥 replace placeholders with typed values
+	Object.entries(variableValues).forEach(([variable, value]) => {
+		const safeValue = value || `{{${variable}}}`;
+		const regex = new RegExp(`{{\\s*${variable}\\s*}}`, "g");
+		updatedBody = updatedBody.replace(regex, safeValue);
 	});
-}	
+
+	// ✅ preserve formatting (bold/italic/strike)
+	document.getElementById("previewBod").innerHTML = updatedBody.replace(
+		/\n/g,
+		"<br>",
+	);
+
+	if (originalTemplateData.header) {
+		document.getElementById("previewHead").innerHTML =
+			originalTemplateData.header;
+	}
+	if (originalTemplateData.footer) {
+		document.getElementById("previewFoot").innerHTML =
+			originalTemplateData.footer;
+	}
+}

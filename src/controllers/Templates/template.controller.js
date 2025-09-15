@@ -194,7 +194,7 @@ export const getList = async (req, res, next) => {
 
 		const result = await Template.aggregate([
 			{ $match: match },
-			{ $sort: { createdAt: -1 } },
+			{ $sort: { updatedAt: -1 } },
 			{
 				$facet: {
 					paginatedResults: [{ $skip: skip }, { $limit: limit }],
@@ -458,7 +458,6 @@ export const editTemplate = async (req, res, next) => {
 			});
 		if (!isString(templateId)) return next();
 
-		// Retrieve the original template from DB
 		const originalTemplate = await Template.findById(templateId);
 		if (!originalTemplate) {
 			return res
@@ -466,7 +465,6 @@ export const editTemplate = async (req, res, next) => {
 				.json({ success: false, error: "Template not found" });
 		}
 
-		// Parse new template data from request body
 		const templateData = JSON.parse(req.body.templateData);
 		const {
 			dynamicVariables,
@@ -474,10 +472,32 @@ export const editTemplate = async (req, res, next) => {
 			selectedLanguageCode,
 			url,
 			body_preview,
+			category,
 		} = templateData;
+
 		const id = req.session?.user?.id || req.session?.addedUser?.owner;
 
-		// Check for duplicate template names
+		// Prevent editing category OR language if already approved
+		if (originalTemplate.status === "APPROVED") {
+			if (category !== originalTemplate.category) {
+				return res.status(400).json({
+					success: false,
+					message:
+						"You cannot update the category after the template is approved by Meta.",
+				});
+			}
+			if (
+				selectedLanguageCode !== originalTemplate.selectedLanguageCode
+			) {
+				return res.status(400).json({
+					success: false,
+					message:
+						"You cannot update the language after the template is approved by Meta.",
+				});
+			}
+		}
+
+		// Check duplicate template name
 		const exists = await Template.findOne({
 			useradmin: id,
 			templateName,
@@ -501,6 +521,7 @@ export const editTemplate = async (req, res, next) => {
 		originalTemplate.dynamicVariables = dynamicVariables;
 		originalTemplate.name = templateName;
 		originalTemplate.selectedLanguageCode = selectedLanguageCode;
+		originalTemplate.category = category;
 		originalTemplate.url = url;
 		originalTemplate.components = components;
 		originalTemplate.status = "Pending";
@@ -517,36 +538,28 @@ export const editTemplate = async (req, res, next) => {
 			);
 
 			const accessToken = user.FB_ACCESS_TOKEN;
-
 			const appId = process.env.FB_APP_ID;
 
 			filePath = await uploadMediaResumable(accessToken, appId, filePath);
 
-			// Find the HEADER component and update its header_handle with the media URL.
 			const headerComponent = originalTemplate.components.find(
 				(component) => component.type === "HEADER",
 			);
 			if (headerComponent) {
 				let fileUrl = `${url}/uploads/${id}/${req.file?.filename}`;
-				// Depending on the header format, update the header_url with the file path
 				if (headerComponent.format === "IMAGE") {
-					console.log("img");
 					headerComponent.example.header_handle = [filePath];
 					headerComponent.example.header_url = fileUrl;
 				} else if (headerComponent.format === "VIDEO") {
-					console.log("vid");
 					headerComponent.example.header_url = fileUrl;
 					headerComponent.example.header_handle = [filePath];
-					console.log(headerComponent.example.header_url);
 				} else if (headerComponent.format === "DOCUMENT") {
-					console.log("doc");
 					headerComponent.example.header_url = fileUrl;
 					headerComponent.example.header_handle = [filePath];
 				}
 			}
 		}
 
-		// Update the template on Facebook
 		const updatedData = await updateTemplateOnFacebook(
 			originalTemplate,
 			user,
@@ -561,25 +574,12 @@ export const editTemplate = async (req, res, next) => {
 			);
 			if (headerComponent) {
 				let fileUrl = `${url}/uploads/${id}/${req.file?.filename}`;
-				// Depending on the header format, update the header_url with the file path
-				if (headerComponent.format === "IMAGE") {
-					console.log("img");
-					headerComponent.example.header_url = fileUrl;
-				} else if (headerComponent.format === "VIDEO") {
-					console.log("vid");
-					headerComponent.example.header_url = fileUrl;
-					console.log(headerComponent.example.header_url);
-				} else if (headerComponent.format === "DOCUMENT") {
-					console.log("doc");
-					headerComponent.example.header_url = fileUrl;
-				}
+				headerComponent.example.header_url = fileUrl;
 			}
 		}
 
-		// Save the updated template in DB
 		await originalTemplate.save();
 
-		// Log the activity
 		await ActivityLogs.create({
 			useradmin: id,
 			unique_id: generateUniqueId(),
@@ -600,6 +600,7 @@ export const editTemplate = async (req, res, next) => {
 		});
 	}
 };
+
 
 export const deleteTemplate = async (req, res, next) => {
 	try {

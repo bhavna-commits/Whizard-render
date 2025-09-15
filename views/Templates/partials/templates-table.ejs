@@ -22,7 +22,7 @@
 					</td>
 					<td class="text-gray-500 border-t border-b border-gray-200 ">
 						<div class="flex w-full h-full justify-center items-center">
-							<span class="mr-2"><%= list.category %></span>
+<span class="mr-2"><%= list.category.charAt(0).toUpperCase() + list.category.slice(1).toLowerCase() %></span>
 							<% if (authTemplateToken && list.category === "Authentication") { %>
 							<svg class="hover:cursor-pointer text-gray-500 ml-1" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 256 256" data-name="<%= list.name %>" data-token="<%= authTemplateToken %>" onclick="copyCurl(this)">
 								<title>Copy Send OTP cURL code</title>
