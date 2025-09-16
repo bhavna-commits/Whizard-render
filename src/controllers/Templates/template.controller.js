@@ -447,7 +447,7 @@ export const getEditTemplate = async (req, res, next) => {
 		res.status(500).render("errors/serverError");
 	}
 };
-
+// edit template
 export const editTemplate = async (req, res, next) => {
 	try {
 		const templateId = req.params?.id;
