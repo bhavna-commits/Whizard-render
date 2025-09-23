@@ -338,11 +338,34 @@ document.addEventListener("DOMContentLoaded", () => {
 	});
 });
 
-document
-	.getElementById("bodyInput")
-	?.addEventListener("keydown", function (event) {
-		const bodyInput = this;
+// body text character limit funtion
 
+const maxLength = 1024;
+
+// const bodyInput = document.getElementById("bodyInput");
+// const charCount = document.getElementById("charCount");
+// const previewBody = document.getElementById("previewBody");
+// const previewBod = document.getElementById("previewBod");
+
+if (bodyInput) {
+	// --- Keydown handler ---
+	bodyInput.addEventListener("keydown", function (event) {
+		// Block typing beyond limit (except for navigation keys/backspace/delete)
+		if (
+			this.textContent.length >= maxLength &&
+			![
+				"Backspace",
+				"Delete",
+				"ArrowLeft",
+				"ArrowRight",
+				"ArrowUp",
+				"ArrowDown",
+			].includes(event.key)
+		) {
+			event.preventDefault();
+		}
+
+		// Handle Enter → insert new line div
 		if (event.key === "Enter") {
 			event.preventDefault();
 			const selection = window.getSelection();
@@ -353,25 +376,61 @@ document
 			range.deleteContents();
 			range.insertNode(newLine);
 
-			// Move the cursor to the new line
+			// Move cursor into new line
 			const newRange = document.createRange();
 			newRange.setStart(newLine, 0);
 			newRange.setEnd(newLine, 0);
 			selection.removeAllRanges();
 			selection.addRange(newRange);
 		}
-		document
-			.getElementById("bodyInput")
-			.addEventListener("input", function () {
-				document.getElementById("previewBody").innerHTML =
-					this.innerHTML;
-				document.getElementById("previewBod").innerHTML =
-					this.innerHTML;
-			});
-
-		document.getElementById("charCount").textContent =
-			this.textContent.length + "/1024";
 	});
+
+	// --- Input handler ---
+	bodyInput.addEventListener("input", function () {
+		let text = this.textContent;
+
+		// Enforce max length
+		if (text.length > maxLength) {
+			this.textContent = text.substring(0, maxLength);
+			placeCaretAtEnd(this);
+		}
+
+		// Update previews
+		if (previewBody) previewBody.innerHTML = this.innerHTML;
+		if (previewBod) previewBod.innerHTML = this.innerHTML;
+
+		// Update counter
+		if (charCount)
+			charCount.textContent = this.textContent.length + "/" + maxLength;
+	});
+
+	// --- Paste handler ---
+	bodyInput.addEventListener("paste", function (event) {
+		event.preventDefault();
+		const paste = (event.clipboardData || window.clipboardData).getData(
+			"text",
+		);
+		const allowed = paste.substring(0, maxLength - this.textContent.length);
+		document.execCommand("insertText", false, allowed);
+	});
+
+	// --- Caret helper ---
+	function placeCaretAtEnd(el) {
+		el.focus();
+		if (
+			typeof window.getSelection !== "undefined" &&
+			typeof document.createRange !== "undefined"
+		) {
+			let range = document.createRange();
+			range.selectNodeContents(el);
+			range.collapse(false);
+			let sel = window.getSelection();
+			sel.removeAllRanges();
+			sel.addRange(range);
+		}
+	}
+}
+
 
 (() => {
 	const previewContainers = ["previewButtons", "previewButton"];
