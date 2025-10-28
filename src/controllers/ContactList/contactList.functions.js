@@ -95,7 +95,7 @@ export const generateTableAndCheckFields = (
 		const number = row.Number?.trim();
 		if (number) {
 			// Validate number format
-			if (!/^\d{12,}$/.test(number)) {
+			if (!/^\d{8,}$/.test(number)) {
 				errors.invalidNumbers.push({
 					row: rowIndex + 1,
 					column: "Number",

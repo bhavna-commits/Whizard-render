@@ -433,12 +433,26 @@ function validateForm() {
 		.getElementById("selectedDialCode")
 		.value.trim();
 	// console.log(countryCode);
-	const phoneNumber = document.getElementById("phoneNumber").value.trim();
-
+	const phoneNumber = document
+		.getElementById("phoneNumber")
+		.value.trim()
+		.replace(/\s|-/g, "");
 	// Regex for country code: must start with a '+' followed by one or more digits.
 	const countryCodeRegex = /^\+[0-9]+$/;
 	// Regex for phone number: exactly 8-17 digits.
-	const phoneRegex = /^[0-9]{8,17}$/;
+	const cleanNumber = String(number)
+		.trim() // remove leading/trailing spaces
+		.replace(/[^\d]/g, ""); // remove all non-digit characters
+
+	const phoneRegex = /^\d{8,17}$/; // 8–17 digits only
+
+	// remove spaces/hyphens
+	if (!phoneRegex.test(cleanNumber)) {
+		result.invalidNumbers.push({
+			row: index + 1,
+			value: number,
+		});
+	}
 
 	const errorBox = document.getElementById("addNewNumberError");
 	let errorMessage = "";
@@ -459,7 +473,7 @@ function validateForm() {
 
 	// Validate phone number only if the user has typed something.
 	if (phoneNumber.length > 0 && !phoneRegex.test(phoneNumber)) {
-		errorMessage += "Invalid phone number. Must be 10-15 digits.<br>";
+		errorMessage += "Invalid phone number. Must be 8–17 digits.<br>";
 	}
 
 	// Display errors only if any exist.
