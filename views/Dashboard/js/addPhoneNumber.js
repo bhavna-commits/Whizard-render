@@ -437,8 +437,8 @@ function validateForm() {
 
 	// Regex for country code: must start with a '+' followed by one or more digits.
 	const countryCodeRegex = /^\+[0-9]+$/;
-	// Regex for phone number: exactly 10-15 digits.
-	const phoneRegex = /^[0-9]{10,15}$/;
+	// Regex for phone number: exactly 8-17 digits.
+	const phoneRegex = /^[0-9]{8,17}$/;
 
 	const errorBox = document.getElementById("addNewNumberError");
 	let errorMessage = "";
