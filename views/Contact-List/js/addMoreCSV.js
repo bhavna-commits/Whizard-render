@@ -282,7 +282,7 @@ function displayErrors(result) {
 			"Invalid Phone Numbers",
 			`<p>Found ${result.invalidNumbers.length} invalid numbers.</p>
             <p class="mt-1">Example: Row ${example.row}: "${example.value}"</p>
-            <p class="mt-2 text-red-700">Phone numbers must contain only : digits, minimum 8 digits, country code without "+"(If any of these things are missing or incorrect please correct it and re-upload the file)</p>`,
+            <p class="mt-2 text-red-700">Phone numbers must contain only : digits, minimum 8 digits and maximum 7 digits, country code without "+"(If any of these things are missing or incorrect please correct it and re-upload the file)</p>`,
 			result.invalidNumbers.length,
 			"invalid-numbers",
 		);
