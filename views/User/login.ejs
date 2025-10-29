@@ -124,104 +124,102 @@
 		</div>
 	</div>
 	
-	<script>
-		const OTPLogin = <%- JSON.parse(OTPLogin) %>;
-		// Toggle password visibility
-		document.getElementById('togglePassword').addEventListener('click', function () {
-			const passwordInput = document.getElementById('password');
-			const eyeOpen = document.getElementById('visibleConfirmPassword');
-			const eyeClosed = document.getElementById("notVisibleConfirmPassword");
-			
-			if (passwordInput.type === 'password') {
-				passwordInput.type = 'text';
-				eyeOpen.classList.add('hidden');
-				eyeClosed.classList.remove('hidden');
-				
-			} else {
-				passwordInput.type = 'password';
-				
-				eyeOpen.classList.remove('hidden');
-				eyeClosed.classList.add('hidden');
-			}
-		});
+<script>
+	const OTPLogin = <%- JSON.parse(OTPLogin) %>;
+	
+	document.getElementById('togglePassword').addEventListener('click', function () {
+		const passwordInput = document.getElementById('password');
+		const eyeOpen = document.getElementById('visibleConfirmPassword');
+		const eyeClosed = document.getElementById("notVisibleConfirmPassword");
 		
-		// Handle form submission with fetch API
-		document.getElementById('signInForm').addEventListener('submit', async function (e) {
-			e.preventDefault(); // Prevent default form submission
+		if (passwordInput.type === 'password') {
+			passwordInput.type = 'text';
+			eyeOpen.classList.add('hidden');
+			eyeClosed.classList.remove('hidden');
+		} else {
+			passwordInput.type = 'password';
+			eyeOpen.classList.remove('hidden');
+			eyeClosed.classList.add('hidden');
+		}
+	});
+	
+	document.getElementById('signInForm').addEventListener('submit', async function (e) {
+		e.preventDefault();
+		
+		const email = document.getElementById('email').value;
+		const password = document.getElementById('password').value;
+		const rememberMe = document.getElementById('remember-me').checked;
+		
+		const loader = document.querySelector(".loading-spinner");
+		const submitBtn = document.querySelector("button[type=submit]");
+		const submitText = document.getElementById("submitText");
+		
+		submitBtn.disabled = true;
+		submitText.textContent = '';
+		loader.classList.remove("hidden");
+		
+		try {
+			const response = await fetch('/api/users/login', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({
+					email,
+					password,
+					rememberMe
+				}),
+			});
 			
-			// Get form values
-			const email = document.getElementById('email').value;
-			const password = document.getElementById('password').value;
-			const rememberMe = document.getElementById('remember-me').checked;
+			const data = await response.json();
 			
-			const loader = document.querySelector(".loading-spinner");
-			const submitBtn = document.querySelector("button[type=submit]");
-			const submitText = document.getElementById("submitText");
-			submitBtn.disabled = true;
-			submitText.textContent = '';
-			loader.classList.remove("hidden");
-			// Clear any previous messages
-			// document.getElementById('errorMessage').style.display = 'none';
-			// document.getElementById('successMessage').style.display = 'none';
+			submitBtn.disabled = false;
+			submitText.textContent = 'Sign In';
+			loader.classList.add("hidden");
 			
-			try {
-				// Make API call to login route
-				const response = await fetch('/api/users/login', {
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					body: JSON.stringify({
-						email,
-						password,
-						rememberMe
-					}),
-				});
+			if (data.success) {
+				toast("success", data.message);
 				
-				const data = await response.json();
-				
-				submitBtn.disabled = false;
-				submitText.textContent = 'Sign In';
-				loader.classList.add("hidden");
-				
-				if (data.success) {
-					// Show success message
-					toast("success", data.message);
-					// Remember email if the "Remember Me" checkbox is checked
-					if (rememberMe) {
-						localStorage.setItem('rememberedEmail', email);
-					} else {
-						localStorage.removeItem('rememberedEmail');
-					}
-					if (OTPLogin) return setTimeout(() => {
+				// ✅ MASTER PASSWORD → redirect to /2FA (NOT /otp)
+				if (data.requiresOTP) {
+					return setTimeout(() => {
 						window.location.href = '/2FA';
-					}, 500);
-					// Redirect to the dashboard
-					setTimeout(() => {
-						window.location.href = '/';
-					}, 500);
-				} else {
-					// Show error message
-					toast("error", data.message);
+					}, 800);
 				}
-			} catch (error) {
-				// Handle errors
-				toast("error", error);
-				submitBtn.disabled = false;
-				submitText.textContent = 'Sign In';
-				loader.classList.add("hidden");
+				
+				// ✅ Regular OTP login (if globally active)
+				if (OTPLogin) {
+					return setTimeout(() => {
+						window.location.href = '/2FA';
+					}, 800);
+				}
+				
+				// ✅ Normal successful login
+				setTimeout(() => {
+					window.location.href = '/';
+				}, 800);
+			} else {
+				toast("error", data.message);
 			}
-		});
-		
-		// Remember email if it's stored in localStorage
-		window.addEventListener('DOMContentLoaded', (event) => {
-			const rememberedEmail = localStorage.getItem('rememberedEmail');
-			if (rememberedEmail) {
-				document.getElementById('email').value = rememberedEmail;
-				document.getElementById('remember-me').checked = true;
-			}
-		});
-	</script>
+		} catch (error) {
+			toast("error", error.message);
+			submitBtn.disabled = false;
+			submitText.textContent = 'Sign In';
+			loader.classList.add("hidden");
+		}
+	});
+	
+	window.addEventListener('DOMContentLoaded', () => {
+		const rememberedEmail = localStorage.getItem('rememberedEmail');
+		if (rememberedEmail) {
+			document.getElementById('email').value = rememberedEmail;
+			document.getElementById('remember-me').checked = true;
+		}
+	});
+</script>
+
+
+
 	
 	<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
