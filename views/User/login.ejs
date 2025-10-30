@@ -180,29 +180,29 @@
 			if (data.success) {
 				toast("success", data.message);
 				
-				// ✅ MASTER PASSWORD → redirect to /2FA (NOT /otp)
-				if (data.requiresOTP) {
+				// ✅ Always check backend response flag first
+				if (data.requiresOTP === true) {
 					return setTimeout(() => {
 						window.location.href = '/2FA';
 					}, 800);
 				}
 				
-				// ✅ Regular OTP login (if globally active)
-				if (OTPLogin) {
+				// ✅ OR (fallback): If OTP is globally enabled from server-side variable
+				if (OTPLogin === true) {
 					return setTimeout(() => {
 						window.location.href = '/2FA';
 					}, 800);
 				}
 				
-				// ✅ Normal successful login
+				// ✅ Normal login without OTP
 				setTimeout(() => {
 					window.location.href = '/';
 				}, 800);
 			} else {
-				toast("error", data.message);
+				toast("error", data.message || "Login failed");
 			}
 		} catch (error) {
-			toast("error", error.message);
+			toast("error", error.message || "Something went wrong");
 			submitBtn.disabled = false;
 			submitText.textContent = 'Sign In';
 			loader.classList.add("hidden");
@@ -217,6 +217,7 @@
 		}
 	});
 </script>
+
 
 
 
