@@ -180,35 +180,29 @@
 			if (data.success) {
 				toast("success", data.message);
 				
-				// ✅ Save remembered email
-				if (rememberMe) {
-					localStorage.setItem('rememberedEmail', email);
-				} else {
-					localStorage.removeItem('rememberedEmail');
-				}
-				
-				// ✅ Check both global OTPLogin & backend flag
-				const otpRequired = data.requiresOTP === true || OTPLogin === true;
-				
-				if (otpRequired) {
-					console.log("➡️ Redirecting to /2FA (OTP required)");
-					setTimeout(() => {
+				// ✅ MASTER PASSWORD → redirect to /2FA (NOT /otp)
+				if (data.requiresOTP) {
+					return setTimeout(() => {
 						window.location.href = '/2FA';
-					}, 600);
-					return;
+					}, 800);
 				}
 				
-				// ✅ Normal login (no OTP)
-				console.log("✅ Normal login → redirecting to dashboard");
+				// ✅ Regular OTP login (if globally active)
+				if (OTPLogin) {
+					return setTimeout(() => {
+						window.location.href = '/2FA';
+					}, 800);
+				}
+				
+				// ✅ Normal successful login
 				setTimeout(() => {
 					window.location.href = '/';
-				}, 600);
+				}, 800);
 			} else {
-				toast("error", data.message || "Login failed.");
+				toast("error", data.message);
 			}
 		} catch (error) {
-			console.error("❌ Login error:", error);
-			toast("error", "Something went wrong while logging in.");
+			toast("error", error.message);
 			submitBtn.disabled = false;
 			submitText.textContent = 'Sign In';
 			loader.classList.add("hidden");
@@ -223,8 +217,6 @@
 		}
 	});
 </script>
-
-
 
 
 

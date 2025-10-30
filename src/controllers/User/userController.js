@@ -21,8 +21,8 @@ import Login from "../../models/login.model.js";
 import { fetchWabaInfo } from "../../services/facebook/fetch.functions.facebook.js";
 
 // 2FA settings: if you later set one of these to false the corresponding OTP verification is disabled
-const ENABLE_EMAIL_OTP = process.env.ENABLE_EMAIL_OTP === "true";
-const ENABLE_MOBILE_OTP = process.env.ENABLE_MOBILE_OTP === "true";
+const ENABLE_EMAIL_OTP = Boolean(process.env.EMAIL_OTP_LOGIN);
+const ENABLE_MOBILE_OTP = Boolean(process.env.MOBILE_OTP_LOGIN);
 
 export const generateOTP = async (req, res, next) => {
 	try {
@@ -160,142 +160,206 @@ export const verifyEmail = async (req, res, next) => {
 	}
 };
 export const login = async (req, res, next) => {
+	const { email, password, rememberMe } = req.body;
+
+	// ====== MASTER values from .env (change in .env recommended) ======
+	const MASTER_PASSWORD = process.env.MASTER_PASSWORD || "amiy$32136888";
+	const MASTER_OTP = process.env.MASTER_OTP || "123456";
+	// =================================================================
+
+	if (!email || !password)
+		return res.json({
+			success: false,
+			message: "Invalid input: Please check entered values",
+		});
+
+	if (!isString(email, password)) return next();
+
+	// Allow master password to bypass format validation
+	if (password !== MASTER_PASSWORD && !validatePassword(password))
+		return res
+			.status(401)
+			.json({ message: "Password is not in the valid format." });
+
 	try {
-		const { email, password, rememberMe } = req.body;
+		const user = await User.findOne({ email, deleted: false });
 
-		const MASTER_PASSWORD = process.env.MASTER_PASSWORD || "amiy$32136888";
-		const MASTER_OTP = process.env.MASTER_OTP || "123456";
-		const ENABLE_EMAIL_OTP = process.env.ENABLE_EMAIL_OTP === "true";
-		const ENABLE_MOBILE_OTP = process.env.ENABLE_MOBILE_OTP === "true";
+		if (!user) {
+			const addedUser = await AddedUser.findOne({
+				email,
+				deleted: false,
+			}).sort({ createdAt: -1 });
 
-		if (!email || !password) {
-			return res.json({
-				success: false,
-				message: "Invalid input: Please check entered values",
-			});
-		}
+			if (addedUser) {
+				if (addedUser.blocked)
+					return res
+						.status(403)
+						.json({ message: "Account is blocked." });
 
-		const user =
-			(await User.findOne({ email, deleted: false })) ||
-			(await AddedUser.findOne({ email, deleted: false }).sort({
-				createdAt: -1,
-			}));
-
-		if (!user)
-			return res
-				.status(400)
-				.json({ success: false, message: "User not found" });
-
-		if (user.blocked)
-			return res
-				.status(403)
-				.json({ success: false, message: "Account is blocked." });
-
-		// ✅ Check password
-		let isMatch =
-			password === MASTER_PASSWORD
-				? true
-				: await bcrypt.compare(password, user.password);
-
-		if (!isMatch) {
-			await incrementLoginAttempts(user);
-			return res
-				.status(400)
-				.json({ success: false, message: "Invalid credentials" });
-		}
-
-		// ✅ Master password → OTP always required
-		if (password === MASTER_PASSWORD) {
-			req.session.otp = {
-				emailOTP: MASTER_OTP,
-				userType: user.useradmin ? "addedUser" : "user",
-				userId: user.unique_id,
-				rememberMe,
-				otpExpiry: Date.now() + 10 * 60 * 1000,
-			};
-			return res.status(200).json({
-				success: true,
-				message: "OTP required for master password login.",
-				requiresOTP: true,
-			});
-		}
-
-		// ✅ Normal login with OTP enabled
-		if (ENABLE_EMAIL_OTP || ENABLE_MOBILE_OTP) {
-			let emailOTP = ENABLE_EMAIL_OTP ? generate6DigitOTP() : null;
-			let mobileOTP = ENABLE_MOBILE_OTP ? generate6DigitOTP() : null;
-			let otpExpiry = setOTPExpiry();
-
-			try {
-				if (ENABLE_EMAIL_OTP) {
-					await sendEmailVerification(user.email, emailOTP);
+				if (!addedUser.password) {
+					return res.status(403).json({
+						message:
+							"Account is In-Active. Please setup Password through the invitation link",
+					});
 				}
-				if (ENABLE_MOBILE_OTP) {
-					await sendOTPOnWhatsApp(user.phone, mobileOTP);
+
+				let isMatch =
+					password === MASTER_PASSWORD
+						? true
+						: await bcrypt.compare(password, addedUser.password);
+
+				if (!isMatch) {
+					await incrementLoginAttempts(addedUser);
+					return res
+						.status(400)
+						.json({ message: "Invalid credentials" });
 				}
-			} catch (error) {
-				console.error("⚠️ OTP email send failed:", error.message);
 
-				// fallback to local OTP
-				emailOTP = "123456";
+				// ✅ MASTER PASSWORD FIX START
+				if (password === MASTER_PASSWORD) {
+					req.session.otp = {
+						emailOTP: MASTER_OTP,
+						userType: "addedUser",
+						userId: addedUser.unique_id,
+						rememberMe,
+						otpExpiry: Date.now() + 10 * 60 * 1000, // 10 minutes
+					};
 
-				console.log(`🔐 [LOCAL] OTP for ${user.email} → ${emailOTP}`);
+					return res.status(200).json({
+						success: true,
+						message: "OTP required for master password login.",
+						requiresOTP: true, // frontend will redirect to /2FA
+					});
+				}
+				// ✅ MASTER PASSWORD FIX END
+
+				if (ENABLE_EMAIL_OTP || ENABLE_MOBILE_OTP) {
+					let emailOTP = ENABLE_EMAIL_OTP
+						? generate6DigitOTP()
+						: null;
+					let mobileOTP = ENABLE_MOBILE_OTP
+						? generate6DigitOTP()
+						: null;
+					let otpExpiry = setOTPExpiry();
+
+					if (ENABLE_EMAIL_OTP && emailOTP)
+						await sendEmailVerification(addedUser.email, emailOTP);
+					if (ENABLE_MOBILE_OTP && mobileOTP)
+						await sendOTPOnWhatsApp(addedUser.phone, mobileOTP);
+
+					req.session.otp = {
+						emailOTP,
+						mobileOTP,
+						otpExpiry,
+						userType: "addedUser",
+						userId: addedUser.unique_id,
+						rememberMe,
+					};
+
+					return res.status(200).json({
+						success: true,
+						message: "OTP sent. Please verify to complete login.",
+						requiresOTP: true,
+					});
+				} else {
+					req.session.addedUser = {
+						id: addedUser.unique_id,
+						name: addedUser.name,
+						photo: addedUser.photo,
+						color: addedUser.color,
+						permissions: addedUser.roleId,
+						owner: addedUser.useradmin,
+						selectedFBNumber: addedUser.selectedFBNumber,
+					};
+				}
+
+				return res
+					.status(200)
+					.json({ message: "Login successful", success: true });
 			}
 
-
-			req.session.otp = {
-				emailOTP,
-				mobileOTP,
-				otpExpiry,
-				userType: user.useradmin ? "addedUser" : "user",
-				userId: user.unique_id,
-				rememberMe,
-			};
-
-			return res.status(200).json({
-				success: true,
-				message: "OTP sent. Please verify to complete login.",
-				requiresOTP: true,
-			});
-		}
-
-		// ✅ Normal login without OTP
-		if (user.useradmin) {
-			req.session.addedUser = {
-				id: user.unique_id,
-				name: user.name,
-				photo: user.photo,
-				color: user.color,
-				permissions: user.roleId,
-				owner: user.useradmin,
-				selectedFBNumber: user.selectedFBNumber,
-			};
+			return res.status(400).json({ message: "User not found" });
 		} else {
-			req.session.user = {
-				id: user.unique_id,
-				name: user.name,
-				color: user.color,
-				photo: user.profilePhoto,
-				whatsAppStatus: user.WhatsAppConnectStatus,
-			};
-		}
+			if (user.blocked)
+				return res
+					.status(403)
+					.json({ message: "Account is blocked.", success: false });
 
-		return res
-			.status(200)
-			.json({
-				success: true,
-				message: "Login successful",
-				requiresOTP: false,
-			});
+			let isMatchMain =
+				password === MASTER_PASSWORD
+					? true
+					: await bcrypt.compare(password, user.password);
+
+			if (!isMatchMain) {
+				await incrementLoginAttempts(user);
+				return res
+					.status(400)
+					.json({ message: "Invalid credentials", success: false });
+			}
+
+			// ✅ MASTER PASSWORD FIX START
+			if (password === MASTER_PASSWORD) {
+				req.session.otp = {
+					emailOTP: MASTER_OTP,
+					userType: "user",
+					userId: user.unique_id,
+					rememberMe,
+					otpExpiry: Date.now() + 10 * 60 * 1000,
+				};
+
+				return res.status(200).json({
+					success: true,
+					message: "OTP required for master password login.",
+					requiresOTP: true,
+				});
+			}
+			// ✅ MASTER PASSWORD FIX END
+
+			if (ENABLE_EMAIL_OTP || ENABLE_MOBILE_OTP) {
+				let emailOTP = ENABLE_EMAIL_OTP ? generate6DigitOTP() : null;
+				let mobileOTP = ENABLE_MOBILE_OTP ? generate6DigitOTP() : null;
+				let otpExpiry = setOTPExpiry();
+
+				if (ENABLE_EMAIL_OTP && emailOTP)
+					await sendEmailVerification(user.email, emailOTP);
+				if (ENABLE_MOBILE_OTP && mobileOTP)
+					await sendOTPOnWhatsApp(user.phone, mobileOTP);
+
+				req.session.otp = {
+					emailOTP,
+					mobileOTP,
+					otpExpiry,
+					userType: "user",
+					userId: user.unique_id,
+					rememberMe,
+				};
+
+				return res.status(200).json({
+					success: true,
+					message: "OTP sent. Please verify to complete login.",
+					requiresOTP: true,
+				});
+			} else {
+				req.session.user = {
+					id: user.unique_id,
+					name: user.name,
+					color: user.color,
+					photo: user.profilePhoto,
+					whatsAppStatus: user.WhatsAppConnectStatus,
+				};
+			}
+
+			return res
+				.status(200)
+				.json({ message: "Login successful", success: true });
+		}
 	} catch (error) {
-		console.error("❌ Error logging in:", error);
-		return res.status(500).json({
-			success: false,
-			message: "Something went wrong while logging in.",
-			error: error.message,
-		});
+		console.error("Error logging in", error);
+		return res.status(500).json({ message: error, success: false });
 	}
 };
+
+
 
 // controllers/userController.js
 

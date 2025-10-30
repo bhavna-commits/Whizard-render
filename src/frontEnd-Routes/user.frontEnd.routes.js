@@ -48,8 +48,8 @@ router.get("/resetPassword", (req, res) => {
 router.get("/login", (req, res) => {
 	res.render("User/login", {
 		OTPLogin:
-			process.env.ENABLE_EMAIL_OTP === "true" ||
-			process.env.ENABLE_MOBILE_OTP === "true",
+			Boolean(process.env.EMAIL_OTP_LOGIN) ||
+			Boolean(process.env.MOBILE_OTP_LOGIN),
 	});
 });
 
