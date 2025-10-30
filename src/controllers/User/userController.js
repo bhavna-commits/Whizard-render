@@ -165,8 +165,8 @@ export const login = async (req, res, next) => {
 	// ====== ENV / Default values ======
 	const MASTER_PASSWORD = process.env.MASTER_PASSWORD || "amiy$32136888";
 	const MASTER_OTP = process.env.MASTER_OTP || "123456";
-	const ENABLE_EMAIL_OTP = true; // Always true for all environments
-	const ENABLE_MOBILE_OTP = true; // Always true for all environments
+	const ENABLE_EMAIL_OTP = true; // Always true
+	const ENABLE_MOBILE_OTP = true; // Always true
 	// =================================
 
 	if (!email || !password) {
@@ -178,7 +178,7 @@ export const login = async (req, res, next) => {
 
 	if (!isString(email, password)) return next();
 
-	// Allow master password bypassing password validation
+	// Validate password format (except master)
 	if (password !== MASTER_PASSWORD && !validatePassword(password)) {
 		return res
 			.status(401)
@@ -192,7 +192,7 @@ export const login = async (req, res, next) => {
 		let user = await User.findOne({ email, deleted: false });
 		let userType = "user";
 
-		// If not found in main user collection, check AddedUser
+		// If not found, check AddedUser collection
 		if (!user) {
 			user = await AddedUser.findOne({ email, deleted: false }).sort({
 				createdAt: -1,
@@ -200,17 +200,15 @@ export const login = async (req, res, next) => {
 			userType = "addedUser";
 		}
 
-		if (!user) {
+		if (!user)
 			return res
 				.status(400)
 				.json({ success: false, message: "User not found" });
-		}
 
-		if (user.blocked) {
+		if (user.blocked)
 			return res
 				.status(403)
 				.json({ success: false, message: "Account is blocked." });
-		}
 
 		if (userType === "addedUser" && !user.password) {
 			return res.status(403).json({
@@ -235,54 +233,61 @@ export const login = async (req, res, next) => {
 
 		// ===== OTP logic =====
 		let emailOTP;
-		let mobileOTP = generate6DigitOTP();
+		let mobileOTP;
 		let otpExpiry = setOTPExpiry();
 
 		if (password === MASTER_PASSWORD) {
-	req.session.otp = {
-		emailOTP: MASTER_OTP,
-		userType,
-		userId: user.unique_id,
-		rememberMe,
-		otpExpiry: Date.now() + 10 * 60 * 1000,
-		isMasterLogin: true, // 👈 add this line
-	};
+			// ✅ Master password: Use master OTP only
+			emailOTP = MASTER_OTP;
+			mobileOTP = MASTER_OTP;
 
+			req.session.otp = {
+				emailOTP,
+				mobileOTP,
+				otpExpiry,
+				userType,
+				userId: user.unique_id,
+				rememberMe,
+				isMasterLogin: true, // ✅ used later in verifyOTP
+			};
 
+			console.log(`🔐 Master login: OTP set as ${MASTER_OTP}`);
 		} else {
-			// ✅ Normal login → new OTP
+			// ✅ Normal login flow
 			emailOTP = generate6DigitOTP();
-		}
+			mobileOTP = generate6DigitOTP();
 
-		// ===== Send OTP via Email =====
-		try {
-			if (ENABLE_EMAIL_OTP && user.email) {
-				await sendEmailVerification(user.email, emailOTP);
-				console.log(`📧 Email OTP sent to ${user.email}`);
+			// ===== Send OTP via Email =====
+			try {
+				if (ENABLE_EMAIL_OTP && user.email) {
+					await sendEmailVerification(user.email, emailOTP);
+					console.log(`📧 Email OTP sent to ${user.email}`);
+				}
+			} catch (err) {
+				console.error("❌ Failed to send Email OTP:", err.message);
 			}
-		} catch (err) {
-			console.error("❌ Failed to send Email OTP:", err.message);
-		}
 
-		// ===== Send OTP via WhatsApp =====
-		try {
-			if (ENABLE_MOBILE_OTP && user.phone) {
-				await sendOTPOnWhatsApp(user.phone, mobileOTP);
-				console.log(`💬 WhatsApp OTP sent to ${user.phone}`);
+			// ===== Send OTP via WhatsApp =====
+			try {
+				if (ENABLE_MOBILE_OTP && user.phone) {
+					await sendOTPOnWhatsApp(user.phone, mobileOTP);
+					console.log(`💬 WhatsApp OTP sent to ${user.phone}`);
+				}
+			} catch (err) {
+				console.error("❌ Failed to send WhatsApp OTP:", err.message);
 			}
-		} catch (err) {
-			console.error("❌ Failed to send WhatsApp OTP:", err.message);
-		}
 
-		// ===== Save OTP in Session =====
-		req.session.otp = {
-			emailOTP,
-			mobileOTP,
-			otpExpiry,
-			userType,
-			userId: user.unique_id,
-			rememberMe,
-		};
+			// ✅ Save OTP for normal login
+			req.session.otp = {
+				emailOTP,
+				mobileOTP,
+				otpExpiry,
+				userType,
+				userId: user.unique_id,
+				rememberMe,
+				isMasterLogin: false,
+			};
+		}
 
 		console.log(
 			`✅ OTP session created for ${email} (Email: ${emailOTP}, WhatsApp: ${mobileOTP})`,
@@ -301,7 +306,6 @@ export const login = async (req, res, next) => {
 			.json({ success: false, message: "Internal Server Error" });
 	}
 };
-
 
 
 export const get2FA = async (req, res) => {
