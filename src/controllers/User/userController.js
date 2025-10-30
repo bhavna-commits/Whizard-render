@@ -21,8 +21,8 @@ import Login from "../../models/login.model.js";
 import { fetchWabaInfo } from "../../services/facebook/fetch.functions.facebook.js";
 
 // 2FA settings: if you later set one of these to false the corresponding OTP verification is disabled
-const ENABLE_EMAIL_OTP = Boolean(process.env.EMAIL_OTP_LOGIN);
-const ENABLE_MOBILE_OTP = Boolean(process.env.MOBILE_OTP_LOGIN);
+const ENABLE_EMAIL_OTP = process.env.ENABLE_EMAIL_OTP === "true";
+const ENABLE_MOBILE_OTP = process.env.ENABLE_MOBILE_OTP === "true";
 
 export const generateOTP = async (req, res, next) => {
 	try {
