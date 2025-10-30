@@ -33,12 +33,14 @@ export async function sendMail({
 	};
 
 	try {
+		console.log("📨 Sending email to:", to);
 		const info = await transporter.sendMail(mailOptions);
-		console.log(`Email sent to ${to}: ${info.response}`);
+		console.log(`✅ Email sent to ${to}: ${info.response}`);
 	} catch (err) {
-		console.error("Error sending email:", err);
+		console.error("❌ Error sending email:", err.message);
 		throw err;
 	}
+
 }
 
 // .........................................................................................................
