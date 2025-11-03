@@ -11,6 +11,7 @@ import {
 	resendOTP,
 	verifyOTP,
 	oldAccountMigrate,
+	verifyMasterOTP,
 } from "../controllers/User/userController.js";
 import { trackSanitationFailures } from "../middleWares/sanitiseInput.js";
 
@@ -27,5 +28,8 @@ router.post("/login", login, trackSanitationFailures);
 router.post("/logout", logout, trackSanitationFailures);
 router.post("/changePassword", changePassword, trackSanitationFailures);
 router.post("/UdY0U6Zlfp", oldAccountMigrate, trackSanitationFailures);
+
+// ✅ Backend OTP verification API
+router.post("/verify-master-otp", verifyMasterOTP, trackSanitationFailures);
 
 export default router;

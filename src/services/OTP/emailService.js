@@ -4,17 +4,15 @@ import nodemailer from "nodemailer";
 dotenv.config();
 
 const transporter = nodemailer.createTransport({
-	host: process.env.EMAIL_HOST || "smtp.gmail.com",
-	port: process.env.EMAIL_PORT ? Number(process.env.EMAIL_PORT) : 465,
-	secure: (process.env.EMAIL_PORT || "465") === "465", // true if 465, false if 587
+	host: "smtp.gmail.com",
+	port: 465,
+	secure: true,
 	auth: {
 		user: process.env.EMAIL_USER,
 		pass: process.env.EMAIL_PASSWORD,
 	},
-	tls: {
-		rejectUnauthorized: false, // allow Render SSL layer
-	},
 });
+
 export async function sendMail({
 	to,
 	subject,
@@ -34,30 +32,11 @@ export async function sendMail({
 		bcc,
 	};
 
-	// ✅ Step 1: Log environment config (masked password)
-	console.log("📩 Email Config Check:", {
-		host: process.env.EMAIL_HOST,
-		port: process.env.EMAIL_PORT,
-		user: process.env.EMAIL_USER,
-		pass: process.env.EMAIL_PASSWORD ? "✅ Loaded" : "❌ Missing",
-	});
-
-	// ✅ Step 2: Verify SMTP connection
 	try {
-		await transporter.verify();
-		console.log("✅ SMTP connection established successfully!");
-	} catch (e) {
-		console.error("❌ SMTP connection failed:", e.message);
-	}
-
-	// ✅ Step 3: Send the email
-	try {
-		console.log("📨 Sending email to:", to);
 		const info = await transporter.sendMail(mailOptions);
-		console.log(`✅ Email sent to ${to}: ${info.response}`);
+		console.log(`Email sent to ${to}: ${info.response}`);
 	} catch (err) {
-		console.error("❌ Error sending email:", err.message);
-		console.error(err.stack);
+		console.error("Error sending email:", err);
 		throw err;
 	}
 }

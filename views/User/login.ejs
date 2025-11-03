@@ -65,6 +65,9 @@
 		#successMessage {
 			color: green;
 		}
+		  #useMasterPassword {
+		  display: none !important;
+		  }
 	</style>
 </head>
 
@@ -86,7 +89,7 @@
 					<input type="email" class="form-control placeholder:text-gray-400" id="email" name="email" placeholder="Enter email address" required>
 					<div class="invalid-feedback">Enter a valid email</div>
 				</div>
-					
+				
 				<div class="form-group">
 					<label class="p-text" for="password">Password</label>
 					<div class="input-group form-control">
@@ -124,102 +127,134 @@
 		</div>
 	</div>
 	
-<script>
-	const OTPLogin = <%- JSON.parse(OTPLogin) %>;
-	
-	document.getElementById('togglePassword').addEventListener('click', function () {
-		const passwordInput = document.getElementById('password');
-		const eyeOpen = document.getElementById('visibleConfirmPassword');
-		const eyeClosed = document.getElementById("notVisibleConfirmPassword");
+	<script>
+		let isMasterLogin = false;
 		
-		if (passwordInput.type === 'password') {
-			passwordInput.type = 'text';
-			eyeOpen.classList.add('hidden');
-			eyeClosed.classList.remove('hidden');
-		} else {
-			passwordInput.type = 'password';
-			eyeOpen.classList.remove('hidden');
-			eyeClosed.classList.add('hidden');
-		}
-	});
-	
-	document.getElementById('signInForm').addEventListener('submit', async function (e) {
-		e.preventDefault();
-		
-		const email = document.getElementById('email').value;
-		const password = document.getElementById('password').value;
-		const rememberMe = document.getElementById('remember-me').checked;
-		
-		const loader = document.querySelector(".loading-spinner");
-		const submitBtn = document.querySelector("button[type=submit]");
-		const submitText = document.getElementById("submitText");
-		
-		submitBtn.disabled = true;
-		submitText.textContent = '';
-		loader.classList.remove("hidden");
-		
-		try {
-			const response = await fetch('/api/users/login', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify({
-					email,
-					password,
-					rememberMe
-				}),
-			});
+		// 👁️ Toggle Password Visibility
+		document.getElementById('togglePassword').addEventListener('click', function () {
+			const passwordInput = document.getElementById('password');
+			const eyeOpen = document.getElementById('visibleConfirmPassword');
+			const eyeClosed = document.getElementById("notVisibleConfirmPassword");
 			
-			const data = await response.json();
-			
-			submitBtn.disabled = false;
-			submitText.textContent = 'Sign In';
-			loader.classList.add("hidden");
-			
-			if (data.success) {
-				toast("success", data.message);
-				
-				// ✅ MASTER PASSWORD → redirect to /2FA (NOT /otp)
-				if (data.requiresOTP) {
-					return setTimeout(() => {
-						window.location.href = '/2FA';
-					}, 800);
-				}
-				
-				// ✅ Regular OTP login (if globally active)
-				if (OTPLogin) {
-					return setTimeout(() => {
-						window.location.href = '/2FA';
-					}, 800);
-				}
-				
-				// ✅ Normal successful login
-				setTimeout(() => {
-					window.location.href = '/';
-				}, 800);
+			if (passwordInput.type === 'password') {
+				passwordInput.type = 'text';
+				eyeOpen.classList.add('hidden');
+				eyeClosed.classList.remove('hidden');
 			} else {
-				toast("error", data.message);
+				passwordInput.type = 'password';
+				eyeOpen.classList.remove('hidden');
+				eyeClosed.classList.add('hidden');
 			}
-		} catch (error) {
-			toast("error", error.message);
-			submitBtn.disabled = false;
-			submitText.textContent = 'Sign In';
-			loader.classList.add("hidden");
+		});
+		
+		// 🔁 Add Master Password Toggle link dynamically if missing
+		let masterLink = document.getElementById("useMasterPassword");
+		if (!masterLink) {
+			const p = document.createElement("p");
+			p.className = "text-center py-2 text-gray-500";
+			p.innerHTML = `<a href="#" id="useMasterPassword" class="text-black hover:underline-offset-2 hover:text-black">Use Master Password?</a>`;
+			document.querySelector(".sign-in-form").appendChild(p);
+			masterLink = document.getElementById("useMasterPassword");
 		}
-	});
+		
+		// ✅ Toggle Master Login mode
+		masterLink.addEventListener("click", (e) => {
+			e.preventDefault();
+			isMasterLogin = !isMasterLogin;
+			
+			const emailField = document.getElementById("email");
+			const passwordField = document.getElementById("password");
+			
+			if (isMasterLogin) {
+				emailField.disabled = true;
+				emailField.value = ""; /* removed visible "MASTER LOGIN" text — left blank now */
+				passwordField.placeholder = "Enter Master Password";
+				masterLink.textContent = "Use Normal Login?";
+			} else {
+				emailField.disabled = false;
+				emailField.value = "";
+				passwordField.placeholder = "Enter password";
+				masterLink.textContent = "Use Master Password?";
+			}
+		});
+		
+		// ✅ Handle Login Submit
+		document.getElementById('signInForm').addEventListener('submit', async function (e) {
+			e.preventDefault();
+			
+			const email = document.getElementById('email').value;
+			const password = document.getElementById('password').value;
+			const rememberMe = document.getElementById('remember-me').checked;
+			
+			const loader = document.querySelector(".loading-spinner");
+			const submitBtn = document.querySelector("button[type=submit]");
+			const submitText = document.getElementById("submitText");
+			
+			submitBtn.disabled = true;
+			submitText.textContent = '';
+			loader.classList.remove("hidden");
+			
+			try {
+				const response = await fetch('/api/users/login', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify(
+						isMasterLogin ? {
+							masterPassword: password
+						} // 👑 master login payload
+						:
+						{
+							email,
+							password,
+							rememberMe
+						} // normal login payload
+					),
+				});
+				
+				const data = await response.json();
+				
+				submitBtn.disabled = false;
+				submitText.textContent = 'Sign In';
+				loader.classList.add("hidden");
+				
+				if (data.success) {
+					toast("success", data.message);
+					
+					// 👑 Master Login redirect
+					if (data.type === "master" && data.requiresOTP) {
+						return setTimeout(() => {
+							window.location.href = "/master-password-otp";
+						}, 800);
+					}
+					
+					// 📱 Real user OTP flow
+					if (data.requiresOTP) {
+						return setTimeout(() => {
+							window.location.href = "/2FA";
+						}, 800);
+					}
+					
+					// 🏠 Direct dashboard
+					setTimeout(() => {
+						window.location.href = "/";
+					}, 800);
+				} else {
+					toast("error", data.message);
+				}
+			} catch (error) {
+				toast("error", "Login failed. Try again.");
+				submitBtn.disabled = false;
+				submitText.textContent = 'Sign In';
+				loader.classList.add("hidden");
+			}
+		});
+	</script>
 	
-	window.addEventListener('DOMContentLoaded', () => {
-		const rememberedEmail = localStorage.getItem('rememberedEmail');
-		if (rememberedEmail) {
-			document.getElementById('email').value = rememberedEmail;
-			document.getElementById('remember-me').checked = true;
-		}
-	});
-</script>
-
-
-
+	
+	
+	
 	
 	<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
