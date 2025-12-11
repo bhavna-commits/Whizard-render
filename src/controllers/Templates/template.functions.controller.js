@@ -590,6 +590,8 @@ export function convertHtmlToWhatsApp(html) {
 	});
 
 	html = html.replace(/\r\n/g, "\n");
+	html = html.replace(/\r(?!\n)/g, "\n");
+
 	html = html.replace(/&nbsp;/gi, "\u00A0");
 
 	const tagRe = /<\s*(\/)?\s*([a-zA-Z0-9]+)([^>]*)>/g;
