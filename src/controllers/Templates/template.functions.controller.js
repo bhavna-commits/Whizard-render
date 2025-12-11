@@ -660,9 +660,15 @@ export function convertHtmlToWhatsApp(html) {
 
 		if (!isClose) {
 			if (tag === "br") {
-				out += "\n";
+				// out += "\n";
+				out += "\u000B";
 				continue;
 			}
+			 // handle opening <p> - do nothing special (we'll add blank line on close)
+    if (tag === "p") {
+        // don't output text now; content will be collected until </p>
+        continue;
+    }
 			const markers = markersFromTag(tag, attrStr);
 			const href =
 				extractAttr(attrStr, "href") ||
@@ -686,8 +692,8 @@ export function convertHtmlToWhatsApp(html) {
 			}
 			if (poppedIndex === -1) continue;
 
-			const popped = stack.splice(poppedIndex)[ 0 ];
-			
+			const popped = stack.splice(poppedIndex)[0];
+
 			const closeMarkers = (popped.markers || [])
 				.slice()
 				.reverse()
@@ -699,6 +705,13 @@ export function convertHtmlToWhatsApp(html) {
 
 			// ✅ Updated: no closing markers added
 			// out += "";
+			// right after processing popped and closeMarkers:
+    if (popped.tag === "p") {
+        // Add two newlines to represent a paragraph break.
+        out += "\n\n";
+        // do NOT add extra space here
+        continue;
+    }
 
 			if (popped.tag === "a" && popped.href) {
 				const href = popped.href.trim();
@@ -722,10 +735,14 @@ export function convertHtmlToWhatsApp(html) {
 
 	out = processSegment(out);
 	out = out.replace(/__PH_(\d+)__/g, (_, n) => placeholders[Number(n)] || "");
-	out = out.replace(/\s*\n\s*/g, "\n");
 
-	// normalize spaces
-	out = out.replace(/\s{2,}/g, " ").trim();
+	out = out.replace(/\r/g, "");
+	out = out.replace(/\u00A0/g, " ");
+	out = out.trimEnd();
+
+	// FINAL FIX: allow double/ triple blank line spacing exactly as typed
+	out = out.replace(/\u000B/g, "\n");
+
 
 	const found = [...out.matchAll(/{{\s*(\d+)\s*}}/g)].map((x) =>
 		Number(x[1]),
