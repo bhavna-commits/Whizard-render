@@ -57,7 +57,7 @@ const startWorkerServer = () => {
 		});
 	});
 
-	server.listen(PORT, () => {
+	server.listen(PORT,"0.0.0.0", () => {
 		console.log(`Worker ${process.pid} listening on port ${PORT}`);
 	});
 };
