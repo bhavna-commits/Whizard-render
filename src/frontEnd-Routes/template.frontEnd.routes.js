@@ -6,9 +6,9 @@ import {
 	getCreateTemplate,
 	getDuplicateTemplate,
 	getEditTemplate,
+	// syncFacebookTemplates,
 } from "../controllers/Templates/template.controller.js";
 import { trackSanitationFailures } from "../middleWares/sanitiseInput.js";
-
 
 const router = express.Router();
 
@@ -35,7 +35,7 @@ router.get(
 );
 
 router.get("/templates/edit/:id", getEditTemplate, trackSanitationFailures);
-
-
+/* ⭐⭐⭐ facebook sync route THIS ROUTE ⭐⭐⭐ */
+// router.get("/templates/sync", syncFacebookTemplates, trackSanitationFailures);
 
 export default router;

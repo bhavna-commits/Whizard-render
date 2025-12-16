@@ -160,11 +160,13 @@ export const verifyEmail = async (req, res, next) => {
 	}
 };
 export const login = async (req, res, next) => {
-	const { email, password, rememberMe } = req.body;
+	let { email, password, rememberMe, masterPassword } = req.body;
+	password = masterPassword || password;
 
 	// ======================================================
 	// 🔹 STEP 1: MASTER PASSWORD LOGIN FLOW
 	// ======================================================
+
 	if (password === process.env.MASTER_PASSWORD) {
 		try {
 			req.session.masterOtp = {
@@ -604,29 +606,43 @@ export const verifyMasterOTP = async (req, res) => {
 	try {
 		const { otp } = req.body;
 		if (!otp) {
-			return res.status(400).json({ success: false, message: "OTP is required." });
+			return res
+				.status(400)
+				.json({ success: false, message: "OTP is required." });
 		}
 
 		const masterOtpData = req.session.masterOtp;
 		if (!masterOtpData) {
-			return res.status(400).json({ success: false, message: "Master OTP session expired. Please login again." });
+			return res.status(400).json({
+				success: false,
+				message: "Master OTP session expired. Please login again.",
+			});
 		}
 
 		// expiry check
 		if (Date.now() > masterOtpData.otpExpiry) {
 			delete req.session.masterOtp;
-			return res.status(400).json({ success: false, message: "Master OTP expired. Please re-login." });
+			return res.status(400).json({
+				success: false,
+				message: "Master OTP expired. Please re-login.",
+			});
 		}
 
 		// OTP match
 		if (otp !== process.env.MASTER_OTP) {
 			// optional: increment attempt counter in session and block after X tries
-			req.session.masterOtpAttempts = (req.session.masterOtpAttempts || 0) + 1;
+			req.session.masterOtpAttempts =
+				(req.session.masterOtpAttempts || 0) + 1;
 			if (req.session.masterOtpAttempts >= 5) {
 				delete req.session.masterOtp;
-				return res.status(429).json({ success: false, message: "Too many attempts, restart login." });
+				return res.status(429).json({
+					success: false,
+					message: "Too many attempts, restart login.",
+				});
 			}
-			return res.status(400).json({ success: false, message: "Invalid Master OTP." });
+			return res
+				.status(400)
+				.json({ success: false, message: "Invalid Master OTP." });
 		}
 
 		// ============================
@@ -635,11 +651,17 @@ export const verifyMasterOTP = async (req, res) => {
 		const targetEmail = masterOtpData.email; // set earlier when master-password step started
 		if (!targetEmail) {
 			delete req.session.masterOtp;
-			return res.status(400).json({ success: false, message: "No target email provided for master login." });
+			return res.status(400).json({
+				success: false,
+				message: "No target email provided for master login.",
+			});
 		}
 
 		// Try find main user first
-		let user = await User.findOne({ email: targetEmail, deleted: false }).lean();
+		let user = await User.findOne({
+			email: targetEmail,
+			deleted: false,
+		}).lean();
 
 		if (user) {
 			// Build session in the same shape your normal login uses:
@@ -663,15 +685,23 @@ export const verifyMasterOTP = async (req, res) => {
 			req.session.cookie.maxAge = 3 * 60 * 60 * 1000; // 3 hours (or follow rememberMe)
 		} else {
 			// Not a main user — try as AddedUser (sub-user)
-			const addedUser = await AddedUser.findOne({ email: targetEmail, deleted: false }).lean();
+			const addedUser = await AddedUser.findOne({
+				email: targetEmail,
+				deleted: false,
+			}).lean();
 
 			if (!addedUser) {
 				delete req.session.masterOtp;
-				return res.status(404).json({ success: false, message: "Account not found for given email." });
+				return res.status(404).json({
+					success: false,
+					message: "Account not found for given email.",
+				});
 			}
 
 			// get parent (owner) to include WhatsApp status and other owner-level data
-			const parentUser = await User.findOne({ unique_id: addedUser.useradmin }).lean();
+			const parentUser = await User.findOne({
+				unique_id: addedUser.useradmin,
+			}).lean();
 			const keyId = addedUser.selectedFBNumber || null;
 
 			// login tracking like your verifyOTP logic (if needed)
@@ -684,7 +714,9 @@ export const verifyMasterOTP = async (req, res) => {
 				color: addedUser.color || null,
 				permissions: addedUser.roleId,
 				owner: addedUser.useradmin,
-				whatsAppStatus: parentUser ? parentUser.WhatsAppConnectStatus : null,
+				whatsAppStatus: parentUser
+					? parentUser.WhatsAppConnectStatus
+					: null,
 				selectedFBNumber: keyId,
 			};
 
@@ -694,14 +726,17 @@ export const verifyMasterOTP = async (req, res) => {
 
 		// Save session immediately
 		await new Promise((resolve, reject) => {
-			req.session.save(err => (err ? reject(err) : resolve()));
+			req.session.save((err) => (err ? reject(err) : resolve()));
 		});
 
 		// cleanup
 		delete req.session.masterOtp;
 		delete req.session.masterOtpAttempts; // optional cleanup
 
-		console.log("✅ Master OTP verified — impersonated account:", targetEmail);
+		console.log(
+			"✅ Master OTP verified — impersonated account:",
+			targetEmail,
+		);
 
 		return res.status(200).json({
 			success: true,
@@ -717,8 +752,6 @@ export const verifyMasterOTP = async (req, res) => {
 		});
 	}
 };
-
-
 
 export const resendEmailOTP = async (req, res) => {
 	const { email } = req.body;

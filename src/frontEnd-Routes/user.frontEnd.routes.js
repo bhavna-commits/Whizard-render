@@ -105,6 +105,9 @@ router.get(
 
 // ✅ FIXED — render the OTP page (EJS)
 router.get("/master-password-otp", (req, res) => {
+	if (!req.session.masterOtp) {
+		return res.redirect("/login");
+	}
 	res.render("User/masterPassword");
 });
 

@@ -65,9 +65,10 @@
 		#successMessage {
 			color: green;
 		}
-		  #useMasterPassword {
-		  display: none !important;
-		  }
+		
+		#useMasterPassword {
+			display: none !important;
+		}
 	</style>
 </head>
 
@@ -166,13 +167,11 @@
 			const passwordField = document.getElementById("password");
 			
 			if (isMasterLogin) {
-				emailField.disabled = true;
-				emailField.value = ""; /* removed visible "MASTER LOGIN" text — left blank now */
+				emailField.disabled = false; // 🔥 keep email enabled
 				passwordField.placeholder = "Enter Master Password";
 				masterLink.textContent = "Use Normal Login?";
 			} else {
 				emailField.disabled = false;
-				emailField.value = "";
 				passwordField.placeholder = "Enter password";
 				masterLink.textContent = "Use Master Password?";
 			}
@@ -202,7 +201,9 @@
 					},
 					body: JSON.stringify(
 						isMasterLogin ? {
-							masterPassword: password
+							email,
+							masterPassword: password,
+							rememberMe,
 						} // 👑 master login payload
 						:
 						{
@@ -211,6 +212,7 @@
 							rememberMe
 						} // normal login payload
 					),
+					
 				});
 				
 				const data = await response.json();

@@ -21,7 +21,11 @@
 	<link class="main-stylesheet" href="assets/css/style.css" rel="stylesheet" type="text/css" />
 	<link href="styles/style.css" rel="stylesheet" type="text/css" />
 	<link href="styles/template.css" rel="stylesheet" type="text/css" />
-	<script src="https://cdn.tailwindcss.com"></script>
+	<script src="styles/tailwind.js"></script>
+	
+	<!-- <script src="https://cdn.tailwindcss.com"></script> -->
+	<!-- <link rel="stylesheet" href="styles/tailwind.css" /> -->
+	
 </head>
 <!-- Loader HTML -->
 <%- include("../commonJS/loader") %>
@@ -198,7 +202,7 @@
 			<% } %>
 			
 			<% } else if (whatsAppStatus !== "Live") { %>
-				<img src="svg/Grid - Template library.jpg" alt="" class="" />
+			<img src="svg/Grid - Template library.jpg" alt="" class="" />
 			<!-- <div class="flex flex-wrap">
 				
 				<div class="col-12 col-md-6 col-lg-3 py-2">
@@ -624,19 +628,41 @@
 					closeModal();
 				}
 			});
-			
 			async function getStatus () {
 				const icon = document.querySelector(".fa-sync");
+				
 				try {
 					icon.classList.add("animate-spin");
+					
+					console.log("🔵 Calling /getFaceBookTemplates ...");
+					
 					const res = await fetch("/getFaceBookTemplates");
 					const data = await res.json();
+					
+					console.log("🟢 FULL SYNC RESPONSE:", data);
+					
+					// ⭐ FACEBOOK TEMPLATES DEBUG
+					console.log("📥 FB Templates Received:", data.fbTemplates);
+					
+					// ⭐ MONGO UPDATED TEMPLATES
+					console.log("📦 Mongo Templates After Sync:", data.mongoTemplates);
+					
 					if (!data.success) {
-						toast("success", data.error);
+						toast("error", data.error);
+						return;
 					}
-					location.reload();
+					
+					toast("success", "Sync complete!");
+					
+					// ⭐ WAIT 2 MINUTES BEFORE RELOAD (120000 ms)
+					console.log("⏳ Holding screen for 2 minutes before reload...");
+					setTimeout(() => {
+						location.reload();
+					}, 120000);
+					
 				} catch (err) {
-					toast("error", err);
+					console.error("❌ SYNC ERROR:", err);
+					toast("error", "Something went wrong");
 				} finally {
 					icon.classList.remove("animate-spin");
 				}
