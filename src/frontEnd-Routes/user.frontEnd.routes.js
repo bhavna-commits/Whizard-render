@@ -111,4 +111,15 @@ router.get("/master-password-otp", (req, res) => {
 	res.render("User/masterPassword");
 });
 
+router.get("/terms-and-condition", (req, res) => {
+	res.render("User/common/termsCondition");
+});
+
+router.get("/privacy-policy", (req, res) => {
+	res.render("User/common/privacyPolicy");
+});
+router.get("/cancellation-policy", (req, res) => {
+	res.render("User/common/cancellationPolicy");
+});
+
 export default router;

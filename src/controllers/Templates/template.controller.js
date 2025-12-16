@@ -601,6 +601,7 @@ export const editTemplate = async (req, res, next) => {
 	}
 };
 
+
 export const deleteTemplate = async (req, res, next) => {
 	try {
 		const templateId = req.params?.id;
@@ -724,79 +725,98 @@ export const getCampaignSingleTemplates = async (req, res) => {
 
 export const getFaceBookTemplates = async (req, res) => {
 	try {
-		console.log("🔥 [SYNC] API HIT");
-
+		// Determine the user ID from session
 		const userId = req.session?.user?.id || req.session?.addedUser?.owner;
-
 		if (!userId) {
 			return res.status(401).json({
 				success: false,
-				error: "Unauthorized",
+				error: "Unauthorized: no user session found",
 			});
 		}
 
-		const [mongoTemplates, fbRes] = await Promise.all([
+		// Fetch MongoDB templates and Facebook templates in parallel
+		const [mongoTemplates, facebookResponse] = await Promise.all([
 			Template.find({ useradmin: userId, deleted: false }).lean(),
 			fetchFacebookTemplates(userId),
 		]);
 
-		const fbTemplates = Array.isArray(fbRes.data) ? fbRes.data : [];
-		console.log("📥 FB Templates Received:", fbTemplates.length);
-
-		const fbTemplateMap = fbTemplates.reduce((map, t) => {
-			map[t.id] = t;
+		const fbTemplates = Array.isArray(facebookResponse.data)
+			? facebookResponse.data
+			: [];
+		// Create a lookup map for Facebook templates by their ID
+		const fbTemplateMap = fbTemplates.reduce((map, tmpl) => {
+			map[tmpl.id] = tmpl;
 			return map;
 		}, {});
 
-		let bulkOps = [];
+		// console.log(fbTemplateMap);
 
-		for (let mongoTpl of mongoTemplates) {
-			const fbTpl = fbTemplateMap[mongoTpl.template_id];
-			if (!fbTpl) continue;
+		// Prepare bulk operations to minimize database round-trips
+		const bulkOps = mongoTemplates
+			.map((mongoTpl) => {
+				const fbTpl = fbTemplateMap[mongoTpl.template_id];
 
-			const newStatus =
-				fbTpl.status === "APPROVED"
-					? "Approved"
-					: fbTpl.status === "REJECTED"
-					? "Rejected"
-					: "Pending";
+				if (fbTpl) {
+					// Determine new status and rejection reason
+					let newStatus;
+					let rejectedReason = null;
 
-			const rejectedReason =
-				fbTpl.status === "REJECTED"
-					? fbTpl.rejected_reason ?? "UNKNOWN"
-					: null;
+					switch (fbTpl.status) {
+						case "APPROVED":
+							newStatus = "Approved";
+							break;
+						case "REJECTED":
+							newStatus = "Rejected";
+							rejectedReason = fbTpl.rejected_reason ?? "UNKNOWN";
+							break;
+						default:
+							newStatus = "Pending";
+					}
 
-			let updateFields = {};
+					// Collect fields that have changed
+					const updateFields = {};
+					if (mongoTpl.status !== newStatus)
+						updateFields.status = newStatus;
+					if (mongoTpl.rejected_reason !== rejectedReason)
+						updateFields.rejected_reason = rejectedReason;
+					// if (mongoTpl.name !== fbTpl.name)
+						// updateFields.name = fbTpl.name;
 
-			if (mongoTpl.status !== newStatus) updateFields.status = newStatus;
-			if (mongoTpl.rejected_reason !== rejectedReason)
-				updateFields.rejected_reason = rejectedReason;
+					if (Object.keys(updateFields).length) {
+						return {
+							updateOne: {
+								filter: { _id: mongoTpl._id },
+								update: { $set: updateFields },
+							},
+						};
+					}
+				} else if (!mongoTpl.deleted) {
+					// Mark as deleted if no longer present on Facebook
+					return {
+						updateOne: {
+							filter: { _id: mongoTpl._id },
+							update: { $set: { deleted: true } },
+						},
+					};
+				}
 
-			if (Object.keys(updateFields).length) {
-				bulkOps.push({
-					updateOne: {
-						filter: { _id: mongoTpl._id },
-						update: { $set: updateFields },
-					},
-				});
-			}
+				return null;
+			})
+			.filter(Boolean);
+
+		// Execute bulk updates if there are any
+		if (bulkOps.length) {
+			await Template.bulkWrite(bulkOps);
 		}
 
-		if (bulkOps.length) await Template.bulkWrite(bulkOps);
-
+		// Return the refreshed list
 		const updatedTemplates = await Template.find({
 			useradmin: userId,
 		}).lean();
-
-		// ⭐ RETURN BOTH MONGO + FACEBOOK DATA
-		return res.json({
-			success: true,
-			mongoTemplates: updatedTemplates,
-			fbTemplates: fbTemplates, // <------ ⭐ FIX
-		});
-	} catch (err) {
-		console.error("SYNC ERROR:", err);
-		res.status(500).json({ success: false, error: err.message });
+		res.json({ success: true, data: updatedTemplates });
+	} catch (error) {
+		console.error("Error syncing Facebook templates:", error);
+		res.status(500).json({ success: false, error: error.message });
 	}
 };
 
@@ -857,27 +877,26 @@ export const getCampaignTemplates = async (req, res) => {
 // 				.status(500)
 // 				.json({ success: false, message: "Failed to fetch templates" });
 // 		}
+// for (const t of fbData.data) {
+// 	await Template.findOneAndUpdate(
+// 		{ template_id: t.id },
+// 		{
+// 			template_id: t.id,
+// 			name: t.name,
+// 			category: t.category,
+// 			selectedLanguageCode: t.language,
+// 			status: t.status.toUpperCase(),
+// 			components: t.components,
+// 			useradmin: user.unique_id,
+// 			deleted: false,
+// 		},
+// 		{
+// 			upsert: true,
+// 			setDefaultsOnInsert: true,
+// 		},
+// 	);
+// }
 
-// 		for (const t of fbData.data) {
-// 			await Template.findOneAndUpdate(
-// 				{ template_id: t.id }, // FIX: match correct field
-// 				{
-// 					template_id: t.id,
-// 					name: t.name,
-// 					category: t.category,
-// 					selectedLanguageCode: t.language,
-// 					status: t.status.toUpperCase(),
-// 					components: t.components,
-// 					useradmin: user.unique_id,
-// 					deleted: false,
-// 					updatedAt: new Date(),
-// 				},
-// 				{
-// 					upsert: true,
-// 					setDefaultsOnInsert: true,
-// 				},
-// 			);
-// 		}
 
 // 		console.log("✅ SYNC COMPLETE");
 
@@ -885,10 +904,11 @@ export const getCampaignTemplates = async (req, res) => {
 // 			success: true,
 // 			message: "Templates synced successfully",
 // 			count: fbData.data.length,
-// 			data: fbData.data,
+// 			data: fbData.data, 
 // 		});
 // 	} catch (err) {
 // 		console.log("SYNC ERROR:", err);
 // 		res.status(500).json({ success: false, error: err.message });
 // 	}
 // };
+

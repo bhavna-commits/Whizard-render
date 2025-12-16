@@ -32,7 +32,9 @@
 						</div>						
 					</td>
 					<td class="border-t border-b border-gray-200">
-						<span class="inline-block px-2 py-1 text-gray-500"><%= list.language.language %></span>
+<span class="inline-block px-2 py-1 text-gray-500">
+	<%= list.language?.language?.split(" (")[0] || "—" %>
+</span>
 					</td>
 					<td class="border-t border-b border-gray-200">
 						<% if (list.status === 'Rejected') { %>
