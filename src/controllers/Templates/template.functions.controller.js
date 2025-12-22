@@ -393,35 +393,35 @@ export const fetchFacebookTemplates = async (id) => {
 	try {
 		const user = await User.findOne({ unique_id: id });
 
-		const url = `https://graph.facebook.com/${FB_GRAPH_VERSION}/${user.WABA_ID}/message_templates`;
+		let url = `https://graph.facebook.com/${FB_GRAPH_VERSION}/${user.WABA_ID}/message_templates?limit=100`;
 
-		// Using native fetch API
-		const response = await fetch(url, {
-			method: "GET",
-			headers: {
-				Authorization: `Bearer ${user.FB_ACCESS_TOKEN}`,
-			},
-		});
+		let allData = [];
 
-		// Check if the response is ok (status code 200-299)
-		if (!response.ok) {
-			throw new Error(
-				`Error fetching templates from Facebook: ${response.statusText}`,
-			);
+		while (url) {
+			const response = await fetch(url, {
+				method: "GET",
+				headers: { Authorization: `Bearer ${user.FB_ACCESS_TOKEN}` },
+			});
+
+			if (!response.ok) throw new Error("Failed");
+
+			const json = await response.json();
+
+			if (Array.isArray(json.data)) {
+				allData.push(...json.data);
+			}
+
+			url = json?.paging?.next || null;
 		}
 
-		// Parse and return the JSON response
-		const data = await response.json();
-		// console.log(data);
-		return data;
-	} catch (error) {
-		console.error(
-			"Error fetching Facebook message templates:",
-			error.message,
-		);
-		throw new Error("Failed to fetch Facebook message templates");
+
+		return { data: allData };
+	} catch (err) {
+		console.log(err);
+		throw err;
 	}
 };
+
 
 export function createComponents(templateData, dynamicVariables, html) {
 	const components = [];

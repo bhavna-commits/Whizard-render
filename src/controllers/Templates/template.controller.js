@@ -166,8 +166,10 @@ export const getList = async (req, res, next) => {
 		const { category, search, language } = req.query;
 		const limit = 6;
 		const skip = (page - 1) * limit;
+		
 
 		if (!isString(category, search, language)) return next();
+		
 
 		const match = {
 			useradmin: id,
@@ -601,7 +603,6 @@ export const editTemplate = async (req, res, next) => {
 	}
 };
 
-
 export const deleteTemplate = async (req, res, next) => {
 	try {
 		const templateId = req.params?.id;
@@ -742,6 +743,7 @@ export const getFaceBookTemplates = async (req, res) => {
 		const fbTemplates = Array.isArray(facebookResponse?.data)
 			? facebookResponse.data
 			: [];
+console.log("🔥 TOTAL FACEBOOK TEMPLATES RECEIVED:", fbTemplates.length);
 
 		// ---------- EXTRACT BODY VARIABLES ----------
 		function extractVariables(components) {
@@ -762,6 +764,7 @@ export const getFaceBookTemplates = async (req, res) => {
 
 		// ---------- PROCESS LOOP ----------
 		fbTemplates.forEach((fb) => {
+			// console.log(" Processing FB Template:", fb);
 			const exists = mongoMap.get(String(fb.id));
 
 			// ⬇ convert facebook language into standard object
@@ -773,28 +776,25 @@ export const getFaceBookTemplates = async (req, res) => {
 
 			// ---------- INSERT ----------
 			if (!exists) {
-				newDocs.push({
-					useradmin: userId,
-					template_id: fb.id,
-					name: fb.name,
+			newDocs.push({
+				useradmin: userId,
+				template_id: fb.id,
+				name: fb.name,
+				language: langObject,
+				status:
+					fb.status === "APPROVED"
+						? "Approved"
+						: fb.status === "REJECTED"
+						? "Rejected"
+						: "Pending",
+				category: fb.category || "MARKETING",
+				dynamicVariables: extractVariables(fb.components),
+				unique_id: fb.id,
+				FB_PHONE_ID:
+					exists?.FB_PHONE_ID || mongoTemplates[0]?.FB_PHONE_ID,
+				deleted: false,
+			});
 
-					language: langObject,
-
-					status:
-						fb.status === "APPROVED"
-							? "Approved"
-							: fb.status === "REJECTED"
-							? "Rejected"
-							: "Pending",
-
-					category: fb.category || "MARKETING",
-
-					dynamicVariables: extractVariables(fb.components),
-
-					unique_id: fb.id,
-					FB_PHONE_ID: "",
-					deleted: false,
-				});
 			}
 
 			// ---------- UPDATE ----------
@@ -857,6 +857,7 @@ export const getFaceBookTemplates = async (req, res) => {
 			facebook_data: fbTemplates,
 			db_data: finalMongo,
 		});
+		// console.log("facebook template after sync:", )
 	} catch (error) {
 		console.error(error);
 		return res.status(500).json({
@@ -864,9 +865,7 @@ export const getFaceBookTemplates = async (req, res) => {
 			error: error.message,
 		});
 	}
-
 };
-
 
 
 export const getCampaignTemplates = async (req, res) => {
@@ -893,4 +892,3 @@ export const getCampaignTemplates = async (req, res) => {
 		});
 	}
 };
-
