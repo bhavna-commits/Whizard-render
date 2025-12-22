@@ -642,10 +642,10 @@
 					console.log("🟢 FULL SYNC RESPONSE:", data);
 					
 					// ⭐ FACEBOOK TEMPLATES DEBUG
-					console.log("📥 FB Templates Received:", data.fbTemplates);
+console.log("📥 FB Templates Received:", data.facebook_data);
 					
 					// ⭐ MONGO UPDATED TEMPLATES
-					console.log("📦 Mongo Templates After Sync:", data.mongoTemplates);
+console.log("📦 Mongo Templates After Sync:", data.db_data);
 					
 					if (!data.success) {
 						toast("error", data.error);
@@ -658,7 +658,7 @@
 					console.log("⏳ Holding screen for 2 minutes before reload...");
 					setTimeout(() => {
 						location.reload();
-					}, 120000);
+					}, 6000);
 					
 				} catch (err) {
 					console.error("❌ SYNC ERROR:", err);

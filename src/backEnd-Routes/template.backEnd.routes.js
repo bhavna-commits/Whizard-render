@@ -5,7 +5,6 @@ import {
 	deleteTemplate,
 	getCampaignSingleTemplates,
 	editTemplate,
-	// syncFacebookTemplates,
 } from "../controllers/Templates/template.controller.js";
 import { multerMiddle } from "../config/multerMiddleware.js";
 import { trackSanitationFailures } from "../middleWares/sanitiseInput.js";
@@ -21,12 +20,7 @@ router.post(
 
 router.delete("/delete/:id", deleteTemplate, trackSanitationFailures);
 
-/* ⭐⭐⭐ ADD SYNC ROUTE BEFORE /:id ⭐⭐⭐ */
-// router.get("/sync", syncFacebookTemplates, trackSanitationFailures);
 
-/* ⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐ */
-
-/* ❗ This MUST be last — catch-all route */
 router.get("/:id", getCampaignSingleTemplates, trackSanitationFailures);
 
 router.post(
