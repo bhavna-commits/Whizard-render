@@ -746,12 +746,38 @@ export const getFaceBookTemplates = async (req, res) => {
 console.log("🔥 TOTAL FACEBOOK TEMPLATES RECEIVED:", fbTemplates.length);
 
 		// ---------- EXTRACT BODY VARIABLES ----------
-		function extractVariables(components) {
+		function extractVariables(components = []) {
+			if (!Array.isArray(components)) return [];
+
 			const body = components.find((c) => c.type === "BODY");
-			if (!body?.text) return [];
-			const matches = body.text.match(/\{\{\d+\}\}/g);
+			if (!body) return [];
+
+			let text = body.text;
+
+			// 🔥 fallback if text is missing
+			if (!text && body.example?.body_text?.[0]) {
+				text = body.example.body_text[0].join(" ");
+			}
+
+			if (!text) return [];
+
+			const matches = text.match(/\{\{\d+\}\}/g);
 			return matches ? matches.map((v) => v.replace(/[{}]/g, "")) : [];
 		}
+function extractBodyText(components = []) {
+	if (!Array.isArray(components)) return "";
+
+	const body = components.find((c) => c.type === "BODY");
+	if (!body) return "";
+
+	if (body.text) return body.text;
+
+	if (body.example?.body_text?.[0]) {
+		return body.example.body_text[0].join(" ");
+	}
+
+	return "";
+}
 
 		// ---------- DB MAP ----------
 		const mongoMap = new Map();
@@ -764,76 +790,121 @@ console.log("🔥 TOTAL FACEBOOK TEMPLATES RECEIVED:", fbTemplates.length);
 
 		// ---------- PROCESS LOOP ----------
 		fbTemplates.forEach((fb) => {
-			// console.log(" Processing FB Template:", fb);
 			const exists = mongoMap.get(String(fb.id));
 
-			// ⬇ convert facebook language into standard object
-			// facebook: "en_US" → { code:"en_US", label:"en_US" }
 			const langObject = {
 				code: fb.language,
 				label: fb.language,
 			};
 
+const bodyText = extractBodyText(fb.components);
+const variables = extractVariables(fb.components);
+
+// 🔥 ENSURE BODY COMPONENT EXISTS WITH TEXT (FRONTEND COMPATIBLE)
+let normalizedComponents = Array.isArray(fb.components)
+	? [...fb.components]
+	: [];
+
+const bodyIndex = normalizedComponents.findIndex((c) => c.type === "BODY");
+
+if (bodyIndex !== -1) {
+	normalizedComponents[bodyIndex] = {
+		...normalizedComponents[bodyIndex],
+		text: bodyText, // ✅ FORCE TEXT
+	};
+} else if (bodyText) {
+	normalizedComponents.push({
+		type: "BODY",
+		text: bodyText,
+	});
+}
+
 			// ---------- INSERT ----------
 			if (!exists) {
-			newDocs.push({
-				useradmin: userId,
-				template_id: fb.id,
-				name: fb.name,
-				language: langObject,
-				status:
-					fb.status === "APPROVED"
-						? "Approved"
-						: fb.status === "REJECTED"
-						? "Rejected"
-						: "Pending",
-				category: fb.category || "MARKETING",
-				dynamicVariables: extractVariables(fb.components),
-				unique_id: fb.id,
-				FB_PHONE_ID:
-					exists?.FB_PHONE_ID || mongoTemplates[0]?.FB_PHONE_ID,
-				deleted: false,
-			});
+				newDocs.push({
+					useradmin: userId,
+					template_id: fb.id,
+					name: fb.name,
+					language: langObject,
+					status:
+						fb.status === "APPROVED"
+							? "Approved"
+							: fb.status === "REJECTED"
+							? "Rejected"
+							: "Pending",
+					category: fb.category || "MARKETING",
 
+					// ✅ BOTH STORED
+					body_text: bodyText,
+					components: normalizedComponents,
+
+					dynamicVariables: variables,
+					unique_id: fb.id,
+					FB_PHONE_ID: mongoTemplates[0]?.FB_PHONE_ID || null,
+					deleted: false,
+				});
+
+				return;
 			}
 
 			// ---------- UPDATE ----------
-			if (exists) {
-				let update = {};
+			let update = {};
+			if (
+				JSON.stringify(exists.components || []) !==
+				JSON.stringify(normalizedComponents)
+			) {
+				update.components = normalizedComponents;
+			}
 
-				// fix language mixing issue
-				if (
-					typeof exists.language === "string" ||
-					!exists.language?.code
-				) {
-					update.language = langObject;
-				}
 
-				if (exists.category !== fb.category) {
-					update.category = fb.category;
-				}
+			if (typeof exists.language === "string" || !exists.language?.code) {
+				update.language = langObject;
+			}
 
-				let newStatus =
-					fb.status === "APPROVED"
-						? "Approved"
-						: fb.status === "REJECTED"
-						? "Rejected"
-						: "Pending";
+			if (exists.category !== fb.category) {
+				update.category = fb.category;
+			}
 
-				if (exists.status !== newStatus) {
-					update.status = newStatus;
-				}
+			const newStatus =
+				fb.status === "APPROVED"
+					? "Approved"
+					: fb.status === "REJECTED"
+					? "Rejected"
+					: "Pending";
 
-				if (Object.keys(update).length > 0) {
-					updateOps.push({
-						updateOne: {
-							filter: { _id: exists._id },
-							update: { $set: update },
-						},
-					});
-				}
+			if (exists.status !== newStatus) {
+				update.status = newStatus;
+			}
+
+			// 🔥 BODY TEXT UPDATE (CORRECT PLACE)
+			if ((exists.body_text || "") !== bodyText) {
+				update.body_text = bodyText;
+			}
+
+			// 🔥 VARIABLES UPDATE (optional but recommended)
+			if (
+				JSON.stringify(exists.dynamicVariables || []) !==
+				JSON.stringify(variables)
+			) {
+				update.dynamicVariables = variables;
+			}
+
+			if (Object.keys(update).length > 0) {
+				updateOps.push({
+					updateOne: {
+						filter: { _id: exists._id },
+						update: { $set: update },
+					},
+				});
 			}
 		});
+
+		if (fbTemplates.length > 0) {
+			console.log(
+				"🧩 FB COMPONENTS (first template):",
+				JSON.stringify(fbTemplates[0].components, null, 2),
+			);
+		}
 
 		// ---------- WRITE ----------
 		if (newDocs.length > 0) {
