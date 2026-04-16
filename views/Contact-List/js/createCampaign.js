@@ -27,12 +27,46 @@ class AttributeManager {
 		this.container = container;
 		this.onAttributeChange = onAttributeChange;
 	}
+	extractVariablesFromText(text) {
+		if (!text) return [];
 
+		const matches = text.match(/{{\d+}}/g) || [];
+
+		return matches.map((match) => {
+			const key = match.replace(/[{}]/g, "");
+			return { [key]: "" };
+		});
+	}
+	// update(template, contacts) {
+	// 	// console.log(template?.dynamicVariables);
+	// 	if (!template?.dynamicVariables || !contacts.length) {
+	// 		this.container.innerHTML =
+	// 			'<p class="text-center p-2 text-gray-500">No attributes available</p>';
+	// 		return;
+	// 	}
 	update(template, contacts) {
-		// console.log(template?.dynamicVariables);
-		if (!template?.dynamicVariables || !contacts.length) {
-			this.container.innerHTML =
-				'<p class="text-center p-2 text-gray-500">No attributes available</p>';
+		if (!template) {
+			this.container.innerHTML = "Select a template first";
+			return;
+		}
+
+		if (!contacts || contacts.length === 0) {
+			this.container.innerHTML = "Select a contact list first";
+			return;
+		}
+		let bodyVars = template?.dynamicVariables?.body;
+
+		if (!bodyVars || bodyVars.length === 0) {
+			const bodyText =
+				template?.components?.find((c) => c.type === "BODY")?.text ||
+				template?.body_preview ||
+				"";
+
+			bodyVars = this.extractVariablesFromText(bodyText);
+		}
+
+		if (!bodyVars || bodyVars.length === 0) {
+			this.container.innerHTML = "No attributes available";
 			return;
 		}
 
@@ -44,7 +78,9 @@ class AttributeManager {
 		this.container.innerHTML = "";
 
 		// Process BODY dynamic variables
-		this.container.innerHTML += template?.dynamicVariables?.body
+		// this.container.innerHTML += template?.dynamicVariables?.body
+		this.container.innerHTML += bodyVars
+
 			?.map((variableObj, index) => {
 				const variableKey = Object.keys(variableObj)[0]; // Get the variable key, e.g., '1'
 				return `
@@ -93,6 +129,112 @@ class AttributeManager {
 	}
 }
 
+// class AttributeManager {
+// 	constructor(container, onAttributeChange) {
+// 		this.container = container;
+// 		this.onAttributeChange = onAttributeChange;
+// 	}
+
+// 	// ✅ NEW: extract {{1}} from old templates
+// 	extractVariablesFromText(text) {
+// 		if (!text) return [];
+
+// 		const matches = text.match(/{{\d+}}/g) || [];
+
+// 		return matches.map((match) => {
+// 			const key = match.replace(/[{}]/g, "");
+// 			return { [key]: "" };
+// 		});
+// 	}
+
+// 	update(template, contacts) {
+// 		// ✅ Step 1: Basic validation
+// 		if (!template) {
+// 			this.container.innerHTML = "Select a template first";
+// 			return;
+// 		}
+
+// 		if (!contacts || contacts.length === 0) {
+// 			this.container.innerHTML = "Select a contact list first";
+// 			return;
+// 		}
+
+// 		// ✅ Step 2: Try NEW template format
+// 		let bodyVars = template?.dynamicVariables?.body;
+
+// 		// ✅ Step 3: Fallback for OLD templates ({{1}})
+// 		if (!bodyVars || bodyVars.length === 0) {
+// 			const bodyText =
+// 				template?.components?.find(c => c.type === "BODY")?.text ||
+// 				template?.body_preview ||
+// 				"";
+
+// 			bodyVars = this.extractVariablesFromText(bodyText);
+// 		}
+
+// 		// ❌ Still nothing
+// 		if (!bodyVars || bodyVars.length === 0) {
+// 			this.container.innerHTML = "No attributes available";
+// 			return;
+// 		}
+
+// 		// ✅ Step 4: Get attributes from contacts
+// 		const attributes = contacts[0]?.masterExtra || {};
+// 		const options = this.generateAttributeOptions(Object.keys(attributes));
+
+// 		this.container.innerHTML = "";
+
+// 		// ✅ Step 5: Render dropdowns
+// 		this.container.innerHTML += bodyVars
+// 			.map((variableObj, index) => {
+// 				const variableKey = Object.keys(variableObj)[0];
+
+// 				return `
+// 					<div class="mb-4">
+// 						<label class="w-full text-gray-400 border-gray-400">
+// 							Attribute ${variableKey}
+// 						</label>
+// 						<select class="attribute-select w-full text-gray-400" data-variable="${variableKey}">
+// 							<option disabled selected>Select a value</option>
+// 							${options
+// 								.map(
+// 									(opt) =>
+// 										`<option value="${opt.value}">${opt.label}</option>`
+// 								)
+// 								.join("")}
+// 						</select>
+// 					</div>
+// 				`;
+// 			})
+// 			.join("");
+
+// 		// ✅ Step 6: Init select2
+// 		$(this.container)
+// 			.find(".attribute-select")
+// 			.select2()
+// 			.on("change", () => this.handleSelection());
+// 	}
+
+// 	generateAttributeOptions(attributes, includeUserName = true) {
+// 		const options = includeUserName ? ["Name"] : [];
+// 		return [...options, ...attributes].map((attr) => ({
+// 			value: attr,
+// 			label: attr.charAt(0).toUpperCase() + attr.slice(1),
+// 		}));
+// 	}
+
+// 	handleSelection() {
+// 		const variables = {};
+// 		$(this.container)
+// 			.find(".attribute-select")
+// 			.each(function () {
+// 				const variable = $(this).data("variable");
+// 				variables[variable] = $(this).val();
+// 			});
+
+// 		this.onAttributeChange(variables);
+// 	}
+// }
 class Preview {
 	constructor(container) {
 		this.container = container;
@@ -429,6 +571,7 @@ class TemplateManager {
 		if (!templateId) {
 			this.currentTemplate = null;
 			this.preview.update(null);
+			this.attributeManager.update(null, []);
 			return;
 		}
 
@@ -436,7 +579,13 @@ class TemplateManager {
 			const { template } = await fetchTemplateById(templateId);
 			this.currentTemplate = template;
 			this.preview.update(template);
-			this.attributeManager.update(template, this.currentContacts);
+			// this.attributeManager.update(template, this.currentContacts);
+			if (this.currentContacts && this.currentContacts.length > 0) {
+				this.attributeManager.update(
+					this.currentTemplate,
+					this.currentContacts,
+				);
+			}
 		} catch (error) {
 			console.error("Error loading template:", error);
 		}
@@ -453,14 +602,19 @@ class TemplateManager {
 		}
 
 		try {
-			this.currentContacts = await fetchContactListContacts(
-				contactListId,
-			);
+			this.currentContacts =
+				await fetchContactListContacts(contactListId);
 			// console.log(this.currentContacts);
-			this.attributeManager.update(
-				this.currentTemplate,
-				this.currentContacts,
-			);
+			// this.attributeManager.update(
+			// 	this.currentTemplate,
+			// 	this.currentContacts,
+			// );
+			if (this.currentTemplate && this.currentContacts.length > 0) {
+				this.attributeManager.update(
+					this.currentTemplate,
+					this.currentContacts,
+				);
+			}
 		} catch (error) {
 			console.error("Error loading contacts:", error);
 		}
@@ -476,14 +630,19 @@ class TemplateManager {
 		}
 
 		try {
-			this.currentContacts = await fetchContactListContacts(
-				contactListId,
-			);
+			this.currentContacts =
+				await fetchContactListContacts(contactListId);
 			// console.log(this.currentContacts);
-			this.attributeManager.update(
-				this.currentTemplate,
-				this.currentContacts,
-			);
+			// this.attributeManager.update(
+			// 	this.currentTemplate,
+			// 	this.currentContacts,
+			// );
+			if (this.currentTemplate && this.currentContacts.length > 0) {
+				this.attributeManager.update(
+					this.currentTemplate,
+					this.currentContacts,
+				);
+			}
 		} catch (error) {
 			console.error("Error loading contacts:", error);
 		}
