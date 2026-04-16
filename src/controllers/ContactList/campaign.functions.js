@@ -199,24 +199,68 @@ export function replaceDynamicVariables(template, variables, contact) {
 			(c) => c.type === "BODY",
 		);
 
-		if (bodyComponent && template.dynamicVariables?.body?.length > 0) {
+		// if (bodyComponent && template.dynamicVariables?.body?.length > 0) {
+		// 	const bodyParameters = [];
+
+		// 	template.dynamicVariables.body.forEach((bodyVar) => {
+		// 		const key = Object.keys(bodyVar)[0];
+		// 		const mappedKey = variables?.get?.(key);
+
+		// 		if (mappedKey === "Name") {
+		// 			bodyParameters.push({
+		// 				type: "text",
+		// 				text: contact?.Name || "",
+		// 			});
+		// 		} else if (mappedKey) {
+		// 			bodyParameters.push({
+		// 				type: "text",
+		// 				text: contact?.masterExtra?.[mappedKey] || "",
+		// 			});
+		// 		}
+		// 	});
+
+		// 	if (bodyParameters.length > 0) {
+		// 		messageComponents.push({
+		// 			type: "body",
+		// 			parameters: bodyParameters,
+		// 		});
+		// 	}
+		// }
+
+		// 🟢 Debug log: show plain values before returning
+
+		if (bodyComponent) {
 			const bodyParameters = [];
 
-			template.dynamicVariables.body.forEach((bodyVar) => {
+			let bodyVars = template.dynamicVariables?.body;
+
+			if (!bodyVars || bodyVars.length === 0) {
+				const matches = bodyComponent.text.match(/{{\d+}}/g) || [];
+
+				bodyVars = matches.map((match) => {
+					const key = match.replace(/[{}]/g, "");
+					return { [key]: "" };
+				});
+			}
+
+			bodyVars.forEach((bodyVar) => {
 				const key = Object.keys(bodyVar)[0];
 				const mappedKey = variables?.get?.(key);
 
+				let value = "";
+
 				if (mappedKey === "Name") {
-					bodyParameters.push({
-						type: "text",
-						text: contact?.Name || "",
-					});
+					value = contact?.Name || "User";
 				} else if (mappedKey) {
-					bodyParameters.push({
-						type: "text",
-						text: contact?.masterExtra?.[mappedKey] || "",
-					});
+					value = contact?.masterExtra?.[mappedKey] || "User";
+				} else {
+					value = "User";
 				}
+
+				bodyParameters.push({
+					type: "text",
+					text: value,
+				});
 			});
 
 			if (bodyParameters.length > 0) {
@@ -226,8 +270,6 @@ export function replaceDynamicVariables(template, variables, contact) {
 				});
 			}
 		}
-
-		// 🟢 Debug log: show plain values before returning
 		console.log(
 			"[replaceDynamicVariables] Final body text values:",
 			messageComponents

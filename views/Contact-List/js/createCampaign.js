@@ -79,9 +79,11 @@ class AttributeManager {
 
 		// Process BODY dynamic variables
 		// this.container.innerHTML += template?.dynamicVariables?.body
-		this.container.innerHTML += bodyVars
+		// 	this.container.innerHTML += bodyVars
 
-			?.map((variableObj, index) => {
+		// ?.map((variableObj, index) => {
+		this.container.innerHTML += bodyVars
+			.map((variableObj, index) => {
 				const variableKey = Object.keys(variableObj)[0]; // Get the variable key, e.g., '1'
 				return `
                 <div class=" mb-4">
@@ -746,17 +748,23 @@ class TemplateManager {
 			return;
 		}
 
+		// if (Object.keys(selectedAttributes).length > 0) {
+		// 	console.log(selectedAttributes);
+		// 	formData.append("variables", JSON.stringify(selectedAttributes));
+		// }
 		if (Object.keys(selectedAttributes).length > 0) {
-			console.log(selectedAttributes);
-			formData.append("variables", JSON.stringify(selectedAttributes));
+			console.log("Selected Attributes:", selectedAttributes);
+			formData.set("variables", JSON.stringify(selectedAttributes));
 		}
-
 		if (actionType === "test") {
 			formData.append("schedule", null);
 			formData.append(
 				"test",
 				document.getElementById("testNumber").value,
 			);
+			if (Object.keys(selectedAttributes).length > 0) {
+				formData.set("variables", JSON.stringify(selectedAttributes));
+			}
 			// Submit the form
 			try {
 				const response = await fetch(
